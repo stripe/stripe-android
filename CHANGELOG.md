@@ -10,7 +10,8 @@ This release patches a crash with payment launcher when there is a configuration
   to :stripe-core.
 * [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) Remove network related internal files.
 * [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
-* [ADDED] [4818](https://github.com/stripe/stripe-android/pull/4818) Release Stripe's Connections SDK.
+* [ADDED] [4818](https://github.com/stripe/stripe-android/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
+
 * [CHANGED] [4778](https://github.com/stripe/stripe-android/pull/4778) CardImageVerificationSheet: removed the callback from
   present to create, wrapping it inside a CardImageVerificationResultCallback object.
 * [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) The following classes' packages are changed
