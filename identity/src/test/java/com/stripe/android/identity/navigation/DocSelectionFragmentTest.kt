@@ -309,7 +309,7 @@ internal class DocSelectionFragmentTest {
     }
 
     @Test
-    fun `when camera permission is denied, clicking continue navigates to ErrorFragment when requireLiveCapture is true`() {
+    fun `when camera permission is denied, clicking continue navigates to CameraPermissionDeniedFragment when requireLiveCapture is true`() {
         launchDocSelectionFragment { binding, navController, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_SINGLE_CHOICE_DL
@@ -344,7 +344,9 @@ internal class DocSelectionFragmentTest {
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.errorFragment)
+                .isEqualTo(R.id.cameraPermissionDeniedFragment)
+
+            assertThat(requireNotNull(navController.backStack.last().arguments).isEmpty).isTrue()
         }
     }
 

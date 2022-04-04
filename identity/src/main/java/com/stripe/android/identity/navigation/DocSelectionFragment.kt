@@ -246,19 +246,18 @@ internal class DocSelectionFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
-                if (verificationPage.documentCapture.requireLiveCapture) {
-                    Log.e(TAG, "Can't access camera and client has required live capture.")
-                    navigateToDefaultErrorFragment()
-                } else {
-                    findNavController().navigate(
-                        R.id.action_camera_permission_denied,
+                findNavController().navigate(
+                    R.id.action_camera_permission_denied,
+                    if (verificationPage.documentCapture.requireLiveCapture)
+                        null
+                    else
                         bundleOf(
                             CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
                         )
-                    )
-                }
+                )
             },
             onFailure = {
+                Log.e(TAG, "failed to observeForVerificationPage: $it")
                 navigateToDefaultErrorFragment()
             }
         )
