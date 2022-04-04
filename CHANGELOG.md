@@ -6,19 +6,26 @@ This release patches a crash with payment launcher when there is a configuration
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
 * [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on
   PaymentSheet to use Compose.
+
+### Core
 * [CHANGED] [4800](https://github.com/stripe/stripe-android/pull/4800) Relocated network exceptions
   to :stripe-core.
 * [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) Remove network related internal files.
-* [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
-* [ADDED] [4818](https://github.com/stripe/stripe-android/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
-
-* [CHANGED] [4778](https://github.com/stripe/stripe-android/pull/4778) CardImageVerificationSheet: removed the callback from
-  present to create, wrapping it inside a CardImageVerificationResultCallback object.
 * [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) The following classes' packages are changed
   * `com.stripe.android.AppInfo` -> `com.stripe.android.core.AppInfo`
   * `com.stripe.android.model.StripeFile` -> `com.stripe.android.core.model.StripeFile`
   * `com.stripe.android.model.StripeFileParams` -> `com.stripe.android.core.model.StripeFileParams`
   * `com.stripe.android.model.StripeFilePurpose` -> `com.stripe.android.core.model.StripeFilePurpose`
+
+### Identity
+* [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
+
+### Connections
+* [ADDED] [4818](https://github.com/stripe/stripe-android/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
+
+### CardScan
+* [CHANGED] [4778](https://github.com/stripe/stripe-android/pull/4778) CardImageVerificationSheet: removed the callback from
+  present to create, wrapping it inside a CardImageVerificationResultCallback object.
 
 ## 19.3.1 - 2022-03-22
 This release patches an issue with 3ds2 confirmation
