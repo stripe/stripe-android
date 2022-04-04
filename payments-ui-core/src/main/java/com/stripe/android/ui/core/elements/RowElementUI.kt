@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -55,7 +54,7 @@ internal fun RowElementUI(
                         )
                 )
 
-                if (!hiddenIdentifiers.contains(field.identifier) && index != (fields.size - 1)) {
+                if (!hiddenIdentifiers.contains(field.identifier) && index != fields.lastIndex) {
                     Divider(
                         modifier = Modifier
                             .constrainAs(dividerRefs[index]) {
@@ -67,8 +66,8 @@ internal fun RowElementUI(
                             .padding(
                                 horizontal = PaymentsTheme.shapes.borderStrokeWidth
                             )
-                            .width(PaymentsTheme.shapes.borderStrokeWidth)
-                            .background(PaymentsTheme.colors.colorComponentBorder)
+                            .width(PaymentsTheme.shapes.borderStrokeWidth),
+                        color = PaymentsTheme.colors.colorComponentDivider
                     )
                 }
             }

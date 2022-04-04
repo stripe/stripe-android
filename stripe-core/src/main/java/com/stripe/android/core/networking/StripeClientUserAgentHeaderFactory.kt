@@ -3,7 +3,7 @@ package com.stripe.android.core.networking
 import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.InternalAppInfo
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
 
@@ -12,7 +12,7 @@ class StripeClientUserAgentHeaderFactory(
     private val systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER
 ) {
     fun create(
-        appInfo: InternalAppInfo? = null
+        appInfo: AppInfo? = null
     ): Map<String, String> {
         return mapOf(
             HEADER_STRIPE_CLIENT_USER_AGENT to createHeaderValue(appInfo).toString()
@@ -21,7 +21,7 @@ class StripeClientUserAgentHeaderFactory(
 
     @VisibleForTesting
     fun createHeaderValue(
-        appInfo: InternalAppInfo? = null
+        appInfo: AppInfo? = null
     ): JSONObject {
         return JSONObject(
             mapOf(

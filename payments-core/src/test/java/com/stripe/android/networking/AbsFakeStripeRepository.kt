@@ -2,6 +2,8 @@ package com.stripe.android.networking
 
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
@@ -25,8 +27,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
-import com.stripe.android.model.StripeFile
-import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -364,6 +364,40 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         params: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): BankConnectionsLinkedAccountSession? {
+        return null
+    }
+
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return null
+    }
+
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
         return null
     }
 }

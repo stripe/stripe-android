@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
@@ -12,8 +13,8 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
-import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -27,7 +28,7 @@ class CameraPermissionDeniedFragmentTest {
     @Test
     fun `when scan type is ID_FRONT title is set and clicking upload navigates to id upload fragment`() {
         verifyFragmentWithScanType(
-            IdDocumentParam.Type.IDCARD,
+            CollectedDataParam.Type.IDCARD,
             R.id.IDUploadFragment,
             R.string.id_card
         )
@@ -36,7 +37,7 @@ class CameraPermissionDeniedFragmentTest {
     @Test
     fun `when scan type is DL_FRONT title is set and clicking upload navigates to driver license upload fragment`() {
         verifyFragmentWithScanType(
-            IdDocumentParam.Type.DRIVINGLICENSE,
+            CollectedDataParam.Type.DRIVINGLICENSE,
             R.id.driverLicenseUploadFragment,
             R.string.driver_license
         )
@@ -45,15 +46,24 @@ class CameraPermissionDeniedFragmentTest {
     @Test
     fun `when scan type is PASSPORT title is set and clicking upload navigates to passport upload fragment`() {
         verifyFragmentWithScanType(
-            IdDocumentParam.Type.PASSPORT,
+            CollectedDataParam.Type.PASSPORT,
             R.id.passportUploadFragment,
             R.string.passport
         )
     }
 
     @Test
+    fun `when scan type is not set message2 is hidden and top button is hidden`() {
+        launchCameraPermissionDeniedFragment().onFragment {
+            val binding = BaseErrorFragmentBinding.bind(it.requireView())
+            assertThat(binding.message2.visibility).isEqualTo(View.GONE)
+            assertThat(binding.topButton.visibility).isEqualTo(View.GONE)
+        }
+    }
+
+    @Test
     fun `when app setting button is clicked app setting is opened and returns to DocSelectionFragment`() {
-        launchCameraPermissionDeniedFragment(IdDocumentParam.Type.IDCARD).onFragment {
+        launchCameraPermissionDeniedFragment(CollectedDataParam.Type.IDCARD).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -74,7 +84,7 @@ class CameraPermissionDeniedFragmentTest {
     }
 
     private fun verifyFragmentWithScanType(
-        type: IdDocumentParam.Type,
+        type: CollectedDataParam.Type,
         @IdRes
         expectedDestination: Int = 0,
         @StringRes
@@ -101,7 +111,7 @@ class CameraPermissionDeniedFragmentTest {
             )
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [ARG_SHOULD_SHOW_CAMERA]
+                [ARG_SHOULD_SHOW_TAKE_PHOTO]
             ).isEqualTo(false)
             assertThat(binding.message2.text).isEqualTo(
                 it.getString(
@@ -113,11 +123,13 @@ class CameraPermissionDeniedFragmentTest {
     }
 
     private fun launchCameraPermissionDeniedFragment(
-        type: IdDocumentParam.Type
+        type: CollectedDataParam.Type? = null
     ) = launchFragmentInContainer(
-        bundleOf(
-            ARG_SCAN_TYPE to type
-        ),
+        type?.let {
+            bundleOf(
+                ARG_SCAN_TYPE to type
+            )
+        },
         themeResId = R.style.Theme_MaterialComponents
     ) {
         CameraPermissionDeniedFragment(mockAppSettingsOpenable)

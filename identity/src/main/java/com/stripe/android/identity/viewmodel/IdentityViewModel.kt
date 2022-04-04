@@ -13,8 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.ml.BoundingBox
@@ -61,7 +61,7 @@ internal class IdentityViewModel(
      * Wrapper class for the uploaded param.
      */
     internal data class UploadedResult(
-        val uploadedStripeFile: InternalStripeFile,
+        val uploadedStripeFile: StripeFile,
         val scores: List<Float>?,
         val uploadMethod: UploadMethod
     )
@@ -164,7 +164,7 @@ internal class IdentityViewModel(
             ),
             resultLiveData = if (isFront) _frontHighResUploaded else _backHighResUploaded,
             filePurpose = requireNotNull(
-                InternalStripeFilePurpose.fromCode(docCapturePage.filePurpose)
+                StripeFilePurpose.fromCode(docCapturePage.filePurpose)
             ),
             uploadMethod = uploadMethod
         )
@@ -263,7 +263,7 @@ internal class IdentityViewModel(
                     )
                 },
                 filePurpose = requireNotNull(
-                    InternalStripeFilePurpose.fromCode(docCapturePage.filePurpose)
+                    StripeFilePurpose.fromCode(docCapturePage.filePurpose)
                 ),
                 uploadMethod = UploadMethod.AUTOCAPTURE,
                 scores = scores
@@ -277,7 +277,7 @@ internal class IdentityViewModel(
     private fun uploadImageAndNotify(
         imageFile: File,
         resultLiveData: MutableLiveData<Resource<UploadedResult>>,
-        filePurpose: InternalStripeFilePurpose,
+        filePurpose: StripeFilePurpose,
         uploadMethod: UploadMethod,
         scores: List<Float>? = null
     ) {

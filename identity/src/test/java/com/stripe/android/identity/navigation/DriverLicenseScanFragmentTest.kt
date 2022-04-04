@@ -15,7 +15,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
@@ -25,7 +25,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
@@ -168,7 +167,7 @@ internal class DriverLicenseScanFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                            type = IdDocumentParam.Type.DRIVINGLICENSE,
+                            type = CollectedDataParam.Type.DRIVINGLICENSE,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
@@ -305,6 +304,9 @@ internal class DriverLicenseScanFragmentTest {
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.front_of_dl)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_front)
             )
@@ -323,6 +325,9 @@ internal class DriverLicenseScanFragmentTest {
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.back_of_dl)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_back)
             )
@@ -466,28 +471,28 @@ internal class DriverLicenseScanFragmentTest {
 
     private companion object {
         val FRONT_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val FRONT_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontLowResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val BACK_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "backHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val BACK_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),

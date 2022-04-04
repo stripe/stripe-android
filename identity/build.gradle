@@ -15,7 +15,7 @@ configurations {
 }
 
 if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
+    group = 'com.github.stripe.stripe-android'
 }
 
 dependencies {
@@ -48,8 +48,6 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
 
-    implementation 'com.github.bumptech.glide:glide:4.13.1'
-
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
@@ -73,6 +71,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        vectorDrawables.useSupportLibrary = true
     }
 
     sourceSets {
@@ -131,3 +130,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }
+
+ext {
+    artifactId = "identity"
+    artifactName = "identity"
+    artifactDescrption = "Stripe Identity Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

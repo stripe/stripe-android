@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.PaymentsTheme
@@ -33,6 +34,7 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.StaticElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
@@ -97,11 +99,12 @@ internal fun FormInternal(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
+            val isDark = PaymentsTheme.colors.material.surface.shouldUseDarkDynamicColor()
             CircularProgressIndicator(
                 modifier = Modifier.size(
                     dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
                 ),
-                color = PaymentsTheme.colors.subtitle,
+                color = if (isDark) Color.Black else Color.White,
                 strokeWidth = dimensionResource(
                     R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
                 )

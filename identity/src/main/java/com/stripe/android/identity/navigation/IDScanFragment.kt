@@ -5,8 +5,7 @@ import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
-import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 
@@ -36,7 +35,7 @@ internal class IDScanFragment(
                     startScanning(ID_BACK)
                 }
                 ID_BACK -> {
-                    observeAndUploadForBothSides(IdDocumentParam.Type.IDCARD)
+                    observeAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
                 }
                 else -> {
                     Log.e(
@@ -56,42 +55,23 @@ internal class IDScanFragment(
         }
     }
 
-    override fun updateUI(identityScanState: IdentityScanState) {
-        super.updateUI(identityScanState)
-        when (identityScanState) {
-            is IdentityScanState.Initial -> {
-                when (identityScanViewModel.targetScanType) {
-                    ID_FRONT -> {
-                        messageView.text = requireContext().getText(R.string.position_id_front)
-                    }
-                    ID_BACK -> {
-                        messageView.text = requireContext().getText(R.string.position_id_back)
-                    }
-                    else -> {
-                        Log.e(
-                            TAG,
-                            "Incorrect target scan type: ${identityScanViewModel.targetScanType}"
-                        )
-                    }
-                }
+    override fun resetUI() {
+        super.resetUI()
+        when (identityScanViewModel.targetScanType) {
+            ID_FRONT -> {
+                headerTitle.text = requireContext().getText(R.string.front_of_id)
+                messageView.text = requireContext().getText(R.string.position_id_front)
             }
-            is IdentityScanState.Unsatisfied -> {
-                when (identityScanViewModel.targetScanType) {
-                    ID_FRONT -> {
-                        messageView.text = requireContext().getText(R.string.position_id_front)
-                    }
-                    ID_BACK -> {
-                        messageView.text = requireContext().getText(R.string.position_id_back)
-                    }
-                    else -> {
-                        Log.e(
-                            TAG,
-                            "Incorrect target scan type: ${identityScanViewModel.targetScanType}"
-                        )
-                    }
-                }
+            ID_BACK -> {
+                headerTitle.text = requireContext().getText(R.string.back_of_id)
+                messageView.text = requireContext().getText(R.string.position_id_back)
             }
-            else -> {} // no-op
+            else -> {
+                Log.e(
+                    TAG,
+                    "Incorrect target scan type: ${identityScanViewModel.targetScanType}"
+                )
+            }
         }
     }
 

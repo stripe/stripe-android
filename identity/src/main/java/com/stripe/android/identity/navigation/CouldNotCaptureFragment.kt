@@ -14,8 +14,11 @@ import com.stripe.android.identity.utils.navigateToUploadFragment
 internal class CouldNotCaptureFragment : BaseErrorFragment() {
 
     override fun onCustomizingViews() {
-        val scanType =
-            requireNotNull(arguments)[ARG_COULD_NOT_CAPTURE_SCAN_TYPE] as IdentityScanState.ScanType
+        val args = requireNotNull(arguments) {
+            "Argument to CouldNotCaptureFragment is null"
+        }
+        val scanType = args[ARG_COULD_NOT_CAPTURE_SCAN_TYPE] as IdentityScanState.ScanType
+        val requireLiveCapture = args[ARG_REQUIRE_LIVE_CAPTURE] as Boolean
 
         title.text = getString(R.string.could_not_capture_title)
         message1.text = getString(R.string.could_not_capture_body1)
@@ -25,7 +28,8 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
         topButton.setOnClickListener {
             navigateToUploadFragment(
                 scanType.toUploadDestinationId(),
-                true
+                shouldShowTakePhoto = true,
+                shouldShowChoosePhoto = !requireLiveCapture
             )
         }
 
@@ -42,6 +46,7 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
 
     internal companion object {
         const val ARG_COULD_NOT_CAPTURE_SCAN_TYPE = "scanType"
+        const val ARG_REQUIRE_LIVE_CAPTURE = "requireLiveCapture"
 
         @IdRes
         private fun IdentityScanState.ScanType.toUploadDestinationId() =

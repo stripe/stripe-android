@@ -1,11 +1,33 @@
 # CHANGELOG
-## xx.x.x - YYYY-MM-DD
-This release patches a crash with payment launcher when there is a configuration change
+## 20.0.0 - 2022-04-04
+This release patches on a crash on PaymentLauncher, updates the package name of some public classes,
+changes the public API for CardImageVerificationSheet and releases Identity SDK.
 
-### Payments
+### Payments (`com.stripe:stripe-android`)
 * [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Added card-scanning feature to PaymentSheet
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
-* [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on PaymentSheet to use Compose.
+* [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on
+  PaymentSheet to use Compose.
+
+### Identity (`com.stripe:identity`)
+* [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
+
+### Connections (`com.stripe:connection`)
+* [ADDED] [4818](https://github.com/stripe/stripe-mandroid/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
+
+### CardScan (`com.stripe:stripecardscan`)
+* [CHANGED] [4778](https://github.com/stripe/stripe-android/pull/4778) CardImageVerificationSheet: removed the callback from
+  present to create, wrapping it inside a CardImageVerificationResultCallback object.
+
+### Core (`com.stripe:stripe-core`)
+* [CHANGED] [4800](https://github.com/stripe/stripe-android/pull/4800) Relocated network exceptions
+  to :stripe-core.
+* [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) Remove network related internal files.
+* [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) The following classes' packages are changed
+  * `com.stripe.android.AppInfo` -> `com.stripe.android.core.AppInfo`
+  * `com.stripe.android.model.StripeFile` -> `com.stripe.android.core.model.StripeFile`
+  * `com.stripe.android.model.StripeFileParams` -> `com.stripe.android.core.model.StripeFileParams`
+  * `com.stripe.android.model.StripeFilePurpose` -> `com.stripe.android.core.model.StripeFilePurpose`
 
 ## 19.3.1 - 2022-03-22
 This release patches an issue with 3ds2 confirmation

@@ -1,7 +1,7 @@
 package com.stripe.android.identity.networking
 
-import com.stripe.android.core.InternalAppInfo
-import com.stripe.android.core.model.InternalStripeFileParams
+import com.stripe.android.core.AppInfo
+import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.FileUploadRequest
 import java.io.OutputStream
@@ -11,9 +11,9 @@ import java.io.PrintWriter
  * Identity's [FileUploadRequest] that needs to add form data "owned_by"
  */
 internal class IdentityFileUploadRequest(
-    fileParams: InternalStripeFileParams,
+    fileParams: StripeFileParams,
     options: ApiRequest.Options,
-    appInfo: InternalAppInfo? = null,
+    appInfo: AppInfo? = null,
     internal val verificationId: String
 ) : FileUploadRequest(fileParams, options, appInfo) {
 

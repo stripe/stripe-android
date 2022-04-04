@@ -1412,4 +1412,39 @@ internal object PaymentIntentFixtures {
             }
         """.trimIndent()
     )
+
+    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON = JSONObject(
+        """
+            {
+                "id": "pi_3KbV27Lu5o3P18Zp1e7NOonG",
+                "object": "payment_intent",
+                "client_secret": "pi_3KbV27Lu5o3P18Zp1e7NOonG_secret_9PqgvdhyLNub0UvzjFf9bQKqd",
+                "last_payment_error": null,
+                "livemode": false,
+                "next_action": null,
+                "status": "processing",
+                "amount": 6099,
+                "automatic_payment_methods": null,
+                "canceled_at": null,
+                "cancellation_reason": null,
+                "capture_method": "automatic",
+                "confirmation_method": "automatic",
+                "created": 1646853531,
+                "currency": "usd",
+                "description": "Example PaymentIntent",
+                "payment_method": "pm_1KbV27Lu5o3P18ZpAEIGorq8",
+                "payment_method_options": { },
+                "payment_method_types": [
+                    "us_bank_account"
+                ],
+                "processing": null,
+                "receipt_email": null,
+                "setup_future_usage": "off_session",
+                "shipping": null,
+                "source": null
+            }
+        """.trimIndent()
+    )
+
+    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED = PARSER.parse(PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
 }

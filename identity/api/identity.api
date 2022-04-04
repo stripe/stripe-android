@@ -79,7 +79,6 @@ public final class com/stripe/android/identity/databinding/BaseErrorFragmentBind
 }
 
 public final class com/stripe/android/identity/databinding/ConfirmationFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field clockLogo Landroid/widget/ImageView;
 	public final field contentText Landroid/widget/TextView;
 	public final field kontinue Landroid/widget/Button;
 	public final field titleText Landroid/widget/TextView;
@@ -146,29 +145,9 @@ public final class com/stripe/android/identity/databinding/DriverLicenseUploadFr
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
 }
 
-public final class com/stripe/android/identity/databinding/FrontBackUploadFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field contentText Landroid/widget/TextView;
-	public final field finishedCheckMarkBack Landroid/widget/ImageView;
-	public final field finishedCheckMarkFront Landroid/widget/ImageView;
-	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
-	public final field labelBack Landroid/widget/TextView;
-	public final field labelFront Landroid/widget/TextView;
-	public final field progressCircularBack Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field progressCircularFront Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field selectBack Lcom/google/android/material/button/MaterialButton;
-	public final field selectFront Lcom/google/android/material/button/MaterialButton;
-	public final field titleText Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/FrontBackUploadFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/FrontBackUploadFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/FrontBackUploadFragmentBinding;
-}
-
 public final class com/stripe/android/identity/databinding/GetLocalImageDialogBinding : androidx/viewbinding/ViewBinding {
 	public final field chooseFile Lcom/google/android/material/button/MaterialButton;
 	public final field takePhoto Lcom/google/android/material/button/MaterialButton;
-	public final field title Lcom/google/android/material/textview/MaterialTextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/LinearLayout;
@@ -200,27 +179,33 @@ public final class com/stripe/android/identity/databinding/IdentityCameraScanFra
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
 }
 
+public final class com/stripe/android/identity/databinding/IdentityUploadFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field backUpload Landroid/widget/RelativeLayout;
+	public final field contentText Landroid/widget/TextView;
+	public final field finishedCheckMarkBack Landroid/widget/ImageView;
+	public final field finishedCheckMarkFront Landroid/widget/ImageView;
+	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
+	public final field labelBack Landroid/widget/TextView;
+	public final field labelFront Landroid/widget/TextView;
+	public final field progressCircularBack Lcom/google/android/material/progressindicator/CircularProgressIndicator;
+	public final field progressCircularFront Lcom/google/android/material/progressindicator/CircularProgressIndicator;
+	public final field selectBack Lcom/google/android/material/button/MaterialButton;
+	public final field selectFront Lcom/google/android/material/button/MaterialButton;
+	public final field separator Landroid/view/View;
+	public final field titleText Landroid/widget/TextView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityUploadFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/LinearLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityUploadFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityUploadFragmentBinding;
+}
+
 public final class com/stripe/android/identity/databinding/LoadingButtonBinding : androidx/viewbinding/ViewBinding {
 	public final field button Lcom/google/android/material/button/MaterialButton;
 	public final field indicator Lcom/google/android/material/progressindicator/CircularProgressIndicator;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/LoadingButtonBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/identity/databinding/LoadingButtonBinding;
-}
-
-public final class com/stripe/android/identity/databinding/PassportUploadFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field contentText Landroid/widget/TextView;
-	public final field finishedCheckMark Landroid/widget/ImageView;
-	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
-	public final field label Landroid/widget/TextView;
-	public final field progressCircular Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field select Lcom/google/android/material/button/MaterialButton;
-	public final field titleText Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {

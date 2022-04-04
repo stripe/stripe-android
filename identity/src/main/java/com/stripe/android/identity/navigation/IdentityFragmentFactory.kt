@@ -11,10 +11,10 @@ import com.stripe.android.identity.networking.DefaultIDDetectorFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
-import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
+import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.viewmodel.PassportUploadViewModel
 
 /**
  * Factory for creating Identity fragments.
@@ -33,10 +33,13 @@ internal class IdentityFragmentFactory(
         DefaultIdentityRepository(identityIO = identityIO)
     private val identityScanViewModelFactory =
         IdentityScanViewModel.IdentityScanViewModelFactory()
-    private val frontBackUploadViewModelFactory =
-        FrontBackUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
-    private val passportUploadViewModelFactory =
-        PassportUploadViewModel.PassportUploadViewModelFactory(identityIO)
+    private val identityUploadViewModelFactory =
+        IdentityUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
+    private val consentFragmentViewModelFactory =
+        ConsentFragmentViewModel.ConsentFragmentViewModelFactory(
+            identityIO,
+            identityRepository
+        )
 
     internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
         verificationArgs,
@@ -64,19 +67,20 @@ internal class IdentityFragmentFactory(
                 appSettingsOpenable
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
-                frontBackUploadViewModelFactory,
+                identityUploadViewModelFactory,
                 identityViewModelFactory
             )
             DriverLicenseUploadFragment::class.java.name -> DriverLicenseUploadFragment(
-                frontBackUploadViewModelFactory,
+                identityUploadViewModelFactory,
                 identityViewModelFactory
             )
             PassportUploadFragment::class.java.name -> PassportUploadFragment(
-                passportUploadViewModelFactory,
+                identityUploadViewModelFactory,
                 identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory,
+                consentFragmentViewModelFactory,
                 verificationFlowFinishable
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(

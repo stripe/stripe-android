@@ -2,8 +2,8 @@ package com.stripe.android.identity.networking
 
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -51,12 +51,18 @@ internal interface IdentityRepository {
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: InternalStripeFilePurpose
-    ): InternalStripeFile
+        filePurpose: StripeFilePurpose
+    ): StripeFile
 
     @Throws(
         APIConnectionException::class,
         APIException::class
     )
     suspend fun downloadModel(modelUrl: String): File
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun downloadFile(fileUrl: String): File
 }

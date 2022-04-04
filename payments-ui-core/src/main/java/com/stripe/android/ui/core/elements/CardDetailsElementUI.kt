@@ -20,12 +20,14 @@ internal fun CardDetailsElementUI(
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier
         )
-        Divider(
-            color = PaymentsTheme.colors.colorComponentBorder,
-            thickness = PaymentsTheme.shapes.borderStrokeWidth,
-            modifier = Modifier.padding(
-                horizontal = PaymentsTheme.shapes.borderStrokeWidth
+        if (index != controller.fields.lastIndex) {
+            Divider(
+                color = PaymentsTheme.colors.colorComponentDivider,
+                thickness = PaymentsTheme.shapes.borderStrokeWidth,
+                modifier = Modifier.padding(
+                    horizontal = PaymentsTheme.shapes.borderStrokeWidth
+                )
             )
-        )
+        }
     }
 }

@@ -90,6 +90,7 @@ ext {
     mockitoKotlinVersion = '4.0.0'
     espressoVersion = '3.4.0'
     jsonVersion = '20220320'
+    uiautomator = '2.2.0'
 
     group_name = GROUP
     version_name = VERSION_NAME
