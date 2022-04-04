@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="kontinue">continue</string>
-    <string name="decline">Decline and use alternative method</string>
     <string name="driver_license" description="display name for driver's license">Driver\'s license</string>
     <string name="id_card" description="display name for ID">ID</string>
     <string name="passport" description="display name for driver's license">Passport</string>
-
-    <string name="doc_select_title">Which form of identification do you want to use?</string>
 
     <string name="front_of_id" description="Title for the screen to scan back of ID">Front of ID</string>
     <string name="back_of_id" description="Title for the screen to scan front of ID">Back of ID</string>
@@ -28,8 +25,7 @@
     <string name="app_settings" description="Button text for app settings">App Settings</string>
     <string name="camera_permission" description="Camera permission denied screen title">Camera permission</string>
 
-    <!--TODO: This string is not yet finalized-->
-    <string name="camera_permission_rationale" description="Message for camera permission rationale before requesting permission" translatable="false">We need to use your camera for capture ID images.</string>
+    <string name="camera_permission_rationale" description="Message for camera permission rationale before requesting permission">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
 
     <string name="grant_camera_permission_text" description="Message for camera permission denied screen">We need permission to use your camera. Please allow camera access in app settings.</string>
     <string name="ok" description="OK button text">OK</string>
@@ -58,11 +54,12 @@
     <string name="error" description="Title of general error screen">Error</string>
     <string name="unexpected_error_try_again" description="Message when an unexpected error happens">There was an unexpected error — try again in a few seconds</string>
     <string name="go_back" description="Text to return to previous page">Go Back</string>
-    <string name="description_exclamation_mark">Exclamation point for error page</string>
     <string name="description_clock" description="Description of the clock icon, used for A11Y">Clock icon</string>
     <string name="loading" description="Message on initial loading page">Loading</string>
 
-    <string name="single_selection_body_content_dl" description="Message when the only allowed type of confirmation is driver licence">You will need to take photos of the front and back in the following steps.</string>
-    <string name="single_selection_body_content_id" description="Message when the only allowed type of confirmation is ID">You will need to take photos of the front and back in the following steps.</string>
-    <string name="single_selection_body_content_passport" description="Message when the only allowed type of confirmation is passport">You will need to take a photo of the passport in the following steps.</string>
+    <string name="could_not_capture_title" description="Title of the error screen when live capture fails">Could not capture image</string>
+    <string name="could_not_capture_body1" description="Line1 body text of error screen when live capture fails">We could not capture a high-quality image.</string>
+    <string name="could_not_capture_body2" description="Line2 body text of error screen when live capture fails">You can either try again or upload an image from your device.</string>
+    <string name="try_again" description="Button text for trying again">Try Again</string>
+
 </resources>

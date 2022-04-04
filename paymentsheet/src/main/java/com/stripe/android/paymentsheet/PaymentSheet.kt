@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.ColorRes
+import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -213,61 +213,60 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class Colors(
         // A primary color used throughout PaymentSheet
-        @ColorRes
+        @ColorInt
         val primary: Int,
 
         // The color used for the surfaces (backgrounds) of PaymentSheet
-        @ColorRes
+        @ColorInt
         val surface: Int,
 
         // The color used for the background of inputs, tabs, and other components
-        @ColorRes
-        val componentBackground: Int,
+        @ColorInt
+        val component: Int,
 
         // The color used for borders of inputs, tabs, and other components
-        @ColorRes
+        @ColorInt
         val componentBorder: Int,
 
         // The color of the divider lines used inside inputs, tabs, and other components
-        @ColorRes
+        @ColorInt
         val componentDivider: Int,
 
-        // The default color used for text and on other primary elements in Payment Sheet
-        @ColorRes
-        val onPrimary: Int,
-
-        // The color used for text of secondary importance. For example, this color is used for the label above input fields
-        @ColorRes
-        val textSecondary: Int,
-
-        // The color used for input placeholder text
-        @ColorRes
-        val placeholderText: Int,
+        // The default color used for text and on other elements that live on components
+        @ColorInt
+        val onComponent: Int,
 
         // The color used for items appearing over the background in Payment Sheet
-        @ColorRes
-        val onBackground: Int,
+        @ColorInt
+        val onSurface: Int,
 
-        // / The color used for icons in PaymentSheet, such as the close or back icons
-        @ColorRes
+        // The color used for text of secondary importance. For example, this color is used for the label above input fields
+        @ColorInt
+        val subtitle: Int,
+
+        // The color used for input placeholder text
+        @ColorInt
+        val placeholderText: Int,
+
+        // The color used for icons in PaymentSheet, such as the close or back icons
+        @ColorInt
         val appBarIcon: Int,
 
         // A color used to indicate errors or destructive actions in PaymentSheet
-        @ColorRes
+        @ColorInt
         val error: Int,
     ) : Parcelable {
         companion object {
             val defaultLight = Colors(
                 primary = PaymentsThemeDefaults.colorsLight.primary.toArgb(),
                 surface = PaymentsThemeDefaults.colorsLight.surface.toArgb(),
-                componentBackground = PaymentsThemeDefaults
-                    .colorsLight.componentBackground.toArgb(),
+                component = PaymentsThemeDefaults.colorsLight.component.toArgb(),
                 componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder.toArgb(),
                 componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider.toArgb(),
-                onPrimary = PaymentsThemeDefaults.colorsLight.onPrimary.toArgb(),
-                textSecondary = PaymentsThemeDefaults.colorsLight.textSecondary.toArgb(),
+                onComponent = PaymentsThemeDefaults.colorsLight.onComponent.toArgb(),
+                subtitle = PaymentsThemeDefaults.colorsLight.subtitle.toArgb(),
                 placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText.toArgb(),
-                onBackground = PaymentsThemeDefaults.colorsLight.onBackground.toArgb(),
+                onSurface = PaymentsThemeDefaults.colorsLight.onSurface.toArgb(),
                 appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon.toArgb(),
                 error = PaymentsThemeDefaults.colorsLight.error.toArgb(),
             )
@@ -275,13 +274,13 @@ class PaymentSheet internal constructor(
             val defaultDark = Colors(
                 primary = PaymentsThemeDefaults.colorsDark.primary.toArgb(),
                 surface = PaymentsThemeDefaults.colorsDark.surface.toArgb(),
-                componentBackground = PaymentsThemeDefaults.colorsDark.componentBackground.toArgb(),
+                component = PaymentsThemeDefaults.colorsDark.component.toArgb(),
                 componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder.toArgb(),
                 componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider.toArgb(),
-                onPrimary = PaymentsThemeDefaults.colorsDark.onPrimary.toArgb(),
-                textSecondary = PaymentsThemeDefaults.colorsDark.textSecondary.toArgb(),
+                onComponent = PaymentsThemeDefaults.colorsDark.onComponent.toArgb(),
+                subtitle = PaymentsThemeDefaults.colorsDark.subtitle.toArgb(),
                 placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText.toArgb(),
-                onBackground = PaymentsThemeDefaults.colorsDark.onBackground.toArgb(),
+                onSurface = PaymentsThemeDefaults.colorsDark.onSurface.toArgb(),
                 appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon.toArgb(),
                 error = PaymentsThemeDefaults.colorsDark.error.toArgb(),
             )

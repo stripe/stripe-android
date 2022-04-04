@@ -32,60 +32,58 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun lookupConsumer(
         email: String,
         authSessionCookie: String?
-    ): Result<ConsumerSessionLookup> =
-        withContext(workContext) {
-            runCatching {
-                stripeRepository.lookupConsumerSession(
-                    email,
-                    authSessionCookie,
-                    ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
+    ): Result<ConsumerSessionLookup> = withContext(workContext) {
+        runCatching {
+            stripeRepository.lookupConsumerSession(
+                email,
+                authSessionCookie,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
                 )
-            }.fold(
-                onSuccess = {
-                    it?.let {
-                        Result.success(it)
-                    } ?: Result.failure(InternalError("Error looking up consumer"))
-                },
-                onFailure = {
-                    logger.error("Error looking up consumer", it)
-                    Result.failure(it)
-                }
             )
-        }
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error looking up consumer"))
+            },
+            onFailure = {
+                logger.error("Error looking up consumer", it)
+                Result.failure(it)
+            }
+        )
+    }
 
     override suspend fun consumerSignUp(
         email: String,
         phone: String,
         country: String,
         authSessionCookie: String?
-    ): Result<ConsumerSession> =
-        withContext(workContext) {
-            runCatching {
-                stripeRepository.consumerSignUp(
-                    email,
-                    phone,
-                    country,
-                    authSessionCookie,
-                    ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
+    ): Result<ConsumerSession> = withContext(workContext) {
+        runCatching {
+            stripeRepository.consumerSignUp(
+                email,
+                phone,
+                country,
+                authSessionCookie,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
                 )
-            }.fold(
-                onSuccess = {
-                    it?.let {
-                        Result.success(it)
-                    } ?: Result.failure(InternalError("Error signing up consumer"))
-                },
-                onFailure = {
-                    logger.error("Error signing up consumer", it)
-                    Result.failure(it)
-                }
             )
-        }
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error signing up consumer"))
+            },
+            onFailure = {
+                logger.error("Error signing up consumer", it)
+                Result.failure(it)
+            }
+        )
+    }
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
@@ -171,7 +169,7 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun listPaymentDetails(
         consumerSessionClientSecret: String
     ): Result<ConsumerPaymentDetails> = withContext(workContext) {
-        kotlin.runCatching {
+        runCatching {
             stripeRepository.listPaymentDetails(
                 consumerSessionClientSecret,
                 setOf("card"),

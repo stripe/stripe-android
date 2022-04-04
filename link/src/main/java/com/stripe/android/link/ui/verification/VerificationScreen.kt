@@ -34,6 +34,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.ui.core.elements.SectionCard
 
@@ -134,7 +135,7 @@ internal fun VerificationBody(
             modifier = Modifier
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colors.onBackground,
+                    color = MaterialTheme.linkColors.disabledText,
                     shape = MaterialTheme.shapes.medium
                 ),
             colors = ButtonDefaults.buttonColors(

@@ -2,7 +2,7 @@ package com.stripe.android.identity.networking.models
 
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -29,19 +29,18 @@ internal data class CollectedDataParam(
 
         fun createFromUploadedResultsForAutoCapture(
             type: IdDocumentParam.Type,
-            frontHighResResult: IdentityScanViewModel.UploadedResult,
-            frontLowResResult: IdentityScanViewModel.UploadedResult,
-            backHighResResult: IdentityScanViewModel.UploadedResult? = null,
-            backLowResResult: IdentityScanViewModel.UploadedResult? = null
+            frontHighResResult: IdentityViewModel.UploadedResult,
+            frontLowResResult: IdentityViewModel.UploadedResult,
+            backHighResResult: IdentityViewModel.UploadedResult? = null,
+            backLowResResult: IdentityViewModel.UploadedResult? = null
         ): CollectedDataParam =
             if (backHighResResult != null && backLowResResult != null) {
                 CollectedDataParam(
                     idDocument = IdDocumentParam(
                         front = DocumentUploadParam(
-                            backScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_BACK],
+                            backScore = requireNotNull(frontHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
                             frontCardScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_FRONT],
                             invalidScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_INVALID],
-                            noDocumentScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_NO_ID],
                             passportScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_PASSPORT],
                             highResImage = requireNotNull(
                                 frontHighResResult.uploadedStripeFile.id
@@ -56,10 +55,9 @@ internal data class CollectedDataParam(
                             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
                         ),
                         back = DocumentUploadParam(
-                            backScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_BACK],
+                            backScore = requireNotNull(backHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
                             frontCardScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_FRONT],
                             invalidScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_INVALID],
-                            noDocumentScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_NO_ID],
                             passportScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_PASSPORT],
                             highResImage = requireNotNull(
                                 backHighResResult.uploadedStripeFile.id
@@ -80,10 +78,9 @@ internal data class CollectedDataParam(
                 CollectedDataParam(
                     idDocument = IdDocumentParam(
                         front = DocumentUploadParam(
-                            backScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_BACK],
+                            backScore = requireNotNull(frontHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
                             frontCardScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_FRONT],
                             invalidScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_INVALID],
-                            noDocumentScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_NO_ID],
                             passportScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_PASSPORT],
                             highResImage = requireNotNull(
                                 frontHighResResult.uploadedStripeFile.id

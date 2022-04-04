@@ -116,6 +116,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
         }
 
+        val isDark = baseContext.isSystemDarkTheme()
+        viewModel.config?.let {
+            bottomSheet.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+            toolbar.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+        }
+
         setSheetWidthForTablets()
     }
 

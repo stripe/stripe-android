@@ -33,13 +33,13 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     PaymentsTheme.colorsLightMutable = PaymentsThemeDefaults.colorsLight.copy(
         primary = Color(colorsLight.primary),
         surface = Color(colorsLight.surface),
-        componentBackground = Color(colorsLight.componentBackground),
+        component = Color(colorsLight.component),
         componentBorder = Color(colorsLight.componentBorder),
         componentDivider = Color(colorsLight.componentDivider),
-        onPrimary = Color(colorsLight.onPrimary),
-        textSecondary = Color(colorsLight.textSecondary),
+        onComponent = Color(colorsLight.onComponent),
+        subtitle = Color(colorsLight.subtitle),
         placeholderText = Color(colorsLight.placeholderText),
-        onBackground = Color(colorsLight.onBackground),
+        onSurface = Color(colorsLight.onSurface),
         appBarIcon = Color(colorsLight.appBarIcon),
         error = Color(colorsLight.error)
     )
@@ -47,13 +47,13 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     PaymentsTheme.colorsDarkMutable = PaymentsThemeDefaults.colorsDark.copy(
         primary = Color(colorsDark.primary),
         surface = Color(colorsDark.surface),
-        componentBackground = Color(colorsDark.componentBackground),
+        component = Color(colorsDark.component),
         componentBorder = Color(colorsDark.componentBorder),
         componentDivider = Color(colorsDark.componentDivider),
-        onPrimary = Color(colorsDark.onPrimary),
-        textSecondary = Color(colorsDark.textSecondary),
+        onComponent = Color(colorsDark.onComponent),
+        subtitle = Color(colorsDark.subtitle),
         placeholderText = Color(colorsDark.placeholderText),
-        onBackground = Color(colorsDark.onBackground),
+        onSurface = Color(colorsDark.onSurface),
         appBarIcon = Color(colorsDark.appBarIcon),
         error = Color(colorsDark.error)
     )

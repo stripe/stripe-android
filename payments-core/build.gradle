@@ -6,6 +6,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     api project(":stripe-core")
+    compileOnly project(':connections')
 
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
@@ -36,6 +37,7 @@ dependencies {
     javadocDeps "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     javadocDeps "com.google.android.material:material:$materialVersion"
 
+    testImplementation project(':connections')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
@@ -48,6 +50,7 @@ dependencies {
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation testLibs.turbine
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"

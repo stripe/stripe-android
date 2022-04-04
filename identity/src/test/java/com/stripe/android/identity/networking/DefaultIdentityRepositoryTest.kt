@@ -3,7 +3,7 @@ package com.stripe.android.identity.networking
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.QueryStringFactory
@@ -199,7 +199,7 @@ class DefaultIdentityRepositoryTest {
                 mock()
             )
 
-            assertThat(internalStripeFile).isInstanceOf(InternalStripeFile::class.java)
+            assertThat(internalStripeFile).isInstanceOf(StripeFile::class.java)
             verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
 
             val request = requestCaptor.firstValue

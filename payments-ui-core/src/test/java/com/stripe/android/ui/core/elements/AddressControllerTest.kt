@@ -13,11 +13,11 @@ import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class AddressControllerTest {
-    private val emailController = TextFieldController(
+    private val emailController = SimpleTextFieldController(
         EmailConfig()
     )
     private val ibanController =
-        TextFieldController(
+        SimpleTextFieldController(
             IbanConfig()
         )
     private val sectionFieldElementFlow = MutableStateFlow(

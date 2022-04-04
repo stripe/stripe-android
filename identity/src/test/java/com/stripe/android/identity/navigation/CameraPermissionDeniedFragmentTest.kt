@@ -10,10 +10,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.CameraPermissionDeniedFragmentBinding
+import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -66,7 +66,7 @@ class CameraPermissionDeniedFragmentTest {
                 navController
             )
 
-            CameraPermissionDeniedFragmentBinding.bind(it.requireView()).appSettings.callOnClick()
+            BaseErrorFragmentBinding.bind(it.requireView()).bottomButton.callOnClick()
 
             verify(mockAppSettingsOpenable).openAppSettings()
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.docSelectionFragment)
@@ -93,17 +93,17 @@ class CameraPermissionDeniedFragmentTest {
                 navController
             )
 
-            val binding = CameraPermissionDeniedFragmentBinding.bind(it.requireView())
-            binding.fileUpload.callOnClick()
+            val binding = BaseErrorFragmentBinding.bind(it.requireView())
+            binding.topButton.callOnClick()
 
             assertThat(navController.currentDestination?.id).isEqualTo(
                 expectedDestination
             )
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [ARG_SHOULD_SHOW_CAMERA]
+                [ARG_SHOULD_SHOW_TAKE_PHOTO]
             ).isEqualTo(false)
-            assertThat(binding.uploadFileText.text).isEqualTo(
+            assertThat(binding.message2.text).isEqualTo(
                 it.getString(
                     R.string.upload_file_text,
                     it.getString(expectedTitleSuffix)

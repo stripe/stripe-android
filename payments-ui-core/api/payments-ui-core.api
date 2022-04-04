@@ -150,6 +150,14 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$PostalCode
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$PreFilledParameterMap : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$PreFilledParameterMap;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$SaveForFutureUse : com/stripe/android/ui/core/elements/IdentifierSpec {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -213,6 +221,11 @@ public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
 	public static final fun getBancontactParamKey ()Ljava/util/Map;
 }
 
+public final class com/stripe/android/ui/core/forms/CardSpecKt {
+	public static final fun getCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getCardParamKey ()Ljava/util/Map;
+}
+
 public final class com/stripe/android/ui/core/forms/EpsSpecKt {
 	public static final fun getEpsForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 	public static final fun getEpsParamKey ()Ljava/util/Map;
@@ -255,7 +268,7 @@ public final class com/stripe/android/ui/core/forms/SofortSpecKt {
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;Ljava/lang/String;ZLjava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;Ljava/lang/String;ZLjava/lang/String;Landroid/content/Context;)V
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
 }
 

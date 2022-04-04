@@ -9,6 +9,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
@@ -25,14 +26,16 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymen
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AnimationConstants
+import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -60,15 +63,25 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
 
         val paymentMethods = sheetViewModel.supportedPaymentMethods
-        viewBinding.googlePayDivider.setText(
-            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
-                paymentMethods.size == 1
-            ) {
-                R.string.stripe_paymentsheet_or_pay_with_card
-            } else {
-                R.string.stripe_paymentsheet_or_pay_using
+        viewBinding.googlePayDivider.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val visibility by sheetViewModel.googlePayDividerVisibilility.observeAsState(false)
+                if (visibility) {
+                    GooglePayDividerUi(
+                        context.resources.getString(
+                            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
+                                paymentMethods.size == 1
+                            ) {
+                                R.string.stripe_paymentsheet_or_pay_with_card
+                            } else {
+                                R.string.stripe_paymentsheet_or_pay_using
+                            }
+                        )
+                    )
+                }
             }
-        )
+        }
 
         viewBinding.addPaymentMethodHeader.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -119,6 +132,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+
+        val isSystemDarkMode = context?.isSystemDarkTheme() ?: false
+        sheetViewModel.config?.appearance?.getColors(isSystemDarkMode)?.surface?.let {
+            viewBinding.googlePayButton.setBackgroundColor(Color(it).shouldUseDarkDynamicColor())
+        }
     }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {
@@ -212,14 +230,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     companion object {
 
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-            when (paymentMethod) {
-                SupportedPaymentMethod.Card -> {
-                    CardDataCollectionFragment::class.java
-                }
-                else -> {
-                    ComposeFormDataCollectionFragment::class.java
-                }
-            }
+            ComposeFormDataCollectionFragment::class.java
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
 

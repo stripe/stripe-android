@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -12,6 +14,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
+import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFragment() {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
@@ -42,7 +47,6 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
 
         viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         val googlePayButton = viewBinding.googlePayButton
-        val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
             // The scroll will be made visible onResume of the activity
@@ -52,7 +56,7 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-        googlePayDivider.isVisible = shouldShowGooglePayButton
+        sheetViewModel.googlePayDividerVisibilility.postValue(shouldShowGooglePayButton)
         sheetViewModel.headerVisibilility.postValue(!shouldShowGooglePayButton)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
@@ -79,7 +83,20 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+        val context = context ?: return
+        val appearance = sheetViewModel.config?.appearance ?: return
+        userMessage?.message.let { message ->
+            viewBinding.message.text = createTextSpanFromTextStyle(
+                text = message,
+                context = context,
+                fontSizeDp = (
+                    appearance.typography.sizeScaleFactor
+                        * PaymentsThemeDefaults.typography.smallFontSize.value
+                    ).dp,
+                color = Color(appearance.getColors(context.isSystemDarkTheme()).error),
+                fontFamily = appearance.typography.fontResId
+            )
+        }
         viewBinding.message.isVisible = userMessage != null
-        viewBinding.message.text = userMessage?.message
     }
 }

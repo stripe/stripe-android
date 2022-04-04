@@ -1,14 +1,16 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal object BsbSpec : SectionFieldSpec(IdentifierSpec.Generic("bsb_number")) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object BsbSpec : SectionFieldSpec(IdentifierSpec.Generic("bsb_number")) {
     fun transform(): SectionFieldElement =
         SimpleTextElement(
             this.identifier,
-            TextFieldController(BsbConfig(banks))
+            SimpleTextFieldController(BsbConfig(banks))
         )
 }
 
@@ -74,7 +76,10 @@ internal val banks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("646", "Maitland Mutual Building Society"),
     BecsDebitBanks.Bank("647", "IMB"),
     BecsDebitBanks.Bank("650", "Newcastle Permanent Building Society"),
-    BecsDebitBanks.Bank("653", "Pioneer Permanent Building Society (division of Bank of Queensland)"),
+    BecsDebitBanks.Bank(
+        "653",
+        "Pioneer Permanent Building Society (division of Bank of Queensland)"
+    ),
     BecsDebitBanks.Bank("654", "ECU Australia"),
     BecsDebitBanks.Bank("655", "The Rock Building Society"),
     BecsDebitBanks.Bank("656", "Wide Bay Australia"),

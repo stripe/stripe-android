@@ -1,6 +1,7 @@
 package com.stripe.android.identity.states
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
@@ -12,6 +13,11 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class LookBackWindowTransitionerTest {
+
+    private val mockNeverTimeOutClockMark = mock<ClockMark>().also {
+        whenever(it.hasPassed()).thenReturn(false)
+    }
+
     @Test
     fun `transitions to Unsatisfied with bad hit rate`() {
         val transitioner = LookBackWindowTransitioner()
@@ -25,6 +31,8 @@ internal class LookBackWindowTransitionerTest {
         val resultState = transitioner.transition(
             mock<IdentityScanState.Found>().also {
                 whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+                whenever(it.timeoutAt).thenReturn(mockNeverTimeOutClockMark)
+                whenever(it.transitioner).thenReturn(transitioner)
             },
             ID_FRONT_OUTPUT
         )
@@ -48,6 +56,8 @@ internal class LookBackWindowTransitionerTest {
         val resultState = transitioner.transition(
             mock<IdentityScanState.Found>().also {
                 whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+                whenever(it.timeoutAt).thenReturn(mockNeverTimeOutClockMark)
+                whenever(it.transitioner).thenReturn(transitioner)
             },
             ID_FRONT_OUTPUT
         )
@@ -59,6 +69,7 @@ internal class LookBackWindowTransitionerTest {
     fun `transitions to Found when more results are required`() {
         val initialState = IdentityScanState.Found(
             IdentityScanState.ScanType.ID_FRONT,
+            mockNeverTimeOutClockMark,
             LookBackWindowTransitioner()
         ).also {
             // hits count below required

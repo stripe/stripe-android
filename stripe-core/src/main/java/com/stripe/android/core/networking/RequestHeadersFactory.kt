@@ -3,7 +3,7 @@ package com.stripe.android.core.networking
 import android.system.Os
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiVersion
-import com.stripe.android.core.InternalAppInfo
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
 
@@ -38,7 +38,7 @@ sealed class RequestHeadersFactory {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     open class BaseApiHeadersFactory(
         private val optionsProvider: () -> ApiRequest.Options,
-        private val appInfo: InternalAppInfo? = null,
+        private val appInfo: AppInfo? = null,
         private val locale: Locale = Locale.getDefault(),
         private val apiVersion: String = ApiVersion.get().code,
         private val sdkVersion: String = StripeSdkVersion.VERSION
@@ -47,8 +47,8 @@ sealed class RequestHeadersFactory {
 
         private val languageTag: String?
             get() {
-                return locale.toString().replace("_", "-")
-                    .takeIf { it.isNotBlank() }
+                return locale.toLanguageTag()
+                    .takeIf { it.isNotBlank() && it != UNDETERMINED_LANGUAGE }
             }
 
         override val userAgent: String
@@ -95,7 +95,7 @@ sealed class RequestHeadersFactory {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Api(
         options: ApiRequest.Options,
-        appInfo: InternalAppInfo? = null,
+        appInfo: AppInfo? = null,
         locale: Locale = Locale.getDefault(),
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION,
@@ -113,7 +113,7 @@ sealed class RequestHeadersFactory {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class FileUpload(
         options: ApiRequest.Options,
-        appInfo: InternalAppInfo? = null,
+        appInfo: AppInfo? = null,
         locale: Locale = Locale.getDefault(),
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION,
@@ -164,5 +164,7 @@ sealed class RequestHeadersFactory {
         ) = "Stripe/v1 $sdkVersion"
 
         val CHARSET: String = Charsets.UTF_8.name()
+
+        const val UNDETERMINED_LANGUAGE = "und"
     }
 }

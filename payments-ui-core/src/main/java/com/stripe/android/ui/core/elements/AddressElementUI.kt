@@ -12,16 +12,28 @@ import com.stripe.android.ui.core.PaymentsTheme
 @Composable
 internal fun AddressElementUI(
     enabled: Boolean,
-    controller: AddressController
+    controller: AddressController,
+    hiddenIdentifiers: List<IdentifierSpec>?,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val fields by controller.fieldsFlowable.collectAsState(null)
-    fields?.let { fieldList ->
+
+    // The last rendered field is not always the last field in the list.
+    // So we need to pre filter so we know when to stop drawing dividers.
+    fields?.filter {
+        (hiddenIdentifiers?.contains(it.identifier) == false)
+    }?.let { fieldList ->
         Column {
             fieldList.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field)
-                if (index != fieldList.size - 1) {
+                SectionFieldElementUI(
+                    enabled,
+                    field,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier
+                )
+                if (index != fieldList.lastIndex) {
                     Divider(
-                        color = PaymentsTheme.colors.colorComponentBorder,
+                        color = PaymentsTheme.colors.colorComponentDivider,
                         thickness = PaymentsTheme.shapes.borderStrokeWidth,
                         modifier = Modifier.padding(
                             horizontal = PaymentsTheme.shapes.borderStrokeWidth

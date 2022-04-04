@@ -1,7 +1,9 @@
 package com.stripe.android.ui.core.forms
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BankDropdownSpec
@@ -29,10 +31,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
 import java.io.File
 
+@RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
+
+    private val context = ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
 
     private val nameSection = SectionSpec(
         IdentifierSpec.Generic("name_section"),
@@ -63,7 +70,8 @@ internal class TransformSpecToElementTest {
                 amount = null,
                 country = "DE",
                 saveForFutureUseInitialValue = true,
-                merchantName = "Merchant, Inc."
+                merchantName = "Merchant, Inc.",
+                context
             )
     }
 
@@ -88,7 +96,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a country section sets up the section and country elements correctly`() {
+    fun `Adding a country section sets up the section and country elements correctly`() = runBlocking {
         val countrySection = SectionSpec(
             IdentifierSpec.Generic("country_section"),
             CountrySpec(onlyShowCountryCodes = setOf("AT"))
@@ -104,7 +112,7 @@ internal class TransformSpecToElementTest {
         assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
 
         // Verify the correct config is setup for the controller
-        assertThat(countryElement.controller.label).isEqualTo(CountryConfig().label)
+        assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
 
         assertThat(countrySectionElement.identifier.value).isEqualTo("country_section")
 
@@ -112,7 +120,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a ideal bank section sets up the section and country elements correctly`() {
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() = runBlocking {
         val idealSection = SectionSpec(
             IdentifierSpec.Generic("ideal_section"),
             IDEAL_BANK_CONFIG
@@ -125,7 +133,7 @@ internal class TransformSpecToElementTest {
         val idealElement = idealSectionElement.fields[0] as SimpleDropdownElement
 
         // Verify the correct config is setup for the controller
-        assertThat(idealElement.controller.label).isEqualTo(R.string.ideal_bank)
+        assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
 
         assertThat(idealSectionElement.identifier.value).isEqualTo("ideal_section")
 
@@ -133,7 +141,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a name section spec sets up the name element correctly`() {
+    fun `Add a name section spec sets up the name element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(nameSection)
         )
@@ -142,7 +150,7 @@ internal class TransformSpecToElementTest {
             .fields[0] as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
+        assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.value).isEqualTo("name")
 
         assertThat(nameElement.controller.capitalization).isEqualTo(KeyboardCapitalization.Words)
@@ -150,7 +158,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a simple text section spec sets up the text element correctly`() {
+    fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(
                 SectionSpec(
@@ -170,13 +178,13 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
         assertThat(nameElement.identifier.value).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
 
     @Test
-    fun `Add a email section spec sets up the email element correctly`() {
+    fun `Add a email section spec sets up the email element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(emailSection)
         )
@@ -185,7 +193,7 @@ internal class TransformSpecToElementTest {
         val emailElement = emailSectionElement.fields[0] as EmailElement
 
         // Verify the correct config is setup for the controller
-        assertThat(emailElement.controller.label).isEqualTo(EmailConfig().label)
+        assertThat(emailElement.controller.label.first()).isEqualTo(EmailConfig().label)
         assertThat(emailElement.identifier.value).isEqualTo("email")
     }
 

@@ -64,10 +64,13 @@ fun SectionCard(
         border = PaymentsTheme.getBorderStroke(isSelected),
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = PaymentsTheme.colors.colorComponentBackground,
+        backgroundColor = PaymentsTheme.colors.component,
+        shape = PaymentsTheme.shapes.material.medium,
         modifier = modifier
     ) {
-        content()
+        Column {
+            content()
+        }
     }
 }
 
@@ -79,6 +82,7 @@ internal fun SectionError(error: String) {
     Text(
         text = error,
         color = PaymentsTheme.colors.material.error,
+        style = PaymentsTheme.typography.h6,
         modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }

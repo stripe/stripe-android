@@ -1,22 +1,13 @@
 package com.stripe.android.paymentsheet
 
-import android.graphics.Paint
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.TextPaint
-import android.text.style.AbsoluteSizeSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.MetricAffectingSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
@@ -25,7 +16,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.convertDpToPx
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -81,46 +72,19 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     private fun setEditMenuText() {
-        val isDark = this.context?.isSystemDarkTheme() ?: false
+        val context = context ?: return
+        val appearance = sheetViewModel.config?.appearance ?: return
         editMenuItem?.apply {
-            val editMenuText = getString(if (isEditing) R.string.done else R.string.edit)
-            val editMenuTextSpan = SpannableString(editMenuText)
-
-            sheetViewModel.config?.appearance?.let { appearance ->
-                val color = Color(appearance.getColors(isDark).appBarIcon).toArgb()
-                editMenuTextSpan.setSpan(
-                    ForegroundColorSpan(color),
-                    0,
-                    editMenuTextSpan.length,
-                    0
-                )
-
-                context?.let {
-                    val typeFace = ResourcesCompat.getFont(
-                        it,
-                        appearance.typography.fontResId
-                    )
-                    typeFace?.let {
-                        editMenuTextSpan.setSpan(
-                            CustomTypefaceSpan(typeFace),
-                            0,
-                            editMenuTextSpan.length,
-                            0
-                        )
-                    }
-                    val fontSize = it.convertDpToPx(
-                        PaymentsThemeDefaults.typography.smallFontSize.value.dp
-                            * appearance.typography.sizeScaleFactor
-                    )
-                    editMenuTextSpan.setSpan(
-                        AbsoluteSizeSpan(fontSize.toInt()),
-                        0,
-                        editMenuTextSpan.length,
-                        0
-                    )
-                }
-            }
-            title = editMenuTextSpan
+            title = createTextSpanFromTextStyle(
+                text = getString(if (isEditing) R.string.done else R.string.edit),
+                context = context,
+                fontSizeDp = (
+                    appearance.typography.sizeScaleFactor
+                        * PaymentsThemeDefaults.typography.smallFontSize.value
+                    ).dp,
+                color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
+                fontFamily = appearance.typography.fontResId
+            )
         }
     }
 
@@ -189,23 +153,6 @@ internal abstract class BasePaymentMethodsListFragment(
     private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
         adapter.removeItem(item)
         sheetViewModel.removePaymentMethod(item.paymentMethod)
-    }
-
-    class CustomTypefaceSpan(typeface: Typeface) : MetricAffectingSpan() {
-        private val typeface: Typeface = typeface
-        override fun updateDrawState(ds: TextPaint) {
-            applyCustomTypeFace(ds, typeface)
-        }
-
-        override fun updateMeasureState(paint: TextPaint) {
-            applyCustomTypeFace(paint, typeface)
-        }
-
-        companion object {
-            private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
-                paint.typeface = tf
-            }
-        }
     }
 
     private companion object {

@@ -37,7 +37,7 @@ internal class ConfirmationFragment(
         binding = ConfirmationFragmentBinding.inflate(inflater, container, false)
         binding.kontinue.setOnClickListener {
             verificationFlowFinishable.finishWithResult(
-                IdentityVerificationSheet.VerificationResult.Completed
+                IdentityVerificationSheet.VerificationFlowResult.Completed
             )
         }
         return binding.root

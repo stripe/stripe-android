@@ -1,11 +1,14 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class AddressSpec(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+data class AddressSpec(
     override val identifier: IdentifierSpec,
+    val countryCodes: Set<String>
 ) : SectionFieldSpec(identifier) {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
@@ -14,6 +17,7 @@ internal data class AddressSpec(
         AddressElement(
             IdentifierSpec.Generic("billing"),
             addressRepository,
-            initialValues
+            initialValues,
+            countryCodes = countryCodes
         )
 }

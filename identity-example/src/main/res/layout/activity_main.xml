@@ -6,24 +6,105 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/allowed_type_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/allowed_types"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="40dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/allowed_types"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/allowed_types"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/require_live_capture"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/allowed_type_label">
+
+        <CheckBox
+            android:id="@+id/allowed_type_dl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/driver_license" />
+
+        <CheckBox
+            android:id="@+id/allowed_type_passport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/passport" />
+
+        <CheckBox
+            android:id="@+id/allowed_type_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/id_card" />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/require_live_capture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/require_live_capture"
+        android:checked="true"
+        app:layout_constraintBottom_toTopOf="@+id/require_id_number"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/allowed_types" />
+
+    <CheckBox
+        android:id="@+id/require_id_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/require_id_number"
+        android:enabled="false"
+        app:layout_constraintBottom_toTopOf="@+id/require_matching_selfie"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/require_live_capture" />
+
+    <CheckBox
+        android:id="@+id/require_matching_selfie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/require_matching_selfie"
+        android:enabled="false"
+        app:layout_constraintBottom_toTopOf="@+id/progress_circular"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/require_id_number" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress_circular"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:visibility="invisible"
         android:indeterminate="true"
         app:indicatorSize="28dp"
         app:layout_constraintBottom_toTopOf="@id/start_verification"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/require_matching_selfie"
+        app:layout_constraintVertical_weight="1" />
+
 
     <Button
         android:id="@+id/start_verification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/start_verification"
+        android:layout_marginBottom="40dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

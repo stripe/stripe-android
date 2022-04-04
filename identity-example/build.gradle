@@ -44,6 +44,28 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    flavorDimensions += "theme"
+    productFlavors {
+        create("theme1") {
+            manifestPlaceholders["appTheme"] = "@style/Theme.Theme1"
+            manifestPlaceholders["appIcon"] = "@drawable/merchant_logo_purple"
+            manifestPlaceholders["appIconRound"] = "@drawable/merchant_logo_purple"
+
+            dimension = "theme"
+            applicationIdSuffix = ".theme1"
+            versionNameSuffix = "-theme1"
+        }
+        create("theme2") {
+            manifestPlaceholders["appTheme"] = "@style/Theme.Theme2"
+            manifestPlaceholders["appIcon"] = "@drawable/merchant_logo_red"
+            manifestPlaceholders["appIconRound"] = "@drawable/merchant_logo_red"
+
+            dimension = "theme"
+            applicationIdSuffix = ".theme2"
+            versionNameSuffix = "-theme2"
+        }
+    }
 }
 
 dependencies {

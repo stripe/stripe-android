@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * This is used to define each section in the visual form layout.
@@ -14,4 +15,6 @@ sealed class FormElement {
     abstract val controller: Controller?
 
     abstract fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
+    open fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+        MutableStateFlow(emptyList())
 }

@@ -12,6 +12,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -28,7 +29,10 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -191,8 +195,22 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
+        userMessage?.message.let { message ->
+            viewModel.config?.appearance?.let {
+                messageView.text = createTextSpanFromTextStyle(
+                    text = message,
+                    context = this,
+                    fontSizeDp = (
+                        it.typography.sizeScaleFactor
+                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                        ).dp,
+                    color = Color(it.getColors(baseContext.isSystemDarkTheme()).error),
+                    fontFamily = it.typography.fontResId
+                )
+            }
+        }
+
         messageView.isVisible = userMessage != null
-        messageView.text = userMessage?.message
     }
 
     private fun onTransitionTarget(
@@ -262,7 +280,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             .observe(this, buyButtonStateObserver)
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
             .observe(this, googlePayButtonStateObserver)
-
+        val isDark = baseContext.isSystemDarkTheme()
         viewModel.selection.observe(this) { paymentSelection ->
             updateErrorMessage()
 
@@ -273,12 +291,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 ) is PaymentSheetListFragment
 
             if (shouldShowGooglePay) {
-                viewBinding.googlePayButton.bringToFront()
-                viewBinding.googlePayButton.isVisible = true
-                viewBinding.buyButton.isVisible = false
+                viewModel.config?.appearance?.let {
+                    val surfaceColor = Color(it.getColors(isDark).surface)
+                    viewBinding.googlePayButton.apply {
+                        bringToFront()
+                        isVisible = true
+                        setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
+                    }
+                    viewBinding.buyButton.isVisible = false
+                }
             } else {
                 viewBinding.buyButton.bringToFront()
                 viewBinding.buyButton.isVisible = true
+
                 viewBinding.googlePayButton.isVisible = false
             }
         }
@@ -289,7 +314,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }
 
-        val isDark = baseContext.isSystemDarkTheme()
         viewModel.config?.let {
             viewBinding.buyButton.setDefaultBackGroundColor(
                 it.primaryButtonColor ?: ColorStateList.valueOf(
@@ -297,13 +321,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 )
             )
             viewBinding.buyButton.setCornerRadius(it.appearance.shapes.cornerRadiusDp)
-
-            viewBinding.bottomSheet.setBackgroundColor(
-                Color(it.appearance.getColors(isDark).surface).toArgb()
-            )
-            viewBinding.toolbar.setBackgroundColor(
-                Color(it.appearance.getColors(isDark).surface).toArgb()
-            )
         }
 
         viewBinding.buyButton.setOnClickListener {

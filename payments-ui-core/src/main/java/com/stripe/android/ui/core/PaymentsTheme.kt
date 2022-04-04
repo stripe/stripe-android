@@ -3,6 +3,13 @@ package com.stripe.android.ui.core
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.TextPaint
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.MetricAffectingSpan
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
@@ -18,6 +25,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -26,19 +34,21 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.ColorUtils
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
     val primary: Color,
     val surface: Color,
-    val componentBackground: Color,
+    val component: Color,
     val componentBorder: Color,
     val componentDivider: Color,
-    val onPrimary: Color,
-    val textSecondary: Color,
+    val onComponent: Color,
+    val subtitle: Color,
     val textCursor: Color,
     val placeholderText: Color,
-    val onBackground: Color,
+    val onSurface: Color,
     val appBarIcon: Color,
     val error: Color,
 )
@@ -75,14 +85,14 @@ object PaymentsThemeDefaults {
     val colorsLight = PaymentsColors(
         primary = Color(0xFF007AFF),
         surface = Color.White,
-        componentBackground = Color.White,
+        component = Color.White,
         componentBorder = Color(0x33787880),
         componentDivider = Color(0x33787880),
-        onPrimary = Color.Black,
-        textSecondary = Color(0x99000000),
+        onComponent = Color.Black,
+        subtitle = Color(0x99000000),
         textCursor = Color.Black,
         placeholderText = Color(0x993C3C43),
-        onBackground = Color.Black,
+        onSurface = Color.Black,
         appBarIcon = Color(0x99000000),
         error = Color.Red,
     )
@@ -90,14 +100,14 @@ object PaymentsThemeDefaults {
     val colorsDark = PaymentsColors(
         primary = Color(0xFF0074D4),
         surface = Color(0xff2e2e2e),
-        componentBackground = Color.DarkGray,
+        component = Color.DarkGray,
         componentBorder = Color(0xFF787880),
         componentDivider = Color(0xFF787880),
-        onPrimary = Color.White,
-        textSecondary = Color(0x99FFFFFF),
+        onComponent = Color.White,
+        subtitle = Color(0x99FFFFFF),
         textCursor = Color.White,
         placeholderText = Color(0x61FFFFFF),
-        onBackground = Color.White,
+        onSurface = Color.White,
         appBarIcon = Color.White,
         error = Color.Red,
     )
@@ -125,12 +135,13 @@ object PaymentsThemeDefaults {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsComposeColors(
-    val colorComponentBackground: Color,
+    val component: Color,
     val colorComponentBorder: Color,
     val colorComponentDivider: Color,
-    val colorTextSecondary: Color,
+    val subtitle: Color,
     val colorTextCursor: Color,
     val placeholderText: Color,
+    val onComponent: Color,
     val material: Colors
 )
 
@@ -146,18 +157,18 @@ data class PaymentsComposeShapes(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsColors.toComposeColors(): PaymentsComposeColors {
     return PaymentsComposeColors(
-        colorComponentBackground = componentBackground,
+        component = component,
         colorComponentBorder = componentBorder,
         colorComponentDivider = componentDivider,
-        colorTextSecondary = textSecondary,
+        onComponent = onComponent,
+        subtitle = subtitle,
         colorTextCursor = textCursor,
         placeholderText = placeholderText,
 
         material = lightColors(
             primary = primary,
-            onPrimary = onPrimary,
             surface = surface,
-            onBackground = onBackground,
+            onSurface = onSurface,
             error = error,
         )
     )
@@ -281,8 +292,10 @@ fun PaymentsTheme(
 // This mirrors an object that lives inside of MaterialTheme.
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
+    const val minContrastForWhite = 2.2
     var colorsDarkMutable = PaymentsThemeDefaults.colorsDark
     var colorsLightMutable = PaymentsThemeDefaults.colorsLight
+
     val colors: PaymentsComposeColors
         @Composable
         @ReadOnlyComposable
@@ -317,4 +330,61 @@ fun Context.isSystemDarkTheme(): Boolean {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.convertDpToPx(dp: Dp): Float {
     return dp.value * resources.displayMetrics.density
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun createTextSpanFromTextStyle(
+    text: String?,
+    context: Context,
+    fontSizeDp: Dp,
+    color: Color,
+    @FontRes
+    fontFamily: Int
+): SpannableString {
+    val span = SpannableString(text ?: "")
+
+    val fontSize = context.convertDpToPx(fontSizeDp)
+    span.setSpan(AbsoluteSizeSpan(fontSize.toInt()), 0, span.length, 0)
+
+    span.setSpan(ForegroundColorSpan(color.toArgb()), 0, span.length, 0)
+
+    ResourcesCompat.getFont(
+        context,
+        fontFamily
+    )?.let {
+        span.setSpan(CustomTypefaceSpan(it), 0, span.length, 0)
+    }
+
+    return span
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal class CustomTypefaceSpan(private val typeface: Typeface) : MetricAffectingSpan() {
+    override fun updateDrawState(ds: TextPaint) {
+        applyCustomTypeFace(ds, typeface)
+    }
+
+    override fun updateMeasureState(paint: TextPaint) {
+        applyCustomTypeFace(paint, typeface)
+    }
+
+    companion object {
+        private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
+            paint.typeface = tf
+        }
+    }
+}
+
+// This method calculates if black or white offers a better contrast compared to a given color.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Color.shouldUseDarkDynamicColor(): Boolean {
+    val contrastRatioToBlack = ColorUtils.calculateContrast(this.toArgb(), Color.Black.toArgb())
+    val contrastRatioToWhite = ColorUtils.calculateContrast(this.toArgb(), Color.White.toArgb())
+
+    // Prefer white as long as the min contrast has been met.
+    return if (contrastRatioToWhite > PaymentsTheme.minContrastForWhite) {
+        false
+    } else {
+        contrastRatioToBlack > contrastRatioToWhite
+    }
 }
