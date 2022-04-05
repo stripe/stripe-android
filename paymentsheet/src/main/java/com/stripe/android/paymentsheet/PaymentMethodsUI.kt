@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.util.DisplayMetrics
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -31,8 +32,10 @@ import com.stripe.android.ui.core.elements.SectionCard
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
-internal const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 internal const val PM_LIST_PADDING = 14.0f
+
+@VisibleForTesting
+const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 
 @Composable
 internal fun PaymentMethodsUI(

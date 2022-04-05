@@ -31,7 +31,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
@@ -166,6 +168,14 @@ class IdentityCameraScanFragmentTest {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.TimeOut>())
                 }
             )
+
+            val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE)
 
             verify(mockScanFlow).resetFlow()
             assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()

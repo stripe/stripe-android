@@ -18,19 +18,14 @@
         android:textSize="@dimen/doc_selection_title_text_size"
         android:textStyle="bold"
         android:layout_marginTop="58dp"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="32dp"
+        tools:text="Which form of identification do you want to use?"/>
 
     <LinearLayout
         android:id="@+id/multi_selection_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="@dimen/item_vertical_margin"
-            android:background="?android:attr/listDivider" />
 
         <RelativeLayout
             android:id="@+id/dl_container"

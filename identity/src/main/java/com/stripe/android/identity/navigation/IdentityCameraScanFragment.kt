@@ -26,10 +26,10 @@ import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
+import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
@@ -79,6 +79,8 @@ internal abstract class IdentityCameraScanFragment(
         binding = IdentityCameraScanFragmentBinding.inflate(inflater, container, false)
         cameraView = binding.cameraView
 
+        cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+
         headerTitle = binding.headerTitle
         messageView = binding.message
 
@@ -95,28 +97,30 @@ internal abstract class IdentityCameraScanFragment(
             updateUI(newState)
         }
         identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
-            if (finalResult.identityState is IdentityScanState.Finished) {
-                identityViewModel.observeForVerificationPage(
-                    viewLifecycleOwner,
-                    onSuccess = {
+            identityViewModel.observeForVerificationPage(
+                viewLifecycleOwner,
+                onSuccess = { verificationPage ->
+                    if (finalResult.identityState is IdentityScanState.Finished) {
                         identityViewModel.uploadScanResult(
                             finalResult,
-                            it.documentCapture,
+                            verificationPage.documentCapture,
                             identityScanViewModel.targetScanType
                         )
-                    },
-                    onFailure = {
-                        navigateToDefaultErrorFragment()
+                    } else if (finalResult.identityState is IdentityScanState.TimeOut) {
+                        findNavController().navigate(
+                            R.id.action_global_couldNotCaptureFragment,
+                            bundleOf(
+                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType,
+                                ARG_REQUIRE_LIVE_CAPTURE to verificationPage.documentCapture.requireLiveCapture
+                            )
+                        )
                     }
-                )
-            } else if (finalResult.identityState is IdentityScanState.TimeOut) {
-                findNavController().navigate(
-                    R.id.action_global_couldNotCaptureFragment,
-                    bundleOf(
-                        ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
-                    )
-                )
-            }
+                },
+                onFailure = {
+                    Log.e(TAG, "Fail to observeForVerificationPage: $it")
+                    navigateToDefaultErrorFragment()
+                }
+            )
             stopScanning()
         }
         cameraAdapter = Camera1Adapter(
@@ -164,25 +168,15 @@ internal abstract class IdentityCameraScanFragment(
     protected open fun updateUI(identityScanState: IdentityScanState) {
         when (identityScanState) {
             is IdentityScanState.Initial -> {
-                cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
-                cameraView.viewFinderWindowView.visibility = View.VISIBLE
-                cameraView.viewFinderBorderView.visibility = View.VISIBLE
-                continueButton.isEnabled = false
-                checkMarkView.visibility = View.GONE
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+                resetUI()
             }
             is IdentityScanState.Found -> {
                 messageView.text = requireContext().getText(R.string.hold_still)
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
                 cameraView.viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
             }
-            is IdentityScanState.Unsatisfied -> {
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-            }
+            is IdentityScanState.Unsatisfied -> {} // no-op
             is IdentityScanState.Satisfied -> {
                 messageView.text = requireContext().getText(R.string.scanned)
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
             }
             is IdentityScanState.Finished -> {
                 cameraView.viewFinderBackgroundView.visibility = View.INVISIBLE
@@ -199,11 +193,21 @@ internal abstract class IdentityCameraScanFragment(
         }
     }
 
+    protected open fun resetUI() {
+        cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
+        cameraView.viewFinderWindowView.visibility = View.VISIBLE
+        cameraView.viewFinderBorderView.visibility = View.VISIBLE
+        continueButton.isEnabled = false
+        checkMarkView.visibility = View.GONE
+        cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+    }
+
     /**
      * Start scanning for the required scan type.
      */
     protected fun startScanning(scanType: IdentityScanState.ScanType) {
         identityScanViewModel.targetScanType = scanType
+        resetUI()
         cameraAdapter.bindToLifecycle(this)
         identityScanViewModel.scanState = null
         identityScanViewModel.scanStatePrevious = null
@@ -226,10 +230,10 @@ internal abstract class IdentityCameraScanFragment(
     }
 
     /**
-     * Observe for [IdentityScanViewModel.bothUploaded],
+     * Observe for [IdentityViewModel.bothUploaded],
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
-    protected fun observeAndUploadForBothSides(type: IdDocumentParam.Type) =
+    protected fun observeAndUploadForBothSides(type: CollectedDataParam.Type) =
         identityViewModel.bothUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -270,10 +274,10 @@ internal abstract class IdentityCameraScanFragment(
         }
 
     /**
-     * Observe for [IdentityScanViewModel.frontUploaded],
+     * Observe for [IdentityViewModel.frontUploaded],
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
-    protected fun observeAndUploadForFrontSide(type: IdDocumentParam.Type) =
+    protected fun observeAndUploadForFrontSide(type: CollectedDataParam.Type) =
         identityViewModel.frontUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {

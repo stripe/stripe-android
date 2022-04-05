@@ -60,10 +60,10 @@ android {
 }
 
 
-//ext {
-//    artifactId = "connections"
-//    artifactName = "connections"
-//    artifactDescrption = "The connections module of Stripe Payment Android SDK"
-//}
-//
-//apply from: "${rootDir}/deploy/deploy.gradle"
+ext {
+    artifactId = "connections"
+    artifactName = "connections"
+    artifactDescrption = "The connections module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

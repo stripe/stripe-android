@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">アプリの設定</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">運転免許証の裏面</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">運転免許証の裏面が選択されました</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">身分証明書の裏面</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">ID の裏面が選択されました</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">カメラの使用許可</string>
+  <string name="camera_permission_rationale">このアプリはカメラを使用して身分証明書をスキャンし、写真を撮影してお客様の身元を確認します。</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">チェックマークは、書類のキャプチャーが完了したことを示します</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">写真を選択</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">高画質の画像をキャプチャーできませんでした。</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">もう一度お試しいただくか、デバイスから画像をアプロードしてください。</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">画像をキャプチャーできませんでした</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">クロックアイコン</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">運転免許証</string>
+  <!-- Text for error labels -->
+  <string name="error">エラー</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">ファイルをアップロード</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">運転免許証の表裏両面の画像をアップロードしてください</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">身分証明書の表裏両面の画像をアップロードしてください</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">パスポートの画像をアップロードしてください</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">運転免許証の表面</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">運転免許証の表面が選択されました</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">身分証明書の表面</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">ID の表面が選択されました</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">戻る</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">カメラへのアクセス許可が必要です。アプリの設定でカメラへのアクセスを許可してください。</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">動かさないでください、スキャンしています</string>
+  <!-- display name for ID -->
+  <string name="id_card">ID</string>
+  <!-- Continue button text -->
+  <string name="kontinue">続ける</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">読み込み中</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">パスポート</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">パスポートが選択されました</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">運転免許証を裏返してください</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">運転免許証をフレームの中央に置いてください</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">身分証明書を裏返してください</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">身分証明書をフレームの中央に置いてください</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">パスポートをフレームの中央に置いてください</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">スキャン終了</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">選択</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">写真を撮る</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">やり直す</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">予期しないエラーが発生しました。数秒後にもう一度お試しください</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">運転免許証の裏面をアップロード</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">運転免許証の表面をアップロード</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">ID の裏面をアップロード</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">ID の表面をアップロード</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">パスポートをアップロード</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">または、%1$sの写真を手動でアップロードすることもできます。</string>
+</resources>

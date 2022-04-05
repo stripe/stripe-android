@@ -1,3 +1,28 @@
+public final class com/stripe/android/core/AppInfo : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/core/AppInfo$Companion;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/AppInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/core/AppInfo$Companion {
+	public final fun create (Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static synthetic fun create$default (Lcom/stripe/android/core/AppInfo$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/AppInfo;
+}
+
 public final class com/stripe/android/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -134,6 +159,77 @@ public final class com/stripe/android/core/injection/NamedConstantsKt {
 }
 
 public final class com/stripe/android/core/model/CountryCodeKt {
+}
+
+public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/core/model/StripeFilePurpose;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lcom/stripe/android/core/model/StripeFilePurpose;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/core/model/StripeFilePurpose;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/model/StripeFile;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/model/StripeFile;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/core/model/StripeFilePurpose;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/model/StripeFile;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreated ()Ljava/lang/Long;
+	public final fun getFilename ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPurpose ()Lcom/stripe/android/core/model/StripeFilePurpose;
+	public final fun getSize ()Ljava/lang/Integer;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/core/model/StripeFileParams {
+	public static final field $stable I
+	public fun <init> (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)V
+	public final fun copy (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)Lcom/stripe/android/core/model/StripeFileParams;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/model/StripeFileParams;Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;ILjava/lang/Object;)Lcom/stripe/android/core/model/StripeFileParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/core/model/StripeFileParams$FileLink : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/Long;)V
+	public fun <init> (ZLjava/lang/Long;Ljava/util/Map;)V
+	public synthetic fun <init> (ZLjava/lang/Long;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (ZLjava/lang/Long;Ljava/util/Map;)Lcom/stripe/android/core/model/StripeFileParams$FileLink;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/model/StripeFileParams$FileLink;ZLjava/lang/Long;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/model/StripeFileParams$FileLink;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
+	public static final field BusinessIcon Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field BusinessLogo Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field Companion Lcom/stripe/android/core/model/StripeFilePurpose$Companion;
+	public static final field CustomerSignature Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field DisputeEvidence Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field IdentityDocument Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field IdentityPrivate Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field PciDocument Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field TaxDocumentUserUpload Lcom/stripe/android/core/model/StripeFilePurpose;
+	public final fun getCode ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static fun values ()[Lcom/stripe/android/core/model/StripeFilePurpose;
 }
 
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {

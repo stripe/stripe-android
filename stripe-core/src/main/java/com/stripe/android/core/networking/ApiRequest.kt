@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
-import com.stripe.android.core.InternalAppInfo
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -25,7 +25,7 @@ data class ApiRequest internal constructor(
     val baseUrl: String,
     val params: Map<String, *>? = null,
     val options: Options,
-    private val appInfo: InternalAppInfo? = null,
+    private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
     private val sdkVersion: String = StripeSdkVersion.VERSION,
 ) : StripeRequest() {
@@ -135,7 +135,7 @@ data class ApiRequest internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Factory(
-        private val appInfo: InternalAppInfo? = null,
+        private val appInfo: AppInfo? = null,
         private val apiVersion: String = ApiVersion.get().code,
         private val sdkVersion: String = StripeSdkVersion.VERSION
     ) {

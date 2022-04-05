@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Postavke aplikacije</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Stražnja strana vozačke dozvole</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Poleđina vozačke dozvole je odabrana</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Stražnja strana osobne iskaznice</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Poleđina osobne iskaznice je odabrana</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Dozvole kamere</string>
+  <string name="camera_permission_rationale">Ova aplikacija koristi kameru za skeniranje vaših osobnih dokumenata i snimanje fotografija radi provjere vašeg identiteta.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Kvačica za označavanje uspješnog preuzimanja dokumenta</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Odaberi fotografiju</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Nismo uspjeli snimiti fotografiju visoke kvalitete.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Možete pokušati ponovno ili prenijeti sliku sa svog uređaja.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Nismo uspjeli snimiti fotografiju</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Ikona sata</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Vozačka dozvola</string>
+  <!-- Text for error labels -->
+  <string name="error">Greška</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Učitavanje datoteke</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Molimo vas učitajte slike prednje i stražnje strane vaše vozačke dozvole</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Molimo vas učitajte slike prednje i stražnje strane vaše osobne iskaznice</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Molimo učitajte sliku vaše putovnice</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Prednja strana vozačke dozvole</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Prednja strana vozačke dozvole je odabrana</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Prednja strana osobne iskaznice</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Prednja strana osobne iskaznice je odabrana</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Vrati se natrag</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Potrebna nam je dozvola za uporabu kamere. Molimo dozvolite pristup kameri u postavkama aplikacije.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Ne pomičite se, skeniranje u tijeku</string>
+  <!-- display name for ID -->
+  <string name="id_card">Osobna iskaznica</string>
+  <!-- Continue button text -->
+  <string name="kontinue">Nastavi</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Učitavanje</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">U redu</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Putovnica</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Putovnica je odabrana</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Okrenite svoju vozačku dozvolu na drugu stranu</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Postavite svoju vozačku dozvolu u sredinu okvira</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Okrenite svoju osobnu iskaznicu na drugu stranu</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Postavite svoju osobnu iskaznicu u sredinu okvira</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Postavite svoju putovnicu u sredinu okvira</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Skenirano</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Odaberi</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Snimi fotografiju</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Pokušaj ponovno</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Došlo je do neočekivane pogreške -- pokušajte ponovno za nekoliko sekundi</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Učitajte poleđinu vozačke dozvole</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Učitajte prednju stranu vozačke dozvole</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Učitajte poleđinu osobne iskaznice</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Učitajte prednju stranu osobne iskaznice</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Učitajte fotografiju putovnice</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Umjesto toga možete ručno prenijeti fotografiju vaše %1$s</string>
+</resources>

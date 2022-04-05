@@ -8,23 +8,22 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocumentType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
+import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -34,12 +33,17 @@ import kotlinx.coroutines.launch
  */
 internal class ConsentFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory,
+    private val consentViewModelFactory: ViewModelProvider.Factory,
     private val verificationFlowFinishable: VerificationFlowFinishable,
 ) : Fragment() {
     private lateinit var binding: ConsentFragmentBinding
 
     private val identityViewModel: IdentityViewModel by activityViewModels {
         identityViewModelFactory
+    }
+
+    private val consentViewModel: ConsentFragmentViewModel by viewModels {
+        consentViewModelFactory
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,15 +67,17 @@ internal class ConsentFragment(
     ): View {
         binding = ConsentFragmentBinding.inflate(inflater, container, false)
 
-        Glide.with(requireContext()).load(identityViewModel.args.brandLogo)
-            .into(binding.merchantLogo)
+        consentViewModel.loadUriIntoImageView(
+            identityViewModel.args.brandLogo,
+            binding.merchantLogo
+        )
 
         binding.agree.setOnClickListener {
             binding.agree.toggleToLoading()
             binding.decline.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
-                    consent = ConsentParam(biometric = true)
+                    biometricConsent = true
                 )
             )
         }
@@ -80,7 +86,7 @@ internal class ConsentFragment(
             binding.agree.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
-                    consent = ConsentParam(biometric = false)
+                    biometricConsent = false
                 )
             )
         }
@@ -122,13 +128,8 @@ internal class ConsentFragment(
                 collectedDataParam,
                 ClearDataParam.CONSENT_TO_DOC_SELECT,
                 shouldNotSubmit = { true },
-                notSubmitBlock = { verificationPageData ->
-                    if (verificationPageData.isMissingDocumentType()) {
-                        navigateToDocSelection()
-                    } else {
-                        // TODO(ccen) Determine the behavior when verificationPageData.isMissingDocumentType() is false
-                        // how to get the type that's already selected
-                    }
+                notSubmitBlock = {
+                    navigateToDocSelection()
                 }
             )
         }

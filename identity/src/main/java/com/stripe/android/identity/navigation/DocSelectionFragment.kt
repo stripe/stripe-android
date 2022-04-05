@@ -19,9 +19,7 @@ import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.networking.models.IdDocumentParam.Type
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBackOrFront
+import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -66,7 +64,7 @@ internal class DocSelectionFragment(
                             toggleSingleSelectionUI(
                                 documentSelect.idDocumentTypeAllowlist.entries.first().key,
                                 documentSelect.buttonText,
-                                documentSelect.idDocumentTypeAllowlist.entries.first().value,
+                                documentSelect.body,
                             )
                         }
                     }
@@ -142,7 +140,11 @@ internal class DocSelectionFragment(
     /**
      * Toggle UI to show single selection type.
      */
-    private fun toggleSingleSelectionUI(allowedType: String, buttonText: String, bodyText: String) {
+    private fun toggleSingleSelectionUI(
+        allowedType: String,
+        buttonText: String,
+        bodyText: String?
+    ) {
         binding.multiSelectionContent.visibility = View.GONE
         binding.singleSelectionContent.visibility = View.VISIBLE
         binding.singleSelectionContinue.setText(buttonText)
@@ -182,11 +184,9 @@ internal class DocSelectionFragment(
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel = identityViewModel,
-                collectedDataParam = CollectedDataParam(idDocument = IdDocumentParam(type = type)),
+                collectedDataParam = CollectedDataParam(idDocumentType = type),
                 clearDataParam = ClearDataParam.DOC_SELECT_TO_UPLOAD,
-                shouldNotSubmit = { verificationPageData ->
-                    verificationPageData.isMissingBackOrFront()
-                },
+                shouldNotSubmit = { true },
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
                         onCameraReady = {
@@ -225,7 +225,11 @@ internal class DocSelectionFragment(
                     Log.e(TAG, "Can't access camera and client has required live capture.")
                     navigateToDefaultErrorFragment()
                 } else {
-                    navigateToUploadFragment(type.toUploadDestinationId(), true)
+                    navigateToUploadFragment(
+                        type.toUploadDestinationId(),
+                        shouldShowTakePhoto = true,
+                        shouldShowChoosePhoto = true
+                    )
                 }
             },
             onFailure = {
@@ -242,19 +246,18 @@ internal class DocSelectionFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
-                if (verificationPage.documentCapture.requireLiveCapture) {
-                    Log.e(TAG, "Can't access camera and client has required live capture.")
-                    navigateToDefaultErrorFragment()
-                } else {
-                    findNavController().navigate(
-                        R.id.action_camera_permission_denied,
+                findNavController().navigate(
+                    R.id.action_camera_permission_denied,
+                    if (verificationPage.documentCapture.requireLiveCapture)
+                        null
+                    else
                         bundleOf(
                             CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
                         )
-                    )
-                }
+                )
             },
             onFailure = {
+                Log.e(TAG, "failed to observeForVerificationPage: $it")
                 navigateToDefaultErrorFragment()
             }
         )

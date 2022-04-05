@@ -3,9 +3,9 @@ package com.stripe.android.identity.networking
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFileParams
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -81,10 +81,10 @@ internal class DefaultIdentityRepository(
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: InternalStripeFilePurpose
-    ): InternalStripeFile = executeRequestWithModelJsonParser(
+        filePurpose: StripeFilePurpose
+    ): StripeFile = executeRequestWithModelJsonParser(
         request = IdentityFileUploadRequest(
-            fileParams = InternalStripeFileParams(
+            fileParams = StripeFileParams(
                 file = imageFile,
                 purpose = filePurpose
             ),
@@ -98,7 +98,7 @@ internal class DefaultIdentityRepository(
 
     override suspend fun downloadModel(modelUrl: String) = runCatching {
         stripeNetworkClient.executeRequestForFile(
-            IdentityModelDownloadRequest(modelUrl),
+            IdentityFileDownloadRequest(modelUrl),
             identityIO.createTFLiteFile(modelUrl)
         )
     }.fold(
@@ -120,6 +120,35 @@ internal class DefaultIdentityRepository(
         onFailure = {
             throw APIConnectionException(
                 "Fail to download file at $modelUrl",
+                cause = it
+            )
+        }
+    )
+
+    override suspend fun downloadFile(fileUrl: String) = runCatching {
+        stripeNetworkClient.executeRequestForFile(
+            IdentityFileDownloadRequest(fileUrl),
+            identityIO.createCacheFile()
+        )
+    }.fold(
+        onSuccess = { response ->
+            if (response.isError) {
+                throw APIException(
+                    requestId = response.requestId?.value,
+                    statusCode = response.code,
+                    message = "Downloading from $fileUrl returns error response"
+                )
+            } else {
+                response.body ?: run {
+                    throw APIException(
+                        message = "Downloading from $fileUrl returns a null body"
+                    )
+                }
+            }
+        },
+        onFailure = {
+            throw APIConnectionException(
+                "Fail to download file at $fileUrl",
                 cause = it
             )
         }

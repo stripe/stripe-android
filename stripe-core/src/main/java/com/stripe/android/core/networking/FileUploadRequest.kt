@@ -1,8 +1,8 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.InternalAppInfo
-import com.stripe.android.core.model.InternalStripeFileParams
+import com.stripe.android.core.AppInfo
+import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
 import java.io.OutputStream
 import java.io.PrintWriter
@@ -16,9 +16,9 @@ import kotlin.random.Random
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class FileUploadRequest(
-    private val fileParams: InternalStripeFileParams,
+    private val fileParams: StripeFileParams,
     options: ApiRequest.Options,
-    appInfo: InternalAppInfo? = null,
+    appInfo: AppInfo? = null,
     /**
      * Boundary to delineate parts of the message
      *
