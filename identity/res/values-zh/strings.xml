@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">应用设置</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">驾驶证背面</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">已选择驾驶证背面</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">身份证背面</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">已选择身份证背面</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">相机许可</string>
+  <string name="camera_permission_rationale">该应用将使用相机来扫描您的身份证件并拍照来验证您的身份。</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">选中标记，表示证件捕获成功</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">选择照片</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">我们未能捕捉到高质量图片。</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">您可以重试或从设备上传一张照片。</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">无法捕获图片</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">时钟图标</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">驾驶证</string>
+  <!-- Text for error labels -->
+  <string name="error">错误</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">文件上传</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">请上传您的驾驶证正反面的照片</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">请上传您的身份证正反面的照片</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">请上传您的护照的照片</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">驾驶证正面</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">已选择驾驶证正面</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">身份证正面</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">已选择身份证正面</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">返回</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">我们需要使用您的相机的许可。请在应用设置中允许使用相机。</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">保持不动，正在扫描</string>
+  <!-- display name for ID -->
+  <string name="id_card">身份证件</string>
+  <!-- Continue button text -->
+  <string name="kontinue">继续</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">正在加载</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">确定</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">护照</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">已选择护照</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">将驾驶证翻到另一面</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">将驾驶证放在画面正中间</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">将身份证翻到另一面</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">将身份证放在画面正中间</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">将护照放在画面正中间</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">已扫描</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">选择</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">拍照</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">重试</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">发生了意外错误 —— 请过几秒钟再试</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">上传驾驶证背面</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">上传驾驶证正面</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">上传身份证背面</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">上传身份证正面</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">上传护照</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">您也可以手动上传您的%1$s</string>
+</resources>
