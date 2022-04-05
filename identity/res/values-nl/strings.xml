@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">App-instellingen</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Achterkant van rijbewijs</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Achterkant van rijbewijs is geselecteerd</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Achterkant van identiteitskaart</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Achterkant van ID-kaart is geselecteerd</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Toestemming voor camera</string>
+  <string name="camera_permission_rationale">Deze app gebruikt de camera om je identiteitsbewijs te scannen en neemt foto\'s om je identiteit te verifiëren.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Vinkje om aan te geven dat het document is vastgelegd</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Foto selecteren</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">We kunnen geen afbeelding in hoge kwaliteit vastleggen.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Probeer het nogmaals of upload een afbeelding van je apparaat.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Niet gelukt om afbeelding vast te leggen</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Klokpictogram</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Rijbewijs</string>
+  <!-- Text for error labels -->
+  <string name="error">Fout</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Bestand uploaden</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Upload afbeeldingen van de voor- en achterkant van je rijbewijs</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Upload afbeeldingen van de voor- en achterkant van je identiteitskaart</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Upload een afbeelding van je paspoort</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Voorkant van rijbewijs</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Voorkant van rijbewijs is geselecteerd</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Voorkant van identiteitskaart</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Voorkant van ID-kaart is geselecteerd</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Terug</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">We hebben toestemming nodig om je camera te gebruiken. Sta dit toe via de app-instellingen.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Niet bewegen, het document wordt gescand</string>
+  <!-- display name for ID -->
+  <string name="id_card">ID</string>
+  <!-- Continue button text -->
+  <string name="kontinue">doorgaan</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Bezig met laden</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Paspoort</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Paspoort is geselecteerd</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Draai je rijbewijs om, zodat de andere kant zichtbaar is</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Plaats je rijbewijs midden in het frame</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Draai je identiteitskaart om, zodat de andere kant zichtbaar is</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Plaats je identiteitskaart midden in het frame</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Plaats je paspoort midden in het frame</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Gescand</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Selecteren</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Foto maken</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Opnieuw proberen</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Er is een onverwachte fout opgetreden. Probeer het over enkele seconden opnieuw</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Achterkant van rijbewijs uploaden</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Voorkant van rijbewijs uploaden</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Achterkant van ID-kaart uploaden</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Voorkant van ID-kaart uploaden</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Paspoort uploaden</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Als alternatief kun je ook handmatig een foto van je %1$s uploaden.</string>
+</resources>

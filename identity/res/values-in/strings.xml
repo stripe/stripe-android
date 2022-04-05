@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Pengaturan Aplikasi</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Bagian belakang surat izin mengemudi</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Bagian belakang surat izin mengemudi dipilih</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Bagian belakang kartu identitas</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Bagian belakang identitas dipilih</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Izin kamera</string>
+  <string name="camera_permission_rationale">Aplikasi ini menggunakan kamera untuk memindai dokumen identitas Anda dan mengambil foto untuk memverifikasi identitas Anda.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Beri tanda centang untuk menunjukkan keberhasilan pengambilan dokumen</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Pilih Foto</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Kami tidak dapat mengambil gambar berkualitas tinggi.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Anda dapat mencoba lagi atau mengunggah gambar dari perangkat.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Tidak dapat mengambil gambar</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Ikon jam</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Surat izin mengemudi</string>
+  <!-- Text for error labels -->
+  <string name="error">Kesalahan</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Pengunggahan File</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Unggah gambar bagian depan dan belakang surat izin mengemudi Anda</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Unggah gambar bagian depan dan belakang kartu identitas Anda</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Unggah gambar paspor Anda</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Bagian depan surat izin mengemudi</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Bagian depan surat izin mengemudi dipilih</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Bagian depan kartu identitas</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Bagian depan identitas dipilih</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Kembali</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Kami memerlukan izin Anda untuk menggunakan kamera. Harap izinkan akses kamera di pengaturan aplikasi.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Jangan bergerak, memindai</string>
+  <!-- display name for ID -->
+  <string name="id_card">Identitas</string>
+  <!-- Continue button text -->
+  <string name="kontinue">lanjutkan</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Memuat</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Paspor</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Paspor dipilih</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Balikkan surat izin mengemudi Anda ke sisi yang lain</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Posisikan surat izin mengemudi Anda di tengah bingkai</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Balikkan kartu identitas Anda ke sisi yang lain</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Posisikan kartu identitas Anda di tengah bingkai</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Posisikan paspor Anda di tengah bingkai</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Dipindai</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Pilih</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Ambil Foto</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Coba Lagi</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Ada kesalahan tak terduga -- cobalah lagi dalam beberapa detik</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Unggah bagian belakang surat izin mengemudi</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Unggah bagian depan surat izin mengemudi</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Unggah bagian belakang identitas</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Unggah bagian depan identitas</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Unggah paspor</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Atau, Anda dapat mengunggah foto %1$s secara manual</string>
+</resources>

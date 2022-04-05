@@ -3,9 +3,9 @@
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">App Settings</string>
   <!-- Description of back of driver's license image -->
-  <string name="back_of_dl">Back of driver\'s license</string>
+  <string name="back_of_dl">Back of driving licence</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
-  <string name="back_of_dl_selected">Back of driver license is selected</string>
+  <string name="back_of_dl_selected">Back of driving licence is selected</string>
   <!-- Description of back of identity card image -->
   <string name="back_of_id">Back of identity card</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
@@ -14,7 +14,7 @@
   <string name="camera_permission">Camera permission</string>
   <string name="camera_permission_rationale">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
   <!-- Description of the check mark, used for A11Y -->
-  <string name="check_mark">Check mark to indicate document capture success</string>
+  <string name="check_mark">Tick mark to indicate document capture success</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="choose_file">Choose Photo</string>
   <!-- Line1 body text of error screen when live capture fails -->
@@ -32,15 +32,15 @@
   <!-- Button that opens file upload screen -->
   <string name="file_upload">File Upload</string>
   <!-- Instructions for uploading images of drivers license -->
-  <string name="file_upload_content_dl">Please upload images of the front and back of your driver\'s license</string>
+  <string name="file_upload_content_dl">Please upload images of the front and back of your driving licence</string>
   <!-- Instructions for uploading images of identity card -->
   <string name="file_upload_content_id">Please upload images of the front and back of your identity card</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Please upload an image of your passport</string>
   <!-- Description of front of driver's license image -->
-  <string name="front_of_dl">Front of driver\'s license</string>
+  <string name="front_of_dl">Front of driving licence</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
-  <string name="front_of_dl_selected">Front of driver license is selected</string>
+  <string name="front_of_dl_selected">Front of driving licence is selected</string>
   <!-- Description of front of identity card image -->
   <string name="front_of_id">Front of identity card</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
@@ -64,15 +64,15 @@
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="passport_selected">Passport is selected</string>
   <!-- Instructional text for scanning back of a driver's license -->
-  <string name="position_dl_back">Flip your driver\'s license over to the other side</string>
+  <string name="position_dl_back">Flip your driving licence over to the other side</string>
   <!-- Instructional text for scanning front of a driver's license -->
-  <string name="position_dl_front">Position your driver\'s license in the center of the frame</string>
+  <string name="position_dl_front">Position your driving licence in the centre of the frame</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="position_id_back">Flip your identity card over to the other side</string>
   <!-- Instructional text for scanning front of a identity card -->
-  <string name="position_id_front">Position your identity card in the center of the frame</string>
+  <string name="position_id_front">Position your identity card in the centre of the frame</string>
   <!-- Instructional text for scanning a passport -->
-  <string name="position_passport">Position your passport in the center of the frame</string>
+  <string name="position_passport">Position your passport in the centre of the frame</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Scanned</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
@@ -82,11 +82,11 @@
   <!-- Button to attempt to re-scan identity document image -->
   <string name="try_again">Try Again</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="unexpected_error_try_again">There was an unexpected error -- try again in a few seconds</string>
+  <string name="unexpected_error_try_again">There was an unexpected error - please try again in a few seconds</string>
   <!-- Title of dialog to upload back of driver license -->
-  <string name="upload_dialog_title_dl_back">Upload back of driver\'s license</string>
+  <string name="upload_dialog_title_dl_back">Upload back of driving licence</string>
   <!-- Title of dialog to upload front of driver license -->
-  <string name="upload_dialog_title_dl_front">Upload front of driver\'s license</string>
+  <string name="upload_dialog_title_dl_front">Upload front of driving licence</string>
   <!-- Title of dialog to upload back of ID -->
   <string name="upload_dialog_title_id_back">Upload back of ID</string>
   <!-- Title of dialog to upload front of ID -->
