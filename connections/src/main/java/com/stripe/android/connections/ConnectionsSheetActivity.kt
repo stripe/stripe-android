@@ -42,6 +42,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         ConnectionsSheetContract.Args.fromIntent(intent)
     }
 
+    // Random change.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
