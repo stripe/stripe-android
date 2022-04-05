@@ -3,7 +3,6 @@ package com.stripe.android
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
-import androidx.test.espresso.IdlingPolicies
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -11,25 +10,23 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
-import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class TestHardCodedLpms {
@@ -75,7 +72,7 @@ class TestHardCodedLpms {
     )
 
     @Test
-    fun testBancontact()  {
+    fun testBancontact() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Bancontact,
@@ -85,7 +82,7 @@ class TestHardCodedLpms {
     }
 
     @Test
-    fun testSepaDebit()  {
+    fun testSepaDebit() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
@@ -100,7 +97,7 @@ class TestHardCodedLpms {
     }
 
     @Test
-    fun testIdeal()  {
+    fun testIdeal() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Ideal,
@@ -110,7 +107,7 @@ class TestHardCodedLpms {
     }
 
     @Test
-    fun testEps()  {
+    fun testEps() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Eps,
@@ -120,7 +117,7 @@ class TestHardCodedLpms {
     }
 
     @Test
-    fun testGiropay()  {
+    fun testGiropay() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Giropay,
@@ -140,7 +137,7 @@ class TestHardCodedLpms {
     }
 
     @Test
-    fun testAfterpay()  {
+    fun testAfterpay() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AfterpayClearpay,
@@ -151,8 +148,34 @@ class TestHardCodedLpms {
         )
     }
 
+    @Ignore("Ignored until ready to release")
+//    @Test
+    fun testAffirm() {
+        testDriver.confirmNewOrGuestComplete(
+            newUser.copy(
+                paymentMethod = SupportedPaymentMethod.Affirm,
+                authorizationAction = AuthorizeAction.Authorize,
+                currency = Currency.USD,
+                shipping = Shipping.On,
+                automatic = Automatic.Off
+            )
+        )
+    }
+
+    @Ignore("Cannot be tested requires AU-based merchant")
+    fun testAuBecsDD() {
+        testDriver.confirmNewOrGuestComplete(
+            newUser.copy(
+                paymentMethod = SupportedPaymentMethod.AuBecsDebit,
+                authorizationAction = AuthorizeAction.Authorize,
+                currency = Currency.USD,
+                shipping = Shipping.On
+            )
+        )
+    }
+
     @Ignore("Complex authorization handling required")
-    fun testKlarna()  {
+    fun testKlarna() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Klarna,
@@ -163,7 +186,7 @@ class TestHardCodedLpms {
     }
 
     @Ignore("Cannot be tested requires EU-based merchant")
-    fun testPayPal()  {
+    fun testPayPal() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.PayPal,

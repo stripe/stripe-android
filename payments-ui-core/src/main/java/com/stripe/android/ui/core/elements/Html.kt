@@ -1,6 +1,6 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -12,40 +12,40 @@ import android.text.style.UnderlineSpan
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
-import com.google.accompanist.flowlayout.FlowRow
 import com.stripe.android.ui.core.PaymentsTheme
 
 private const val LINK_TAG = "URL"
-
 
 data class EmbeddableImage(
     @DrawableRes val id: Int,
@@ -61,7 +61,9 @@ data class EmbeddableImage(
 internal fun Html(
     html: String,
     imageGetter: Map<String, EmbeddableImage>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    color: Color,
+    style: TextStyle
 ) {
     val inlineContentMap = imageGetter.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
@@ -89,100 +91,26 @@ internal fun Html(
         )
     }
 
+    val annotatedText = annotatedStringResource(html, imageGetter)
+
     val context = LocalContext.current
-    val annotatedText = annotatedLinkStringResource(html, imageGetter)
-
-    FlowRow(modifier = modifier) {
-        var currentStart = 0
-        // Each tag should be created as a separate element so it is read by accessibility
-        // correctly.  If this is not done and there is an embedded image the name of the image will
-        // be read after the rest of the string is read.
-        val linkStrings = annotatedText.getStringAnnotations(0, annotatedText.length)
-        linkStrings.forEach { annotateStringRange ->
-            if (annotateStringRange.start > currentStart) {
-                HtmlText(
-                    annotatedText,
-                    currentStart,
-                    annotateStringRange.start - 1,
-                    inlineContentMap
-                )
-                currentStart = annotateStringRange.start
-            }
-            if (annotateStringRange.tag == LINK_TAG) {
-                HtmlLinkText(
-                    context,
-                    annotatedText,
-                    annotateStringRange.start,
-                    annotateStringRange.end,
-                    annotateStringRange.item
-                )
-                currentStart = annotateStringRange.end
-            } else {
-                HtmlText(
-                    annotatedText,
-                    currentStart,
-                    annotateStringRange.end,
-                    inlineContentMap
-                )
-                currentStart = annotateStringRange.end
-            }
-        }
-        if (currentStart < annotatedText.length) {
-            HtmlText(
-                annotatedText,
-                currentStart,
-                annotatedText.length,
-                inlineContentMap
-            )
-            currentStart = annotatedText.length
-        }
-    }
-
-}
-
-@Composable
-internal fun HtmlLinkText(
-    context: Context,
-    annotatedText: AnnotatedString,
-    start: Int,
-    end: Int,
-    item: String,
-) {
     ClickableText(
-        text = annotatedText.subSequence(start, end),
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) { // makes it a separate accessible item,
-                this.role = Role.Button
-            },
-        onClick = {
-            val openURL = Intent(Intent.ACTION_VIEW)
-            openURL.data = Uri.parse(item)
-            context.startActivity(openURL)
-        },
-        style = TextStyle.Default.copy(
-            color = PaymentsTheme.colors.subtitle
-        ),
-    )
-}
-
-@Composable
-internal fun HtmlText(
-    annotatedText: AnnotatedString,
-    start: Int,
-    end: Int,
-    inlineContentMap: Map<String, InlineTextContent>
-) {
-    Text(
-        text = annotatedText.subSequence(
-            start,
-            end,
-        ),
+        annotatedText,
         inlineContent = inlineContentMap,
-        modifier = Modifier
+        modifier = modifier
             .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
-        color = PaymentsTheme.colors.subtitle,
+            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item,
+        color = color,
+        style = style,
+        onClick = {
+            annotatedText
+                .getStringAnnotations(LINK_TAG, it, it)
+                .firstOrNull()?.let { annotation ->
+                    val openURL = Intent(Intent.ACTION_VIEW)
+                    openURL.data = Uri.parse(annotation.item)
+                    context.startActivity(openURL)
+                }
+        }
     )
 }
 
@@ -194,10 +122,9 @@ internal fun HtmlText(
  * @return the string data associated with the resource
  */
 @Composable
-internal fun annotatedLinkStringResource(
+private fun annotatedStringResource(
     text: String,
     imageGetter: Map<String, EmbeddableImage>,
-    urlStyle: TextDecoration = TextDecoration.Underline
 ): AnnotatedString {
     val spanned = remember(text) {
         HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -252,7 +179,7 @@ internal fun annotatedLinkStringResource(
                         }
                         is URLSpan -> {
                             addStyle(
-                                SpanStyle(textDecoration = urlStyle),
+                                SpanStyle(textDecoration = TextDecoration.Underline),
                                 start,
                                 end
                             )
@@ -273,3 +200,41 @@ internal fun annotatedLinkStringResource(
     }
 }
 
+@Composable
+private fun ClickableText(
+    text: AnnotatedString,
+    inlineContent: Map<String, InlineTextContent> = mapOf(),
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
+    color: Color = PaymentsTheme.colors.subtitle,
+    style: TextStyle = PaymentsTheme.typography.body2,
+    softWrap: Boolean = true,
+    overflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    onClick: (Int) -> Unit
+) {
+    val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
+    val pressIndicator = Modifier.pointerInput(onClick) {
+        detectTapGestures { pos ->
+            layoutResult.value?.let { layoutResult ->
+                onClick(layoutResult.getOffsetForPosition(pos))
+            }
+        }
+    }
+
+    BasicText(
+        text = text,
+        modifier = modifier.then(pressIndicator),
+        style = style.copy(
+            color = color
+        ),
+        softWrap = softWrap,
+        overflow = overflow,
+        maxLines = maxLines,
+        onTextLayout = {
+            layoutResult.value = it
+            onTextLayout(it)
+        },
+        inlineContent = inlineContent
+    )
+}

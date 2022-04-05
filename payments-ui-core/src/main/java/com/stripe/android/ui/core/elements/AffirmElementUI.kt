@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -19,6 +20,8 @@ fun AffirmElementUI() {
                 R.string.affirm
             )
         ),
-        modifier = Modifier.padding(bottom = 4.dp)
+        modifier = Modifier.padding(bottom = 4.dp),
+        color = PaymentsTheme.colors.subtitle,
+        style = PaymentsTheme.typography.h6
     )
 }
