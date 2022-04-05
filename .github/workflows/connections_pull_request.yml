@@ -19,7 +19,7 @@ jobs:
   build-master:
     needs:
       - connections-changed-files
-    if: needs.connections-changed-files.outputs.any_changed == 'true'
+    if: always() && (needs.connections-changed-files.outputs.any_changed == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -37,7 +37,7 @@ jobs:
   build-pr:
     needs:
       - connections-changed-files
-    if: needs.connections-changed-files.outputs.any_changed == 'true'
+    if: always() && (needs.connections-changed-files.outputs.any_changed == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -52,7 +52,7 @@ jobs:
   # Execute Diffuse only when the two APKs are built successfully
   diffuse:
     needs: [ build-master, build-pr, connections-changed-files ]
-    if: needs.connections-changed-files.outputs.any_changed == 'true'
+    if: always() && (needs.connections-changed-files.outputs.any_changed == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
