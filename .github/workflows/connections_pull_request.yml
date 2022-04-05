@@ -20,6 +20,8 @@ jobs:
           echo "One or more files listed above has changed."
   # Checkout master branch and build the APK
   build-master:
+    needs:
+      - connections-changed-files
     if: needs.connections-changed-files.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -36,6 +38,8 @@ jobs:
 
   # Checkout PR branch and build the APK
   build-pr:
+    needs:
+      - connections-changed-files
     if: needs.connections-changed-files.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -50,8 +54,8 @@ jobs:
 
   # Execute Diffuse only when the two APKs are built successfully
   diffuse:
+    needs: [ build-master, build-pr, connections-changed-files ]
     if: needs.connections-changed-files.outputs.any_changed == 'true'
-    needs: [ build-master, build-pr ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
