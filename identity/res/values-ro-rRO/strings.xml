@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Setările aplicației</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Verso-ul permisului de conducere</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Este selectat verso-ul permisului de conducere</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Verso-ul cărții de identitate</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Este selectat verso-ul cărții de identitate</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Permisiune cameră</string>
+  <string name="camera_permission_rationale">Această aplicație utilizează camera pentru a vă scana documentele de identificare și face fotografii pentru a vă verifica identitatea.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Bifă care indică faptul că documentele au fost captate cu succes</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Alegeți o fotografie</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Nu am putut captura o imagine de înaltă calitate.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Puteți să încercați din nou sau să încărcați o imagine de pe dispozitivul dvs.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Nu s-a putut capta imaginea</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Pictogramă ceas</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Permis de conducere</string>
+  <!-- Text for error labels -->
+  <string name="error">Eroare</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Încărcare fișier</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Vă rugăm să încărcați imagini cu partea frontală și verso-ul permisului dvs. de conducere</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Vă rugăm să încărcați imagini cu partea frontală și verso-ul cărții dvs. de identitate</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Vă rugăm să încărcați o imagine a pașaportului dvs.</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Partea frontală a permisului de conducere</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Este selectată partea din față a permisului de conducere</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Partea frontală a cărții de identitate</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Este selectată partea din față a cărții de identitate</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Înapoi</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Avem nevoie de permisiunea de a utiliza camera dvs. Vă rugăm să permiteți accesul la cameră în setările aplicației.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Nu mișcați, se scanează</string>
+  <!-- display name for ID -->
+  <string name="id_card">Carte de identitate</string>
+  <!-- Continue button text -->
+  <string name="kontinue">continuare</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Se încarcă</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Pașaport</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Este selectat pașaportul</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Întoarceți permisul de conducere pe partea cealaltă</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Poziționați-vă permisul de conducere în centrul cadrului</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Întoarceți cartea de identitate pe partea cealaltă</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Poziționați-vă cartea de identitate în centrul cadrului</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Poziționați-vă pașaportul în centrul cadrului</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Scanat</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Selectare</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Faceți o fotografie</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Încercați din nou</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">A apărut o eroare neașteptată -- încercați din nou în câteva secunde</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Încărcați verso-ul permisului de conducere</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Încărcați partea din față a permisului de conducere</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Încărcați verso-ul cărții de identitate</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Încărcați partea din față a cărții de identitate</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Încărcați pașaportul</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Alternativ, puteți încărca manual o fotografie a %1$s</string>
+</resources>
