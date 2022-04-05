@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Aadressirida 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Emiraat</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Eeslinn või linn</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Vald</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Departemang</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Regioon</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Piirkond</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">Eircode</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Townland</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">Pin</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Saar</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Prefektuur</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Naabruskond</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Oblast</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Postipiirkond või linn</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Eeslinn</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Küla või alev</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Arveldusaadress</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">See väli ei tohi olla tühi.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">Muuda</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Meiliaadress</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Teie meiliaadress on kehtetu.</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="eps_bank">EPS Bank</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="form_label_optional">%s (valikuline)</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Sisestatud IBAN on puudulik.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Sisestatud IBAN on kehtetu.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Sisestatud IBAN on kehtetu, \"%s\" ei ole toetatud riigikood.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="ideal_bank">iDEALi pank</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="klarna_buy_now_pay_later">Ostke nüüd või makske hiljem Klarnaga.</string>
+  <!-- Klarna pay later copy -->
+  <string name="klarna_pay_later">Makske hiljem Klarnaga.</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="p24_bank">Przelewy24 Bank</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="save_for_future_payments_with_merchant_name">Salvestage tulevasteks %s makseteks</string>
+  <!-- SEPA mandate text -->
+  <string name="sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet %s ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_pay_button_amount">Maksa %s</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_setup_button_label">Seadista</string>
+</resources>

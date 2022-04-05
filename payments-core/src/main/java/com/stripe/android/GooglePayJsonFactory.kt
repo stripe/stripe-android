@@ -3,9 +3,9 @@ package com.stripe.android
 import android.content.Context
 import android.os.Parcelable
 import com.stripe.android.GooglePayJsonFactory.TransactionInfo.TotalPriceStatus
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject

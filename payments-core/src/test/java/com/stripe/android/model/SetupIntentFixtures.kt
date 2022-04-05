@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONObject
 
+@Suppress("MaxLineLength")
 internal object SetupIntentFixtures {
     private val PARSER = SetupIntentJsonParser()
 
@@ -33,6 +34,76 @@ internal object SetupIntentFixtures {
         }
         """.trimIndent()
     )
+
+    internal val SI_NEXT_ACTION_VERIFY_WITH_MICRODEPOSITS_JSON =
+        JSONObject(
+            """
+        {
+            "id": "seti_1Kd5ncLu5o3P18ZpOYpGt5BF",
+            "object": "setup_intent",
+            "cancellation_reason": null,
+            "client_secret": "seti_1Kd5ncLu5o3P18ZpOYpGt5BF_secret_LJjGof4HuzSfxwvNCYP5UhdSQKSC9kS",
+            "created": 1647233188,
+            "description": "Example SetupIntent",
+            "last_setup_error": null,
+            "livemode": false,
+            "next_action": {
+                "type": "verify_with_microdeposits",
+                "verify_with_microdeposits": {
+                    "arrival_date": 1647327600,
+                    "hosted_verification_url": "https://payments.stripe.com/microdeposit/sacs_test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLHNhX25vbmNlX0xKakc4NzlEYjNZaWxQT09Ma0RaZDROTklPcUVHb2s0000d7kDmkhf",
+                    "microdeposit_type": "amounts"
+                }
+            },
+            "payment_method": {
+                "id": "pm_1Kd5ndLu5o3P18ZpLVuthxK2",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": "johnny@lawrence.com",
+                    "name": "Johnny Lawrence",
+                    "phone": null
+                },
+                "created": 1647233189,
+                "customer": null,
+                "livemode": false,
+                "type": "us_bank_account",
+                "us_bank_account": {
+                    "account_holder_type": "individual",
+                    "account_type": "checking",
+                    "bank_name": "STRIPE TEST BANK",
+                    "fingerprint": "FFDMA0xfhBjWSZLu",
+                    "last4": "6789",
+                    "linked_account": null,
+                    "networks": {
+                        "preferred": "ach",
+                        "supported": [
+                            "ach"
+                        ]
+                    },
+                    "routing_number": "110000000"
+                }
+            },
+            "payment_method_options": {
+                "us_bank_account": {
+                    "verification_method": "automatic"
+                }
+            },
+            "payment_method_types": [
+                "us_bank_account"
+            ],
+            "status": "requires_action",
+            "usage": "off_session"
+        }
+            """.trimIndent()
+        )
 
     internal val SI_WITH_LAST_PAYMENT_ERROR = requireNotNull(
         PARSER.parse(
@@ -339,4 +410,43 @@ internal object SetupIntentFixtures {
     val SI_NEXT_ACTION_REDIRECT = requireNotNull(
         PARSER.parse(SI_NEXT_ACTION_REDIRECT_JSON)
     )
+
+    val SI_NEXT_ACTION_VERIFY_WITH_MICRODEPOSITS = requireNotNull(
+        PARSER.parse(SI_NEXT_ACTION_VERIFY_WITH_MICRODEPOSITS_JSON)
+    )
+
+    val SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON = JSONObject(
+        """
+            {
+                "id": "seti_3KbV27Lu5o3P18Zp1e7NOonG",
+                "object": "setup_intent",
+                "client_secret": "seti_3KbV27Lu5o3P18Zp1e7NOonG_secret_9PqgvdhyLNub0UvzjFf9bQKqd",
+                "last_payment_error": null,
+                "livemode": false,
+                "next_action": null,
+                "status": "processing",
+                "amount": 6099,
+                "automatic_payment_methods": null,
+                "canceled_at": null,
+                "cancellation_reason": null,
+                "capture_method": "automatic",
+                "confirmation_method": "automatic",
+                "created": 1646853531,
+                "currency": "usd",
+                "description": "Example SetupIntent",
+                "payment_method": "pm_1KbV27Lu5o3P18ZpAEIGorq8",
+                "payment_method_options": { },
+                "payment_method_types": [
+                    "us_bank_account"
+                ],
+                "processing": null,
+                "receipt_email": null,
+                "setup_future_usage": "off_session",
+                "shipping": null,
+                "source": null
+            }
+        """.trimIndent()
+    )
+
+    val SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED = PARSER.parse(SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
 }

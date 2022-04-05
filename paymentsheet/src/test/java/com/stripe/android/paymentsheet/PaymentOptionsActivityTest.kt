@@ -1,37 +1,42 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -40,7 +45,7 @@ class PaymentOptionsActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = createViewModel()
@@ -51,11 +56,6 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -178,7 +178,7 @@ class PaymentOptionsActivityTest {
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
-                assertThat(addBinding.label.text)
+                assertThat(activity.viewBinding.continueButton.externalLabel)
                     .isEqualTo("Continue")
 
                 activity.finish()
@@ -297,21 +297,16 @@ class PaymentOptionsActivityTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY
-        )
-    }
-
-    private companion object {
-        private val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
-            newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
-            enableLogging = false,
-            productUsage = mock()
+            resourceRepository = StaticResourceRepository(
+                BankRepository(
+                    ApplicationProvider.getApplicationContext<Context>().resources
+                ),
+                AddressFieldElementRepository(
+                    ApplicationProvider.getApplicationContext<Context>().resources
+                )
+            ),
+            savedStateHandle = SavedStateHandle()
         )
     }
 }

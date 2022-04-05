@@ -6,11 +6,11 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import kotlinx.parcelize.Parcelize
 

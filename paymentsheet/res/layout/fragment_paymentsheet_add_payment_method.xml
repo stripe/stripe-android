@@ -17,11 +17,10 @@
         app:layout_constraintVertical_bias="0"
         app:layout_constraintVertical_chainStyle="spread_inside">
 
-        <TextView
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/add_payment_method_header"
-            style="@style/StripePaymentSheetTitle"
-            android:layout_width="wrap_content"
-            android:text="@string/stripe_paymentsheet_add_payment_method_title" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <com.stripe.android.paymentsheet.ui.GooglePayButton
             android:id="@+id/google_pay_button"
@@ -32,31 +31,26 @@
 
         <TextView
             android:id="@+id/message"
-            style="@style/StripePaymentSheetErrorMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:padding="1dp"
             android:layout_marginVertical="2dp" />
 
-        <com.stripe.android.paymentsheet.ui.GooglePayDivider
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/google_pay_divider"
-            android:visibility="gone"
-            android:layout_marginTop="16dp"
+            android:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="14dp"
         android:paddingTop="18dp"
         android:paddingBottom="6dp"
         android:visibility="gone"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/payment_method_fragment_container"
         app:layout_constraintStart_toStartOf="parent" />

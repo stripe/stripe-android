@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.model.StripeModel
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**

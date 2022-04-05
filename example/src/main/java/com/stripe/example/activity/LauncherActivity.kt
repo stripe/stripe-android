@@ -98,6 +98,10 @@ class LauncherActivity : AppCompatActivity() {
                 KlarnaPaymentActivity::class.java
             ),
             Item(
+                activity.getString(R.string.confirm_with_affirm),
+                AffirmPaymentActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.becs_debit_example),
                 BecsDebitPaymentMethodActivity::class.java
             ),
@@ -132,7 +136,15 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.compose_example),
                 ComposeExampleActivity::class.java
-            )
+            ),
+//            Item(
+//                activity.getString(R.string.confirm_with_us_bank_account_entry_point),
+//                ConnectUSBankAccountActivity::class.java
+//            ),
+//            Item(
+//                activity.getString(R.string.manual_us_bank_account_example),
+//                ManualUSBankAccountPaymentMethodActivity::class.java
+//            ),
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

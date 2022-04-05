@@ -34,4 +34,8 @@
     <string name="shipping_address">Shipping Address</string>
     <string name="allowsDelayedPaymentMethods">Delayed PMs</string>
     <string name="automatic_pm">Automatic PMs</string>
+    <string name="reset_defaults">Reset Defaults</string>
+    <string name="confirm">confirm</string>
+    <string name="currency_usd">USD</string>
+    <string name="currency_eur">EUR</string>
 </resources>

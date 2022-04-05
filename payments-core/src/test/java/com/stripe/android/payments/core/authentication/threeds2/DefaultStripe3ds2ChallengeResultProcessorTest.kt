@@ -4,35 +4,39 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.exception.APIException
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transactions.UiType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class DefaultStripe3ds2ChallengeResultProcessorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
@@ -55,14 +59,19 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         testDispatcher
     )
 
+    @BeforeTest
+    fun before() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
     @AfterTest
     fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain()
     }
 
     @Test
     fun `process() when completion endpoint call succeeds should return expected flowOutcome`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val paymentFlowResult = resultProcessor.process(SUCCEEDED)
 
             assertThat(stripeRepository.sourceIds)
@@ -80,7 +89,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() when completion endpoint call fails should return expected flowOutcome`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             stripeRepository.completionValue = {
                 error("Failed")
             }
@@ -102,7 +111,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `complete3ds2Auth() should retry until max retries are attempted due to a 4xx response`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             stripeRepository.completionValue = {
                 throw InvalidRequestException(
                     statusCode = 400
@@ -117,7 +126,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `complete3ds2Auth() should succeed after a single retry failure due to a 4xx response`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             stripeRepository.completionValue = {
                 if (stripeRepository.complete3ds2AuthInvocations <= 2) {
                     throw InvalidRequestException(
@@ -145,7 +154,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `complete3ds2Auth() should not retry after a 5xx response`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             stripeRepository.completionValue = {
                 throw APIException(statusCode = 500)
             }
@@ -167,7 +176,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() with Succeeded result should fire expected analytics events`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             resultProcessor.process(SUCCEEDED)
 
             assertThat(
@@ -180,7 +189,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() with Canceled result should fire expected analytics events`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             resultProcessor.process(
                 ChallengeResult.Canceled(
                     UiType.Text.code,
@@ -199,7 +208,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() with Failed result should fire expected analytics events`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             resultProcessor.process(
                 ChallengeResult.Failed(
                     UiType.Text.code,
@@ -218,7 +227,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() with ProtocolError result should fire expected analytics events`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             resultProcessor.process(
                 ChallengeResult.ProtocolError(
                     mock(),
@@ -237,7 +246,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() with Runtime result should fire expected analytics events`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             resultProcessor.process(
                 ChallengeResult.RuntimeError(
                     RuntimeException(),
@@ -256,7 +265,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
     @Test
     fun `process() with Timeout result should fire expected analytics events`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             resultProcessor.process(
                 ChallengeResult.Timeout(
                     UiType.Text.code,

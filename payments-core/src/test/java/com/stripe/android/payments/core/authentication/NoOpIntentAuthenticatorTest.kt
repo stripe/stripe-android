@@ -7,14 +7,13 @@ import com.stripe.android.FakeActivityResultLauncher
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
@@ -28,8 +27,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class NoOpIntentAuthenticatorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
-
     private val host = mock<AuthActivityStarterHost>()
 
     private val paymentRelayStarterFactory =
@@ -41,7 +38,7 @@ class NoOpIntentAuthenticatorTest {
 
     @Test
     fun verifyModernPaymentRelayStarter() =
-        testDispatcher.runBlockingTest {
+        runTest {
 
             val launcher = FakeActivityResultLauncher(PaymentRelayContract())
 
@@ -66,7 +63,7 @@ class NoOpIntentAuthenticatorTest {
 
     @Test
     fun verifyLegacyPaymentRelayStarter() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val classArgumentCaptor: KArgumentCaptor<Class<*>> = argumentCaptor()
             val bundleArgumentCaptor: KArgumentCaptor<Bundle> = argumentCaptor()
             val requestCodeArgumentCaptor: KArgumentCaptor<Int> = argumentCaptor()

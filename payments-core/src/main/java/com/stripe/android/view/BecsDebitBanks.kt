@@ -2,11 +2,13 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Parcelable
-import com.stripe.android.model.StripeJsonUtils
+import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Scanner
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BecsDebitBanks(
     internal val banks: List<Bank>,
     private val shouldIncludeTestBank: Boolean = true
@@ -29,9 +31,8 @@ class BecsDebitBanks(
 
     @Parcelize
     data class Bank(
-        internal val prefix: String,
-        internal val code: String,
-        internal val name: String
+        val prefix: String,
+        val name: String
     ) : Parcelable
 
     private companion object {
@@ -39,13 +40,10 @@ class BecsDebitBanks(
             return StripeJsonUtils.jsonObjectToMap(
                 JSONObject(readFile(context))
             ).orEmpty().map { entry ->
-                (entry.value as List<*>).let {
-                    Bank(
-                        prefix = entry.key,
-                        code = it.first().toString(),
-                        name = it.last().toString()
-                    )
-                }
+                Bank(
+                    prefix = entry.key,
+                    name = entry.value.toString()
+                )
             }
         }
 
@@ -57,7 +55,6 @@ class BecsDebitBanks(
 
         private val STRIPE_TEST_BANK = Bank(
             prefix = "00",
-            code = "STRIPE",
             name = "Stripe Test Bank"
         )
     }

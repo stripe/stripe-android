@@ -2,8 +2,10 @@ import java.time.Duration
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlinVersion = '1.5.31'
-    ext.dokkaVersion = '1.5.31'
+    apply from: 'dependencies.gradle'
+    apply from: './build-configuration/build-environment.gradle'
+    ext.kotlinVersion = '1.6.10'
+    ext.dokkaVersion = '1.6.10'
 
     repositories {
         mavenCentral()
@@ -12,16 +14,21 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath 'com.android.tools.build:gradle:7.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.8.0"
+        classpath buildLibs.detektGradlePlugin
     }
 }
 
 plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+    id 'io.codearte.nexus-staging' version '0.30.0'
 }
+
+apply plugin: "io.gitlab.arturbosch.detekt"
 
 allprojects {
     group = GROUP
@@ -50,21 +57,40 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 31
 
-    kotlinCoroutinesVersion = '1.5.2'
-    kotlinSerializationVersion = '1.3.0'
-    coreKtxVersion = '1.7.0'
-    composeVersion = '1.0.5'
-    composeActivityVersion = '1.3.1'
-    espressoVersion = '3.4.0'
-    ktlintVersion = '0.43.0'
-    materialVersion = '1.4.0'
-    daggerVersion = '2.40'
+    androidxActivityVersion = '1.4.0'
+    androidxAnnotationVersion = '1.3.0'
+    androidxAppcompatVersion = '1.4.1'
+    androidxArchCoreVersion = '2.1.0'
+    androidxBrowserVersion = '1.4.0'
+    androidxComposeVersion = '1.1.1'
+    androidxConstraintlayoutComposeVersion = '1.0.0'
+    androidxConstraintlayoutVersion = '2.1.3'
+    androidxCoreVersion = '1.7.0'
+    androidxFragmentVersion = '1.4.1'
+    androidxLifecycleVersion = '2.4.1'
+    androidxNavigationVersion = '2.4.1'
+    androidxPreferenceVersion = '1.2.0'
+    androidxRecyclerviewVersion = '1.2.1'
+    androidxSecurityVersion = '1.1.0-alpha03'
+
+    kotlinCoroutinesVersion = '1.6.0'
+    kotlinSerializationVersion = '1.3.2'
+    flowlayoutVersion = '0.23.1'
+    ktlintVersion = '0.45.1'
+    materialVersion = '1.5.0'
+    daggerVersion = '2.41'
+    playServicesWalletVersion = '19.1.0'
 
     androidTestVersion = '1.4.0'
+    androidTestJunitVersion = '1.1.3'
+    truthVersion = '1.1.3'
     junitVersion = '4.13.2'
-    robolectricVersion = '4.6'
-    mockitoCoreVersion = '4.0.0'
+    robolectricVersion = '4.7.3'
+    mockitoCoreVersion = '4.4.0'
     mockitoKotlinVersion = '4.0.0'
+    espressoVersion = '3.4.0'
+    jsonVersion = '20220320'
+    uiautomator = '2.2.0'
 
     group_name = GROUP
     version_name = VERSION_NAME
@@ -107,5 +133,6 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "cardverificationsheet-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example"]
+    nonPublicMarkers.add("androidx.annotation.RestrictTo")
 }

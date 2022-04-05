@@ -12,6 +12,10 @@ def getBackendUrl() {
     return readProperty('STRIPE_END_TO_END_TESTS_BACKEND_URL')
 }
 
+def getPublishableKey() {
+    return readProperty('STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY')
+}
+
 private def readProperty(name) {
     final String propValue = findProperty(name) ?: System.getenv(name)
     return propValue?.trim() ? propValue : ""
@@ -33,7 +37,8 @@ android {
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
         manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl()
+                BACKEND_URL: getBackendUrl(),
+                PUBLISHABLE_KEY: getPublishableKey()
         ]
     }
 
@@ -56,12 +61,12 @@ android {
 dependencies {
     implementation project(':payments')
 
-    testImplementation 'org.robolectric:robolectric:4.6.1'
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'com.google.truth:truth:1.1.3'
-    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation 'androidx.test.ext:junit-ktx:1.1.3'
+    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
 
     testImplementation "com.squareup.retrofit2:retrofit:2.9.0"
     testImplementation "com.squareup.retrofit2:converter-moshi:2.9.0"

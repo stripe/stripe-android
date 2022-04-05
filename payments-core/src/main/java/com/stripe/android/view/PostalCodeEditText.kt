@@ -76,6 +76,7 @@ open class PostalCodeEditText @JvmOverloads constructor(
         updateHint(R.string.address_label_postal_code)
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+        filters = arrayOf()
     }
 
     /**
@@ -110,6 +111,13 @@ open class PostalCodeEditText @JvmOverloads constructor(
         Global,
         US
     }
+
+    /**
+     * Returns if the postal is valid. If config is not US, any non-empty postal is valid.
+     */
+    internal fun hasValidPostal() =
+        config == Config.US && ZIP_CODE_PATTERN.matcher(fieldText)
+            .matches() || config == Config.Global && fieldText.isNotEmpty()
 
     private companion object {
         private const val MAX_LENGTH_US = 5

@@ -3,24 +3,23 @@ package com.stripe.android.payments
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class SetupIntentFlowResultProcessorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
@@ -30,14 +29,9 @@ internal class SetupIntentFlowResultProcessorTest {
         testDispatcher
     )
 
-    @AfterTest
-    fun after() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun `processResult() when shouldCancelSource=true should return canceled SetupIntent`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val setupIntentResult = processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "client_secret",

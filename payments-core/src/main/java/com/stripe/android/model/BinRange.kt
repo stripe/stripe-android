@@ -1,10 +1,13 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-internal data class BinRange(
+data class BinRange(
     val low: String,
     val high: String
 ) : StripeModel {
@@ -12,7 +15,7 @@ internal data class BinRange(
      * Number matching strategy: Truncate the longer of the two numbers (theirs and our
      * bounds) to match the length of the shorter one, then do numerical compare.
      */
-    internal fun matches(cardNumber: CardNumber.Unvalidated): Boolean {
+    fun matches(cardNumber: CardNumber.Unvalidated): Boolean {
         val number = cardNumber.normalized
         val numberBigDecimal = number.toBigDecimalOrNull() ?: return false
 

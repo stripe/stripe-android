@@ -4,6 +4,7 @@ import android.util.AttributeSet
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.BankListPaymentMethodBinding
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -25,11 +26,14 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
 
     override val createParams: PaymentMethodCreateParams?
         get() {
-            val netbankingBank = NetbankingBank.values()[netbankingAdapter.selectedPosition]
+            return netbankingAdapter.selectedPosition.takeIf { it != RecyclerView.NO_POSITION }
+                ?.let {
+                    val netbankingBank = NetbankingBank.values()[netbankingAdapter.selectedPosition]
 
-            return PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Netbanking(bank = netbankingBank.code)
-            )
+                    return PaymentMethodCreateParams.create(
+                        PaymentMethodCreateParams.Netbanking(bank = netbankingBank.code)
+                    )
+                }
         }
 
     init {

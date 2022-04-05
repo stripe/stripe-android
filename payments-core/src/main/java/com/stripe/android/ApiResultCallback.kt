@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.model.StripeModel
+import com.stripe.android.core.model.StripeModel
 
 /**
  * Generic interface for an API operation callback that either returns a

@@ -10,8 +10,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
-import com.stripe.android.StripeError
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
 
 internal class PaymentMethodsViewModel(
@@ -105,7 +105,8 @@ internal class PaymentMethodsViewModel(
         private val initialPaymentMethodId: String?,
         private val startedFromPaymentSession: Boolean
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return PaymentMethodsViewModel(
                 application,
                 customerSession,

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Stripe Identity Example</string>
+
+    <string name="theme1">theme1</string>
+    <string name="theme2">theme2</string>
+
+    <string name="start_verification">Start Verification</string>
+
+    <string name="require_live_capture">Require live capture</string>
+    <string name="allowed_types">Allowed document types</string>
+    <string name="require_id_number">Require ID number</string>
+    <string name="require_matching_selfie">Require matching selfie</string>
+</resources>

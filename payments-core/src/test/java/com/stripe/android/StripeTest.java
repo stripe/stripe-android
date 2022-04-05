@@ -5,13 +5,15 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.networking.AnalyticsRequest;
 import com.stripe.android.core.networking.AnalyticsRequestExecutor;
 import com.stripe.android.core.networking.DefaultStripeNetworkClient;
-import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.core.version.StripeSdkVersion;
+import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.core.exception.InvalidRequestException;
-import com.stripe.android.exception.StripeException;
+import com.stripe.android.core.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.AddressFixtures;
 import com.stripe.android.model.BankAccount;
@@ -29,9 +31,9 @@ import com.stripe.android.model.PersonTokenParamsFixtures;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceTypeModel;
-import com.stripe.android.model.StripeFile;
-import com.stripe.android.model.StripeFileParams;
-import com.stripe.android.model.StripeFilePurpose;
+import com.stripe.android.core.model.StripeFile;
+import com.stripe.android.core.model.StripeFileParams;
+import com.stripe.android.core.model.StripeFilePurpose;
 import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory;
@@ -117,8 +119,8 @@ public class StripeTest {
     @Test
     public void testVersion() {
         assertEquals(
-                String.format(Locale.ROOT, "AndroidBindings/%s", Stripe.VERSION_NAME),
-                Stripe.VERSION
+                String.format(Locale.ROOT, "AndroidBindings/%s", StripeSdkVersion.VERSION_NAME),
+                StripeSdkVersion.VERSION
         );
     }
 

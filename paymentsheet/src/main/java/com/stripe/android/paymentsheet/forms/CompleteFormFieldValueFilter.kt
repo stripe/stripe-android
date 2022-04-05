@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -17,8 +18,8 @@ internal class CompleteFormFieldValueFilter(
     private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>
 ) {
     /**
-     * This will return null if any form field values are incomplete, otherwise it is an object
-     * representing all the complete, non-hidden fields.
+     * This flow does not emit any value until all form field values are complete, then it emits an
+     * object representing all the complete, non-hidden fields.
      */
     fun filterFlow() = combine(
         currentFieldValueMap,

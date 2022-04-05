@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">เพิ่มวิธีการชำระเงินใหม่</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">ยกเลิก</string>
+  <!-- Done button title -->
+  <string name="done">เสร็จสิ้น</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">แก้ไข</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">นำออก</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">เรากำลังประสบปัญหาในการเชื่อมต่อกับผู้ให้บริการชำระเงิน โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">เกิดข้อผิดพลาดภายใน</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ เพิ่ม</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">ประเทศหรือภูมิภาค</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">เพิ่มข้อมูลการชำระเงิน</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">ย้อนกลับ</string>
+  <string name="stripe_paymentsheet_close">ปิด</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">ดำเนินการต่อ</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">หรือชำระเงินด้วย</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">หรือชำระเงินด้วยบัตร</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">ชำระเงิน</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">บัตร</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">การหักบัญชีอัตโนมัติแบบ SEPA</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">กำลังประมวลผล...</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">นำ %s ออก</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">บันทึกไว้เพื่อชำระเงินในอนาคต</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">บันทึกบัตรนี้เพื่อชำระเงินให้ %s ในอนาคต</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">เลือกวิธีการชำระเงิน</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">รวม: %s</string>
+</resources>

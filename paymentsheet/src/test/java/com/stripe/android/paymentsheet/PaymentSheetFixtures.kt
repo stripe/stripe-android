@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR
@@ -40,6 +42,18 @@ internal object PaymentSheetFixtures {
         get() = CONFIG_CUSTOMER.copy(
             googlePay = ConfigFixtures.GOOGLE_PAY
         )
+
+    internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        paymentMethods = emptyList(),
+        config = CONFIG_GOOGLEPAY,
+        isGooglePayReady = false,
+        newCard = null,
+        statusBarColor = STATUS_BAR_COLOR,
+        injectorKey = DUMMY_INJECTOR_KEY,
+        enableLogging = false,
+        productUsage = mock()
+    )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContract.Args(

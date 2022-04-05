@@ -20,8 +20,6 @@
   <string name="address_county_required">Írja be az országot.</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Cím</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Cím 1. sora</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">1. címsor (nem kötelező)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,44 +28,28 @@
   <string name="address_label_address_optional">Cím (nem kötelező)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">Házszám (nem kötelező)</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">Város</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Város (nem kötelező)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Ország</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Ország</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Ország (nem kötelező)</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Név</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Telefonszám</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefonszám (nem kötelező)</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Irányítószám</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Irányítószám (nem kötelező)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Irányítószám</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Irányítószám (nem kötelező)</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Tartomány</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Tartomány (nem kötelező)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Állam/tartomány/régió</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Állam/tartomány/régió (nem kötelező)</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Állam</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Állam (nem kötelező)</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Irányítószám</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Irányítószám (nem kötelező)</string>
   <!-- Label for input requesting postal code, used for international addresses -->

@@ -6,20 +6,19 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
+import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
-    private val canClickSelectedItem: Boolean,
-    private val eventReporter: EventReporter
+    private val canClickSelectedItem: Boolean
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
@@ -34,7 +33,7 @@ internal abstract class BasePaymentMethodsListFragment(
         set(value) {
             field = value
             adapter.setEditing(value)
-            editMenuItem?.setTitle(if (value) R.string.done else R.string.edit)
+            setEditMenuText()
             sheetViewModel.setEditing(value)
         }
 
@@ -53,7 +52,7 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
-        eventReporter.onShowExistingPaymentOptions()
+        sheetViewModel.eventReporter.onShowExistingPaymentOptions()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,10 +64,23 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
         // Menu is created after view state is restored, so we need to update the title here
-        editMenuItem = menu.findItem(R.id.edit).apply {
-            setTitle(if (isEditing) R.string.done else R.string.edit)
-        }
+        editMenuItem = menu.findItem(R.id.edit)
+        setEditMenuText()
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun setEditMenuText() {
+        editMenuItem?.apply {
+            context?.let {
+                title = createTextSpanFromTextStyle(
+                    text = getString(if (isEditing) R.string.done else R.string.edit),
+                    context = it,
+                    textStyle = PaymentsThemeConfig.Typography.h6,
+                    color = PaymentsThemeConfig.colors(it.isSystemDarkTheme()).appBarIcon,
+                    fontFamily = PaymentsThemeConfig.Typography.fontFamily
+                )
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -133,30 +145,10 @@ internal abstract class BasePaymentMethodsListFragment(
         sheetViewModel.updateSelection(paymentSelection)
     }
 
-    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) =
-        AlertDialog.Builder(requireActivity())
-            .setTitle(
-                resources.getString(
-                    R.string.stripe_paymentsheet_remove_pm,
-                    SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
-                        ?.run {
-                            resources.getString(
-                                displayNameResource
-                            )
-                        }
-                )
-            )
-            .setMessage(item.getDescription(resources))
-            .setCancelable(true)
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
-                dialog.dismiss()
-            }
-            .setPositiveButton(R.string.remove) { _, _ ->
-                adapter.removeItem(item)
-                sheetViewModel.removePaymentMethod(item.paymentMethod)
-            }
-            .create()
-            .show()
+    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
+        adapter.removeItem(item)
+        sheetViewModel.removePaymentMethod(item.paymentMethod)
+    }
 
     private companion object {
         private const val IS_EDITING = "is_editing"

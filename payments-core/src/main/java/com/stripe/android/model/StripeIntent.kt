@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
 
@@ -76,7 +77,8 @@ sealed interface StripeIntent : StripeModel {
         DisplayOxxoDetails("oxxo_display_details"),
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
-        WeChatPayRedirect("wechat_pay_redirect_to_android_app");
+        WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) VerifyWithMicrodeposits("verify_with_microdeposits");
 
         override fun toString(): String {
             return code
@@ -250,5 +252,13 @@ sealed interface StripeIntent : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class VerifyWithMicrodeposits(
+            val arrivalDate: Long,
+            val hostedVerificationUrl: String,
+            val microdepositType: MicrodepositType
+        ) : NextActionData()
     }
 }

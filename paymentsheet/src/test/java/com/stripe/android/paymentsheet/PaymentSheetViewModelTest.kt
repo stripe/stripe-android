@@ -2,14 +2,16 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -23,14 +25,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -46,9 +44,9 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -57,21 +55,18 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
+import java.util.Locale
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -79,7 +74,7 @@ internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
@@ -97,7 +92,6 @@ internal class PaymentSheetViewModelTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -120,7 +114,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
-        runBlockingTest {
+        runTest {
             val customerRepository = mock<CustomerRepository>()
             val viewModel = createViewModel(
                 customerRepository = customerRepository
@@ -144,7 +138,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
-        runBlockingTest {
+        runTest {
             val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             val failingStripeRepository: StripeRepository = mock()
             whenever(
@@ -175,7 +169,7 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `removePaymentMethod triggers async removal`() = runBlockingTest {
+    fun `removePaymentMethod triggers async removal`() = runTest {
         val customerRepository = spy(FakeCustomerRepository())
         val viewModel = createViewModel(
             customerRepository = customerRepository
@@ -204,7 +198,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `updatePaymentMethods() should fetch only supported payment method types`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val paymentMethodsRepository = mock<CustomerRepository>()
             val viewModel = createViewModel(
                 customerRepository = paymentMethodsRepository
@@ -248,7 +242,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
+    fun `checkout() should confirm saved payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -263,7 +257,10 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
-                    CLIENT_SECRET
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
                 )
             )
     }
@@ -291,7 +288,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm new payment methods`() = testDispatcher.runBlockingTest {
+    fun `checkout() should confirm new payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -311,7 +308,9 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    )
                 )
             )
     }
@@ -415,7 +414,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() should update ViewState and save preferences`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val viewModel = createViewModel(
                 stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT),
             )
@@ -455,7 +454,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() should update ViewState and save new payment method`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val viewModel = createViewModel(
                 stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT_WITH_PM)
             )
@@ -505,7 +504,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() with non-success outcome should report failure event`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
@@ -523,7 +522,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() should update emit API errors`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             viewModel.maybeFetchStripeIntent()
 
             val viewStateList = mutableListOf<PaymentSheetViewState>()
@@ -588,7 +587,8 @@ internal class PaymentSheetViewModelTest {
             stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = failingStripeRepository,
                 lazyPaymentConfig = { paymentConfiguration },
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                Locale.US
             )
         )
         var result: PaymentSheetResult? = null
@@ -636,8 +636,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.maybeFetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
-                "A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.\n" +
-                    "The current PaymentIntent has status 'succeeded'.\n" +
+                "PaymentSheet cannot set up a PaymentIntent in status 'succeeded'.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status."
             )
     }
@@ -783,6 +782,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
         var isEnabled = false
+        viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
@@ -791,6 +791,7 @@ internal class PaymentSheetViewModelTest {
             .isFalse()
 
         viewModel.updateSelection(PaymentSelection.GooglePay)
+        idleLooper()
         assertThat(isEnabled)
             .isFalse()
 
@@ -833,63 +834,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<PaymentSheetViewModelSubcomponent>()
-        val mockViewModel = mock<PaymentSheetViewModel>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
-        whenever((mockSubComponent.viewModel)).thenReturn(mockViewModel)
-
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as PaymentSheetViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = PaymentSheetViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            {
-                PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
-                    "testSecret",
-                    injectorKey = injectorKey
-                )
-            }
-        )
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(PaymentSheetViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(mockViewModel)
-
-        WeakMapInjectorRegistry.staticCacheMap.clear()
-    }
-
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        val factory = PaymentSheetViewModel.Factory(
-            { context },
-            {
-                PaymentSheetContract.Args.createPaymentIntentArgs(
-                    "testSecret",
-                )
-            }
-        )
-        val factorySpy = spy(factory)
-
-        assertNotNull(factorySpy.create(PaymentSheetViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context
-            }
-        )
-    }
-
-    @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
         val viewModel = createViewModel()
         viewModel.setStripeIntent(
@@ -898,7 +842,6 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Eps.code,
                     PaymentMethod.Type.Sofort.code
                 )
             )
@@ -928,7 +871,6 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Eps.code,
                     PaymentMethod.Type.Sofort.code
                 )
             )
@@ -968,7 +910,8 @@ internal class PaymentSheetViewModelTest {
             mock(),
             Logger.noop(),
             testDispatcher,
-            DUMMY_INJECTOR_KEY
+            DUMMY_INJECTOR_KEY,
+            savedStateHandle = SavedStateHandle()
         )
     }
 

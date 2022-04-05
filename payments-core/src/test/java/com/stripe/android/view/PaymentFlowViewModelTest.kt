@@ -11,14 +11,13 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -27,17 +26,12 @@ class PaymentFlowViewModelTest {
     private val customerSession: CustomerSession = mock()
     private val customerRetrievalListener = argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val viewModel = PaymentFlowViewModel(
         customerSession = customerSession,
         paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
         workContext = testDispatcher
     )
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
 
     @Test
     fun saveCustomerShippingInformation_onSuccess_returnsExpectedData() {

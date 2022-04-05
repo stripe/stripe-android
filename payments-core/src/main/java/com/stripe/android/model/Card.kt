@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.IntRange
 import androidx.annotation.Size
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**

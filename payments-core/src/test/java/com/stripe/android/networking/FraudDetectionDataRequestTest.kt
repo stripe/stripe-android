@@ -3,7 +3,8 @@ package com.stripe.android.networking
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.FraudDetectionDataFixtures
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
+import com.stripe.android.core.networking.HEADER_CONTENT_TYPE
+import com.stripe.android.core.networking.RequestHeadersFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream

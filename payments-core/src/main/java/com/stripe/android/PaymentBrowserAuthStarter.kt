@@ -24,7 +24,7 @@ internal interface PaymentBrowserAuthStarter :
                 .toBundle()
 
             host.startActivityForResult(
-                when (args.hasDefaultReturnUrl(defaultReturnUrl)) {
+                when (args.hasDefaultReturnUrl(defaultReturnUrl) || args.isInstantApp) {
                     true -> StripeBrowserLauncherActivity::class.java
                     false -> PaymentAuthWebViewActivity::class.java
                 },

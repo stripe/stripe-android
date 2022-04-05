@@ -9,9 +9,9 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
@@ -94,7 +94,8 @@ internal class StripeGooglePayViewModel(
         private val stripeAccountId: String? = null,
         private val args: StripeGooglePayContract.Args
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val appName =
                 application.applicationInfo.loadLabel(application.packageManager).toString()
             return StripeGooglePayViewModel(

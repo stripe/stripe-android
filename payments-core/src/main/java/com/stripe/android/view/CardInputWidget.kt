@@ -333,8 +333,16 @@ class CardInputWidget @JvmOverloads constructor(
     private fun updatePostalRequired() {
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
+            cardValidCallback?.let {
+                // First remove if it's already added, to make sure it's not added multiple times.
+                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+                postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
+            }
         } else {
             requiredFields.remove(postalCodeEditText)
+            cardValidCallback?.let {
+                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            }
         }
     }
 
@@ -744,6 +752,12 @@ class CardInputWidget @JvmOverloads constructor(
         cvcEditText.setAfterTextChangedListener { text ->
             if (brand.isMaxCvc(text)) {
                 cardInputListener?.onCvcComplete()
+            }
+        }
+
+        postalCodeEditText.setAfterTextChangedListener {
+            if (isPostalRequired() && postalCodeEditText.hasValidPostal()) {
+                cardInputListener?.onPostalCodeComplete()
             }
         }
 

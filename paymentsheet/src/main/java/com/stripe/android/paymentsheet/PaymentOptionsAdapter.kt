@@ -2,27 +2,54 @@ package com.stripe.android.paymentsheet
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
-import android.view.LayoutInflater
-import android.view.View
-import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
-import androidx.core.view.isVisible
-import androidx.core.view.marginEnd
-import androidx.core.view.marginStart
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.IMPORTANT_FOR_ACCESSIBILITY_NO
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.databinding.LayoutPaymentsheetAddNewPaymentMethodItemBinding
-import com.stripe.android.paymentsheet.databinding.LayoutPaymentsheetGooglePayItemBinding
-import com.stripe.android.paymentsheet.databinding.LayoutPaymentsheetPaymentMethodItemBinding
+import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTIONS_DEFAULT_PADDING
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
-import kotlin.math.roundToInt
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -32,7 +59,7 @@ internal class PaymentOptionsAdapter(
         (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
     val paymentMethodDeleteListener:
         (paymentMethod: Item.SavedPaymentMethod) -> Unit,
-    val addCardClickListener: View.OnClickListener
+    val addCardClickListener: () -> Unit
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
     @VisibleForTesting
     internal var items: List<Item> = emptyList()
@@ -205,32 +232,16 @@ internal class PaymentOptionsAdapter(
         parent: ViewGroup,
         viewType: Int
     ): PaymentOptionViewHolder {
+        val width = calculateViewWidth(parent)
         return when (ViewType.values()[viewType]) {
-            ViewType.AddCard -> AddNewPaymentMethodViewHolder(parent).apply {
-                itemView.setOnClickListener(addCardClickListener)
-            }
-            ViewType.GooglePay -> GooglePayViewHolder(parent).apply {
-                itemView.setOnClickListener {
-                    onItemSelected(bindingAdapterPosition, isClick = true)
+            ViewType.AddCard ->
+                AddNewPaymentMethodViewHolder(parent, width, addCardClickListener)
+            ViewType.GooglePay ->
+                GooglePayViewHolder(parent, width, ::onItemSelected)
+            ViewType.SavedPaymentMethod ->
+                SavedPaymentMethodViewHolder(parent, width, ::onItemSelected) { position ->
+                    paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
                 }
-            }
-            ViewType.SavedPaymentMethod -> SavedPaymentMethodViewHolder(parent) { position ->
-                paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
-            }.apply {
-                itemView.setOnClickListener {
-                    onItemSelected(bindingAdapterPosition, isClick = true)
-                }
-            }
-        }.apply {
-            val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
-            // minimum width for each item, accounting for the CardView margin so that the CardView
-            // is at least 100dp wide
-            val minItemWidth = 100 * parent.context.resources.displayMetrics.density +
-                cardView.marginEnd + cardView.marginStart
-            // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
-            val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-            val viewWidth = targetWidth / numVisibleItems
-            itemView.layoutParams.width = viewWidth.toInt()
         }
     }
 
@@ -238,156 +249,187 @@ internal class PaymentOptionsAdapter(
         holder: PaymentOptionViewHolder,
         position: Int
     ) {
-        val item = items[position]
-        when (holder) {
-            is SavedPaymentMethodViewHolder -> {
-                holder.bindSavedPaymentMethod(item as Item.SavedPaymentMethod)
-                holder.setSelected(position == selectedItemPosition && !isEditing)
-                holder.setEnabled(isEnabled)
-                holder.setEditing(isEditing)
-            }
-            is GooglePayViewHolder -> {
-                holder.setSelected(position == selectedItemPosition && !isEditing)
-                holder.setEnabled(isEnabled && !isEditing)
-            }
-            else -> {
-                holder.setEnabled(isEnabled && !isEditing)
-            }
+        // Saved methods are still enabled while editing.
+        val enabled = if (holder is SavedPaymentMethodViewHolder) {
+            isEnabled
+        } else {
+            isEnabled && !isEditing
         }
+
+        holder.bind(
+            isSelected = position == selectedItemPosition && !isEditing,
+            isEnabled = enabled,
+            isEditing = isEditing,
+            item = items[position],
+            position = position
+        )
     }
 
-    private class SavedPaymentMethodViewHolder(
-        private val binding: LayoutPaymentsheetPaymentMethodItemBinding,
-        private val onRemoveListener: (Int) -> Unit
-    ) : PaymentOptionViewHolder(binding.root) {
-        constructor(parent: ViewGroup, onRemoveListener: (Int) -> Unit) : this(
-            LayoutPaymentsheetPaymentMethodItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            ),
-            onRemoveListener
+    override fun onViewRecycled(holder: PaymentOptionViewHolder) {
+        holder.onViewRecycled()
+        super.onViewRecycled(holder)
+    }
+
+    @VisibleForTesting
+    internal class SavedPaymentMethodViewHolder(
+        private val composeView: ComposeView,
+        private val width: Dp,
+        private val onRemoveListener: (Int) -> Unit,
+        private val onItemSelectedListener: ((Int, Boolean) -> Unit)
+    ) : PaymentOptionViewHolder(
+        composeView
+    ) {
+        constructor(
+            parent: ViewGroup,
+            width: Dp,
+            onItemSelectedListener: ((Int, Boolean) -> Unit),
+            onRemoveListener: (Int) -> Unit
+        ) : this (
+            composeView = ComposeView(parent.context),
+            width = width,
+            onRemoveListener = onRemoveListener,
+            onItemSelectedListener = onItemSelectedListener
         )
 
-        override val cardView: View
-            get() = binding.card
+        override fun bind(
+            isSelected: Boolean,
+            isEnabled: Boolean,
+            isEditing: Boolean,
+            item: Item,
+            position: Int
+        ) {
+            val savedPaymentMethod = item as Item.SavedPaymentMethod
+            val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
+            val removeTitle = itemView.resources.getString(
+                R.string.stripe_paymentsheet_remove_pm,
+                SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
+                    ?.run {
+                        itemView.resources.getString(
+                            displayNameResource
+                        )
+                    }
+            )
 
-        init {
-            // ensure that the icons are above the card
-            binding.checkIcon.elevation = binding.card.elevation + 1
-            binding.deleteIcon.elevation = binding.card.elevation + 1
-            binding.deleteIcon.setOnClickListener {
-                onRemoveListener(absoluteAdapterPosition)
-            }
-        }
-
-        fun bindSavedPaymentMethod(item: Item.SavedPaymentMethod) {
-            binding.brandIcon.setImageResource(item.paymentMethod.getSavedPaymentMethodIcon() ?: 0)
-            binding.label.text = item.paymentMethod.getLabel(itemView.resources)
-            binding.root.contentDescription = item.getDescription(itemView.resources)
-            binding.deleteIcon.contentDescription =
-                itemView.resources.getString(
-                    R.string.stripe_paymentsheet_remove_pm,
-                    item.getDescription(itemView.resources)
+            composeView.setContent {
+                PaymentOptionUi(
+                    viewWidth = width,
+                    isEditing = isEditing,
+                    isSelected = isSelected,
+                    isEnabled = isEnabled,
+                    iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+                    labelText = labelText,
+                    removePmDialogTitle = removeTitle,
+                    description = item.getDescription(itemView.resources),
+                    onRemoveListener = { onRemoveListener(position) },
+                    onRemoveAccessibilityDescription =
+                    savedPaymentMethod.getRemoveDescription(itemView.resources),
+                    onItemSelectedListener = { onItemSelectedListener(position, true) },
                 )
-        }
-
-        fun setSelected(selected: Boolean) {
-            binding.root.isSelected = selected
-            binding.checkIcon.isVisible = selected
-            binding.card.strokeWidth = cardStrokeWidth(selected)
-        }
-
-        override fun setEnabled(enabled: Boolean) {
-            binding.card.isEnabled = enabled
-            binding.root.isEnabled = enabled
-            binding.label.isEnabled = enabled
-            binding.brandIcon.alpha = if (enabled) 1F else 0.6F
-        }
-
-        fun setEditing(editing: Boolean) {
-            binding.deleteIcon.isVisible = editing
-            binding.root.importantForAccessibility = if (editing) {
-                IMPORTANT_FOR_ACCESSIBILITY_NO
-            } else {
-                IMPORTANT_FOR_ACCESSIBILITY_YES
             }
         }
     }
 
-    private class AddNewPaymentMethodViewHolder(
-        private val binding: LayoutPaymentsheetAddNewPaymentMethodItemBinding
+    @VisibleForTesting
+    internal class AddNewPaymentMethodViewHolder(
+        private val composeView: ComposeView,
+        private val width: Dp,
+        private val onItemSelectedListener: () -> Unit
     ) : PaymentOptionViewHolder(
-        binding.root
+        composeView
     ) {
-        constructor(parent: ViewGroup) : this(
-            LayoutPaymentsheetAddNewPaymentMethodItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+        constructor(parent: ViewGroup, width: Dp, onItemSelectedListener: () -> Unit) : this(
+            composeView = ComposeView(parent.context),
+            width = width,
+            onItemSelectedListener = onItemSelectedListener
         )
 
-        override val cardView: View
-            get() = binding.card
-
-        override fun setEnabled(enabled: Boolean) {
-            binding.card.isEnabled = enabled
-            binding.root.isEnabled = enabled
-            binding.label.isEnabled = enabled
-            binding.plusIcon.alpha = if (enabled) 1F else 0.6F
+        override fun bind(
+            isSelected: Boolean,
+            isEnabled: Boolean,
+            isEditing: Boolean,
+            item: Item,
+            position: Int
+        ) {
+            composeView.setContent {
+                PaymentOptionUi(
+                    viewWidth = width,
+                    isEditing = false,
+                    isSelected = false,
+                    isEnabled = isEnabled,
+                    labelText =
+                    itemView.resources.getString(
+                        R.string.stripe_paymentsheet_add_payment_method_button_label
+                    ),
+                    iconRes = R.drawable.stripe_ic_paymentsheet_add,
+                    onItemSelectedListener = { onItemSelectedListener() },
+                    description =
+                    itemView.resources.getString(R.string.add_new_payment_method),
+                )
+            }
         }
     }
 
-    private class GooglePayViewHolder(
-        private val binding: LayoutPaymentsheetGooglePayItemBinding
+    @VisibleForTesting
+    internal class GooglePayViewHolder(
+        private val composeView: ComposeView,
+        private val width: Dp,
+        private val onItemSelectedListener: ((Int, Boolean) -> Unit)
     ) : PaymentOptionViewHolder(
-        binding.root
+        composeView
     ) {
-        constructor(parent: ViewGroup) : this(
-            LayoutPaymentsheetGooglePayItemBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
+        constructor(
+            parent: ViewGroup,
+            width: Dp,
+            onItemSelectedListener: ((Int, Boolean) -> Unit)
+        ) : this(
+            composeView = ComposeView(parent.context),
+            width = width,
+            onItemSelectedListener = onItemSelectedListener
         )
 
-        override val cardView: View
-            get() = binding.card
+        override fun bind(
+            isSelected: Boolean,
+            isEnabled: Boolean,
+            isEditing: Boolean,
+            item: Item,
+            position: Int
+        ) {
+            composeView.setContent {
+                PaymentOptionUi(
+                    viewWidth = width,
+                    isEditing = false,
+                    isSelected = isSelected,
+                    isEnabled = isEnabled,
+                    iconRes = R.drawable.stripe_google_pay_mark,
+                    labelText = itemView.resources.getString(R.string.google_pay),
+                    description = itemView.resources.getString(R.string.google_pay),
+                    onItemSelectedListener = { onItemSelectedListener(position, true) },
+                )
+            }
+        }
+    }
+
+    internal abstract class PaymentOptionViewHolder(
+        private val composeView: ComposeView,
+    ) : RecyclerView.ViewHolder(composeView) {
+        abstract fun bind(
+            isSelected: Boolean,
+            isEnabled: Boolean,
+            isEditing: Boolean,
+            item: Item,
+            position: Int
+        )
 
         init {
-            // ensure that the check icon is above the card
-            binding.checkIcon.elevation = binding.card.elevation + 1
+            composeView.setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+            )
         }
 
-        fun setSelected(selected: Boolean) {
-            binding.root.isSelected = selected
-            binding.checkIcon.isVisible = selected
-            binding.card.strokeWidth = cardStrokeWidth(selected)
-        }
-
-        override fun setEnabled(enabled: Boolean) {
-            binding.card.isEnabled = enabled
-            binding.root.isEnabled = enabled
-            binding.label.isEnabled = enabled
-            binding.googlePayMark.alpha = if (enabled) 1F else 0.6F
-        }
-    }
-
-    internal abstract class PaymentOptionViewHolder(parent: ViewGroup) :
-        RecyclerView.ViewHolder(parent) {
-
-        abstract val cardView: View
-        abstract fun setEnabled(enabled: Boolean)
-
-        fun cardStrokeWidth(selected: Boolean): Int {
-            return if (selected) {
-                itemView.resources
-                    .getDimension(R.dimen.stripe_paymentsheet_card_stroke_width_selected)
-                    .roundToInt()
-            } else {
-                itemView.resources
-                    .getDimension(R.dimen.stripe_paymentsheet_card_stroke_width)
-                    .roundToInt()
-            }
+        fun onViewRecycled() {
+            // Dispose the underlying Composition of the ComposeView
+            // when RecyclerView has recycled this ViewHolder
+            composeView.disposeComposition()
         }
     }
 
@@ -428,6 +470,156 @@ internal class PaymentOptionsAdapter(
                 )
                 else -> ""
             }
+
+            fun getRemoveDescription(resources: Resources) = resources.getString(
+                R.string.stripe_paymentsheet_remove_pm,
+                getDescription(resources)
+            )
         }
+    }
+    internal companion object {
+        private fun calculateViewWidth(parent: ViewGroup): Dp {
+            val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
+            val screenDensity = parent.context.resources.displayMetrics.density
+            // minimum width for each item, accounting for the CardView margin so that the CardView
+            // is at least 100dp wide
+            val minItemWidth = 100 * screenDensity + (2 * PM_OPTIONS_DEFAULT_PADDING)
+            // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
+            val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
+            val viewWidth = (targetWidth / numVisibleItems)
+            return (viewWidth / screenDensity).dp
+        }
+
+        internal const val PM_OPTIONS_DEFAULT_PADDING = 6.0F
+    }
+}
+
+@Composable
+internal fun PaymentOptionUi(
+    viewWidth: Dp,
+    isSelected: Boolean,
+    isEditing: Boolean,
+    isEnabled: Boolean,
+    iconRes: Int,
+    labelText: String = "",
+    removePmDialogTitle: String = "",
+    description: String,
+    onRemoveListener: (() -> Unit)? = null,
+    onRemoveAccessibilityDescription: String = "",
+    onItemSelectedListener: (() -> Unit)
+) {
+    // An attempt was made to not use constraint layout here but it was unsuccessful in
+    // precisely positioning the check and delete icons to match the mocks.
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .width(viewWidth)
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .selectable(selected = isSelected, enabled = isEnabled, onClick = {
+                onItemSelectedListener()
+            })
+    ) {
+        val (checkIcon, deleteIcon, label, card) = createRefs()
+        SectionCard(
+            isSelected = isSelected,
+            modifier = Modifier
+                .height(64.dp)
+                .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
+                .fillMaxWidth()
+                .constrainAs(card) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(56.dp)
+                )
+            }
+        }
+        if (isSelected) {
+            Image(
+                painter = painterResource(R.drawable.stripe_ic_check_circle),
+                contentDescription = null,
+
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color = PaymentsTheme.colors.material.primary)
+                    .constrainAs(checkIcon) {
+                        top.linkTo(card.bottom, (-12).dp)
+                        end.linkTo(card.end)
+                    }
+            )
+        }
+        if (isEditing && onRemoveListener != null) {
+            val openDialog = remember { mutableStateOf(false) }
+
+            SimpleDialogElementUI(
+                openDialog = openDialog,
+                titleText = removePmDialogTitle,
+                messageText = description,
+                confirmText = stringResource(R.string.remove),
+                dismissText = stringResource(R.string.cancel),
+                onConfirmListener = onRemoveListener
+            )
+
+            // tint the delete symbol so it contrasts well with the error color around it.
+            val iconColor = PaymentsTheme.colors.material.error
+            val deleteIconColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            Image(
+                painter = painterResource(R.drawable.stripe_ic_delete_symbol),
+                contentDescription = onRemoveAccessibilityDescription,
+                colorFilter = ColorFilter.tint(deleteIconColor),
+                modifier = Modifier
+                    .constrainAs(deleteIcon) {
+                        top.linkTo(card.top, margin = (-9).dp)
+                        end.linkTo(card.end)
+                    }
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color = iconColor)
+                    .clickable(
+                        onClick = {
+                            openDialog.value = true
+                        }
+                    )
+            )
+        }
+
+        LpmSelectorText(
+            text = labelText,
+            textColor = PaymentsTheme.colors.material.onSurface,
+            isEnabled = isEnabled,
+            modifier = Modifier
+                .constrainAs(label) {
+                    top.linkTo(card.bottom)
+                    start.linkTo(card.start)
+                }
+                .padding(
+                    top = 4.dp,
+                    start = PM_OPTIONS_DEFAULT_PADDING.dp,
+                    end = PM_OPTIONS_DEFAULT_PADDING.dp
+                )
+                .semantics {
+                    // This makes the screen reader read out numbers digit by digit
+                    // one one one one vs one thousand one hundred eleven
+                    this.contentDescription =
+                        description.replace("\\d".toRegex(), "$0 ")
+                },
+        )
     }
 }

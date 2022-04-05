@@ -17,7 +17,9 @@ import androidx.core.os.ConfigurationCompat
 import androidx.core.view.doOnNextLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
-import com.stripe.android.model.CountryCode
+import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
 import kotlin.properties.Delegates
@@ -132,6 +134,8 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
                 val countryEntered = countryAutocomplete.text.toString()
                 CountryUtils.getCountryCodeByName(countryEntered, getLocale())?.let {
                     updateUiForCountryEntered(it)
+                } ?: CountryUtils.getCountryByCode(CountryCode.create(countryEntered), getLocale())?.let {
+                    updateUiForCountryEntered(CountryCode.create(countryEntered))
                 }
             }
         }

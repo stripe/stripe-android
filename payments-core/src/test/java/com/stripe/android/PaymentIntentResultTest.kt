@@ -1,8 +1,10 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.utils.ParcelUtils
@@ -32,6 +34,54 @@ class PaymentIntentResultTest {
             paymentMethodTypes = listOf("card"),
             status = StripeIntent.Status.Processing,
             unactivatedPaymentMethods = emptyList()
+        )
+        val result = PaymentIntentResult(
+            intent = paymentIntent
+        )
+        assertThat(result.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+    }
+
+    @Test
+    fun outcome_whenOxxoAndProcessing_shouldReturnSucceeded() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT_PAYMENT_METHOD,
+            isLiveMode = false,
+            id = "pi_12345",
+            currency = "usd",
+            paymentMethodTypes = listOf(PaymentMethod.Type.USBankAccount.code),
+            status = StripeIntent.Status.Processing,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.DisplayOxxoDetails()
+        )
+        val result = PaymentIntentResult(
+            intent = paymentIntent
+        )
+        assertThat(result.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+    }
+
+    @Test
+    fun outcome_whenUSBankAccountAndRequiresAction_shouldReturnSucceeded() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT_PAYMENT_METHOD,
+            isLiveMode = false,
+            id = "pi_12345",
+            currency = "usd",
+            paymentMethodTypes = listOf(PaymentMethod.Type.USBankAccount.code),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                arrivalDate = 1234567,
+                hostedVerificationUrl = "hostedVerificationUrl",
+                microdepositType = MicrodepositType.AMOUNTS
+            )
         )
         val result = PaymentIntentResult(
             intent = paymentIntent

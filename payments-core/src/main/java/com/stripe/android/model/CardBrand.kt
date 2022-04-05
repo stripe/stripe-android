@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import java.util.regex.Pattern
@@ -117,7 +118,10 @@ enum class CardBrand(
         "mastercard",
         "Mastercard",
         R.drawable.stripe_ic_mastercard,
-        pattern = Pattern.compile("^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$"),
+        pattern = Pattern.compile(
+            "^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|" +
+                "227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$"
+        ),
         partialPatterns = mapOf(
             1 to Pattern.compile("^2|5|6$"),
             2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
@@ -174,7 +178,8 @@ enum class CardBrand(
      *
      * Note: currently only [CardBrand.DinersClub] has variants
      */
-    internal fun getMaxLengthForCardNumber(cardNumber: String): Int {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getMaxLengthForCardNumber(cardNumber: String): Int {
         val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalized
         return variantMaxLength.entries.firstOrNull { (pattern, _) ->
             pattern.matcher(normalizedCardNumber).matches()
@@ -191,7 +196,8 @@ enum class CardBrand(
          * @return the [CardBrand] that matches the [cardNumber]'s prefix, if one is found;
          * otherwise, [CardBrand.Unknown]
          */
-        internal fun fromCardNumber(cardNumber: String?): CardBrand {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun fromCardNumber(cardNumber: String?): CardBrand {
             if (cardNumber.isNullOrBlank()) {
                 return Unknown
             }
@@ -205,7 +211,8 @@ enum class CardBrand(
                 ).first()
         }
 
-        internal fun getCardBrands(cardNumber: String?): List<CardBrand> {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getCardBrands(cardNumber: String?): List<CardBrand> {
             if (cardNumber.isNullOrBlank()) {
                 return listOf(Unknown)
             }

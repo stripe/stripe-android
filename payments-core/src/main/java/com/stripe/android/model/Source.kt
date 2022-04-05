@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.StringDef
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Source.Flow
 import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.parsers.SourceJsonParser

@@ -2,29 +2,33 @@ package com.stripe.android.paymentsheet.ui
 
 import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
+import android.content.res.ColorStateList
 import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
+import android.view.WindowMetrics
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.ui.graphics.toArgb
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
-import android.util.DisplayMetrics
 import kotlin.math.roundToInt
-import android.view.WindowInsets
-import android.view.WindowMetrics
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel<*>
@@ -52,10 +56,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportFragmentManager.fragmentFactory =
-            PaymentSheetFragmentFactory(viewModel.eventReporter)
-
         super.onCreate(savedInstanceState)
+
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
             // orientation. See https://stackoverflow.com/a/50832408/11103900
@@ -114,6 +116,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
         }
 
+        val isDark = baseContext.isSystemDarkTheme()
+        bottomSheet.setBackgroundColor(
+            PaymentsThemeConfig.colors(isDark).surface.toArgb()
+        )
+        toolbar.setBackgroundColor(
+            PaymentsThemeConfig.colors(isDark).surface.toArgb()
+        )
+
         setSheetWidthForTablets()
     }
 
@@ -151,7 +161,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             )
         }
 
-        toolbar.navigationIcon = ContextCompat.getDrawable(this, toolbarResources.icon)
+        val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
+        navigationIconDrawable?.setTintList(
+            ColorStateList.valueOf(
+                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
+            )
+        )
+
+        toolbar.navigationIcon = navigationIconDrawable
         toolbar.navigationContentDescription = resources.getString(toolbarResources.description)
     }
 

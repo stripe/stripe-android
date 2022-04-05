@@ -54,21 +54,20 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.paymentResultLiveData
             .observe(
-                this,
-                {
-                    when (it) {
-                        is PaymentResult.Completed -> {
-                            onConfirmSuccess()
-                        }
-                        is PaymentResult.Canceled -> {
-                            onConfirmCanceled()
-                        }
-                        is PaymentResult.Failed -> {
-                            onConfirmError(it)
-                        }
+                this
+            ) {
+                when (it) {
+                    is PaymentResult.Completed -> {
+                        onConfirmSuccess()
+                    }
+                    is PaymentResult.Canceled -> {
+                        onConfirmCanceled()
+                    }
+                    is PaymentResult.Failed -> {
+                        onConfirmError(it)
                     }
                 }
-            )
+            }
     }
 
     protected fun createAndConfirmPaymentIntent(
@@ -89,38 +88,42 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             country = country,
             supportedPaymentMethods = supportedPaymentMethods
         ).observe(
-            this,
-            { result ->
-                result.onSuccess {
-                    handleCreatePaymentIntentResponse(
-                        it,
-                        paymentMethodCreateParams,
-                        shippingDetails,
-                        stripeAccountId,
-                        existingPaymentMethodId,
-                        mandateDataParams,
-                        onPaymentIntentCreated
-                    )
-                }
+            this
+        ) { result ->
+            result.onSuccess {
+                handleCreatePaymentIntentResponse(
+                    it,
+                    paymentMethodCreateParams,
+                    shippingDetails,
+                    stripeAccountId,
+                    existingPaymentMethodId,
+                    mandateDataParams,
+                    onPaymentIntentCreated
+                )
             }
-        )
+        }
     }
 
     protected fun createAndConfirmSetupIntent(
         country: String,
         params: PaymentMethodCreateParams,
-        stripeAccountId: String? = null
+        stripeAccountId: String? = null,
+        onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         keyboardController.hide()
 
         viewModel.createSetupIntent(country).observe(
-            this,
-            { result ->
-                result.onSuccess {
-                    handleCreateSetupIntentResponse(it, params, stripeAccountId)
-                }
+            this
+        ) { result ->
+            result.onSuccess {
+                handleCreateSetupIntentResponse(
+                    it,
+                    params,
+                    stripeAccountId,
+                    onPaymentIntentCreated
+                )
             }
-        )
+        }
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -155,15 +158,21 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 mandateData = mandateDataParams
             )
         }
-        paymentLauncher.confirm(confirmPaymentIntentParams)
+        confirmPaymentIntent(confirmPaymentIntentParams)
+    }
+
+    protected fun confirmPaymentIntent(params: ConfirmPaymentIntentParams) {
+        paymentLauncher.confirm(params)
     }
 
     private fun handleCreateSetupIntentResponse(
         responseData: JSONObject,
         params: PaymentMethodCreateParams,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        onSetupIntentCreated: (String) -> Unit = {}
     ) {
         val secret = responseData.getString("secret")
+        onSetupIntentCreated(secret)
         viewModel.status.postValue(
             viewModel.status.value +
                 "\n\nStarting SetupIntent confirmation" + (
@@ -172,12 +181,18 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 } ?: ""
                 )
         )
-        paymentLauncher.confirm(
+        confirmSetupIntent(
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
                 clientSecret = secret
             )
         )
+    }
+
+    private fun confirmSetupIntent(
+        params: ConfirmSetupIntentParams,
+    ) {
+        paymentLauncher.confirm(params)
     }
 
     protected open fun onConfirmSuccess() {

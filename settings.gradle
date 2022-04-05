@@ -1,21 +1,18 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
-include ':cardverificationsheet'
-include ':cardverificationsheet-example'
-include ':paymentsheet-example'
-include ':stripe-test-e2e'
+include ':camera-core'
+include ':connections'
 include ':example'
-include ':payments-core'
+include ':identity'
+include ':identity-example'
+include ':link'
 include ':payments'
+include ':payments-core'
+include ':payments-ui-core'
+include ':paymentsheet-example'
 include ':paymentsheet'
+include ':stripecardscan'
+include ':stripecardscan-example'
+include ':stripe-core'
+include ':stripe-test-e2e'
 include ':wechatpay'
-
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libraries") {
-            from(files(
-                    "gradle/androidx.versions.toml"
-            ))
-        }
-    }
-}

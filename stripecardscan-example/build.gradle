@@ -1,0 +1,101 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+}
+
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_CARDSCAN_EXAMPLE_BACKEND_URL') ?: "https://gradle"
+}
+
+def getPublishableKey() {
+    return findProperty('STRIPE_CARDSCAN_EXAMPLE_PUBLISHABLE_KEY') ?: ""
+}
+
+dependencies {
+    implementation project(':stripecardscan')
+
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
+    implementation "androidx.preference:preference-ktx:$androidxPreferenceVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
+    implementation "androidx.navigation:navigation-fragment-ktx:$androidxNavigationVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$androidxNavigationVersion"
+    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
+    implementation "com.google.android.material:material:$materialVersion"
+
+    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
+
+    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    // Tooling support (Previews, etc.)
+    implementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
+    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
+    // Material Design
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
+    // Material design icons
+    implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
+    implementation "androidx.compose.material:material-icons-extended:$androidxComposeVersion"
+    // Integration with activities
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    // Integration with ViewModels
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
+    // Integration with observables
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
+
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    defaultConfig {
+        applicationId "com.stripe.android.stripecardscan.example"
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+        versionCode 2
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+            BACKEND_URL: getBackendUrl(),
+            PUBLISHABLE_KEY: getPublishableKey(),
+        ]
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+    }
+}

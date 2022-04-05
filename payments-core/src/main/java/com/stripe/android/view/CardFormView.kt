@@ -18,12 +18,13 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.CountryCode
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
 

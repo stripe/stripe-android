@@ -4,14 +4,22 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.CardException
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -24,8 +32,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeFile
-import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -386,4 +392,110 @@ abstract class StripeRepository {
     internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ): RadarSession?
+
+    // Link endpoints
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun lookupConsumerSession(
+        email: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun logoutConsumer(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails?
+
+    internal abstract suspend fun createPaymentIntentLinkAccountSession(
+        paymentIntentId: String,
+        params: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): BankConnectionsLinkedAccountSession?
+
+    internal abstract suspend fun createSetupIntentLinkAccountSession(
+        setupIntentId: String,
+        params: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): BankConnectionsLinkedAccountSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun attachLinkAccountSessionToPaymentIntent(
+        clientSecret: String,
+        paymentIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun attachLinkAccountSessionToSetupIntent(
+        clientSecret: String,
+        setupIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent?
 }

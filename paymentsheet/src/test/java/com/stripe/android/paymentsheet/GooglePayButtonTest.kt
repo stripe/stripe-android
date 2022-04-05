@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -47,13 +48,12 @@ class GooglePayButtonTest {
         )
         assertThat(primaryButton.isVisible).isTrue()
         assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isFalse()
-        assertThat(primaryButton.backgroundTintList).isNull()
 
         googlePayButton.updateState(
             PrimaryButton.State.Ready
         )
         assertThat(primaryButton.isVisible).isFalse()
-        assertThat(primaryButton.backgroundTintList).isNotNull()
+        assertThat((primaryButton.background as GradientDrawable).color).isNotNull()
         assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isTrue()
     }
 
@@ -63,7 +63,7 @@ class GooglePayButtonTest {
             PrimaryButton.State.StartProcessing,
         )
         assertThat(
-            primaryButton.viewBinding.label.text.toString()
+            primaryButton.externalLabel
         ).isEqualTo(
             "Processing…"
         )

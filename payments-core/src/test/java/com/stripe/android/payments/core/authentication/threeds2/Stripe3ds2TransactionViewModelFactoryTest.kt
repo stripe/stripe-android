@@ -13,13 +13,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import org.junit.Test
@@ -58,7 +58,7 @@ class Stripe3ds2TransactionViewModelFactoryTest {
             // ViewModel.mBagOfTags that's initialized in base class.
             // Mocking it would leave this field null, causing an NPE.
             val viewModel = Stripe3ds2TransactionViewModel(
-                mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock()
+                mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), false
             )
             val mockBuilder = mock<Stripe3ds2TransactionViewModelSubcomponent.Builder>()
             val mockSubcomponent = mock<Stripe3ds2TransactionViewModelSubcomponent>()
@@ -88,7 +88,7 @@ class Stripe3ds2TransactionViewModelFactoryTest {
             verify(factorySpy, times(0)).fallbackInitialize(any())
             assertThat(createdViewModel).isEqualTo(viewModel)
 
-            WeakMapInjectorRegistry.staticCacheMap.clear()
+            WeakMapInjectorRegistry.clear()
         }
     }
 

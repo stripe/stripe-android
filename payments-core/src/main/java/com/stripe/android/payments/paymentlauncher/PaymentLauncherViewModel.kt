@@ -11,13 +11,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -27,12 +31,9 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModelFactoryComponent
+import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
-import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
-import com.stripe.android.payments.core.injection.UIContext
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.launch
@@ -57,16 +58,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val analyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @UIContext private val uiContext: CoroutineContext,
-    private val authActivityStarterHost: AuthActivityStarterHost,
-    activityResultCaller: ActivityResultCaller,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : ViewModel() {
-    init {
-        authenticatorRegistry.onNewActivityResultCaller(
-            activityResultCaller,
-            ::onPaymentFlowResult
-        )
-    }
 
     /**
      * Indicates if the [ViewModel] has complete handling a [StripeIntent].
@@ -75,7 +69,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * this value will be set true, preventing [PaymentLauncherConfirmationActivity] to try to
      * confirm the same [StripeIntent] again.
      */
-    internal val hasStarted: Boolean
+    private val hasStarted: Boolean
         get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
 
     /**
@@ -84,39 +78,61 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal val paymentLauncherResult = MutableLiveData<PaymentResult>()
 
     /**
+     * Registers the calling activity to listen to payment flow results. Should be called in the
+     * activity onCreate.
+     */
+    internal fun register(caller: ActivityResultCaller) {
+        authenticatorRegistry.onNewActivityResultCaller(
+            caller,
+            ::onPaymentFlowResult
+        )
+    }
+
+    /**
      * Confirms a payment intent or setup intent
      */
-    internal suspend fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
-        savedStateHandle.set(KEY_HAS_STARTED, true)
-        logReturnUrl(confirmStripeIntentParams.returnUrl)
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-            ?: defaultReturnUrl.value
-        runCatching {
-            confirmIntent(confirmStripeIntentParams, returnUrl)
-        }.fold(
-            onSuccess = { intent ->
-                intent.nextActionData?.let {
-                    if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
-                        intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+    internal fun confirmStripeIntent(
+        confirmStripeIntentParams: ConfirmStripeIntentParams,
+        host: AuthActivityStarterHost
+    ) {
+        if (hasStarted) return
+        viewModelScope.launch {
+            savedStateHandle.set(KEY_HAS_STARTED, true)
+            logReturnUrl(confirmStripeIntentParams.returnUrl)
+            val returnUrl =
+                if (isInstantApp) {
+                    confirmStripeIntentParams.returnUrl
+                } else {
+                    confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                        ?: defaultReturnUrl.value
+                }
+            runCatching {
+                confirmIntent(confirmStripeIntentParams, returnUrl)
+            }.fold(
+                onSuccess = { intent ->
+                    intent.nextActionData?.let {
+                        if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
+                            intent.id?.let { intentId ->
+                                threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
+                            }
                         }
                     }
+                    authenticatorRegistry.getAuthenticator(intent).authenticate(
+                        host,
+                        intent,
+                        apiRequestOptionsProvider.get()
+                    )
+                },
+                onFailure = {
+                    paymentLauncherResult.postValue(PaymentResult.Failed(it))
                 }
-                authenticatorRegistry.getAuthenticator(intent).authenticate(
-                    authActivityStarterHost,
-                    intent,
-                    apiRequestOptionsProvider.get()
-                )
-            },
-            onFailure = {
-                paymentLauncherResult.postValue(PaymentResult.Failed(it))
-            }
-        )
+            )
+        }
     }
 
     private suspend fun confirmIntent(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
-        returnUrl: String
+        returnUrl: String?
     ): StripeIntent =
         confirmStripeIntentParams.also {
             it.returnUrl = returnUrl
@@ -146,28 +162,32 @@ internal class PaymentLauncherViewModel @Inject constructor(
     /**
      * Fetches a [StripeIntent] and handles its next action.
      */
-    internal suspend fun handleNextActionForStripeIntent(clientSecret: String) {
-        savedStateHandle.set(KEY_HAS_STARTED, true)
-        runCatching {
-            requireNotNull(
-                stripeApiRepository.retrieveStripeIntent(
-                    clientSecret,
-                    apiRequestOptionsProvider.get()
-                )
-            )
-        }.fold(
-            onSuccess = { intent ->
-                authenticatorRegistry.getAuthenticator(intent)
-                    .authenticate(
-                        authActivityStarterHost,
-                        intent,
+    internal fun handleNextActionForStripeIntent(clientSecret: String, host: AuthActivityStarterHost) {
+        if (hasStarted) return
+        viewModelScope.launch {
+            savedStateHandle.set(KEY_HAS_STARTED, true)
+            runCatching {
+                requireNotNull(
+                    stripeApiRepository.retrieveStripeIntent(
+                        clientSecret,
                         apiRequestOptionsProvider.get()
                     )
-            },
-            onFailure = {
-                paymentLauncherResult.postValue(PaymentResult.Failed(it))
-            }
-        )
+                )
+            }.fold(
+                onSuccess = { intent ->
+                    authenticatorRegistry
+                        .getAuthenticator(intent)
+                        .authenticate(
+                            host,
+                            intent,
+                            apiRequestOptionsProvider.get()
+                        )
+                },
+                onFailure = {
+                    paymentLauncherResult.postValue(PaymentResult.Failed(it))
+                }
+            )
+        }
     }
 
     @VisibleForTesting
@@ -253,8 +273,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal class Factory(
         private val argsSupplier: () -> PaymentLauncherContract.Args,
         private val applicationSupplier: () -> Application,
-        private val authActivityStarterHostProvider: () -> AuthActivityStarterHost,
-        private val activityResultCaller: ActivityResultCaller,
         owner: SavedStateRegistryOwner,
     ) : AbstractSavedStateViewModelFactory(owner, null),
         Injectable<Factory.FallbackInitializeParam> {
@@ -301,8 +319,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     }
                 )
                 .savedStateHandle(handle)
-                .authActivityStarterHost(authActivityStarterHostProvider())
-                .activityResultCaller(activityResultCaller)
                 .build().viewModel as T
         }
 

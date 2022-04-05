@@ -68,6 +68,9 @@
         <activity android:name=".activity.ConnectExampleActivity" />
         <activity android:name=".activity.ComposeExampleActivity" />
         <activity android:name=".activity.KlarnaPaymentActivity"/>
+        <activity android:name=".activity.AffirmPaymentActivity"/>
+        <activity android:name=".activity.ConnectUSBankAccountActivity"/>
+        <activity android:name=".activity.ManualUSBankAccountPaymentMethodActivity"/>
     </application>
 
 </manifest>

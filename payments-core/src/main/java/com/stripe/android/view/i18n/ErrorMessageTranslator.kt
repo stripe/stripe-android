@@ -1,6 +1,6 @@
 package com.stripe.android.view.i18n
 
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 
 interface ErrorMessageTranslator {
     /**

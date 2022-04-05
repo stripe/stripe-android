@@ -6,14 +6,17 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.google.android.instantapps.InstantApps
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -23,7 +26,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -80,6 +82,8 @@ constructor(
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
+    private val isInstantApp = InstantApps.isInstantApp(context)
+
     /**
      * [paymentRelayLauncher] is mutable and might be updated during
      * through [registerLaunchersWithActivityResultCaller]
@@ -108,7 +112,8 @@ constructor(
             uiContext,
             threeDs1IntentReturnUrlMap,
             publishableKeyProvider,
-            paymentAnalyticsRequestFactory.defaultProductUsageTokens
+            paymentAnalyticsRequestFactory.defaultProductUsageTokens,
+            isInstantApp
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -140,9 +145,13 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
-
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-            ?: defaultReturnUrl.value
+        val returnUrl =
+            if (isInstantApp) {
+                confirmStripeIntentParams.returnUrl
+            } else {
+                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                    ?: defaultReturnUrl.value
+            }
 
         runCatching {
             when (confirmStripeIntentParams) {
@@ -168,7 +177,7 @@ constructor(
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
                         intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
                         }
                     }
                 }

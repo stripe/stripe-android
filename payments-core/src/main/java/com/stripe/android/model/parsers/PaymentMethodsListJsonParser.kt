@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.PaymentMethodsList
 import org.json.JSONArray
 import org.json.JSONObject

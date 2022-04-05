@@ -1,15 +1,17 @@
 package com.stripe.android.cards
 
-import com.stripe.android.model.StripeModel
+import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-internal data class Bin internal constructor(
+data class Bin internal constructor(
     internal val value: String
 ) : StripeModel {
     override fun toString() = value
 
-    companion object {
+    internal companion object {
         fun create(cardNumber: String): Bin? {
             return cardNumber
                 .take(BIN_LENGTH)

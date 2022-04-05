@@ -3,9 +3,9 @@ package com.stripe.android.payments.core.authentication
 import android.app.Activity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.core.ActivityResultLauncherHost
 import com.stripe.android.view.AuthActivityStarterHost
 

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="stripeDefaultTheme" parent="Theme.AppCompat.Light.NoActionBar.FullScreen">
+        <item name="background">@color/stripeNotFoundBackground</item>
+
+        <item name="stripeNotFoundBackgroundColor">@color/stripeNotFoundBackground</item>
+        <item name="stripeNotFoundOutlineColor">@color/stripeNotFoundOutline</item>
+        <item name="stripeNotFoundOutlineWidth">@integer/stripeNotFoundOutlineWidth</item>
+
+        <item name="stripeFoundBackgroundColor">@color/stripeFoundBackground</item>
+        <item name="stripeFoundOutlineColor">@color/stripeFoundOutline</item>
+        <item name="stripeFoundOutlineWidth">@integer/stripeFoundOutlineWidth</item>
+
+        <item name="stripeWrongBackgroundColor">@color/stripeWrongBackground</item>
+        <item name="stripeWrongOutlineColor">@color/stripeWrongOutline</item>
+        <item name="stripeWrongOutlineWidth">@integer/stripeWrongOutlineWidth</item>
+
+        <item name="stripeCorrectBackgroundColor">@color/stripeCorrectBackground</item>
+        <item name="stripeCorrectOutlineColor">@color/stripeCorrectOutline</item>
+        <item name="stripeCorrectOutlineWidth">@integer/stripeCorrectOutlineWidth</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <attr name="stripeCardPanColor" format="color" />
+    <attr name="stripeCardExpiryColor" format="color" />
+
+    <attr name="stripeNotFoundBackgroundColor" format="color" />
+    <attr name="stripeNotFoundOutlineColor" format="color" />
+    <attr name="stripeNotFoundOutlineWidth" format="dimension" />
+
+    <attr name="stripeFoundBackgroundColor" format="color" />
+    <attr name="stripeFoundOutlineColor" format="color" />
+    <attr name="stripeFoundOutlineWidth" format="dimension" />
+
+    <attr name="stripeWrongBackgroundColor" format="color" />
+    <attr name="stripeWrongOutlineColor" format="color" />
+    <attr name="stripeWrongOutlineWidth" format="dimension" />
+
+    <attr name="stripeCorrectBackgroundColor" format="color" />
+    <attr name="stripeCorrectOutlineColor" format="color" />
+    <attr name="stripeCorrectOutlineWidth" format="dimension" />
+
+</resources>

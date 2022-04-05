@@ -65,6 +65,20 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun parsePaymentIntentWithAffirmPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_AFFIRM_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("affirm")
+    }
+
+    @Test
+    fun parsePaymentIntentWithUSBankAccountPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("us_bank_account")
+    }
+
+    @Test
     fun getNextActionData_whenUseStripeSdkWith3ds2() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.nextActionData)
@@ -93,7 +107,10 @@ class PaymentIntentTest {
         val redirectData = paymentIntent.nextActionData as StripeIntent.NextActionData.RedirectToUrl
         assertThat(redirectData.url)
             .isEqualTo(
-                Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")
+                Uri.parse(
+                    "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CR" +
+                        "Mbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"
+                )
             )
         assertThat(redirectData.returnUrl)
             .isEqualTo("stripe://deeplink")
@@ -127,6 +144,24 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun getNextActionData_whenVerifyWithMicrodeposits() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.nextActionData)
+            .isInstanceOf(StripeIntent.NextActionData.VerifyWithMicrodeposits::class.java)
+        val verify =
+            (paymentIntent.nextActionData as StripeIntent.NextActionData.VerifyWithMicrodeposits)
+        assertThat(verify).isEqualTo(
+            StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                arrivalDate = 1647241200,
+                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8" +
+                    "xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo00" +
+                    "00v3GS1Jej",
+                microdepositType = MicrodepositType.AMOUNTS
+            )
+        )
+    }
+
+    @Test
     fun getLastPaymentError_parsesCorrectly() {
         val lastPaymentError =
             requireNotNull(PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR.lastPaymentError)
@@ -140,7 +175,9 @@ class PaymentIntentTest {
             .isEqualTo("https://stripe.com/docs/error-codes/payment-intent-authentication-failure")
         assertThat(lastPaymentError.message)
             .isEqualTo(
-                "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."
+                "The provided PaymentMethod has failed authentication. You can provide " +
+                    "payment_method_data or a new PaymentMethod to attempt to fulfill this " +
+                    "PaymentIntent again."
             )
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import org.json.JSONException
 import org.json.JSONObject

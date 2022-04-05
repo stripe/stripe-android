@@ -31,6 +31,8 @@ data class PaymentMethodCreateParams internal constructor(
     private val sofort: Sofort? = null,
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
+    private val usBankAccount: USBankAccount? = null,
+    private val link: Link? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -159,6 +161,17 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    private constructor(
+        usBankAccount: USBankAccount,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = PaymentMethod.Type.USBankAccount,
+        usBankAccount = usBankAccount,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap
             ?: mapOf(
@@ -186,6 +199,8 @@ data class PaymentMethodCreateParams internal constructor(
                 PaymentMethod.Type.Sofort -> sofort?.toParamMap()
                 PaymentMethod.Type.Upi -> upi?.toParamMap()
                 PaymentMethod.Type.Netbanking -> netbanking?.toParamMap()
+                PaymentMethod.Type.USBankAccount -> usBankAccount?.toParamMap()
+                PaymentMethod.Type.Link -> link?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
@@ -201,7 +216,6 @@ data class PaymentMethodCreateParams internal constructor(
         internal val expiryYear: Int? = null,
         internal val cvc: String? = null,
         private val token: String? = null,
-
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
         internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
@@ -414,6 +428,59 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class USBankAccount(
+        internal var accountNumber: String,
+        internal var routingNumber: String,
+        internal var accountType: PaymentMethod.USBankAccount.USBankAccountType,
+        internal var accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_ACCOUNT_NUMBER to accountNumber,
+                PARAM_ROUTING_NUMBER to routingNumber,
+                PARAM_ACCOUNT_TYPE to accountType.value,
+                PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType.value
+            )
+        }
+
+        private companion object {
+            private const val PARAM_ACCOUNT_NUMBER = "account_number"
+            private const val PARAM_ROUTING_NUMBER = "routing_number"
+            private const val PARAM_ACCOUNT_TYPE = "account_type"
+            private const val PARAM_ACCOUNT_HOLDER_TYPE = "account_holder_type"
+        }
+    }
+
+    @Parcelize
+    data class Link(
+        internal var paymentDetailsId: String,
+        internal var consumerSessionClientSecret: String,
+        internal var paymentMethodOptions: Map<String, Map<String, String>>? = null
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_PAYMENT_DETAILS_ID to paymentDetailsId,
+                PARAM_CREDENTIALS to mapOf(
+                    PARAM_CONSUMER_SESSION_CLIENT_SECRET to consumerSessionClientSecret
+                )
+            ).plus(
+                paymentMethodOptions?.let {
+                    mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it)
+                } ?: emptyMap()
+            )
+        }
+
+        private companion object {
+            private const val PARAM_PAYMENT_DETAILS_ID = "payment_details_id"
+            private const val PARAM_CREDENTIALS = "credentials"
+            private const val PARAM_CONSUMER_SESSION_CLIENT_SECRET =
+                "consumer_session_client_secret"
+            private const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
+        }
+    }
+
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -541,6 +608,17 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(upi, billingDetails, metadata)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            usBankAccount: USBankAccount,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(usBankAccount, billingDetails, metadata)
         }
 
         /**
@@ -745,6 +823,43 @@ data class PaymentMethodCreateParams internal constructor(
                 type = PaymentMethod.Type.Klarna,
                 billingDetails = billingDetails,
                 metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createAffirm(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Affirm,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createUSBankAccount(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.USBankAccount,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createLink(
+            paymentDetailsId: String,
+            consumerSessionClientSecret: String,
+            paymentMethodOptions: Map<String, Map<String, String>>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Link,
+                link = Link(paymentDetailsId, consumerSessionClientSecret, paymentMethodOptions)
             )
         }
 

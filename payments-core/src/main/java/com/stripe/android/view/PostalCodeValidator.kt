@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CountryUtils
 import java.util.Locale
 import java.util.regex.Pattern
 

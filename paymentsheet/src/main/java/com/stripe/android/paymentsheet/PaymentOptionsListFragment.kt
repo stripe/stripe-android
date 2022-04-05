@@ -2,17 +2,12 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isVisible
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal class PaymentOptionsListFragment(
-    eventReporter: EventReporter
-) : BasePaymentMethodsListFragment(
-    canClickSelectedItem = true,
-    eventReporter
+internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
+    canClickSelectedItem = true
 ) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory(
@@ -21,7 +16,8 @@ internal class PaymentOptionsListFragment(
                 requireNotNull(
                     requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
                 )
-            }
+            },
+            (activity as? AppCompatActivity) ?: this
         )
     }
 
@@ -33,7 +29,6 @@ internal class PaymentOptionsListFragment(
         // We need to make sure the list fragment is attached before jumping, so the
         // list is properly added to the backstack.
         sheetViewModel.resolveTransitionTarget(config)
-        FragmentPaymentsheetPaymentMethodsListBinding.bind(view).total.isVisible = false
     }
 
     override fun transitionToAddPaymentMethod() {

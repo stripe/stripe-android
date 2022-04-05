@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.BankListPaymentMethodBinding
 import com.stripe.android.model.BankStatuses
@@ -36,11 +37,12 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     override val createParams: PaymentMethodCreateParams?
         get() {
-            val fpxBank = FpxBank.values()[fpxAdapter.selectedPosition]
-
-            return PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
-            )
+            return fpxAdapter.selectedPosition.takeIf { it != RecyclerView.NO_POSITION }?.let {
+                val fpxBank = FpxBank.values()[it]
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
+                )
+            }
         }
 
     init {

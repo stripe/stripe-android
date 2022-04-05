@@ -4,18 +4,17 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -23,12 +22,7 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
@@ -109,6 +103,63 @@ internal class PaymentMethodEndToEndTest {
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Netbanking)
+    }
+
+    @Test
+    fun createPaymentMethod_withUSBankAccount_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT
+        val paymentMethod =
+            Stripe(
+                context,
+                ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.USBankAccount)
+            ).createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(paymentMethod?.usBankAccount).isEqualTo(
+            PaymentMethod.USBankAccount(
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                bankName = "STRIPE TEST BANK",
+                fingerprint = "FFDMA0xfhBjWSZLu",
+                last4 = "6789",
+                linkedAccount = null,
+                networks = null,
+                routingNumber = "110000000"
+            )
+        )
+    }
+
+    @Test
+    fun createPaymentMethod_withUSBankAccount_missingEmail_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
+        )
+        val paymentMethod =
+            Stripe(
+                context,
+                ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.USBankAccount)
+            ).createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.USBankAccount)
+    }
+
+    @Test
+    fun createPaymentMethod_withUSBankAccount_missingName_shouldFail() {
+        val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+        )
+        val exception = assertFailsWith<InvalidRequestException>(
+            "A name is required to create a US Bank Account payment method"
+        ) {
+            Stripe(
+                context,
+                ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.USBankAccount)
+            ).createPaymentMethodSynchronous(params)
+        }
+        assertThat(exception.message)
+            .isEqualTo("Missing required param: billing_details[name].")
     }
 
     @Test
@@ -226,7 +277,7 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
+    fun createPaymentMethod_withGrabPay_shouldCreateObject() = runTest {
         val repository = StripeApiRepository(
             context,
             { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
@@ -243,7 +294,7 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
+    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
             context,
             { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
@@ -381,5 +432,17 @@ internal class PaymentMethodEndToEndTest {
                 .createPaymentMethodSynchronous(params)
 
         assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.Klarna)
+    }
+
+    @Test
+    fun `createPaymentMethod with Affirm should create expected object`() {
+        val paymentMethod = Stripe(context, ApiKeyFixtures.AFFIRM_PUBLISHABLE_KEY)
+            .createPaymentMethodSynchronous(
+                PaymentMethodCreateParams.createAffirm(
+                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
+                )
+            )
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Affirm)
     }
 }

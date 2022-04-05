@@ -65,12 +65,12 @@
 
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/fragment_container"
+                    android:name="com.stripe.android.paymentsheet.PaymentSheetLoadingFragment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/message"
-                    style="@style/StripePaymentSheetErrorMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"

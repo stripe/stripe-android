@@ -22,7 +22,6 @@ Table of contents
    * [Installation](#installation)
       * [Requirements](#requirements)
       * [Configuration](#configuration)
-      * [Proguard](#proguard)
    * [Getting Started](#getting-started)
    * [Examples](#examples)
 <!--te-->
@@ -39,9 +38,12 @@ Table of contents
 
 **Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
 
-**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build a custom UI on top of this layer.
+**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/payments-core/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build a custom UI on top of this layer.
 
-**Localized**: We support the following localizations: Bulgarian, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Finnish, French, French (Canada), German, Greek, Hungarian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian Bokmål, Polish, Portuguese (Brazil), Portuguese, Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, and Turkish.
+**Localized**: We support the following localizations: Bulgarian, Catalan, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Filipino, Finnish, French, French (Canada), German, Greek, Hungarian, Indonesian, Italian, Japanese, Korean, Latvian, Lithuanian, Malay, Maltese, Norwegian Bokmål, Norwegian Nynorsk (Norway), Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, Turkish, Thai and Vietnamese.
+
+**Recommended usage**
+If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), and you plan to distribute it through the Google Play Store, you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
 
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
@@ -62,13 +64,9 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:18.2.0'
+    implementation 'com.stripe:stripe-android:20.0.0'
 }
 ```
-
-### Proguard
-
-The Stripe Android SDK will configure your app's Proguard rules using [proguard-rules.txt](stripe/proguard-rules.txt).
 
 ## Getting Started
 
@@ -79,4 +77,4 @@ Get started with our [📚 integration guides](https://stripe.com/docs/payments/
 - The [PaymentSheet example project](https://github.com/stripe/stripe-android/tree/master/paymentsheet-example) demonstrates how to integrate and use our prebuilt ui (single-step and multi-step).
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates other integrations, that give you more control over the user experience:
     - how to use the Stripe class's synchronous and asynchronous methods
-    - how to use the CardInputWidget.
+    - how to use the CardFormView.

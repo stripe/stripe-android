@@ -39,6 +39,7 @@ class SourceSepaDebitDataJsonParserTest {
         return SourceSepaDebitDataJsonParser().parse(jsonObject)
     }
 
+    @Suppress("MaxLineLength")
     private companion object {
         private val EXAMPLE_SEPA_JSON_DATA = JSONObject(
             """
@@ -53,7 +54,7 @@ class SourceSepaDebitDataJsonParserTest {
             """.trimIndent()
         )
 
-        private const val MANDATE_URL =
-            "https://hooks.stripe.com/adapter/sepa_debit/file/src_1A0burBbvEcIpqUbyTfDmJPk/src_client_secret_5Dgw1AQGTABOh0vlnKyxgboh"
+        private const val MANDATE_URL = "https://hooks.stripe.com/adapter/sepa_debit/file/" +
+            "src_1A0burBbvEcIpqUbyTfDmJPk/src_client_secret_5Dgw1AQGTABOh0vlnKyxgboh"
     }
 }

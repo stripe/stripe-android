@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.Stripe
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.utils.ContextUtils.packageInfo
 import java.math.BigDecimal
 import java.math.MathContext
@@ -35,7 +35,7 @@ internal class FraudDetectionDataRequestParamsFactory @VisibleForTesting interna
     internal fun createParams(fraudDetectionData: FraudDetectionData?): Map<String, Any> {
         return mapOf(
             "v2" to 1,
-            "tag" to Stripe.VERSION_NAME,
+            "tag" to StripeSdkVersion.VERSION_NAME,
             "src" to "android-sdk",
             "a" to createFirstMap(),
             "b" to createSecondMap(fraudDetectionData)

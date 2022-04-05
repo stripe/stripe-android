@@ -1,6 +1,12 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -71,6 +77,9 @@ internal interface AuthenticationComponent {
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        @BindsInstance
+        fun isInstantApp(@Named(IS_INSTANT_APP) isInstantApp: Boolean): Builder
 
         fun build(): AuthenticationComponent
     }

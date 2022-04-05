@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository

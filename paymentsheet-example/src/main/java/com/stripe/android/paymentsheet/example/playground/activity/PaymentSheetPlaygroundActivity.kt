@@ -1,9 +1,14 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
+import androidx.test.espresso.IdlingResource
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -13,16 +18,18 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetP
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 
-internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityPaymentSheetPlaygroundBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: PaymentSheetPlaygroundViewModel by lazy {
+    @VisibleForTesting
+    val viewModel: PaymentSheetPlaygroundViewModel by lazy {
         PaymentSheetPlaygroundViewModel(application)
     }
 
@@ -52,6 +59,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val currency: CheckoutCurrency
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
             R.id.currency_usd_button -> CheckoutCurrency.USD
+            R.id.currency_aud_button -> CheckoutCurrency.AUD
             else -> CheckoutCurrency.EUR
         }
 
@@ -71,6 +79,12 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
+    @Nullable
+    private var multiStepUIIdlingResource: CountingIdlingResource? = null
+
+    @Nullable
+    private var singleStepUIIdlingResource: CountingIdlingResource? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -82,6 +96,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             ::onPaymentSheetResult
         )
         val backendUrl = Settings(this).playgroundBackendUrl
+
+        viewBinding.resetDefaultsButton.setOnClickListener {
+            setToggles(
+                Toggle.Customer.default.toString(),
+                Toggle.GooglePay.default as Boolean,
+                Toggle.Currency.default.toString(),
+                Toggle.Mode.default.toString(),
+                Toggle.SetShippingAddress.default as Boolean,
+                Toggle.SetAutomaticPaymentMethods.default as Boolean
+            )
+        }
+
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.prepareCheckout(
@@ -109,7 +135,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.status.observe(this) {
             Snackbar.make(
-                findViewById(android.R.id.content), it, Snackbar.LENGTH_SHORT)
+                findViewById(android.R.id.content), it, Snackbar.LENGTH_SHORT
+            )
                 .setBackgroundTint(resources.getColor(R.color.black))
                 .setTextColor(resources.getColor(R.color.white))
                 .show()
@@ -117,6 +144,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
+            if (it) {
+                singleStepUIIdlingResource?.increment()
+                multiStepUIIdlingResource?.increment()
+            } else {
+                singleStepUIIdlingResource?.decrement()
+                multiStepUIIdlingResource?.decrement()
+            }
         }
 
         viewModel.readyToCheckout.observe(this) { isReady ->
@@ -129,6 +163,73 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         disableViews()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
+        setToggles(
+            customer,
+            googlePay,
+            currency,
+            mode,
+            setShippingAddress,
+            setAutomaticPaymentMethods
+        )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.storeToggleState(
+            customer.value,
+            googlePayConfig != null,
+            currency.value,
+            mode.value,
+            setShippingAddress,
+            setAutomaticPaymentMethods
+        )
+    }
+
+    private fun setToggles(
+        customer: String?,
+        googlePay: Boolean,
+        currency: String?,
+        mode: String?,
+        setShippingAddress: Boolean,
+        setAutomaticPaymentMethods: Boolean
+    ) {
+        when (customer) {
+            CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
+            CheckoutCustomer.New.value -> viewBinding.customerRadioGroup.check(R.id.new_customer_button)
+            else -> viewBinding.customerRadioGroup.check(R.id.returning_customer_button)
+        }
+
+        when (googlePay) {
+            true -> viewBinding.googlePayRadioGroup.check(R.id.google_pay_on_button)
+            false -> viewBinding.googlePayRadioGroup.check(R.id.google_pay_off_button)
+        }
+
+        when (currency) {
+            CheckoutCurrency.USD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_usd_button)
+            CheckoutCurrency.AUD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_aud_button)
+            else -> viewBinding.currencyRadioGroup.check(R.id.currency_eur_button)
+        }
+
+        when (mode) {
+            CheckoutMode.Payment.value -> viewBinding.modeRadioGroup.check(R.id.mode_payment_button)
+            CheckoutMode.PaymentWithSetup.value -> viewBinding.modeRadioGroup.check(R.id.mode_payment_with_setup_button)
+            else -> viewBinding.modeRadioGroup.check(R.id.mode_setup_button)
+        }
+
+        when (setShippingAddress) {
+            true -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
+            false -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
+        }
+
+        when (setAutomaticPaymentMethods) {
+            true -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_on_button)
+            false -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_off_button)
+        }
     }
 
     private fun disableViews() {
@@ -230,7 +331,30 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.status.value = paymentResult.toString()
     }
 
+    /**
+     * Only called from test, creates and returns a new [SimpleIdlingResource].
+     */
+
+    @VisibleForTesting
+    @NonNull
+    fun getMultiStepIdlingResource(): IdlingResource? {
+        if (multiStepUIIdlingResource == null) {
+            multiStepUIIdlingResource = CountingIdlingResource("multiStepUIIdlingResource")
+        }
+        return multiStepUIIdlingResource
+    }
+
+    @VisibleForTesting
+    @NonNull
+    fun getSingleStepIdlingResource(): IdlingResource? {
+        if (singleStepUIIdlingResource == null) {
+            singleStepUIIdlingResource = CountingIdlingResource("singleStepUIIdlingResource")
+        }
+        return singleStepUIIdlingResource
+    }
+
     companion object {
         private const val merchantName = "Example, Inc."
+        private const val sharedPreferencesName = "playgroundToggles"
     }
 }
