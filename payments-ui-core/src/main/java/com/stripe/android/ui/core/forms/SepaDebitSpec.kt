@@ -8,7 +8,6 @@ import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.billingParams
@@ -56,6 +55,5 @@ val SepaDebitForm = LayoutSpec.create(
     sepaDebitEmailSection,
     sepaDebitIbanSection,
     sepaBillingSection,
-    SaveForFutureUseSpec(emptyList()),
     sepaDebitMandate,
 )

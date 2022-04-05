@@ -43,5 +43,5 @@ internal val creditBillingSection = SectionSpec(
 val CardForm = LayoutSpec.create(
     creditDetailsSection,
     creditBillingSection,
-    SaveForFutureUseSpec(emptyList())
+    SaveForFutureUseSpec()
 )

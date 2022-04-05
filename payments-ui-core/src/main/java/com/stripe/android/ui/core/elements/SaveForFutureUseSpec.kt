@@ -9,20 +9,13 @@ import kotlinx.parcelize.Parcelize
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class SaveForFutureUseSpec(
-    val identifierRequiredForFutureUse: List<RequiredItemSpec>
-) : FormItemSpec(), RequiredItemSpec {
+class SaveForFutureUseSpec : FormItemSpec(), RequiredItemSpec {
     override val identifier = IdentifierSpec.SaveForFutureUse
 
     fun transform(initialValue: Boolean, merchantName: String): FormElement =
         SaveForFutureUseElement(
             this.identifier,
-            SaveForFutureUseController(
-                this.identifierRequiredForFutureUse.map { requiredItemSpec ->
-                    requiredItemSpec.identifier
-                },
-                initialValue
-            ),
+            SaveForFutureUseController(initialValue),
             merchantName
         )
 }
