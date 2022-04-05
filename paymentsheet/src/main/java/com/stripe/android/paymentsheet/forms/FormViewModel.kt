@@ -14,10 +14,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,9 +103,6 @@ internal class FormViewModel @Inject internal constructor(
         this.enabled.value = enabled
     }
 
-    @VisibleForTesting
-    internal val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
-
     private val saveForFutureUseElement = elements
         .map { elementsList ->
             elementsList?.find { element ->
@@ -123,10 +122,39 @@ internal class FormViewModel @Inject internal constructor(
                 ?.filterIsInstance<CardBillingAddressElement>()
                 ?.firstOrNull()
         }
+    private var externalHiddenIdentifiers = MutableStateFlow(emptyList<IdentifierSpec>())
 
-    internal val hiddenIdentifiers = cardBillingElement.map {
-        it?.hiddenIdentifiers ?: flowOf(emptyList())
-    }.flattenConcat()
+    @VisibleForTesting
+    internal fun addHiddenIdentifiers(identifierSpecs: List<IdentifierSpec>) {
+        externalHiddenIdentifiers.value = identifierSpecs
+    }
+
+    private val sectionToFieldIdentifierMap = layout.items
+        .filterIsInstance<SectionSpec>()
+        .associate { sectionSpec ->
+            sectionSpec.identifier to sectionSpec.fields.map {
+                it.identifier
+            }
+        }
+
+    internal val hiddenIdentifiers = combine(
+        cardBillingElement.map {
+            it?.hiddenIdentifiers ?: flowOf(emptyList())
+        }.flattenConcat(),
+        externalHiddenIdentifiers
+    ) { cardBillingIdentifiers, saveFutureUseIdentifiers ->
+        val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
+        // For hidden *section* identifiers, list of identifiers of elements in the section
+        val identifiers = sectionToFieldIdentifierMap
+            .filter { idControllerPair ->
+                hiddenIdentifiers.contains(idControllerPair.key)
+            }
+            .flatMap { sectionToSectionFieldEntry ->
+                sectionToSectionFieldEntry.value
+            }
+
+        hiddenIdentifiers.plus(identifiers)
+    }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
     private val showingMandate =

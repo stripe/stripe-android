@@ -140,7 +140,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -155,36 +155,9 @@ internal class FormViewModelTest {
         assertThat(values[0]).isTrue()
 
         formViewModel.setSaveForFutureUse(false)
+        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
 
         assertThat(values[1]).isFalse()
-    }
-
-    @Test
-    fun `Verify setting save for future use visibility`() {
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            LayoutSpec.create(
-                emailSection,
-                countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
-            ),
-            args,
-            resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
-
-        val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                values.add(it)
-            }
-        assertThat(values[0]).isEmpty()
-
-        formViewModel.saveForFutureUseVisible.value = false
-
-        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec.SaveForFutureUse)
     }
 
     @Test
@@ -194,7 +167,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -209,6 +182,7 @@ internal class FormViewModelTest {
         assertThat(values[0]).isEmpty()
 
         formViewModel.setSaveForFutureUse(false)
+        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Generic("email_section")))
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -247,7 +221,7 @@ internal class FormViewModelTest {
                 nameSection,
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -257,6 +231,7 @@ internal class FormViewModelTest {
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
             .filterIsInstance(SaveForFutureUseController::class.java).first()
 
+        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
@@ -275,7 +250,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -315,7 +290,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -333,6 +308,7 @@ internal class FormViewModelTest {
         // Verify formFieldValues is null because the email is required and invalid
         assertThat(formViewModel.completeFormValues.first()).isNull()
 
+        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues is not null even though the email is invalid
@@ -365,7 +341,18 @@ internal class FormViewModelTest {
             showCheckboxControlledFields = true
         )
         val formViewModel = FormViewModel(
-            SofortForm,
+            LayoutSpec.create(
+                SectionSpec(
+                    IdentifierSpec.Generic("name_section"),
+                    NAME
+                ),
+                SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec),
+                SectionSpec(
+                    IdentifierSpec.Generic("country_section"),
+                    CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
+                ),
+                SaveForFutureUseSpec()
+            ),
             args,
             resourceRepository = resourceRepository,
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -375,6 +362,7 @@ internal class FormViewModelTest {
             getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
         val emailElement =
             getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+
 
         nameElement?.onValueChange("joe")
         assertThat(
