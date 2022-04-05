@@ -9,6 +9,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
@@ -32,7 +33,6 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
@@ -134,8 +134,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
 
         val isSystemDarkMode = context?.isSystemDarkTheme() ?: false
-        val surfaceColor = PaymentsThemeConfig.colors(isSystemDarkMode).surface
-        viewBinding.googlePayButton.setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
+        sheetViewModel.config?.appearance?.getColors(isSystemDarkMode)?.surface?.let {
+            viewBinding.googlePayButton.setBackgroundColor(Color(it).shouldUseDarkDynamicColor())
+        }
     }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {

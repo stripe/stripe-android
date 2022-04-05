@@ -6,6 +6,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
@@ -13,7 +15,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
 
@@ -70,16 +72,19 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     private fun setEditMenuText() {
+        val context = context ?: return
+        val appearance = sheetViewModel.config?.appearance ?: return
         editMenuItem?.apply {
-            context?.let {
-                title = createTextSpanFromTextStyle(
-                    text = getString(if (isEditing) R.string.done else R.string.edit),
-                    context = it,
-                    textStyle = PaymentsThemeConfig.Typography.h6,
-                    color = PaymentsThemeConfig.colors(it.isSystemDarkTheme()).appBarIcon,
-                    fontFamily = PaymentsThemeConfig.Typography.fontFamily
-                )
-            }
+            title = createTextSpanFromTextStyle(
+                text = getString(if (isEditing) R.string.done else R.string.edit),
+                context = context,
+                fontSizeDp = (
+                    appearance.typography.sizeScaleFactor
+                        * PaymentsThemeDefaults.typography.smallFontSize.value
+                    ).dp,
+                color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
+                fontFamily = appearance.typography.fontResId
+            )
         }
     }
 

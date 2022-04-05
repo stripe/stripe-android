@@ -10,7 +10,9 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -27,7 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
@@ -95,13 +97,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             try {
                 starterArgs.config?.validate()
                 starterArgs.clientSecret.validate()
+                starterArgs.config?.appearance?.parseAppearance()
             } catch (e: InvalidParameterException) {
                 setActivityResult(PaymentSheetResult.Failed(e))
                 finish()
                 return
             }
         }
-
         viewModel.registerFromActivity(this)
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -194,13 +196,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
         userMessage?.message.let { message ->
-            messageView.text = createTextSpanFromTextStyle(
-                text = message,
-                context = this,
-                textStyle = PaymentsThemeConfig.Typography.h6,
-                color = PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).error,
-                fontFamily = PaymentsThemeConfig.Typography.fontFamily
-            )
+            viewModel.config?.appearance?.let {
+                messageView.text = createTextSpanFromTextStyle(
+                    text = message,
+                    context = this,
+                    fontSizeDp = (
+                        it.typography.sizeScaleFactor
+                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                        ).dp,
+                    color = Color(it.getColors(baseContext.isSystemDarkTheme()).error),
+                    fontFamily = it.typography.fontResId
+                )
+            }
         }
 
         messageView.isVisible = userMessage != null
@@ -284,13 +291,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 ) is PaymentSheetListFragment
 
             if (shouldShowGooglePay) {
-                val surfaceColor = PaymentsThemeConfig.colors(isDark).surface
-                viewBinding.googlePayButton.apply {
-                    bringToFront()
-                    isVisible = true
-                    setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
+                viewModel.config?.appearance?.let {
+                    val surfaceColor = Color(it.getColors(isDark).surface)
+                    viewBinding.googlePayButton.apply {
+                        bringToFront()
+                        isVisible = true
+                        setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
+                    }
+                    viewBinding.buyButton.isVisible = false
                 }
-                viewBinding.buyButton.isVisible = false
             } else {
                 viewBinding.buyButton.bringToFront()
                 viewBinding.buyButton.isVisible = true
@@ -305,11 +314,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }
 
-        viewBinding.buyButton.setDefaultBackGroundColor(
-            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(isDark).primary.toArgb()
+        viewModel.config?.let {
+            viewBinding.buyButton.setDefaultBackGroundColor(
+                it.primaryButtonColor ?: ColorStateList.valueOf(
+                    Color(it.appearance.getColors(isDark).primary).toArgb()
+                )
             )
-        )
+            viewBinding.buyButton.setCornerRadius(it.appearance.shapes.cornerRadiusDp)
+        }
 
         viewBinding.buyButton.setOnClickListener {
             updateErrorMessage()

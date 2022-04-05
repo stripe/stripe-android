@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -12,7 +14,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
 
@@ -81,16 +83,19 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+        val context = context ?: return
+        val appearance = sheetViewModel.config?.appearance ?: return
         userMessage?.message.let { message ->
-            context?.let {
-                viewBinding.message.text = createTextSpanFromTextStyle(
-                    text = message,
-                    context = it,
-                    textStyle = PaymentsThemeConfig.Typography.h6,
-                    color = PaymentsThemeConfig.colors(it.isSystemDarkTheme()).error,
-                    fontFamily = PaymentsThemeConfig.Typography.fontFamily
-                )
-            }
+            viewBinding.message.text = createTextSpanFromTextStyle(
+                text = message,
+                context = context,
+                fontSizeDp = (
+                    appearance.typography.sizeScaleFactor
+                        * PaymentsThemeDefaults.typography.smallFontSize.value
+                    ).dp,
+                color = Color(appearance.getColors(context.isSystemDarkTheme()).error),
+                fontFamily = appearance.typography.fontResId
+            )
         }
         viewBinding.message.isVisible = userMessage != null
     }
