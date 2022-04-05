@@ -13,8 +13,8 @@ jobs:
           files: |
             **/connections/**
             **/stripe-core/**
-      outputs:
-        any_changed: steps.changed-files-specific.outputs.any_changed
+    outputs:
+      any_changed: steps.changed-files-specific.outputs.any_changed
   # Checkout master branch and build the APK
   build-master:
     needs:
