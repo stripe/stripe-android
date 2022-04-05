@@ -1,4 +1,14 @@
 # Migration Guide
+## Migrating from versions < 20.0.0
+- The following classes' packages are changed
+  * `com.stripe.android.AppInfo` -> `com.stripe.android.core.AppInfo`
+  * `com.stripe.android.model.StripeFile` -> `com.stripe.android.core.model.StripeFile`
+  * `com.stripe.android.model.StripeFileParams` -> `com.stripe.android.core.model.StripeFileParams`
+  * `com.stripe.android.model.StripeFilePurpose` -> `com.stripe.android.core.model.StripeFilePurpose`
+  * `com.stripe.android.exception.AuthenticationException` -> `com.stripe.android.core.exception.AuthenticationException`
+  * `com.stripe.android.exception.PermissionException` -> `com.stripe.android.core.exception.PermissionException`
+  * `com.stripe.android.exception.RateLimitException` -> `com.stripe.android.core.exception.RateLimitException`
+
 ## Migrating from versions < 19.3.0
 - Changes to `StripeCardScan.Configuration`
     - Setting custom scan values in `Config` is no longer supported. Configuration values have been moved to the `StripeCardScan.Configuration` object. If a value was removed that you need access to, please file an issue against this repository.

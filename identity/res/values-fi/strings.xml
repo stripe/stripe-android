@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Sovelluksen asetukset</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Ajokortin takapuoli</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Ajokortin takapuoli valittu</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Henkilökortin takapuoli</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Henkilökortin takapuoli valittu</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Kameran käyttöoikeus</string>
+  <string name="camera_permission_rationale">Tämä sovellus käyttää kameraa henkilöllisyysasiakirjojen skannaukseen ja ottaa valokuvia henkilöllisyytesi vahvistamiseksi.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Valintamerkki, joka osoittaa asiakirjan suorituksen onnistumisen</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Valitse kuva</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Emme kyenneet ottamaan korkealaatuista kuvaa.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Voit joko yrittää uudelleen tai ladata kuvan laitteestasi.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Kuvaa ei voitu ottaa</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Kellokuvake</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Ajokortti</string>
+  <!-- Text for error labels -->
+  <string name="error">Virhe</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Tiedoston lataus</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Lataa ajokortin etu- ja takapuolen kuvat</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Lataa henkilökortin etu- ja takapuolen kuvat</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Lataa kuva passista</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Ajokortin etupuoli</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Ajokortin etupuoli valittu</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Henkilökortin etupuoli</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Henkilökortin etupuoli valittu</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Siirry takaisin</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Tarvitsemme kameran käyttöoikeuden. Salli käyttöoikeus sovelluksen asetuksissa.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Odota, skannaus kesken</string>
+  <!-- display name for ID -->
+  <string name="id_card">Henkilökortti</string>
+  <!-- Continue button text -->
+  <string name="kontinue">jatka</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Ladataan</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Passi</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Passi valittu</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Käännä ajokortti toisinpäin</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Aseta ajokortti kehyksen keskelle</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Käännä henkilökortti toisinpäin</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Aseta henkilökortti kehyksen keskelle</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Aseta passi kehyksen keskelle</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Skannattu</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Valitse</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Ota kuva</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Yritä uudelleen</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Odottamaton virhe – kokeile uudelleen muutaman sekunnin kuluttua</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Lataa ajokortin takapuoli</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Lataa ajokortin etupuoli</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Lataa henkilökortin takapuoli</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Lataa henkilökortin etupuoli</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Lataa passi</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Voit vaihtoehtoisesti ladata %1$s kuvan manuaalisesti</string>
+</resources>

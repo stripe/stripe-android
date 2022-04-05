@@ -1,6 +1,6 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-
+$dokka.location:com.stripe.android.link.confirmation////PointingToDeclaration/link/com.stripe.android.link.confirmation.html
 module:camera-core
 com.stripe.android.camera
 com.stripe.android.camera.framework
@@ -10,17 +10,21 @@ com.stripe.android.camera.framework.time
 com.stripe.android.camera.framework.util
 com.stripe.android.camera.scanui
 com.stripe.android.camera.scanui.util
+module:connections
+com.stripe.android.connections
+com.stripe.android.connections.model
 module:identity
 com.stripe.android.identity
-com.stripe.android.identity.navigation
 com.stripe.android.identity.utils
 com.stripe.android.identity.viewmodel
 module:link
 com.stripe.android.link
+com.stripe.android.link.confirmation
 com.stripe.android.link.injection
 com.stripe.android.link.ui
 module:payments-core
 com.stripe.android
+com.stripe.android.cards
 com.stripe.android.exception
 com.stripe.android.googlepaylauncher
 com.stripe.android.googlepaylauncher.injection
@@ -29,6 +33,8 @@ com.stripe.android.model.parsers
 com.stripe.android.model.wallets
 com.stripe.android.networking
 com.stripe.android.payments
+com.stripe.android.payments.bankaccount
+com.stripe.android.payments.bankaccount.navigation
 com.stripe.android.payments.core
 com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
@@ -44,6 +50,7 @@ com.stripe.android.ui.core.forms.resources
 module:paymentsheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.viewmodels
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
