@@ -168,16 +168,16 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppBarIcon ()I
-	public final fun getComponentBackground ()I
+	public final fun getComponent ()I
 	public final fun getComponentBorder ()I
 	public final fun getComponentDivider ()I
 	public final fun getError ()I
-	public final fun getOnBackground ()I
-	public final fun getOnPrimary ()I
+	public final fun getOnComponent ()I
+	public final fun getOnSurface ()I
 	public final fun getPlaceholderText ()I
 	public final fun getPrimary ()I
+	public final fun getSubtitle ()I
 	public final fun getSurface ()I
-	public final fun getTextSecondary ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
