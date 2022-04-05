@@ -13,11 +13,8 @@ jobs:
           files: |
             **/connections/**
             **/stripe-core/**
-
-      - name: Run step if any of the listed files above change
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
-        run: |
-          echo "One or more files listed above has changed."
+      outputs:
+        any_changed: steps.changed-files-specific.outputs.any_changed
   # Checkout master branch and build the APK
   build-master:
     needs:
