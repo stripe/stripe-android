@@ -371,12 +371,16 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
+	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
+	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
 	public final field header Landroidx/compose/ui/platform/ComposeView;
+	public final field linkButton Lcom/stripe/android/link/ui/LinkViewButton;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
 	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
-	public final field topContainer Lcom/stripe/android/paymentsheet/databinding/PaymentsheetTopButtonsBinding;
+	public final field topContainer Landroid/widget/LinearLayout;
+	public final field topMessage Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
@@ -426,19 +430,6 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/PaymentsheetTopButtonsBinding : androidx/viewbinding/ViewBinding {
-	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
-	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
-	public final field linkButton Lcom/stripe/android/link/ui/LinkViewButton;
-	public final field topContainer Landroid/widget/LinearLayout;
-	public final field topMessage Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/PaymentsheetTopButtonsBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/PaymentsheetTopButtonsBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/PaymentsheetTopButtonsBinding;
 }
 
 public final class com/stripe/android/paymentsheet/databinding/PrimaryButtonBinding : androidx/viewbinding/ViewBinding {
