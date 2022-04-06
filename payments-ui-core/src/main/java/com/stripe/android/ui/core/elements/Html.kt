@@ -47,7 +47,7 @@ import com.stripe.android.ui.core.PaymentsTheme
 
 private const val LINK_TAG = "URL"
 
-data class EmbeddableImage(
+internal data class EmbeddableImage(
     @DrawableRes val id: Int,
     @StringRes val contentDescription: Int
 )
@@ -135,9 +135,9 @@ private fun annotatedStringResource(
             spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
                 val end = spanned.getSpanEnd(span)
-                if (currentStart < spanned.toString().length
-                    && start < spanned.toString().length
-                    && start - currentStart >= 0
+                if (currentStart < spanned.toString().length &&
+                    start < spanned.toString().length &&
+                    start - currentStart >= 0
                 ) {
                     append(spanned.toString().substring(currentStart, start))
                     currentStart = start
