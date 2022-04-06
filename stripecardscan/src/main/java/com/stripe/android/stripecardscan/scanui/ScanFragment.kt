@@ -274,7 +274,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
         cameraStream: Flow<CameraPreviewImage<Bitmap>>,
     )
 
-    companion object {
+    internal companion object {
         private val LOG_TAG = ScanFragment::class.java.simpleName
     }
 }
