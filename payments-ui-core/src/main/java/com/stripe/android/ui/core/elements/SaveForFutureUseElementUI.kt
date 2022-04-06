@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,8 +17,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.menu.Checkbox
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,11 +39,6 @@ fun SaveForFutureUseElementUI(
         }
     )
 
-    val checkboxColors = CheckboxDefaults.colors(
-        checkedColor = PaymentsTheme.colors.material.primary,
-        uncheckedColor = PaymentsTheme.colors.subtitle,
-        checkmarkColor = PaymentsTheme.colors.material.surface
-    )
     Row(
         modifier = Modifier
             .padding(vertical = 2.dp)
@@ -67,8 +60,7 @@ fun SaveForFutureUseElementUI(
         Checkbox(
             checked = checked,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
-            enabled = enabled,
-            colors = checkboxColors
+            enabled = enabled
         )
         label?.let {
             H6Text(
