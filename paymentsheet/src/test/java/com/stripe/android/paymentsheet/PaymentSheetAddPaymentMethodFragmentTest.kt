@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
@@ -12,7 +11,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
@@ -20,18 +18,14 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -43,7 +37,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -64,14 +57,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     @After
     override fun after() {
         super.after()
-    }
-
-    @Test
-    fun `when processing google pay should be disabled`() {
-        createFragment { fragment, viewBinding, _ ->
-            fragment.sheetViewModel._processing.value = true
-            assertThat(viewBinding.googlePayButton.isEnabled).isFalse()
-        }
     }
 
     @Test
@@ -110,198 +95,198 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
     }
 
-    @Test
-    fun `when isGooglePayEnabled=true should configure Google Pay button`() {
-        createFragment { fragment, viewBinding, _ ->
-            val paymentSelections = mutableListOf<PaymentSelection>()
-            fragment.sheetViewModel.selection.observeForever { paymentSelection ->
-                if (paymentSelection != null) {
-                    paymentSelections.add(paymentSelection)
-                }
-            }
-
-            assertThat(viewBinding.googlePayButton.isVisible)
-                .isTrue()
-
-            viewBinding.googlePayButton.performClick()
-
-            assertThat(paymentSelections)
-                .containsExactly(PaymentSelection.GooglePay)
-        }
-    }
-
-    @Test
-    // TODO: Intermittent failure
-    fun `when back to Ready state should update PaymentSelection`() {
-        createFragment(
-            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        ) { fragment, viewBinding, _ ->
-            fragment.sheetViewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
-
-            idleLooper()
-            val paymentSelections = mutableListOf<PaymentSelection?>()
-            fragment.sheetViewModel.selection.observeForever { paymentSelection ->
-                paymentSelections.add(paymentSelection)
-            }
-
-            assertThat(viewBinding.googlePayButton.isVisible)
-                .isFalse()
-
-            idleLooper()
-            // Start with null PaymentSelection because the card entered is invalid
-            paymentSelections.forEach {
-                println(it?.toString())
-            }
-            assertThat(paymentSelections.size)
-                .isEqualTo(0)
-
-            viewBinding.googlePayButton.performClick()
-
-            // Updates PaymentSelection to Google Pay
-            assertThat(paymentSelections.size)
-                .isEqualTo(1)
-            assertThat(paymentSelections[0])
-                .isEqualTo(PaymentSelection.GooglePay)
-
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
-
-            // Back to Ready state, should return to null PaymentSelection
-            assertThat(paymentSelections.size)
-                .isEqualTo(2)
-            assertThat(paymentSelections[1])
-                .isNull()
-        }
-    }
-
-    @Test
-    fun `started fragment should report onShowNewPaymentOptionForm() event`() {
-        createFragment { _, _, _ ->
-            idleLooper()
-            verify(eventReporter).onShowNewPaymentOptionForm()
-        }
-    }
-
-    @Test
-    fun `google pay button state updated on start processing`() {
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.StartProcessing
-
-            val googlePayButton =
-                StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
-            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
-            assertThat(googlePayButton.primaryButton.externalLabel).isEqualTo(
-                fragment.getString(R.string.stripe_paymentsheet_primary_button_processing)
-            )
-        }
-    }
-
-    @Test
-    fun `google pay button error message displayed`() {
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
-            fragment.sheetViewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage("This is my test error message"))
-
-            assertThat(viewBinding.message.text.toString()).isEqualTo("This is my test error message")
-
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
-
-            assertThat(viewBinding.message.text.toString()).isEqualTo("")
-        }
-    }
-
-    @Test
-    fun `google pay flow updates the scroll view before and after`() {
-
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-
-            viewBinding.googlePayButton.performClick()
-            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(false)
-
-            fragment.sheetViewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(true)
-        }
-    }
-
-    @Test
-    fun `google pay button state updated on finish processing`() {
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
-
-            var finishProcessingCalled = false
-            fragment.sheetViewModel._viewState.value =
-                PaymentSheetViewState.FinishProcessing {
-                    finishProcessingCalled = true
-                }
-
-            idleLooper()
-
-            val googlePayButton =
-                StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
-            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
-            assertThat(finishProcessingCalled).isTrue()
-        }
-    }
-
-    @Test
-    fun `when Google Pay is cancelled then previously selected payment method is selected again`() {
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-            val lastPaymentMethod =
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            fragment.sheetViewModel.updateSelection(lastPaymentMethod)
-
-            viewBinding.googlePayButton.performClick()
-
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset()
-
-            assertThat(fragment.sheetViewModel.selection.value).isEqualTo(lastPaymentMethod)
-        }
-    }
-
-    @Test
-    fun `when new payment method is selected then error message is cleared`() {
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-            viewBinding.googlePayButton.performClick()
-
-            val errorMessage = "Error message"
-            fragment.sheetViewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            assertThat(viewBinding.message.isVisible).isTrue()
-            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
-
-            fragment.sheetViewModel.updateSelection(
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-
-            assertThat(viewBinding.message.isVisible).isFalse()
-            assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
-        }
-    }
-
-    @Test
-    fun `when checkout starts then error message is cleared`() {
-        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
-            viewBinding.googlePayButton.performClick()
-
-            val errorMessage = "Error message"
-            fragment.sheetViewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            assertThat(viewBinding.message.isVisible).isTrue()
-            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
-
-            viewBinding.googlePayButton.performClick()
-
-            assertThat(viewBinding.message.isVisible).isFalse()
-            assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
-        }
-    }
+//    @Test
+//    fun `when isGooglePayEnabled=true should configure Google Pay button`() {
+//        createFragment { fragment, viewBinding, _ ->
+//            val paymentSelections = mutableListOf<PaymentSelection>()
+//            fragment.sheetViewModel.selection.observeForever { paymentSelection ->
+//                if (paymentSelection != null) {
+//                    paymentSelections.add(paymentSelection)
+//                }
+//            }
+//
+//            assertThat(viewBinding.googlePayButton.isVisible)
+//                .isTrue()
+//
+//            viewBinding.googlePayButton.performClick()
+//
+//            assertThat(paymentSelections)
+//                .containsExactly(PaymentSelection.GooglePay)
+//        }
+//    }
+//
+//    @Test
+//    // TODO: Intermittent failure
+//    fun `when back to Ready state should update PaymentSelection`() {
+//        createFragment(
+//            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+//        ) { fragment, viewBinding, _ ->
+//            fragment.sheetViewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
+//
+//            idleLooper()
+//            val paymentSelections = mutableListOf<PaymentSelection?>()
+//            fragment.sheetViewModel.selection.observeForever { paymentSelection ->
+//                paymentSelections.add(paymentSelection)
+//            }
+//
+//            assertThat(viewBinding.googlePayButton.isVisible)
+//                .isFalse()
+//
+//            idleLooper()
+//            // Start with null PaymentSelection because the card entered is invalid
+//            paymentSelections.forEach {
+//                println(it?.toString())
+//            }
+//            assertThat(paymentSelections.size)
+//                .isEqualTo(0)
+//
+//            viewBinding.googlePayButton.performClick()
+//
+//            // Updates PaymentSelection to Google Pay
+//            assertThat(paymentSelections.size)
+//                .isEqualTo(1)
+//            assertThat(paymentSelections[0])
+//                .isEqualTo(PaymentSelection.GooglePay)
+//
+//            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
+//
+//            // Back to Ready state, should return to null PaymentSelection
+//            assertThat(paymentSelections.size)
+//                .isEqualTo(2)
+//            assertThat(paymentSelections[1])
+//                .isNull()
+//        }
+//    }
+//
+//    @Test
+//    fun `started fragment should report onShowNewPaymentOptionForm() event`() {
+//        createFragment { _, _, _ ->
+//            idleLooper()
+//            verify(eventReporter).onShowNewPaymentOptionForm()
+//        }
+//    }
+//
+//    @Test
+//    fun `google pay button state updated on start processing`() {
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+//            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.StartProcessing
+//
+//            val googlePayButton =
+//                StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
+//            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
+//            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+//            assertThat(googlePayIconComponent.isVisible).isFalse()
+//            assertThat(googlePayButton.primaryButton.externalLabel).isEqualTo(
+//                fragment.getString(R.string.stripe_paymentsheet_primary_button_processing)
+//            )
+//        }
+//    }
+//
+//    @Test
+//    fun `google pay button error message displayed`() {
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+//            fragment.sheetViewModel._viewState.value =
+//                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage("This is my test error message"))
+//
+//            assertThat(viewBinding.message.text.toString()).isEqualTo("This is my test error message")
+//
+//            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
+//
+//            assertThat(viewBinding.message.text.toString()).isEqualTo("")
+//        }
+//    }
+//
+//    @Test
+//    fun `google pay flow updates the scroll view before and after`() {
+//
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//
+//            viewBinding.googlePayButton.performClick()
+//            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(false)
+//
+//            fragment.sheetViewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+//            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(true)
+//        }
+//    }
+//
+//    @Test
+//    fun `google pay button state updated on finish processing`() {
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+//
+//            var finishProcessingCalled = false
+//            fragment.sheetViewModel._viewState.value =
+//                PaymentSheetViewState.FinishProcessing {
+//                    finishProcessingCalled = true
+//                }
+//
+//            idleLooper()
+//
+//            val googlePayButton =
+//                StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
+//            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
+//            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+//            assertThat(googlePayIconComponent.isVisible).isFalse()
+//            assertThat(finishProcessingCalled).isTrue()
+//        }
+//    }
+//
+//    @Test
+//    fun `when Google Pay is cancelled then previously selected payment method is selected again`() {
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//            val lastPaymentMethod =
+//                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+//            fragment.sheetViewModel.updateSelection(lastPaymentMethod)
+//
+//            viewBinding.googlePayButton.performClick()
+//
+//            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset()
+//
+//            assertThat(fragment.sheetViewModel.selection.value).isEqualTo(lastPaymentMethod)
+//        }
+//    }
+//
+//    @Test
+//    fun `when new payment method is selected then error message is cleared`() {
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//            viewBinding.googlePayButton.performClick()
+//
+//            val errorMessage = "Error message"
+//            fragment.sheetViewModel._viewState.value =
+//                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+//
+//            assertThat(viewBinding.message.isVisible).isTrue()
+//            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
+//
+//            fragment.sheetViewModel.updateSelection(
+//                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+//            )
+//
+//            assertThat(viewBinding.message.isVisible).isFalse()
+//            assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
+//        }
+//    }
+//
+//    @Test
+//    fun `when checkout starts then error message is cleared`() {
+//        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding, _ ->
+//            viewBinding.googlePayButton.performClick()
+//
+//            val errorMessage = "Error message"
+//            fragment.sheetViewModel._viewState.value =
+//                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+//
+//            assertThat(viewBinding.message.isVisible).isTrue()
+//            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
+//
+//            viewBinding.googlePayButton.performClick()
+//
+//            assertThat(viewBinding.message.isVisible).isFalse()
+//            assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
+//        }
+//    }
 
     @Test
     fun `when multiple supported payment methods and configuration changes it should restore selected payment method`() {

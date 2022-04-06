@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -58,10 +59,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
-    override val messageView: TextView by lazy { viewBinding.message }
-    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
+    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
+    override val header: ComposeView by lazy { viewBinding.header }
+    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    override val messageView: TextView by lazy { viewBinding.message }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
