@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -34,13 +34,10 @@ import com.stripe.android.ui.core.R
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CardDetailsSectionElementUI(
     enabled: Boolean,
-    hiddenIdentifiers: List<IdentifierSpec>?,
-    context: Context
+    controller: CardDetailsSectionController,
+    hiddenIdentifiers: List<IdentifierSpec>?
 ) {
-    val cardDetailsElement = CardDetailsElement(
-        IdentifierSpec.Generic("credit_detail"), context
-    )
-
+    val context = LocalContext.current
     val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     Row(
@@ -61,7 +58,7 @@ fun CardDetailsSectionElementUI(
             val cardScanLauncher =
                 rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                     it.data?.let {
-                        cardDetailsElement.controller.numberElement.controller.onCardScanResult(
+                        controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
                             it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
                                 ?: CardScanSheetResult.Failed(
                                     UnknownScanException("No data in the result intent")
@@ -104,11 +101,11 @@ fun CardDetailsSectionElementUI(
     SectionElementUI(
         enabled,
         SectionElement(
-            IdentifierSpec.Generic("credit_details_section"),
-            listOf(cardDetailsElement),
-            SectionController(null, listOf(cardDetailsElement.sectionFieldErrorController()))
+            IdentifierSpec.Generic("credit_details"),
+            listOf(controller.cardDetailsElement),
+            SectionController(null, listOf(controller.cardDetailsElement.sectionFieldErrorController()))
         ),
         hiddenIdentifiers ?: emptyList(),
-        cardDetailsElement.controller.cvcElement.identifier
+        IdentifierSpec.Generic("card_details")
     )
 }

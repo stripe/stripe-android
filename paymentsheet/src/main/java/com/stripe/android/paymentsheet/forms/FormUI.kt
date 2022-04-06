@@ -88,7 +88,7 @@ internal fun FormInternal(
                         is AffirmHeaderElement -> AffirmElementUI()
                         is MandateTextElement -> MandateTextUI(element)
                         is CardDetailsSectionElement -> CardDetailsSectionElementUI(
-                            enabled, hiddenIdentifiers, context
+                            enabled, element.controller, hiddenIdentifiers
                         )
                     }
                 }
