@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.ACCOUNTS
-import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.DISCOVER_ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY16_ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY19_ACCOUNTS
 import com.stripe.android.core.networking.ApiRequest
