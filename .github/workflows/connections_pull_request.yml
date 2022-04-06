@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          ref: master
+          ref: f/connections-example
       - name: Build in master
         run: ./gradlew :connections-example:assembleRelease && mv connections-example/build/outputs/apk/release/connections-example-release-unsigned.apk connections-example/build/outputs/apk/release/connections-example-release-master.apk
       - name: Upload APK
