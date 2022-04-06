@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.Context
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -9,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 internal data class CardDetailsSectionSpec(
     val identifier: IdentifierSpec
 ) : FormItemSpec() {
-    fun transform(): FormElement = CardDetailsSectionElement(
-        identifier
+    fun transform(context: Context): FormElement = CardDetailsSectionElement(
+        context, identifier
     )
 }

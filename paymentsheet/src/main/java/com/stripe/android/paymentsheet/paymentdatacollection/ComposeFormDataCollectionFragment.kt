@@ -44,7 +44,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                 requireArguments().getParcelable(
                     EXTRA_CONFIG
                 )
-            )
+            ),
+            contextSupplier = { requireContext() }
         )
     }
 
@@ -61,7 +62,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         setContent {
             PaymentsTheme {
                 Column(Modifier.fillMaxSize()) {
-                    Form(formViewModel)
+                    Form(formViewModel, context)
                 }
             }
         }
