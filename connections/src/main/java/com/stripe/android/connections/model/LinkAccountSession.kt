@@ -33,7 +33,7 @@ data class LinkAccountSession internal constructor(
     val livemode: Boolean,
 
     @SerialName("payment_account")
-    val paymentAccount: PaymentAccount? = null,
+    internal val paymentAccount: PaymentAccount? = null,
 
     @SerialName("return_url")
     val returnUrl: String? = null

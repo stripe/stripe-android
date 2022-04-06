@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class BankAccount(
+internal data class BankAccount(
 
     @SerialName(value = "id") @Required val id: String,
 
