@@ -70,6 +70,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> CheckoutMode.Setup
         }
 
+    private val linkEnabled: Boolean
+        get() = viewBinding.linkRadioGroup.checkedRadioButtonId == R.id.link_on_button
+
     private val setShippingAddress: Boolean
         get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
 
@@ -100,6 +103,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.resetDefaultsButton.setOnClickListener {
             setToggles(
                 Toggle.Customer.default.toString(),
+                Toggle.Link.default as Boolean,
                 Toggle.GooglePay.default as Boolean,
                 Toggle.Currency.default.toString(),
                 Toggle.Mode.default.toString(),
@@ -114,6 +118,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     customer,
                     currency,
                     mode,
+                    linkEnabled,
                     setShippingAddress,
                     setAutomaticPaymentMethods,
                     backendUrl
@@ -167,9 +172,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
+        val (customer, link, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
         setToggles(
             customer,
+            link,
             googlePay,
             currency,
             mode,
@@ -182,6 +188,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onPause()
         viewModel.storeToggleState(
             customer.value,
+            linkEnabled,
             googlePayConfig != null,
             currency.value,
             mode.value,
@@ -192,6 +199,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun setToggles(
         customer: String?,
+        link: Boolean,
         googlePay: Boolean,
         currency: String?,
         mode: String?,
@@ -202,6 +210,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
             CheckoutCustomer.New.value -> viewBinding.customerRadioGroup.check(R.id.new_customer_button)
             else -> viewBinding.customerRadioGroup.check(R.id.returning_customer_button)
+        }
+
+        when (link) {
+            true -> viewBinding.linkRadioGroup.check(R.id.link_on_button)
+            false -> viewBinding.linkRadioGroup.check(R.id.link_off_button)
         }
 
         when (googlePay) {

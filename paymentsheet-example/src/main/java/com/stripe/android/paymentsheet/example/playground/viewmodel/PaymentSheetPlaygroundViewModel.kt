@@ -40,6 +40,7 @@ class PaymentSheetPlaygroundViewModel(
 
     fun storeToggleState(
         customer: String,
+        link: Boolean,
         googlePay: Boolean,
         currency: String,
         mode: String,
@@ -53,6 +54,7 @@ class PaymentSheetPlaygroundViewModel(
         val editor = sharedPreferences.edit()
 
         editor.putString(Toggle.Customer.key, customer)
+        editor.putBoolean(Toggle.Link.key, link)
         editor.putBoolean(Toggle.GooglePay.key, googlePay)
         editor.putString(Toggle.Currency.key, currency)
         editor.putString(Toggle.Mode.key, mode)
@@ -66,10 +68,12 @@ class PaymentSheetPlaygroundViewModel(
             sharedPreferencesName,
             AppCompatActivity.MODE_PRIVATE
         )
-
         val customer = sharedPreferences.getString(
             Toggle.Customer.key,
             Toggle.Customer.default.toString()
+        )
+        val link = sharedPreferences.getBoolean(
+            Toggle.Link.key, Toggle.Link.default as Boolean
         )
         val googlePay = sharedPreferences.getBoolean(
             Toggle.GooglePay.key,
@@ -94,6 +98,7 @@ class PaymentSheetPlaygroundViewModel(
 
         return SavedToggles(
             customer.toString(),
+            link,
             googlePay,
             currency.toString(),
             mode.toString(),
@@ -110,6 +115,7 @@ class PaymentSheetPlaygroundViewModel(
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
         mode: CheckoutMode,
+        linkEnabled: Boolean,
         setShippingAddress: Boolean,
         setAutomaticPaymentMethod: Boolean,
         backendUrl: String
@@ -124,7 +130,8 @@ class PaymentSheetPlaygroundViewModel(
             currency.value,
             mode.value,
             setShippingAddress,
-            setAutomaticPaymentMethod
+            setAutomaticPaymentMethod,
+            linkEnabled
         )
 
         Fuel.post(backendUrl + "checkout")
