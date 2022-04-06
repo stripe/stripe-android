@@ -30,7 +30,12 @@ class ConnectionsExampleViewModel : ViewModel() {
                     status = "Fetching link account session from example backend!"
                 )
             }
-            kotlin.runCatching { repository.createLinkAccountSession() }
+            kotlin.runCatching {
+                val createAccountHolderResponse = repository.createAccountHolder()
+                val linkedAccount =
+                    repository.createLinkAccountSession(createAccountHolderResponse.accountHolder)
+                linkedAccount
+            }
                 // Success creating session: open ConnectionsSheet with received secret
                 .onSuccess {
                     setState {
@@ -43,7 +48,7 @@ class ConnectionsExampleViewModel : ViewModel() {
                         OpenConnectionsSheetExample(
                             configuration = ConnectionsSheet.Configuration(
                                 it.clientSecret,
-                                it.publishableKey
+                                "it.publishableKey"
                             )
                         )
                     )
