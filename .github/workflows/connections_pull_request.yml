@@ -1,24 +1,13 @@
 name: connections-example size diff
-on: [ pull_request ]
+on:
+  pull_request:
+    paths:
+      - 'connections/**'
+      - 'stripe-core/**'
+      - 'build.gradle'
+      - 'dependencies.gradle'
 jobs:
-  connections-changed-files:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Get specific changed files
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v18.6
-        with:
-          files: |
-            **/connections/**
-            **/stripe-core/**
-    outputs:
-      any_changed: steps.changed-files-specific.outputs.any_changed
-  # Checkout master branch and build the APK
   build-master:
-    needs: [ connections-changed-files ]
-    if: always() && (needs.connections-changed-files.outputs.any_changed == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -34,8 +23,6 @@ jobs:
 
   # Checkout PR branch and build the APK
   build-pr:
-    needs: [ connections-changed-files ]
-    if: always() && (needs.connections-changed-files.outputs.any_changed == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -49,8 +36,7 @@ jobs:
 
   # Execute Diffuse only when the two APKs are built successfully
   diffuse:
-    needs: [ build-master, build-pr, connections-changed-files ]
-    if: always() && (needs.connections-changed-files.outputs.any_changed == 'true')
+    needs: [ build-master, build-pr ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
