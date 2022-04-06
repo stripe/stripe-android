@@ -68,23 +68,21 @@ class PaymentSheetPlaygroundViewModel(
             sharedPreferencesName,
             AppCompatActivity.MODE_PRIVATE
         )
-
-        val customer =
-            sharedPreferences.getString(
-                Toggle.Customer.key,
-                Toggle.Customer.default.toString()
-            )
-        val link = sharedPreferences.getBoolean(Toggle.Link.key, Toggle.Link.default as Boolean)
-        val googlePay =
-            sharedPreferences.getBoolean(
-                Toggle.GooglePay.key,
-                Toggle.GooglePay.default as Boolean
-            )
-        val currency =
-            sharedPreferences.getString(
-                Toggle.Currency.key,
-                Toggle.Currency.default.toString()
-            )
+        val customer = sharedPreferences.getString(
+            Toggle.Customer.key,
+            Toggle.Customer.default.toString()
+        )
+        val link = sharedPreferences.getBoolean(
+            Toggle.Link.key, Toggle.Link.default as Boolean
+        )
+        val googlePay = sharedPreferences.getBoolean(
+            Toggle.GooglePay.key,
+            Toggle.GooglePay.default as Boolean
+        )
+        val currency = sharedPreferences.getString(
+            Toggle.Currency.key,
+            Toggle.Currency.default.toString()
+        )
         val mode = sharedPreferences.getString(
             Toggle.Mode.key,
             Toggle.Mode.default.toString()
