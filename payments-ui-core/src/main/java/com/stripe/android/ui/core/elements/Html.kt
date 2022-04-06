@@ -9,6 +9,8 @@ import android.text.style.ImageSpan
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,14 +47,26 @@ import com.stripe.android.ui.core.PaymentsTheme
 
 private const val LINK_TAG = "URL"
 
+internal data class EmbeddableImage(
+    @DrawableRes val id: Int,
+    @StringRes val contentDescription: Int
+)
+
+/**
+ * This will display html annotated text in a string.  Images cannot be embedded in
+ * <a> link tags.  The following tags are supported: <a>, <b>, <u>, <i>, <img>
+ * The source value in the img tab, must map to something in the imageGetter.
+ */
 @Composable
-internal fun HtmlText(
+internal fun Html(
     html: String,
-    imageGetter: Map<String, Int>,
-    modifier: Modifier = Modifier
+    imageGetter: Map<String, EmbeddableImage>,
+    modifier: Modifier = Modifier,
+    color: Color,
+    style: TextStyle
 ) {
     val inlineContentMap = imageGetter.entries.associate { (key, value) ->
-        val painter = painterResource(value)
+        val painter = painterResource(value.id)
         val height = painter.intrinsicSize.height
         val width = painter.intrinsicSize.width
         val newWidth = MaterialTheme.typography.body1.fontSize * (width / height)
@@ -70,7 +84,7 @@ internal fun HtmlText(
                         .fillMaxHeight(),
                     painter = painter,
                     contentDescription = stringResource(
-                        value
+                        value.contentDescription
                     )
                 )
             }
@@ -86,7 +100,8 @@ internal fun HtmlText(
         modifier = modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item,
-        color = PaymentsTheme.colors.subtitle,
+        color = color,
+        style = style,
         onClick = {
             annotatedText
                 .getStringAnnotations(LINK_TAG, it, it)
@@ -109,7 +124,7 @@ internal fun HtmlText(
 @Composable
 private fun annotatedStringResource(
     text: String,
-    imageGetter: Map<String, Int>,
+    imageGetter: Map<String, EmbeddableImage>,
 ): AnnotatedString {
     val spanned = remember(text) {
         HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -120,48 +135,61 @@ private fun annotatedStringResource(
             spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
                 val end = spanned.getSpanEnd(span)
-                append(spanned.toString().substring(currentStart, start))
-                currentStart = start
-                when (span) {
-                    is StyleSpan -> when (span.style) {
-                        Typeface.BOLD -> {
-                            addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+                if (currentStart < spanned.toString().length &&
+                    start < spanned.toString().length &&
+                    start - currentStart >= 0
+                ) {
+                    append(spanned.toString().substring(currentStart, start))
+                    currentStart = start
+                    when (span) {
+                        is StyleSpan -> when (span.style) {
+                            Typeface.BOLD -> {
+                                addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+                            }
+                            Typeface.ITALIC -> {
+                                addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
+                            }
+                            Typeface.BOLD_ITALIC -> {
+                                addStyle(
+                                    SpanStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        fontStyle = FontStyle.Italic,
+                                    ),
+                                    start,
+                                    end,
+                                )
+                            }
                         }
-                        Typeface.ITALIC -> {
-                            addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
-                        }
-                        Typeface.BOLD_ITALIC -> {
+                        is UnderlineSpan -> {
                             addStyle(
-                                SpanStyle(
-                                    fontWeight = FontWeight.Bold,
-                                    fontStyle = FontStyle.Italic,
-                                ),
+                                SpanStyle(textDecoration = TextDecoration.Underline),
                                 start,
-                                end,
+                                end
                             )
                         }
-                    }
-                    is UnderlineSpan -> {
-                        addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
-                    }
-                    is ForegroundColorSpan -> {
-                        addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
-                    }
-                    is ImageSpan -> {
-                        currentStart = end
-                        span.source?.let {
-                            requireNotNull(imageGetter.containsKey(span.source!!))
-                            appendInlineContent(span.source!!)
+                        is ForegroundColorSpan -> {
+                            addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
                         }
-                    }
-                    is URLSpan -> {
-                        addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
-                        addStringAnnotation(
-                            tag = LINK_TAG,
-                            annotation = span.url,
-                            start = start,
-                            end = end
-                        )
+                        is ImageSpan -> {
+                            currentStart = end
+                            span.source?.let {
+                                requireNotNull(imageGetter.containsKey(span.source!!))
+                                appendInlineContent(span.source!!)
+                            }
+                        }
+                        is URLSpan -> {
+                            addStyle(
+                                SpanStyle(textDecoration = TextDecoration.Underline),
+                                start,
+                                end
+                            )
+                            addStringAnnotation(
+                                tag = LINK_TAG,
+                                annotation = span.url,
+                                start = start,
+                                end = end
+                            )
+                        }
                     }
                 }
             }
@@ -177,8 +205,8 @@ private fun ClickableText(
     text: AnnotatedString,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    style: TextStyle = TextStyle.Default,
+    color: Color = PaymentsTheme.colors.subtitle,
+    style: TextStyle = PaymentsTheme.typography.body2,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
