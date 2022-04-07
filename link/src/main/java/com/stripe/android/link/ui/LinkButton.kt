@@ -52,7 +52,6 @@ private fun LinkButton(
                     disabledBackgroundColor = MaterialTheme.colors.primary
                 )
             ) {
-                println(LocalContentAlpha.current)
                 Icon(
                     painter = painterResource(R.drawable.ic_link_logo),
                     contentDescription = stringResource(R.string.link),
@@ -83,18 +82,21 @@ class LinkViewButton @JvmOverloads constructor(
     defStyle: Int = 0
 ) : AbstractComposeView(context, attrs, defStyle) {
 
+    override var shouldCreateCompositionOnAttachedToWindow: Boolean = false
+        private set
+
     var onClick by mutableStateOf({})
-    var isButtonEnabled by mutableStateOf(isEnabled)
+    private var isEnabledState by mutableStateOf(isEnabled)
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        isButtonEnabled = enabled
+        isEnabledState = enabled
     }
 
     @Composable
     override fun Content() {
         LinkButton(
-            isButtonEnabled,
+            isEnabledState,
             onClick
         )
     }
