@@ -217,7 +217,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
             replace(
                 R.id.payment_method_fragment_container,
-                fragmentForPaymentMethod(paymentMethod),
+                ComposeFormDataCollectionFragment::class.java,
                 args
             )
         }
@@ -227,10 +227,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-
-        private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-            ComposeFormDataCollectionFragment::class.java
-
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
 
         @VisibleForTesting

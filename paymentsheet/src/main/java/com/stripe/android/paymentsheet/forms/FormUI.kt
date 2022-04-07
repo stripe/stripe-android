@@ -67,7 +67,7 @@ internal fun FormInternal(
 
     ) {
         elements?.let {
-            it.forEachIndexed { index, element ->
+            it.forEachIndexed { _, element ->
                 if (!hiddenIdentifiers.contains(element.identifier)) {
                     when (element) {
                         is SectionElement -> SectionElementUI(
