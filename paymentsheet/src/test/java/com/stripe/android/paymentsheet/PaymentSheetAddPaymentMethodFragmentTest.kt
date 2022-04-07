@@ -13,6 +13,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
@@ -504,6 +505,42 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
+    fun `card payment method selection has the fields from formFieldValues`() {
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.SaveForFutureUse to FormFieldEntry("true", true),
+                IdentifierSpec.CardNumber to FormFieldEntry("4242424242421234", true),
+                IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true)
+            ),
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+        val selection =
+            BaseAddPaymentMethodFragment.transformToPaymentSelection(
+                formFieldValues,
+                mapOf(
+                    "type" to "card",
+                    "card" to mapOf(
+                        "number" to null,
+                        "exp_month" to null,
+                        "exp_year" to null,
+                        "cvc" to null,
+                    )
+                ),
+                SupportedPaymentMethod.Card
+            )
+        assertThat(selection?.customerRequestedSave).isEqualTo(
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+        assertThat((selection as? PaymentSelection.New.Card)?.last4).isEqualTo(
+            "1234"
+        )
+        assertThat((selection as? PaymentSelection.New.Card)?.brand).isEqualTo(
+            CardBrand.Visa
+        )
+    }
+
+    @Test
     fun `payment method selection has the fields from formFieldValues`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
@@ -523,10 +560,10 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         assertThat(selection?.customerRequestedSave).isEqualTo(
             PaymentSelection.CustomerRequestedSave.RequestReuse
         )
-        assertThat(selection?.labelResource).isEqualTo(
+        assertThat((selection as? PaymentSelection.New.GenericPaymentMethod)?.labelResource).isEqualTo(
             R.string.stripe_paymentsheet_payment_method_sofort
         )
-        assertThat(selection?.iconResource).isEqualTo(
+        assertThat((selection as? PaymentSelection.New.GenericPaymentMethod)?.iconResource).isEqualTo(
             R.drawable.stripe_ic_paymentsheet_pm_klarna
         )
     }

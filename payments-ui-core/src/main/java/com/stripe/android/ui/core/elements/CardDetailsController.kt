@@ -8,7 +8,7 @@ internal class CardDetailsController constructor(context: Context) : SectionFiel
 
     val label: Int? = null
     val numberElement = CardNumberElement(
-        IdentifierSpec.Generic("number"),
+        IdentifierSpec.CardNumber,
         CardNumberController(CardNumberConfig(), context)
     )
 

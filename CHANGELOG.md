@@ -1,4 +1,10 @@
 # CHANGELOG
+
+## x.x.x - xxxx-xx-xx
+
+### PaymentSheet
+* [FIXED] [4840](https://github.com/stripe/stripe-android/pull/4840) Multi-step now shows the last 4 of the card number instead of 'card'.
+
 ## 20.0.0 - 2022-04-04
 This release patches on a crash on PaymentLauncher, updates the package name of some public classes,
 changes the public API for CardImageVerificationSheet and releases Identity SDK.
