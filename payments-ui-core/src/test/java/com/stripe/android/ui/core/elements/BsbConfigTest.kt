@@ -19,7 +19,7 @@ class BsbConfigTest {
     @Test
     fun `verify visualTransformation formats entered value`() {
         Truth.assertThat(bsbConfig.visualTransformation.filter(AnnotatedString("123456")).text)
-            .isEqualTo(AnnotatedString("123-456"))
+            .isEqualTo(AnnotatedString("123 - 456"))
     }
 
     @Test
