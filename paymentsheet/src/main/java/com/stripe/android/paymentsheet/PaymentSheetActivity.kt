@@ -300,9 +300,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupGooglePayButton()
 
         viewModel.showTopContainer.observe(this) { visible ->
-            topContainer.isVisible = visible
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
             googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
+            topContainer.isVisible = visible
         }
     }
 
