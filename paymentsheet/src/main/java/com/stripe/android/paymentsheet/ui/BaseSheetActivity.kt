@@ -18,7 +18,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -194,13 +193,11 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             setContent {
                 val text = viewModel.headerText.observeAsState()
 
-                Column {
-                    text.value?.let {
-                        H4Text(
-                            text = it,
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        )
-                    }
+                text.value?.let {
+                    H4Text(
+                        text = it,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
                 }
             }
         }

@@ -83,6 +83,22 @@ public final class com/stripe/android/ui/core/elements/H4TextKt {
 public final class com/stripe/android/ui/core/elements/H6TextKt {
 }
 
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardBrand : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$CardBrand;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardNumber : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$CardNumber;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$City : com/stripe/android/ui/core/elements/IdentifierSpec {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
