@@ -5,7 +5,6 @@ import android.util.Log
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.stripecardscan.framework.FetchedData
-import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.Loader
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -87,4 +86,8 @@ internal abstract class TFLAnalyzerFactory<
 
     private suspend fun loadModel(fetchedModel: FetchedData): ByteBuffer? =
         loadModelMutex.withLock { loadedModel ?: run { loader.loadData(fetchedModel) } }
+
+    companion object {
+        private val LOG_TAG = TFLAnalyzerFactory::class.java.simpleName
+    }
 }

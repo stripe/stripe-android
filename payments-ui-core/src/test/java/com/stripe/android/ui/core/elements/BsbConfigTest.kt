@@ -6,16 +6,20 @@ import com.stripe.android.view.BecsDebitBanks
 import org.junit.Test
 
 class BsbConfigTest {
-    // TODO: remove this list, not sure if we will remove the manually added bank list in BsbSpec.
     private val banks: List<BecsDebitBanks.Bank> = listOf(
         BecsDebitBanks.Bank("00", "Stripe Test Bank")
     )
     private val bsbConfig = BsbConfig(banks)
+    @Test
+    fun `visualTransformation formats entered value`() {
+        Truth.assertThat(bsbConfig.visualTransformation.filter(AnnotatedString("000000")).text)
+            .isEqualTo(AnnotatedString("000 - 000"))
+    }
 
     @Test
     fun `verify visualTransformation formats entered value`() {
         Truth.assertThat(bsbConfig.visualTransformation.filter(AnnotatedString("123456")).text)
-            .isEqualTo(AnnotatedString("123-456"))
+            .isEqualTo(AnnotatedString("123 - 456"))
     }
 
     @Test

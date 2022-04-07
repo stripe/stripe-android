@@ -1,14 +1,13 @@
 package com.stripe.android.stripecardscan.framework.api.dto
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.framework.TaskStats
 import com.stripe.android.stripecardscan.framework.ml.ModelLoadDetails
+import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class StatsPayload(
     @SerialName("instance_id") val instanceId: String,
     @SerialName("scan_id") val scanId: String?,
@@ -16,12 +15,12 @@ internal data class StatsPayload(
     @SerialName("device") val device: ClientDevice,
     @SerialName("app") val app: AppInfo,
     @SerialName("scan_stats") val scanStats: ScanStatistics,
+    @SerialName("configuration") val configuration: ConfigurationStats,
 // TODO: these should probably be reported as part of scanstats
 //    @SerialName("model_versions") val modelVersions: List<ModelVersion>,
 )
 
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class ScanStatistics(
     @SerialName("tasks") val tasks: Map<String, List<TaskStatistics>>,
     @SerialName("repeating_tasks") val repeatingTasks: Map<String, RepeatingTaskStatistics>,
@@ -43,7 +42,6 @@ internal data class ScanStatistics(
 }
 
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class ModelVersion(
     @SerialName("name") val name: String,
     @SerialName("version") val version: String,
@@ -61,7 +59,6 @@ internal data class ModelVersion(
 }
 
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class TaskStatistics(
     @SerialName("started_at_ms") val startedAtMs: Long,
     @SerialName("duration_ms") val durationMs: Long,
@@ -78,7 +75,18 @@ internal data class TaskStatistics(
 }
 
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class RepeatingTaskStatistics(
     @SerialName("executions") val executions: Int,
 )
+
+@Serializable
+internal data class ConfigurationStats(
+    @SerialName("strict_mode_frames") val strictModeFrames: Int,
+) {
+    companion object {
+        @JvmStatic
+        internal fun fromScanConfig(scanConfig: ScanConfig) = ConfigurationStats(
+            strictModeFrames = scanConfig.strictModeFrameCount,
+        )
+    }
+}

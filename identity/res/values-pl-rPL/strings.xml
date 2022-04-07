@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Ustawienia aplikacji</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Tylna strona prawa jazdy</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Wybrano tył prawa jazdy</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Tylna strona dokumentu tożsamości</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Wybrano tył dokumentu tożsamości</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Zezwolenie dla aparatu</string>
+  <string name="camera_permission_rationale">Ta aplikacja wykorzystuje aparat fotograficzny do skanowania dokumentów tożsamości i robienia zdjęć w celu weryfikacji tożsamości użytkownika.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Zaznacz, aby wskazać pomyślne zarejestrowanie dokumentu</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Wybierz zdjęcie</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Nie można zarejestrować obrazu wysokiej jakości.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Możesz spróbować ponownie lub przesłać obraz z urządzenia.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Nie można wykonać zdjęcia</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Ikona zegara</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Prawo jazdy</string>
+  <!-- Text for error labels -->
+  <string name="error">Błąd</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Przesyłanie pliku</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Prześlij zdjęcia przedniej i tylnej strony prawa jazdy</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Prześlij zdjęcia przedniej i tylnej strony dokumentu tożsamości</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Prześlij zdjęcie paszportu</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Przednia strona prawa jazdy</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Wybrano przód prawa jazdy</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Przednia strona dokumentu tożsamości</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Wybrano przód dokumentu tożsamości</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Wróć</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Potrzebujemy pozwolenia na używanie Twojego aparatu. Zezwól w ustawieniach aplikacji na dostęp do aparatu.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Zaczekaj, trwa skanowanie</string>
+  <!-- display name for ID -->
+  <string name="id_card">Dokument tożsamości</string>
+  <!-- Continue button text -->
+  <string name="kontinue">kontynuuj</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Wczytywanie</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Paszport</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Wybrano paszport</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Obróć prawo jazdy na drugą stronę</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Umieść prawo jazdy w centrum kadru</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Obróć dowód tożsamości na drugą stronę</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Umieść dowód tożsamości w centrum kadru</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Umieść paszport w centrum kadru</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Zeskanowano</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Wybierz</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Zrób zdjęcie</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Spróbuj ponownie</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Wystąpił nieoczekiwany błąd – spróbuj ponownie za kilka sekund</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Prześlij tył prawa jazdy</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Prześlij przód prawa jazdy</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Prześlij przód dowodu tożsamości</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Prześlij tył dowodu tożsamości</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Prześlij paszport</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Możesz też ręcznie przesłać zdjęcie swojego %1$s</string>
+</resources>
