@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -18,6 +19,7 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
+import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
@@ -55,7 +57,20 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
     internal val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        private fun isBackingToUploadFragment() =
+            navController.previousBackStackEntry?.destination?.id == R.id.IDUploadFragment ||
+                navController.previousBackStackEntry?.destination?.id == R.id.passportUploadFragment ||
+                navController.previousBackStackEntry?.destination?.id == R.id.driverLicenseUploadFragment
+
         override fun handleOnBackPressed() {
+            if (isBackingToUploadFragment()) {
+                navController.previousBackStackEntry?.destination?.addArgument(
+                    ARG_IS_NAVIGATED_UP_TO,
+                    NavArgument.Builder()
+                        .setDefaultValue(true)
+                        .build()
+                )
+            }
             navController.navigateUp()
         }
     }
@@ -118,6 +133,12 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
                 )
             )
         )
+
+        binding.topAppBar.setNavigationOnClickListener {
+            // Explicitly invoke the onBackPressedCallback, as clicking up button on app bar should
+            // have the same behavior as clicking device back button
+            onBackPressedCallback.handleOnBackPressed()
+        }
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {

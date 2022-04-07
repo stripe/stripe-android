@@ -1,7 +1,5 @@
 package com.stripe.android.identity.navigation
 
-import android.os.Bundle
-import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.states.IdentityScanState
@@ -21,11 +19,4 @@ internal class DriverLicenseUploadFragment(
     override var backCheckMarkContentDescription: Int? = R.string.back_of_dl_selected
     override val frontScanType = IdentityScanState.ScanType.DL_FRONT
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.DL_BACK
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        observeForFrontUploaded()
-        observeForBackUploaded()
-        enableKontinueWhenBothUploaded()
-    }
 }
