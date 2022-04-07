@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Rakenduse sätted</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Juhiloa tagakülg</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Valitud on juhiloa tagakülg</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">ID-kaardi tagakülg</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Valitud on ID-kaardi tagakülg</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Kaamera luba</string>
+  <string name="camera_permission_rationale">See rakendus kasutab teie isikut tõendavate dokumentide skannimiseks kaamerat ja pildistab teie isiku kinnitamiseks.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Dokumendi edukat jäädvustamist tähistav märge</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Vali foto</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Meil ei õnnestunud teha kõrge kvaliteediga pilti.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Võite kas uuesti proovida või pildi oma seadmest üles laadida.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Pilti ei saanud teha</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Kellaikoon</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Juhiluba</string>
+  <!-- Text for error labels -->
+  <string name="error">Viga</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Faili üleslaadimine</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Laadige üles oma juhiloa esi- ja tagakülje pildid</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Laadige üles oma ID-kaardi esi- ja tagakülje pildid</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Laadige üles oma passi pilt</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Juhiloa esikülg</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Valitud on juhiloa esikülg</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">ID-kaardi esikülg</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Valitud on ID-kaardi esikülg</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Mine tagasi</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Vajame teie kaamera kasutamiseks luba. Andke rakenduse sätete kaudu juurdepääs kaamerale.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Hoidke paigal, skannimine</string>
+  <!-- display name for ID -->
+  <string name="id_card">ID-kaart</string>
+  <!-- Continue button text -->
+  <string name="kontinue">jätka</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Laadimine</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Pass</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Valitud on pass</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Pöörake juhiluba ümber</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Jälgige, et juhiluba oleks raami keskel</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Pöörake ID-kaart ümber</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Jälgige, et ID-kaart oleks raami keskel</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Jälgige, et pass oleks raami keskel</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Skannitud</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Vali</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Pildista</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Proovi uuesti</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Esines ootamatu tõrge – proovige mõne sekundi pärast uuesti</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Juhiloa tagakülje üleslaadimine</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Juhiloa esikülje üleslaadimine</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">ID-kaardi tagakülje üleslaadimine</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">ID-kaardi esikülje üleslaadimine</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Passi üleslaadimine</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Samuti võite oma %1$s foto käsitsi üles laadida</string>
+</resources>

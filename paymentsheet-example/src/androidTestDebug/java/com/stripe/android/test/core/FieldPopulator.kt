@@ -74,7 +74,6 @@ class FieldPopulator(
                                 is SimpleTextSpec -> {}
                                 AuBankAccountNumberSpec -> {}
                                 is BankDropdownSpec -> {}
-                                BsbSpec -> {}
                                 IbanSpec -> {}
                                 is KlarnaCountrySpec -> {}
                             }

@@ -357,6 +357,10 @@ internal abstract class WebFetcher : Fetcher {
      * After download, clean up.
      */
     protected abstract suspend fun cleanUpPostDownload(downloadedFile: File)
+
+    companion object {
+        private val LOG_TAG = WebFetcher::class.java.simpleName
+    }
 }
 
 /**

@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -177,20 +178,26 @@ internal class FormViewModel @Inject internal constructor(
             } ?: false
         }
 
-    private val userRequestedReuse =
-        saveForFutureUseElement.map {
-            it?.controller?.saveForFutureUse?.map { saveForFutureUse ->
-                if (config.showCheckbox) {
-                    if (saveForFutureUse) {
-                        PaymentSelection.CustomerRequestedSave.RequestReuse
+    // This will convert the save for future use value into a CustomerRequestedSave operation
+    private val userRequestedReuse = elements.filterNotNull().map { elementsList ->
+        combine(elementsList.map { it.getFormFieldValueFlow() }) { formFieldValues ->
+            formFieldValues.toList().flatten()
+                .filter { it.first == IdentifierSpec.SaveForFutureUse }
+                .map { it.second.value.toBoolean() }
+                .map { saveForFutureUse ->
+                    if (config.showCheckbox) {
+                        if (saveForFutureUse) {
+                            PaymentSelection.CustomerRequestedSave.RequestReuse
+                        } else {
+                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        }
                     } else {
-                        PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        PaymentSelection.CustomerRequestedSave.NoRequest
                     }
-                } else {
-                    PaymentSelection.CustomerRequestedSave.NoRequest
                 }
-            }?.firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
+                .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
         }
+    }.flattenConcat()
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
@@ -213,6 +220,7 @@ internal class FormViewModel @Inject internal constructor(
             it.toList().flatten()
         }
     }.flattenConcat()
+
     val lastTextFieldIdentifier = combine(
         hiddenIdentifiers,
         textFieldControllerIdsFlow

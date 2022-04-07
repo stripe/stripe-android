@@ -92,6 +92,10 @@ internal class Loader(private val context: Context) {
             null
         }
     }
+
+    companion object {
+        private val LOG_TAG = Fetcher::class.java.simpleName
+    }
 }
 
 /**

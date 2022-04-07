@@ -59,6 +59,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
+        setPadding(0, 18, 0, 0)
+
         setContent {
             PaymentsTheme {
                 Column(Modifier.fillMaxSize()) {
