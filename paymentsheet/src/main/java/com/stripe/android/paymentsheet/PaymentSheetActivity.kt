@@ -318,7 +318,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.selection.observe(this) { paymentSelection ->
-            clearErrorMessages()
             if (paymentSelection == PaymentSelection.GooglePay) {
                 viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
             }
