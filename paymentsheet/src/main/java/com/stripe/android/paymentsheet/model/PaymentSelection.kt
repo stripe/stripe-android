@@ -33,8 +33,10 @@ internal sealed class PaymentSelection : Parcelable {
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New() {
-            val last4: String = ((paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                ["number"] as String)
+            val last4: String = (
+                (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
+                ["number"] as String
+                )
                 .takeLast(4)
         }
 
