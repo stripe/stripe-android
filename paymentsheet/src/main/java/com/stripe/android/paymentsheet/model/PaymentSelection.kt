@@ -32,7 +32,11 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave
-        ) : New()
+        ) : New() {
+            val last4: String = ((paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
+                ["number"] as String)
+                .takeLast(4)
+        }
 
         @Parcelize
         data class GenericPaymentMethod(
