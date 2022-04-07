@@ -231,4 +231,3 @@ internal class ConnectionsSheetViewModel @Inject constructor(
         internal const val MAX_ACCOUNTS = 100
     }
 }
-

@@ -33,7 +33,6 @@ internal data class ConnectionsSheetState(
     }
 }
 
-
 /**
  *  Class containing all side effects intended to be run by the view.
  *
