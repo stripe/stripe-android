@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.content.res.Resources
+import android.util.DisplayMetrics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -82,14 +85,15 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
-            assertThat(116.dp)
-                .isEqualTo(
-                    calculateViewWidth(
+            assertThat(
+                calculateViewWidth(
+                    convertPixelsToDp(
                         viewBinding.paymentMethodFragmentContainer.measuredWidth,
-                        fragment.resources.displayMetrics,
-                        paymentIntent.paymentMethodTypes.size
-                    )
+                        fragment.resources
+                    ),
+                    paymentIntent.paymentMethodTypes.size
                 )
+            ).isEqualTo(143.0.dp)
         }
     }
 
@@ -100,16 +104,22 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
-            assertThat(223.dp)
-                .isEqualTo(
-                    calculateViewWidth(
+            assertThat(
+                calculateViewWidth(
+                    convertPixelsToDp(
                         viewBinding.paymentMethodFragmentContainer.measuredWidth,
-                        fragment.resources.displayMetrics,
-                        paymentIntent.paymentMethodTypes.size
-                    )
+                        fragment.resources
+                    ),
+                    paymentIntent.paymentMethodTypes.size
                 )
+            ).isEqualTo(220.5.dp)
         }
     }
+
+    fun convertPixelsToDp(px: Int, resources: Resources): Dp {
+        return (px / (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).dp
+    }
+
 
     @Test
     fun `when isGooglePayEnabled=true should configure Google Pay button`() {

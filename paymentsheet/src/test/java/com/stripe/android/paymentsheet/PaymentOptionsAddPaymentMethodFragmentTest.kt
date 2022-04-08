@@ -102,6 +102,27 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         }
     }
 
+    @Test
+    fun `test bancontact selection`() {
+        // curl https://api.stripe.com/v1/payment_intents   -u sk_test_....   -d amount=2000   -d currency=eur   -d automatic_payment_methods[enabled]=true
+        // us currencies: pi_3KmJfULu5o3P18Zp0N8pGkCk_secret_i14QVxRhDxOy9SuOvLwYxxJpg
+        // eur currencies: pi_3KmJgGLu5o3P18Zp0oFQ2T27_secret_MYVUs1roNidjWOF0CH0B63cMl
+//        createFragment(
+//            args = PaymentOptionContract.Args(
+//                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+//                paymentMethods = listOf(PaymentMethod.Bancontact),
+//                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+//                isGooglePayReady = false,
+//                newCard = null,
+//                statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+//                injectorKey = DUMMY_INJECTOR_KEY,
+//                enableLogging = false,
+//                productUsage = mock()
+//            )
+//        ) { fragment, _, viewModel ->
+//        }
+    }
+
     private fun createFragment(
         args: PaymentOptionContract.Args = PaymentOptionContract.Args(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
