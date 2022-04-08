@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,7 +17,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,7 +30,7 @@ import com.stripe.android.ui.core.elements.SectionCard
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
-internal const val PM_LIST_PADDING = 14.0f
+internal const val PM_LIST_PADDING = 17.0f
 
 @VisibleForTesting
 const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
@@ -56,10 +54,8 @@ internal fun PaymentMethodsUI(
     }
 
     BoxWithConstraints {
-        val resources = LocalContext.current.resources
         val viewWidth = calculateViewWidth(
-            dpToPx(resources.displayMetrics, this.maxWidth),
-            resources.displayMetrics,
+            this.maxWidth,
             paymentMethods.size
         )
 
@@ -92,31 +88,20 @@ internal fun PaymentMethodsUI(
 }
 
 internal fun calculateViewWidth(
-    maxWidth: Int,
-    displayMetrics: DisplayMetrics,
+    maxWidth: Dp,
     numberOfPaymentMethods: Int
 ): Dp {
-    val screenDensity = displayMetrics.density
-    val targetWidth = maxWidth - dpToPx(displayMetrics, PM_LIST_PADDING.dp * 2)
-    val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
+    val targetWidthDp = maxWidth - (PM_LIST_PADDING.dp * 2)
+    val minItemWidthDp = (100 + (2 * CARD_HORIZONTAL_PADDING)).dp
 
-    // if all items fit at min width, then span them across the sheet evenly filling it.
-    // otherwise the number of items visible should be a multiple of .5
-    val viewWidth =
-        if (minItemWidth * numberOfPaymentMethods < targetWidth) {
-            targetWidth / numberOfPaymentMethods
-        } else {
-            // numVisibleItems is incremented in steps of 0.5 items
-            // (1, 1.5, 2, 2.5, 3, ...)
-            val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-            targetWidth / numVisibleItems
-        }
+    val viewWidth = if ((minItemWidthDp * numberOfPaymentMethods) < targetWidthDp) {
+        targetWidthDp / numberOfPaymentMethods
+    } else {
+        val maxNumVisibleItemsAtMinimumSize = (targetWidthDp / minItemWidthDp).toInt()
+        targetWidthDp / maxNumVisibleItemsAtMinimumSize
+    }
 
-    return (viewWidth.toInt() / screenDensity).dp
-}
-
-internal fun dpToPx(displayMetrics: DisplayMetrics, dp: Dp): Int {
-    return (dp.value * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).toInt()
+    return viewWidth
 }
 
 @Composable
