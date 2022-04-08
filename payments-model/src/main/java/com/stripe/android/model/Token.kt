@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Token.Type
 import com.stripe.android.model.parsers.TokenJsonParser
@@ -13,7 +14,7 @@ import java.util.Date
  * secure manner. A Token representing this information is returned to you to use.
  */
 @Parcelize
-data class Token internal constructor(
+data class Token @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
 
     /**
      * The Token id
@@ -50,7 +51,9 @@ data class Token internal constructor(
      */
     val card: Card? = null
 ) : StripeModel, StripePaymentSource {
-    enum class Type(internal val code: String) {
+    enum class Type(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val code: String
+    ) {
         Card("card"),
         BankAccount("bank_account"),
         Pii("pii"),

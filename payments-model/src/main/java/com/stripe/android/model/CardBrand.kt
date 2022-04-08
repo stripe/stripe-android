@@ -2,13 +2,14 @@ package com.stripe.android.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
-import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
+import com.stripe.payments.model.R
 import java.util.regex.Pattern
 
 /**
  * A representation of supported card brands and related data
  */
+@Suppress("LongParameterList", "MaxLineLength")
 enum class CardBrand(
     val code: String,
     val displayName: String,
