@@ -120,7 +120,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         return (px / (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).dp
     }
 
-
     @Test
     fun `when isGooglePayEnabled=true should configure Google Pay button`() {
         createFragment { fragment, viewBinding, _ ->

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
@@ -17,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -55,7 +53,7 @@ internal fun PaymentMethodsUI(
         }
     }
 
-    BoxWithConstraints{
+    BoxWithConstraints {
         val viewWidth = calculateViewWidth(
             this.maxWidth,
             paymentMethods.size
@@ -99,8 +97,6 @@ internal fun calculateViewWidth(
     val viewWidth = if ((minItemWidthDp * numberOfPaymentMethods) < targetWidthDp) {
         targetWidthDp / numberOfPaymentMethods
     } else {
-        // numVisibleItems is incremented in steps of 0.5 items
-        // (1, 1.5, 2, 2.5, 3, ...)
         val maxNumVisibleItemsAtMinimumSize = (targetWidthDp / minItemWidthDp).toInt()
         targetWidthDp / maxNumVisibleItemsAtMinimumSize
     }

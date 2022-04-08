@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.FragmentScenario
@@ -12,27 +11,18 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -43,11 +33,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -66,7 +52,6 @@ internal class PaymentSheetAddPaymentMethodFragmentLpmTest : PaymentSheetViewMod
     override fun after() {
         super.after()
     }
-
 
     @Test
     fun `card payment method selection has the fields from formFieldValues`() {
@@ -96,7 +81,7 @@ internal class PaymentSheetAddPaymentMethodFragmentLpmTest : PaymentSheetViewMod
         assertThat(selection?.paymentMethodCreateParams?.toParamMap()).isEqualTo(
             mapOf(
                 "type" to "card",
-                
+
             )
         )
         assertThat(selection?.customerRequestedSave).isEqualTo(
@@ -111,7 +96,7 @@ internal class PaymentSheetAddPaymentMethodFragmentLpmTest : PaymentSheetViewMod
     }
 
     @Test
-    fun `test bancontact`(){
+    fun `test bancontact`() {
         createFragment(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         ) { fragment, viewBinding, _ ->
