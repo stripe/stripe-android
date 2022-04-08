@@ -74,6 +74,7 @@ class IdentityCameraScanFragmentTest {
     ) : IdentityCameraScanFragment(
         identityScanViewModelFactory, identityViewModelFactory
     ) {
+        override val fragmentId = R.id.IDScanFragment
         var currentState: IdentityScanState? = null
         var onCameraReadyIsCalled = false
 
@@ -92,6 +93,13 @@ class IdentityCameraScanFragmentTest {
 
         override fun updateUI(identityScanState: IdentityScanState) {
             currentState = identityScanState
+        }
+    }
+
+    @Test
+    fun `when viewCreated uploadedState is reset`() {
+        launchTestFragment().onFragment {
+            verify(mockIdentityViewModel).resetUploadedState()
         }
     }
 

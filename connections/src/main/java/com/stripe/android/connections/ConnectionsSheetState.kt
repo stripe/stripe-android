@@ -17,7 +17,8 @@ internal data class ConnectionsSheetState(
      */
     internal fun from(savedStateHandle: SavedStateHandle): ConnectionsSheetState {
         return copy(
-            manifest = savedStateHandle.get(KEY_MANIFEST)
+            manifest = savedStateHandle.get(KEY_MANIFEST) ?: manifest,
+            authFlowActive = savedStateHandle.get(KEY_AUTHFLOW_ACTIVE) ?: authFlowActive,
         )
     }
 
@@ -25,11 +26,15 @@ internal data class ConnectionsSheetState(
      * Saves the persistable fields of this state that changed to the given [SavedStateHandle]
      */
     internal fun to(savedStateHandle: SavedStateHandle, previousValue: ConnectionsSheetState) {
-        if (previousValue.manifest != manifest) savedStateHandle.set(KEY_MANIFEST, manifest)
+        if (previousValue.manifest != manifest)
+            savedStateHandle.set(KEY_MANIFEST, manifest)
+        if (previousValue.authFlowActive != authFlowActive)
+            savedStateHandle.set(KEY_AUTHFLOW_ACTIVE, authFlowActive)
     }
 
     companion object {
         private const val KEY_MANIFEST = "key_manifest"
+        private const val KEY_AUTHFLOW_ACTIVE = "key_authflow_active"
     }
 }
 

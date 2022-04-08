@@ -183,7 +183,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        _state.update { it.copy(authFlowActive = false) }
+        _state.updateAndPersist { it.copy(authFlowActive = false) }
         viewModelScope.launch {
             val manifest = _state.value.manifest
             when (intent?.data.toString()) {

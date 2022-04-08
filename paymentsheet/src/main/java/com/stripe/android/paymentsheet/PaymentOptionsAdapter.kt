@@ -88,11 +88,12 @@ internal class PaymentOptionsAdapter(
     fun setItems(
         config: FragmentConfig,
         paymentMethods: List<PaymentMethod>,
+        showGooglePay: Boolean,
         paymentSelection: PaymentSelection? = null
     ) {
         val items = listOfNotNull(
             Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady }
+            Item.GooglePay.takeIf { config.isGooglePayReady && showGooglePay }
         ) + sortedPaymentMethods(paymentMethods, config.savedSelection).map {
             Item.SavedPaymentMethod(it)
         }

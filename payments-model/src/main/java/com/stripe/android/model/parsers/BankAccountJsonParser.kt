@@ -1,11 +1,13 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.BankAccount
 import org.json.JSONObject
 
-internal class BankAccountJsonParser : ModelJsonParser<BankAccount> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class BankAccountJsonParser : ModelJsonParser<BankAccount> {
     override fun parse(json: JSONObject): BankAccount {
         return BankAccount(
             id = StripeJsonUtils.optString(json, FIELD_ID),
