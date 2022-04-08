@@ -21,6 +21,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -149,7 +150,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     sheetViewModel.updateSelection(
                         transformToPaymentSelection(
                             formFieldValues,
-                            formFragment.paramKeySpec,
                             sheetViewModel.getAddFragmentSelectedLpmValue()
                         )
                     )
@@ -234,29 +234,36 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         @VisibleForTesting
         internal fun transformToPaymentSelection(
             formFieldValues: FormFieldValues?,
-            paramKey: Map<String, Any?>,
             selectedPaymentMethodResources: SupportedPaymentMethod,
         ) = formFieldValues?.let {
-            transformToPaymentMethodCreateParams.transform(formFieldValues, paramKey)
-                ?.run {
-                    if (this.typeCode == "card") {
-                        PaymentSelection.New.Card(
-                            paymentMethodCreateParams = this,
-                            brand = CardBrand.fromCode(
-                                formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
-                            ),
-                            customerRequestedSave = formFieldValues.userRequestedReuse
+            transformToPaymentMethodCreateParams.transform(
+                formFieldValues.copy(
+                    fieldValuePairs = it.fieldValuePairs
+                        .filterNot { entry ->
+                            entry.key == IdentifierSpec.SaveForFutureUse ||
+                                entry.key == IdentifierSpec.CardBrand
+                        }
+                ),
+                selectedPaymentMethodResources.type
+            ).run {
+                if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
+                    PaymentSelection.New.Card(
+                        paymentMethodCreateParams = this,
+                        brand = CardBrand.fromCode(
+                            formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
+                        ),
+                        customerRequestedSave = formFieldValues.userRequestedReuse
 
-                        )
-                    } else {
-                        PaymentSelection.New.GenericPaymentMethod(
-                            selectedPaymentMethodResources.displayNameResource,
-                            selectedPaymentMethodResources.iconResource,
-                            this,
-                            customerRequestedSave = formFieldValues.userRequestedReuse
-                        )
-                    }
+                    )
+                } else {
+                    PaymentSelection.New.GenericPaymentMethod(
+                        selectedPaymentMethodResources.displayNameResource,
+                        selectedPaymentMethodResources.iconResource,
+                        this,
+                        customerRequestedSave = formFieldValues.userRequestedReuse
+                    )
                 }
+            }
         }
 
         @VisibleForTesting

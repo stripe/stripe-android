@@ -244,7 +244,7 @@ internal class TransformSpecToElementTest {
 
     companion object {
         val IDEAL_BANK_CONFIG = BankDropdownSpec(
-            IdentifierSpec.Generic("bank"),
+            IdentifierSpec.Generic("ideal[bank]"),
             R.string.ideal_bank,
             SupportedBankType.Ideal
         )

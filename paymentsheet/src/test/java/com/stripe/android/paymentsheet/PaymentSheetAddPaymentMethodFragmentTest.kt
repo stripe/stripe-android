@@ -518,15 +518,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         val selection =
             BaseAddPaymentMethodFragment.transformToPaymentSelection(
                 formFieldValues,
-                mapOf(
-                    "type" to "card",
-                    "card" to mapOf(
-                        "number" to null,
-                        "exp_month" to null,
-                        "exp_year" to null,
-                        "cvc" to null,
-                    )
-                ),
                 SupportedPaymentMethod.Card
             )
         assertThat(selection?.customerRequestedSave).isEqualTo(
@@ -552,9 +543,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         val selection =
             BaseAddPaymentMethodFragment.transformToPaymentSelection(
                 formFieldValues,
-                mapOf(
-                    "type" to "sofort"
-                ),
                 SupportedPaymentMethod.Sofort
             )
         assertThat(selection?.customerRequestedSave).isEqualTo(

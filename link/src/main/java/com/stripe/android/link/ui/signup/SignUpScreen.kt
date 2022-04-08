@@ -139,7 +139,7 @@ private fun EmailCollectionSection(
         SectionElementUI(
             enabled = signUpState != SignUpState.VerifyingEmail,
             element = SectionElement(
-                identifier = IdentifierSpec.Generic("email"),
+                identifier = IdentifierSpec.Email,
                 fields = listOf(emailElement),
                 controller = SectionController(
                     null,

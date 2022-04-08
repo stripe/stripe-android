@@ -51,10 +51,10 @@ internal class CardDetailsElement(
             controller.numberElement.identifier to number,
             controller.cvcElement.identifier to cvc,
             IdentifierSpec.CardBrand to FormFieldEntry(brand.code, true),
-            IdentifierSpec.Generic("exp_month") to expirationDate.copy(
+            IdentifierSpec.Generic("card[exp_month]") to expirationDate.copy(
                 value = month.toString()
             ),
-            IdentifierSpec.Generic("exp_year") to expirationDate.copy(
+            IdentifierSpec.Generic("card[exp_year]") to expirationDate.copy(
                 value = year.toString()
             )
         )

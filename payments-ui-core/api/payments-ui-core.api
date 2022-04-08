@@ -176,14 +176,6 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$PostalCode
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/ui/core/elements/IdentifierSpec$PreFilledParameterMap : com/stripe/android/ui/core/elements/IdentifierSpec {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$PreFilledParameterMap;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$SaveForFutureUse : com/stripe/android/ui/core/elements/IdentifierSpec {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -232,67 +224,54 @@ public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
 
 public final class com/stripe/android/ui/core/forms/AffirmSpecKt {
 	public static final fun getAffirmForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getAffirmParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
 	public static final fun getAfterpayClearpayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getAfterpayClearpayParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/AuBecsDebitSpecKt {
 	public static final fun getAuBecsDebitForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getAuBecsDebitParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
 	public static final fun getBancontactForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getBancontactParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/CardSpecKt {
 	public static final fun getCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getCardParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/EpsSpecKt {
 	public static final fun getEpsForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getEpsParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/GiropaySpecKt {
 	public static final fun getGiropayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getGiropayParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/IdealSpecKt {
 	public static final fun getIdealForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getIdealParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/KlarnaSpecKt {
 	public static final fun getKlarnaForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getKlarnaParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/P24SpecKt {
 	public static final fun getP24Form ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getP24ParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/PaypalSpecKt {
 	public static final fun getPaypalForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getPaypalParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/SepaDebitSpecKt {
 	public static final fun getSepaDebitForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getSepaDebitParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/SofortSpecKt {
 	public static final fun getSofortForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-	public static final fun getSofortParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {

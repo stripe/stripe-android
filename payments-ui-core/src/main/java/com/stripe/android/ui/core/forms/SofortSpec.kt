@@ -10,18 +10,6 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
-import com.stripe.android.ui.core.elements.billingParams
-
-internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
-    "country" to null,
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val SofortParamKey: MutableMap<String, Any?> = mutableMapOf(
-    "type" to "sofort",
-    "billing_details" to billingParams,
-    "sofort" to sofortParams
-)
 
 internal val sofortNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),

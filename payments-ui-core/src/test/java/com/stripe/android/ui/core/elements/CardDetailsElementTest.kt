@@ -39,10 +39,10 @@ class CardDetailsElementTest {
 
         Truth.assertThat(flowValues[flowValues.size - 1]).isEqualTo(
             listOf(
-                IdentifierSpec.Generic("number") to FormFieldEntry("4242424242424242", true),
-                IdentifierSpec.Generic("cvc") to FormFieldEntry("321", true),
-                IdentifierSpec.Generic("exp_month") to FormFieldEntry("1", true),
-                IdentifierSpec.Generic("exp_year") to FormFieldEntry("30", true),
+                IdentifierSpec.Generic("card[number]") to FormFieldEntry("4242424242424242", true),
+                IdentifierSpec.Generic("card[cvc]") to FormFieldEntry("321", true),
+                IdentifierSpec.Generic("card[exp_month]") to FormFieldEntry("1", true),
+                IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("30", true),
             )
         )
     }

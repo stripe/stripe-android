@@ -13,7 +13,7 @@ internal class CardDetailsController constructor(context: Context) : SectionFiel
     )
 
     val cvcElement = CvcElement(
-        IdentifierSpec.Generic("cvc"),
+        IdentifierSpec.Generic("card[cvc]"),
         CvcController(CvcConfig(), numberElement.controller.cardBrandFlow)
     )
 

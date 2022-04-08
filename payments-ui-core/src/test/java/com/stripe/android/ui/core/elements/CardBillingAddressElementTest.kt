@@ -39,7 +39,7 @@ internal class CardBillingAddressElementTest {
             "JP",
             listOf(
                 IbanElement(
-                    IdentifierSpec.Generic("iban"),
+                    IdentifierSpec.Generic("sepa_debit[iban]"),
                     SimpleTextFieldController(IbanConfig())
                 )
             )

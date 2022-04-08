@@ -17,7 +17,7 @@ class BsbElement(
         get() = identifierSpec
 
     internal val textElement: SimpleTextElement = SimpleTextElement(
-        identifier = IdentifierSpec.Generic("bsb_number"),
+        identifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]"),
         SimpleTextFieldController(BsbConfig(banks))
     )
 

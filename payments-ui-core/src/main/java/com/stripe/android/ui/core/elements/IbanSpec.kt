@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-object IbanSpec : SectionFieldSpec(IdentifierSpec.Generic("iban")) {
+object IbanSpec : SectionFieldSpec(IdentifierSpec.Generic("sepa_debit[iban]")) {
     fun transform(): SectionFieldElement =
         IbanElement(
             this.identifier,
