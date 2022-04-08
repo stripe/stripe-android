@@ -129,8 +129,8 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
-                is CardDetailsSpec -> it.transform(context)
-                is CardBillingSpec -> it.transform(addressRepository)
+                is CardDetailsSpec -> it.transform(context, initialValues)
+                is CardBillingSpec -> it.transform(addressRepository, initialValues)
                 is AuBankAccountNumberSpec -> it.transform()
             }
         }

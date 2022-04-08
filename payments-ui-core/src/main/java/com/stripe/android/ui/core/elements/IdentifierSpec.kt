@@ -50,4 +50,24 @@ sealed class IdentifierSpec(val value: String) : Parcelable {
     // Unique extracting functionality
     @Parcelize
     object SaveForFutureUse : IdentifierSpec("save_for_future_use")
+
+    companion object {
+        fun get(value: String) = when (value) {
+            CardBrand.value -> CardBrand
+            CardNumber.value -> CardNumber
+            City.value -> City
+            Country.value -> Country
+            Email.value -> Email
+            Line1.value -> Line1
+            Line2.value -> Line2
+            Name.value -> Name
+            Phone.value -> Phone
+            PostalCode.value -> PostalCode
+            SaveForFutureUse.value -> SaveForFutureUse
+            State.value -> State
+            else -> {
+                Generic(value)
+            }
+        }
+    }
 }

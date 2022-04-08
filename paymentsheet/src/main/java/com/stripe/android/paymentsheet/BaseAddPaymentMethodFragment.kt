@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -206,7 +207,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
-                injectorKey = sheetViewModel.injectorKey
+                injectorKey = sheetViewModel.injectorKey,
+                initialPaymentMethodCreateParams =
+                sheetViewModel.newLpm?.paymentMethodCreateParams.takeIf { sheetViewModel.selection.value == null }
             )
         )
 
@@ -273,7 +276,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            @InjectorKey injectorKey: String
+            @InjectorKey injectorKey: String,
+            initialPaymentMethodCreateParams: PaymentMethodCreateParams?
         ): FormFragmentArguments {
 
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
@@ -285,7 +289,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
-                injectorKey = injectorKey
+                injectorKey = injectorKey,
+                initialPaymentMethodCreateParams = initialPaymentMethodCreateParams
             )
         }
     }

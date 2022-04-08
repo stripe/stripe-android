@@ -9,10 +9,12 @@ internal data class CardBillingSpec(
     val countryCodes: Set<String>
 ) : SectionFieldSpec(identifier) {
     fun transform(
-        addressRepository: AddressFieldElementRepository
+        addressRepository: AddressFieldElementRepository,
+        initialValues: Map<IdentifierSpec, String?>
     ) = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
-        addressRepository,
-        countryCodes = countryCodes
+        addressFieldRepository = addressRepository,
+        countryCodes = countryCodes,
+        rawValuesMap = initialValues
     )
 }
