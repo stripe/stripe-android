@@ -19,6 +19,7 @@ if (System.getenv("JITPACK")) {
 }
 
 dependencies {
+    implementation project(":link")
     implementation project(":payments-core")
     implementation project(':payments-ui-core')
 
@@ -58,6 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
+    testImplementation project(':link')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
@@ -126,6 +128,8 @@ android {
     }
 
     kotlinOptions {
+        // Needed to support @JvmDefault inheritance in ViewModels
+        freeCompilerArgs = ["-Xjvm-default=enable"]
         jvmTarget = "1.8"
     }
 

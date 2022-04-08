@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -31,23 +30,10 @@ class FlowControllerFactoryTest {
 
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    private lateinit var activityScenario: ActivityScenario<*>
-    private lateinit var activity: ComponentActivity
-
     @BeforeTest
     fun before() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-
         Dispatchers.setMain(testDispatcher)
-
-        activityScenarioFactory
-            .createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                this.activityScenario = activityScenario
-                activityScenario.onActivity { activity ->
-                    this.activity = activity
-                }
-            }
     }
 
     @AfterTest
@@ -57,9 +43,16 @@ class FlowControllerFactoryTest {
 
     @Test
     fun `create() should return a FlowController instance`() {
-        val factory = createFactory(activity)
-        assertThat(factory.create())
-            .isNotNull()
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .moveToState(Lifecycle.State.CREATED)
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    val factory = createFactory(activity)
+                    assertThat(factory.create())
+                        .isNotNull()
+                }
+            }
     }
 
     @Test

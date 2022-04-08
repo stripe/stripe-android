@@ -12,8 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:animateLayoutChanges="true"
-        android:background="?colorSurface"
         android:orientation="vertical"
+        android:background="?colorSurface"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -28,9 +28,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?colorSurface"
+                android:paddingEnd="12dp"
                 app:contentInsetStart="0dp"
                 app:contentInsetStartWithNavigation="0dp"
-                android:paddingEnd="12dp"
                 tools:ignore="RtlSymmetry">
 
                 <TextView
@@ -62,6 +62,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:animateLayoutChanges="true">
+
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"/>
 
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/fragment_container"
