@@ -14,6 +14,8 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -38,18 +40,20 @@ internal class PaymentOptionsViewModel @Inject constructor(
     logger: Logger,
     @InjectorKey injectorKey: String,
     resourceRepository: ResourceRepository,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
+    application = application,
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
-    application = application,
     logger = logger,
     injectorKey = injectorKey,
     resourceRepository = resourceRepository,
-    savedStateHandle = savedStateHandle
+    savedStateHandle = savedStateHandle,
+    linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -71,10 +75,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 } ?: false
 
     init {
-        savedStateHandle.set(SAVE_GOOGLE_PAY_READY, args.isGooglePayReady)
+        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
+        setupLink(args.stripeIntent)
         setStripeIntent(args.stripeIntent)
-        savedStateHandle.set(SAVE_PAYMENT_METHODS, args.paymentMethods)
-        savedStateHandle.set(SAVE_PROCESSING, false)
+        savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
+        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     override fun onFatal(throwable: Throwable) {
@@ -99,6 +104,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 is PaymentSelection.New -> processNewCard(paymentSelection)
             }
         }
+    }
+
+    override fun onLinkLaunched() {
+        _processing.value = true
+    }
+
+    override fun onLinkPaymentResult(result: LinkActivityResult) {
+        _processing.value = false
     }
 
     private fun processExistingCard(paymentSelection: PaymentSelection) {
@@ -165,7 +178,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
+        override fun <T : ViewModel> create(
             key: String,
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
