@@ -4,12 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.R
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -25,6 +23,7 @@ internal open class PassportUploadFragment(
     override val frontTextRes = R.string.passport
     override val frontCheckMarkContentDescription = R.string.passport_selected
     override val frontScanType = IdentityScanState.ScanType.PASSPORT
+    override val fragmentId = R.id.passportUploadFragment
 
     override fun showFrontDone(latestState: IdentityViewModel.UploadState) {
         super.showFrontDone(latestState)
@@ -34,9 +33,8 @@ internal open class PassportUploadFragment(
             lifecycleScope.launch {
                 runCatching {
                     val frontResult = requireNotNull(latestState.frontHighResResult.data)
-                    postVerificationPageDataAndMaybeSubmit(
-                        identityViewModel = identityViewModel,
-                        collectedDataParam = CollectedDataParam(
+                    trySubmit(
+                        CollectedDataParam(
                             idDocumentFront = DocumentUploadParam(
                                 highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
                                     "front uploaded file id is null"
@@ -44,9 +42,7 @@ internal open class PassportUploadFragment(
                                 uploadMethod = frontResult.uploadMethod
                             ),
                             idDocumentType = CollectedDataParam.Type.PASSPORT
-                        ),
-                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                        shouldNotSubmit = { false }
+                        )
                     )
                 }.onFailure {
                     Log.d(TAG, "fail to submit uploaded files: $it")

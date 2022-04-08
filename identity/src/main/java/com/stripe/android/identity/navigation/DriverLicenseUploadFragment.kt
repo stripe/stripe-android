@@ -19,4 +19,5 @@ internal class DriverLicenseUploadFragment(
     override var backCheckMarkContentDescription: Int? = R.string.back_of_dl_selected
     override val frontScanType = IdentityScanState.ScanType.DL_FRONT
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.DL_BACK
+    override val fragmentId = R.id.driverLicenseUploadFragment
 }
