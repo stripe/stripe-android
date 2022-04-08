@@ -106,8 +106,11 @@ done
 echo -------------------------------------------
 
 # run test commands for affected_modules
+test_command="./gradlew"
 for module in $affected_modules
 do
-    echo "./gradlew :${module}:testDebugUnitTest"
-    eval "./gradlew :${module}:testDebugUnitTest"
+  test_command="$test_command :${module}:testDebugUnitTest"
 done
+
+echo $test_command
+eval $test_command
