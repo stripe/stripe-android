@@ -46,7 +46,7 @@ class PrimaryButtonTest {
         primaryButton.updateState(
             PrimaryButton.State.Ready
         )
-        assertThat((primaryButton.background as GradientDrawable).color).isEqualTo(ColorStateList.valueOf(Color.BLACK))
+        assertThat((primaryButton.background as GradientDrawable).color).isEqualTo(ColorStateList.valueOf(Color.WHITE))
     }
 
     @Test
