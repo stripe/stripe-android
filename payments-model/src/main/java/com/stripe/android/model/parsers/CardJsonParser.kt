@@ -51,6 +51,7 @@ class CardJsonParser : ModelJsonParser<Card> {
         )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         internal const val VALUE_CARD = "card"

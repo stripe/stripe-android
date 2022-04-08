@@ -23,6 +23,7 @@ sealed class CardNumber {
 
         val isValidLuhn = CardUtils.isValidLuhnNumber(normalized)
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
                 normalized.length == panLength &&
@@ -43,6 +44,7 @@ sealed class CardNumber {
          * `"424242"` with pan length `16` will return `"4242 42"`;
          * `"4242424242424242"` with pan length `14` will return `"4242 424242 4242"`
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun getFormatted(
             panLength: Int = DEFAULT_PAN_LENGTH
         ) = formatNumber(panLength)
@@ -81,9 +83,11 @@ sealed class CardNumber {
                 .joinToString(" ")
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun isPartialEntry(panLength: Int) =
             (normalized.length != panLength) && normalized.isNotBlank()
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun isPossibleCardBrand(): Boolean {
             return normalized.isNotBlank() &&
                 CardBrand.getCardBrands(normalized).first() != CardBrand.Unknown
