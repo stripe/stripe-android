@@ -74,11 +74,11 @@ public abstract interface class com/stripe/android/connections/ConnectionsSheetR
 }
 
 public final class com/stripe/android/connections/ConnectionsSheetViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/connections/ConnectionsSheetViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/connections/ConnectionsSheetViewModel_Factory;
 	public fun get ()Lcom/stripe/android/connections/ConnectionsSheetViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/connections/ConnectionsSheetContract$Args;Lcom/stripe/android/connections/domain/GenerateLinkAccountSessionManifest;Lcom/stripe/android/connections/domain/FetchLinkAccountSession;Lcom/stripe/android/connections/analytics/ConnectionsEventReporter;)Lcom/stripe/android/connections/ConnectionsSheetViewModel;
+	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/connections/ConnectionsSheetContract$Args;Lcom/stripe/android/connections/domain/GenerateLinkAccountSessionManifest;Lcom/stripe/android/connections/domain/FetchLinkAccountSession;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/connections/analytics/ConnectionsEventReporter;)Lcom/stripe/android/connections/ConnectionsSheetViewModel;
 }
 
 public final class com/stripe/android/connections/analytics/DefaultConnectionsEventReporter_Factory : dagger/internal/Factory {
@@ -552,40 +552,6 @@ public final class com/stripe/android/connections/model/LinkAccountSession$$seri
 }
 
 public final class com/stripe/android/connections/model/LinkAccountSession$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/connections/model/LinkAccountSessionManifest {
-	public static final field Companion Lcom/stripe/android/connections/model/LinkAccountSessionManifest$Companion;
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/connections/model/LinkAccountSessionManifest;
-	public static synthetic fun copy$default (Lcom/stripe/android/connections/model/LinkAccountSessionManifest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/connections/model/LinkAccountSessionManifest;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCancelUrl ()Ljava/lang/String;
-	public final fun getHostedAuthUrl ()Ljava/lang/String;
-	public final fun getSuccessUrl ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/connections/model/LinkAccountSessionManifest;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
-}
-
-public final class com/stripe/android/connections/model/LinkAccountSessionManifest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lcom/stripe/android/connections/model/LinkAccountSessionManifest$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/connections/model/LinkAccountSessionManifest;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/connections/model/LinkAccountSessionManifest;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/connections/model/LinkAccountSessionManifest$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
