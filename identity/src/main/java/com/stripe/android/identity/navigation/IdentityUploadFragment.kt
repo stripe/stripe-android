@@ -12,22 +12,27 @@ import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavArgument
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
-import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -76,6 +81,36 @@ internal abstract class IdentityUploadFragment(
         identityUploadViewModel.registerActivityResultCaller(this)
     }
 
+    /**
+     * Check how this fragment is navigated from and reset uploaded state when needed.
+     *
+     * The upload state should only be kept when scanning fails and user is redirected to this
+     * fragment through CouldNotCaptureFragment, in which case it's possible that the front is
+     * already scanned and uploaded, and this fragment should correctly updating the front uploaded UI.
+     *
+     * For all other cases the upload state should be reset in order to reupload both front and back.
+     */
+    private fun maybeResetUploadedState() {
+        val isFromNavigateUp: Boolean = findNavController().currentDestination?.arguments?.get(
+            ARG_IS_NAVIGATED_UP_TO
+        )?.defaultValue as? Boolean == true
+
+        val isPreviousEntryCouldNotCapture =
+            findNavController().previousBackStackEntry?.destination?.id == R.id.couldNotCaptureFragment
+
+        if (isFromNavigateUp || !isPreviousEntryCouldNotCapture) {
+            identityViewModel.resetUploadedState()
+        }
+
+        // flip the argument to indicate it's no longer navigated through back pressed
+        findNavController().currentDestination?.addArgument(
+            ARG_IS_NAVIGATED_UP_TO,
+            NavArgument.Builder()
+                .setDefaultValue(false)
+                .build()
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -118,6 +153,12 @@ internal abstract class IdentityUploadFragment(
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        maybeResetUploadedState()
+        collectUploadedStateAndUpdateUI()
+    }
+
     private fun checkBackFields(
         nonNullBlock: (String, String, IdentityScanState.ScanType) -> Unit,
         nullBlock: () -> Unit
@@ -145,85 +186,25 @@ internal abstract class IdentityUploadFragment(
             }
         }
 
-    protected fun observeForFrontUploaded() {
-        identityViewModel.frontHighResUploaded.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    showFrontDone(it.data)
-                }
-                Status.ERROR -> {
-                    Log.e(TAG, "error uploading front image: $it")
-                    navigateToDefaultErrorFragment()
-                }
-                Status.LOADING -> {
-                    showFrontUploading()
-                }
-            }
-        }
-    }
-
-    protected fun observeForBackUploaded() {
-        identityViewModel.backHighResUploaded.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    showBackDone()
-                }
-                Status.ERROR -> {
-                    Log.e(TAG, "error uploading front image: $it")
-                    navigateToDefaultErrorFragment()
-                }
-                Status.LOADING -> {
-                    showBackUploading()
-                }
-            }
-        }
-    }
-
-    protected fun enableKontinueWhenBothUploaded() {
-        identityViewModel.highResUploaded.observe(viewLifecycleOwner) { frontBackPair ->
-            when (frontBackPair.status) {
-                Status.SUCCESS -> {
-                    binding.kontinue.isEnabled = true
-                    binding.kontinue.setOnClickListener {
-                        binding.kontinue.toggleToLoading()
-                        lifecycleScope.launch {
-                            runCatching {
-                                requireNotNull(frontBackPair.data)
-                                val front = frontBackPair.data.first
-                                val back = frontBackPair.data.second
-
-                                postVerificationPageDataAndMaybeSubmit(
-                                    identityViewModel = identityViewModel,
-                                    collectedDataParam = CollectedDataParam(
-                                        idDocumentFront = DocumentUploadParam(
-                                            highResImage = requireNotNull(front.uploadedStripeFile.id) {
-                                                "front uploaded file id is null"
-                                            },
-                                            uploadMethod = front.uploadMethod
-                                        ),
-                                        idDocumentBack = DocumentUploadParam(
-                                            highResImage = requireNotNull(back.uploadedStripeFile.id) {
-                                                "back uploaded file id is null"
-                                            },
-                                            uploadMethod = back.uploadMethod
-                                        ),
-                                        idDocumentType = frontScanType.toType()
-                                    ),
-                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                    shouldNotSubmit = { false }
-                                )
-                            }.onFailure {
-                                Log.d(TAG, "fail to submit uploaded files: $it")
-                                navigateToDefaultErrorFragment()
-                            }
+    private fun collectUploadedStateAndUpdateUI() {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                identityViewModel.uploadState.collectLatest { latestState ->
+                    if (latestState.hasError()) {
+                        Log.e(TAG, "Fail to upload files: ${latestState.getError()}")
+                        navigateToDefaultErrorFragment()
+                    } else {
+                        if (latestState.isFrontHighResUploaded()) {
+                            showFrontDone(latestState)
+                        }
+                        if (latestState.isBackHighResUploaded()) {
+                            showBackDone()
+                        }
+                        if (latestState.isHighResUploaded()) {
+                            showBothDone(latestState)
                         }
                     }
                 }
-                Status.ERROR -> {
-                    Log.d(TAG, "highResUploaded posts an Error: $frontBackPair")
-                    navigateToDefaultErrorFragment()
-                }
-                Status.LOADING -> {} // no-op
             }
         }
     }
@@ -326,6 +307,11 @@ internal abstract class IdentityUploadFragment(
         uploadMethod: DocumentUploadParam.UploadMethod,
         isFront: Boolean
     ) {
+        if (isFront) {
+            showFrontUploading()
+        } else {
+            showBackUploading()
+        }
         observeForDocCapturePage { docCapturePage ->
             identityViewModel.uploadManualResult(
                 uri = uri,
@@ -342,7 +328,7 @@ internal abstract class IdentityUploadFragment(
         binding.finishedCheckMarkFront.visibility = View.GONE
     }
 
-    protected open fun showFrontDone(frontResult: IdentityViewModel.UploadedResult?) {
+    protected open fun showFrontDone(latestState: IdentityViewModel.UploadState) {
         binding.selectFront.visibility = View.GONE
         binding.progressCircularFront.visibility = View.GONE
         binding.finishedCheckMarkFront.visibility = View.VISIBLE
@@ -358,6 +344,44 @@ internal abstract class IdentityUploadFragment(
         binding.selectBack.visibility = View.GONE
         binding.progressCircularBack.visibility = View.GONE
         binding.finishedCheckMarkBack.visibility = View.VISIBLE
+    }
+
+    private fun showBothDone(latestState: IdentityViewModel.UploadState) {
+        binding.kontinue.isEnabled = true
+        binding.kontinue.setOnClickListener {
+            binding.kontinue.toggleToLoading()
+            lifecycleScope.launch {
+                runCatching {
+                    val front =
+                        requireNotNull(latestState.frontHighResResult.data)
+                    val back =
+                        requireNotNull(latestState.backHighResResult.data)
+                    postVerificationPageDataAndMaybeSubmit(
+                        identityViewModel = identityViewModel,
+                        collectedDataParam = CollectedDataParam(
+                            idDocumentFront = DocumentUploadParam(
+                                highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                    "front uploaded file id is null"
+                                },
+                                uploadMethod = front.uploadMethod
+                            ),
+                            idDocumentBack = DocumentUploadParam(
+                                highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                    "back uploaded file id is null"
+                                },
+                                uploadMethod = back.uploadMethod
+                            ),
+                            idDocumentType = frontScanType.toType()
+                        ),
+                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                        shouldNotSubmit = { false }
+                    )
+                }.onFailure {
+                    Log.d(TAG, "fail to submit uploaded files: $it")
+                    navigateToDefaultErrorFragment()
+                }
+            }
+        }
     }
 
     companion object {

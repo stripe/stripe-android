@@ -35,7 +35,8 @@ internal class IDScanFragment(
                     startScanning(ID_BACK)
                 }
                 ID_BACK -> {
-                    observeAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
+                    continueButton.toggleToLoading()
+                    collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
                 }
                 else -> {
                     Log.e(

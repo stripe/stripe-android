@@ -7,7 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
@@ -29,12 +28,13 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -43,6 +43,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -59,12 +60,6 @@ internal class IDScanFragmentTest {
 
     private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
-    private val mockBothUploaded: PairMediatorLiveData<Pair<UploadedResult, UploadedResult>> =
-        mock()
-    private val bothUploadedObserverCaptor =
-        argumentCaptor<Observer<Resource<Pair<
-                        Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
-                        >>>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
@@ -74,10 +69,29 @@ internal class IDScanFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.pageAndModel).thenReturn(mockPageAndModel)
-        whenever(it.bothUploaded).thenReturn(mockBothUploaded)
+
+    private val uploadState =
+        MutableStateFlow(IdentityViewModel.UploadState())
+
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { pageAndModel } doReturn mockPageAndModel
+        on { uploadState } doReturn uploadState
     }
+
+    private val errorUploadState = mock<IdentityViewModel.UploadState> {
+        on { hasError() } doReturn true
+    }
+
+    private val anyLoadingUploadState = mock<IdentityViewModel.UploadState> {
+        on { isAnyLoading() } doReturn true
+    }
+
+    private val bothUploadedUploadState = IdentityViewModel.UploadState(
+        frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT),
+        frontLowResResult = Resource.success(FRONT_LOW_RES_RESULT),
+        backHighResResult = Resource.success(BACK_HIGH_RES_RESULT),
+        backLowResResult = Resource.success(BACK_LOW_RES_RESULT)
+    )
 
     @Before
     fun simulateModelDownloaded() {
@@ -155,14 +169,9 @@ internal class IDScanFragmentTest {
         simulateBothSidesScanned { _, _ ->
             runBlocking {
                 // mock bothUploaded success
-                bothUploadedObserverCaptor.firstValue.onChanged(
-                    Resource.success(
-                        Pair(
-                            Pair(FRONT_HIGH_RES_RESULT, FRONT_LOW_RES_RESULT),
-                            Pair(BACK_HIGH_RES_RESULT, BACK_LOW_RES_RESULT),
-                        )
-                    )
-                )
+                uploadState.update {
+                    bothUploadedUploadState
+                }
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
@@ -187,9 +196,9 @@ internal class IDScanFragmentTest {
     fun `when both sides are scanned but files uploaded failed, clicking button navigate to error`() {
         simulateBothSidesScanned { navController, _ ->
             // mock bothUploaded error
-            bothUploadedObserverCaptor.firstValue.onChanged(
-                Resource.error()
-            )
+            uploadState.update {
+                errorUploadState
+            }
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -200,10 +209,9 @@ internal class IDScanFragmentTest {
     fun `when both sides are scanned and files are being uploaded, clicking button toggles loading state`() {
         simulateBothSidesScanned { _, binding ->
             // mock bothUploaded loading
-            bothUploadedObserverCaptor.firstValue.onChanged(
-                Resource.loading()
-            )
-
+            uploadState.update {
+                anyLoadingUploadState
+            }
             assertThat(
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).isEnabled
             ).isFalse()
@@ -419,8 +427,6 @@ internal class IDScanFragmentTest {
 
             // click continue, navigates
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
-
-            verify(mockBothUploaded).observe(any(), bothUploadedObserverCaptor.capture())
 
             afterScannedBlock(navController, binding)
         }

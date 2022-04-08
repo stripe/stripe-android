@@ -96,6 +96,13 @@ class IdentityCameraScanFragmentTest {
     }
 
     @Test
+    fun `when viewCreated uploadedState is reset`() {
+        launchTestFragment().onFragment {
+            verify(mockIdentityViewModel).resetUploadedState()
+        }
+    }
+
+    @Test
     fun `when page or model is not ready exception is thrown`() {
         launchTestFragment().onFragment {
             assertFailsWith<InvalidResponseException> {

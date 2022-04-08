@@ -141,4 +141,9 @@ internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
  */
 internal const val ARG_SHOULD_SHOW_CHOOSE_PHOTO = "shouldShowChoosePhoto"
 
+/**
+ * Navigation Argument to indicate if the current Fragment is reached through navigateUp.
+ */
+internal const val ARG_IS_NAVIGATED_UP_TO = "isNavigatedUpTo"
+
 private const val TAG = "NAVIGATION_UTIL"

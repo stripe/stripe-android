@@ -1,8 +1,6 @@
 package com.stripe.android.identity.navigation
 
-import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.R
@@ -18,7 +16,7 @@ import kotlinx.coroutines.launch
 /**
  * Fragment to upload passport.
  */
-internal class PassportUploadFragment(
+internal open class PassportUploadFragment(
     identityUploadViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityUploadFragment(identityUploadViewModelFactory, identityViewModelFactory) {
@@ -28,23 +26,14 @@ internal class PassportUploadFragment(
     override val frontCheckMarkContentDescription = R.string.passport_selected
     override val frontScanType = IdentityScanState.ScanType.PASSPORT
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        observeForFrontUploaded()
-    }
-
-    override fun showFrontDone(frontResult: IdentityViewModel.UploadedResult?) {
-        super.showFrontDone(frontResult)
-        enableKontinueWhenFrontUploaded(frontResult)
-    }
-
-    private fun enableKontinueWhenFrontUploaded(frontResult: IdentityViewModel.UploadedResult?) {
+    override fun showFrontDone(latestState: IdentityViewModel.UploadState) {
+        super.showFrontDone(latestState)
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
             binding.kontinue.toggleToLoading()
             lifecycleScope.launch {
                 runCatching {
-                    requireNotNull(frontResult)
+                    val frontResult = requireNotNull(latestState.frontHighResResult.data)
                     postVerificationPageDataAndMaybeSubmit(
                         identityViewModel = identityViewModel,
                         collectedDataParam = CollectedDataParam(
