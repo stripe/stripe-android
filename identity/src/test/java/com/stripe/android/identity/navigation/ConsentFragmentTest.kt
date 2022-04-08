@@ -149,7 +149,7 @@ internal class ConsentFragmentTest {
     @Test
     fun `when waiting verificationPage UI shows progress circular`() {
         launchConsentFragment { binding, _ ->
-            assertThat(binding.loadings.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.loadings.visibility).isEqualTo(View.GONE)
             assertThat(binding.texts.visibility).isEqualTo(View.GONE)
             assertThat(binding.buttons.visibility).isEqualTo(View.GONE)
         }

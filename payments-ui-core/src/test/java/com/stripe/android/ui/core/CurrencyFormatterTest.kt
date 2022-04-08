@@ -37,7 +37,7 @@ class CurrencyFormatterTest {
                 123412L,
                 Currency.getInstance("USD")
             )
-        ).isEqualTo("$1,234.12")
+        ).isEqualTo("$1,234.13")
     }
 
     @Test
