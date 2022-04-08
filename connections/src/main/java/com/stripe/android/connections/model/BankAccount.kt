@@ -1,5 +1,6 @@
 package com.stripe.android.connections.model
 
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
@@ -7,6 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class BankAccount(
 
     @SerialName(value = "id") @Required val id: String,
