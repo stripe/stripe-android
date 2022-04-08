@@ -57,7 +57,6 @@
 
                 <ImageView
                     android:id="@+id/merchant_logo"
-                    android:src="@drawable/ic_baseline_question_mark_32"
                     android:layout_width="32dp"
                     android:layout_height="32dp" />
 
