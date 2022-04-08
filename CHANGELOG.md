@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [FIXED] [4840](https://github.com/stripe/stripe-android/pull/4840) Multi-step now shows the last 4 of the card number instead of 'card'.
+* [FIXED] [4847](https://github.com/stripe/stripe-android/pull/4847) Fix the width of the PaymentSheet payment method selector.
 
 ## 20.0.0 - 2022-04-04
 This release patches on a crash on PaymentLauncher, updates the package name of some public classes,

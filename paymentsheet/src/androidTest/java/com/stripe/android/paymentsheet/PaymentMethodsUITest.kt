@@ -61,7 +61,7 @@ internal class PaymentMethodsUITest {
         //     composeTestRule.activity.resources.displayMetrics,
         //     paymentMethods.size
         // ) - (CARD_HORIZONTAL_PADDING.dp * 2)
-        bancontact.assertWidthIsEqualTo(109.454544.dp)
+        bancontact.assertWidthIsEqualTo(107.27273.dp)
     }
 
     @Test
