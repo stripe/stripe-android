@@ -96,7 +96,8 @@ internal open class PaymentSheetViewModelTestInjection {
             injectorKey,
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            }
+            },
+            linkPaymentLauncherFactory = mock()
         )
     }
 

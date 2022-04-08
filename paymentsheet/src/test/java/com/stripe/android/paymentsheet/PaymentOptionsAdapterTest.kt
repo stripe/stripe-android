@@ -219,7 +219,8 @@ class PaymentOptionsAdapterTest {
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
                 ),
-                paymentMethods
+                paymentMethods,
+                true
             )
         }
 
@@ -240,6 +241,7 @@ class PaymentOptionsAdapterTest {
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
                 ),
                 paymentMethods,
+                true,
                 PaymentSelection.Saved(selectedPaymentMethod)
             )
         }
@@ -261,6 +263,7 @@ class PaymentOptionsAdapterTest {
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
                 ),
                 paymentMethods,
+                true,
                 PaymentSelection.Saved(selectedPaymentMethod)
             )
         }
@@ -290,7 +293,7 @@ class PaymentOptionsAdapterTest {
         paymentMethods: List<PaymentMethod> = this.paymentMethods
     ): PaymentOptionsAdapter {
         return createAdapter().also {
-            it.setItems(fragmentConfig, paymentMethods)
+            it.setItems(fragmentConfig, paymentMethods, true)
         }
     }
 

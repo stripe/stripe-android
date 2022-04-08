@@ -8,9 +8,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -31,14 +29,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataColl
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AnimationConstants
-import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.PaymentsThemeConfig
-import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.isSystemDarkTheme
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -66,39 +59,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
 
         val paymentMethods = sheetViewModel.supportedPaymentMethods
-        viewBinding.googlePayDivider.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val visibility by sheetViewModel.googlePayDividerVisibilility.observeAsState(false)
-                if (visibility) {
-                    GooglePayDividerUi(
-                        context.resources.getString(
-                            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
-                                paymentMethods.size == 1
-                            ) {
-                                R.string.stripe_paymentsheet_or_pay_with_card
-                            } else {
-                                R.string.stripe_paymentsheet_or_pay_using
-                            }
-                        )
-                    )
-                }
-            }
-        }
 
-        viewBinding.addPaymentMethodHeader.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val headerVisibility = sheetViewModel.headerVisibilility.observeAsState(true)
-                if (headerVisibility.value) {
-                    H4Text(
-                        text = stringResource(
-                            R.string.stripe_paymentsheet_add_payment_method_title
-                        )
-                    )
-                }
-            }
-        }
+        sheetViewModel.headerText.value =
+            getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
             sheetViewModel.getAddFragmentSelectedLpm().value
@@ -135,10 +98,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
-
-        val isSystemDarkMode = context?.isSystemDarkTheme() ?: false
-        val surfaceColor = PaymentsThemeConfig.colors(isSystemDarkMode).surface
-        viewBinding.googlePayButton.setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
     }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {
