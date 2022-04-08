@@ -170,7 +170,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * and reopen the card view. It is used on the Payment Options sheet similar to what is
      * described above, and when you have an unsaved card.
      */
-    abstract var newCard: PaymentSelection.New.Card?
+    abstract var newLpm: PaymentSelection.New?
 
     abstract fun onFatal(throwable: Throwable)
 

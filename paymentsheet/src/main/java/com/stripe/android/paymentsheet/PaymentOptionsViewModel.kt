@@ -57,7 +57,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
-    override var newCard = args.newCard
+    override var newLpm = args.newLpm
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
@@ -66,7 +66,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val shouldTransitionToUnsavedCard: Boolean
         get() =
             !hasTransitionToUnsavedCard &&
-                (newCard as? PaymentSelection.New)?.let {
+                newLpm?.let {
                     it.customerRequestedSave != PaymentSelection.CustomerRequestedSave.RequestReuse
                 } ?: false
 

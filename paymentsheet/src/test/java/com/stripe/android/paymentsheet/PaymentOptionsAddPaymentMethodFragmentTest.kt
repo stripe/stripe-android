@@ -108,7 +108,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
-            newCard = null,
+            newLpm = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,

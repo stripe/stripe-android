@@ -29,7 +29,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -133,7 +132,7 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = PaymentOptionsViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newLpm = null),
             prefsRepositoryFactory = { prefsRepository },
             eventReporter = eventReporter,
             customerRepository = customerRepository,
@@ -161,7 +160,7 @@ internal class PaymentOptionsViewModelTest {
     fun `resolveTransitionTarget new card saved`() {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-                newCard = NEW_CARD_PAYMENT_SELECTION.copy(
+                newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
                 )
             ),
@@ -192,7 +191,7 @@ internal class PaymentOptionsViewModelTest {
     fun `resolveTransitionTarget new card NOT saved`() {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-                newCard = NEW_CARD_PAYMENT_SELECTION.copy(
+                newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             ),
@@ -272,7 +271,7 @@ internal class PaymentOptionsViewModelTest {
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isGooglePayReady = true,
-            newCard = null,
+            newLpm = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
