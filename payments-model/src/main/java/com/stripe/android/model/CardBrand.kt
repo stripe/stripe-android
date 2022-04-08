@@ -2,8 +2,8 @@ package com.stripe.android.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
-import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
+import com.stripe.payments.model.R
 import java.util.regex.Pattern
 
 /**
