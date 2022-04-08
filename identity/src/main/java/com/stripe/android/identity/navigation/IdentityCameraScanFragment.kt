@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -54,6 +55,9 @@ internal abstract class IdentityCameraScanFragment(
 ) : Fragment() {
     protected val identityScanViewModel: IdentityScanViewModel by viewModels { identityCameraScanViewModelFactory }
     protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
+
+    @get:IdRes
+    protected abstract val fragmentId: Int
 
     @VisibleForTesting
     internal lateinit var cameraAdapter: Camera1Adapter
@@ -264,6 +268,7 @@ internal abstract class IdentityCameraScanFragment(
                                             backHighResResult = requireNotNull(it.backHighResResult.data),
                                             backLowResResult = requireNotNull(it.backLowResResult.data)
                                         ),
+                                        fromFragment = fragmentId,
                                         clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
                                         shouldNotSubmit = { false }
                                     )

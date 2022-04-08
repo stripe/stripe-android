@@ -19,6 +19,8 @@ internal class IDScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val fragmentId = R.id.IDScanFragment
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (shouldStartFromBack()) {

@@ -27,6 +27,8 @@ internal class PassportScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val fragmentId = R.id.passportScanFragment
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         headerTitle.text = requireContext().getText(R.string.passport)
@@ -66,6 +68,7 @@ internal class PassportScanFragment(
                                             frontLowResResult = requireNotNull(it.frontLowResResult.data)
                                         ),
                                         clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                        fromFragment = R.id.passportScanFragment,
                                         shouldNotSubmit = { false }
                                     )
                                 }.onFailure { throwable ->

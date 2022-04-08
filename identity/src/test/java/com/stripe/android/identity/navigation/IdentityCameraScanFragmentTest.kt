@@ -74,6 +74,7 @@ class IdentityCameraScanFragmentTest {
     ) : IdentityCameraScanFragment(
         identityScanViewModelFactory, identityViewModelFactory
     ) {
+        override val fragmentId = R.id.IDScanFragment
         var currentState: IdentityScanState? = null
         var onCameraReadyIsCalled = false
 

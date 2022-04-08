@@ -12,6 +12,8 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
+import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
+import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 
 /**
  * Fragment to show generic error.
@@ -54,7 +56,16 @@ internal class ErrorFragment(
                 )
             } ?: run {
                 bottomButton.setOnClickListener {
-                    findNavController().navigate(args[ARG_GO_BACK_BUTTON_DESTINATION] as Int)
+                    val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int
+                    if (destination == UNEXPECTED_DESTINATION) {
+                        findNavController().navigate(DEFAULT_BACK_BUTTON_DESTINATION)
+                    } else {
+                        findNavController().let { navController ->
+                            while (navController.currentDestination?.id != destination) {
+                                navController.navigateUpAndSetArgForUploadFragment()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -70,16 +81,28 @@ internal class ErrorFragment(
         const val ARG_FAILED_REASON = "failedReason"
         private const val UNSET_DESTINATION = 0
 
-        fun NavController.navigateToErrorFragmentWithRequirementErrorAndDestination(
-            requirementError: VerificationPageDataRequirementError,
-            @IdRes backButtonDestination: Int
+        // Indicates the server returns a requirementError that doesn't match with current Fragment.
+        //  E.g ConsentFragment->DocSelectFragment could only have BIOMETRICCONSENT error but not IDDOCUMENTFRONT error.
+        // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
+        internal const val UNEXPECTED_DESTINATION = -1
+
+        private val DEFAULT_BACK_BUTTON_DESTINATION =
+            R.id.action_errorFragment_to_consentFragment
+
+        fun NavController.navigateToErrorFragmentWithRequirementError(
+            @IdRes fromFragment: Int,
+            requirementError: VerificationPageDataRequirementError
         ) {
             navigate(
                 R.id.action_global_errorFragment,
                 bundleOf(
                     ARG_ERROR_TITLE to requirementError.title,
                     ARG_ERROR_CONTENT to requirementError.body,
-                    ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
+                    ARG_GO_BACK_BUTTON_DESTINATION to
+                        if (requirementError.requirement.matchesFromFragment(fromFragment))
+                            fromFragment
+                        else
+                            UNEXPECTED_DESTINATION,
                     ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText,
                     // TODO(ccen) build continue button after backend behavior is finalized
                     // ARG_CONTINUE_BUTTON_TEXT to requirementError.continueButtonText,

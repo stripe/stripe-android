@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
@@ -61,6 +62,9 @@ internal abstract class IdentityUploadFragment(
 
     @get:StringRes
     open var backCheckMarkContentDescription: Int? = null
+
+    @get:IdRes
+    abstract val fragmentId: Int
 
     abstract val frontScanType: IdentityScanState.ScanType
 
@@ -356,9 +360,8 @@ internal abstract class IdentityUploadFragment(
                         requireNotNull(latestState.frontHighResResult.data)
                     val back =
                         requireNotNull(latestState.backHighResResult.data)
-                    postVerificationPageDataAndMaybeSubmit(
-                        identityViewModel = identityViewModel,
-                        collectedDataParam = CollectedDataParam(
+                    trySubmit(
+                        CollectedDataParam(
                             idDocumentFront = DocumentUploadParam(
                                 highResImage = requireNotNull(front.uploadedStripeFile.id) {
                                     "front uploaded file id is null"
@@ -372,9 +375,7 @@ internal abstract class IdentityUploadFragment(
                                 uploadMethod = back.uploadMethod
                             ),
                             idDocumentType = frontScanType.toType()
-                        ),
-                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                        shouldNotSubmit = { false }
+                        )
                     )
                 }.onFailure {
                     Log.d(TAG, "fail to submit uploaded files: $it")
@@ -382,6 +383,16 @@ internal abstract class IdentityUploadFragment(
                 }
             }
         }
+    }
+
+    protected suspend fun trySubmit(collectedDataParam: CollectedDataParam) {
+        postVerificationPageDataAndMaybeSubmit(
+            identityViewModel = identityViewModel,
+            collectedDataParam = collectedDataParam,
+            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+            fromFragment = fragmentId,
+            shouldNotSubmit = { false }
+        )
     }
 
     companion object {
