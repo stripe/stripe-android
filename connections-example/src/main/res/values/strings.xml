@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Connections Example</string>
-    <string name="launch_connections_sheet">Launch Connections Sheet</string>
+    <string name="launch_connections_sheet">Connect Account</string>
+    <string name="launch_connections_sheet_for_token">Connect Account for Token</string>
 </resources>

@@ -34,6 +34,7 @@ class ConnectionsExampleActivity : AppCompatActivity() {
 
     private fun ActivityConnectionsExampleBinding.observeViews() {
         launchConnectionsSheet.setOnClickListener { viewModel.startLinkAccountSession() }
+        launchConnectionsSheetForToken.setOnClickListener { viewModel.startLinkAccountSessionForToken() }
     }
 
     private fun ActivityConnectionsExampleBinding.observeState() {

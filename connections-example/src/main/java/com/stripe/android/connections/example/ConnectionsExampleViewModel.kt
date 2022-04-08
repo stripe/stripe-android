@@ -30,12 +30,7 @@ class ConnectionsExampleViewModel : ViewModel() {
                     status = "Fetching link account session from example backend!"
                 )
             }
-            kotlin.runCatching {
-                val createAccountHolderResponse = repository.createAccountHolder()
-                val linkedAccount =
-                    repository.createLinkAccountSession(createAccountHolderResponse.accountHolder)
-                linkedAccount
-            }
+            kotlin.runCatching { repository.createLinkAccountSession() }
                 // Success creating session: open ConnectionsSheet with received secret
                 .onSuccess {
                     setState {
@@ -48,7 +43,45 @@ class ConnectionsExampleViewModel : ViewModel() {
                         OpenConnectionsSheetExample(
                             configuration = ConnectionsSheet.Configuration(
                                 it.clientSecret,
-                                "it.publishableKey"
+                                it.publishableKey
+                            )
+                        )
+                    )
+                }
+                // Error retrieving session: display error.
+                .onFailure {
+                    setState {
+                        copy(
+                            loading = false,
+                            status = "Error starting linked account session: $it"
+                        )
+                    }
+                }
+        }
+    }
+
+    fun startLinkAccountSessionForToken() {
+        viewModelScope.launch {
+            setState {
+                copy(
+                    loading = true,
+                    status = "Fetching link account session for token from example backend!"
+                )
+            }
+            kotlin.runCatching { repository.createLinkAccountSessionForToken() }
+                // Success creating session: open ConnectionsSheet with received secret
+                .onSuccess {
+                    setState {
+                        copy(
+                            loading = false,
+                            status = "Session created, opening ConnectionsSheet for Token."
+                        )
+                    }
+                    _viewEffect.emit(
+                        OpenConnectionsSheetExample(
+                            configuration = ConnectionsSheet.Configuration(
+                                it.clientSecret,
+                                it.publishableKey
                             )
                         )
                     )
