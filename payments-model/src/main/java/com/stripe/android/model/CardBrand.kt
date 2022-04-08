@@ -9,6 +9,7 @@ import java.util.regex.Pattern
 /**
  * A representation of supported card brands and related data
  */
+@Suppress("LongParameterList", "MaxLineLength")
 enum class CardBrand(
     val code: String,
     val displayName: String,
