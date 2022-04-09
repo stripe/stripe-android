@@ -6,6 +6,7 @@ import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountList
 import com.stripe.android.connections.model.ListLinkedAccountParams
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -27,6 +28,7 @@ import javax.inject.Named
 
 internal class ConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
+    private val logger: Logger,
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory
 ) : ConnectionsRepository {
@@ -94,6 +96,7 @@ internal class ConnectionsApiRepository @Inject constructor(
             if (response.isError) {
                 throw handleApiError(response)
             } else {
+                logger.debug(response.body!!)
                 json.decodeFromString(
                     responseSerializer,
                     requireNotNull(response.body)

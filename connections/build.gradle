@@ -15,6 +15,7 @@ android {
 
 dependencies {
     api project(":stripe-core")
+    api project(":payments-model")
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
