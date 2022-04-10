@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
@@ -8,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * [The bank account object](https://stripe.com/docs/api/customer_bank_accounts/object)
  */
 @Parcelize
-data class BankAccount internal constructor(
+data class BankAccount @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     /**
      * Unique identifier for the object.
      *

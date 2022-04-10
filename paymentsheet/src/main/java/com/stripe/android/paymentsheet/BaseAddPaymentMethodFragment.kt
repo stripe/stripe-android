@@ -168,7 +168,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
                 initialPaymentMethodCreateParams =
-                sheetViewModel.newLpm?.paymentMethodCreateParams.takeIf { sheetViewModel.selection.value == null }
+                sheetViewModel.newLpm?.paymentMethodCreateParams.takeIf {
+                    sheetViewModel.selection.value == null
+                }
             )
         )
 

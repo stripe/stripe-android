@@ -7,7 +7,7 @@ echo -----Done fetching orign master
 
 echo -----Calculating modules to test
 # directory names that corresponds to a module that has unit tests - this list needs to be manually updated when a new module is added/deleted
-TESTABLE_MODULES="payments payments-core paymentsheet wechatpay link stripecardscan identity stripe-core payments-ui-core camera-core"
+TESTABLE_MODULES="payments payments-core payments-model paymentsheet wechatpay link stripecardscan identity stripe-core payments-ui-core camera-core"
 # a function to check if a dir is in TESTABLE_MODULES
 isTestableModule() {
   [[ $TESTABLE_MODULES =~ (^|[[:space:]])$1($|[[:space:]]) ]]
@@ -106,8 +106,11 @@ done
 echo -------------------------------------------
 
 # run test commands for affected_modules
+test_command="./gradlew"
 for module in $affected_modules
 do
-    echo "./gradlew :${module}:testDebugUnitTest"
-    eval "./gradlew :${module}:testDebugUnitTest"
+  test_command="$test_command :${module}:testDebugUnitTest"
 done
+
+echo $test_command
+eval $test_command

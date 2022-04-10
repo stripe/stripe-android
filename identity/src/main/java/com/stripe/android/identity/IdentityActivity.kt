@@ -18,6 +18,7 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
+import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
@@ -55,8 +56,9 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
     internal val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+
         override fun handleOnBackPressed() {
-            navController.navigateUp()
+            navController.navigateUpAndSetArgForUploadFragment()
         }
     }
 
@@ -118,6 +120,12 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
                 )
             )
         )
+
+        binding.topAppBar.setNavigationOnClickListener {
+            // clicking up button on app bar should have the same behavior as clicking device back
+            // button
+            navController.navigateUpAndSetArgForUploadFragment()
+        }
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {

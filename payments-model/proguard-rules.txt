@@ -1,0 +1,6 @@
+-keep class com.stripe.android.** { *; }
+-dontwarn com.stripe.android.view.**
+
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}

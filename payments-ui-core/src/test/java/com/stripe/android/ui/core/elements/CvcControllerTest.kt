@@ -16,7 +16,8 @@ internal class CvcControllerTest {
     private val cardBrandFlow = MutableStateFlow(CardBrand.Visa)
     private val cvcController = CvcController(
         CvcConfig(),
-        cardBrandFlow
+        cardBrandFlow,
+        initialValue = null
     )
 
     @Test

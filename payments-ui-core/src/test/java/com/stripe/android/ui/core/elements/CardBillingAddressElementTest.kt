@@ -19,6 +19,7 @@ internal class CardBillingAddressElementTest {
     )
     val cardBillingElement = CardBillingAddressElement(
         IdentifierSpec.Generic("billing_element"),
+        rawValuesMap = emptyMap(),
         addressFieldElementRepository,
         emptySet(),
         dropdownFieldController

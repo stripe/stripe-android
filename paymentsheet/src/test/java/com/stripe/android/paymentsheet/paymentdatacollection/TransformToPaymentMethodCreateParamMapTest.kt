@@ -86,7 +86,6 @@ class TransformToPaymentMethodCreateParamMapTest {
         )
         addPath(map, "")
         println(list.toMap())
-
     }
 
     val list = mutableListOf<Pair<String, String>>()
@@ -103,7 +102,7 @@ class TransformToPaymentMethodCreateParamMapTest {
     private fun addPathKey(original: String, add: String) = if (original.isEmpty()) {
         add
     } else {
-        "$original[${add}]"
+        "$original[$add]"
     }
 
     @Test
