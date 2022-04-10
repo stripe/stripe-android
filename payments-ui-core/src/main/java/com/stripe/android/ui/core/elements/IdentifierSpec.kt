@@ -52,6 +52,7 @@ sealed class IdentifierSpec(val value: String) : Parcelable {
     object SaveForFutureUse : IdentifierSpec("save_for_future_use")
 
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.value -> CardBrand
             CardNumber.value -> CardNumber

@@ -58,5 +58,5 @@ private fun addPath(map: Map<String, Any>, path: String) {
 private fun addPathKey(original: String, add: String) = if (original.isEmpty()) {
     add
 } else {
-    "$original[${add}]"
+    "$original[$add]"
 }
