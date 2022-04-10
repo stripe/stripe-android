@@ -31,7 +31,7 @@ internal val auBecsDebitEmailSection = SectionSpec(
 internal val auBecsBsbNumberSection = BsbSpec()
 
 internal val auBecsDebitAccountNumberSection = SectionSpec(
-    IdentifierSpec.Generic("au_becs_debit[account_number]"),
+    IdentifierSpec.Generic("account_number_section"),
     AuBankAccountNumberSpec
 )
 

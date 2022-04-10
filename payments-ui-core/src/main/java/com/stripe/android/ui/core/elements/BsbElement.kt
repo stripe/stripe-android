@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.map
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BsbElement(
     private val identifierSpec: IdentifierSpec,
-    private val banks: List<BecsDebitBanks.Bank>
+    private val banks: List<BecsDebitBanks.Bank>,
+    initialValue: String?
 ) : FormElement() {
     override val controller: Controller?
         get() = null
@@ -18,7 +19,7 @@ class BsbElement(
 
     internal val textElement: SimpleTextElement = SimpleTextElement(
         identifier = IdentifierSpec.Generic("au_becs_debit[bsb_number]"),
-        SimpleTextFieldController(BsbConfig(banks))
+        SimpleTextFieldController(BsbConfig(banks), initialValue = initialValue)
     )
 
     val bankName = textElement.controller.fieldValue.map { textFieldValue ->

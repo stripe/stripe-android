@@ -42,7 +42,6 @@ class TransformSpecToElements(
     private val resourceRepository: ResourceRepository,
     private val initialValues: Map<IdentifierSpec, String?>,
     private val amount: Amount?,
-    private val country: String?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context
@@ -59,7 +58,6 @@ class TransformSpecToElements(
                 is SectionSpec -> it.transform(
                     initialValues,
                     amount?.currencyCode,
-                    country,
                     resourceRepository.getBankRepository(),
                     resourceRepository.getAddressRepository()
                 )
@@ -71,21 +69,19 @@ class TransformSpecToElements(
                     it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is BsbSpec -> it.transform()
+                is BsbSpec -> it.transform(initialValues)
             }
         }
 
     private fun SectionSpec.transform(
         initialValues: Map<IdentifierSpec, String?>,
         currencyCode: String?,
-        country: String?,
         bankRepository: BankRepository,
         addressRepository: AddressFieldElementRepository
     ): SectionElement {
         val fieldElements = this.fields.transform(
             initialValues,
             currencyCode,
-            country,
             bankRepository,
             addressRepository
         )
@@ -108,30 +104,29 @@ class TransformSpecToElements(
     private fun List<SectionFieldSpec>.transform(
         initialValues: Map<IdentifierSpec, String?>,
         currencyCode: String?,
-        country: String?,
         bankRepository: BankRepository,
         addressRepository: AddressFieldElementRepository
     ) =
         this.map {
             when (it) {
-                is EmailSpec -> it.transform(initialValues[IdentifierSpec.Email])
-                is IbanSpec -> it.transform()
-                is BankDropdownSpec -> it.transform(bankRepository)
+                is EmailSpec -> it.transform(initialValues)
+                is IbanSpec -> it.transform(initialValues)
+                is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
                     addressRepository
                 )
                 is CountrySpec -> it.transform(
-                    initialValues[IdentifierSpec.Country]
+                    initialValues
                 )
                 is KlarnaCountrySpec -> it.transform(
                     currencyCode,
-                    country
+                    initialValues
                 )
                 is CardDetailsSpec -> it.transform(context, initialValues)
                 is CardBillingSpec -> it.transform(addressRepository, initialValues)
-                is AuBankAccountNumberSpec -> it.transform()
+                is AuBankAccountNumberSpec -> it.transform(initialValues)
             }
         }
 }

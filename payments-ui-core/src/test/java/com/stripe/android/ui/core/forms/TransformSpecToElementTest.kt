@@ -68,7 +68,6 @@ internal class TransformSpecToElementTest {
                 ),
                 initialValues = mapOf(),
                 amount = null,
-                country = "DE",
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 context

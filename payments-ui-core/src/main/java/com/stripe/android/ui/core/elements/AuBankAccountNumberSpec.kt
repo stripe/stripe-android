@@ -5,10 +5,16 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-object AuBankAccountNumberSpec : SectionFieldSpec(IdentifierSpec.Generic("account_number")) {
-    fun transform(): SectionFieldElement =
+object AuBankAccountNumberSpec :
+    SectionFieldSpec(IdentifierSpec.Generic("au_becs_debit[account_number]")) {
+    fun transform(
+        initialValues: Map<IdentifierSpec, String?>
+    ): SectionFieldElement =
         SimpleTextElement(
             this.identifier,
-            SimpleTextFieldController(AuBankAccountNumberConfig())
+            SimpleTextFieldController(
+                AuBankAccountNumberConfig(),
+                initialValue = initialValues[this.identifier]
+            )
         )
 }
