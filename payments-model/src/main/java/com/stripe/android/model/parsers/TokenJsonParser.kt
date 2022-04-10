@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.Token
@@ -8,11 +9,12 @@ import org.json.JSONObject
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-internal class TokenJsonParser : ModelJsonParser<Token> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class TokenJsonParser : ModelJsonParser<Token> {
     override fun parse(json: JSONObject): Token? {
         val tokenId = StripeJsonUtils.optString(json, FIELD_ID)
         val createdTimeStamp = StripeJsonUtils.optLong(json, FIELD_CREATED)
-        val tokenType = Token.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
+        val tokenType = Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
         if (tokenType == null || tokenId == null || createdTimeStamp == null) {
             return null
         }

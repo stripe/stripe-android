@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues />
+  <CurrentIssues>
+    <ID>LongParameterList:CardBrand.kt$CardBrand$( val code: String, val displayName: String,
+      @DrawableRes val icon: Int, @DrawableRes val cvcIcon: Int = R.drawable.stripe_ic_cvc,
+      @DrawableRes val errorIcon: Int = R.drawable.stripe_ic_error, /** * Accepted CVC lengths */
+      val cvcLength: Set&lt;Int> = setOf(3), /** * The default max length when the card number is
+      formatted without spaces (e.g. "4242424242424242") * * Note that [CardBrand.DinersClub]'s max
+      length depends on the BIN (e.g. card number prefix). * In the case of a [CardBrand.DinersClub]
+      card, use [getMaxLengthForCardNumber]. */ private val defaultMaxLength: Int = 16, /** * Based
+      on [Issuer identification number
+      table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
+      */ private val pattern: Pattern? = null, /** * Patterns for discrete lengths */ private val
+      partialPatterns: Map&lt;Int, Pattern>, /** * By default, a [CardBrand] does not have variants.
+      */ private val variantMaxLength: Map&lt;Pattern, Int> = emptyMap(), )
+    </ID>
+    <ID>MagicNumber:BankAccount.kt$BankAccount$3</ID>
+    <ID>MagicNumber:Card.kt$Card$4</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.AmericanExpress$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.AmericanExpress$4</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.DinersClub$14</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.JCB$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.Unknown$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.Unknown$4</ID>
+    <ID>MagicNumber:CardJsonParser.kt$CardJsonParser$12</ID>
+    <ID>MagicNumber:CardUtils.kt$CardUtils$10</ID>
+    <ID>MagicNumber:CardUtils.kt$CardUtils$9</ID>
+    <ID>MaxLineLength:BankAccount.kt$BankAccount$*</ID>
+    <ID>MaxLineLength:CardBrand.kt$CardBrand$* Based on [Issuer identification number
+      table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
+    </ID>
+  </CurrentIssues>
+</SmellBaseline>
