@@ -13,6 +13,7 @@ import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,19 +40,25 @@ internal class SignUpViewModel @Inject constructor(
 ) : ViewModel() {
     val merchantName: String = args.merchantName
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(prefilledEmail)
+    val emailElement: SectionFieldElement = EmailSpec.transform(
+        mapOf(
+            IdentifierSpec.Email to prefilledEmail
+        )
+    )
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
-    private val consumerEmail: StateFlow<String?> =
+    private
+    val consumerEmail: StateFlow<String?> =
         emailElement.getFormFieldValueFlow().map { formFieldsList ->
             // formFieldsList contains only one element, for the email. Take the second value of
             // the pair, which is the FormFieldEntry containing the value entered by the user.
             formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
         }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
 
-    private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
+    private
+    val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
     /**
