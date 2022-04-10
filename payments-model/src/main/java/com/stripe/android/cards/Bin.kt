@@ -6,12 +6,13 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class Bin internal constructor(
-    internal val value: String
+data class Bin constructor(
+    val value: String
 ) : StripeModel {
     override fun toString() = value
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         fun create(cardNumber: String): Bin? {
             return cardNumber
                 .take(BIN_LENGTH)

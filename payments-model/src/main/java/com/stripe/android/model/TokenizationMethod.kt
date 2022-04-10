@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
+
 /**
  * If a card number is tokenized, this is the method that was used.
  *
@@ -21,8 +23,9 @@ enum class TokenizationMethod(
         setOf("visa_checkout")
     );
 
-    internal companion object {
-        internal fun fromCode(code: String?): TokenizationMethod? {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun fromCode(code: String?): TokenizationMethod? {
             return values().firstOrNull {
                 it.code.contains(code)
             }

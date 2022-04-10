@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.IntRange
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
@@ -9,7 +10,7 @@ import kotlinx.parcelize.Parcelize
  * A representation of a [Card API object](https://stripe.com/docs/api/cards/object).
  */
 @Parcelize
-data class Card internal constructor(
+data class Card @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     /**
      * Two-digit number representing the card’s expiration month.
      *
@@ -169,12 +170,13 @@ data class Card internal constructor(
     val tokenizationMethod: TokenizationMethod? = null
 ) : StripeModel, StripePaymentSource {
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         /**
          * See https://stripe.com/docs/api/cards/object#card_object-brand for valid values.
          */
         @JvmSynthetic
-        internal fun getCardBrand(brandName: String?): CardBrand {
+        fun getCardBrand(brandName: String?): CardBrand {
             return when (brandName) {
                 "American Express" -> CardBrand.AmericanExpress
                 "Diners Club" -> CardBrand.DinersClub

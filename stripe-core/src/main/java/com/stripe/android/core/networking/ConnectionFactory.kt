@@ -4,12 +4,12 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.InvalidRequestException
 import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.HttpsURLConnection
 
 /**
- * Factory to create [StripeConnection], which encapsulates an [HttpsURLConnection], triggers the
+ * Factory to create [StripeConnection], which encapsulates an [HttpURLConnection], triggers the
  * request and parses the response with different body type as [StripeResponse].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -43,8 +43,8 @@ interface ConnectionFactory {
             )
         }
 
-        private fun openConnectionAndApplyFields(request: StripeRequest): HttpsURLConnection {
-            return (URL(request.url).openConnection() as HttpsURLConnection).apply {
+        private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
+            return (URL(request.url).openConnection() as HttpURLConnection).apply {
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
                 useCaches = false

@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.Card
@@ -7,7 +8,8 @@ import com.stripe.android.model.CardFunding
 import com.stripe.android.model.TokenizationMethod
 import org.json.JSONObject
 
-internal class CardJsonParser : ModelJsonParser<Card> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CardJsonParser : ModelJsonParser<Card> {
     override fun parse(json: JSONObject): Card? {
         if (VALUE_CARD != json.optString(FIELD_OBJECT)) {
             return null
@@ -49,6 +51,7 @@ internal class CardJsonParser : ModelJsonParser<Card> {
         )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         internal const val VALUE_CARD = "card"
