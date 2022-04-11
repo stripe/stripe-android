@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -265,9 +265,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewBinding.buyButton.setDefaultBackGroundColor(
             viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(isSystemDarkTheme()).primary.toArgb()
+                PaymentsThemeDefaults.colors(isSystemDarkTheme()).primary.toArgb()
             )
         )
+        viewBinding.buyButton.setCornerRadius(PaymentsThemeDefaults.shapes.cornerRadius)
 
         viewBinding.buyButton.setOnClickListener {
             clearErrorMessages()
@@ -307,7 +308,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupGooglePayButton() {
-        val surfaceColor = PaymentsThemeConfig.colors(isSystemDarkTheme()).surface
+        val surfaceColor = PaymentsThemeDefaults.colors(isSystemDarkTheme()).surface
         googlePayButton.setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
 
         googlePayButton.setOnClickListener {
