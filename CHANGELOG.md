@@ -1,6 +1,8 @@
 # CHANGELOG
-
 ## x.x.x - xxxx-xx-xx
+
+## 20.0.1 - 2022-04-11
+This release includes several PaymentSheet bug fixes.
 
 ### PaymentSheet
 * [FIXED] [4840](https://github.com/stripe/stripe-android/pull/4840) Multi-step now shows the last 4 of the card number instead of 'card'.
