@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 /**
@@ -130,11 +130,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        viewBinding.continueButton.setDefaultBackGroundColor(
-            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
+        viewModel.config?.let {
+            viewBinding.continueButton.setDefaultBackGroundColor(
+                it.primaryButtonColor ?: ColorStateList.valueOf(
+                    PaymentsThemeDefaults.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
+                )
             )
-        )
+            viewBinding.continueButton.setCornerRadius(PaymentsThemeDefaults.shapes.cornerRadius)
+        }
 
         addButton.setOnClickListener {
             viewModel.onUserSelection()
