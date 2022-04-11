@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.R
 import com.stripe.android.view.AuthActivityStarterHost
 
 /**
@@ -36,7 +37,9 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O &&
+            !resources.getBoolean(R.bool.isTablet)
+        ) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
             // orientation. See https://stackoverflow.com/a/50832408/11103900
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
