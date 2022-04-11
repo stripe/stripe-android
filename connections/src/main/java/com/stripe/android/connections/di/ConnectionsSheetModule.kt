@@ -6,7 +6,6 @@ import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.analytics.DefaultConnectionsEventReporter
 import com.stripe.android.connections.repository.ConnectionsApiRepository
 import com.stripe.android.connections.repository.ConnectionsRepository
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
