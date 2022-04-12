@@ -1,6 +1,9 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
 
+### PaymentSheet
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+
 ## 20.0.1 - 2022-04-11
 This release includes several PaymentSheet bug fixes.
 
