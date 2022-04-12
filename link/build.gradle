@@ -149,10 +149,10 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-//ext {
-//    artifactId = "link"
-//    artifactName = "link"
-//    artifactDescrption = "The Link module of Stripe Payment Android SDK"
-//}
-//
-//apply from: "${rootDir}/deploy/deploy.gradle"
+ext {
+    artifactId = "link"
+    artifactName = "link"
+    artifactDescrption = "The Link module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
