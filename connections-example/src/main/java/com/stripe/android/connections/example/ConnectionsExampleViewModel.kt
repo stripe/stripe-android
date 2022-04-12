@@ -3,8 +3,10 @@ package com.stripe.android.connections.example
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.connections.ConnectionsSheet
+import com.stripe.android.connections.ConnectionsSheetForTokenResult
 import com.stripe.android.connections.ConnectionsSheetResult
 import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetExample
+import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetForTokenExample
 import com.stripe.android.connections.example.data.BackendRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +80,7 @@ class ConnectionsExampleViewModel : ViewModel() {
                         )
                     }
                     _viewEffect.emit(
-                        OpenConnectionsSheetExample(
+                        OpenConnectionsSheetForTokenExample(
                             configuration = ConnectionsSheet.Configuration(
                                 it.clientSecret,
                                 it.publishableKey
@@ -109,6 +111,19 @@ class ConnectionsExampleViewModel : ViewModel() {
             }
             is ConnectionsSheetResult.Failed -> "Failed! ${connectionsSheetResult.error}"
             is ConnectionsSheetResult.Canceled -> "Cancelled!"
+        }
+        viewModelScope.launch {
+            setState { copy(status = statusText) }
+        }
+    }
+
+    fun onConnectionsSheetForTokenResult(result: ConnectionsSheetForTokenResult) {
+        val statusText = when (result) {
+            is ConnectionsSheetForTokenResult.Completed -> {
+                "Token ${result.token.id} generated for bank account ${result.token.bankAccount?.last4}"
+            }
+            is ConnectionsSheetForTokenResult.Failed -> "Failed! ${result.error}"
+            is ConnectionsSheetForTokenResult.Canceled -> "Cancelled!"
         }
         viewModelScope.launch {
             setState { copy(status = statusText) }

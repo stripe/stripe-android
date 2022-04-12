@@ -6,4 +6,8 @@ sealed class ConnectionsExampleViewEffect {
     data class OpenConnectionsSheetExample(
         val configuration: ConnectionsSheet.Configuration
     ) : ConnectionsExampleViewEffect()
+
+    data class OpenConnectionsSheetForTokenExample(
+        val configuration: ConnectionsSheet.Configuration
+    ) : ConnectionsExampleViewEffect()
 }

@@ -6,13 +6,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connections.ConnectionsSheet
 import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetExample
+import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetForTokenExample
 import com.stripe.android.connections.example.databinding.ActivityConnectionsExampleBinding
 
 class ConnectionsExampleActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<ConnectionsExampleViewModel>()
 
+    /**
+     * Instance used on regular connection flows.
+     */
     private lateinit var connectionsSheet: ConnectionsSheet
+
+    /**
+     * Instance used when connecting bank account for token.
+     */
+    private lateinit var connectionsSheetForToken: ConnectionsSheet
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +39,10 @@ class ConnectionsExampleActivity : AppCompatActivity() {
             activity = this@ConnectionsExampleActivity,
             callback = viewModel::onConnectionsSheetResult
         )
+        connectionsSheetForToken = ConnectionsSheet.createForToken(
+            activity = this@ConnectionsExampleActivity,
+            callback = viewModel::onConnectionsSheetForTokenResult
+        )
     }
 
     private fun ActivityConnectionsExampleBinding.observeViews() {
@@ -46,7 +59,10 @@ class ConnectionsExampleActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
                 when (it) {
-                    is OpenConnectionsSheetExample -> connectionsSheet.present(it.configuration)
+                    is OpenConnectionsSheetExample ->
+                        connectionsSheet.present(it.configuration)
+                    is OpenConnectionsSheetForTokenExample ->
+                        connectionsSheetForToken.present(it.configuration)
                 }
             }
         }

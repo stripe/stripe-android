@@ -20,7 +20,8 @@ internal class FetchLinkAccountSessionForToken @Inject constructor(
      */
     suspend operator fun invoke(clientSecret: String): Pair<LinkAccountSession, Token> {
         val linkAccountSession = connectionsRepository.getLinkAccountSession(clientSecret)
-        val parsedToken = linkAccountSession.token?.let { TokenJsonParser().parse(JSONObject(it)) }
+        val parsedToken =
+            linkAccountSession.bankAccountToken?.let { TokenJsonParser().parse(JSONObject(it)) }
         requireNotNull(parsedToken) { "Could not extract Token from LinkedAccountSession." }
         return linkAccountSession to parsedToken
     }

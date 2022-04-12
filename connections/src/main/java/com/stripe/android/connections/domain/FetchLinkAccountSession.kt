@@ -47,7 +47,7 @@ internal class FetchLinkAccountSession @Inject constructor(
                     count = accounts.size,
                     totalCount = nextLinkedAccountList.totalCount
                 ),
-                token = null, // Token should not be exposed on regular sessions.
+                bankAccountToken = null, // Token should not be exposed on regular sessions.
                 livemode = linkAccountSession.livemode
             )
         }

@@ -41,9 +41,9 @@ data class LinkAccountSession internal constructor(
     @SerialName("return_url")
     val returnUrl: String? = null,
 
-    @SerialName("token")
+    @SerialName("bank_account_token")
     @Serializable(with = JsonAsStringSerializer::class)
-    internal val token: String? = null
+    internal val bankAccountToken: String? = null
 ) : StripeModel, Parcelable
 
 @Serializable(with = PaymentAccountSerializer::class)
