@@ -32,7 +32,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.isSystemDarkTheme
@@ -130,10 +130,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         val isDark = baseContext.isSystemDarkTheme()
         bottomSheet.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
+            PaymentsThemeDefaults.colors(isDark).surface.toArgb()
         )
         toolbar.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
+            PaymentsThemeDefaults.colors(isDark).surface.toArgb()
         )
 
         setSheetWidthForTablets()
@@ -178,9 +178,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             messageView.text = createTextSpanFromTextStyle(
                 text = message,
                 context = this,
-                textStyle = PaymentsThemeConfig.Typography.h6,
-                color = PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).error,
-                fontFamily = PaymentsThemeConfig.Typography.fontFamily
+                fontSizeDp = (
+                    PaymentsThemeDefaults.typography.fontSizeMultiplier
+                        * PaymentsThemeDefaults.typography.smallFontSize.value
+                    ).dp,
+                color = PaymentsThemeDefaults.colors(baseContext.isSystemDarkTheme()).error,
+                fontFamily = PaymentsThemeDefaults.typography.fontFamily
             )
         }
 
@@ -219,7 +222,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
         navigationIconDrawable?.setTintList(
             ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
+                PaymentsThemeDefaults.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
             )
         )
 
