@@ -3,7 +3,7 @@
 
 ### PaymentSheet
 * [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
-* [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode for tablets.
+* [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
 
 ## 20.0.1 - 2022-04-11
 This release includes several PaymentSheet bug fixes.

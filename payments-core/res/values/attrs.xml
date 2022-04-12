@@ -29,6 +29,4 @@
         </attr>
         <attr name="backgroundColorStateList" format="reference" />
     </declare-styleable>
-
-    <bool name="isTablet">false</bool>
 </resources>
