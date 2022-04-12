@@ -8,6 +8,11 @@ import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
+import com.stripe.android.connections.presentation.ConnectionsSheetActivity
+import com.stripe.android.connections.presentation.ConnectionsSheetState
+import com.stripe.android.connections.presentation.ConnectionsSheetViewEffect
+import com.stripe.android.connections.presentation.ConnectionsSheetViewModel
 import com.stripe.android.connections.utils.InjectableActivityScenario
 import com.stripe.android.connections.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.connections.utils.injectableActivityScenario
@@ -36,7 +41,7 @@ class ConnectionsSheetActivityTest {
         ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val args = ConnectionsSheetContract.Args(configuration)
+    private val args = ConnectionsSheetContract.Args.Default(configuration)
     private val intent = contract.createIntent(context, args)
     private val viewModel = createViewModel()
 
@@ -47,6 +52,7 @@ class ConnectionsSheetActivityTest {
             savedStateHandle = SavedStateHandle(),
             generateLinkAccountSessionManifest = mock(),
             fetchLinkAccountSession = mock(),
+            fetchLinkAccountSessionForToken = mock(),
             eventReporter = mock()
         )
     }
@@ -72,7 +78,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Failed::class.java
+            ConnectionsSheetContract.Result.Failed::class.java
         )
     }
 
@@ -80,7 +86,7 @@ class ConnectionsSheetActivityTest {
     fun `onCreate() with invalid args returns Failed result`() {
         val scenario = activityScenario()
         val configuration = ConnectionsSheet.Configuration("", "")
-        val args = ConnectionsSheetContract.Args(configuration)
+        val args = ConnectionsSheetContract.Args.Default(configuration)
         val intent = contract.createIntent(context, args)
         scenario.launch(intent)
         assertThat(
@@ -89,7 +95,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Failed::class.java
+            ConnectionsSheetContract.Result.Failed::class.java
         )
     }
 
@@ -138,7 +144,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Canceled::class.java
+            ConnectionsSheetContract.Result.Canceled::class.java
         )
     }
 

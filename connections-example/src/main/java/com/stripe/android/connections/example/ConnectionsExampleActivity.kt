@@ -26,7 +26,7 @@ class ConnectionsExampleActivity : AppCompatActivity() {
 
     private fun ActivityConnectionsExampleBinding.setupViews() {
         setSupportActionBar(toolbar)
-        connectionsSheet = ConnectionsSheet(
+        connectionsSheet = ConnectionsSheet.create(
             activity = this@ConnectionsExampleActivity,
             callback = viewModel::onConnectionsSheetResult
         )

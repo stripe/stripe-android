@@ -1,7 +1,7 @@
 package com.stripe.android.connections.analytics
 
 import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -27,10 +27,10 @@ internal class DefaultConnectionsEventReporter @Inject constructor(
 
     override fun onResult(
         configuration: ConnectionsSheet.Configuration,
-        connectionsSheetResult: ConnectionsSheetResult
+        connectionsSheetResult: ConnectionsSheetContract.Result
     ) {
         val event = when (connectionsSheetResult) {
-            is ConnectionsSheetResult.Completed ->
+            is ConnectionsSheetContract.Result.Completed ->
                 ConnectionsAnalyticsEvent(
                     ConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
@@ -38,7 +38,7 @@ internal class DefaultConnectionsEventReporter @Inject constructor(
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
-            is ConnectionsSheetResult.Canceled ->
+            is ConnectionsSheetContract.Result.Canceled ->
                 ConnectionsAnalyticsEvent(
                     ConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
@@ -46,7 +46,7 @@ internal class DefaultConnectionsEventReporter @Inject constructor(
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
-            is ConnectionsSheetResult.Failed ->
+            is ConnectionsSheetContract.Result.Failed ->
                 ConnectionsAnalyticsEvent(
                     ConnectionsAnalyticsEvent.Code.SheetFailed,
                     mapOf(

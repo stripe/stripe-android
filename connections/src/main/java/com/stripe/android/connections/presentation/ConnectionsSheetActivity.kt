@@ -1,4 +1,4 @@
-package com.stripe.android.connections
+package com.stripe.android.connections.presentation
 
 import android.app.Activity
 import android.content.Intent
@@ -11,9 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.connections.presentation.ConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.connections.presentation.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.databinding.ActivityConnectionsSheetBinding
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
 import java.security.InvalidParameterException
 
 internal class ConnectionsSheetActivity : AppCompatActivity() {
@@ -49,7 +50,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             finishWithResult(
-                ConnectionsSheetResult.Failed(
+                ConnectionsSheetContract.Result.Failed(
                     IllegalArgumentException("ConnectionsSheet started without arguments.")
                 )
             )
@@ -58,7 +59,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
             try {
                 starterArgs.validate()
             } catch (e: InvalidParameterException) {
-                finishWithResult(ConnectionsSheetResult.Failed(e))
+                finishWithResult(ConnectionsSheetContract.Result.Failed(e))
                 return
             }
         }
@@ -111,13 +112,13 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
      * return canceled result
      */
     override fun onBackPressed() {
-        finishWithResult(ConnectionsSheetResult.Canceled)
+        finishWithResult(ConnectionsSheetContract.Result.Canceled)
     }
 
-    private fun finishWithResult(result: ConnectionsSheetResult) {
+    private fun finishWithResult(result: ConnectionsSheetContract.Result) {
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtras(ConnectionsSheetContract.Result(result).toBundle())
+            Intent().putExtras(result.toBundle())
         )
         finish()
     }

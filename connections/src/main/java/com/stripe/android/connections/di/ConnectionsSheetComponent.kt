@@ -2,8 +2,8 @@ package com.stripe.android.connections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.connections.ConnectionsSheetContract
-import com.stripe.android.connections.ConnectionsSheetViewModel
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
+import com.stripe.android.connections.presentation.ConnectionsSheetViewModel
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
 import dagger.BindsInstance

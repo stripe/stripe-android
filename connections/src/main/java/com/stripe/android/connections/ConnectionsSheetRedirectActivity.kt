@@ -3,6 +3,7 @@ package com.stripe.android.connections
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.connections.presentation.ConnectionsSheetActivity
 
 /**
  * This Activity handles redirects from the ChromeCustomTab hosting the AuthFlow.

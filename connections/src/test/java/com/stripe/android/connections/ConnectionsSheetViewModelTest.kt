@@ -6,15 +6,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ConnectionsSheetResult.Completed
-import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.connections.presentation.ConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.domain.FetchLinkAccountSession
+import com.stripe.android.connections.domain.FetchLinkAccountSessionForToken
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
+import com.stripe.android.connections.launcher.ConnectionsSheetContract.Result.*
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountFixtures
 import com.stripe.android.connections.model.LinkedAccountList
+import com.stripe.android.connections.presentation.ConnectionsSheetViewModel
 import com.stripe.android.core.exception.APIException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -42,6 +45,7 @@ class ConnectionsSheetViewModelTest {
         ApiKeyFixtures.CANCEL_URL
     )
     private val fetchLinkAccountSession = mock<FetchLinkAccountSession>()
+    private val fetchLinkAccountSessionForToken = mock<FetchLinkAccountSessionForToken>()
     private val generateLinkAccountSessionManifest = mock<GenerateLinkAccountSessionManifest>()
 
     @Test
@@ -85,7 +89,7 @@ class ConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(eq(configuration), any<ConnectionsSheetResult.Failed>())
+                .onResult(eq(configuration), any<Failed>())
         }
     }
 
@@ -103,7 +107,7 @@ class ConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(configuration, ConnectionsSheetResult.Canceled)
+                .onResult(configuration, Canceled)
         }
     }
 
@@ -120,7 +124,7 @@ class ConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(FinishWithResult(ConnectionsSheetResult.Canceled)).isEqualTo(awaitItem())
+                assertThat(FinishWithResult(Canceled)).isEqualTo(awaitItem())
             }
         }
 
@@ -139,7 +143,7 @@ class ConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 val viewEffect = awaitItem() as FinishWithResult
-                assertThat(viewEffect.result).isInstanceOf(ConnectionsSheetResult.Failed::class.java)
+                assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
         }
 
@@ -182,7 +186,7 @@ class ConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(ConnectionsSheetResult.Failed(apiException))
+                    FinishWithResult(Failed(apiException))
                 )
             }
         }
@@ -202,7 +206,7 @@ class ConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(ConnectionsSheetResult.Failed(APIException()))
+                    FinishWithResult(Failed(APIException()))
                 )
             }
         }
@@ -219,7 +223,7 @@ class ConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(Canceled))
             }
         }
     }
@@ -238,7 +242,7 @@ class ConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(Canceled))
             }
         }
     }
@@ -285,13 +289,14 @@ class ConnectionsSheetViewModelTest {
         configuration: ConnectionsSheet.Configuration,
         savedStateHandle: SavedStateHandle = SavedStateHandle()
     ): ConnectionsSheetViewModel {
-        val args = ConnectionsSheetContract.Args(configuration)
+        val args = ConnectionsSheetContract.Args.Default(configuration)
         return ConnectionsSheetViewModel(
             applicationId = "com.example.app",
             starterArgs = args,
             savedStateHandle = savedStateHandle,
             generateLinkAccountSessionManifest = generateLinkAccountSessionManifest,
             fetchLinkAccountSession = fetchLinkAccountSession,
+            fetchLinkAccountSessionForToken = fetchLinkAccountSessionForToken,
             eventReporter = eventReporter
         )
     }

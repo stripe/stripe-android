@@ -3,7 +3,7 @@ package com.stripe.android.connections.di
 import android.app.Application
 import com.stripe.android.connections.BuildConfig
 import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetContract
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import dagger.Module
 import dagger.Provides

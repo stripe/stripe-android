@@ -1,5 +1,6 @@
 package com.stripe.android.connections
 
+import com.stripe.android.connections.launcher.ConnectionsSheetLauncher
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify

@@ -12,10 +12,10 @@ import org.junit.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
-class FetchLinkAccountSessionWithTokenTest {
+class FetchLinkAccountSessionForTokenTest {
 
     private val repository = FakeConnectionsRepository(ApiKeyFixtures.MANIFEST)
-    private val getLinkAccountSession = FetchLinkAccountSessionWithToken(repository)
+    private val getLinkAccountSession = FetchLinkAccountSessionForToken(repository)
     private val json = Json {
         ignoreUnknownKeys = true
     }
@@ -33,7 +33,7 @@ class FetchLinkAccountSessionWithTokenTest {
             }
 
             // When
-            val (las, token) = getLinkAccountSession(clientSecret)
+            val (_, token) = getLinkAccountSession(clientSecret)
 
             // Then
             assertThat(token.id).isEqualTo("tok_1F4ACMCRMbs6FrXf6fPqLnN7")

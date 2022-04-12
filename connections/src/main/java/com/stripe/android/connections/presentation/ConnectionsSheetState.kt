@@ -1,6 +1,7 @@
-package com.stripe.android.connections
+package com.stripe.android.connections.presentation
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 
 /**
@@ -53,9 +54,9 @@ internal sealed class ConnectionsSheetViewEffect {
     ) : ConnectionsSheetViewEffect()
 
     /**
-     * Finish [ConnectionsSheetActivity] with a given [ConnectionsSheetResult]
+     * Finish [ConnectionsSheetActivity] with a given [ConnectionsSheetContract.Result]
      */
     data class FinishWithResult(
-        val result: ConnectionsSheetResult
+        val result: ConnectionsSheetContract.Result
     ) : ConnectionsSheetViewEffect()
 }

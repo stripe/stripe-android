@@ -1,7 +1,7 @@
 package com.stripe.android.connections.analytics
 
 import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.connections.launcher.ConnectionsSheetContract
 
 /**
  * Contract for connections related analytic events that will be tracked.
@@ -17,6 +17,6 @@ internal interface ConnectionsEventReporter {
 
     fun onResult(
         configuration: ConnectionsSheet.Configuration,
-        connectionsSheetResult: ConnectionsSheetResult
+        connectionsSheetResult: ConnectionsSheetContract.Result
     )
 }

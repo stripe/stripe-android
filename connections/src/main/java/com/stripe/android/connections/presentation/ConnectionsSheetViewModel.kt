@@ -1,4 +1,4 @@
-package com.stripe.android.connections
+package com.stripe.android.connections.presentation
 
 import android.app.Application
 import android.content.Intent
@@ -8,12 +8,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.connections.launcher.ConnectionsSheetContract.Args
+import com.stripe.android.connections.launcher.ConnectionsSheetContract.Result
+import com.stripe.android.connections.presentation.ConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.connections.presentation.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.di.APPLICATION_ID
 import com.stripe.android.connections.di.DaggerConnectionsSheetComponent
 import com.stripe.android.connections.domain.FetchLinkAccountSession
+import com.stripe.android.connections.domain.FetchLinkAccountSessionForToken
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
@@ -28,9 +31,10 @@ import javax.inject.Named
 
 internal class ConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val starterArgs: ConnectionsSheetContract.Args,
+    private val starterArgs: Args,
     private val generateLinkAccountSessionManifest: GenerateLinkAccountSessionManifest,
     private val fetchLinkAccountSession: FetchLinkAccountSession,
+    private val fetchLinkAccountSessionForToken: FetchLinkAccountSessionForToken,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ConnectionsEventReporter
 ) : ViewModel() {
@@ -114,7 +118,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
             viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
+                _viewEffect.emit(FinishWithResult(Result.Canceled))
             }
         }
     }
@@ -127,22 +131,24 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     internal fun onActivityResult() {
         if (_state.value.authFlowActive && _state.value.activityRecreated) {
             viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
+                _viewEffect.emit(FinishWithResult(Result.Canceled))
             }
         }
     }
 
     /**
+     * For regular connections flows requesting a link account session:
+     *
      * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [LinkAccountSession] model from the API and return that via the
-     * [ConnectionsSheetResult] and [ConnectionsSheetResultCallback]
+     * fetch the updated [LinkAccountSession] from the Stripe API,
+     * and return that via the [Result] to [com.stripe.android.connections.ConnectionsSheet]
      */
     private fun fetchLinkAccountSession() {
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchLinkAccountSession(starterArgs.configuration.linkAccountSessionClientSecret)
             }.onSuccess {
-                val result = ConnectionsSheetResult.Completed(it)
+                val result = Result.Completed(it)
                 eventReporter.onResult(starterArgs.configuration, result)
                 _viewEffect.emit(FinishWithResult(result))
             }.onFailure {
@@ -152,13 +158,35 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     }
 
     /**
-     * If an error occurs during the connections sheet auth flow, return that error via the
-     * [ConnectionsSheetResultCallback] and [ConnectionsSheetResult.Failed].
+     * For connections flows requesting an account [com.stripe.android.model.Token]:
+     *
+     * On successfully completing the hosted auth flow and receiving the success callback intent,
+     * fetch the updated [LinkAccountSession] and the generated [com.stripe.android.model.Token]
+     * and return that via the [Result] to [com.stripe.android.connections.ConnectionsSheet]
+     *
+     */
+    private fun fetchLinkAccountSessionForToken() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                fetchLinkAccountSessionForToken(starterArgs.configuration.linkAccountSessionClientSecret)
+            }.onSuccess { (las, token) ->
+                val result = Result.Completed(las, token)
+                eventReporter.onResult(starterArgs.configuration, result)
+                _viewEffect.emit(FinishWithResult(result))
+            }.onFailure {
+                onFatal(it)
+            }
+        }
+    }
+
+    /**
+     * If an error occurs during the connections sheet auth flow,
+     * returns that error as a [Result.Failed].
      *
      * @param throwable the error encountered during the connections sheet auth flow
      */
     private suspend fun onFatal(throwable: Throwable) {
-        val result = ConnectionsSheetResult.Failed(throwable)
+        val result = Result.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
         _viewEffect.emit(FinishWithResult(result))
     }
@@ -166,10 +194,10 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     /**
      * If a user cancels the hosted auth flow either by closing the custom tab with the back button
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
-     * URL callback, notify the [ConnectionsSheetResultCallback] of [ConnectionsSheetResult.Canceled]
+     * URL callback, finish with [Result.Canceled]
      */
     private suspend fun onUserCancel() {
-        val result = ConnectionsSheetResult.Canceled
+        val result = Result.Canceled
         eventReporter.onResult(starterArgs.configuration, result)
         _viewEffect.emit(FinishWithResult(result))
     }
@@ -187,7 +215,10 @@ internal class ConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             val manifest = _state.value.manifest
             when (intent?.data.toString()) {
-                manifest?.successUrl -> fetchLinkAccountSession()
+                manifest?.successUrl -> when (starterArgs) {
+                    is Args.Default -> fetchLinkAccountSession()
+                    is Args.ForToken -> fetchLinkAccountSessionForToken()
+                }
                 manifest?.cancelUrl -> onUserCancel()
                 else -> onFatal(Exception("Error processing ConnectionsSheet intent"))
             }
@@ -207,7 +238,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
 
     class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> ConnectionsSheetContract.Args,
+        private val starterArgsSupplier: () -> Args,
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {

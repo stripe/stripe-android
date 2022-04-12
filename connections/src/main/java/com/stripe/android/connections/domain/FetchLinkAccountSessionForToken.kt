@@ -7,7 +7,7 @@ import com.stripe.android.model.parsers.TokenJsonParser
 import org.json.JSONObject
 import javax.inject.Inject
 
-internal class FetchLinkAccountSessionWithToken @Inject constructor(
+internal class FetchLinkAccountSessionForToken @Inject constructor(
     private val connectionsRepository: ConnectionsRepository
 ) {
 

@@ -1,6 +1,6 @@
 package com.stripe.android.connections.domain
 
-import com.stripe.android.connections.ConnectionsSheetViewModel
+import com.stripe.android.connections.presentation.ConnectionsSheetViewModel
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkedAccount
 import com.stripe.android.connections.model.LinkedAccountList
