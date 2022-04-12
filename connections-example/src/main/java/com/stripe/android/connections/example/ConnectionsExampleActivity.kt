@@ -74,5 +74,6 @@ class ConnectionsExampleActivity : AppCompatActivity() {
     ) {
         viewBinding.status.text = connectionsExampleState.status
         viewBinding.launchConnectionsSheet.isEnabled = connectionsExampleState.loading.not()
+        viewBinding.launchConnectionsSheetForToken.isEnabled = connectionsExampleState.loading.not()
     }
 }
