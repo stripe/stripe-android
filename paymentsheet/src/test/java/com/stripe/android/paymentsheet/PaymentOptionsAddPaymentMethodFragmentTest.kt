@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -22,7 +21,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
@@ -40,14 +38,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
     @After
     fun cleanUp() {
         super.after()
-    }
-
-    @Test
-    fun `when isGooglePayEnabled=true should still not display the Google Pay button`() {
-        createFragment { _, viewBinding, _ ->
-            assertThat(viewBinding.googlePayButton.isVisible)
-                .isFalse()
-        }
     }
 
     @Test
@@ -128,7 +118,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         viewModel.setStripeIntent(args.stripeIntent)
         TestUtils.idleLooper()
         if (registerInjector) {
-            registerViewModel(args.injectorKey, viewModel)
+            registerViewModel(args.injectorKey, viewModel, createFormViewModel())
         }
         launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
             bundleOf(

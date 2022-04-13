@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface InputController : SectionFieldErrorController {
-    val label: Int
+    val label: Flow<Int>
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>

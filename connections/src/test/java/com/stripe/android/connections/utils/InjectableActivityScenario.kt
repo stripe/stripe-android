@@ -7,7 +7,6 @@ import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.runner.lifecycle.ActivityLifecycleCallback
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
@@ -35,20 +34,6 @@ inline fun <reified T : Activity> injectableActivityScenario(injector: Injectabl
     }
 
 /**
- * Adds an injector to the target [InjectableActivityScenario] for the given [Activity].
- */
-inline fun <reified A : Activity> InjectableActivityScenario<*>.injectActivity(noinline injector: A.() -> Unit) {
-    injectActivity(A::class.java, injector)
-}
-
-/**
- * Adds an injector to the target [InjectableActivityScenario] for the given [Fragment].
- */
-inline fun <reified F : Fragment> InjectableActivityScenario<*>.injectFragment(noinline injector: F.() -> Unit) {
-    injectFragment(F::class.java, injector)
-}
-
-/**
  * InjectableActivityScenario is an extension and wrapper of [ActivityScenario] which allows you to easily inject
  * any [Activity]s and [Fragment]s that need to be loaded from the launch Activity.
  *
@@ -65,10 +50,9 @@ inline fun <reified F : Fragment> InjectableActivityScenario<*>.injectFragment(n
  * }
  * ```
  */
-class InjectableActivityScenario<T : Activity>(private val activityClass: Class<T>) : AutoCloseable, Closeable {
-
-    val state: Lifecycle.State?
-        get() = delegate?.state
+class InjectableActivityScenario<T : Activity>(
+    private val activityClass: Class<T>
+) : AutoCloseable, Closeable {
 
     private var delegate: ActivityScenario<T>? = null
 
@@ -76,7 +60,8 @@ class InjectableActivityScenario<T : Activity>(private val activityClass: Class<
     private val fragmentInjectors = mutableListOf<FragmentInjector<out Fragment>>()
 
     fun launch(startIntent: Intent? = null): InjectableActivityScenario<T> {
-        ActivityLifecycleMonitorRegistry.getInstance().addLifecycleCallback(activityLifecycleObserver)
+        ActivityLifecycleMonitorRegistry.getInstance()
+            .addLifecycleCallback(activityLifecycleObserver)
         delegate = if (startIntent != null) {
             ActivityScenario.launch(startIntent)
         } else {
@@ -87,24 +72,8 @@ class InjectableActivityScenario<T : Activity>(private val activityClass: Class<
 
     override fun close() {
         delegate?.close()
-        ActivityLifecycleMonitorRegistry.getInstance().removeLifecycleCallback(activityLifecycleObserver)
-    }
-
-    fun moveToState(newState: Lifecycle.State): InjectableActivityScenario<T> {
-        val d =
-            delegate ?: throw IllegalStateException(
-                "Cannot move to state $newState since the activity hasn't been launched."
-            )
-        d.moveToState(newState)
-        return this
-    }
-
-    fun recreate(): InjectableActivityScenario<T> {
-        val d = delegate ?: throw IllegalStateException(
-            "Cannot recreate the activity since it hasn't been launched."
-        )
-        d.recreate()
-        return this
+        ActivityLifecycleMonitorRegistry.getInstance()
+            .removeLifecycleCallback(activityLifecycleObserver)
     }
 
     fun onActivity(action: (T) -> Unit): InjectableActivityScenario<T> {
@@ -126,23 +95,6 @@ class InjectableActivityScenario<T : Activity>(private val activityClass: Class<
      */
     fun injectActivity(injector: T.() -> Unit) {
         activityInjectors.add(ActivityInjector(activityClass, injector))
-    }
-
-    fun <A : Activity> injectActivity(activityClass: Class<A>, injector: A.() -> Unit) {
-        activityInjectors.add(ActivityInjector(activityClass, injector))
-    }
-
-    fun <F : Fragment> injectFragment(fragmentClass: Class<F>, injector: F.() -> Unit) {
-        fragmentInjectors.add(FragmentInjector(fragmentClass, injector))
-    }
-
-    fun <F : Fragment> injectFragment(fragment: F, injector: F.() -> Unit) {
-        fragmentInjectors.add(
-            FragmentInjector(
-                fragment::class.java,
-                injector
-            )
-        )
     }
 
     private class ActivityInjector<A : Activity>(

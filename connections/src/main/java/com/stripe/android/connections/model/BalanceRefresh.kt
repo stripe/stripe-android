@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
+@Suppress("unused")
 data class BalanceRefresh(
     @SerialName("status") val status: BalanceRefreshStatus? = BalanceRefreshStatus.UNKNOWN,
     @SerialName("last_attempted_at") val lastAttemptedAt: Int

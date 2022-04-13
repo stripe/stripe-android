@@ -23,6 +23,12 @@ internal interface IdentityIO {
     fun createInternalFileUri(): ContentUriResult
 
     /**
+     * Create a Uri from a file
+     */
+    @Throws(IOException::class)
+    fun createUriForFile(file: File): Uri
+
+    /**
      * Read the image at uri, resize it with corresponding resolution, compress it and save it as a
      * [File] with proper name.
      */
@@ -65,4 +71,9 @@ internal interface IdentityIO {
      * Create a file for tflite model.
      */
     fun createTFLiteFile(modelUrl: String): File
+
+    /**
+     * Create a file in cache.
+     */
+    fun createCacheFile(): File
 }

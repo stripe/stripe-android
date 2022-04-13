@@ -1,9 +1,12 @@
 package com.stripe.android.cards
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 
-internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
     override fun first(
         cardNumber: CardNumber.Unvalidated
     ) = filter(cardNumber).firstOrNull()
@@ -99,9 +102,15 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val UNIONPAY_ACCOUNTS = setOf(
+        @VisibleForTesting
+        internal val UNIONPAY16_ACCOUNTS = setOf(
             BinRange(
                 low = "6200000000000000",
+                high = "6216828049999999"
+            ),
+
+            BinRange(
+                low = "6216828060000000",
                 high = "6299999999999999"
             ),
 
@@ -113,6 +122,20 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
+                brandInfo = AccountRange.BrandInfo.UnionPay
+            )
+        }
+
+        @VisibleForTesting
+        internal val UNIONPAY19_ACCOUNTS = setOf(
+            BinRange(
+                low = "6216828050000000000",
+                high = "6216828059999999999"
+            )
+        ).map {
+            AccountRange(
+                binRange = it,
+                panLength = 19,
                 brandInfo = AccountRange.BrandInfo.UnionPay
             )
         }
@@ -159,7 +182,8 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 .plus(AMEX_ACCOUNTS)
                 .plus(DISCOVER_ACCOUNTS)
                 .plus(JCB_ACCOUNTS)
-                .plus(UNIONPAY_ACCOUNTS)
+                .plus(UNIONPAY16_ACCOUNTS)
+                .plus(UNIONPAY19_ACCOUNTS)
                 .plus(DINERSCLUB16_ACCOUNT_RANGES)
                 .plus(DINERSCLUB14_ACCOUNT_RANGES)
     }

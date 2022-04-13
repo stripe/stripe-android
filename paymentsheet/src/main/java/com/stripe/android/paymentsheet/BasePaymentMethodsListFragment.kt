@@ -1,21 +1,12 @@
 package com.stripe.android.paymentsheet
 
-import android.graphics.Paint
-import android.graphics.Typeface
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.TextPaint
-import android.text.style.AbsoluteSizeSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.MetricAffectingSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
@@ -23,8 +14,8 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
-import com.stripe.android.ui.core.convertDpToPx
+import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -71,6 +62,13 @@ internal abstract class BasePaymentMethodsListFragment(
         isEditing = savedInstanceState?.getBoolean(IS_EDITING) ?: false
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        sheetViewModel.headerText.value =
+            getString(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
         // Menu is created after view state is restored, so we need to update the title here
@@ -80,42 +78,19 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     private fun setEditMenuText() {
-        val isDark = this.context?.isSystemDarkTheme() ?: false
         editMenuItem?.apply {
-            val editMenuText = getString(if (isEditing) R.string.done else R.string.edit)
-            val editMenuTextSpan = SpannableString(editMenuText)
-            editMenuTextSpan.setSpan(
-                ForegroundColorSpan(PaymentsThemeConfig.colors(isDark).appBarIcon.toArgb()),
-                0,
-                editMenuTextSpan.length,
-                0
-            )
-
-            val fontSize = context?.convertDpToPx(
-                PaymentsThemeConfig.Typography.h6.fontSize.value.dp
-            ) ?: 0
-            editMenuTextSpan.setSpan(
-                AbsoluteSizeSpan(fontSize.toInt()),
-                0,
-                editMenuTextSpan.length,
-                0
-            )
             context?.let {
-                val typeFace = ResourcesCompat.getFont(
-                    it,
-                    PaymentsThemeConfig.Typography.fontFamily
+                title = createTextSpanFromTextStyle(
+                    text = getString(if (isEditing) R.string.done else R.string.edit),
+                    context = it,
+                    fontSizeDp = (
+                        PaymentsThemeDefaults.typography.fontSizeMultiplier
+                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                        ).dp,
+                    color = PaymentsThemeDefaults.colors(it.isSystemDarkTheme()).appBarIcon,
+                    fontFamily = PaymentsThemeDefaults.typography.fontFamily
                 )
-                typeFace?.let {
-                    editMenuTextSpan.setSpan(
-                        CustomTypefaceSpan(typeFace),
-                        0,
-                        editMenuTextSpan.length,
-                        0
-                    )
-                }
             }
-
-            title = editMenuTextSpan
         }
     }
 
@@ -163,6 +138,7 @@ internal abstract class BasePaymentMethodsListFragment(
         adapter.setItems(
             config,
             sheetViewModel.paymentMethods.value.orEmpty(),
+            sheetViewModel is PaymentOptionsViewModel,
             sheetViewModel.selection.value
         )
 
@@ -184,23 +160,6 @@ internal abstract class BasePaymentMethodsListFragment(
     private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
         adapter.removeItem(item)
         sheetViewModel.removePaymentMethod(item.paymentMethod)
-    }
-
-    class CustomTypefaceSpan(typeface: Typeface) : MetricAffectingSpan() {
-        private val typeface: Typeface = typeface
-        override fun updateDrawState(ds: TextPaint) {
-            applyCustomTypeFace(ds, typeface)
-        }
-
-        override fun updateMeasureState(paint: TextPaint) {
-            applyCustomTypeFace(paint, typeface)
-        }
-
-        companion object {
-            private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
-                paint.typeface = tf
-            }
-        }
     }
 
     private companion object {

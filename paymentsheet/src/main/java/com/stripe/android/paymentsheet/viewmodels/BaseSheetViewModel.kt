@@ -1,6 +1,11 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -11,8 +16,12 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -27,7 +36,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -38,6 +46,31 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
+
+@VisibleForTesting
+class TransitionFragmentResource {
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        @Nullable
+        var idlingResource: CountingIdlingResource? = null
+
+        // This will only be called from test code
+        @VisibleForTesting
+        @NonNull
+        fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
+            if (idlingResource == null) {
+                idlingResource = try {
+                    Class.forName("androidx.test.espresso.Espresso")
+                    val countingIdlingResource = CountingIdlingResource("transition")
+                    countingIdlingResource
+                } catch (e: ClassNotFoundException) {
+                    null
+                }
+            }
+            return idlingResource
+        }
+    }
+}
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -52,7 +85,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val logger: Logger,
     @InjectorKey val injectorKey: String,
     resourceRepository: ResourceRepository,
-    val savedStateHandle: SavedStateHandle
+    val savedStateHandle: SavedStateHandle,
+    internal val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -62,9 +96,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _fatal = MutableLiveData<Throwable>()
 
     @VisibleForTesting
-    internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(
-        SAVE_GOOGLE_PAY_READY
-    )
+    internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
     private val _isResourceRepositoryReady = savedStateHandle.getLiveData<Boolean>(
@@ -72,6 +104,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     )
     internal val isResourceRepositoryReady: LiveData<Boolean> =
         _isResourceRepositoryReady.distinctUntilChanged()
+
+    private val _isLinkEnabled = MutableLiveData<Boolean>()
+    internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled.distinctUntilChanged()
 
     private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
@@ -96,7 +131,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
     internal val amount: LiveData<Amount> = _amount
 
-    internal val headerVisibilility: MutableLiveData<Boolean> = MutableLiveData(true)
+    internal val headerText = MutableLiveData<String>()
+    internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
 
     private var addFragmentSelectedLPM =
         savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
@@ -107,7 +143,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * Represents what the user last selects (add or buy) on the
      * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
-    private val _savedSelection = savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
+    private val _savedSelection =
+        savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
@@ -132,6 +169,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
+    protected var linkActivityResultLauncher:
+        ActivityResultLauncher<LinkActivityContract.Args>? = null
+
     /**
      * This should be initialized from the starter args, and then from that
      * point forward it will be the last valid card seen or entered in the add card view.
@@ -144,34 +184,45 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onFatal(throwable: Throwable)
 
-    val ctaEnabled = MediatorLiveData<Boolean>().apply {
+    val buttonsEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
             processing,
-            selection,
             editing
         ).forEach { source ->
             addSource(source) {
                 value = processing.value != true &&
-                    selection.value != null &&
                     editing.value != true
             }
         }
     }.distinctUntilChanged()
 
+    val ctaEnabled = MediatorLiveData<Boolean>().apply {
+        listOf(
+            buttonsEnabled,
+            selection,
+        ).forEach { source ->
+            addSource(source) {
+                value = buttonsEnabled.value == true &&
+                    selection.value != null
+            }
+        }
+    }.distinctUntilChanged()
+
     init {
+        TransitionFragmentResource.idlingResource?.increment()
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
                 }
-                savedStateHandle.set(SAVE_SAVED_SELECTION, savedSelection)
+                savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
             }
         }
 
         if (_isResourceRepositoryReady.value == null) {
             viewModelScope.launch {
                 resourceRepository.waitUntilLoaded()
-                savedStateHandle.set(SAVE_RESOURCE_REPOSITORY_READY, true)
+                savedStateHandle[SAVE_RESOURCE_REPOSITORY_READY] = true
             }
         }
     }
@@ -182,7 +233,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             stripeIntent,
             paymentMethods,
             isGooglePayReady,
-            isResourceRepositoryReady
+            isResourceRepositoryReady,
+            isLinkEnabled
         ).forEach { source ->
             addSource(source) {
                 value = createFragmentConfig()
@@ -196,6 +248,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
+        val isLinkReadyValue = isLinkEnabled.value
         val savedSelectionValue = savedSelection.value
         // List of Payment Methods is not passed in the config but we still wait for it to be loaded
         // before adding the Fragment.
@@ -206,6 +259,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
             isResourceRepositoryReadyValue != null &&
+            isLinkReadyValue != null &&
             savedSelectionValue != null
         ) {
             FragmentConfig(
@@ -219,12 +273,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
+        if (TransitionFragmentResource.idlingResource?.isIdleNow == false) {
+            TransitionFragmentResource.idlingResource?.decrement()
+        }
         _transition.postValue(Event(target))
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
-        savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
+        savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
 
         /**
          * The settings of values in this function is so that
@@ -232,10 +289,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * the [BaseAddPaymentMethodFragment]
          */
         val pmsToAdd = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
-        savedStateHandle.set(
-            SAVE_SUPPORTED_PAYMENT_METHOD,
-            pmsToAdd
-        )
+        savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
@@ -250,12 +304,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent is PaymentIntent) {
             runCatching {
-                savedStateHandle.set(
-                    SAVE_AMOUNT,
-                    Amount(
-                        requireNotNull(stripeIntent.amount),
-                        requireNotNull(stripeIntent.currency)
-                    )
+                savedStateHandle[SAVE_AMOUNT] = Amount(
+                    requireNotNull(stripeIntent.amount),
+                    requireNotNull(stripeIntent.currency)
                 )
             }.onFailure {
                 onFatal(
@@ -286,11 +337,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun updateSelection(selection: PaymentSelection?) {
-        savedStateHandle.set(SAVE_SELECTION, selection)
+        savedStateHandle[SAVE_SELECTION] = selection
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
-        savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
+        savedStateHandle[SAVE_SELECTED_ADD_LPM] = lpm
     }
 
     fun getAddFragmentSelectedLpm() =
@@ -311,12 +362,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
-                savedStateHandle.set(
-                    SAVE_PAYMENT_METHODS,
-                    _paymentMethods.value?.filter {
-                        it.id != paymentMethodId
-                    }
-                )
+                savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
+                    it.id != paymentMethodId
+                }
 
                 customerConfig?.let {
                     customerRepository.detachPaymentMethod(
@@ -328,7 +376,42 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
+    protected fun setupLink(stripeIntent: StripeIntent) {
+        // TODO(brnunes-stripe): Enable Link
+        _isLinkEnabled.value = false
+    }
+
+    /**
+     * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
+     * accordingly.
+     */
+    abstract fun onLinkLaunched()
+
+    /**
+     * Method called with the result of a Link payment.
+     */
+    abstract fun onLinkPaymentResult(result: LinkActivityResult)
+
     abstract fun onUserCancel()
+
+    /**
+     * Used to set up any dependencies that require a reference to the current Activity.
+     * Must be called from the Activity's `onCreate`.
+     */
+    open fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
+        linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
+            LinkActivityContract(),
+            ::onLinkPaymentResult
+        )
+    }
+
+    /**
+     * Used to clean up any dependencies that require a reference to the current Activity.
+     * Must be called from the Activity's `onDestroy`.
+     */
+    open fun unregisterFromActivity() {
+        linkActivityResultLauncher = null
+    }
 
     data class UserErrorMessage(val message: String)
 

@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="id_border_initial_color">#FFFFFF</color>
-
     <color name="check_mark_background">#80FFFFFF</color>
+    <color name="error_exclamation_color">#88919E</color>
+    <color name="viewfinder_border_center">#5469D4</color>
 
-    <color name="loading_button_progress_indicator_color">#80FFFFFF</color>
-
-    <color name="exclamation_mark">#88919E</color>
-
-    <color name="choose_file_tint">#88919E</color>
-    <color name="take_photo_tint">#88919E</color>
+    <color name="plus_icon_tint">#1C1C1E</color>
+    <color name="privacy_policy_icon_tint">#1C1C1E</color>
+    <color name="time_estimate_icon_tint">#1C1C1E</color>
 </resources>

@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.stripe.android.identity">
 
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <application>
+    <application
+        android:usesCleartextTraffic="true"
+        tools:targetApi="m">
         <activity
             android:name=".IdentityActivity"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
             android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.stripe.android.identity.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
  */
 @Parcelize
 @Serializable
+@Suppress("unused")
 data class AccountHolder(
 
     @SerialName("type")

@@ -20,7 +20,7 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        cardScanSheet = CardScanSheet.create(this, settings.publishableKey)
+        cardScanSheet = CardScanSheet.create(this, settings.publishableKey, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
             attachCardScanFragment()

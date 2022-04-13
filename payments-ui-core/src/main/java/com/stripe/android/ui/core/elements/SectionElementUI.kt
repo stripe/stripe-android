@@ -16,6 +16,7 @@ fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
     hiddenIdentifiers: List<IdentifierSpec>,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
@@ -32,10 +33,15 @@ fun SectionElementUI(
 
         Section(controller.label, sectionErrorString) {
             element.fields.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field)
-                if (index != element.fields.size - 1) {
+                SectionFieldElementUI(
+                    enabled,
+                    field,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier
+                )
+                if (index != element.fields.lastIndex) {
                     Divider(
-                        color = PaymentsTheme.colors.colorComponentBorder,
+                        color = PaymentsTheme.colors.colorComponentDivider,
                         thickness = PaymentsTheme.shapes.borderStrokeWidth,
                         modifier = Modifier.padding(
                             horizontal = PaymentsTheme.shapes.borderStrokeWidth

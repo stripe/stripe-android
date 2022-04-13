@@ -8,9 +8,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -20,19 +18,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -60,29 +58,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
 
         val paymentMethods = sheetViewModel.supportedPaymentMethods
-        viewBinding.googlePayDivider.setText(
-            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
-                paymentMethods.size == 1
-            ) {
-                R.string.stripe_paymentsheet_or_pay_with_card
-            } else {
-                R.string.stripe_paymentsheet_or_pay_using
-            }
-        )
 
-        viewBinding.addPaymentMethodHeader.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val headerVisibility = sheetViewModel.headerVisibilility.observeAsState(true)
-                if (headerVisibility.value) {
-                    H4Text(
-                        text = stringResource(
-                            R.string.stripe_paymentsheet_add_payment_method_title
-                        )
-                    )
-                }
-            }
-        }
+        sheetViewModel.headerText.value =
+            getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
             sheetViewModel.getAddFragmentSelectedLpm().value
@@ -200,7 +178,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
             replace(
                 R.id.payment_method_fragment_container,
-                fragmentForPaymentMethod(paymentMethod),
+                ComposeFormDataCollectionFragment::class.java,
                 args
             )
         }
@@ -210,17 +188,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-
-        private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-            when (paymentMethod) {
-                SupportedPaymentMethod.Card -> {
-                    CardDataCollectionFragment::class.java
-                }
-                else -> {
-                    ComposeFormDataCollectionFragment::class.java
-                }
-            }
-
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
 
         @VisibleForTesting
@@ -231,12 +198,23 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         ) = formFieldValues?.let {
             transformToPaymentMethodCreateParams.transform(formFieldValues, paramKey)
                 ?.run {
-                    PaymentSelection.New.GenericPaymentMethod(
-                        selectedPaymentMethodResources.displayNameResource,
-                        selectedPaymentMethodResources.iconResource,
-                        this,
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-                    )
+                    if (this.typeCode == "card") {
+                        PaymentSelection.New.Card(
+                            paymentMethodCreateParams = this,
+                            brand = CardBrand.fromCode(
+                                formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
+                            ),
+                            customerRequestedSave = formFieldValues.userRequestedReuse
+
+                        )
+                    } else {
+                        PaymentSelection.New.GenericPaymentMethod(
+                            selectedPaymentMethodResources.displayNameResource,
+                            selectedPaymentMethodResources.iconResource,
+                            this,
+                            customerRequestedSave = formFieldValues.userRequestedReuse
+                        )
+                    }
                 }
         }
 

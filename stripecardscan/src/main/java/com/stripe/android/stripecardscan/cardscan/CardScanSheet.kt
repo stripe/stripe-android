@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
@@ -43,42 +44,73 @@ private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
 class CardScanSheet private constructor(private val stripePublishableKey: String) {
 
-    private var onFinished:
-        ((cardImageVerificationSheetResult: CardScanSheetResult) -> Unit)? = null
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
+
+    /**
+     * Callback to notify when scanning finishes and a result is available.
+     */
+    fun interface CardScanResultCallback {
+        fun onCardScanSheetResult(cardScanSheetResult: CardScanSheetResult)
+    }
 
     companion object {
         /**
          * Create a [CardScanSheet] instance with [ComponentActivity].
          *
          * This API registers an [ActivityResultLauncher] into the
-         * [ComponentActivity], it must be called before the [ComponentActivity]
-         * is created (in the onCreate method).
+         * [ComponentActivity] and notifies its result to [cardScanSheetResultCallback], it must be
+         * called before the [ComponentActivity] is created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: ComponentActivity, stripePublishableKey: String) =
+        fun create(
+            from: ComponentActivity,
+            stripePublishableKey: String,
+            cardScanSheetResultCallback: CardScanResultCallback,
+            registry: ActivityResultRegistry = from.activityResultRegistry,
+        ) =
             CardScanSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
+                launcher = from.registerForActivityResult(
+                    activityResultContract,
+                    registry,
+                    cardScanSheetResultCallback::onCardScanSheetResult,
+                )
             }
 
         /**
          * Create a [CardScanSheet] instance with [Fragment].
          *
-         * This API registers an [ActivityResultLauncher] into the [Fragment], it must be called
-         * before the [Fragment] is created (in the onCreate method).
+         * This API registers an [ActivityResultLauncher] into the [Fragment] and notifies its
+         * result to [cardScanSheetResultCallback], it must be called before the [Fragment] is
+         * created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: Fragment, stripePublishableKey: String) =
+        fun create(
+            from: Fragment,
+            stripePublishableKey: String,
+            cardScanSheetResultCallback: CardScanResultCallback,
+            registry: ActivityResultRegistry? = null,
+        ) =
             CardScanSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
+                launcher = if (registry != null) {
+                    from.registerForActivityResult(
+                        activityResultContract,
+                        registry,
+                        cardScanSheetResultCallback::onCardScanSheetResult,
+                    )
+                } else {
+                    from.registerForActivityResult(
+                        activityResultContract,
+                        cardScanSheetResultCallback::onCardScanSheetResult,
+                    )
+                }
             }
 
         private fun createIntent(context: Context, input: CardScanSheetParams) =
             Intent(context, CardScanActivity::class.java)
                 .putExtra(INTENT_PARAM_REQUEST, input)
 
-        private fun parseResult(intent: Intent): CardScanSheetResult =
-            intent.getParcelableExtra(INTENT_PARAM_RESULT)
+        private fun parseResult(intent: Intent?): CardScanSheetResult =
+            intent?.getParcelableExtra(INTENT_PARAM_RESULT)
                 ?: CardScanSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
@@ -107,7 +139,7 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             override fun parseResult(
                 resultCode: Int,
                 intent: Intent?,
-            ) = this@Companion.parseResult(requireNotNull(intent))
+            ) = this@Companion.parseResult(intent)
         }
     }
 
@@ -118,22 +150,12 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
      * The ID and Secret are created from this server-server request:
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
-    fun present(
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
-    ) {
-        this.onFinished = onFinished
+    fun present() {
         launcher.launch(
             CardScanSheetParams(
                 stripePublishableKey = stripePublishableKey
             )
         )
-    }
-
-    /**
-     * When a result is available from the activity, call [onFinished] if it's available.
-     */
-    private fun onResult(cardScanSheetResult: CardScanSheetResult) {
-        onFinished?.let { it(cardScanSheetResult) }
     }
 
     /**

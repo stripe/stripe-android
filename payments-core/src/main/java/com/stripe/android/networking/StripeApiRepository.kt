@@ -2,20 +2,25 @@ package com.stripe.android.networking
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AppInfo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -32,10 +37,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.PermissionException
-import com.stripe.android.exception.RateLimitException
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
@@ -59,9 +61,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeFile
-import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -143,7 +142,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
-        appInfo = appInfo?.toInternalAppInfo(),
+        appInfo = appInfo,
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
@@ -1089,11 +1088,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): StripeFile {
         val response = makeFileUploadRequest(
-            FileUploadRequest(fileParams.toInternal(), requestOptions, appInfo?.toInternalAppInfo())
+            FileUploadRequest(fileParams, requestOptions, appInfo)
         ) {
             fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
         }
-        return StripeFile.fromInternal(StripeFileJsonParser().parse(response.responseJson()))
+        return StripeFileJsonParser().parse(response.responseJson())
     }
 
     @Throws(
@@ -1405,7 +1404,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachLinkAccountSessionToPaymentIntentUrl(paymentIntentId, linkAccountSessionId),
+                getAttachLinkAccountSessionToPaymentIntentUrl(
+                    paymentIntentId,
+                    linkAccountSessionId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
@@ -1432,6 +1434,100 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
+                )
+            ),
+            SetupIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the PaymentIntent with microdeposits amounts
+     */
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "amounts" to listOf(firstAmount, secondAmount)
+                )
+            ),
+            PaymentIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the PaymentIntent with microdeposits descriptor code
+     */
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "descriptor_code" to descriptorCode
+                )
+            ),
+            PaymentIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the SetupIntent with microdeposits amounts
+     */
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "amounts" to listOf(firstAmount, secondAmount)
+                )
+            ),
+            SetupIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the SetupIntent with microdeposits descriptor code
+     */
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "descriptor_code" to descriptorCode
                 )
             ),
             SetupIntentJsonParser()
@@ -1926,6 +2022,34 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 "setup_intents/%s/link_account_sessions/%s/attach",
                 setupIntentId,
                 linkAccountSessionId
+            )
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/payment_intents/:clientSecret/verify_microdeposits`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getVerifyMicrodepositsOnPaymentIntentUrl(
+            clientSecret: String
+        ): String {
+            return getApiUrl(
+                "payment_intents/%s/verify_microdeposits",
+                clientSecret
+            )
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:clientSecret/verify_microdeposits`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getVerifyMicrodepositsOnSetupIntentUrl(
+            clientSecret: String
+        ): String {
+            return getApiUrl(
+                "setup_intents/%s/verify_microdeposits",
+                clientSecret
             )
         }
 

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import java.util.Locale
 
@@ -24,8 +25,8 @@ class DropdownFieldControllerTest {
     }
 
     @Test
-    fun `Verify label gets the label from the config`() {
-        assertThat(controller.label).isEqualTo(countryConfig.label)
+    fun `Verify label gets the label from the config`() = runBlockingTest {
+        assertThat(controller.label.first()).isEqualTo(countryConfig.label)
     }
 
     @Test

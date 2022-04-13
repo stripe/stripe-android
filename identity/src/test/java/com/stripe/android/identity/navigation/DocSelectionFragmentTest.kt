@@ -1,7 +1,6 @@
 package com.stripe.android.identity.navigation
 
 import android.view.View
-import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
@@ -18,7 +17,7 @@ import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRI
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.ID_CARD_KEY
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.PASSPORT_KEY
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
@@ -129,7 +128,7 @@ internal class DocSelectionFragmentTest {
     fun `Passport single choice UI is correctly bound`() {
         verifySingleChoiceUI(
             DOC_SELECT_SINGLE_CHOICE_PASSPORT,
-            R.string.single_selection_body_content_passport
+            PASSPORT_SINGLE_BODY_TEXT
         )
     }
 
@@ -137,7 +136,7 @@ internal class DocSelectionFragmentTest {
     fun `ID single choice UI is correctly bound`() {
         verifySingleChoiceUI(
             DOC_SELECT_SINGLE_CHOICE_ID,
-            R.string.single_selection_body_content_id
+            ID_SINGLE_BODY_TEXT
         )
     }
 
@@ -145,7 +144,7 @@ internal class DocSelectionFragmentTest {
     fun `Driver license single choice UI is correctly bound`() {
         verifySingleChoiceUI(
             DOC_SELECT_SINGLE_CHOICE_DL,
-            R.string.single_selection_body_content_dl
+            DRIVING_LICENSE_SINGLE_BODY_TEXT
         )
     }
 
@@ -302,7 +301,7 @@ internal class DocSelectionFragmentTest {
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
                 [ARG_SCAN_TYPE]
-            ).isEqualTo(IdDocumentParam.Type.DRIVINGLICENSE)
+            ).isEqualTo(CollectedDataParam.Type.DRIVINGLICENSE)
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.cameraPermissionDeniedFragment)
@@ -310,7 +309,7 @@ internal class DocSelectionFragmentTest {
     }
 
     @Test
-    fun `when camera permission is denied, clicking continue navigates to ErrorFragment when requireLiveCapture is true`() {
+    fun `when camera permission is denied, clicking continue navigates to CameraPermissionDeniedFragment when requireLiveCapture is true`() {
         launchDocSelectionFragment { binding, navController, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_SINGLE_CHOICE_DL
@@ -345,15 +344,17 @@ internal class DocSelectionFragmentTest {
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.errorFragment)
+                .isEqualTo(R.id.cameraPermissionDeniedFragment)
+
+            assertThat(requireNotNull(navController.backStack.last().arguments).isEmpty).isTrue()
         }
     }
 
     private fun verifySingleChoiceUI(
         docSelect: VerificationPageStaticContentDocumentSelectPage,
-        @StringRes expectedBodyStringRes: Int
+        expectedBodyString: String
     ) {
-        launchDocSelectionFragment { binding, _, docSelectionFragment ->
+        launchDocSelectionFragment { binding, _, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 docSelect
             )
@@ -364,7 +365,7 @@ internal class DocSelectionFragmentTest {
             assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.VISIBLE)
 
             assertThat(binding.singleSelectionBody.text).isEqualTo(
-                docSelectionFragment.getString(expectedBodyStringRes)
+                expectedBodyString
             )
 
             assertThat(
@@ -409,6 +410,12 @@ internal class DocSelectionFragmentTest {
         const val PASSPORT_BUTTON_TEXT = "Passport"
         const val ID_BUTTON_TEXT = "ID"
         const val DRIVING_LICENSE_BUTTON_TEXT = "Driver's license"
+        const val PASSPORT_BODY_TEXT = "Passport body"
+        const val ID_BODY_TEXT = "ID body"
+        const val DRIVING_LICENSE_BODY_TEXT = "Driver's license body"
+        const val PASSPORT_SINGLE_BODY_TEXT = "Passport single selection body"
+        const val ID_SINGLE_BODY_TEXT = "ID single selection body"
+        const val DRIVING_LICENSE_SINGLE_BODY_TEXT = "Driver's license single selection body"
 
         val DOC_SELECT_MULTI_CHOICE = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
@@ -417,37 +424,42 @@ internal class DocSelectionFragmentTest {
                 ID_CARD_KEY to ID_BUTTON_TEXT,
                 DRIVING_LICENSE_KEY to DRIVING_LICENSE_BUTTON_TEXT
             ),
-            buttonText = DOCUMENT_SELECT_BUTTON_TEXT
+            buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
+            body = null
         )
 
         val DOC_SELECT_SINGLE_CHOICE_PASSPORT = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                PASSPORT_KEY to PASSPORT_BUTTON_TEXT,
+                PASSPORT_KEY to PASSPORT_BODY_TEXT,
             ),
-            buttonText = DOCUMENT_SELECT_BUTTON_TEXT
+            buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
+            body = PASSPORT_SINGLE_BODY_TEXT
         )
 
         val DOC_SELECT_SINGLE_CHOICE_ID = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                ID_CARD_KEY to ID_BUTTON_TEXT,
+                ID_CARD_KEY to ID_BODY_TEXT,
             ),
-            buttonText = DOCUMENT_SELECT_BUTTON_TEXT
+            buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
+            body = ID_SINGLE_BODY_TEXT
         )
 
         val DOC_SELECT_SINGLE_CHOICE_DL = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                DRIVING_LICENSE_KEY to DRIVING_LICENSE_BUTTON_TEXT
+                DRIVING_LICENSE_KEY to DRIVING_LICENSE_BODY_TEXT
             ),
-            buttonText = DOCUMENT_SELECT_BUTTON_TEXT
+            buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
+            body = DRIVING_LICENSE_SINGLE_BODY_TEXT
         )
 
         val DOC_SELECT_ZERO_CHOICE = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = emptyMap(),
-            buttonText = DOCUMENT_SELECT_BUTTON_TEXT
+            buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
+            body = null
         )
 
         val MISSING_BACK_VERIFICATION_PAGE_DATA = VerificationPageData(
@@ -455,7 +467,7 @@ internal class DocSelectionFragmentTest {
             objectType = "type",
             requirements = VerificationPageDataRequirements(
                 errors = emptyList(),
-                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTBACK)
+//                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTBACK)
             ),
             status = VerificationPageData.Status.VERIFIED,
             submitted = false

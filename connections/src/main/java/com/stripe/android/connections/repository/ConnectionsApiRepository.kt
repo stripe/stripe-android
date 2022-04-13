@@ -2,16 +2,16 @@ package com.stripe.android.connections.repository
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.connections.di.PUBLISHABLE_KEY
-import com.stripe.android.connections.exception.AuthenticationException
-import com.stripe.android.connections.exception.PermissionException
-import com.stripe.android.connections.exception.RateLimitException
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountList
 import com.stripe.android.connections.model.ListLinkedAccountParams
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
@@ -21,7 +21,6 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import java.lang.Exception
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
@@ -29,6 +28,7 @@ import javax.inject.Named
 internal class ConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
+    private val apiRequestFactory: ApiRequest.Factory
 ) : ConnectionsRepository {
 
     @VisibleForTesting
@@ -39,7 +39,6 @@ internal class ConnectionsApiRepository @Inject constructor(
         encodeDefaults = true
     }
 
-    private val apiRequestFactory = ApiRequest.Factory()
     private val options = ApiRequest.Options(
         apiKey = publishableKey
     )
@@ -120,7 +119,11 @@ internal class ConnectionsApiRepository @Inject constructor(
         val stripeError = StripeErrorJsonParser().parse(response.responseJson())
         throw when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST,
-            HttpURLConnection.HTTP_NOT_FOUND -> InvalidRequestException(stripeError, requestId, responseCode)
+            HttpURLConnection.HTTP_NOT_FOUND -> InvalidRequestException(
+                stripeError,
+                requestId,
+                responseCode
+            )
             HttpURLConnection.HTTP_UNAUTHORIZED -> AuthenticationException(stripeError, requestId)
             HttpURLConnection.HTTP_FORBIDDEN -> PermissionException(stripeError, requestId)
             HTTP_TOO_MANY_REQUESTS -> RateLimitException(stripeError, requestId)

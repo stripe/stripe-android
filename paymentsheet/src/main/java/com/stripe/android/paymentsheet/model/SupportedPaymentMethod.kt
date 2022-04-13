@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentIntent
@@ -15,6 +16,8 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
+import com.stripe.android.ui.core.forms.CardForm
+import com.stripe.android.ui.core.forms.CardParamKey
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
@@ -30,7 +33,6 @@ import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.AffirmForm
 import com.stripe.android.ui.core.forms.AffirmParamKey
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
@@ -64,7 +66,8 @@ import kotlinx.parcelize.Parcelize
  * FormSpec is optionally null only because Card is not converted to the
  * compose model.
  */
-internal sealed class SupportedPaymentMethod(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed class SupportedPaymentMethod(
     /**
      * This describes the PaymentMethod Type as described
      * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
@@ -94,18 +97,18 @@ internal sealed class SupportedPaymentMethod(
      */
     val formSpec: LayoutSpec,
 ) : Parcelable {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Card : SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
         CardRequirement,
-        mutableMapOf(),
-        LayoutSpec.create(
-            SaveForFutureUseSpec(emptyList())
-        )
+        CardParamKey,
+        CardForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Bancontact : SupportedPaymentMethod(
         PaymentMethod.Type.Bancontact,
@@ -116,6 +119,7 @@ internal sealed class SupportedPaymentMethod(
         BancontactForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Sofort : SupportedPaymentMethod(
         PaymentMethod.Type.Sofort,
@@ -126,6 +130,7 @@ internal sealed class SupportedPaymentMethod(
         SofortForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Ideal : SupportedPaymentMethod(
         PaymentMethod.Type.Ideal,
@@ -136,6 +141,7 @@ internal sealed class SupportedPaymentMethod(
         IdealForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object SepaDebit : SupportedPaymentMethod(
         PaymentMethod.Type.SepaDebit,
@@ -146,6 +152,7 @@ internal sealed class SupportedPaymentMethod(
         SepaDebitForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Eps : SupportedPaymentMethod(
         PaymentMethod.Type.Eps,
@@ -156,6 +163,7 @@ internal sealed class SupportedPaymentMethod(
         EpsForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object P24 : SupportedPaymentMethod(
         PaymentMethod.Type.P24,
@@ -166,6 +174,7 @@ internal sealed class SupportedPaymentMethod(
         P24Form
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Giropay : SupportedPaymentMethod(
         PaymentMethod.Type.Giropay,
@@ -176,6 +185,7 @@ internal sealed class SupportedPaymentMethod(
         GiropayForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object AfterpayClearpay : SupportedPaymentMethod(
         PaymentMethod.Type.AfterpayClearpay,
@@ -186,6 +196,7 @@ internal sealed class SupportedPaymentMethod(
         AfterpayClearpayForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Klarna : SupportedPaymentMethod(
         PaymentMethod.Type.Klarna,
@@ -196,6 +207,7 @@ internal sealed class SupportedPaymentMethod(
         KlarnaForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object PayPal : SupportedPaymentMethod(
         PaymentMethod.Type.PayPal,
@@ -206,6 +218,7 @@ internal sealed class SupportedPaymentMethod(
         PaypalForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Affirm : SupportedPaymentMethod(
         PaymentMethod.Type.Affirm,
@@ -216,6 +229,7 @@ internal sealed class SupportedPaymentMethod(
         AffirmForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object AuBecsDebit : SupportedPaymentMethod(
         PaymentMethod.Type.AuBecsDebit,
@@ -398,21 +412,34 @@ internal sealed class SupportedPaymentMethod(
          * This is a list of the payment methods that we are allowing in the release
          */
         @VisibleForTesting
-        internal val exposedPaymentMethods = listOf(
-            Card,
-            Bancontact,
-            Sofort,
-            Ideal,
-            SepaDebit,
-            Eps,
-            Giropay,
-            P24,
-            Klarna,
-            PayPal,
-            AfterpayClearpay,
-            // Affirm // TODO: uncomment once we are ready to go live
-            // AuBecsDebit // TODO: uncomment once we are ready to go live
-        )
+        internal val exposedPaymentMethods by lazy {
+            listOf(
+                Card,
+                Bancontact,
+                Sofort,
+                Ideal,
+                SepaDebit,
+                Eps,
+                Giropay,
+                P24,
+                Klarna,
+                PayPal,
+                AfterpayClearpay,
+                // Affirm // TODO: uncomment once we are ready to go live
+                // AuBecsDebit // TODO: uncomment once we are ready to go live
+            )
+        }
+
+        /**
+         * This is a list of payment methods that we should tint their icons
+         * when they are selected in UI.
+         */
+        internal fun SupportedPaymentMethod.shouldTintOnSelection(): Boolean {
+            return setOf(
+                Card,
+                AuBecsDebit
+            ).contains(this)
+        }
 
         /**
          * This will use only those payment methods that are allowed in the release

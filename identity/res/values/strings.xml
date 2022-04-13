@@ -1,72 +1,98 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="kontinue">continue</string>
-    <string name="driver_license" description="display name for driver's license">Driver\'s license</string>
-    <string name="id_card" description="display name for ID">ID</string>
-    <string name="passport" description="display name for driver's license">Passport</string>
-
-    <string name="doc_select_title">Which form of identification do you want to use?</string>
-
-    <string name="front_of_id" description="Title for the screen to scan back of ID">Front of ID</string>
-    <string name="back_of_id" description="Title for the screen to scan front of ID">Back of ID</string>
-    <string name="front_of_dl" description="Title for the screen to scan front of driver's license">Front of dirver\'s license</string>
-    <string name="back_of_dl" description="Title for the screen to scan back of driver's license">Back of dirver\'s license</string>
-
-    <string name="position_id_front" description="Message to tell user to position ID">Position your ID in the center of the frame</string>
-    <string name="position_id_back" description="Message to tell user to flip ID">Flip your ID over to the other side</string>
-    <string name="position_dl_front" description="Message to tell user to position driver's license">Position your driver\'s license in the center of the frame</string>
-    <string name="position_dl_back" description="Message to tell user to flip driver's license">Flip your driver\'s license over to the other side</string>
-    <string name="position_passport" description="Message to tell user to position passport">Position your Passport in the center of the frame</string>
-
-    <string name="hold_still" description="Message to tell user hold camera still">Hold still, scanning</string>
-    <string name="scanned" description="Message to indicate the docment is scanned">Scanned</string>
-
-    <string name="check_mark" description="Description of the check mark, used for A11Y">Check mark to indicate document capture success</string>
-
-    <string name="file_upload" description="Button text for file upload">File Upload</string>
-    <string name="app_settings" description="Button text for app settings">App Settings</string>
-    <string name="camera_permission" description="Camera permission denied screen title">Camera permission</string>
-
-    <!--TODO: This string is not yet finalized-->
-    <string name="camera_permission_rationale" description="Message for camera permission rationale before requesting permission" translatable="false">We need to use your camera for capture ID images.</string>
-
-    <string name="grant_camera_permission_text" description="Message for camera permission denied screen">We need permission to use your camera. Please allow camera access in app settings.</string>
-    <string name="ok" description="OK button text">OK</string>
-    <string name="upload_file_text" description="Message for alternative options when uploading a document">Alternatively, you may manually upload a photo of your %1$s</string>
-
-    <string name="select" description="Text for select button">Select</string>
-
-    <string name="file_upload_content_id" description="Title for ID uploading screen">Please upload images of the front and back of your ID</string>
-    <string name="file_upload_content_dl" description="Title for driver's license uploading screen">Please upload images of the front and back of your driver\'s license</string>
-    <string name="file_upload_content_passport" description="Title for passport uploading screen">Please upload a image of your passport</string>
-
-    <string name="back_of_id_selected" description="Description of the checkmark to indicate back of ID is uploaded, used for A11Y">Back of ID is selected</string>
-    <string name="front_of_id_selected" description="Description of the checkmark to indicate front of ID is uploaded, used for A11Y">Front of ID is selected</string>
-    <string name="back_of_dl_selected" description="Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y">Back of driver license is selected</string>
-    <string name="front_of_dl_selected" description="Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y">Front of driver license is selected</string>
-    <string name="passport_selected" description="Description of the checkmark to indicate passport uploaded, used for A11Y">Passport is selected</string>
-
-    <string name="upload_dialog_title_dl_front" description="Title of dialog to upload front of driver license">Upload front of driver\'s license</string>
-    <string name="upload_dialog_title_dl_back" description="Title of dialog to upload back of driver license">Upload back of driver\'s license</string>
-    <string name="upload_dialog_title_id_front" description="Title of dialog to upload front of ID">Upload front of ID</string>
-    <string name="upload_dialog_title_id_back" description="Title of dialog to upload back of ID">Upload back of ID</string>
-    <string name="upload_dialog_title_passport" description="Title of dialog to upload passport">Upload passport</string>
-    <string name="choose_file" description="Text for choosing a photo from gallery">Choose Photo</string>
-    <string name="take_photo" description="Text for taking a photo with camera">Take Photo</string>
-
-    <string name="error" description="Title of general error screen">Error</string>
-    <string name="unexpected_error_try_again" description="Message when an unexpected error happens">There was an unexpected error — try again in a few seconds</string>
-    <string name="go_back" description="Text to return to previous page">Go Back</string>
-    <string name="description_clock" description="Description of the clock icon, used for A11Y">Clock icon</string>
-    <string name="loading" description="Message on initial loading page">Loading</string>
-
-    <string name="single_selection_body_content_dl" description="Message when the only allowed type of confirmation is driver licence">You will need to take photos of the front and back in the following steps.</string>
-    <string name="single_selection_body_content_id" description="Message when the only allowed type of confirmation is ID">You will need to take photos of the front and back in the following steps.</string>
-    <string name="single_selection_body_content_passport" description="Message when the only allowed type of confirmation is passport">You will need to take a photo of the passport in the following steps.</string>
-
-    <string name="could_not_capture_title" description="Title of the error screen when live capture fails">Could not capture image</string>
-    <string name="could_not_capture_body1" description="Line1 body text of error screen when live capture fails">We could not capture a high-quality image.</string>
-    <string name="could_not_capture_body2" description="Line2 body text of error screen when live capture fails">You can either try again or upload an image from your device.</string>
-    <string name="try_again" description="Button text for trying again">Try Again</string>
-
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">App Settings</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Back of driver\'s license</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Back of driver license is selected</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Back of identity card</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Back of ID is selected</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Camera permission</string>
+  <string name="camera_permission_rationale">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Check mark to indicate document capture success</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Choose Photo</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">We could not capture a high-quality image.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">You can either try again or upload an image from your device.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Could not capture image</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Clock icon</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Driver\'s license</string>
+  <!-- Text for error labels -->
+  <string name="error">Error</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">File Upload</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Please upload images of the front and back of your driver\'s license</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Please upload images of the front and back of your identity card</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Please upload an image of your passport</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Front of driver\'s license</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Front of driver license is selected</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Front of identity card</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Front of ID is selected</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Go Back</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Hold still, scanning</string>
+  <!-- display name for ID -->
+  <string name="id_card">ID</string>
+  <!-- Continue button text -->
+  <string name="kontinue">continue</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Loading</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Passport</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Passport is selected</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Flip your driver\'s license over to the other side</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Position your driver\'s license in the center of the frame</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Flip your identity card over to the other side</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Position your identity card in the center of the frame</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Position your passport in the center of the frame</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Scanned</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Select</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Take Photo</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Try Again</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">There was an unexpected error -- try again in a few seconds</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Upload back of driver\'s license</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Upload front of driver\'s license</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Upload back of ID</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Upload front of ID</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Upload passport</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
 </resources>

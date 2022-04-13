@@ -19,6 +19,7 @@ if (System.getenv("JITPACK")) {
 }
 
 dependencies {
+    implementation project(":link")
     implementation project(":payments-core")
     implementation project(':payments-ui-core')
 
@@ -58,6 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
+    testImplementation project(':link')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
@@ -73,7 +75,12 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
 
+    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation ("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     // Test rules and transitive dependencies:
@@ -86,6 +93,9 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+
+    // Test rules and transitive dependencies:
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeVersion")
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
@@ -120,6 +130,8 @@ android {
     }
 
     kotlinOptions {
+        // Needed to support @JvmDefault inheritance in ViewModels
+        freeCompilerArgs = ["-Xjvm-default=enable"]
         jvmTarget = "1.8"
     }
 

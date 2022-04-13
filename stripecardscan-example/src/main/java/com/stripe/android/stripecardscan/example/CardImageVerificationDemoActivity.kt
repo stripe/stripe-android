@@ -36,7 +36,14 @@ class CardImageVerificationDemoActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         val cardImageVerificationSheet =
-            CardImageVerificationSheet.create(this, settings.publishableKey)
+            CardImageVerificationSheet.create(
+                this,
+                settings.publishableKey,
+                config = CardImageVerificationSheet.Configuration(
+                    strictModeFrames = CardImageVerificationSheet.Configuration.StrictModeFrameCount.Low
+                ),
+                cardImageVerificationResultCallback = this::onScanFinished
+            )
 
         viewBinding.generateCivIntent.setOnClickListener {
             Fuel.post("${settings.backendUrl}/card-set/checkout")
@@ -97,8 +104,7 @@ class CardImageVerificationDemoActivity : AppCompatActivity() {
         viewBinding.launchScanButton.setOnClickListener {
             cardImageVerificationSheet.present(
                 viewBinding.civIdText.text.toString(),
-                viewBinding.civSecretText.text.toString(),
-                this::onScanFinished,
+                viewBinding.civSecretText.text.toString()
             )
         }
     }

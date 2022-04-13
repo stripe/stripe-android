@@ -21,7 +21,7 @@ import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.convertDpToPx
 
 /**
@@ -53,7 +53,10 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
+    private var cornerRadius = context.convertDpToPx(PaymentsThemeDefaults.shapes.cornerRadius.dp)
+
     init {
+        // This is only needed if the button is inside a fragment
         viewBinding.label.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
@@ -70,16 +73,22 @@ internal class PrimaryButton @JvmOverloads constructor(
         defaultTintList = tintList
     }
 
-    override fun setBackgroundTintList(tintList: ColorStateList?) {
-        val cornerRadius = context.convertDpToPx(PaymentsThemeConfig.Shapes.cornerRadius)
+    fun setCornerRadius(radius: Float) {
+        cornerRadius = context.convertDpToPx(radius.dp)
+    }
 
+    override fun setBackgroundTintList(tintList: ColorStateList?) {
         val shape = GradientDrawable()
         shape.shape = GradientDrawable.RECTANGLE
         shape.cornerRadius = cornerRadius
         shape.color = tintList
 
         background = shape
-        setPadding(cornerRadius.toInt())
+        setPadding(
+            resources.getDimensionPixelSize(
+                R.dimen.stripe_paymentsheet_primary_button_padding
+            )
+        )
     }
 
     private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {

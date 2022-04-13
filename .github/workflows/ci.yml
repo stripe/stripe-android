@@ -7,6 +7,7 @@ on:
 
 env:
   STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+  STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
 
 jobs:
   check:
@@ -95,3 +96,4 @@ jobs:
         with:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
+

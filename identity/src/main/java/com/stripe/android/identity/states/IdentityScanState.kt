@@ -1,7 +1,6 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
@@ -15,6 +14,7 @@ import com.stripe.android.identity.ml.Category
 internal sealed class IdentityScanState(
     val type: ScanType,
     val timeoutAt: ClockMark,
+    val transitioner: IdentityFoundStateTransitioner,
     isFinal: Boolean
 ) : ScanState(isFinal) {
 
@@ -43,15 +43,15 @@ internal sealed class IdentityScanState(
     internal class Initial(
         type: ScanType,
         timeoutAt: ClockMark,
-        private val transitioner: IdentityFoundStateTransitioner = IOUTransitioner()
-    ) : IdentityScanState(type, timeoutAt, false) {
+        transitioner: IdentityFoundStateTransitioner
+    ) : IdentityScanState(type, timeoutAt, transitioner, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
             when {
                 timeoutAt.hasPassed() -> {
-                    TimeOut(type, timeoutAt)
+                    TimeOut(type, timeoutAt, transitioner)
                 }
                 analyzerOutput.category.matchesScanType(type) -> {
                     Log.d(
@@ -79,12 +79,12 @@ internal sealed class IdentityScanState(
     internal class Found(
         type: ScanType,
         timeoutAt: ClockMark,
-        @VisibleForTesting
-        internal val transitioner: IdentityFoundStateTransitioner
-    ) : IdentityScanState(type, timeoutAt, false) {
+        transitioner: IdentityFoundStateTransitioner,
+        internal var reachedStateAt: ClockMark = Clock.markNow()
+    ) : IdentityScanState(type, timeoutAt, transitioner, false) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
             if (timeoutAt.hasPassed()) {
-                TimeOut(type, timeoutAt)
+                TimeOut(type, timeoutAt, transitioner)
             } else {
                 transitioner.transition(this, analyzerOutput)
             }
@@ -98,21 +98,21 @@ internal sealed class IdentityScanState(
     internal class Satisfied(
         type: ScanType,
         timeoutAt: ClockMark,
-        private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : IdentityScanState(type, timeoutAt, false) {
-
+        transitioner: IdentityFoundStateTransitioner,
+        private val reachedStateAt: ClockMark = Clock.markNow(),
+        private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION
+    ) : IdentityScanState(type, timeoutAt, transitioner, false) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
-            return if (reachedStateAt.elapsedSince() > DISPLAY_SATISFIED_DURATION) {
+            return if (reachedStateAt.elapsedSince() > displaySatisfiedDuration.milliseconds) {
                 Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
-                Finished(type, timeoutAt)
+                Finished(type, timeoutAt, transitioner)
             } else {
-                Log.d(TAG, "Displaying satisfied state, waiting for timeout")
                 this
             }
         }
 
         private companion object {
-            val DISPLAY_SATISFIED_DURATION = 500.milliseconds
+            const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         }
     }
 
@@ -123,46 +123,49 @@ internal sealed class IdentityScanState(
         internal val reason: String,
         type: ScanType,
         timeoutAt: ClockMark,
-        private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : IdentityScanState(type, timeoutAt, false) {
+        transitioner: IdentityFoundStateTransitioner,
+        private val reachedStateAt: ClockMark = Clock.markNow(),
+        private val displayUnsatisfiedDuration: Int = DEFAULT_DISPLAY_UNSATISFIED_DURATION
+    ) : IdentityScanState(type, timeoutAt, transitioner, false) {
 
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = when {
             timeoutAt.hasPassed() -> {
-                TimeOut(type, timeoutAt)
+                TimeOut(type, timeoutAt, transitioner)
             }
-            reachedStateAt.elapsedSince() > DISPLAY_UNSATISFIED_DURATION -> {
+            reachedStateAt.elapsedSince() > displayUnsatisfiedDuration.milliseconds -> {
                 Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
-                Initial(type, timeoutAt)
+                Initial(type, timeoutAt, transitioner)
             }
             else -> {
-                Log.d(TAG, "Displaying unsatisfied state, waiting for timeout")
                 this
             }
         }
 
         private companion object {
-            val DISPLAY_UNSATISFIED_DURATION = 500.milliseconds
+            const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         }
     }
 
     /**
      * Terminal state, indicting the scan is finished.
      */
-    internal class Finished(type: ScanType, timeoutAt: ClockMark) :
-        IdentityScanState(type, timeoutAt, true) {
+    internal class Finished(
+        type: ScanType,
+        timeoutAt: ClockMark,
+        transitioner: IdentityFoundStateTransitioner
+    ) : IdentityScanState(type, timeoutAt, transitioner, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
     }
 
     /**
      * Terminal state, indicating the scan times out.
      */
-    internal class TimeOut(type: ScanType, timeoutAt: ClockMark) :
-        IdentityScanState(type, timeoutAt, true) {
+    internal class TimeOut(
+        type: ScanType,
+        timeoutAt: ClockMark,
+        transitioner: IdentityFoundStateTransitioner
+    ) : IdentityScanState(type, timeoutAt, transitioner, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
-
-        internal companion object {
-            const val DEFAULT_TIME_OUT_MILLIS = 8000
-        }
     }
 
     private companion object {

@@ -1,37 +1,42 @@
 package com.stripe.android.identity.navigation
 
 import android.net.Uri
+import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialog
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
+import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
+import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.viewmodel.PassportUploadViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +45,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -52,15 +58,19 @@ import org.robolectric.shadows.ShadowDialog
 class PassportUploadFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
-
-    private val frontHighResUploaded =
-        MutableLiveData<Resource<IdentityViewModel.UploadedResult>>()
     private val mockUri = mock<Uri>()
 
-    private val mockPassportUploadViewModel = mock<PassportUploadViewModel>()
+    private val mockIdentityUploadViewModel = mock<IdentityUploadViewModel>()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
+    }
+
+    private val uploadState =
+        MutableStateFlow(IdentityViewModel.UploadState())
+
+    private val errorUploadState = mock<IdentityViewModel.UploadState> {
+        on { hasError() } doReturn true
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
@@ -68,25 +78,31 @@ class PassportUploadFragmentTest {
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
-        whenever(it.frontHighResUploaded).thenReturn(frontHighResUploaded)
+        whenever(it.uploadState).thenReturn(uploadState)
     }
+
+    private val navController = TestNavHostController(
+        ApplicationProvider.getApplicationContext()
+    )
 
     @Test
     fun `when initialized viewmodel registers activityResultCaller and UI is correct`() {
         launchFragment { binding, _, fragment ->
-            verify(mockPassportUploadViewModel).registerActivityResultCaller(same(fragment))
+            verify(mockIdentityUploadViewModel).registerActivityResultCaller(same(fragment))
 
-            assertThat(binding.select.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.progressCircular.visibility).isEqualTo(View.GONE)
-            assertThat(binding.finishedCheckMark.visibility).isEqualTo(View.GONE)
+            assertThat(binding.selectFront.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
+            assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.GONE)
+            assertThat(binding.separator.visibility).isEqualTo(View.GONE)
+            assertThat(binding.backUpload.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
         }
     }
 
     @Test
-    fun `when shouldShowCamera is true UI is correct`() {
-        launchFragment(shouldShowCamera = true) { binding, _, _ ->
-            binding.select.callOnClick()
+    fun `when shouldShowTakePhoto is true UI is correct`() {
+        launchFragment(shouldShowTakePhoto = true) { binding, _, _ ->
+            binding.selectFront.callOnClick()
             val dialog = ShadowDialog.getLatestDialog()
 
             // dialog shows up
@@ -100,9 +116,9 @@ class PassportUploadFragmentTest {
     }
 
     @Test
-    fun `when shouldShowCamera is false UI is correct`() {
-        launchFragment(shouldShowCamera = false) { binding, _, _ ->
-            binding.select.callOnClick()
+    fun `when shouldShowTakePhoto is false UI is correct`() {
+        launchFragment(shouldShowTakePhoto = false) { binding, _, _ ->
+            binding.selectFront.callOnClick()
             val dialog = ShadowDialog.getLatestDialog()
 
             // dialog shows up
@@ -128,7 +144,9 @@ class PassportUploadFragmentTest {
     @Test
     fun `verify upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            frontHighResUploaded.postValue(Resource.error())
+            uploadState.update {
+                errorUploadState
+            }
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -139,15 +157,11 @@ class PassportUploadFragmentTest {
     fun `verify when kontinue is clicked navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
-                frontHighResUploaded.postValue(
-                    Resource.success(
-                        IdentityViewModel.UploadedResult(
-                            uploadedStripeFile = InternalStripeFile(id = FILE_ID),
-                            scores = null,
-                            uploadMethod = UploadMethod.FILEUPLOAD
-                        )
+                uploadState.update {
+                    IdentityViewModel.UploadState(
+                        frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT)
                     )
-                )
+                }
 
                 val collectedDataParamCaptor: KArgumentCaptor<CollectedDataParam> = argumentCaptor()
                 val clearDataParamCaptor: KArgumentCaptor<ClearDataParam> = argumentCaptor()
@@ -168,13 +182,11 @@ class PassportUploadFragmentTest {
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
-                        idDocument = IdDocumentParam(
-                            front = DocumentUploadParam(
-                                highResImage = FILE_ID,
-                                uploadMethod = UploadMethod.FILEUPLOAD
-                            ),
-                            type = IdDocumentParam.Type.PASSPORT
-                        )
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = FILE_ID,
+                            uploadMethod = UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentType = CollectedDataParam.Type.PASSPORT
                     )
                 )
                 assertThat(clearDataParamCaptor.firstValue).isEqualTo(
@@ -189,7 +201,7 @@ class PassportUploadFragmentTest {
 
     private fun verifyFlow(isTakePhoto: Boolean) {
         launchFragment { binding, _, fragment ->
-            binding.select.callOnClick()
+            binding.selectFront.callOnClick()
 
             val dialog = ShadowDialog.getLatestDialog()
 
@@ -216,14 +228,13 @@ class PassportUploadFragmentTest {
             val callbackCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
 
             if (isTakePhoto) {
-                verify(mockPassportUploadViewModel).takePhoto(
+                verify(mockIdentityUploadViewModel).takePhotoFront(
                     same(fragment.requireContext()),
                     callbackCaptor.capture()
                 )
             } else {
-                verify(mockPassportUploadViewModel).chooseImage(callbackCaptor.capture())
+                verify(mockIdentityUploadViewModel).chooseImageFront(callbackCaptor.capture())
             }
-            frontHighResUploaded.postValue(Resource.loading())
 
             // mock photo taken/image chosen
             callbackCaptor.firstValue(mockUri)
@@ -239,66 +250,94 @@ class PassportUploadFragmentTest {
                 else
                     eq(UploadMethod.FILEUPLOAD)
             )
-            assertThat(binding.select.visibility).isEqualTo(View.GONE)
-            assertThat(binding.progressCircular.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.finishedCheckMark.visibility).isEqualTo(View.GONE)
+            assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
+            assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.GONE)
 
             // mock file uploaded
-            frontHighResUploaded.postValue(Resource.success(mock()))
+            uploadState.update {
+                IdentityViewModel.UploadState(
+                    frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT)
+                )
+            }
 
-            assertThat(binding.select.visibility).isEqualTo(View.GONE)
-            assertThat(binding.progressCircular.visibility).isEqualTo(View.GONE)
-            assertThat(binding.finishedCheckMark.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
+            assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
+            assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.kontinue.isEnabled).isTrue()
         }
     }
 
     private fun launchFragment(
-        shouldShowCamera: Boolean = true,
+        shouldShowTakePhoto: Boolean = true,
         testBlock: (
-            binding: PassportUploadFragmentBinding,
+            binding: IdentityUploadFragmentBinding,
             navController: TestNavHostController,
             fragment: PassportUploadFragment
         ) -> Unit
     ) = launchFragmentInContainer(
         fragmentArgs = bundleOf(
-            ARG_SHOULD_SHOW_CAMERA to shouldShowCamera
+            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
+            ARG_SHOULD_SHOW_CHOOSE_PHOTO to true
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        PassportUploadFragment(
-            viewModelFactoryFor(mockPassportUploadViewModel),
-            viewModelFactoryFor(mockIdentityViewModel)
-        )
-    }.onFragment {
-        val navController = TestNavHostController(
-            ApplicationProvider.getApplicationContext()
-        )
-        navController.setGraph(
-            R.navigation.identity_nav_graph
-        )
-        navController.setCurrentDestination(R.id.passportUploadFragment)
-        Navigation.setViewNavController(
-            it.requireView(),
+        TestPassportUploadFragment(
+            viewModelFactoryFor(mockIdentityUploadViewModel),
+            viewModelFactoryFor(mockIdentityViewModel),
             navController
         )
-        testBlock(PassportUploadFragmentBinding.bind(it.requireView()), navController, it)
+    }.onFragment {
+        testBlock(IdentityUploadFragmentBinding.bind(it.requireView()), navController, it)
+    }
+
+    internal class TestPassportUploadFragment(
+        identityUploadViewModelFactory: ViewModelProvider.Factory,
+        identityViewModelFactory: ViewModelProvider.Factory,
+        val navController: TestNavHostController
+    ) : PassportUploadFragment(
+        identityUploadViewModelFactory, identityViewModelFactory
+    ) {
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View {
+            val view = super.onCreateView(inflater, container, savedInstanceState)
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(R.id.passportUploadFragment)
+            Navigation.setViewNavController(
+                view,
+                navController
+            )
+            return view
+        }
     }
 
     private companion object {
         val DOCUMENT_CAPTURE =
             VerificationPageStaticContentDocumentCapturePage(
                 autocaptureTimeout = 0,
-                filePurpose = InternalStripeFilePurpose.IdentityPrivate.code,
+                filePurpose = StripeFilePurpose.IdentityPrivate.code,
                 highResImageCompressionQuality = 0.9f,
                 highResImageCropPadding = 0f,
                 highResImageMaxDimension = 512,
                 lowResImageCompressionQuality = 0f,
                 lowResImageMaxDimension = 0,
                 models = mock(),
-                requireLiveCapture = false
+                requireLiveCapture = false,
+                motionBlurMinDuration = 500,
+                motionBlurMinIou = 0.95f
             )
 
-        val FILE_ID = "file_id"
+        private const val FILE_ID = "file_id"
+
+        val FRONT_HIGH_RES_RESULT = IdentityViewModel.UploadedResult(
+            uploadedStripeFile = StripeFile(id = FILE_ID),
+            scores = null,
+            uploadMethod = UploadMethod.FILEUPLOAD
+        )
     }
 }

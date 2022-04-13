@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.exception.PermissionException
+import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures

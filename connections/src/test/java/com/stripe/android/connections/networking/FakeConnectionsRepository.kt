@@ -12,7 +12,8 @@ internal class FakeConnectionsRepository(
     private val manifest: LinkAccountSessionManifest,
 ) : ConnectionsRepository {
 
-    var getLinkAccountSessionResultProvider: () -> LinkAccountSession = { linkAccountSessionWithNoMoreAccounts }
+    var getLinkAccountSessionResultProvider: () -> LinkAccountSession =
+        { linkAccountSessionWithNoMoreAccounts }
     var getLinkedAccountsResultProvider: () -> LinkedAccountList = { moreLinkedAccountList }
 
     override suspend fun getLinkedAccounts(

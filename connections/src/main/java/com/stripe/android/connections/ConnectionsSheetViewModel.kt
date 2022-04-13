@@ -1,5 +1,6 @@
 package com.stripe.android.connections
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -8,10 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.di.APPLICATION_ID
-import com.stripe.android.connections.di.ComponentHolder
-import com.stripe.android.connections.di.ConnectionsAppComponent
+import com.stripe.android.connections.di.DaggerConnectionsSheetComponent
 import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkAccountSession
@@ -30,17 +31,23 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     private val starterArgs: ConnectionsSheetContract.Args,
     private val generateLinkAccountSessionManifest: GenerateLinkAccountSessionManifest,
     private val fetchLinkAccountSession: FetchLinkAccountSession,
+    private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ConnectionsEventReporter
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ConnectionsSheetState())
+    // on process recreation - restore saved fields from [SavedStateHandle].
+    private val _state = MutableStateFlow(ConnectionsSheetState().from(savedStateHandle))
     internal val state: StateFlow<ConnectionsSheetState> = _state
+
     private val _viewEffect = MutableSharedFlow<ConnectionsSheetViewEffect>()
     internal val viewEffect: SharedFlow<ConnectionsSheetViewEffect> = _viewEffect
 
     init {
         eventReporter.onPresented(starterArgs.configuration)
-        fetchManifest()
+        // avoid re-fetching manifest if already exists (this will happen on process recreations)
+        if (state.value.manifest == null) {
+            fetchManifest()
+        }
     }
 
     /**
@@ -70,13 +77,13 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     private suspend fun openAuthFlow(manifest: LinkAccountSessionManifest) {
         // stores manifest in state for future references.
-        _state.emit(
-            state.value.copy(
+        _state.updateAndPersist {
+            it.copy(
                 manifest = manifest,
                 authFlowActive = true
             )
-        )
-        //_viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+        }
+        _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
     }
 
     /**
@@ -96,7 +103,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @see onActivityResult (we rely on this on config changes)
      */
     internal fun onActivityRecreated() {
-        _state.update { it.copy(activityRecreated = true) }
+        _state.updateAndPersist { it.copy(activityRecreated = true) }
     }
 
     /**
@@ -176,7 +183,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        _state.update { it.copy(authFlowActive = false) }
+        _state.updateAndPersist { it.copy(authFlowActive = false) }
         viewModelScope.launch {
             val manifest = _state.value.manifest
             when (intent?.data.toString()) {
@@ -187,6 +194,17 @@ internal class ConnectionsSheetViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates state AND saves persistable fields into [SavedStateHandle]
+     */
+    private inline fun MutableStateFlow<ConnectionsSheetState>.updateAndPersist(
+        function: (ConnectionsSheetState) -> ConnectionsSheetState
+    ) {
+        val previousValue = value
+        update(function)
+        value.to(savedStateHandle, previousValue)
+    }
+
     class Factory(
         private val starterArgsSupplier: () -> ConnectionsSheetContract.Args,
         owner: SavedStateRegistryOwner,
@@ -194,13 +212,14 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
+        override fun <T : ViewModel> create(
             key: String,
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
             return ComponentHolder.component<ConnectionsAppComponent>()
                 .connectionsSheetComponent()
+                .savedStateHandle(savedStateHandle)
                 .configuration(starterArgsSupplier())
                 .build().viewModel as T
         }

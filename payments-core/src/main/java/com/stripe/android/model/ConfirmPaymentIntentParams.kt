@@ -321,6 +321,28 @@ data class ConfirmPaymentIntentParams internal constructor(
         private const val PARAM_SOURCE_ID = "source"
 
         /**
+         * Create the parameters necessary for confirming a [PaymentIntent] based on its [clientSecret]
+         * and [paymentMethodType]
+         *
+         * Use this initializer for PaymentIntents that already have a PaymentMethod attached.
+         *
+         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+         * @param paymentMethodType the known type of the PaymentIntent's attached PaymentMethod
+         */
+        @JvmStatic
+        fun create(
+            clientSecret: String,
+            paymentMethodType: PaymentMethod.Type
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                // infers default [MandateDataParams] based on the attached [paymentMethodType]
+                mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+                    .takeIf { paymentMethodType.requiresMandate }
+            )
+        }
+
+        /**
          * Create a [ConfirmPaymentIntentParams] without a payment method.
          */
         @JvmOverloads

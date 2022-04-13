@@ -3,7 +3,7 @@ package com.stripe.android.identity.networking
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.QueryStringFactory
@@ -16,7 +16,6 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
-import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.utils.IdentityIO
@@ -84,9 +83,7 @@ class DefaultIdentityRepositoryTest {
                 )
             )
             val collectedDataParam = CollectedDataParam(
-                consent = ConsentParam(
-                    biometric = false
-                )
+                biometricConsent = false
             )
 
             val clearDataParam = ClearDataParam()
@@ -199,7 +196,7 @@ class DefaultIdentityRepositoryTest {
                 mock()
             )
 
-            assertThat(internalStripeFile).isInstanceOf(InternalStripeFile::class.java)
+            assertThat(internalStripeFile).isInstanceOf(StripeFile::class.java)
             verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
 
             val request = requestCaptor.firstValue
@@ -272,8 +269,8 @@ class DefaultIdentityRepositoryTest {
 
             val request = requestCaptor.firstValue
 
-            assertThat(request).isInstanceOf(IdentityModelDownloadRequest::class.java)
-            assertThat((request as IdentityModelDownloadRequest).url).isEqualTo(TEST_URL)
+            assertThat(request).isInstanceOf(IdentityFileDownloadRequest::class.java)
+            assertThat((request as IdentityFileDownloadRequest).url).isEqualTo(TEST_URL)
         }
     }
 

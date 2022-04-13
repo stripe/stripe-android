@@ -7,8 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
@@ -16,7 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
@@ -26,15 +24,16 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.PairMediatorLiveData
+import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -43,6 +42,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -57,14 +57,8 @@ internal class DriverLicenseScanFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
-    private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
-    private val mockBothUploaded: PairMediatorLiveData<Pair<UploadedResult, UploadedResult>> =
-        mock()
-    private val bothUploadedObserverCaptor =
-        argumentCaptor<Observer<Resource<Pair<
-                        Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
-                        >>>>()
+    private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
@@ -74,10 +68,29 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.pageAndModel).thenReturn(mockPageAndModel)
-        whenever(it.bothUploaded).thenReturn(mockBothUploaded)
+
+    private val uploadState =
+        MutableStateFlow(IdentityViewModel.UploadState())
+
+    private val mockIdentityViewModel = mock<IdentityViewModel>() {
+        on { pageAndModel } doReturn mockPageAndModel
+        on { uploadState } doReturn uploadState
     }
+
+    private val errorUploadState = mock<IdentityViewModel.UploadState> {
+        on { hasError() } doReturn true
+    }
+
+    private val anyLoadingUploadState = mock<IdentityViewModel.UploadState> {
+        on { isAnyLoading() } doReturn true
+    }
+
+    private val bothUploadedUploadState = IdentityViewModel.UploadState(
+        frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT),
+        frontLowResResult = Resource.success(FRONT_LOW_RES_RESULT),
+        backHighResResult = Resource.success(BACK_HIGH_RES_RESULT),
+        backLowResResult = Resource.success(BACK_LOW_RES_RESULT)
+    )
 
     @Before
     fun simulateModelDownloaded() {
@@ -155,20 +168,15 @@ internal class DriverLicenseScanFragmentTest {
         simulateBothSidesScanned { _, _ ->
             runBlocking {
                 // mock bothUploaded success
-                bothUploadedObserverCaptor.firstValue.onChanged(
-                    Resource.success(
-                        Pair(
-                            Pair(FRONT_HIGH_RES_RESULT, FRONT_LOW_RES_RESULT),
-                            Pair(BACK_HIGH_RES_RESULT, BACK_LOW_RES_RESULT),
-                        )
-                    )
-                )
+                uploadState.update {
+                    bothUploadedUploadState
+                }
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                            type = IdDocumentParam.Type.DRIVINGLICENSE,
+                            type = CollectedDataParam.Type.DRIVINGLICENSE,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
@@ -187,9 +195,9 @@ internal class DriverLicenseScanFragmentTest {
     fun `when both sides are scanned but files uploaded failed, clicking button navigate to error`() {
         simulateBothSidesScanned { navController, _ ->
             // mock bothUploaded error
-            bothUploadedObserverCaptor.firstValue.onChanged(
-                Resource.error()
-            )
+            uploadState.update {
+                errorUploadState
+            }
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -200,9 +208,9 @@ internal class DriverLicenseScanFragmentTest {
     fun `when both sides are scanned and files are being uploaded, clicking button toggles loading state`() {
         simulateBothSidesScanned { _, binding ->
             // mock bothUploaded loading
-            bothUploadedObserverCaptor.firstValue.onChanged(
-                Resource.loading()
-            )
+            uploadState.update {
+                anyLoadingUploadState
+            }
 
             assertThat(
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).isEnabled
@@ -255,7 +263,10 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when displayStateChanged to Initial UI is properly updated for DL_BACK`() {
         whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
-        postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
+        postDisplayStateChangedDataAndVerifyUI(
+            mock<IdentityScanState.Initial>(),
+            shouldStartFromBack = true
+        ) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderWindowView.visibility)
@@ -302,6 +313,9 @@ internal class DriverLicenseScanFragmentTest {
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.front_of_dl)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_front)
             )
@@ -320,6 +334,9 @@ internal class DriverLicenseScanFragmentTest {
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.back_of_dl)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_back)
             )
@@ -433,8 +450,6 @@ internal class DriverLicenseScanFragmentTest {
             // click continue, navigates
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
-            verify(mockBothUploaded).observe(any(), bothUploadedObserverCaptor.capture())
-
             afterScannedBlock(navController, binding)
         }
     }
@@ -452,9 +467,10 @@ internal class DriverLicenseScanFragmentTest {
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
+        shouldStartFromBack: Boolean = false,
         check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
     ) {
-        launchDriverLicenseFragment().onFragment {
+        launchDriverLicenseFragment(shouldStartFromBack).onFragment {
             displayStateChanged.postValue((newScanState to mock()))
             check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }
@@ -462,28 +478,28 @@ internal class DriverLicenseScanFragmentTest {
 
     private companion object {
         val FRONT_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val FRONT_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontLowResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val BACK_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "backHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val BACK_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),

@@ -6,7 +6,9 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 
 internal class GooglePayButton @JvmOverloads constructor(
@@ -25,7 +27,31 @@ internal class GooglePayButton @JvmOverloads constructor(
         // Call super so we don't inadvertently effect the primary button as well.
         super.setClickable(true)
         super.setEnabled(true)
-        viewBinding.primaryButton.backgroundTintList = (ColorStateList.valueOf(Color.BLACK))
+    }
+
+    fun setBackgroundColor(useDarkResources: Boolean) {
+        val backgroundDrawable = if (useDarkResources) {
+            R.drawable.stripe_googlepay_button_no_shadow_background_dark
+        } else {
+            R.drawable.stripe_googlepay_button_no_shadow_background_light
+        }
+        viewBinding.googlePayButtonIcon.background = ResourcesCompat.getDrawable(
+            resources,
+            backgroundDrawable,
+            null
+        )
+
+        val contentDrawable = if (useDarkResources) R.drawable.stripe_googlepay_button_content_dark
+        else R.drawable.stripe_googlepay_button_content_light
+
+        viewBinding.googlePayButtonContent.setImageDrawable(
+            ResourcesCompat.getDrawable(
+                resources, contentDrawable, null
+            )
+        )
+
+        val primaryButtonColor = if (useDarkResources) Color.BLACK else Color.WHITE
+        viewBinding.primaryButton.backgroundTintList = (ColorStateList.valueOf(primaryButtonColor))
     }
 
     private fun onReadyState() {

@@ -44,7 +44,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                 requireArguments().getParcelable(
                     EXTRA_CONFIG
                 )
-            )
+            ),
+            contextSupplier = { requireContext() }
         )
     }
 
@@ -57,6 +58,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
+        setPadding(0, 18, 0, 0)
 
         setContent {
             PaymentsTheme {

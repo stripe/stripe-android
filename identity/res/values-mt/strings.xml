@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Settings tal-App</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">In-naħa ta\' wara tal-liċenzja tas-sewqan</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Għażilt in-naħa ta\' wara tal-liċenzja tas-sewqan</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">In-naħa ta\' wara tal-karta tal-identità</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Għażilt in-naħa ta\' wara tal-karta tal-identità</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Permess għall-kamera</string>
+  <string name="camera_permission_rationale">Dil-app tuża l-kamera biex tiskennja d-dokumenti tal-identità tiegħek u tieħu r-ritratti biex tivverifika l-identità tiegħek.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Kaxxa mmarkata biex turik li ttieħdet kopja tad-dokument</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Agħżel Ritratt</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Ma stajniex nieħdu ritratt ta\' kwalità tajba.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Tista\' terġa\' tipprova jew tagħżel li ttella\' ritratt mit-tagħmir tiegħek.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Ma stajniex nieħdu r-ritratt</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Ikona tal-arloġġ</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Liċenzja tas-sewqan</string>
+  <!-- Text for error labels -->
+  <string name="error">Żball</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Tlugħ tal-Fajl</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Jekk jogħġbok tella\' r-ritratti tan-naħa ta\' quddiem u ta\' wara tal-liċenzja tas-sewqan tiegħek</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Jekk jogħġbok tella\' r-ritratti tan-naħa ta\' quddiem u ta\' wara tal-karta tal-identità tiegħek</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Jekk jogħġbok tella\' ritratt tal-passaport tiegħek</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">In-naħa ta\' quddiem tal-liċenzja tas-sewqan</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Għażilt in-naħa ta\' quddiem tal-liċenzja tas-sewqan</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">In-naħa ta\' quddiem tal-karta tal-identità</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Għażilt in-naħa ta\' quddiem tal-karta tal-identità</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Mur Lura</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Neħtieġu l-permess biex bużaw il-kamera tiegħek. Jekk jogħġbok agħti aċċess għall-kamera mis-settings tal-apps.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Tiċċaqlaqx, qed niskennjaw</string>
+  <!-- display name for ID -->
+  <string name="id_card">karta tal-identità</string>
+  <!-- Continue button text -->
+  <string name="kontinue">kompli</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Tielgħa</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">Tajjeb</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Passaport</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Għażilt il-passaport</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Dawwar il-liċenzja tas-sewqan tiegħek</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Qiegħed il-liċenzja tas-sewqan tiegħek f\'nofs il-gwarniċ</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Aqleb il-kard tal-identità tiegħek għan-naħa l-oħra</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Qiegħed il-karta tal-identità tiegħek f\'nofs il-gwarniċ</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Qiegħed il-passaport tiegħek f\'nofs il-gwarniċ</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Skennjat</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Agħżel</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Ħu Ritratt</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Erġa\' Pprova</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Kien hemm żball mhux mistenni -- erġa\' pprova wara ftit sekondi</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Tella\' n-naħa ta\' wara tal-liċenzja tas-sewqan</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Tella\' n-naħa ta\' quddiem tal-liċenzja tas-sewqan</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Tella\' n-naħa ta\' wara tal-karta tal-identità</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Tella\' n-naħa ta\' quddiem tal-karta tal-identità</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Tella\' l-passaport</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Inkella tista\' tipprova ttella\' ritratt tal-%1$s tiegħek int stess</string>
+</resources>

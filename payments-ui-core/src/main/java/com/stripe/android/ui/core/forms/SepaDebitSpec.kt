@@ -12,6 +12,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.billingParams
+import com.stripe.android.ui.core.elements.supportedBillingCountries
 
 internal val sepaDebitParams: MutableMap<String, Any?> = mutableMapOf(
     "iban" to null
@@ -42,7 +43,10 @@ internal val sepaDebitMandate = MandateTextSpec(
 )
 internal val sepaBillingSection = SectionSpec(
     IdentifierSpec.Generic("billing_section"),
-    AddressSpec(IdentifierSpec.Generic("address")),
+    AddressSpec(
+        IdentifierSpec.Generic("address"),
+        countryCodes = supportedBillingCountries
+    ),
     R.string.billing_details
 )
 

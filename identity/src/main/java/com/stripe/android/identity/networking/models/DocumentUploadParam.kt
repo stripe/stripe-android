@@ -15,8 +15,6 @@ internal data class DocumentUploadParam(
     val invalidScore: Float? = null,
     @SerialName("low_res_image")
     val lowResImage: String? = null,
-    @SerialName("no_document_score")
-    val noDocumentScore: Float? = null,
     @SerialName("passport_score")
     val passportScore: Float? = null,
     @SerialName("upload_method")

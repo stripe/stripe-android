@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginStart="@dimen/page_horizontal_margin"
     android:layout_marginEnd="@dimen/page_horizontal_margin"
     android:layout_marginTop="@dimen/page_vertical_margin"
@@ -15,7 +16,7 @@
 
         <TextView
             android:id="@+id/header_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="@dimen/scan_title_text_size"
@@ -23,17 +24,20 @@
             app:layout_constraintBottom_toTopOf="@id/message"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Front of driver's license" />
 
         <TextView
             android:id="@+id/message"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:lines="3"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/page_vertical_margin"
             app:layout_constraintBottom_toTopOf="@id/camera_view_card"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/header_title" />
+            app:layout_constraintTop_toBottomOf="@id/header_title"
+            tools:text="Position your driver's license in the center of the frame" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/camera_view_card"
@@ -50,7 +54,7 @@
                 android:id="@+id/camera_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:borderDrawable="@drawable/id_border_initial"
+                app:borderDrawable="@drawable/viewfinder_border_initial"
                 app:viewFinderType="id" />
 
             <ImageView

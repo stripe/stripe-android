@@ -1,15 +1,26 @@
 package com.stripe.android.test.e2e
 
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface Service {
-    @POST("create_pi")
-    suspend fun createPaymentIntent(): CreatedPaymentIntent
+    @POST("e2e/create_pi")
+    suspend fun createCardPaymentIntent(): Response.CreatedCardPaymentIntent
 
-    @GET("fetch_pi")
-    suspend fun fetchPaymentIntent(
+    @GET("e2e/fetch_pi")
+    suspend fun fetchCardPaymentIntent(
         @Query("pi") id: String
-    ): FetchedPaymentIntent
+    ): Response.FetchedCardPaymentIntent
+
+    @POST("create_payment_intent")
+    suspend fun createPaymentIntent(
+        @Body request: Request.CreatePaymentIntentParams
+    ): Response.CreatedPaymentIntent
+
+    @POST("create_setup_intent")
+    suspend fun createSetupIntent(
+        @Body request: Request.CreateSetupIntentParams
+    ): Response.CreatedSetupIntent
 }

@@ -31,6 +31,7 @@ import com.stripe.android.stripecardscan.framework.api.uploadSavedFrames
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsCIV
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
+import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.payment.card.getCardIssuer
@@ -147,6 +148,7 @@ internal open class CardImageVerificationActivity :
                     .putExtra(
                         INTENT_PARAM_RESULT,
                         CardImageVerificationSheetResult.Completed(
+                            params.cardImageVerificationIntentId,
                             ScannedCard(
                                 pan = pan
                             )
@@ -600,7 +602,10 @@ internal open class CardImageVerificationActivity :
             scanId = Stats.scanId,
             device = Device.fromContext(this),
             appDetails = AppDetails.fromContext(this),
-            scanStatistics = ScanStatistics.fromStats()
+            scanStatistics = ScanStatistics.fromStats(),
+            scanConfig = ScanConfig(
+                strictModeFrameCount = params.configuration.strictModeFrames.count,
+            ),
         )
         super.closeScanner()
     }

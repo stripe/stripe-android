@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
@@ -11,10 +12,13 @@ import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
@@ -48,10 +52,12 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormFragmentArguments,
         val resource: Resources,
-        var layout: LayoutSpec
+        var layout: LayoutSpec,
+        private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val resource: Resources
+            val resource: Resources,
+            val context: Context
         )
 
         @Inject
@@ -59,7 +65,8 @@ internal class FormViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            injectWithFallback(config.injectorKey, FallbackInitializeParam(resource))
+            val context = contextSupplier()
+            injectWithFallback(config.injectorKey, FallbackInitializeParam(resource, context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
                 .layout(layout)
@@ -68,6 +75,7 @@ internal class FormViewModel @Inject internal constructor(
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
             DaggerFormViewModelComponent.builder()
+                .context(arg.context)
                 .resources(arg.resource)
                 .build()
                 .inject(this)
@@ -117,13 +125,26 @@ internal class FormViewModel @Inject internal constructor(
             }
         }
 
+    private val cardBillingElement = elements
+        .map { elementsList ->
+            elementsList
+                ?.filterIsInstance<SectionElement>()
+                ?.flatMap { it.fields }
+                ?.filterIsInstance<CardBillingAddressElement>()
+                ?.firstOrNull()
+        }
+
     internal val hiddenIdentifiers =
         combine(
             saveForFutureUseVisible,
             saveForFutureUseElement.map {
                 it?.controller?.hiddenIdentifiers ?: flowOf(emptyList())
+            }.flattenConcat(),
+            cardBillingElement.map {
+                it?.hiddenIdentifiers ?: flowOf(emptyList())
             }.flattenConcat()
-        ) { showFutureUse, hiddenIdentifiers ->
+        ) { showFutureUse, saveFutureUseIdentifiers, cardBillingIdentifiers ->
+            val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
             // For hidden *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->
@@ -157,20 +178,26 @@ internal class FormViewModel @Inject internal constructor(
             } ?: false
         }
 
-    private val userRequestedReuse =
-        saveForFutureUseElement.map {
-            it?.controller?.saveForFutureUse?.map { saveForFutureUse ->
-                if (config.showCheckbox) {
-                    if (saveForFutureUse) {
-                        PaymentSelection.CustomerRequestedSave.RequestReuse
+    // This will convert the save for future use value into a CustomerRequestedSave operation
+    private val userRequestedReuse = elements.filterNotNull().map { elementsList ->
+        combine(elementsList.map { it.getFormFieldValueFlow() }) { formFieldValues ->
+            formFieldValues.toList().flatten()
+                .filter { it.first == IdentifierSpec.SaveForFutureUse }
+                .map { it.second.value.toBoolean() }
+                .map { saveForFutureUse ->
+                    if (config.showCheckbox) {
+                        if (saveForFutureUse) {
+                            PaymentSelection.CustomerRequestedSave.RequestReuse
+                        } else {
+                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        }
                     } else {
-                        PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        PaymentSelection.CustomerRequestedSave.NoRequest
                     }
-                } else {
-                    PaymentSelection.CustomerRequestedSave.NoRequest
                 }
-            }?.firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
+                .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
         }
+    }.flattenConcat()
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
@@ -187,4 +214,19 @@ internal class FormViewModel @Inject internal constructor(
             showingMandate,
             userRequestedReuse
         ).filterFlow()
+
+    private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
+        combine(elementsList.map { it.getTextFieldIdentifiers() }) {
+            it.toList().flatten()
+        }
+    }.flattenConcat()
+
+    val lastTextFieldIdentifier = combine(
+        hiddenIdentifiers,
+        textFieldControllerIdsFlow
+    ) { hiddenIds, textFieldControllerIds ->
+        textFieldControllerIds.lastOrNull {
+            !hiddenIds.contains(it)
+        }
+    }
 }

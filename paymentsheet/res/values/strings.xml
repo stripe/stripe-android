@@ -1,57 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
-  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
-  <string name="add_new_payment_method">Add a new payment method</string>
-  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="bank_account_ending_in">Remove bank account ending in %s</string>
-  <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Cancel</string>
-  <!-- Done button title -->
-  <string name="done">Done</string>
-  <!-- Button title to enter editing mode -->
-  <string name="edit">Edit</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Remove</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Back</string>
-  <string name="stripe_paymentsheet_close">Close</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Continue</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">Pay</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
-  <!-- Title for credit card number entry field -->
-  <string name="stripe_paymentsheet_payment_method_card">Card</string>
-  <!-- Payment method brand name -->
-  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
-  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
-  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
-  <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
-  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+    <string name="add_new_payment_method">Add a new payment method</string>
+    <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+    <string name="bank_account_ending_in">Remove bank account ending in %s</string>
+    <!-- Button title to cancel action in an alert -->
+    <string name="cancel">Cancel</string>
+    <!-- Done button title -->
+    <string name="done">Done</string>
+    <!-- Button title to enter editing mode -->
+    <string name="edit">Edit</string>
+    <!-- Button title for confirmation alert to remove a saved payment method
+     Text for remove button -->
+    <string name="remove">Remove</string>
+    <!-- Generic error message shown when payment cannot be processed. -->
+    <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
+    <!-- When an internal error is reported when a google pay payment is started. -->
+    <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
+    <!-- Country selector and postal code entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
+    <!-- Text for back button -->
+    <string name="stripe_paymentsheet_back">Back</string>
+    <string name="stripe_paymentsheet_close">Close</string>
+    <!-- Text for continue button -->
+    <string name="stripe_paymentsheet_continue_button_label">Continue</string>
+    <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+    <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
+    <!-- Label for a button that starts processing the payment. -->
+    <string name="stripe_paymentsheet_pay_button_label">Pay</string>
+    <!-- Payment Method type brand name  -->
+    <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+    <!-- Title for credit card number entry field -->
+    <string name="stripe_paymentsheet_payment_method_card">Card</string>
+    <!-- Payment method brand name -->
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
+    <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+    <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
+    <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+    <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_paymentsheet_payment_method_au_becs_debit" tools:ignore="MissingTranslation">AU BECS Direct Debit</string>
 </resources>

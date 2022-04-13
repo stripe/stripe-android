@@ -26,6 +26,7 @@ sealed interface CardImageVerificationSheetResult : Parcelable {
 
     @Parcelize
     data class Completed(
+        val cardImageVerificationIntentId: String,
         val scannedCard: ScannedCard,
     ) : CardImageVerificationSheetResult
 
@@ -66,8 +67,15 @@ class CardImageVerificationSheet private constructor(
         }
     }
 
-    private var onFinished:
-        ((cardImageVerificationSheetResult: CardImageVerificationSheetResult) -> Unit)? = null
+    /**
+     * Callback to notify when scanning finishes and a result is available.
+     */
+    fun interface CardImageVerificationResultCallback {
+        fun onCardImageVerificationSheetResult(
+            cardImageVerificationSheetResult: CardImageVerificationSheetResult
+        )
+    }
+
     private lateinit var launcher: ActivityResultLauncher<CardImageVerificationSheetParams>
 
     companion object {
@@ -84,13 +92,14 @@ class CardImageVerificationSheet private constructor(
             from: ComponentActivity,
             stripePublishableKey: String,
             config: Configuration = Configuration(),
+            cardImageVerificationResultCallback: CardImageVerificationResultCallback,
             registry: ActivityResultRegistry = from.activityResultRegistry,
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
                 launcher = from.registerForActivityResult(
                     activityResultContract,
                     registry,
-                    ::onResult,
+                    cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
                 )
             }
 
@@ -106,13 +115,21 @@ class CardImageVerificationSheet private constructor(
             from: Fragment,
             stripePublishableKey: String,
             config: Configuration = Configuration(),
+            cardImageVerificationResultCallback: CardImageVerificationResultCallback,
             registry: ActivityResultRegistry? = null,
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
                 launcher = if (registry != null) {
-                    from.registerForActivityResult(activityResultContract, registry, ::onResult)
+                    from.registerForActivityResult(
+                        activityResultContract,
+                        registry,
+                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
+                    )
                 } else {
-                    from.registerForActivityResult(activityResultContract, ::onResult)
+                    from.registerForActivityResult(
+                        activityResultContract,
+                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
+                    )
                 }
             }
 
@@ -120,8 +137,8 @@ class CardImageVerificationSheet private constructor(
             Intent(context, CardImageVerificationActivity::class.java)
                 .putExtra(INTENT_PARAM_REQUEST, input)
 
-        private fun parseResult(intent: Intent): CardImageVerificationSheetResult =
-            intent.getParcelableExtra(INTENT_PARAM_RESULT)
+        private fun parseResult(intent: Intent?): CardImageVerificationSheetResult =
+            intent?.getParcelableExtra(INTENT_PARAM_RESULT)
                 ?: CardImageVerificationSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
@@ -138,7 +155,7 @@ class CardImageVerificationSheet private constructor(
             override fun parseResult(
                 resultCode: Int,
                 intent: Intent?,
-            ) = this@Companion.parseResult(requireNotNull(intent))
+            ) = this@Companion.parseResult(intent)
         }
     }
 
@@ -152,9 +169,7 @@ class CardImageVerificationSheet private constructor(
     fun present(
         cardImageVerificationIntentId: String,
         cardImageVerificationIntentSecret: String,
-        onFinished: (cardImageVerificationSheetResult: CardImageVerificationSheetResult) -> Unit,
     ) {
-        this.onFinished = onFinished
         launcher.launch(
             CardImageVerificationSheetParams(
                 stripePublishableKey = stripePublishableKey,
@@ -163,12 +178,5 @@ class CardImageVerificationSheet private constructor(
                 cardImageVerificationIntentSecret = cardImageVerificationIntentSecret,
             )
         )
-    }
-
-    /**
-     * When a result is available from the activity, call [onFinished] if it's available.
-     */
-    private fun onResult(cardImageVerificationSheetResult: CardImageVerificationSheetResult) {
-        onFinished?.let { it(cardImageVerificationSheetResult) }
     }
 }

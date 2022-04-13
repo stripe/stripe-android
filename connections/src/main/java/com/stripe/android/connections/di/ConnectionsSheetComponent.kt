@@ -1,5 +1,7 @@
 package com.stripe.android.connections.di
 
+import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.connections.ConnectionsSheetContract
 import com.stripe.android.connections.ConnectionsSheetViewModel
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -23,6 +25,9 @@ internal interface ConnectionsSheetComponent {
 
     @Subcomponent.Builder
     interface Builder {
+        @BindsInstance
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
+
         @BindsInstance
         fun configuration(configuration: ConnectionsSheetContract.Args): Builder
 

@@ -43,7 +43,7 @@ class ConnectionsExampleViewModel : ViewModel() {
                         OpenConnectionsSheetExample(
                             configuration = ConnectionsSheet.Configuration(
                                 it.clientSecret,
-                                "pk_live_Uxk6GdfUJzeCePW1FdQmeOFM"
+                                it.publishableKey
                             )
                         )
                     )

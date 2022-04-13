@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
+@Suppress("unused")
 data class OwnershipRefresh(
 
     /* The time at which the last refresh attempt was initiated. Measured in seconds since the Unix epoch. */

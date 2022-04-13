@@ -18,7 +18,7 @@ fun MandateTextUI(
     Text(
         text = stringResource(element.stringResId, element.merchantName ?: ""),
         style = PaymentsTheme.typography.body2,
-        color = PaymentsTheme.colors.colorTextSecondary,
+        color = PaymentsTheme.colors.subtitle,
         modifier = Modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item

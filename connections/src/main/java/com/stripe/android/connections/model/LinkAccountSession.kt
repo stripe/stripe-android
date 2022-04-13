@@ -1,6 +1,8 @@
 package com.stripe.android.connections.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
+import com.stripe.android.connections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
@@ -32,8 +34,12 @@ data class LinkAccountSession internal constructor(
     val livemode: Boolean,
 
     @SerialName("payment_account")
-    val paymentAccount: LinkedAccount? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val paymentAccount: PaymentAccount? = null,
 
     @SerialName("return_url")
     val returnUrl: String? = null
 ) : StripeModel, Parcelable
+
+@Serializable(with = PaymentAccountSerializer::class)
+sealed class PaymentAccount : Parcelable

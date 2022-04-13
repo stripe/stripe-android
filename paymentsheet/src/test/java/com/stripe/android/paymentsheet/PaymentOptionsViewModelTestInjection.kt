@@ -10,6 +10,8 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,18 +60,29 @@ internal open class PaymentOptionsViewModelTestInjection {
             resourceRepository = mock(),
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            }
+            },
+            linkPaymentLauncherFactory = mock()
+        )
+    }
+
+    @ExperimentalCoroutinesApi
+    fun createFormViewModel(): FormViewModel = runBlocking {
+        FormViewModel(
+            layout = mock(),
+            config = mock(),
+            resourceRepository = mock(),
+            transformSpecToElement = mock()
         )
     }
 
     fun registerViewModel(
         @InjectorKey injectorKey: String,
-        viewModel: PaymentOptionsViewModel
+        viewModel: PaymentOptionsViewModel,
+        formViewModel: FormViewModel
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
         val mockSubcomponent = mock<PaymentOptionsViewModelSubcomponent>()
         val mockSubComponentBuilderProvider = mock<Provider<PaymentOptionsViewModelSubcomponent.Builder>>()
-
         whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
         whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.application(any())).thenReturn(mockBuilder)
@@ -77,10 +90,22 @@ internal open class PaymentOptionsViewModelTestInjection {
         whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
         whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
 
+        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
+        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
+        val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
+        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
+        whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.layout(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
+        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
+
         injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
+                }
+                (injectable as? FormViewModel.Factory)?.let {
+                    injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
                 }
             }
         }

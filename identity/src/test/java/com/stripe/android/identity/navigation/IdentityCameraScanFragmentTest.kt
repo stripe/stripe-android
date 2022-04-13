@@ -9,7 +9,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
@@ -24,6 +23,7 @@ import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -31,7 +31,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
@@ -51,8 +53,8 @@ class IdentityCameraScanFragmentTest {
         whenever(it.previewFrame).thenReturn(mockPreviewFrame)
     }
 
-    private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
-    private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
+    private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
@@ -72,6 +74,7 @@ class IdentityCameraScanFragmentTest {
     ) : IdentityCameraScanFragment(
         identityScanViewModelFactory, identityViewModelFactory
     ) {
+        override val fragmentId = R.id.IDScanFragment
         var currentState: IdentityScanState? = null
         var onCameraReadyIsCalled = false
 
@@ -90,6 +93,13 @@ class IdentityCameraScanFragmentTest {
 
         override fun updateUI(identityScanState: IdentityScanState) {
             currentState = identityScanState
+        }
+    }
+
+    @Test
+    fun `when viewCreated uploadedState is reset`() {
+        launchTestFragment().onFragment {
+            verify(mockIdentityViewModel).resetUploadedState()
         }
     }
 
@@ -166,6 +176,14 @@ class IdentityCameraScanFragmentTest {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.TimeOut>())
                 }
             )
+
+            val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE)
 
             verify(mockScanFlow).resetFlow()
             assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()

@@ -2,6 +2,7 @@ package com.stripe.android.connections
 
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -23,6 +24,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
@@ -47,6 +49,29 @@ class ConnectionsSheetViewModelTest {
         createViewModel(configuration)
         verify(eventReporter)
             .onPresented(configuration)
+    }
+
+    @Test
+    fun `init - if manifest not restored from SavedStateHandle, fetchManifest triggered`() =
+        runTest {
+            createViewModel(
+                configuration = configuration,
+                savedStateHandle = SavedStateHandle()
+            )
+
+            verify(generateLinkAccountSessionManifest).invoke(any(), any())
+        }
+
+    @Test
+    fun `init - if manifest restored from SavedStateHandle, fetchManifest not triggered`() {
+        runTest {
+            createViewModel(
+                configuration = configuration,
+                savedStateHandle = SavedStateHandle().also { it.set("key_manifest", manifest) }
+            )
+
+            verifyNoInteractions(generateLinkAccountSessionManifest)
+        }
     }
 
     @Test
@@ -257,12 +282,14 @@ class ConnectionsSheetViewModelTest {
     )
 
     private fun createViewModel(
-        configuration: ConnectionsSheet.Configuration
+        configuration: ConnectionsSheet.Configuration,
+        savedStateHandle: SavedStateHandle = SavedStateHandle()
     ): ConnectionsSheetViewModel {
-        val args = ConnectionsSheetContract.Args.create(configuration)
+        val args = ConnectionsSheetContract.Args(configuration)
         return ConnectionsSheetViewModel(
             applicationId = "com.example.app",
             starterArgs = args,
+            savedStateHandle = savedStateHandle,
             generateLinkAccountSessionManifest = generateLinkAccountSessionManifest,
             fetchLinkAccountSession = fetchLinkAccountSession,
             eventReporter = eventReporter

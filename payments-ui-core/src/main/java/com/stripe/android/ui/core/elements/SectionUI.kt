@@ -22,14 +22,16 @@ import com.stripe.android.ui.core.PaymentsTheme
 internal fun Section(
     @StringRes title: Int?,
     error: String?,
-    content: @Composable () -> Unit
+    contentOutsideCard: @Composable () -> Unit = {},
+    contentInCard: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
-        SectionCard(content = content)
+        SectionCard(content = contentInCard)
         if (error != null) {
             SectionError(error)
         }
+        contentOutsideCard()
     }
 }
 
@@ -42,7 +44,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
         H6Text(
             text = stringResource(titleText),
             modifier = Modifier
-                .padding(vertical = 4.dp)
+                .padding(bottom = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
                 }
@@ -64,10 +66,13 @@ fun SectionCard(
         border = PaymentsTheme.getBorderStroke(isSelected),
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = PaymentsTheme.colors.colorComponentBackground,
+        backgroundColor = PaymentsTheme.colors.component,
+        shape = PaymentsTheme.shapes.material.medium,
         modifier = modifier
     ) {
-        content()
+        Column {
+            content()
+        }
     }
 }
 
@@ -79,6 +84,7 @@ internal fun SectionError(error: String) {
     Text(
         text = error,
         color = PaymentsTheme.colors.material.error,
+        style = PaymentsTheme.typography.h6,
         modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }

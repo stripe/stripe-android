@@ -63,6 +63,50 @@
                 android:orientation="vertical"
                 android:animateLayoutChanges="true">
 
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal" />
+
+                <LinearLayout
+                    android:id="@+id/top_container"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+                    android:orientation="vertical">
+
+                    <com.stripe.android.paymentsheet.ui.GooglePayButton
+                        android:id="@+id/google_pay_button"
+                        android:visibility="gone"
+                        android:layout_marginTop="7dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <com.stripe.android.link.ui.LinkViewButton
+                        android:id="@+id/link_button"
+                        android:visibility="gone"
+                        android:layout_marginTop="6dp"
+                        android:padding="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp" />
+
+                    <TextView
+                        android:id="@+id/top_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:padding="1dp"
+                        android:layout_marginVertical="2dp" />
+
+                    <androidx.compose.ui.platform.ComposeView
+                        android:id="@+id/google_pay_divider"
+                        android:visibility="visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/fragment_container"
                     android:name="com.stripe.android.paymentsheet.PaymentSheetLoadingFragment"
@@ -71,7 +115,6 @@
 
                 <TextView
                     android:id="@+id/message"
-                    style="@style/StripePaymentSheetErrorMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -93,14 +136,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
                         android:text="@string/stripe_paymentsheet_pay_button_label"
-                        android:layout_marginVertical="2dp"
-                        android:visibility="gone" />
-
-                    <com.stripe.android.paymentsheet.ui.GooglePayButton
-                        android:id="@+id/google_pay_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone" />
+                        android:layout_marginVertical="2dp" />
                 </FrameLayout>
             </LinearLayout>
         </ScrollView>

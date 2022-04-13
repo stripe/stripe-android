@@ -22,6 +22,7 @@ import kotlinx.serialization.Serializable
  */
 @Parcelize
 @Serializable
+@Suppress("unused")
 data class Balance(
 
     /* The time that the external institution calculated this balance.

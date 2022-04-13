@@ -6,15 +6,13 @@ import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
@@ -24,15 +22,16 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.PairMediatorLiveData
+import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -41,6 +40,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -54,14 +54,8 @@ class PassportScanFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
-    private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
-    private val mockFrontUploaded: PairMediatorLiveData<UploadedResult> =
-        mock()
-    private val frontUploadedObserverCaptor =
-        argumentCaptor<Observer<Resource<
-                    Pair<UploadedResult, UploadedResult>
-                    >>>()
+    private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
@@ -71,10 +65,27 @@ class PassportScanFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.pageAndModel).thenReturn(mockPageAndModel)
-        whenever(it.frontUploaded).thenReturn(mockFrontUploaded)
+
+    private val uploadState =
+        MutableStateFlow(IdentityViewModel.UploadState())
+
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { pageAndModel } doReturn mockPageAndModel
+        on { uploadState } doReturn uploadState
     }
+
+    private val errorUploadState = mock<IdentityViewModel.UploadState> {
+        on { hasError() } doReturn true
+    }
+
+    private val frontLoadingUploadState = mock<IdentityViewModel.UploadState> {
+        on { isFrontLoading() } doReturn true
+    }
+
+    private val frontUploadedUploadState = IdentityViewModel.UploadState(
+        frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT),
+        frontLowResResult = Resource.success(FRONT_LOW_RES_RESULT)
+    )
 
     @Before
     fun simulateModelDownloaded() {
@@ -85,21 +96,15 @@ class PassportScanFragmentTest {
     fun `when scanned and file is uploaded, clicking button triggers navigation`() {
         simulateFrontScanned { _, _ ->
             runBlocking {
-                // mock bothUploaded success
-                frontUploadedObserverCaptor.firstValue.onChanged(
-                    Resource.success(
-                        Pair(
-                            FRONT_HIGH_RES_RESULT,
-                            FRONT_LOW_RES_RESULT
-                        ),
-                    )
-                )
+                uploadState.update {
+                    frontUploadedUploadState
+                }
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                            type = IdDocumentParam.Type.PASSPORT,
+                            type = CollectedDataParam.Type.PASSPORT,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
@@ -115,11 +120,9 @@ class PassportScanFragmentTest {
     @Test
     fun `when scanned but files uploaded failed, clicking button navigate to error`() {
         simulateFrontScanned { navController, _ ->
-            // mock bothUploaded error
-            frontUploadedObserverCaptor.firstValue.onChanged(
-                Resource.error()
-            )
-
+            uploadState.update {
+                errorUploadState
+            }
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
         }
@@ -128,10 +131,9 @@ class PassportScanFragmentTest {
     @Test
     fun `when scanned and files are being uploaded, clicking button toggles loading state`() {
         simulateFrontScanned { _, binding ->
-            // mock bothUploaded loading
-            frontUploadedObserverCaptor.firstValue.onChanged(
-                Resource.loading()
-            )
+            uploadState.update {
+                frontLoadingUploadState
+            }
 
             assertThat(
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).isEnabled
@@ -276,8 +278,6 @@ class PassportScanFragmentTest {
             val binding = IdentityCameraScanFragmentBinding.bind(passportScanFragment.requireView())
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
-            verify(mockFrontUploaded).observe(any(), frontUploadedObserverCaptor.capture())
-
             afterScannedBlock(navController, binding)
         }
     }
@@ -303,14 +303,14 @@ class PassportScanFragmentTest {
 
     private companion object {
         val FRONT_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val FRONT_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontLowResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),

@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -46,6 +49,7 @@ import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -84,11 +88,12 @@ internal class PaymentOptionsAdapter(
     fun setItems(
         config: FragmentConfig,
         paymentMethods: List<PaymentMethod>,
+        showGooglePay: Boolean,
         paymentSelection: PaymentSelection? = null
     ) {
         val items = listOfNotNull(
             Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady }
+            Item.GooglePay.takeIf { config.isGooglePayReady && showGooglePay }
         ) + sortedPaymentMethods(paymentMethods, config.savedSelection).map {
             Item.SavedPaymentMethod(it)
         }
@@ -531,6 +536,7 @@ internal fun PaymentOptionUi(
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
             ) {
                 Image(
                     painter = painterResource(iconRes),
@@ -568,9 +574,17 @@ internal fun PaymentOptionUi(
                 onConfirmListener = onRemoveListener
             )
 
+            // tint the delete symbol so it contrasts well with the error color around it.
+            val iconColor = PaymentsTheme.colors.material.error
+            val deleteIconColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
             Image(
                 painter = painterResource(R.drawable.stripe_ic_delete_symbol),
                 contentDescription = onRemoveAccessibilityDescription,
+                colorFilter = ColorFilter.tint(deleteIconColor),
                 modifier = Modifier
                     .constrainAs(deleteIcon) {
                         top.linkTo(card.top, margin = (-9).dp)
@@ -578,7 +592,7 @@ internal fun PaymentOptionUi(
                     }
                     .size(20.dp)
                     .clip(CircleShape)
-                    .background(color = PaymentsTheme.colors.material.error)
+                    .background(color = iconColor)
                     .clickable(
                         onClick = {
                             openDialog.value = true
@@ -589,7 +603,7 @@ internal fun PaymentOptionUi(
 
         LpmSelectorText(
             text = labelText,
-            textColor = PaymentsTheme.colors.material.onPrimary,
+            textColor = PaymentsTheme.colors.material.onSurface,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {
