@@ -6,12 +6,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connections.ConnectionsSheetContract.Result.Canceled
+import com.stripe.android.connections.ConnectionsSheetContract.Result.Completed
+import com.stripe.android.connections.ConnectionsSheetContract.Result.Failed
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.FetchLinkAccountSessionForToken
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
-import com.stripe.android.connections.ConnectionsSheetContract.Result.*
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountFixtures

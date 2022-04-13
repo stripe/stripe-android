@@ -7,7 +7,6 @@ import com.stripe.android.connections.ConnectionsSheet
 import com.stripe.android.connections.ConnectionsSheetContract
 import com.stripe.android.connections.ConnectionsSheetContract.Result
 import com.stripe.android.connections.ConnectionsSheetForTokenResult
-import com.stripe.android.connections.ConnectionsSheetLauncher
 
 internal class ConnectionsSheetForTokenLauncher(
     private val activityResultLauncher: ActivityResultLauncher<ConnectionsSheetContract.Args>
@@ -52,4 +51,3 @@ private fun Result.toExposedResult(): ConnectionsSheetForTokenResult = when (thi
         token = requireNotNull(token)
     )
 }
-

@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
+@Suppress("LongParameterList", "TooManyFunctions")
 internal class ConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val starterArgs: Args,

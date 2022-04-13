@@ -2,8 +2,11 @@ package com.stripe.android.connections
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import com.stripe.android.connections.launcher.ConnectionsSheetForTokenLauncher
+import com.stripe.android.connections.launcher.ConnectionsSheetLauncher
+import com.stripe.android.connections.launcher.DefaultConnectionsSheetLauncher
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -12,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
  */
-class ConnectionsSheet private constructor(
+class ConnectionsSheet @VisibleForTesting internal constructor(
     private val connectionsSheetLauncher: ConnectionsSheetLauncher
 ) {
     /**
@@ -68,7 +71,6 @@ class ConnectionsSheet private constructor(
                 DefaultConnectionsSheetLauncher(fragment, callback)
             )
         }
-
 
         /**
          * Constructor to be used when launching the connections sheet from an Activity.

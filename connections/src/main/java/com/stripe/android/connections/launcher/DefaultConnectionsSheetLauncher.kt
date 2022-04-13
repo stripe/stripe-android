@@ -1,8 +1,12 @@
-package com.stripe.android.connections
+package com.stripe.android.connections.launcher
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
+import com.stripe.android.connections.ConnectionsSheet
+import com.stripe.android.connections.ConnectionsSheetContract
+import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.connections.ConnectionsSheetResultCallback
 
 internal class DefaultConnectionsSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<ConnectionsSheetContract.Args>
