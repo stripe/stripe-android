@@ -1,0 +1,85 @@
+package com.stripe.android.payments.bankaccount.domain
+
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+
+@ExperimentalCoroutinesApi
+class RetrieveStripeIntentTest {
+
+    private val stripeRepository = mock<StripeRepository>()
+    private val retrieveStripeIntent = RetrieveStripeIntent(stripeRepository)
+
+    @Test
+    fun `retrieve - given payment intent client secret, payment intent is retrieved`() {
+        runTest {
+            // Given
+            val publishableKey = "publishable_key"
+            val clientSecret = "pi_1234_secret_5678"
+            givenRetrieveStripeIntentReturns {
+                mock<PaymentIntent>()
+            }
+
+            // When
+            val intent = retrieveStripeIntent.retrieve(
+                publishableKey = publishableKey,
+                clientSecret = clientSecret
+            ).getOrNull()
+
+            // Then
+            verify(stripeRepository).retrieveStripeIntent(
+                clientSecret = "pi_1234_secret_5678",
+                options = ApiRequest.Options(publishableKey)
+            )
+
+            assertThat(intent).isInstanceOf(PaymentIntent::class.java)
+        }
+    }
+
+    @Test
+    fun `retrieve - given setup intent client secret, setup intent is retrieved`() {
+        runTest {
+            // Given
+            val publishableKey = "publishable_key"
+            val clientSecret = "seti_1234_secret_5678"
+            givenRetrieveStripeIntentReturns {
+                mock<SetupIntent>()
+            }
+
+            // When
+            val intent = retrieveStripeIntent.retrieve(
+                publishableKey = publishableKey,
+                clientSecret = clientSecret
+            ).getOrNull()
+
+            // Then
+            verify(stripeRepository).retrieveStripeIntent(
+                clientSecret = "seti_1234_secret_5678",
+                options = ApiRequest.Options(publishableKey)
+            )
+            assertThat(intent).isInstanceOf(SetupIntent::class.java)
+        }
+    }
+
+    private suspend fun givenRetrieveStripeIntentReturns(
+        intent: () -> StripeIntent
+    ) {
+        whenever(
+            stripeRepository.retrieveStripeIntent(
+                any(),
+                any(),
+                any(),
+            )
+        ).thenAnswer { intent() }
+    }
+}

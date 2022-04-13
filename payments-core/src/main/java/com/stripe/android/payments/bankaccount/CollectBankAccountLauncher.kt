@@ -18,13 +18,15 @@ interface CollectBankAccountLauncher {
     fun presentWithPaymentIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration
+        configuration: CollectBankAccountConfiguration,
+        attachToIntent: Boolean = true
     )
 
     fun presentWithSetupIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration
+        configuration: CollectBankAccountConfiguration,
+        attachToIntent: Boolean = true
     )
 
     companion object {
@@ -71,13 +73,15 @@ internal class StripeCollectBankAccountLauncher constructor(
     override fun presentWithPaymentIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration
+        configuration: CollectBankAccountConfiguration,
+        attachToIntent: Boolean
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret,
-                configuration = configuration
+                configuration = configuration,
+                attachToIntent = attachToIntent
             )
         )
     }
@@ -85,13 +89,15 @@ internal class StripeCollectBankAccountLauncher constructor(
     override fun presentWithSetupIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration
+        configuration: CollectBankAccountConfiguration,
+        attachToIntent: Boolean
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret,
-                configuration = configuration
+                configuration = configuration,
+                attachToIntent = attachToIntent
             )
         )
     }

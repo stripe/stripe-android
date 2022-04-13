@@ -9,10 +9,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
 import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
+import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
@@ -34,6 +36,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     // injected instances
     private val createLinkAccountSession: CreateLinkAccountSession,
     private val attachLinkAccountSession: AttachLinkAccountSession,
+    private val retrieveStripeIntent: RetrieveStripeIntent,
     private val logger: Logger
 ) : ViewModel() {
 
@@ -83,7 +86,11 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 is FinancialConnectionsSheetResult.Failed ->
                     finishWithError(result.error)
                 is FinancialConnectionsSheetResult.Completed ->
-                    attachLinkAccountSessionToIntent(result.linkAccountSession.id)
+                    if (args.attachToIntent) {
+                        attachLinkAccountSessionToIntent(result.linkAccountSession)
+                    } else {
+                        finishWithLinkAccountSession(result.linkAccountSession)
+                    }
             }
         }
     }
@@ -92,21 +99,41 @@ internal class CollectBankAccountViewModel @Inject constructor(
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun attachLinkAccountSessionToIntent(linkedAccountSessionId: String) {
+    private fun finishWithLinkAccountSession(linkAccountSession: LinkAccountSession) {
+        viewModelScope.launch {
+            retrieveStripeIntent.retrieve(
+                args.publishableKey,
+                args.clientSecret
+            ).onSuccess { stripeIntent ->
+                finishWithResult(
+                    Completed(
+                        CollectBankAccountResponse(
+                            stripeIntent,
+                            linkAccountSession
+                        )
+                    )
+                )
+            }.onFailure {
+                finishWithError(it)
+            }
+        }
+    }
+
+    private fun attachLinkAccountSessionToIntent(linkAccountSession: LinkAccountSession) {
         viewModelScope.launch {
             when (args) {
                 is ForPaymentIntent -> attachLinkAccountSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
-                    linkedAccountSessionId = linkedAccountSessionId
+                    linkedAccountSessionId = linkAccountSession.id
                 )
                 is ForSetupIntent -> attachLinkAccountSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
-                    linkedAccountSessionId = linkedAccountSessionId
+                    linkedAccountSessionId = linkAccountSession.id
                 )
             }
-                .mapCatching { Completed(CollectBankAccountResponse(it)) }
+                .mapCatching { Completed(CollectBankAccountResponse(it, linkAccountSession)) }
                 .onSuccess { result: Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
