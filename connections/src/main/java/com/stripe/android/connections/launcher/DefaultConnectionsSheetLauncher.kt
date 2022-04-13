@@ -2,11 +2,13 @@ package com.stripe.android.connections.launcher
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.connections.ConnectionsSheet
 import com.stripe.android.connections.ConnectionsSheetContract
 import com.stripe.android.connections.ConnectionsSheetResult
 import com.stripe.android.connections.ConnectionsSheetResultCallback
+import org.jetbrains.annotations.TestOnly
 
 internal class DefaultConnectionsSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<ConnectionsSheetContract.Args>
@@ -32,6 +34,20 @@ internal class DefaultConnectionsSheetLauncher(
         ) {
             callback.onConnectionsSheetResult(it.toExposedResult())
         }
+    )
+
+    @TestOnly
+    constructor(
+        fragment: Fragment,
+        registry: ActivityResultRegistry,
+        callback: ConnectionsSheetResultCallback
+    ) : this(
+        fragment.registerForActivityResult(
+            ConnectionsSheetContract(),
+            registry
+        ) {
+            callback.onConnectionsSheetResult(it.toExposedResult())
+        },
     )
 
     override fun present(configuration: ConnectionsSheet.Configuration) {
