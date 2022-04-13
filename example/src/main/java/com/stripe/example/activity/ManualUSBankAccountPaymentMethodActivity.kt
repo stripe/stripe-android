@@ -55,7 +55,7 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     private val verifyCallback = object : ApiResultCallback<StripeIntent> {
         override fun onSuccess(result: StripeIntent) {
             viewModel.inProgress.value = false
-            viewModel.status.value += "Account verified with \n\n$result\n"
+            viewModel.status.value += "Attempted to verify with \n\n$result\n"
         }
 
         override fun onError(e: Exception) {
@@ -345,15 +345,15 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
         if (inProgress) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
-        if (status.isNotEmpty()) {
-            Text(text = status)
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .verticalScroll(scrollState)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .verticalScroll(scrollState)
+        ) {
+            if (status.isNotEmpty()) {
+                Text(text = status)
+            } else {
                 Text(text = "Enter verification details from your bank account.")
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -390,8 +390,8 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
                     onClick = {
                         verifyWithMicrodeposits(
                             descriptorCode = descriptorCode.value,
-                            firstAmount = firstAmount.value.toInt(),
-                            secondAmount = secondAmount.value.toInt()
+                            firstAmount = firstAmount.value.toIntOrNull() ?: 0,
+                            secondAmount = secondAmount.value.toIntOrNull() ?: 0
                         )
                     }
                 )
