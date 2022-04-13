@@ -2,6 +2,7 @@ package com.stripe.android.connections.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.connections.model.serializer.JsonAsStringSerializer
 import com.stripe.android.connections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
@@ -38,7 +39,11 @@ data class LinkAccountSession internal constructor(
     val paymentAccount: PaymentAccount? = null,
 
     @SerialName("return_url")
-    val returnUrl: String? = null
+    val returnUrl: String? = null,
+
+    @SerialName("bank_account_token")
+    @Serializable(with = JsonAsStringSerializer::class)
+    internal val bankAccountToken: String? = null
 ) : StripeModel, Parcelable
 
 @Serializable(with = PaymentAccountSerializer::class)

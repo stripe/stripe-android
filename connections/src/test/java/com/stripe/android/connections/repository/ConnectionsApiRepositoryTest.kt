@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connections.ApiKeyFixtures
 import com.stripe.android.connections.model.BankAccount
 import com.stripe.android.connections.model.LinkedAccount
+import com.stripe.android.connections.test.readResourceAsString
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
@@ -13,7 +14,6 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.io.BufferedReader
 import java.net.HttpURLConnection
 
 @ExperimentalCoroutinesApi
@@ -55,12 +55,6 @@ class ConnectionsApiRepositoryTest {
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }
-
-    private fun readResourceAsString(resourcePath: String): String = javaClass
-        .classLoader!!
-        .getResourceAsStream(resourcePath)!!
-        .bufferedReader()
-        .use(BufferedReader::readText)
 
     private suspend fun givenGetRequestReturns(successBody: String) {
         val mock = mock<ApiRequest>()

@@ -53,9 +53,9 @@ internal sealed class ConnectionsSheetViewEffect {
     ) : ConnectionsSheetViewEffect()
 
     /**
-     * Finish [ConnectionsSheetActivity] with a given [ConnectionsSheetResult]
+     * Finish [ConnectionsSheetActivity] with a given [ConnectionsSheetContract.Result]
      */
     data class FinishWithResult(
-        val result: ConnectionsSheetResult
+        val result: ConnectionsSheetContract.Result
     ) : ConnectionsSheetViewEffect()
 }

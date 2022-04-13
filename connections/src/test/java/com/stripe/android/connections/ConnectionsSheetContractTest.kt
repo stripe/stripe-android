@@ -14,7 +14,7 @@ class ConnectionsSheetContractTest {
     @Test
     fun `parseResult() with missing data should return failed result`() {
         assertThat(ConnectionsSheetContract().parseResult(0, Intent()))
-            .isInstanceOf(ConnectionsSheetResult.Failed::class.java)
+            .isInstanceOf(ConnectionsSheetContract.Result.Failed::class.java)
     }
 
     @Test
@@ -23,7 +23,7 @@ class ConnectionsSheetContractTest {
             ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        val args = ConnectionsSheetContract.Args(configuration)
+        val args = ConnectionsSheetContract.Args.Default(configuration)
         args.validate()
     }
 
@@ -33,7 +33,7 @@ class ConnectionsSheetContractTest {
             " ",
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        val args = ConnectionsSheetContract.Args(configuration)
+        val args = ConnectionsSheetContract.Args.Default(configuration)
         assertFailsWith<InvalidParameterException>(
             "The link account session client secret cannot be an empty string."
         ) {
@@ -47,7 +47,7 @@ class ConnectionsSheetContractTest {
             ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
             " "
         )
-        val args = ConnectionsSheetContract.Args(configuration)
+        val args = ConnectionsSheetContract.Args.Default(configuration)
         assertFailsWith<InvalidParameterException>(
             "The publishable key cannot be an empty string."
         ) {

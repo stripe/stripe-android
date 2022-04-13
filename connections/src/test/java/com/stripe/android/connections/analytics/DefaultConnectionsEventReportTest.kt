@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.connections.ApiKeyFixtures
 import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.connections.ConnectionsSheetContract.Result
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkedAccountList
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -68,7 +68,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for success`() {
-        eventReporter.onResult(configuration, ConnectionsSheetResult.Completed(linkAccountSession))
+        eventReporter.onResult(configuration, Result.Completed(linkAccountSession))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
@@ -80,7 +80,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for cancelled`() {
-        eventReporter.onResult(configuration, ConnectionsSheetResult.Canceled)
+        eventReporter.onResult(configuration, Result.Canceled)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
@@ -92,7 +92,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for failure`() {
-        eventReporter.onResult(configuration, ConnectionsSheetResult.Failed(Exception()))
+        eventReporter.onResult(configuration, Result.Failed(Exception()))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.failed" &&

@@ -15,7 +15,7 @@ internal class DefaultConnectionsSheetLauncher(
         activity.registerForActivityResult(
             ConnectionsSheetContract()
         ) {
-            callback.onConnectionsSheetResult(it)
+            callback.onConnectionsSheetResult(it.toExposedResult())
         }
     )
 
@@ -26,15 +26,24 @@ internal class DefaultConnectionsSheetLauncher(
         fragment.registerForActivityResult(
             ConnectionsSheetContract()
         ) {
-            callback.onConnectionsSheetResult(it)
+            callback.onConnectionsSheetResult(it.toExposedResult())
         }
     )
 
     override fun present(configuration: ConnectionsSheet.Configuration) {
         activityResultLauncher.launch(
-            ConnectionsSheetContract.Args(
+            ConnectionsSheetContract.Args.Default(
                 configuration,
             )
         )
     }
 }
+
+private fun ConnectionsSheetContract.Result.toExposedResult(): ConnectionsSheetResult =
+    when (this) {
+        is ConnectionsSheetContract.Result.Canceled -> ConnectionsSheetResult.Canceled
+        is ConnectionsSheetContract.Result.Failed -> ConnectionsSheetResult.Failed(error)
+        is ConnectionsSheetContract.Result.Completed -> ConnectionsSheetResult.Completed(
+            linkAccountSession = linkAccountSession,
+        )
+    }

@@ -6,11 +6,13 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.connections.model.LinkAccountSession
+import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 
 internal class ConnectionsSheetContract :
-    ActivityResultContract<ConnectionsSheetContract.Args, ConnectionsSheetResult>() {
+    ActivityResultContract<ConnectionsSheetContract.Args, ConnectionsSheetContract.Result>() {
 
     override fun createIntent(
         context: Context,
@@ -22,18 +24,25 @@ internal class ConnectionsSheetContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): ConnectionsSheetResult {
-        val connectionsResult =
-            intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.connectionsSheetResult
-        return connectionsResult ?: ConnectionsSheetResult.Failed(
+    ): Result {
+        return intent?.getParcelableExtra(EXTRA_RESULT) ?: Result.Failed(
             IllegalArgumentException("Failed to retrieve a ConnectionsSheetResult.")
         )
     }
 
-    @Parcelize
-    data class Args constructor(
-        val configuration: ConnectionsSheet.Configuration,
+    sealed class Args constructor(
+        open val configuration: ConnectionsSheet.Configuration,
     ) : Parcelable {
+
+        @Parcelize
+        data class Default(
+            override val configuration: ConnectionsSheet.Configuration
+        ) : Args(configuration)
+
+        @Parcelize
+        data class ForToken(
+            override val configuration: ConnectionsSheet.Configuration
+        ) : Args(configuration)
 
         fun validate() {
             if (configuration.linkAccountSessionClientSecret.isBlank()) {
@@ -55,10 +64,32 @@ internal class ConnectionsSheetContract :
         }
     }
 
-    @Parcelize
-    data class Result(
-        val connectionsSheetResult: ConnectionsSheetResult
-    ) : Parcelable {
+    internal sealed class Result : Parcelable {
+        /**
+         * The customer completed the connections session.
+         * @param linkAccountSession The link account session connected
+         */
+        @Parcelize
+        data class Completed(
+            val linkAccountSession: LinkAccountSession,
+            val token: Token? = null
+        ) : Result()
+
+        /**
+         * The customer canceled the connections session attempt.
+         */
+        @Parcelize
+        object Canceled : Result()
+
+        /**
+         * The connections session attempt failed.
+         * @param error The error encountered by the customer.
+         */
+        @Parcelize
+        data class Failed(
+            val error: Throwable
+        ) : Result()
+
         fun toBundle(): Bundle {
             return bundleOf(EXTRA_RESULT to this)
         }

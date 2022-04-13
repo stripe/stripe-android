@@ -3,6 +3,7 @@ package com.stripe.android.connections
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
+import com.stripe.android.connections.launcher.ConnectionsSheetForTokenLauncher
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -20,6 +21,13 @@ class ConnectionsSheet internal constructor(
      * @param activity  the Activity that is presenting the connections sheet.
      * @param callback  called with the result of the connections session after the connections sheet is dismissed.
      */
+    @Deprecated(
+        message = "Use ConnectionsSheet.create to build ConnectionsSheet instead",
+        replaceWith = ReplaceWith(
+            expression = "ConnectionsSheet.create(activity, callback)",
+            imports = ["com.stripe.android.connections.ConnectionsSheet"]
+        )
+    )
     constructor(
         activity: ComponentActivity,
         callback: ConnectionsSheetResultCallback
@@ -33,6 +41,13 @@ class ConnectionsSheet internal constructor(
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
      */
+    @Deprecated(
+        message = "Use ConnectionsSheet.create to build ConnectionsSheet instead",
+        replaceWith = ReplaceWith(
+            expression = "ConnectionsSheet.create(fragment, callback)",
+            imports = ["com.stripe.android.connections.ConnectionsSheet"]
+        )
+    )
     constructor(
         fragment: Fragment,
         callback: ConnectionsSheetResultCallback
@@ -61,5 +76,68 @@ class ConnectionsSheet internal constructor(
         configuration: Configuration
     ) {
         connectionsSheetLauncher.present(configuration)
+    }
+
+    companion object {
+        /**
+         * Constructor to be used when launching the connections sheet from an Activity.
+         *
+         * @param activity  the Activity that is presenting the connections sheet.
+         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
+         */
+        fun create(
+            activity: ComponentActivity,
+            callback: ConnectionsSheetResultCallback
+        ): ConnectionsSheet {
+            return ConnectionsSheet(
+                DefaultConnectionsSheetLauncher(activity, callback)
+            )
+        }
+
+        /**
+         * Constructor to be used when launching the payment sheet from a Fragment.
+         *
+         * @param fragment the Fragment that is presenting the payment sheet.
+         * @param callback called with the result of the payment after the payment sheet is dismissed.
+         */
+        fun create(
+            fragment: Fragment,
+            callback: ConnectionsSheetResultCallback
+        ): ConnectionsSheet {
+            return ConnectionsSheet(
+                DefaultConnectionsSheetLauncher(fragment, callback)
+            )
+        }
+
+
+        /**
+         * Constructor to be used when launching the connections sheet from an Activity.
+         *
+         * @param activity  the Activity that is presenting the connections sheet.
+         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
+         */
+        fun createForToken(
+            activity: ComponentActivity,
+            callback: (ConnectionsSheetForTokenResult) -> Unit
+        ): ConnectionsSheet {
+            return ConnectionsSheet(
+                ConnectionsSheetForTokenLauncher(activity, callback)
+            )
+        }
+
+        /**
+         * Constructor to be used when launching the payment sheet from a Fragment.
+         *
+         * @param fragment the Fragment that is presenting the payment sheet.
+         * @param callback called with the result of the payment after the payment sheet is dismissed.
+         */
+        fun createForToken(
+            fragment: Fragment,
+            callback: (ConnectionsSheetForTokenResult) -> Unit
+        ): ConnectionsSheet {
+            return ConnectionsSheet(
+                ConnectionsSheetForTokenLauncher(fragment, callback)
+            )
+        }
     }
 }

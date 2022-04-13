@@ -36,7 +36,7 @@ class ConnectionsSheetActivityTest {
         ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val args = ConnectionsSheetContract.Args(configuration)
+    private val args = ConnectionsSheetContract.Args.Default(configuration)
     private val intent = contract.createIntent(context, args)
     private val viewModel = createViewModel()
 
@@ -47,6 +47,7 @@ class ConnectionsSheetActivityTest {
             savedStateHandle = SavedStateHandle(),
             generateLinkAccountSessionManifest = mock(),
             fetchLinkAccountSession = mock(),
+            fetchLinkAccountSessionForToken = mock(),
             eventReporter = mock()
         )
     }
@@ -72,7 +73,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Failed::class.java
+            ConnectionsSheetContract.Result.Failed::class.java
         )
     }
 
@@ -80,7 +81,7 @@ class ConnectionsSheetActivityTest {
     fun `onCreate() with invalid args returns Failed result`() {
         val scenario = activityScenario()
         val configuration = ConnectionsSheet.Configuration("", "")
-        val args = ConnectionsSheetContract.Args(configuration)
+        val args = ConnectionsSheetContract.Args.Default(configuration)
         val intent = contract.createIntent(context, args)
         scenario.launch(intent)
         assertThat(
@@ -89,7 +90,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Failed::class.java
+            ConnectionsSheetContract.Result.Failed::class.java
         )
     }
 
@@ -138,7 +139,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Canceled::class.java
+            ConnectionsSheetContract.Result.Canceled::class.java
         )
     }
 
