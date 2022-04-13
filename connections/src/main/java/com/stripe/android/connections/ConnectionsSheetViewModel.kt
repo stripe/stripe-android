@@ -1,6 +1,5 @@
 package com.stripe.android.connections
 
-import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -12,7 +11,7 @@ import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResul
 import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.di.APPLICATION_ID
-import com.stripe.android.connections.di.DaggerConnectionsSheetComponent
+import com.stripe.android.connections.di.appComponent
 import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkAccountSession
@@ -217,7 +216,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            return ComponentHolder.component<ConnectionsAppComponent>()
+            return appComponent
                 .connectionsSheetComponent()
                 .savedStateHandle(savedStateHandle)
                 .configuration(starterArgsSupplier())
