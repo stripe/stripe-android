@@ -73,7 +73,7 @@ data class PaymentsTypography(
     val largeFontSize: TextUnit,
     val xLargeFontSize: TextUnit,
     @FontRes
-    val fontFamily: Int
+    val fontFamily: Int?
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -129,7 +129,7 @@ object PaymentsThemeDefaults {
         mediumFontSize = 14.sp,
         largeFontSize = 16.sp,
         xLargeFontSize = 20.sp,
-        fontFamily = R.font.roboto
+        fontFamily = null // We default to the default system font.
     )
 }
 
@@ -192,10 +192,12 @@ fun PaymentsShapes.toComposeShapes(): PaymentsComposeShapes {
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTypography.toComposeTypography(): Typography {
+
+    val fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (xLargeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightBold),
     )
@@ -203,7 +205,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // h5 is our medium headline label.
     // ex: "Pay $50.99" in Payment Sheet's buy button.
     val h5 = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (largeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.32).sp
@@ -212,7 +214,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // h6 is our smallest headline label.
     // ex: Section labels in Payment Sheet
     val h6 = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (smallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.15).sp
@@ -221,7 +223,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // body1 is our larger body text. Used for the bulk of our elements and forms.
     // ex: the text used in Payment Sheet's text form elements.
     val body1 = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
     )
@@ -229,7 +231,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // subtitle1 is our only subtitle size. Used for labeling fields.
     // ex: the placeholder texts that appear when you type in Payment Sheet's forms.
     val subtitle1 = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp
@@ -238,7 +240,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // caption is used to label images in payment sheet.
     // ex: the labels under our payment method selectors in Payment Sheet.
     val caption = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (xSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium)
     )
@@ -246,7 +248,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // body2 is our smaller body text. Used for less important fields that are not required to
     // read. Ex: our mandate texts in Payment Sheet.
     val body2 = TextStyle.Default.copy(
-        fontFamily = FontFamily(Font(fontFamily)),
+        fontFamily = fontFamily,
         fontSize = (xxSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp
@@ -339,7 +341,7 @@ fun createTextSpanFromTextStyle(
     fontSizeDp: Dp,
     color: Color,
     @FontRes
-    fontFamily: Int
+    fontFamily: Int?
 ): SpannableString {
     val span = SpannableString(text ?: "")
 
@@ -348,10 +350,14 @@ fun createTextSpanFromTextStyle(
 
     span.setSpan(ForegroundColorSpan(color.toArgb()), 0, span.length, 0)
 
-    ResourcesCompat.getFont(
-        context,
-        fontFamily
-    )?.let {
+    if (fontFamily != null) {
+        ResourcesCompat.getFont(
+            context,
+            fontFamily
+        )
+    } else {
+        Typeface.DEFAULT
+    }?.let {
         span.setSpan(CustomTypefaceSpan(it), 0, span.length, 0)
     }
 
