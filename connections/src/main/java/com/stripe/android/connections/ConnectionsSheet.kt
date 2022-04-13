@@ -12,49 +12,9 @@ import kotlinx.parcelize.Parcelize
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
  */
-class ConnectionsSheet internal constructor(
+class ConnectionsSheet private constructor(
     private val connectionsSheetLauncher: ConnectionsSheetLauncher
 ) {
-    /**
-     * Constructor to be used when launching the connections sheet from an Activity.
-     *
-     * @param activity  the Activity that is presenting the connections sheet.
-     * @param callback  called with the result of the connections session after the connections sheet is dismissed.
-     */
-    @Deprecated(
-        message = "Use ConnectionsSheet.create to build ConnectionsSheet instead",
-        replaceWith = ReplaceWith(
-            expression = "ConnectionsSheet.create(activity, callback)",
-            imports = ["com.stripe.android.connections.ConnectionsSheet"]
-        )
-    )
-    constructor(
-        activity: ComponentActivity,
-        callback: ConnectionsSheetResultCallback
-    ) : this(
-        DefaultConnectionsSheetLauncher(activity, callback)
-    )
-
-    /**
-     * Constructor to be used when launching the payment sheet from a Fragment.
-     *
-     * @param fragment the Fragment that is presenting the payment sheet.
-     * @param callback called with the result of the payment after the payment sheet is dismissed.
-     */
-    @Deprecated(
-        message = "Use ConnectionsSheet.create to build ConnectionsSheet instead",
-        replaceWith = ReplaceWith(
-            expression = "ConnectionsSheet.create(fragment, callback)",
-            imports = ["com.stripe.android.connections.ConnectionsSheet"]
-        )
-    )
-    constructor(
-        fragment: Fragment,
-        callback: ConnectionsSheetResultCallback
-    ) : this(
-        DefaultConnectionsSheetLauncher(fragment, callback)
-    )
-
     /**
      * Configuration for a Connections Sheet
      *
