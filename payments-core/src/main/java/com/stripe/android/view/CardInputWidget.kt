@@ -287,12 +287,12 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeEditText.isEnabled = true
             postalCodeTextInputLayout.visibility = View.VISIBLE
 
-            cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT or EditorInfo.IME_FLAG_NO_FULLSCREEN
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
-            cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_FULLSCREEN
         }
         updatePostalRequired()
     }
