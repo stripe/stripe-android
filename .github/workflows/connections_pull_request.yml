@@ -4,6 +4,7 @@ on:
     paths:
       - 'connections/**'
       - 'stripe-core/**'
+      - 'payments-model/**'
       - 'build.gradle'
       - 'dependencies.gradle'
 jobs:
@@ -12,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          ref: f/connections-example
+          ref: master
       - name: Build in master
         run: ./gradlew :connections-example:assembleRelease && mv connections-example/build/outputs/apk/release/connections-example-release-unsigned.apk connections-example/build/outputs/apk/release/connections-example-release-master.apk
       - name: Upload APK
