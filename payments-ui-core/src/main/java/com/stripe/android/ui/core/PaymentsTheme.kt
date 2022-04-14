@@ -10,6 +10,7 @@ import android.text.TextPaint
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.MetricAffectingSpan
+import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
@@ -77,6 +78,20 @@ data class PaymentsTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PrimaryButtonModifier(
+    val primaryLight: Color,
+    val onPrimaryLight: Color,
+    val primaryDark: Color,
+    val onPrimaryDark: Color,
+    val cornerRadius: Float,
+    val border: Color,
+    val borderStrokeWidth: Float,
+    @FontRes
+    val fontFamily: Int?,
+    val height: Float,
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsThemeDefaults {
     fun colors(isDark: Boolean): PaymentsColors {
         return if (isDark) colorsDark else colorsLight
@@ -131,6 +146,18 @@ object PaymentsThemeDefaults {
         xLargeFontSize = 20.sp,
         fontFamily = null // We default to the default system font.
     )
+
+    val primaryButtonModifier = PrimaryButtonModifier(
+        primaryLight = colors(false).primary,
+        onPrimaryLight = Color.White,
+        primaryDark = colors(true).primary,
+        onPrimaryDark = Color.White,
+        cornerRadius = shapes.cornerRadius,
+        border = Color.Transparent,
+        borderStrokeWidth = 0.0F,
+        fontFamily = typography.fontFamily,
+        height = 40.0f
+    )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -150,6 +177,13 @@ data class PaymentsComposeShapes(
     val borderStrokeWidth: Dp,
     val borderStrokeWidthSelected: Dp,
     val material: Shapes
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PrimaryButtonModifierCompose(
+    val onPrimary: Color,
+    val style: TextStyle,
+    val height: Dp,
 )
 
 @Composable
@@ -266,6 +300,24 @@ fun PaymentsTypography.toComposeTypography(): Typography {
 }
 
 @Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonModifier.toComposeModifier(isDark: Boolean): PrimaryButtonModifierCompose {
+    val baseStyle = PaymentsTheme.typography.h5
+    val textStyle = if (fontFamily != null) {
+        baseStyle.copy(fontFamily = FontFamily(Font(fontFamily)))
+    } else {
+        baseStyle
+    }
+
+    return PrimaryButtonModifierCompose(
+        onPrimary = if (isDark) onPrimaryDark else onPrimaryLight,
+        style = textStyle,
+        height = height.dp
+    )
+}
+
+@Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
     content: @Composable () -> Unit
@@ -314,6 +366,12 @@ object PaymentsTheme {
         @Composable
         @ReadOnlyComposable
         get() = typographyMutable.toComposeTypography()
+
+    var primaryButtonModifierMutable = PaymentsThemeDefaults.primaryButtonModifier
+    val primaryButtonModifier: PrimaryButtonModifierCompose
+        @Composable
+        @ReadOnlyComposable
+        get() = primaryButtonModifierMutable.toComposeModifier(isSystemInDarkTheme())
 
     @Composable
     @ReadOnlyComposable
@@ -393,4 +451,11 @@ fun Color.shouldUseDarkDynamicColor(): Boolean {
     } else {
         contrastRatioToBlack > contrastRatioToWhite
     }
+}
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonModifier.getPrimaryColor(context: Context): Int {
+    val isDark = context.isSystemDarkTheme()
+    return (if (isDark) primaryDark else primaryLight).toArgb()
 }

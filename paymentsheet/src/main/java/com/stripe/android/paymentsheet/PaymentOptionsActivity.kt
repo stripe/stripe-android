@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -24,8 +23,8 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.getPrimaryColor
 
 /**
  * An `Activity` for selecting a payment option.
@@ -132,12 +131,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
         viewModel.config?.let {
-            viewBinding.continueButton.setDefaultBackGroundColor(
-                it.primaryButtonColor ?: ColorStateList.valueOf(
-                    PaymentsThemeDefaults.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
-                )
+            val buttonColor = it.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsTheme.primaryButtonModifierMutable.getPrimaryColor(baseContext)
             )
-            viewBinding.continueButton.setCornerRadius(PaymentsThemeDefaults.shapes.cornerRadius)
+            viewBinding.continueButton.setAppearanceConfiguration(
+                PaymentsTheme.primaryButtonModifierMutable,
+                buttonColor
+            )
         }
 
         addButton.setOnClickListener {
