@@ -26,20 +26,24 @@ internal class LinkAccountManager @Inject constructor(
 
     val accountStatus =
         linkAccount.transform { value ->
-            emit(value?.accountStatus
-                ?: (// If the consumer has previously logged in, fetch their account using the saved cookie
-                    cookieStore.getAuthSessionCookie()?.let {
-                        lookupConsumer(null).getOrNull()?.accountStatus
-                    } ?:
-                    // If a customer email was passed in, lookup the account,
-                    // unless the user has logged out of this account
-                    args.customerEmail?.let {
-                        if (hasUserLoggedOut(it)) {
-                            AccountStatus.SignedOut
-                        } else {
-                            lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+            emit(
+                value?.accountStatus
+                    ?: (
+                        // If consumer has previously logged in, fetch their account using the cookie
+                        cookieStore.getAuthSessionCookie()?.let {
+                            lookupConsumer(null).getOrNull()?.accountStatus
                         }
-                    } ?: AccountStatus.SignedOut))
+                            // If a customer email was passed in, lookup the account,
+                            // unless the user has logged out of this account
+                            ?: args.customerEmail?.let {
+                                if (hasUserLoggedOut(it)) {
+                                    AccountStatus.SignedOut
+                                } else {
+                                    lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+                                }
+                            } ?: AccountStatus.SignedOut
+                        )
+            )
         }
 
     /**

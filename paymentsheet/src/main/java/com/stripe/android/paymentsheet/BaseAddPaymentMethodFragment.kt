@@ -98,9 +98,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             lifecycleScope.launch {
                 sheetViewModel.linkLauncher.accountStatus.collect {
                     // Show inline sign up view only if user is logged out
-                    viewBinding.linkInlineSignup.isVisible =
-                        it == AccountStatus.SignedOut ||
-                            viewBinding.linkInlineSignup.hasUserInteracted
+                    viewBinding.linkInlineSignup.isVisible = it == AccountStatus.SignedOut ||
+                        viewBinding.linkInlineSignup.hasUserInteracted
                 }
             }
         }

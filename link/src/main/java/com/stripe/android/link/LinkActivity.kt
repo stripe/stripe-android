@@ -134,23 +134,23 @@ internal class LinkActivity : ComponentActivity() {
         viewModel.navigator.onDismiss = ::dismiss
         viewModel.setupPaymentLauncher(this)
 
-        window.decorView.rootView.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                lifecycleScope.launch {
-                    viewModel.navigator.navigateTo(
-                        target = when (viewModel.linkAccountManager.accountStatus.first()) {
-                            AccountStatus.Verified -> LinkScreen.Wallet
-                            AccountStatus.NeedsVerification,
-                            AccountStatus.VerificationStarted -> LinkScreen.Verification
-                            AccountStatus.SignedOut -> LinkScreen.SignUp()
-                        },
-                        clearBackStack = true
-                    )
+        window.decorView.rootView.viewTreeObserver.addOnGlobalLayoutListener(
+            object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    lifecycleScope.launch {
+                        viewModel.navigator.navigateTo(
+                            target = when (viewModel.linkAccountManager.accountStatus.first()) {
+                                AccountStatus.Verified -> LinkScreen.Wallet
+                                AccountStatus.NeedsVerification,
+                                AccountStatus.VerificationStarted -> LinkScreen.Verification
+                                AccountStatus.SignedOut -> LinkScreen.SignUp()
+                            },
+                            clearBackStack = true
+                        )
+                    }
+                    window.decorView.rootView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
-                window.decorView.rootView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-            }
-        })
+            })
     }
 
     override fun onDestroy() {

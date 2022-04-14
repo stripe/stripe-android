@@ -1167,9 +1167,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 consumerSessionLookupUrl,
                 requestOptions,
-                (email?.let {
-                    mapOf("email_address" to it.lowercase())
-                } ?: emptyMap()).plus(
+                (
+                    email?.let {
+                        mapOf(
+                            "email_address" to it.lowercase()
+                        )
+                    } ?: emptyMap()
+                    ).plus(
                     authSessionCookie?.let {
                         mapOf(
                             "cookies" to
