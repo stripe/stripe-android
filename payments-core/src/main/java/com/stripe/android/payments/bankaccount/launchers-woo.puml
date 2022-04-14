@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+@startuml
+[CollectBankAccountLauncher] as C
+[PaymentsSheet] as P
+
+
+package internal {
+[StripeCollectBankAccountLauncher] as DL
+[PaymentsSheetCollectBankAccountLauncher] as PL #LightGreen
+[CollectBankAccountActivity] as A
+}
+
+
+C --> DL
+P --> PL
+DL --> A: attach : true
+PL --> A: attach : false
+
+@enduml
