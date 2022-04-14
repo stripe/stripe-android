@@ -1,10 +1,13 @@
 package com.stripe.android.link.account
 
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,17 +17,42 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
+    args: LinkActivityContract.Args,
     private val linkRepository: LinkRepository,
     private val cookieStore: CookieStore
 ) {
-    private val _linkAccount =
-        MutableStateFlow<LinkAccount?>(null)
+    private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
+
+    val accountStatus =
+        linkAccount.transform { value ->
+            emit(value?.accountStatus
+                ?: (// If the consumer has previously logged in, fetch their account using the saved cookie
+                    cookieStore.getAuthSessionCookie()?.let {
+                        lookupConsumer(null).getOrNull()?.accountStatus
+                    } ?:
+                    // If a customer email was passed in, lookup the account,
+                    // unless the user has logged out of this account
+                    args.customerEmail?.let {
+                        if (hasUserLoggedOut(it)) {
+                            AccountStatus.SignedOut
+                        } else {
+                            lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+                        }
+                    } ?: AccountStatus.SignedOut))
+        }
+
+    /**
+     * Keeps track of whether the user has logged out during this session. If that's the case, we
+     * want to ignore the email passed in by the merchant to avoid confusion.
+     */
+    private var userHasLoggedOut = false
 
     /**
      * Retrieves the Link account associated with the email and starts verification, if needed.
+     * When the [email] parameter is null, will lookup the account for the currently stored cookie.
      */
-    suspend fun lookupConsumer(email: String): Result<LinkAccount?> =
+    suspend fun lookupConsumer(email: String?): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
             .map { consumerSessionLookup ->
                 setAndReturnNullable(
@@ -109,22 +137,36 @@ internal class LinkAccountManager @Inject constructor(
             val cookie = cookie()
             cookieStore.logout(account.email)
             _linkAccount.value = null
+            userHasLoggedOut = true
             GlobalScope.launch {
                 linkRepository.logout(account.clientSecret, cookie)
             }
         }
 
+    /**
+     * Returns true if user has logged out from any account during this session, or if the last
+     * logout was from the [email] passed as parameter.
+     */
+    fun hasUserLoggedOut(email: String?) = userHasLoggedOut || email?.let {
+        cookieStore.isEmailLoggedOut(it)
+    } ?: false
+
     private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {
         _linkAccount.value = linkAccount
         cookieStore.updateAuthSessionCookie(linkAccount.getAuthSessionCookie())
+        if (cookieStore.isEmailLoggedOut(linkAccount.email)) {
+            cookieStore.storeLoggedOutEmail("")
+        }
         return linkAccount
     }
 
-    private fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? {
-        _linkAccount.value = linkAccount
-        cookieStore.updateAuthSessionCookie(linkAccount?.getAuthSessionCookie())
-        return linkAccount
-    }
+    private fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? =
+        linkAccount?.let {
+            setAndReturn(it)
+        } ?: run {
+            _linkAccount.value = null
+            null
+        }
 
     private fun cookie() = cookieStore.getAuthSessionCookie()
 }

@@ -122,10 +122,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
 
-    @VisibleForTesting
-    internal val _contentVisible = MutableLiveData(true)
-    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
-
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
     internal fun getButtonStateObservable(
         checkoutIdentifier: CheckoutIdentifier
@@ -302,7 +298,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun resetViewState(userErrorMessage: String? = null) {
         _viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        savedStateHandle.set(SAVE_PROCESSING, false)
+        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
@@ -312,7 +308,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         this.checkoutIdentifier = checkoutIdentifier
-        savedStateHandle.set(SAVE_PROCESSING, true)
+        savedStateHandle[SAVE_PROCESSING] = true
         _viewState.value = PaymentSheetViewState.StartProcessing
     }
 
@@ -370,10 +366,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentLauncher = null
     }
 
-    fun setContentVisible(visible: Boolean) {
-        _contentVisible.value = visible
-    }
-
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -388,14 +380,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun launchLink() {
-    }
-
     override fun onLinkLaunched() {
+        super.onLinkLaunched()
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
 
     override fun onLinkPaymentResult(result: LinkActivityResult) {
+        super.onLinkPaymentResult(result)
         onPaymentResult(result.convertToPaymentResult())
     }
 

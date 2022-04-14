@@ -397,7 +397,7 @@ abstract class StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup?

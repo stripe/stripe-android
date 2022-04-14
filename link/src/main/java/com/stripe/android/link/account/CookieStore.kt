@@ -52,7 +52,7 @@ internal class CookieStore @Inject constructor(
     fun isEmailLoggedOut(email: String) =
         store.read(LOGGED_OUT_EMAIL_HASH) == email.sha256()
 
-    private fun storeLoggedOutEmail(email: String) =
+    fun storeLoggedOutEmail(email: String) =
         store.write(LOGGED_OUT_EMAIL_HASH, email.sha256())
 
     companion object {

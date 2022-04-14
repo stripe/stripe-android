@@ -12,8 +12,15 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
+import com.stripe.android.link.injection.LinkPaymentLauncherComponent
+import com.stripe.android.link.injection.MERCHANT_NAME
+import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
@@ -23,6 +30,8 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
@@ -30,8 +39,9 @@ import kotlin.coroutines.CoroutineContext
  * Launcher for an Activity that will confirm a payment using Link.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkPaymentLauncher @AssistedInject constructor(
-    @Assisted private val activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
+class LinkPaymentLauncher @AssistedInject internal constructor(
+    @Assisted(MERCHANT_NAME) private val merchantName: String,
+    @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -42,8 +52,11 @@ class LinkPaymentLauncher @AssistedInject constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository
-) {
+) : NonFallbackInjectable {
+    private var args: LinkActivityContract.Args? = null
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
+        .merchantName(merchantName)
+        .customerEmail(customerEmail)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -60,11 +73,45 @@ class LinkPaymentLauncher @AssistedInject constructor(
         requireNotNull(LinkPaymentLauncher::class.simpleName)
     )
 
+    /**
+     * The dependency injector for all injectable classes in Link.
+     * This is safe to hold here because [LinkPaymentLauncher] lives only for as long as
+     * PaymentSheet's ViewModel is alive.
+     */
+    internal var injector: NonFallbackInjector? = null
+
+    /**
+     * The [LinkAccountManager], exposed here so that classes that are not injected (like LinkButton
+     * or LinkInlineSignup) can access it and share the account status with all other components.
+     */
+    internal lateinit var linkAccountManager: LinkAccountManager
+
+    /**
+     * Publicly visible account status, used by PaymentSheet to display the correct UI.
+     */
+    lateinit var accountStatus: Flow<AccountStatus>
+
+    /**
+     * Sets up Link to process the given [StripeIntent].
+     *
+     * This will fetch the user's account if they're already logged in, or lookup the email passed
+     * in during instantiation.
+     */
+    suspend fun setup(stripeIntent: StripeIntent): AccountStatus {
+        val component = setupDependencies(stripeIntent)
+        accountStatus = component.linkAccountManager.accountStatus
+        linkAccountManager = component.linkAccountManager
+        return accountStatus.first()
+    }
+
     fun present(
-        stripeIntent: StripeIntent,
-        merchantName: String,
-        customerEmail: String? = null
+        activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
     ) {
+        requireNotNull(args) { "Must call setup before presenting" }
+        activityResultLauncher.launch(args)
+    }
+
+    private fun setupDependencies(stripeIntent: StripeIntent): LinkPaymentLauncherComponent {
         val args = LinkActivityContract.Args(
             stripeIntent,
             merchantName,
@@ -78,22 +125,18 @@ class LinkPaymentLauncher @AssistedInject constructor(
             )
         )
 
-        setupInjector(args)
-        activityResultLauncher.launch(args)
-    }
-
-    private fun setupInjector(args: LinkActivityContract.Args) {
-        val launcherComponent = launcherComponentBuilder
+        val component = launcherComponentBuilder
             .starterArgs(args)
             .build()
 
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
-                    is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
-                    is SignUpViewModel.Factory -> launcherComponent.inject(injectable)
-                    is VerificationViewModel.Factory -> launcherComponent.inject(injectable)
-                    is WalletViewModel.Factory -> launcherComponent.inject(injectable)
+                    is LinkActivityViewModel.Factory -> component.inject(injectable)
+                    is SignUpViewModel.Factory -> component.inject(injectable)
+                    is VerificationViewModel.Factory -> component.inject(injectable)
+                    is WalletViewModel.Factory -> component.inject(injectable)
+                    is InlineSignupViewModel.Factory -> component.inject(injectable)
                     else -> {
                         throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                     }
@@ -102,5 +145,8 @@ class LinkPaymentLauncher @AssistedInject constructor(
         }
 
         WeakMapInjectorRegistry.register(injector, injectorKey)
+        this.args = args
+        this.injector = injector
+        return component
     }
 }

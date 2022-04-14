@@ -16,6 +16,11 @@
         android:background="?colorSurface"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/link_auth"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"

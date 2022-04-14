@@ -13,7 +13,7 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
         authSessionCookie: String?
     ): Result<ConsumerSessionLookup>
 

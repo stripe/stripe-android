@@ -107,10 +107,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onLinkLaunched() {
+        super.onLinkLaunched()
         _processing.value = true
     }
 
     override fun onLinkPaymentResult(result: LinkActivityResult) {
+        super.onLinkPaymentResult(result)
         _processing.value = false
     }
 
