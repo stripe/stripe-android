@@ -9,8 +9,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -24,7 +23,8 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.getPrimaryColor
 
 /**
  * An `Activity` for selecting a payment option.
@@ -58,10 +58,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
-    override val messageView: TextView by lazy { viewBinding.message }
-    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
+    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
+    override val header: ComposeView by lazy { viewBinding.header }
+    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    override val messageView: TextView by lazy { viewBinding.message }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,12 +130,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
         viewModel.config?.let {
-            viewBinding.continueButton.setDefaultBackGroundColor(
-                it.primaryButtonColor ?: ColorStateList.valueOf(
-                    Color(it.appearance.getColors(baseContext.isSystemDarkTheme()).primary).toArgb()
-                )
+            val buttonColor = it.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsTheme.primaryButtonModifierMutable.getPrimaryColor(baseContext)
             )
-            viewBinding.continueButton.setCornerRadius(it.appearance.shapes.cornerRadiusDp)
+            viewBinding.continueButton.setAppearanceConfiguration(
+                PaymentsTheme.primaryButtonModifierMutable,
+                buttonColor
+            )
         }
 
         addButton.setOnClickListener {

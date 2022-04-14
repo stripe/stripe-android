@@ -1,4 +1,18 @@
 # CHANGELOG
+## x.x.x - xxxx-xx-xx
+
+### PaymentSheet
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+* [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
+
+## 20.0.1 - 2022-04-11
+This release includes several PaymentSheet bug fixes.
+
+### PaymentSheet
+* [FIXED] [4840](https://github.com/stripe/stripe-android/pull/4840) Multi-step now shows the last 4 of the card number instead of 'card'.
+* [FIXED] [4847](https://github.com/stripe/stripe-android/pull/4847) Fix the width of the PaymentSheet payment method selector.
+* [FIXED] [4851](https://github.com/stripe/stripe-android/pull/4851) Add support for http logoUri.
+
 ## 20.0.0 - 2022-04-04
 This release patches on a crash on PaymentLauncher, updates the package name of some public classes,
 changes the public API for CardImageVerificationSheet and releases Identity SDK.

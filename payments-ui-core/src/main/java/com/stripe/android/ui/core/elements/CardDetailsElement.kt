@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -33,8 +34,9 @@ internal class CardDetailsElement(
     override fun getFormFieldValueFlow() = combine(
         controller.numberElement.controller.formFieldValue,
         controller.cvcElement.controller.formFieldValue,
-        controller.expirationDateElement.controller.formFieldValue
-    ) { number, cvc, expirationDate ->
+        controller.expirationDateElement.controller.formFieldValue,
+        controller.numberElement.controller.cardBrandFlow,
+    ) { number, cvc, expirationDate, brand ->
         var month = -1
         var year = -1
         expirationDate.value?.let { date ->
@@ -48,6 +50,7 @@ internal class CardDetailsElement(
         listOf(
             controller.numberElement.identifier to number,
             controller.cvcElement.identifier to cvc,
+            IdentifierSpec.CardBrand to FormFieldEntry(brand.code, true),
             IdentifierSpec.Generic("exp_month") to expirationDate.copy(
                 value = month.toString()
             ),

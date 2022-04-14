@@ -3,20 +3,8 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.createTextSpanFromTextStyle
-import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFragment() {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
@@ -34,69 +22,12 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
         viewModelFactory
     }
 
-    private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val config = arguments?.getParcelable<com.stripe.android.paymentsheet.model.FragmentConfig>(
-            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
-        )
-        val shouldShowGooglePayButton = config?.let {
-            config.isGooglePayReady && sheetViewModel.paymentMethods.value.isNullOrEmpty()
-        } ?: false
 
-        viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
-        val googlePayButton = viewBinding.googlePayButton
-
-        googlePayButton.setOnClickListener {
-            // The scroll will be made visible onResume of the activity
-            sheetViewModel.setContentVisible(false)
-            sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
-            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
+        sheetViewModel.showTopContainer.observe(viewLifecycleOwner) { visible ->
+            sheetViewModel.headerText.value = if (visible) null else
+                getString(R.string.stripe_paymentsheet_add_payment_method_title)
         }
-
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        sheetViewModel.googlePayDividerVisibilility.postValue(shouldShowGooglePayButton)
-        sheetViewModel.headerVisibilility.postValue(!shouldShowGooglePayButton)
-
-        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
-            updateErrorMessage(null)
-            if (paymentSelection == PaymentSelection.GooglePay) {
-                sheetViewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
-            }
-        }
-
-        sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
-            .observe(viewLifecycleOwner) { viewState ->
-                if (viewState is PaymentSheetViewState.Reset) {
-                    // If Google Pay was cancelled or failed, re-select the form payment method
-                    sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
-                }
-
-                updateErrorMessage(viewState?.errorMessage)
-                googlePayButton.updateState(viewState?.convert())
-            }
-
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            googlePayButton.isEnabled = !isProcessing
-        }
-    }
-
-    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
-        val context = context ?: return
-        val appearance = sheetViewModel.config?.appearance ?: return
-        userMessage?.message.let { message ->
-            viewBinding.message.text = createTextSpanFromTextStyle(
-                text = message,
-                context = context,
-                fontSizeDp = (
-                    appearance.typography.sizeScaleFactor
-                        * PaymentsThemeDefaults.typography.smallFontSize.value
-                    ).dp,
-                color = Color(appearance.getColors(context.isSystemDarkTheme()).error),
-                fontFamily = appearance.typography.fontResId
-            )
-        }
-        viewBinding.message.isVisible = userMessage != null
     }
 }

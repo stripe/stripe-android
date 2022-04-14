@@ -320,7 +320,7 @@ class PaymentSheet internal constructor(
 
         // The font used in text. This should be a resource ID value.
         @FontRes
-        val fontResId: Int,
+        val fontResId: Int?,
     ) : Parcelable {
         companion object {
             val default = Typography(

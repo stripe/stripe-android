@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,11 +92,12 @@ internal class PaymentOptionsAdapter(
     fun setItems(
         config: FragmentConfig,
         paymentMethods: List<PaymentMethod>,
+        showGooglePay: Boolean,
         paymentSelection: PaymentSelection? = null
     ) {
         val items = listOfNotNull(
             Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady }
+            Item.GooglePay.takeIf { config.isGooglePayReady && showGooglePay }
         ) + sortedPaymentMethods(paymentMethods, config.savedSelection).map {
             Item.SavedPaymentMethod(it)
         }
@@ -351,6 +356,11 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
+                val iconRes = if (PaymentsTheme.colors.component.shouldUseDarkDynamicColor()) {
+                    R.drawable.stripe_ic_paymentsheet_add_dark
+                } else {
+                    R.drawable.stripe_ic_paymentsheet_add_light
+                }
                 PaymentOptionUi(
                     viewWidth = width,
                     isEditing = false,
@@ -360,7 +370,7 @@ internal class PaymentOptionsAdapter(
                     itemView.resources.getString(
                         R.string.stripe_paymentsheet_add_payment_method_button_label
                     ),
-                    iconRes = R.drawable.stripe_ic_paymentsheet_add,
+                    iconRes = iconRes,
                     onItemSelectedListener = { onItemSelectedListener() },
                     description =
                     itemView.resources.getString(R.string.add_new_payment_method),
@@ -547,19 +557,31 @@ internal fun PaymentOptionUi(
             }
         }
         if (isSelected) {
-            Image(
-                painter = painterResource(R.drawable.stripe_ic_check_circle),
-                contentDescription = null,
-
+            val iconColor = PaymentsTheme.colors.material.primary
+            val checkSymbolColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(20.dp)
                     .clip(CircleShape)
-                    .background(color = PaymentsTheme.colors.material.primary)
+                    .size(24.dp)
+                    .background(PaymentsTheme.colors.material.primary)
                     .constrainAs(checkIcon) {
-                        top.linkTo(card.bottom, (-12).dp)
+                        top.linkTo(card.bottom, (-18).dp)
                         end.linkTo(card.end)
                     }
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = checkSymbolColor,
+                    modifier = Modifier
+                        .size(12.dp)
+                )
+            }
         }
         if (isEditing && onRemoveListener != null) {
             val openDialog = remember { mutableStateOf(false) }

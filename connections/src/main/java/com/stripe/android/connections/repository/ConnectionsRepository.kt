@@ -1,12 +1,12 @@
 package com.stripe.android.connections.repository
 
-import com.stripe.android.connections.exception.AuthenticationException
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountList
 import com.stripe.android.connections.model.ListLinkedAccountParams
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 
 internal interface ConnectionsRepository {

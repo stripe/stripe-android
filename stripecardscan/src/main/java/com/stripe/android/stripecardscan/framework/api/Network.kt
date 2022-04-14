@@ -4,7 +4,6 @@ import android.util.Log
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
 import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.time.seconds
-import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.util.retry
@@ -19,6 +18,8 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPOutputStream
+
+private const val LOG_TAG = "Network"
 
 private const val REQUEST_METHOD_GET = "GET"
 private const val REQUEST_METHOD_POST = "POST"

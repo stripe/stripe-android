@@ -1,48 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/stripe_paymentsheet_outer_spacing_top">
-
-    <LinearLayout
-        android:id="@+id/top_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/payment_methods_recycler"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0"
-        app:layout_constraintVertical_chainStyle="spread_inside">
-
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/add_payment_method_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <com.stripe.android.paymentsheet.ui.GooglePayButton
-            android:id="@+id/google_pay_button"
-            android:visibility="gone"
-            android:layout_marginTop="7dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:padding="1dp"
-            android:layout_marginVertical="2dp" />
-
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/google_pay_divider"
-            android:visibility="visible"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+    android:paddingTop="@dimen/stripe_paymentsheet_outer_spacing_top"
+    android:orientation="vertical">
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/payment_methods_recycler"
@@ -50,17 +11,12 @@
         android:layout_height="wrap_content"
         android:paddingTop="18dp"
         android:paddingBottom="6dp"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/payment_method_fragment_container"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:visibility="gone" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/payment_method_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

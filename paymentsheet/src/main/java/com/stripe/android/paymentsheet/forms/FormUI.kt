@@ -22,6 +22,9 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
+import com.stripe.android.ui.core.elements.BsbElement
+import com.stripe.android.ui.core.elements.BsbElementUI
+import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
@@ -64,7 +67,7 @@ internal fun FormInternal(
 
     ) {
         elements?.let {
-            it.forEachIndexed { index, element ->
+            it.forEachIndexed { _, element ->
                 if (!hiddenIdentifiers.contains(element.identifier)) {
                     when (element) {
                         is SectionElement -> SectionElementUI(
@@ -82,6 +85,8 @@ internal fun FormInternal(
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
                         is MandateTextElement -> MandateTextUI(element)
+                        is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
+                        is EmptyFormElement -> {}
                     }
                 }
             }

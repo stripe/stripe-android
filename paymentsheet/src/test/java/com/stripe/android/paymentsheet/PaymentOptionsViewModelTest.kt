@@ -29,7 +29,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -65,7 +64,8 @@ internal class PaymentOptionsViewModelTest {
         logger = Logger.noop(),
         injectorKey = DUMMY_INJECTOR_KEY,
         resourceRepository = resourceRepository,
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = SavedStateHandle(),
+        linkPaymentLauncherFactory = mock()
     )
 
     @Test
@@ -142,7 +142,8 @@ internal class PaymentOptionsViewModelTest {
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
             resourceRepository = resourceRepository,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            linkPaymentLauncherFactory = mock()
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -173,7 +174,8 @@ internal class PaymentOptionsViewModelTest {
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
             resourceRepository = resourceRepository,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            linkPaymentLauncherFactory = mock()
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -204,7 +206,8 @@ internal class PaymentOptionsViewModelTest {
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
             resourceRepository = resourceRepository,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            linkPaymentLauncherFactory = mock()
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -235,7 +238,8 @@ internal class PaymentOptionsViewModelTest {
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
             resourceRepository = resourceRepository,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            linkPaymentLauncherFactory = mock()
         )
 
         viewModel.removePaymentMethod(cards[1])

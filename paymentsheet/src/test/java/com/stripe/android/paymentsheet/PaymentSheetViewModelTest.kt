@@ -319,10 +319,10 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout cancelled returns to Ready state`() {
         viewModel.maybeFetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
 
         val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observeForever {
                 viewState.add(it)
             }
@@ -351,8 +351,8 @@ internal class PaymentSheetViewModelTest {
     fun `On checkout clear the previous view state error`() {
 
         val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observeForever {
                 googleViewState.add(it)
             }
@@ -379,10 +379,10 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout failed returns to Ready state and shows error`() {
         viewModel.maybeFetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
 
         val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observeForever {
                 viewState.add(it)
             }
@@ -911,7 +911,8 @@ internal class PaymentSheetViewModelTest {
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            mock()
         )
     }
 

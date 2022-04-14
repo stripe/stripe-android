@@ -31,17 +31,23 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     private val starterArgs: ConnectionsSheetContract.Args,
     private val generateLinkAccountSessionManifest: GenerateLinkAccountSessionManifest,
     private val fetchLinkAccountSession: FetchLinkAccountSession,
+    private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ConnectionsEventReporter
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ConnectionsSheetState())
+    // on process recreation - restore saved fields from [SavedStateHandle].
+    private val _state = MutableStateFlow(ConnectionsSheetState().from(savedStateHandle))
     internal val state: StateFlow<ConnectionsSheetState> = _state
+
     private val _viewEffect = MutableSharedFlow<ConnectionsSheetViewEffect>()
     internal val viewEffect: SharedFlow<ConnectionsSheetViewEffect> = _viewEffect
 
     init {
         eventReporter.onPresented(starterArgs.configuration)
-        fetchManifest()
+        // avoid re-fetching manifest if already exists (this will happen on process recreations)
+        if (state.value.manifest == null) {
+            fetchManifest()
+        }
     }
 
     /**
@@ -71,12 +77,12 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     private suspend fun openAuthFlow(manifest: LinkAccountSessionManifest) {
         // stores manifest in state for future references.
-        _state.emit(
-            state.value.copy(
+        _state.updateAndPersist {
+            it.copy(
                 manifest = manifest,
                 authFlowActive = true
             )
-        )
+        }
         _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
     }
 
@@ -97,7 +103,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @see onActivityResult (we rely on this on config changes)
      */
     internal fun onActivityRecreated() {
-        _state.update { it.copy(activityRecreated = true) }
+        _state.updateAndPersist { it.copy(activityRecreated = true) }
     }
 
     /**
@@ -177,7 +183,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        _state.update { it.copy(authFlowActive = false) }
+        _state.updateAndPersist { it.copy(authFlowActive = false) }
         viewModelScope.launch {
             val manifest = _state.value.manifest
             when (intent?.data.toString()) {
@@ -186,6 +192,17 @@ internal class ConnectionsSheetViewModel @Inject constructor(
                 else -> onFatal(Exception("Error processing ConnectionsSheet intent"))
             }
         }
+    }
+
+    /**
+     * Updates state AND saves persistable fields into [SavedStateHandle]
+     */
+    private inline fun MutableStateFlow<ConnectionsSheetState>.updateAndPersist(
+        function: (ConnectionsSheetState) -> ConnectionsSheetState
+    ) {
+        val previousValue = value
+        update(function)
+        value.to(savedStateHandle, previousValue)
     }
 
     class Factory(
@@ -204,6 +221,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
             return DaggerConnectionsSheetComponent
                 .builder()
                 .application(applicationSupplier())
+                .savedStateHandle(savedStateHandle)
                 .configuration(starterArgsSupplier())
                 .build().viewModel as T
         }

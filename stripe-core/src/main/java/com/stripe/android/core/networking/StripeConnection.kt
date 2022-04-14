@@ -9,7 +9,6 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.Scanner
-import javax.net.ssl.HttpsURLConnection
 
 /**
  * A wrapper for accessing a [HttpURLConnection]. Implements [Closeable] to simplify closing related
@@ -21,8 +20,9 @@ interface StripeConnection<ResponseBodyType> : Closeable {
     val response: StripeResponse<ResponseBodyType>
     fun createBodyFromResponseStream(responseStream: InputStream?): ResponseBodyType?
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class AbstractConnection<ResponseBodyType>(
-        private val conn: HttpsURLConnection
+        private val conn: HttpURLConnection
     ) : StripeConnection<ResponseBodyType> {
         override val responseCode: Int
             @JvmSynthetic
@@ -67,7 +67,7 @@ interface StripeConnection<ResponseBodyType> : Closeable {
      * Default [StripeConnection] that converts the ResponseStream to a String.
      */
     class Default internal constructor(
-        conn: HttpsURLConnection
+        conn: HttpURLConnection
     ) : AbstractConnection<String>(conn = conn) {
 
         /**
@@ -95,7 +95,7 @@ interface StripeConnection<ResponseBodyType> : Closeable {
      * [StripeConnection] that writes the ResponseStream to a File.
      */
     class FileConnection internal constructor(
-        conn: HttpsURLConnection,
+        conn: HttpURLConnection,
         private val outputFile: File
     ) : AbstractConnection<File>(conn = conn) {
 

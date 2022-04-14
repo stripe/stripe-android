@@ -18,14 +18,24 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
+import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
@@ -46,6 +56,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val scrollView: ScrollView
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
+    abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
     abstract val testModeIndicator: TextView
 
@@ -57,6 +68,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.registerFromActivity(this)
 
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
@@ -107,6 +119,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
+        setupHeader()
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
@@ -136,10 +149,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
+            clearErrorMessages()
             super.onBackPressed()
         } else {
             viewModel.onUserCancel()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
     }
 
     protected fun closeSheet(
@@ -148,6 +167,48 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
+    }
+
+    open fun clearErrorMessages() {
+        updateErrorMessage(messageView)
+    }
+
+    protected fun updateErrorMessage(
+        messageView: TextView,
+        userMessage: BaseSheetViewModel.UserErrorMessage? = null
+    ) {
+        userMessage?.message.let { message ->
+            viewModel.config?.appearance?.let {
+                messageView.text = createTextSpanFromTextStyle(
+                    text = message,
+                    context = this,
+                    fontSizeDp = (
+                        it.typography.sizeScaleFactor
+                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                        ).dp,
+                    color = Color(it.getColors(this.isSystemDarkTheme()).error),
+                    fontFamily = it.typography.fontResId
+                )
+            }
+        }
+
+        messageView.isVisible = userMessage != null
+    }
+
+    private fun setupHeader() {
+        header.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val text = viewModel.headerText.observeAsState()
+
+                text.value?.let {
+                    H4Text(
+                        text = it,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+            }
+        }
     }
 
     private fun updateToolbarButton(isStackEmpty: Boolean) {
@@ -163,17 +224,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             )
         }
 
+        val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
         viewModel.config?.appearance?.let {
-            val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
             navigationIconDrawable?.setTintList(
                 ColorStateList.valueOf(
-                    Color(it.getColors(baseContext.isSystemDarkTheme()).appBarIcon).toArgb()
+                    it.getColors(baseContext.isSystemDarkTheme()).appBarIcon
                 )
             )
-
-            toolbar.navigationIcon = navigationIconDrawable
         }
 
+        toolbar.navigationIcon = navigationIconDrawable
         toolbar.navigationContentDescription = resources.getString(toolbarResources.description)
     }
 

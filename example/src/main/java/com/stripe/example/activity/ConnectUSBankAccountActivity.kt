@@ -34,12 +34,15 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
         launcher = CollectBankAccountLauncher.create(
             this
         ) { result: CollectBankAccountResult ->
+            viewModel.inProgress.postValue(false)
             when (result) {
                 is CollectBankAccountResult.Completed -> {
                     viewModel.status
                         .postValue(
                             "Attached bank account to paymentIntent." +
-                                " secret: ${result.response.intent.clientSecret}. Confirming..."
+                                " secret: ${result.response.intent.clientSecret}. Attempting to " +
+                                "confirm payment intent. You should have webhooks setup to check" +
+                                " the final state of this payment intent."
                         )
                     confirmPaymentIntent(
                         ConfirmPaymentIntentParams.create(

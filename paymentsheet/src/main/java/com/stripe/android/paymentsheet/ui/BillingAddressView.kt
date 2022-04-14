@@ -384,7 +384,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
 
     private fun getLocale(): Locale {
-        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
+        return ConfigurationCompat.getLocales(context.resources.configuration)[0]!!
     }
 
     internal sealed class PostalCodeConfig {

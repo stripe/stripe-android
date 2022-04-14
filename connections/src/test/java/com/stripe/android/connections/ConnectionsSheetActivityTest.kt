@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connections.utils.InjectableActivityScenario
@@ -43,6 +44,7 @@ class ConnectionsSheetActivityTest {
         ConnectionsSheetViewModel(
             applicationId = "com.example.test",
             starterArgs = args,
+            savedStateHandle = SavedStateHandle(),
             generateLinkAccountSessionManifest = mock(),
             fetchLinkAccountSession = mock(),
             eventReporter = mock()

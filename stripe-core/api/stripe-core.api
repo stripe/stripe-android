@@ -275,14 +275,6 @@ public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory
 	public static fun newInstance ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
 }
 
-public abstract class com/stripe/android/core/networking/StripeConnection$AbstractConnection : com/stripe/android/core/networking/StripeConnection {
-	public static final field $stable I
-	public fun <init> (Ljavax/net/ssl/HttpsURLConnection;)V
-	public fun close ()V
-	public synthetic fun getResponse ()Lcom/stripe/android/core/networking/StripeResponse;
-	public synthetic fun getResponseCode ()I
-}
-
 public final class com/stripe/android/core/networking/StripeConnection$Default : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
 	public static final field $stable I
 	public synthetic fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
