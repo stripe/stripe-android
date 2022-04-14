@@ -31,7 +31,7 @@ class RetrieveStripeIntentTest {
             }
 
             // When
-            val intent = retrieveStripeIntent.retrieve(
+            val intent = retrieveStripeIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret
             ).getOrNull()
@@ -57,7 +57,7 @@ class RetrieveStripeIntentTest {
             }
 
             // When
-            val intent = retrieveStripeIntent.retrieve(
+            val intent = retrieveStripeIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret
             ).getOrNull()

@@ -294,10 +294,9 @@ class CollectBankAccountViewModelTest {
     private fun givenRetrieveStripeIntentReturns(
         result: Result<StripeIntent>
     ) {
-
         retrieveStripeIntent.stub {
             onBlocking {
-                retrieve(
+                this(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret
                 )

@@ -12,7 +12,7 @@ internal class RetrieveStripeIntent @Inject constructor(
     /**
      * Retrieve [StripeIntent].
      */
-    suspend fun retrieve(
+    suspend operator fun invoke(
         publishableKey: String,
         clientSecret: String,
     ): Result<StripeIntent> = kotlin.runCatching {
@@ -20,5 +20,5 @@ internal class RetrieveStripeIntent @Inject constructor(
             clientSecret = clientSecret,
             options = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { it }
+    }
 }

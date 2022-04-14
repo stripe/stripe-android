@@ -101,7 +101,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private fun finishWithLinkAccountSession(linkAccountSession: LinkAccountSession) {
         viewModelScope.launch {
-            retrieveStripeIntent.retrieve(
+            retrieveStripeIntent(
                 args.publishableKey,
                 args.clientSecret
             ).onSuccess { stripeIntent ->

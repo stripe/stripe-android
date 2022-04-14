@@ -18,15 +18,13 @@ interface CollectBankAccountLauncher {
     fun presentWithPaymentIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration,
-        attachToIntent: Boolean = true
+        configuration: CollectBankAccountConfiguration
     )
 
     fun presentWithSetupIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration,
-        attachToIntent: Boolean = true
+        configuration: CollectBankAccountConfiguration
     )
 
     companion object {
@@ -66,6 +64,48 @@ interface CollectBankAccountLauncher {
     }
 }
 
+interface CollectBankAccountForPaymentSheetLauncher {
+    companion object {
+        /**
+         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
+         *
+         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
+         * to be called before the [ComponentActivity] is created.
+         *
+         * This API will not attach the [LinkAccountSession] to a [StripeIntent].
+         */
+        fun create(
+            activity: ComponentActivity,
+            callback: (CollectBankAccountResult) -> Unit
+        ): CollectBankAccountLauncher {
+            return PaymentSheetCollectBankAccountLauncher(
+                activity.registerForActivityResult(CollectBankAccountContract()) {
+                    callback(it)
+                },
+            )
+        }
+
+        /**
+         * Create a [CollectBankAccountLauncher] instance with [Fragment].
+         *
+         * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
+         * to be called before the [Fragment] is created.
+         *
+         * This API will not attach the [LinkAccountSession] to a [StripeIntent].
+         */
+        fun create(
+            fragment: Fragment,
+            callback: (CollectBankAccountResult) -> Unit
+        ): CollectBankAccountLauncher {
+            return PaymentSheetCollectBankAccountLauncher(
+                fragment.registerForActivityResult(CollectBankAccountContract()) {
+                    callback(it)
+                },
+            )
+        }
+    }
+}
+
 internal class StripeCollectBankAccountLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
 ) : CollectBankAccountLauncher {
@@ -73,15 +113,14 @@ internal class StripeCollectBankAccountLauncher constructor(
     override fun presentWithPaymentIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration,
-        attachToIntent: Boolean
+        configuration: CollectBankAccountConfiguration
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = attachToIntent
+                attachToIntent = true
             )
         )
     }
@@ -89,15 +128,49 @@ internal class StripeCollectBankAccountLauncher constructor(
     override fun presentWithSetupIntent(
         publishableKey: String,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration,
-        attachToIntent: Boolean
+        configuration: CollectBankAccountConfiguration
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = attachToIntent
+                attachToIntent = true
+            )
+        )
+    }
+}
+
+internal class PaymentSheetCollectBankAccountLauncher constructor(
+    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
+) : CollectBankAccountLauncher {
+
+    override fun presentWithPaymentIntent(
+        publishableKey: String,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration
+    ) {
+        hostActivityLauncher.launch(
+            CollectBankAccountContract.Args.ForPaymentIntent(
+                publishableKey = publishableKey,
+                clientSecret = clientSecret,
+                configuration = configuration,
+                attachToIntent = false
+            )
+        )
+    }
+
+    override fun presentWithSetupIntent(
+        publishableKey: String,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration
+    ) {
+        hostActivityLauncher.launch(
+            CollectBankAccountContract.Args.ForSetupIntent(
+                publishableKey = publishableKey,
+                clientSecret = clientSecret,
+                configuration = configuration,
+                attachToIntent = false
             )
         )
     }

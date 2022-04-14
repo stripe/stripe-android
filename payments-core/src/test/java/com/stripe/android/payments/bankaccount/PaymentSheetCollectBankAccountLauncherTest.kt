@@ -9,12 +9,12 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class StripeCollectBankAccountLauncherTest {
+class PaymentSheetCollectBankAccountLauncherTest {
 
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
-    private val launcher = StripeCollectBankAccountLauncher(mockHostActivityLauncher)
+    private val launcher = PaymentSheetCollectBankAccountLauncher(mockHostActivityLauncher)
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
@@ -29,7 +29,7 @@ class StripeCollectBankAccountLauncherTest {
                 publishableKey = PUBLISHABLE_KEY,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = false
             )
         )
     }
@@ -47,7 +47,7 @@ class StripeCollectBankAccountLauncherTest {
                 publishableKey = PUBLISHABLE_KEY,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = false
             )
         )
     }
