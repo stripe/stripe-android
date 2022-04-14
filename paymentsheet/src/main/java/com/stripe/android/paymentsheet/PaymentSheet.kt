@@ -192,6 +192,34 @@ class PaymentSheet internal constructor(
 
         // Describes the typography used for text.
         val typography: Typography = Typography.default,
+
+        // Describes appearance of the primary button (e.g., the "Pay" button) in PaymentSheet
+        val primaryButton: PrimaryButton = PrimaryButton(
+            colorsLight = PrimaryButtonColors(
+                background =
+                colorsLight.primary,
+                onBackground =
+                PaymentsThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border =
+                PaymentsThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
+            ),
+            colorsDark = PrimaryButtonColors(
+                background =
+                colorsDark.primary,
+                onBackground =
+                PaymentsThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border =
+                PaymentsThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
+            ),
+            shape = PrimaryButtonShape(
+                cornerRadiusDp = shapes.cornerRadiusDp,
+                borderStrokeWidthDp = shapes.borderStrokeWidthDp
+            ),
+            typography = PrimaryButtonTypography(
+                fontResId = typography.fontResId
+            )
+        )
+
     ) : Parcelable {
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
@@ -202,11 +230,14 @@ class PaymentSheet internal constructor(
             private var colorsDark = Colors.defaultDark
             private var shapes = Shapes.default
             private var typography = Typography.default
+            private var primaryButton: PrimaryButton = Appearance().primaryButton
 
             fun colorsLight(colors: Colors) = apply { this.colorsLight = colors }
             fun colorsDark(colors: Colors) = apply { this.colorsDark = colors }
             fun shapes(shapes: Shapes) = apply { this.shapes = shapes }
             fun typography(typography: Typography) = apply { this.typography = typography }
+            fun primaryButtonModifier(primaryButton: PrimaryButton) =
+                apply { this.primaryButton = primaryButton }
         }
     }
 
@@ -332,6 +363,47 @@ class PaymentSheet internal constructor(
             )
         }
     }
+
+    @Parcelize
+    data class PrimaryButton(
+        // Describes the colors used while the system is in light mode
+        val colorsLight: PrimaryButtonColors,
+        // Describes the colors used while the system is in dark mode
+        val colorsDark: PrimaryButtonColors,
+        // Describes the shape of the primary button.
+        val shape: PrimaryButtonShape,
+        // Describes the typography of the primary button.
+        val typography: PrimaryButtonTypography
+    ) : Parcelable
+
+    @Parcelize
+    data class PrimaryButtonColors(
+        // The background color of the primary button
+        @ColorInt
+        val background: Int,
+        // The color appearing on the primary button
+        @ColorInt
+        val onBackground: Int,
+        // The border color of the primary button
+        @ColorInt
+        val border: Int,
+    ) : Parcelable
+
+    @Parcelize
+    data class PrimaryButtonShape(
+        // The corner radius of the primary button
+        val cornerRadiusDp: Float,
+        // The border width of the primary button
+        val borderStrokeWidthDp: Float
+    ) : Parcelable
+
+    @Parcelize
+    data class PrimaryButtonTypography(
+        // The font used in the primary button.
+        // Note: if 'null' the Appearance.Typography.fontResId is used.
+        @FontRes
+        val fontResId: Int?
+    ) : Parcelable
 
     @Parcelize
     data class Address(
