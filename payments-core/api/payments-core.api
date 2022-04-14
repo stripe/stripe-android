@@ -4832,6 +4832,15 @@ public final class com/stripe/android/payments/bankaccount/CollectBankAccountCon
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountForPaymentSheetLauncher {
+	public static final field Companion Lcom/stripe/android/payments/bankaccount/CollectBankAccountForPaymentSheetLauncher$Companion;
+}
+
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountForPaymentSheetLauncher$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;
+	public final fun create (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;
+}
+
 public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountLauncher {
 	public static final field Companion Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher$Companion;
 	public abstract fun presentWithPaymentIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;)V
@@ -4897,6 +4906,14 @@ public final class com/stripe/android/payments/bankaccount/domain/CreateLinkAcco
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession;
 }
 
+public final class com/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent_Factory;
+	public fun get ()Lcom/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent;
+}
+
 public final class com/stripe/android/payments/bankaccount/domain/VerifyWithMicrodeposit_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/domain/VerifyWithMicrodeposit_Factory;
@@ -4908,13 +4925,15 @@ public final class com/stripe/android/payments/bankaccount/domain/VerifyWithMicr
 public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/model/StripeIntent;)V
+	public fun <init> (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/connections/model/LinkAccountSession;)V
 	public final fun component1 ()Lcom/stripe/android/model/StripeIntent;
-	public final fun copy (Lcom/stripe/android/model/StripeIntent;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;Lcom/stripe/android/model/StripeIntent;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
+	public final fun component2 ()Lcom/stripe/android/connections/model/LinkAccountSession;
+	public final fun copy (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/connections/model/LinkAccountSession;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/connections/model/LinkAccountSession;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIntent ()Lcom/stripe/android/model/StripeIntent;
+	public final fun getLinkAccountSession ()Lcom/stripe/android/connections/model/LinkAccountSession;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -4963,11 +4982,11 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 }
 
 public final class com/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel_Factory;
 	public fun get ()Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;Lkotlinx/coroutines/flow/MutableSharedFlow;Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession;Lcom/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
+	public static fun newInstance (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;Lkotlinx/coroutines/flow/MutableSharedFlow;Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession;Lcom/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession;Lcom/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
 }
 
 public final class com/stripe/android/payments/core/ActivityResultLauncherHost$DefaultImpls {
