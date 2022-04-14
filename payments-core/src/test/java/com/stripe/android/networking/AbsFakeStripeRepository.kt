@@ -282,7 +282,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     ) = RadarSession("rse_abc123")
 
     override suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
