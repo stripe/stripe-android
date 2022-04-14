@@ -4832,15 +4832,6 @@ public final class com/stripe/android/payments/bankaccount/CollectBankAccountCon
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountForPaymentSheetLauncher {
-	public static final field Companion Lcom/stripe/android/payments/bankaccount/CollectBankAccountForPaymentSheetLauncher$Companion;
-}
-
-public final class com/stripe/android/payments/bankaccount/CollectBankAccountForPaymentSheetLauncher$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;
-	public final fun create (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;
-}
-
 public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountLauncher {
 	public static final field Companion Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher$Companion;
 	public abstract fun presentWithPaymentIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;)V
@@ -4920,6 +4911,21 @@ public final class com/stripe/android/payments/bankaccount/domain/VerifyWithMicr
 	public fun get ()Lcom/stripe/android/payments/bankaccount/domain/VerifyWithMicrodeposit;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/VerifyWithMicrodeposit;
+}
+
+public abstract class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getAttachToIntent ()Z
+	public fun getClientSecret ()Ljava/lang/String;
+	public fun getConfiguration ()Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;
+	public fun getPublishableKey ()Ljava/lang/String;
+	public final fun toBundle ()Landroid/os/Bundle;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args$Companion {
+	public final fun fromIntent (Landroid/content/Intent;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;
 }
 
 public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {

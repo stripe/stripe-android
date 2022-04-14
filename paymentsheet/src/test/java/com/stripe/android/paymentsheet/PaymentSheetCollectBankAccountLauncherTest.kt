@@ -1,6 +1,7 @@
-package com.stripe.android.payments.bankaccount
+package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import org.junit.Test
 import org.junit.runner.RunWith

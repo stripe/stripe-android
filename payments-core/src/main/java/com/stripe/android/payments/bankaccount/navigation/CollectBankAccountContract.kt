@@ -5,13 +5,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import kotlinx.parcelize.Parcelize
 
-internal class CollectBankAccountContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CollectBankAccountContract :
     ActivityResultContract<CollectBankAccountContract.Args, CollectBankAccountResult>() {
 
     override fun createIntent(
@@ -41,7 +43,8 @@ internal class CollectBankAccountContract :
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
-        data class ForPaymentIntent internal constructor(
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class ForPaymentIntent constructor(
             override val publishableKey: String,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
@@ -49,7 +52,8 @@ internal class CollectBankAccountContract :
         ) : Args(publishableKey, clientSecret, configuration, attachToIntent)
 
         @Parcelize
-        data class ForSetupIntent internal constructor(
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class ForSetupIntent constructor(
             override val publishableKey: String,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
