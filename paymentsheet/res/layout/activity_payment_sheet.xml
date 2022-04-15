@@ -16,6 +16,7 @@
         android:background="?colorSurface"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+        <!-- This empty ComposeView is used to open a LinkVerificationDialog when needed -->
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/link_auth"
             android:layout_width="0dp"
