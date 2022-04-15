@@ -57,6 +57,9 @@ class CreateCardSourceActivity : AppCompatActivity() {
             } ?: showSnackbar("Enter a valid card.")
         }
 
+        viewBinding.cardWidget.postalCodeEnabled = true
+        viewBinding.cardWidget.postalCodeRequired = true
+
         viewBinding.cardWidget.setCardValidCallback { isValid, invalidFields -> // We will not call cardParams unless it is valid because
             // this will cause the inFocus field to change.
             if (isValid) {
