@@ -1370,7 +1370,6 @@ internal class CardInputWidgetTest {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
         cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.postalCodeRequired = false
         cardInputWidget.setCardValidCallback { isValid, invalidFields ->
             currentIsValid = isValid
             currentInvalidFields = invalidFields
@@ -1648,19 +1647,6 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeRequired = false
         cardInputWidget.postalCodeRequired = true
         cardInputWidget.postalCodeEnabled = true
-        postalCodeEditText.setText("54321")
-
-        // Called only when the callback is set and when the text is set.
-        verify(callback, times(2)).onInputChanged(any(), any())
-    }
-
-    @Test
-    fun `Enabled but not required postal code should fire card valid callback when changed`() {
-        val callback = mock<CardValidCallback>()
-        cardInputWidget.setCardValidCallback(callback)
-
-        cardInputWidget.postalCodeEnabled = true
-        cardInputWidget.postalCodeRequired = false
         postalCodeEditText.setText("54321")
 
         // Called only when the callback is set and when the text is set.
