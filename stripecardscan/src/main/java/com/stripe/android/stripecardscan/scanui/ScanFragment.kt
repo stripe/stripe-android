@@ -1,9 +1,12 @@
 package com.stripe.android.stripecardscan.scanui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PointF
+import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import android.util.Size
 import android.view.View
@@ -22,6 +25,7 @@ import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
 import com.stripe.android.stripecardscan.framework.LOG_TAG
+import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -73,6 +77,11 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
     override fun onStart() {
         super.onStart()
         Stats.startScan()
+
+        openAppSettingsText.setOnClickListener {
+            storage.storeValue(PERMISSION_RATIONALE_SHOWN, false)
+            openAppSettings()
+        }
 
         if (!CameraAdapter.isCameraSupported(requireActivity())) {
             showCameraNotSupported()
@@ -143,7 +152,8 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun showPermissionDenied() {
         instructionsText.visibility = View.VISIBLE
-        instructionsText.setText(R.string.stripe_camera_permission_settings_message)
+        instructionsText.setText(R.string.stripe_camera_permission_denied_message)
+        openAppSettingsText.visibility = View.VISIBLE
         storage.storeValue(PERMISSION_RATIONALE_SHOWN, true)
     }
 
@@ -220,6 +230,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
 
     protected open fun onCameraReady() {
         instructionsText.visibility = View.GONE
+        openAppSettingsText.visibility = View.GONE
         cameraAdapter.bindToLifecycle(this)
 
         val torchStat = Stats.trackTask("torch_supported")
@@ -262,9 +273,20 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             cameraErrorListener = cameraErrorListener,
         )
 
+    private fun openAppSettings() {
+        val packageName = context?.let { getAppPackageName(it) }
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            }
+        )
+    }
+
     protected abstract val previewFrame: ViewGroup
 
     protected abstract val instructionsText: TextView
+
+    protected abstract val openAppSettingsText: TextView
 
     protected abstract val minimumAnalysisResolution: Size
 
