@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.StripeApiBeta
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -38,15 +37,9 @@ import com.stripe.example.StripeFactory
 import com.stripe.example.theme.DefaultExampleTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/**
- * This example is currently work in progress. Do not use it as a reference.
- *
- * In order for this example to work uncomment ManualUSBankAccountPaymentMethodActivity
- * in LauncherActivity.kt
- */
 class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     private val stripe by lazy {
-        StripeFactory(this, betas = setOf(StripeApiBeta.USBankAccount)).create()
+        StripeFactory(this).create()
     }
 
     private var paymentIntentSecret: String? = null

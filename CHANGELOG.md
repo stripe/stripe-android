@@ -1,7 +1,8 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
 
-### Payments
+### Payments (`com.stripe:stripe-android`)
+* [ADDED] [4874](https://github.com/stripe/stripe-android/pull/4874) `us_bank_account` PaymentMethod is now available for ACH Direct Debit payments, including APIs to collect customer bank information (requires Connections SDK) and verify microdeposits.
 * [FIXED] [4875](https://github.com/stripe/stripe-android/pull/4875) fix postal code callback not firing when enabled
 
 ### PaymentSheet

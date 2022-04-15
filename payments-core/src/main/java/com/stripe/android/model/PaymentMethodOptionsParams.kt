@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 sealed class PaymentMethodOptionsParams(
@@ -91,7 +90,6 @@ sealed class PaymentMethodOptionsParams(
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class USBankAccount(
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
