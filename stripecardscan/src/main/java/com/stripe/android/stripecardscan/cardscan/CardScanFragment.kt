@@ -54,6 +54,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     override val instructionsText: TextView by lazy { viewBinding.instructions }
 
+    override val openAppSettingsText: TextView by lazy { viewBinding.openSettingsButton }
+
     override val previewFrame: ViewGroup by lazy { viewBinding.previewFrame }
 
     private val params: CardScanSheetParams by lazy {
