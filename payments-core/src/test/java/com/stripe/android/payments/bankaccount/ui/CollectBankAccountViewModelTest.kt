@@ -113,8 +113,7 @@ class CollectBankAccountViewModelTest {
             )
 
             // Then
-            awaitItem()
-            awaitItem()
+            cancelAndConsumeRemainingEvents()
             verify(attachLinkAccountSession, never()).forPaymentIntent(any(), any(), any())
         }
     }
@@ -134,8 +133,7 @@ class CollectBankAccountViewModelTest {
             )
 
             // Then
-            awaitItem()
-            awaitItem()
+            cancelAndConsumeRemainingEvents()
             verify(attachLinkAccountSession, never()).forSetupIntent(any(), any(), any())
         }
     }
