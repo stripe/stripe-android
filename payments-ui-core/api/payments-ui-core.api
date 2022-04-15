@@ -56,12 +56,21 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionControl
 
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
 }
+public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
+}
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/ui/core/elements/DropdownItemSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -89,6 +98,22 @@ public final class com/stripe/android/ui/core/elements/H4TextKt {
 }
 
 public final class com/stripe/android/ui/core/elements/H6TextKt {
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardBrand : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$CardBrand;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardNumber : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$CardNumber;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$City : com/stripe/android/ui/core/elements/IdentifierSpec {
@@ -217,6 +242,9 @@ public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion 
 }
 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
 }
 
 public final class com/stripe/android/ui/core/forms/AffirmSpecKt {

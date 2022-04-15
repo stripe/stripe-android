@@ -4,6 +4,7 @@
 # payment sdk
 /payments/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @jameswoo-stripe
 /payments-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @jameswoo-stripe
+/payments-model/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @jameswoo-stripe
 /paymentsheet/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
 /example/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
 /paymentsheet-example/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe

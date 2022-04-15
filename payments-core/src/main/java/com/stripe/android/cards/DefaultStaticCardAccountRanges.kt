@@ -1,6 +1,7 @@
 package com.stripe.android.cards
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 
@@ -101,7 +102,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val UNIONPAY16_ACCOUNTS = setOf(
+        @VisibleForTesting
+        internal val UNIONPAY16_ACCOUNTS = setOf(
             BinRange(
                 low = "6200000000000000",
                 high = "6216828049999999"
@@ -124,7 +126,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val UNIONPAY19_ACCOUNTS = setOf(
+        @VisibleForTesting
+        internal val UNIONPAY19_ACCOUNTS = setOf(
             BinRange(
                 low = "6216828050000000000",
                 high = "6216828059999999999"

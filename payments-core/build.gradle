@@ -6,6 +6,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     api project(":stripe-core")
+    api project(":payments-model")
     compileOnly project(':connections')
 
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"

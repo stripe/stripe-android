@@ -30,7 +30,7 @@ internal class PaymentOptionFactory(
                     drawableResourceId = selection.brand.getCardBrandIcon(),
                     label = createCardLabel(
                         resources,
-                        selection.paymentMethodCreateParams.card?.getLast4()
+                        selection.last4
                     )
                 )
             }

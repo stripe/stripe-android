@@ -72,6 +72,7 @@ class TransformSpecToElements(
                 is EmptyFormSpec -> EmptyFormElement()
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(context)
+                is BsbSpec -> it.transform()
             }
         }
 
@@ -131,7 +132,6 @@ class TransformSpecToElements(
                 )
                 is CardBillingSpec -> it.transform(addressRepository)
                 is AuBankAccountNumberSpec -> it.transform()
-                is BsbSpec -> it.transform()
             }
         }
 }

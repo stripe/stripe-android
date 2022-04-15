@@ -1,0 +1,22 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+
+dependencies {
+    implementation project(":stripe-core")
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+
+    testImplementation 'junit:junit:4.13.2'
+}
+
+ext {
+    artifactId = "payments-model"
+    artifactName = "payments-model"
+    artifactDescrption = "The models module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

@@ -22,14 +22,16 @@ import com.stripe.android.ui.core.PaymentsTheme
 internal fun Section(
     @StringRes title: Int?,
     error: String?,
-    content: @Composable () -> Unit
+    contentOutsideCard: @Composable () -> Unit = {},
+    contentInCard: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
-        SectionCard(content = content)
+        SectionCard(content = contentInCard)
         if (error != null) {
             SectionError(error)
         }
+        contentOutsideCard()
     }
 }
 
@@ -42,7 +44,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
         H6Text(
             text = stringResource(titleText),
             modifier = Modifier
-                .padding(vertical = 4.dp)
+                .padding(bottom = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
                 }

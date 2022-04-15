@@ -1,6 +1,7 @@
 package com.stripe.android.connections.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.connections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
@@ -33,6 +34,7 @@ data class LinkAccountSession internal constructor(
     val livemode: Boolean,
 
     @SerialName("payment_account")
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val paymentAccount: PaymentAccount? = null,
 
     @SerialName("return_url")

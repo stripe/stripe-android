@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -25,7 +28,12 @@ val AuBecsDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
 
 internal val auBecsDebitNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
-    SimpleTextSpec.NAME
+    SimpleTextSpec(
+        IdentifierSpec.Name,
+        label = R.string.au_becs_account_name,
+        capitalization = KeyboardCapitalization.Words,
+        keyboardType = KeyboardType.Text
+    )
 )
 
 internal val auBecsDebitEmailSection = SectionSpec(
@@ -33,10 +41,7 @@ internal val auBecsDebitEmailSection = SectionSpec(
     EmailSpec
 )
 
-internal val auBecsBsbNumberSection = SectionSpec(
-    IdentifierSpec.Generic("bsb_number_section"),
-    BsbSpec
-)
+internal val auBecsBsbNumberSection = BsbSpec()
 
 internal val auBecsDebitAccountNumberSection = SectionSpec(
     IdentifierSpec.Generic("account_number"),

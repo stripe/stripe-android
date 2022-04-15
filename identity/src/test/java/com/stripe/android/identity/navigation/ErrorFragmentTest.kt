@@ -45,7 +45,7 @@ class ErrorFragmentTest {
 
     @Test
     fun `bottom button is set correctly when set`() {
-        launchErrorFragment(R.id.action_errorFragment_to_consentFragment).onFragment {
+        launchErrorFragment(ErrorFragment.UNEXPECTED_DESTINATION).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )

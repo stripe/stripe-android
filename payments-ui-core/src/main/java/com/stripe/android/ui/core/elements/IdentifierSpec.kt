@@ -18,6 +18,12 @@ sealed class IdentifierSpec(val value: String) : Parcelable {
     object Name : IdentifierSpec("name")
 
     @Parcelize
+    object CardBrand : IdentifierSpec("card_brand_code")
+
+    @Parcelize
+    object CardNumber : IdentifierSpec("number")
+
+    @Parcelize
     object Email : IdentifierSpec("email")
 
     @Parcelize
