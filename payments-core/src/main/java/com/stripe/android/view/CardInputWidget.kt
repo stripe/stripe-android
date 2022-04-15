@@ -754,7 +754,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         postalCodeEditText.setAfterTextChangedListener {
-            if (postalCodeEditText.hasValidPostal()) {
+            if (postalCodeEditText.isEnabled && postalCodeEditText.hasValidPostal()) {
                 cardInputListener?.onPostalCodeComplete()
             }
         }

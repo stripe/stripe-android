@@ -1530,10 +1530,10 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun usZipCodeRequired_whenFalse_shouldNotCallOnPostalCodeComplete() {
+    fun usZipCodeRequired_whenFalse_shouldCallOnPostalCodeComplete() {
         cardInputWidget.usZipCodeRequired = false
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
@@ -1626,7 +1626,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun `Removing postal code requirement removes CardValidCallback notifications for the field`() {
+    fun `Removing postal code requirement keeps CardValidCallback notifications for the field`() {
         val callback = mock<CardValidCallback>()
         cardInputWidget.postalCodeRequired = true
         cardInputWidget.setCardValidCallback(callback)
@@ -1634,7 +1634,7 @@ internal class CardInputWidgetTest {
 
         postalCodeEditText.setText("54321")
 
-        verify(callback, times(1)).onInputChanged(any(), any())
+        verify(callback, times(2)).onInputChanged(any(), any())
     }
 
     @Test

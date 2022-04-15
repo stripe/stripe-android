@@ -1,6 +1,9 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
 
+### Payments
+* [FIXED] [4875](https://github.com/stripe/stripe-android/pull/4875) fix postal code callback not firing when enabled
+
 ### PaymentSheet
 * [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
 * [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
