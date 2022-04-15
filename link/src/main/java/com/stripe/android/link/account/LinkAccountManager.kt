@@ -27,9 +27,10 @@ internal class LinkAccountManager @Inject constructor(
     val accountStatus =
         linkAccount.transform { value ->
             emit(
+                // If we already fetched an account, return its status
                 value?.accountStatus
                     ?: (
-                        // If consumer has previously logged in, fetch their account using the cookie
+                        // If consumer has previously logged in, fetch their account
                         cookieStore.getAuthSessionCookie()?.let {
                             lookupConsumer(null).getOrNull()?.accountStatus
                         }
@@ -148,8 +149,8 @@ internal class LinkAccountManager @Inject constructor(
         }
 
     /**
-     * Returns true if user has logged out from any account during this session, or if the last
-     * logout was from the [email] passed as parameter.
+     * Whether the user has logged out from any account during this session, or the last logout was
+     * from the [email] passed as parameter, even if in a previous session.
      */
     fun hasUserLoggedOut(email: String?) = userHasLoggedOut || email?.let {
         cookieStore.isEmailLoggedOut(it)

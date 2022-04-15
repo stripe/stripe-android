@@ -113,8 +113,6 @@ android {
     }
 
     testOptions {
-        animationsDisabled = true
-
         unitTests {
             // Note: without this, all Robolectric tests using assets will fail.
             includeAndroidResources = true

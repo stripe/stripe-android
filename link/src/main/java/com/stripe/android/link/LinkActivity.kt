@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
@@ -83,7 +84,7 @@ internal class LinkActivity : ComponentActivity() {
                                         .fillMaxHeight(),
                                     contentAlignment = Alignment.Center
                                 ) {
-//                                    CircularProgressIndicator()
+                                    CircularProgressIndicator()
                                 }
                             }
                             composable(
@@ -122,7 +123,7 @@ internal class LinkActivity : ComponentActivity() {
                                         .fillMaxHeight(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = "<Placholder>\nAdd new payment method")
+                                    Text(text = "<Placeholder>\nAdd new payment method")
                                 }
                             }
                         }
@@ -134,6 +135,7 @@ internal class LinkActivity : ComponentActivity() {
         viewModel.navigator.onDismiss = ::dismiss
         viewModel.setupPaymentLauncher(this)
 
+        // Navigate to the initial screen once the view has been laid out.
         window.decorView.rootView.viewTreeObserver.addOnGlobalLayoutListener(
             object : ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
