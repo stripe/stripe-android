@@ -1,5 +1,5 @@
 ext.versions = [
-        detekt: "1.19.0",
+        detekt: "1.20.0",
 ]
 
 ext.buildLibs = [
