@@ -1,6 +1,9 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
 
+### Payments (`com.stripe:stripe-android`)
+* [ADDED] [4874](https://github.com/stripe/stripe-android/pull/4874) `us_bank_account` PaymentMethod is now available for ACH Direct Debit payments, including APIs to collect customer bank information (requires Connections SDK) and verify microdeposits.
+
 ### PaymentSheet
 * [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
 * [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
