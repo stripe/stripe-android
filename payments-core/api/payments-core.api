@@ -4913,17 +4913,6 @@ public final class com/stripe/android/payments/bankaccount/domain/VerifyWithMicr
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/VerifyWithMicrodeposit;
 }
 
-public abstract class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args : android/os/Parcelable {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getAttachToIntent ()Z
-	public fun getClientSecret ()Ljava/lang/String;
-	public fun getConfiguration ()Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;
-	public fun getPublishableKey ()Ljava/lang/String;
-	public final fun toBundle ()Landroid/os/Bundle;
-}
-
 public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args$Companion {
 	public final fun fromIntent (Landroid/content/Intent;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;
 }

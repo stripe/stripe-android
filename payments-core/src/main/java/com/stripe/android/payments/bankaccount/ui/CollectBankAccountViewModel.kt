@@ -108,8 +108,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 finishWithResult(
                     Completed(
                         CollectBankAccountResponse(
-                            stripeIntent,
-                            linkAccountSession
+                            intent = stripeIntent,
+                            linkAccountSession = linkAccountSession
                         )
                     )
                 )

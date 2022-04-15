@@ -34,6 +34,7 @@ class CollectBankAccountContract :
         )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val publishableKey: String,
         open val clientSecret: String,

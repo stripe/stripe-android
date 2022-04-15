@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -47,6 +48,33 @@ class RetrieveStripeIntentTest {
     }
 
     @Test
+    fun `retrieve - given invalid payment intent client secret, exception is thrown`() {
+        runTest {
+            // Given
+            val publishableKey = "publishable_key"
+            val clientSecret = "pi_invalid"
+            val expectedException = APIException()
+            givenRetrieveStripeIntentReturns {
+                throw expectedException
+            }
+
+            // When
+            val intent = retrieveStripeIntent(
+                publishableKey = publishableKey,
+                clientSecret = clientSecret
+            )
+
+            // Then
+            verify(stripeRepository).retrieveStripeIntent(
+                clientSecret = "pi_invalid",
+                options = ApiRequest.Options(publishableKey)
+            )
+
+            assertThat(intent.exceptionOrNull()).isEqualTo(expectedException)
+        }
+    }
+
+    @Test
     fun `retrieve - given setup intent client secret, setup intent is retrieved`() {
         runTest {
             // Given
@@ -68,6 +96,33 @@ class RetrieveStripeIntentTest {
                 options = ApiRequest.Options(publishableKey)
             )
             assertThat(intent).isInstanceOf(SetupIntent::class.java)
+        }
+    }
+
+    @Test
+    fun `retrieve - given invalid setup intent client secret, exception is thrown`() {
+        runTest {
+            // Given
+            val publishableKey = "publishable_key"
+            val clientSecret = "seti_invalid"
+            val expectedException = APIException()
+            givenRetrieveStripeIntentReturns {
+                throw expectedException
+            }
+
+            // When
+            val intent = retrieveStripeIntent(
+                publishableKey = publishableKey,
+                clientSecret = clientSecret
+            )
+
+            // Then
+            verify(stripeRepository).retrieveStripeIntent(
+                clientSecret = "seti_invalid",
+                options = ApiRequest.Options(publishableKey)
+            )
+
+            assertThat(intent.exceptionOrNull()).isEqualTo(expectedException)
         }
     }
 
