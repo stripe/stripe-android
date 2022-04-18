@@ -48,6 +48,9 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
 }
 
+public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
+}
+
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V
@@ -55,8 +58,6 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionControl
 }
 
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
-}
-public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {

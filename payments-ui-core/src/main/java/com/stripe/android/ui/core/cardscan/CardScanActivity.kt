@@ -1,10 +1,12 @@
-package com.stripe.android.ui.core
+package com.stripe.android.ui.core.cardscan
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.StripeCardScanProxy
 import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
 
 internal class CardScanActivity : AppCompatActivity() {

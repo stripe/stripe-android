@@ -25,10 +25,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
-import com.stripe.android.ui.core.CardScanActivity
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cardscan.CardScanActivity
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
