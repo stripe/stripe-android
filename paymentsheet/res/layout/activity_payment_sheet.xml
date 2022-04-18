@@ -126,7 +126,7 @@
                     android:animateLayoutChanges="true"
                     android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/stripe_paymentsheet_max_primary_button_height"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                     android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom">
@@ -134,7 +134,7 @@
                     <com.stripe.android.paymentsheet.ui.PrimaryButton
                         android:id="@+id/buy_button"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
+                        android:layout_height="wrap_content"
                         android:text="@string/stripe_paymentsheet_pay_button_label"
                         android:layout_marginVertical="2dp" />
                 </FrameLayout>

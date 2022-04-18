@@ -137,8 +137,8 @@ class CardImageVerificationSheet private constructor(
             Intent(context, CardImageVerificationActivity::class.java)
                 .putExtra(INTENT_PARAM_REQUEST, input)
 
-        private fun parseResult(intent: Intent): CardImageVerificationSheetResult =
-            intent.getParcelableExtra(INTENT_PARAM_RESULT)
+        private fun parseResult(intent: Intent?): CardImageVerificationSheetResult =
+            intent?.getParcelableExtra(INTENT_PARAM_RESULT)
                 ?: CardImageVerificationSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
@@ -155,7 +155,7 @@ class CardImageVerificationSheet private constructor(
             override fun parseResult(
                 resultCode: Int,
                 intent: Intent?,
-            ) = this@Companion.parseResult(requireNotNull(intent))
+            ) = this@Companion.parseResult(intent)
         }
     }
 

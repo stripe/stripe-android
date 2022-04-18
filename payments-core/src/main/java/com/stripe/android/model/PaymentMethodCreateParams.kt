@@ -429,7 +429,6 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class USBankAccount(
         internal var accountNumber: String,
         internal var routingNumber: String,
@@ -612,7 +611,6 @@ data class PaymentMethodCreateParams internal constructor(
 
         @JvmStatic
         @JvmOverloads
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             usBankAccount: USBankAccount,
             billingDetails: PaymentMethod.BillingDetails? = null,
@@ -839,7 +837,8 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        @JvmOverloads
         fun createUSBankAccount(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
