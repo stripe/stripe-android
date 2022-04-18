@@ -39,5 +39,4 @@ object CreateBrowserIntentForUrl {
 
     private const val FIREFOX_PACKAGE = "org.mozilla"
     private const val CHROME_PACKAGE = "com.android.chrome"
-
 }
