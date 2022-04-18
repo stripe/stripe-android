@@ -10,4 +10,6 @@
     <string name="allowed_types">Allowed document types</string>
     <string name="require_id_number">Require ID number</string>
     <string name="require_matching_selfie">Require matching selfie</string>
+    <string name="use_native">Use native SDK</string>
+    <string name="use_web">Use web redirect</string>
 </resources>

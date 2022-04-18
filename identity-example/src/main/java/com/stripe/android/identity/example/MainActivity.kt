@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
 import com.google.android.material.snackbar.Snackbar
@@ -20,7 +21,7 @@ abstract class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    lateinit var identityVerificationSheet: IdentityVerificationSheet
+    private lateinit var identityVerificationSheet: IdentityVerificationSheet
 
     private val json by lazy {
         Json {
@@ -58,6 +59,24 @@ abstract class MainActivity : AppCompatActivity() {
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
+
+        binding.useNative.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                binding.requireIdNumber.isChecked = false
+                binding.requireMatchingSelfie.isChecked = false
+                binding.requireIdNumber.isEnabled = false
+                binding.requireMatchingSelfie.isEnabled = false
+            }
+        }
+
+        binding.useWeb.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                binding.requireIdNumber.isChecked = false
+                binding.requireMatchingSelfie.isChecked = false
+                binding.requireIdNumber.isEnabled = true
+                binding.requireMatchingSelfie.isEnabled = true
+            }
+        }
 
         binding.startVerification.setOnClickListener {
             binding.startVerification.isEnabled = false
@@ -103,10 +122,15 @@ abstract class MainActivity : AppCompatActivity() {
                                     VerificationSessionCreationResponse.serializer(),
                                     result.get()
                                 ).let {
-                                    identityVerificationSheet.present(
-                                        verificationSessionId = it.verificationSessionId,
-                                        ephemeralKeySecret = it.ephemeralKeySecret
-                                    )
+                                    if (binding.useNative.isChecked) {
+                                        identityVerificationSheet.present(
+                                            verificationSessionId = it.verificationSessionId,
+                                            ephemeralKeySecret = it.ephemeralKeySecret
+                                        )
+                                    } else {
+                                        CustomTabsIntent.Builder().build()
+                                            .launchUrl(this, Uri.parse(it.url))
+                                    }
                                 }
                             } catch (t: Throwable) {
                                 showSnackBar("Fail to decode")
@@ -127,6 +151,7 @@ abstract class MainActivity : AppCompatActivity() {
         @SerialName("client_secret") val clientSecret: String,
         @SerialName("ephemeral_key_secret") val ephemeralKeySecret: String,
         @SerialName("id") val verificationSessionId: String,
+        @SerialName("url") val url: String,
     )
 
     @Serializable
