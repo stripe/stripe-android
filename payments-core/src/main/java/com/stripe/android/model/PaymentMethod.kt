@@ -127,7 +127,12 @@ constructor(
 
     @JvmField val netbanking: Netbanking? = null,
 
-    internal val usBankAccount: USBankAccount? = null
+    /**
+     * If this is an `us_bank_account` PaymentMethod, this hash contains details about the bank account.
+     *
+     * [us_bank_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account)
+     */
+    @JvmField val usBankAccount: USBankAccount? = null
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -362,7 +367,7 @@ constructor(
         private var bacsDebit: BacsDebit? = null
         private var sofort: Sofort? = null
         private var netbanking: Netbanking? = null
-        internal var usBankAccount: USBankAccount? = null
+        private var usBankAccount: USBankAccount? = null
         private var upi: Upi? = null
 
         fun setId(id: String?): Builder = apply {
@@ -429,7 +434,7 @@ constructor(
             this.netbanking = netbanking
         }
 
-        internal fun setUSBankAccount(usBankAccount: USBankAccount?): Builder = apply {
+        fun setUSBankAccount(usBankAccount: USBankAccount?): Builder = apply {
             this.usBankAccount = usBankAccount
         }
 
@@ -864,7 +869,6 @@ constructor(
     }
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class USBankAccount internal constructor(
         /**
          * Account holder type
@@ -926,7 +930,6 @@ constructor(
         override val type: Type get() = Type.USBankAccount
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class USBankAccountHolderType(val value: String) : StripeModel {
             UNKNOWN("unknown"),
             // Account belongs to an individual
@@ -936,7 +939,6 @@ constructor(
         }
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class USBankAccountType(val value: String) : StripeModel {
             UNKNOWN("unknown"),
             // Bank account type is checking
@@ -946,7 +948,6 @@ constructor(
         }
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class USBankNetworks(
             val preferred: String?,
             val supported: List<String>

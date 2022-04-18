@@ -20,7 +20,6 @@
     <color name="stripe_paymentsheet_payment_method_label_text_disabled">#61000000</color>
     <color name="stripe_paymentsheet_primary_button_default_background">#0074D4</color>
     <color name="stripe_paymentsheet_primary_button_success_background">#24B47E</color>
-    <color name="stripe_paymentsheet_primary_button_text">@android:color/white</color>
     <color name="stripe_paymentsheet_primary_button_confirming_progress">#ffffff</color>
     <color name="stripe_paymentsheet_form_border">#33787880</color>
     <color name="stripe_paymentsheet_elements_background_default">

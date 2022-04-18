@@ -23,7 +23,7 @@ internal interface ConnectionsPaymentsProxy {
             fragment: Fragment,
             onComplete: (ConnectionsSheetResult) -> Unit,
             provider: () -> ConnectionsPaymentsProxy = {
-                DefaultConnectionsPaymentsProxy(ConnectionsSheet(fragment, onComplete))
+                DefaultConnectionsPaymentsProxy(ConnectionsSheet.create(fragment, onComplete))
             },
             isConnectionsAvailable: IsConnectionsAvailable = DefaultIsConnectionsAvailable()
         ): ConnectionsPaymentsProxy {
@@ -38,7 +38,7 @@ internal interface ConnectionsPaymentsProxy {
             activity: AppCompatActivity,
             onComplete: (ConnectionsSheetResult) -> Unit,
             provider: () -> ConnectionsPaymentsProxy = {
-                DefaultConnectionsPaymentsProxy(ConnectionsSheet(activity, onComplete))
+                DefaultConnectionsPaymentsProxy(ConnectionsSheet.create(activity, onComplete))
             },
             isConnectionsAvailable: IsConnectionsAvailable = DefaultIsConnectionsAvailable()
         ): ConnectionsPaymentsProxy {

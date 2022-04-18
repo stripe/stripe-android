@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Intent
-import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -605,7 +604,6 @@ suspend fun Stripe.confirmSetupIntent(
  * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">WeChat Pay Documentation</a>
  *
  * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
- * US Bank Account API is still in beta, create a [Stripe] instance with [StripeApiBeta.USBankAccount] to enable this API.
  *
  * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
  * [PaymentIntent]
@@ -817,7 +815,6 @@ internal inline fun <reified ApiObject : StripeModel> runApiRequest(
  * @throws APIConnectionException failure to connect to Stripe's API
  * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Throws(
     AuthenticationException::class,
     InvalidRequestException::class,
@@ -860,7 +857,6 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
  * @throws APIConnectionException failure to connect to Stripe's API
  * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Throws(
     AuthenticationException::class,
     InvalidRequestException::class,
@@ -903,7 +899,6 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
  * @throws APIConnectionException failure to connect to Stripe's API
  * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Throws(
     AuthenticationException::class,
     InvalidRequestException::class,
@@ -946,7 +941,6 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
  * @throws APIConnectionException failure to connect to Stripe's API
  * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Throws(
     AuthenticationException::class,
     InvalidRequestException::class,
