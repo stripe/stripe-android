@@ -14,8 +14,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -25,8 +25,11 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.PrimaryButtonModifier
+import com.stripe.android.ui.core.PrimaryButtonTheme
 import com.stripe.android.ui.core.convertDpToPx
+import com.stripe.android.ui.core.getBorderStrokeColor
+import com.stripe.android.ui.core.getComposeTextStyle
+import com.stripe.android.ui.core.getOnBackgroundColor
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -58,12 +61,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     private var cornerRadius = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonModifier.cornerRadius.dp
+        PaymentsThemeDefaults.primaryButtonTheme.shape.cornerRadius.dp
     )
     private var borderStrokeWidth = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonModifier.borderStrokeWidth.dp
+        PaymentsThemeDefaults.primaryButtonTheme.shape.borderStrokeWidth.dp
     )
-    private var borderStrokeColor = PaymentsThemeDefaults.primaryButtonModifier.border.toArgb()
+    private var borderStrokeColor =
+        PaymentsThemeDefaults.primaryButtonTheme.getBorderStrokeColor(context)
 
     init {
         // This is only needed if the button is inside a fragment
@@ -79,12 +83,15 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     fun setAppearanceConfiguration(
-        primaryButtonModifier: PrimaryButtonModifier,
+        primaryButtonTheme: PrimaryButtonTheme,
         tintList: ColorStateList?
     ) {
-        cornerRadius = context.convertDpToPx(primaryButtonModifier.cornerRadius.dp)
-        borderStrokeWidth = context.convertDpToPx(primaryButtonModifier.borderStrokeWidth.dp)
-        borderStrokeColor = primaryButtonModifier.border.toArgb()
+        cornerRadius = context.convertDpToPx(primaryButtonTheme.shape.cornerRadius.dp)
+        borderStrokeWidth = context.convertDpToPx(primaryButtonTheme.shape.borderStrokeWidth.dp)
+        borderStrokeColor = primaryButtonTheme.getBorderStrokeColor(context)
+        viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
+            primaryButtonTheme.getOnBackgroundColor(context)
+        )
         backgroundTintList = tintList
         defaultTintList = tintList
     }
@@ -210,15 +217,14 @@ private fun LabelUI(label: String) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .height(PaymentsTheme.primaryButtonModifier.height)
+            .height(dimensionResource(R.dimen.stripe_paymentsheet_primary_button_height))
     ) {
         Text(
             text = label,
             textAlign = TextAlign.Center,
-            color = PaymentsTheme.primaryButtonModifier.onPrimary,
-            style = PaymentsTheme.primaryButtonModifier.style,
+            style = PaymentsTheme.primaryButtonMutable.getComposeTextStyle(),
             modifier = Modifier
-                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+                .padding(horizontal = 4.dp)
         )
     }
 }

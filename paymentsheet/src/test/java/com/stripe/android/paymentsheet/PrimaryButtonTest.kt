@@ -37,7 +37,7 @@ class PrimaryButtonTest {
 
     @Test
     fun `onFinishingState() should clear any tint and restore onReadyState()`() {
-        primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonModifier, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonTheme, ColorStateList.valueOf(Color.BLACK))
         primaryButton.updateState(
             PrimaryButton.State.FinishProcessing({})
         )
