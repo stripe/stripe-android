@@ -89,7 +89,7 @@ data class PrimaryButtonStyle(
 data class PrimaryButtonColors(
     val background: Color,
     val onBackground: Color,
-    val borderStroke: Color,
+    val border: Color,
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -164,12 +164,12 @@ object PaymentsThemeDefaults {
         colorsLight = PrimaryButtonColors(
             background = colors(false).primary,
             onBackground = Color.White,
-            borderStroke = Color.Transparent
+            border = Color.Transparent
         ),
         colorsDark = PrimaryButtonColors(
             background = colors(true).primary,
             onBackground = Color.White,
-            borderStroke = Color.Transparent
+            border = Color.Transparent
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
@@ -449,21 +449,21 @@ fun Color.shouldUseDarkDynamicColor(): Boolean {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getBackgroundColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsLight else colorsDark).background.toArgb()
+    return (if (isDark) colorsDark else colorsLight).background.toArgb()
 }
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsLight else colorsDark).onBackground.toArgb()
+    return (if (isDark) colorsDark else colorsLight).onBackground.toArgb()
 }
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsLight.borderStroke else colorsDark.borderStroke).toArgb()
+    return (if (isDark) colorsDark else colorsLight).border.toArgb()
 }
 
 @Composable
