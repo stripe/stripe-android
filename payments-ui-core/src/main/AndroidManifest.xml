@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name=".CardScanActivity"
+            android:name=".cardscan.CardScanActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
     </application>

@@ -64,7 +64,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         setContent {
             PaymentsTheme {
                 Column(Modifier.fillMaxSize()) {
-                    Form(formViewModel, context)
+                    Form(formViewModel)
                 }
             }
         }
