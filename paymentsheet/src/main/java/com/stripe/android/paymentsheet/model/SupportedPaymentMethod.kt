@@ -45,6 +45,7 @@ import com.stripe.android.ui.core.forms.PaypalForm
 import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SofortForm
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 
 /**
  * Enum defining all payment method types for which Payment Sheet can collect
@@ -241,7 +242,7 @@ sealed class SupportedPaymentMethod(
         val userSelectableSave = LayoutFormDescriptor(
             formSpec,
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            showCheckboxControlledFields = Locale.getDefault() == Locale.US
         )
 
         if (!stripeIntent.paymentMethodTypes.contains(type.code)) {
