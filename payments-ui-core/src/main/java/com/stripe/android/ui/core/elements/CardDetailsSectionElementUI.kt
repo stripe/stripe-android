@@ -45,7 +45,6 @@ fun CardDetailsSectionElementUI(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 9.dp),
     ) {
         H6Text(
             text = stringResource(R.string.card_information),
