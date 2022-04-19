@@ -96,12 +96,12 @@ class FinancialFinancialConnectionsSheetActivityTest {
     @Test
     fun `viewEffect - OpenAuthFlowWithUrl opens Chrome Custom Tab intent`() {
         val chromeCustomTabUrl = "www.authflow.com"
-        val viewEffects = MutableSharedFlow<ConnectionsSheetViewEffect>()
+        val viewEffects = MutableSharedFlow<FinancialConnectionsSheetViewEffect>()
         val mockViewModel = mock<FinancialConnectionsSheetViewModel> {
             on { viewEffect } doReturn viewEffects
         }
         activityScenario(mockViewModel).launch(intent).suspendOnActivity {
-            viewEffects.emit(ConnectionsSheetViewEffect.OpenAuthFlowWithUrl(chromeCustomTabUrl))
+            viewEffects.emit(FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl(chromeCustomTabUrl))
             val intent: Intent = shadowOf(it).nextStartedActivity
             assertThat(intent.getIntExtra(CustomTabsIntent.EXTRA_SHARE_STATE, 0)).isEqualTo(
                 SHARE_STATE_OFF

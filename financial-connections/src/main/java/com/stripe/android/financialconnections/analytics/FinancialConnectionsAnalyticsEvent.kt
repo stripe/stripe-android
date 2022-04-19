@@ -11,7 +11,6 @@ internal data class FinancialConnectionsAnalyticsEvent(
 
     enum class Code(internal val code: String) {
 
-        // Connections Sheet Events
         SheetPresented("sheet.presented"),
         SheetClosed("sheet.closed"),
         SheetFailed("sheet.failed");

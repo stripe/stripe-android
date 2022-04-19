@@ -46,32 +46,32 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
     override suspend fun getLinkedAccounts(
         listLinkedAccountParams: ListLinkedAccountParams
     ): LinkedAccountList {
-        val connectionsRequest = apiRequestFactory.createGet(
+        val financialConnectionsRequest = apiRequestFactory.createGet(
             url = listAccountsUrl,
             options = options,
             params = listLinkedAccountParams.toParamMap()
         )
-        return executeRequest(connectionsRequest, LinkedAccountList.serializer())
+        return executeRequest(financialConnectionsRequest, LinkedAccountList.serializer())
     }
 
     override suspend fun getLinkAccountSession(
         clientSecret: String
     ): LinkAccountSession {
-        val connectionsRequest = apiRequestFactory.createGet(
+        val financialConnectionsRequest = apiRequestFactory.createGet(
             url = sessionReceiptUrl,
             options = options,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret
             ),
         )
-        return executeRequest(connectionsRequest, LinkAccountSession.serializer())
+        return executeRequest(financialConnectionsRequest, LinkAccountSession.serializer())
     }
 
     override suspend fun generateLinkAccountSessionManifest(
         clientSecret: String,
         applicationId: String
     ): LinkAccountSessionManifest {
-        val connectionsRequest = apiRequestFactory.createPost(
+        val financialConnectionsRequest = apiRequestFactory.createPost(
             url = generateHostedUrl,
             options = options,
             params = mapOf(
@@ -79,7 +79,7 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_APPLICATION_ID to applicationId
             ),
         )
-        return executeRequest(connectionsRequest, LinkAccountSessionManifest.serializer())
+        return executeRequest(financialConnectionsRequest, LinkAccountSessionManifest.serializer())
     }
 
     private suspend fun <Response> executeRequest(

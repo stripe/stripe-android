@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Completed
-import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
 import com.stripe.android.financialconnections.domain.GenerateLinkAccountSessionManifest

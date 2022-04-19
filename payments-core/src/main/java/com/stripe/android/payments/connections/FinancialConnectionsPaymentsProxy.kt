@@ -9,7 +9,7 @@ import com.stripe.android.payments.connections.reflection.DefaultIsConnectionsAv
 import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
 
 /**
- * Proxy to access connections code safely in payments.
+ * Proxy to access financial connections code safely in payments.
  *
  */
 internal interface FinancialConnectionsPaymentsProxy {
@@ -81,7 +81,7 @@ internal class UnsupportedFinancialConnectionsPaymentsProxy : FinancialConnectio
     override fun present(linkAccountSessionClientSecret: String, publishableKey: String) {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(
-                "Missing connections dependency, please add it to your apps build.gradle"
+                "Missing financial-connections dependency, please add it to your apps build.gradle"
             )
         }
     }

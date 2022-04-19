@@ -47,7 +47,7 @@ class CollectBankAccountViewModelTest {
         id = linkedAccountSessionId
     )
 
-    private val connectionsLinkAccountSession = mock<LinkAccountSession> {
+    private val linkAccountSession = mock<LinkAccountSession> {
         on { this.clientSecret } doReturn "client_secret"
         on { this.id } doReturn linkedAccountSessionId
     }
@@ -125,7 +125,7 @@ class CollectBankAccountViewModelTest {
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
@@ -149,7 +149,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
@@ -173,7 +173,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then

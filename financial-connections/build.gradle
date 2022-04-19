@@ -63,7 +63,7 @@ android {
 ext {
     artifactId = "financial-connections"
     artifactName = "financial-connections"
-    artifactDescrption = "The connections module of Stripe Payment Android SDK"
+    artifactDescrption = "The financial connections module of Stripe Android SDK"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

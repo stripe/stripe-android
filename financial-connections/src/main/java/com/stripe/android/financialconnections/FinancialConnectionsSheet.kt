@@ -15,7 +15,7 @@ class FinancialConnectionsSheet internal constructor(
     private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher
 ) {
     /**
-     * Configuration for a Connections Sheet
+     * Configuration for a [FinancialConnectionsSheet]
      *
      * @param linkAccountSessionClientSecret the client secret for the Link Account Session
      * @param publishableKey the Stripe publishable key
@@ -27,9 +27,9 @@ class FinancialConnectionsSheet internal constructor(
     ) : Parcelable
 
     /**
-     * Present the connections sheet.
+     * Present the [FinancialConnectionsSheet].
      *
-     * @param configuration the connections sheet configuration
+     * @param configuration the [FinancialConnectionsSheet] configuration
      */
     fun present(
         configuration: Configuration
@@ -39,9 +39,9 @@ class FinancialConnectionsSheet internal constructor(
 
     companion object {
         /**
-         * Constructor to be used when launching the connections sheet from an Activity.
+         * Constructor to be used when launching the [FinancialConnectionsSheet] from an Activity.
          *
-         * @param activity  the Activity that is presenting the connections sheet.
+         * @param activity  the Activity that is presenting the [FinancialConnectionsSheet].
          * @param callback  called with the result of the connections session after the connections sheet is dismissed.
          */
         fun create(

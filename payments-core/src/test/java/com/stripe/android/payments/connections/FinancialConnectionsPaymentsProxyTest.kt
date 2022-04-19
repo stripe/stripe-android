@@ -13,8 +13,8 @@ import kotlin.test.assertTrue
 
 class FinancialConnectionsPaymentsProxyTest {
     companion object {
-        private const val CONNECTIONS_SHEET_CANONICAL_NAME =
-            "com.stripe.android.connections.ConnectionsSheet"
+        private const val FINANCIAL_CONNECTIONS_SHEET_CANONICAL_NAME =
+            "com.stripe.android.financialconnections.FinancialConnectionsSheet"
     }
 
     private val mockIsConnectionsAvailable: IsConnectionsAvailable = mock()
@@ -28,7 +28,7 @@ class FinancialConnectionsPaymentsProxyTest {
     }
 
     @Test
-    fun `connections SDK availability returns null when connections module is not loaded`() {
+    fun `financial connections SDK availability returns null when module is not loaded`() {
         whenever(mockIsConnectionsAvailable()).thenAnswer { false }
 
         assertTrue(
@@ -48,7 +48,7 @@ class FinancialConnectionsPaymentsProxyTest {
     }
 
     @Test
-    fun `connections SDK availability returns sdk when connections module is loaded`() {
+    fun `financial connections SDK availability returns sdk when module is loaded`() {
         assertTrue(
             FinancialConnectionsPaymentsProxy.create(
                 fragment = mockFragment,
@@ -86,9 +86,9 @@ class FinancialConnectionsPaymentsProxyTest {
     }
 
     @Test
-    fun `ensure ConnectionsSheet exists`() {
+    fun `ensure FinancialConnectionsSheet exists`() {
         assertEquals(
-            CONNECTIONS_SHEET_CANONICAL_NAME,
+            FINANCIAL_CONNECTIONS_SHEET_CANONICAL_NAME,
             FinancialConnectionsSheet::class.qualifiedName
         )
     }

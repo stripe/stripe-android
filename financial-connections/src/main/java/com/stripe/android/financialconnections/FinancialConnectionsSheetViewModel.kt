@@ -8,8 +8,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
@@ -39,8 +39,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val _state = MutableStateFlow(FinancialConnectionsSheetState().from(savedStateHandle))
     internal val state: StateFlow<FinancialConnectionsSheetState> = _state
 
-    private val _viewEffect = MutableSharedFlow<ConnectionsSheetViewEffect>()
-    internal val viewEffect: SharedFlow<ConnectionsSheetViewEffect> = _viewEffect
+    private val _viewEffect = MutableSharedFlow<FinancialConnectionsSheetViewEffect>()
+    internal val viewEffect: SharedFlow<FinancialConnectionsSheetViewEffect> = _viewEffect
 
     init {
         eventReporter.onPresented(starterArgs.configuration)
@@ -152,10 +152,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     /**
-     * If an error occurs during the connections sheet auth flow, return that error via the
+     * If an error occurs during the auth flow, return that error via the
      * [FinancialConnectionsSheetResultCallback] and [FinancialConnectionsSheetResult.Failed].
      *
-     * @param throwable the error encountered during the connections sheet auth flow
+     * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
      */
     private suspend fun onFatal(throwable: Throwable) {
         val result = FinancialConnectionsSheetResult.Failed(throwable)
@@ -189,7 +189,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             when (intent?.data.toString()) {
                 manifest?.successUrl -> fetchLinkAccountSession()
                 manifest?.cancelUrl -> onUserCancel()
-                else -> onFatal(Exception("Error processing ConnectionsSheet intent"))
+                else -> onFatal(Exception("Error processing FinancialConnectionsSheet intent"))
             }
         }
     }
