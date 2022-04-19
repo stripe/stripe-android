@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.repository
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.LinkedAccount
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.model.BankAccount
+import com.stripe.android.financialconnections.model.LinkedAccount
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

@@ -2,10 +2,6 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.core.os.LocaleListCompat
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.analytics.DefaultFinancialFinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.repository.FinancialFinancialConnectionsApiRepository
-import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -14,6 +10,10 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.financialconnections.analytics.DefaultFinancialFinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialFinancialConnectionsApiRepository
 import dagger.Module
 import dagger.Provides
 import java.util.Locale

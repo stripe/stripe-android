@@ -1,11 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -19,6 +14,11 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
+import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.LinkedAccountList
+import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection

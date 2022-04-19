@@ -10,9 +10,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.financialconnections.databinding.ActivityFinancialconnectionsSheetBinding
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.databinding.ActivityFinancialconnectionsSheetBinding
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import java.security.InvalidParameterException
 

@@ -2,13 +2,13 @@ package com.stripe.android.financialconnections.analytics
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test

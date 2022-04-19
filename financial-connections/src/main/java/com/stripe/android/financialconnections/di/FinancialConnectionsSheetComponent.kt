@@ -2,10 +2,10 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
-import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton

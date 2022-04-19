@@ -2,9 +2,9 @@ package com.stripe.android.payments.bankaccount.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.core.Logger
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent

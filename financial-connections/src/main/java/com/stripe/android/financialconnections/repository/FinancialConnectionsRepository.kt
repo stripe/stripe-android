@@ -1,13 +1,13 @@
 package com.stripe.android.financialconnections.repository
 
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.LinkedAccountList
+import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 
 internal interface FinancialConnectionsRepository {
     @Throws(

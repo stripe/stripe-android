@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.linkAccountSessionWithMoreAccounts
 import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
@@ -9,7 +10,6 @@ import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.moreLinkedAccountList
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
-import com.stripe.android.core.exception.APIException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

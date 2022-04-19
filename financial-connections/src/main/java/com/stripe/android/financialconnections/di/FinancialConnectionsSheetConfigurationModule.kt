@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
-import com.stripe.android.core.injection.ENABLE_LOGGING
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
