@@ -1,12 +1,10 @@
-package com.stripe.android.payments.connections
+package com.stripe.android.payments.financialconnections
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.payments.connections.reflection.DefaultIsConnectionsAvailable
-import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
 
 /**
  * Proxy to access financial connections code safely in payments.
@@ -30,9 +28,9 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isConnectionsAvailable: IsConnectionsAvailable = DefaultIsConnectionsAvailable()
+            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
         ): FinancialConnectionsPaymentsProxy {
-            return if (isConnectionsAvailable()) {
+            return if (isFinancialConnectionsAvailable()) {
                 provider()
             } else {
                 UnsupportedFinancialConnectionsPaymentsProxy()
@@ -50,9 +48,9 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isConnectionsAvailable: IsConnectionsAvailable = DefaultIsConnectionsAvailable()
+            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
         ): FinancialConnectionsPaymentsProxy {
-            return if (isConnectionsAvailable()) {
+            return if (isFinancialConnectionsAvailable()) {
                 provider()
             } else {
                 UnsupportedFinancialConnectionsPaymentsProxy()

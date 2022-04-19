@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
-import com.stripe.android.payments.connections.FinancialConnectionsPaymentsProxy
+import com.stripe.android.payments.financialconnections.FinancialConnectionsPaymentsProxy
 
 /**
  * No-UI activity that will handle collect bank account logic.
