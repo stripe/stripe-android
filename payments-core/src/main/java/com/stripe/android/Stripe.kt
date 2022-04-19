@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -215,7 +214,6 @@ class Stripe internal constructor(
      * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">WeChat Pay Documentation</a>
      *
      * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
-     * US Bank Account API is still in beta, create a [Stripe] instance with [StripeApiBeta.USBankAccount] to enable this API.
      *
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
@@ -1661,7 +1659,8 @@ class Stripe internal constructor(
      * sent to the bank account
      * @param callback a [ApiResultCallback] to receive the result or error
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @UiThread
+    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
@@ -1694,7 +1693,8 @@ class Stripe internal constructor(
      * statement descriptor to the bank account
      * @param callback a [ApiResultCallback] to receive the result or error
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @UiThread
+    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
@@ -1727,7 +1727,8 @@ class Stripe internal constructor(
      * sent to the bank account
      * @param callback a [ApiResultCallback] to receive the result or error
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @UiThread
+    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
@@ -1760,7 +1761,8 @@ class Stripe internal constructor(
      * statement descriptor to the bank account
      * @param callback a [ApiResultCallback] to receive the result or error
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @UiThread
+    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,

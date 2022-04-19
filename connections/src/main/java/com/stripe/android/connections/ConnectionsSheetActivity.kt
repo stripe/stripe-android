@@ -8,12 +8,12 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.databinding.ActivityConnectionsSheetBinding
+import com.stripe.android.connections.presentation.CreateBrowserIntentForUrl
 import java.security.InvalidParameterException
 
 internal class ConnectionsSheetActivity : AppCompatActivity() {
@@ -84,12 +84,12 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
     }
 
     private fun OpenAuthFlowWithUrl.launch() {
+        val uri = Uri.parse(this.url)
         startForResult.launch(
-            CustomTabsIntent.Builder()
-                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                .build()
-                .also { it.intent.data = Uri.parse(this.url) }
-                .intent
+            CreateBrowserIntentForUrl(
+                context = this@ConnectionsSheetActivity,
+                uri = uri,
+            )
         )
     }
 

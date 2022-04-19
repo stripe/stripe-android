@@ -2,6 +2,7 @@ package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
@@ -27,6 +28,7 @@ import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
@@ -37,8 +39,9 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
-    val saveForFutureCheckbox =
-        EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+    val saveForFutureCheckbox = composeTestRule
+        .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+
     val customer = when (testParameters.customer) {
         Customer.Guest -> EspressoLabelIdButton(R.string.customer_guest)
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
@@ -234,6 +237,24 @@ class Selectors(
         "Or pay",
         substring = true,
         useUnmergedTree = true
+    )
+
+    fun getCardNumber() = composeTestRule.onNodeWithText(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            com.stripe.android.R.string.acc_label_card_number
+        )
+    )
+
+    fun getCardExpiration() = composeTestRule.onNodeWithText(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            R.string.stripe_paymentsheet_expiration_date_hint
+        )
+    )
+
+    fun getCardCvc() = composeTestRule.onNodeWithText(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            com.stripe.android.ui.core.R.string.cvc_number_hint
+        )
     )
 
     companion object {
