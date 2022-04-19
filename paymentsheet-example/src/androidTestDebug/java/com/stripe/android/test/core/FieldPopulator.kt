@@ -1,13 +1,16 @@
 package com.stripe.android.test.core
 
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsToggleable
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
-import com.google.common.truth.Truth
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
-import com.stripe.android.ui.core.elements.BsbSpec
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
@@ -29,12 +32,29 @@ class FieldPopulator(
 
         Espresso.closeSoftKeyboard()
 
-        Truth.assertThat(testParameters.saveForFutureUseCheckboxVisible)
-            .isEqualTo(selectors.saveForFutureCheckbox.exists())
-        if (selectors.saveForFutureCheckbox.exists()) {
-            if (!testParameters.saveCheckboxValue) {
-                selectors.saveForFutureCheckbox.click()
+        if (testParameters.saveForFutureUseCheckboxVisible) {
+            selectors.saveForFutureCheckbox.assertExists()
+            if (testParameters.saveCheckboxValue) {
+                if (!isSaveForFutureUseSelected()) {
+                    selectors.saveForFutureCheckbox.performClick()
+                }
+            } else {
+                if (isSaveForFutureUseSelected()) {
+                    selectors.saveForFutureCheckbox.performClick()
+                }
             }
+        } else {
+            selectors.saveForFutureCheckbox.assertDoesNotExist()
+        }
+    }
+
+    private fun isSaveForFutureUseSelected(): Boolean {
+        return try {
+            selectors.saveForFutureCheckbox.assertIsToggleable()
+            selectors.saveForFutureCheckbox.assertIsOn()
+            true
+        } catch (e: AssertionError) {
+            false
         }
     }
 
@@ -76,11 +96,23 @@ class FieldPopulator(
                                 is BankDropdownSpec -> {}
                                 IbanSpec -> {}
                                 is KlarnaCountrySpec -> {}
+                                is CardBillingSpec -> {
+                                    if (testParameters.billing == Billing.Off) {
+                                        // TODO: This will not work when other countries are selected or defaulted
+                                        selectors.getZip()
+                                            .performTextInput("12345")
+                                    }
+                                }
+                                CardDetailsSpec -> {
+                                    selectors.getCardNumber().performTextInput("4242424242424242")
+                                    selectors.composeTestRule.waitForIdle()
+                                    selectors.getCardExpiration().performTextInput("1230")
+                                    selectors.getCardCvc().performTextInput("123")
+                                }
                             }
                         }
                     }
                 }
-                else -> {}
             }
         }
     }
