@@ -10,7 +10,7 @@ import androidx.browser.customtabs.CustomTabsIntent
  * Constructs an intent to launch the given [Uri] on a CustomTab or in a regular browser,
  * based on the default browser set for this device.
  */
-object CreateBrowserIntentForUrl {
+internal object CreateBrowserIntentForUrl {
 
     operator fun invoke(context: Context, uri: Uri): Intent {
         val browserIntent = Intent(Intent.ACTION_VIEW, uri)
