@@ -7,7 +7,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 dependencies {
     api project(":stripe-core")
     api project(":payments-model")
-    compileOnly project(':connections')
+    compileOnly project(':financial-connections')
 
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
@@ -37,8 +37,8 @@ dependencies {
     javadocDeps "androidx.annotation:annotation:$androidxAnnotationVersion"
     javadocDeps "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     javadocDeps "com.google.android.material:material:$materialVersion"
+    testImplementation project(':financial-connections')
 
-    testImplementation project(':connections')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"

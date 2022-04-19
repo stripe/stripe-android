@@ -32,7 +32,7 @@ changes the public API for CardImageVerificationSheet and releases Identity SDK.
 ### Identity (`com.stripe:identity`)
 * [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
 
-### Connections (`com.stripe:connection`)
+### Financial Connections (`com.stripe:financial-connections`)
 * [ADDED] [4818](https://github.com/stripe/stripe-mandroid/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
 
 ### CardScan (`com.stripe:stripecardscan`)
