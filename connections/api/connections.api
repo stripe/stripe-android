@@ -7,7 +7,6 @@ public final class com/stripe/android/connections/BuildConfig {
 
 public final class com/stripe/android/connections/ConnectionsSheet {
 	public static final field Companion Lcom/stripe/android/connections/ConnectionsSheet$Companion;
-	public synthetic fun <init> (Lcom/stripe/android/connections/ConnectionsSheetLauncher;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun present (Lcom/stripe/android/connections/ConnectionsSheet$Configuration;)V
 }
 
