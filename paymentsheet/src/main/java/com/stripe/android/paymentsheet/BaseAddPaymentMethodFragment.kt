@@ -107,6 +107,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val formViewModel = formFragment.formViewModel
             viewLifecycleOwner.lifecycleScope.launch {
                 formViewModel.completeFormValues.collect { formFieldValues ->
+                    // if the formFieldValues is a change either null or new values for the
+                    // newLpm then we should clear it out --- but what happens if we cancel -- selection should
+                    // have the correct value
                     sheetViewModel.updateSelection(
                         transformToPaymentSelection(
                             formFieldValues,
@@ -167,9 +170,20 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
-                initialPaymentMethodCreateParams =
-                sheetViewModel.newLpm?.paymentMethodCreateParams.takeIf {
-                    sheetViewModel.selection.value == null
+                initialPaymentMethodCreateParams = if (sheetViewModel.newLpm?.paymentMethodCreateParams?.typeCode == paymentMethod.type.code) {
+                    when (sheetViewModel.newLpm) {
+                        is PaymentSelection.New.GenericPaymentMethod -> {
+                            (sheetViewModel.newLpm as PaymentSelection.New.GenericPaymentMethod).paymentMethodCreateParams
+                        }
+                        is PaymentSelection.New.Card -> {
+                            (sheetViewModel.newLpm as PaymentSelection.New.Card).paymentMethodCreateParams
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+                } else {
+                    null
                 }
             )
         )

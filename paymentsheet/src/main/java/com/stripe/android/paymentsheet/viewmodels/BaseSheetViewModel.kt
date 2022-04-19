@@ -337,6 +337,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun updateSelection(selection: PaymentSelection?) {
+        if (selection is PaymentSelection.New) {
+            newLpm = selection
+        }
         savedStateHandle[SAVE_SELECTION] = selection
     }
 
