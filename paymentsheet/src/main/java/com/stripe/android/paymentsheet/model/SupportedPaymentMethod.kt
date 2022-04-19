@@ -242,7 +242,7 @@ sealed class SupportedPaymentMethod(
         val userSelectableSave = LayoutFormDescriptor(
             formSpec,
             showCheckbox = true,
-            showCheckboxControlledFields = Locale.getDefault() == Locale.US
+            showCheckboxControlledFields = false
         )
 
         if (!stripeIntent.paymentMethodTypes.contains(type.code)) {
