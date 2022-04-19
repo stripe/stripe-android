@@ -3,8 +3,8 @@ package com.stripe.android.payments.connections
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
-import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.financialconnections.ConnectionsSheet
+import com.stripe.android.financialconnections.ConnectionsSheetResult
 import com.stripe.android.payments.connections.reflection.DefaultIsConnectionsAvailable
 import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
 

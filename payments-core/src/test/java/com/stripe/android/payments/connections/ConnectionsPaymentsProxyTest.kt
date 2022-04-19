@@ -2,7 +2,7 @@ package com.stripe.android.payments.connections
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.stripe.android.connections.ConnectionsSheet
+import com.stripe.android.financialconnections.ConnectionsSheet
 import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
 import org.junit.Test
 import org.mockito.kotlin.mock
