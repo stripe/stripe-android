@@ -1,9 +1,11 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal object CardDetailsSpec : SectionFieldSpec(IdentifierSpec.Generic("card_details")) {
     fun transform(
         context: Context,
