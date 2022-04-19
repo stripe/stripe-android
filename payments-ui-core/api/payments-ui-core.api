@@ -209,6 +209,7 @@ public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
+	public static final field SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
 
 public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
