@@ -8,19 +8,17 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Browser
-import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +26,8 @@ import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class TestCustomers {
+class TestReloadFields {
+
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
 
@@ -40,21 +39,10 @@ class TestCustomers {
 
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
-    private val screenshotProcessor = MyScreenCaptureProcessor()
 
-    @Before
-    fun before() {
-        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
-    }
-
-    @After
-    fun after() {
-    }
-
-    private val bancontactNewUser = TestParameters(
+    private val returningUser = TestParameters(
         SupportedPaymentMethod.Bancontact,
-        Customer.New,
+        Customer.Returning,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,
@@ -64,25 +52,27 @@ class TestCustomers {
         automatic = Automatic.On,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
-        useBrowser = Browser.Chrome,
+        useBrowser = null,
         authorizationAction = AuthorizeAction.Authorize,
+        takeScreenshotOnLpmLoad = true
     )
 
-    @Test
-    fun testAuthorizeGuest() {
-        testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
-                customer = Customer.Guest,
-            )
-        )
+    @Before
+    fun before() {
+        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
     }
 
+
     @Test
-    fun testAuthorizeNew() {
-        testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
-                customer = Customer.New,
-            )
-        )
+    fun testStuff() {
+        testDriver.confirmComplete(returningUser) {}
+
+    }
+
+    companion object {
+        // There exists only one screenshot processor so that all tests put
+        // their files in the same directory.
+        private val screenshotProcessor = MyScreenCaptureProcessor()
     }
 }

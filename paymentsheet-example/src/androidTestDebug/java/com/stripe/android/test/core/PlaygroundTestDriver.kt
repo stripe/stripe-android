@@ -2,7 +2,9 @@ package com.stripe.android.test.core
 
 import android.graphics.Bitmap
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
@@ -39,6 +41,61 @@ class PlaygroundTestDriver(
     private val callbackLock = Semaphore(1)
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
+
+    fun confirmComplete(
+        testParameters: TestParameters,
+        populateCustomLpmFields: () -> Unit = {}
+    ) {
+
+        this.selectors = Selectors(device, composeTestRule, testParameters)
+        this.testParameters = testParameters
+
+        registerListeners()
+        launchComplete(selectors)
+
+        // PaymentSheetActivity is now on screen
+        callbackLock.acquire()
+
+        // click add button
+        pressAdd()
+
+        selectors.paymentSelection.click()
+
+        val beforeByteScreenCaptureProcessor = ByteScreenCaptureProcessor()
+        val afterByteScreenCaptureProcessor = ByteScreenCaptureProcessor()
+        takeScreenShot(
+            fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
+            testParameters.takeScreenshotOnLpmLoad
+        )
+
+        FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields
+        ).populateFields()
+
+        takeScreenShot(
+            fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
+            testParameters.takeScreenshotOnLpmLoad
+        )
+
+        pressBack()
+
+        pressAdd()
+
+    }
+
+    private fun pressAdd(){
+        selectors.addButton.performClick()
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+    }
+
+    private fun pressBack(){
+        Espresso.pressBack()
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+    }
 
     /**
      * This will open the payment sheet complete flow from the playground with a new or
