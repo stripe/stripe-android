@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.PrimaryButtonTheme
+import com.stripe.android.ui.core.PrimaryButtonStyle
 import com.stripe.android.ui.core.convertDpToPx
 import com.stripe.android.ui.core.getBorderStrokeColor
 import com.stripe.android.ui.core.getComposeTextStyle
@@ -61,13 +61,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     private var cornerRadius = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonTheme.shape.cornerRadius.dp
+        PaymentsThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
     )
     private var borderStrokeWidth = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonTheme.shape.borderStrokeWidth.dp
+        PaymentsThemeDefaults.primaryButtonStyle.shape.borderStrokeWidth.dp
     )
     private var borderStrokeColor =
-        PaymentsThemeDefaults.primaryButtonTheme.getBorderStrokeColor(context)
+        PaymentsThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
 
     init {
         // This is only needed if the button is inside a fragment
@@ -83,14 +83,14 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     fun setAppearanceConfiguration(
-        primaryButtonTheme: PrimaryButtonTheme,
+        primaryButtonStyle: PrimaryButtonStyle,
         tintList: ColorStateList?
     ) {
-        cornerRadius = context.convertDpToPx(primaryButtonTheme.shape.cornerRadius.dp)
-        borderStrokeWidth = context.convertDpToPx(primaryButtonTheme.shape.borderStrokeWidth.dp)
-        borderStrokeColor = primaryButtonTheme.getBorderStrokeColor(context)
+        cornerRadius = context.convertDpToPx(primaryButtonStyle.shape.cornerRadius.dp)
+        borderStrokeWidth = context.convertDpToPx(primaryButtonStyle.shape.borderStrokeWidth.dp)
+        borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(context)
         viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
-            primaryButtonTheme.getOnBackgroundColor(context)
+            primaryButtonStyle.getOnBackgroundColor(context)
         )
         backgroundTintList = tintList
         defaultTintList = tintList
@@ -222,7 +222,7 @@ private fun LabelUI(label: String) {
         Text(
             text = label,
             textAlign = TextAlign.Center,
-            style = PaymentsTheme.primaryButtonMutable.getComposeTextStyle(),
+            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(horizontal = 4.dp)
         )

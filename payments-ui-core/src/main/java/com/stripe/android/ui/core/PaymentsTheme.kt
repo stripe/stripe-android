@@ -78,7 +78,7 @@ data class PaymentsTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PrimaryButtonTheme(
+data class PrimaryButtonStyle(
     val colorsLight: PrimaryButtonColors,
     val colorsDark: PrimaryButtonColors,
     val shape: PrimaryButtonShape,
@@ -160,7 +160,7 @@ object PaymentsThemeDefaults {
         fontFamily = null // We default to the default system font.
     )
 
-    val primaryButtonTheme = PrimaryButtonTheme(
+    val primaryButtonStyle = PrimaryButtonStyle(
         colorsLight = PrimaryButtonColors(
             background = colors(false).primary,
             onBackground = Color.White,
@@ -363,7 +363,7 @@ object PaymentsTheme {
         @ReadOnlyComposable
         get() = typographyMutable.toComposeTypography()
 
-    var primaryButtonMutable = PaymentsThemeDefaults.primaryButtonTheme
+    var primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle
 
     @Composable
     @ReadOnlyComposable
@@ -447,21 +447,21 @@ fun Color.shouldUseDarkDynamicColor(): Boolean {
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonTheme.getBackgroundColor(context: Context): Int {
+fun PrimaryButtonStyle.getBackgroundColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
     return (if (isDark) colorsLight else colorsDark).background.toArgb()
 }
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonTheme.getOnBackgroundColor(context: Context): Int {
+fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
     return (if (isDark) colorsLight else colorsDark).onBackground.toArgb()
 }
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonTheme.getBorderStrokeColor(context: Context): Int {
+fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
     val isDark = context.isSystemDarkTheme()
     return (if (isDark) colorsLight.borderStroke else colorsDark.borderStroke).toArgb()
 }
@@ -469,7 +469,7 @@ fun PrimaryButtonTheme.getBorderStrokeColor(context: Context): Int {
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonTheme.getComposeTextStyle(): TextStyle {
+fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
     val baseStyle = PaymentsTheme.typography.h5.copy(
         color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
     )

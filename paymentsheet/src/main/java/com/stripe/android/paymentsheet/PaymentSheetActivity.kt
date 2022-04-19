@@ -265,10 +265,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             .observe(this, buyButtonStateObserver)
 
         val buttonColor = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-            PaymentsTheme.primaryButtonMutable.getBackgroundColor(baseContext)
+            PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
         )
         viewBinding.buyButton.setAppearanceConfiguration(
-            PaymentsTheme.primaryButtonMutable,
+            PaymentsTheme.primaryButtonStyle,
             buttonColor
         )
 
