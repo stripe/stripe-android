@@ -13,12 +13,7 @@ ext {
 
 android {
     buildFeatures {
-        compose = true
         viewBinding true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 }
 
@@ -26,7 +21,6 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     implementation "androidx.browser:browser:$androidxBrowserVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
