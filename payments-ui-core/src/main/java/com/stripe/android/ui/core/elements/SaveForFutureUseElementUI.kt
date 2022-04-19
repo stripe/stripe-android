@@ -16,9 +16,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.Checkbox
+
+const val SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG = "SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG"
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -43,6 +46,7 @@ fun SaveForFutureUseElementUI(
         modifier = Modifier
             .padding(vertical = 2.dp)
             .semantics {
+                testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
                 stateDescription = description
             }
             .toggleable(

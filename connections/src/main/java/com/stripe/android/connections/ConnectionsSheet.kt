@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
  */
-class ConnectionsSheet private constructor(
+class ConnectionsSheet internal constructor(
     private val connectionsSheetLauncher: ConnectionsSheetLauncher
 ) {
     /**
