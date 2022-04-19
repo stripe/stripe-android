@@ -66,7 +66,7 @@ class TestReloadFields {
 
     @Test
     fun testStuff() {
-        testDriver.confirmComplete(returningUser) {}
+        testDriver.confirmCustom(returningUser) {}
 
     }
 

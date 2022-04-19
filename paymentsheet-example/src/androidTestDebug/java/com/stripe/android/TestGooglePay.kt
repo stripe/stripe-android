@@ -116,7 +116,7 @@ class TestGooglePay {
         Assume.assumeTrue("Google pay is available", googlePayAvailable)
         if (googlePayAvailable) {
             testDriver.registerListeners()
-            testDriver.launchComplete(selectors)
+            testDriver.launchComplete()
 
             selectors.getGoogleDividerText()
                 .assertTextEquals(

@@ -10,6 +10,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
@@ -42,7 +43,7 @@ class PlaygroundTestDriver(
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
-    fun confirmComplete(
+    fun confirmCustom(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
@@ -51,22 +52,18 @@ class PlaygroundTestDriver(
         this.testParameters = testParameters
 
         registerListeners()
-        launchComplete(selectors)
+        setConfiguration(selectors)
+        launchCustom()
 
         // PaymentSheetActivity is now on screen
         callbackLock.acquire()
 
-        // click add button
-        pressAdd()
+        // click add button if returning user
+        if (testParameters.customer == Customer.Returning) {
+            pressAdd()
+        }
 
         selectors.paymentSelection.click()
-
-        val beforeByteScreenCaptureProcessor = ByteScreenCaptureProcessor()
-        val afterByteScreenCaptureProcessor = ByteScreenCaptureProcessor()
-        takeScreenShot(
-            fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
-            testParameters.takeScreenshotOnLpmLoad
-        )
 
         FieldPopulator(
             selectors,
@@ -74,24 +71,32 @@ class PlaygroundTestDriver(
             populateCustomLpmFields
         ).populateFields()
 
-        takeScreenShot(
-            fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
-            testParameters.takeScreenshotOnLpmLoad
-        )
+        TimeUnit.SECONDS.sleep(1)
+        val populatedFieldsScreenshot = getScreenshotBytes()
 
-        pressBack()
+        // press continue
+        selectors.buyButton.apply {
+            scrollTo()
+            click()
+        }
 
-        pressAdd()
+        // press payment method
+        EspressoLabelIdButton(R.id.payment_method).click()
 
+        TimeUnit.SECONDS.sleep(1)
+        assertWithMessage("Screenshots differ").that(getScreenshotBytes())
+            .isEqualTo(populatedFieldsScreenshot)
+
+        callbackLock.release()
     }
 
-    private fun pressAdd(){
+    private fun pressAdd() {
         selectors.addButton.performClick()
         Espresso.onIdle()
         composeTestRule.waitForIdle()
     }
 
-    private fun pressBack(){
+    private fun pressBack() {
         Espresso.pressBack()
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -111,7 +116,8 @@ class PlaygroundTestDriver(
         this.testParameters = testParameters
 
         registerListeners()
-        launchComplete(selectors)
+        setConfiguration(selectors)
+        launchComplete()
 
         // PaymentSheetActivity is now on screen
         callbackLock.acquire()
@@ -209,7 +215,7 @@ class PlaygroundTestDriver(
         launchPlayground.release()
     }
 
-    internal fun launchComplete(selectors: Selectors) {
+    internal fun setConfiguration(selectors: Selectors) {
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
@@ -223,9 +229,18 @@ class PlaygroundTestDriver(
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
 
+    }
+
+    internal fun launchComplete() {
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
         EspressoLabelIdButton(R.string.checkout_complete).click()
     }
+
+    internal fun launchCustom() {
+        EspressoLabelIdButton(R.string.reload_paymentsheet).click()
+        EspressoLabelIdButton(R.id.payment_method).click()
+    }
+
 
     private fun doAuthorization() {
         selectors.apply {
@@ -291,6 +306,15 @@ class PlaygroundTestDriver(
                 PaymentSheetResult.Completed.toString()
             )
         }
+    }
+
+    private fun getScreenshotBytes(): ByteArray {
+        val byteScreenCaptureProcessor = ByteScreenCaptureProcessor()
+
+        val capture = Screenshot.capture()
+        capture.process(setOf(byteScreenCaptureProcessor))
+
+        return byteScreenCaptureProcessor.getBytes()
     }
 
     private fun takeScreenShot(
