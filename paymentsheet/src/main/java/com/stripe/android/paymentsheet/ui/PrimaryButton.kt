@@ -7,15 +7,11 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -214,17 +210,11 @@ internal class PrimaryButton @JvmOverloads constructor(
 
 @Composable
 private fun LabelUI(label: String) {
-    Box(
-        contentAlignment = Alignment.Center,
+    Text(
+        text = label,
+        textAlign = TextAlign.Center,
+        style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
         modifier = Modifier
-            .height(dimensionResource(R.dimen.stripe_paymentsheet_primary_button_height))
-    ) {
-        Text(
-            text = label,
-            textAlign = TextAlign.Center,
-            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-        )
-    }
+            .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+    )
 }
