@@ -6,11 +6,11 @@ import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 import com.stripe.android.financialconnections.moreLinkedAccountList
-import com.stripe.android.financialconnections.repository.ConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
-internal class FakeConnectionsRepository(
+internal class FakeFinancialConnectionsRepository(
     private val manifest: LinkAccountSessionManifest,
-) : ConnectionsRepository {
+) : FinancialConnectionsRepository {
 
     var getLinkAccountSessionResultProvider: () -> LinkAccountSession =
         { linkAccountSessionWithNoMoreAccounts }

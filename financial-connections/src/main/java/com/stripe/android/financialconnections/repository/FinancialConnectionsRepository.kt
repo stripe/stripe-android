@@ -9,7 +9,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 
-internal interface ConnectionsRepository {
+internal interface FinancialConnectionsRepository {
     @Throws(
         AuthenticationException::class,
         InvalidRequestException::class,

@@ -9,30 +9,33 @@ import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 
-internal class ConnectionsSheetContract :
-    ActivityResultContract<ConnectionsSheetContract.Args, ConnectionsSheetResult>() {
+internal class FinancialConnectionsSheetContract :
+    ActivityResultContract<FinancialConnectionsSheetContract.Args, FinancialConnectionsSheetResult>() {
 
     override fun createIntent(
         context: Context,
         input: Args
     ): Intent {
-        return Intent(context, ConnectionsSheetActivity::class.java).putExtra(EXTRA_ARGS, input)
+        return Intent(context, FinancialConnectionsSheetActivity::class.java).putExtra(
+            EXTRA_ARGS,
+            input
+        )
     }
 
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): ConnectionsSheetResult {
+    ): FinancialConnectionsSheetResult {
         val connectionsResult =
-            intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.connectionsSheetResult
-        return connectionsResult ?: ConnectionsSheetResult.Failed(
+            intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.financialConnectionsSheetResult
+        return connectionsResult ?: FinancialConnectionsSheetResult.Failed(
             IllegalArgumentException("Failed to retrieve a ConnectionsSheetResult.")
         )
     }
 
     @Parcelize
     data class Args constructor(
-        val configuration: ConnectionsSheet.Configuration,
+        val configuration: FinancialConnectionsSheet.Configuration,
     ) : Parcelable {
 
         fun validate() {
@@ -57,7 +60,7 @@ internal class ConnectionsSheetContract :
 
     @Parcelize
     data class Result(
-        val connectionsSheetResult: ConnectionsSheetResult
+        val financialConnectionsSheetResult: FinancialConnectionsSheetResult
     ) : Parcelable {
         fun toBundle(): Bundle {
             return bundleOf(EXTRA_RESULT to this)

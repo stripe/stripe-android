@@ -11,8 +11,8 @@ import kotlinx.parcelize.Parcelize
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
  */
-class ConnectionsSheet internal constructor(
-    private val connectionsSheetLauncher: ConnectionsSheetLauncher
+class FinancialConnectionsSheet internal constructor(
+    private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher
 ) {
     /**
      * Configuration for a Connections Sheet
@@ -34,7 +34,7 @@ class ConnectionsSheet internal constructor(
     fun present(
         configuration: Configuration
     ) {
-        connectionsSheetLauncher.present(configuration)
+        financialConnectionsSheetLauncher.present(configuration)
     }
 
     companion object {
@@ -46,10 +46,10 @@ class ConnectionsSheet internal constructor(
          */
         fun create(
             activity: ComponentActivity,
-            callback: ConnectionsSheetResultCallback
-        ): ConnectionsSheet {
-            return ConnectionsSheet(
-                DefaultConnectionsSheetLauncher(activity, callback)
+            callback: FinancialConnectionsSheetResultCallback
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                DefaultFinancialConnectionsSheetLauncher(activity, callback)
             )
         }
 
@@ -61,10 +61,10 @@ class ConnectionsSheet internal constructor(
          */
         fun create(
             fragment: Fragment,
-            callback: ConnectionsSheetResultCallback
-        ): ConnectionsSheet {
-            return ConnectionsSheet(
-                DefaultConnectionsSheetLauncher(fragment, callback)
+            callback: FinancialConnectionsSheetResultCallback
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                DefaultFinancialConnectionsSheetLauncher(fragment, callback)
             )
         }
     }

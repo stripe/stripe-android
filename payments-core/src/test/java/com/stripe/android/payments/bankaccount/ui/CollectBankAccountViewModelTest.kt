@@ -2,7 +2,7 @@ package com.stripe.android.payments.bankaccount.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.ConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.core.Logger
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
@@ -125,7 +125,7 @@ class CollectBankAccountViewModelTest {
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(connectionsLinkAccountSession)
             )
 
             // Then
@@ -149,7 +149,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(connectionsLinkAccountSession)
             )
 
             // Then
@@ -173,7 +173,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(connectionsLinkAccountSession)
             )
 
             // Then

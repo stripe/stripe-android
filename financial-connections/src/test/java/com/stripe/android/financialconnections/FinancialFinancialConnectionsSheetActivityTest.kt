@@ -28,20 +28,20 @@ import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class ConnectionsSheetActivityTest {
+class FinancialFinancialConnectionsSheetActivityTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val contract = ConnectionsSheetContract()
-    private val configuration = ConnectionsSheet.Configuration(
+    private val contract = FinancialConnectionsSheetContract()
+    private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val args = ConnectionsSheetContract.Args(configuration)
+    private val args = FinancialConnectionsSheetContract.Args(configuration)
     private val intent = contract.createIntent(context, args)
     private val viewModel = createViewModel()
 
-    private fun createViewModel(): ConnectionsSheetViewModel = runBlocking {
-        ConnectionsSheetViewModel(
+    private fun createViewModel(): FinancialConnectionsSheetViewModel = runBlocking {
+        FinancialConnectionsSheetViewModel(
             applicationId = "com.example.test",
             starterArgs = args,
             savedStateHandle = SavedStateHandle(),
@@ -52,8 +52,8 @@ class ConnectionsSheetActivityTest {
     }
 
     private fun activityScenario(
-        viewModel: ConnectionsSheetViewModel = this.viewModel
-    ): InjectableActivityScenario<ConnectionsSheetActivity> {
+        viewModel: FinancialConnectionsSheetViewModel = this.viewModel
+    ): InjectableActivityScenario<FinancialConnectionsSheetActivity> {
         return injectableActivityScenario {
             injectActivity {
                 viewModelFactory = viewModelFactoryFor(viewModel)
@@ -64,7 +64,7 @@ class ConnectionsSheetActivityTest {
     @Test
     fun `onCreate() with no args returns Failed result`() {
         val scenario = activityScenario()
-        val intent = Intent(context, ConnectionsSheetActivity::class.java)
+        val intent = Intent(context, FinancialConnectionsSheetActivity::class.java)
         scenario.launch(intent)
         assertThat(
             contract.parseResult(
@@ -72,15 +72,15 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Failed::class.java
+            FinancialConnectionsSheetResult.Failed::class.java
         )
     }
 
     @Test
     fun `onCreate() with invalid args returns Failed result`() {
         val scenario = activityScenario()
-        val configuration = ConnectionsSheet.Configuration("", "")
-        val args = ConnectionsSheetContract.Args(configuration)
+        val configuration = FinancialConnectionsSheet.Configuration("", "")
+        val args = FinancialConnectionsSheetContract.Args(configuration)
         val intent = contract.createIntent(context, args)
         scenario.launch(intent)
         assertThat(
@@ -89,7 +89,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Failed::class.java
+            FinancialConnectionsSheetResult.Failed::class.java
         )
     }
 
@@ -97,7 +97,7 @@ class ConnectionsSheetActivityTest {
     fun `viewEffect - OpenAuthFlowWithUrl opens Chrome Custom Tab intent`() {
         val chromeCustomTabUrl = "www.authflow.com"
         val viewEffects = MutableSharedFlow<ConnectionsSheetViewEffect>()
-        val mockViewModel = mock<ConnectionsSheetViewModel> {
+        val mockViewModel = mock<FinancialConnectionsSheetViewModel> {
             on { viewEffect } doReturn viewEffects
         }
         activityScenario(mockViewModel).launch(intent).suspendOnActivity {
@@ -111,7 +111,7 @@ class ConnectionsSheetActivityTest {
 
     @Test
     fun `onNewIntent() calls view model handleOnNewIntent()`() {
-        val mockViewModel = mock<ConnectionsSheetViewModel>()
+        val mockViewModel = mock<FinancialConnectionsSheetViewModel>()
         val scenario = activityScenario(mockViewModel)
         scenario.launch(intent).suspendOnActivity {
             val newIntent = Intent(Intent.ACTION_VIEW)
@@ -125,8 +125,8 @@ class ConnectionsSheetActivityTest {
 
     @Test
     fun `onBackPressed() cancels connection sheet`() {
-        val mockViewModel = mock<ConnectionsSheetViewModel> {
-            on { state } doReturn MutableStateFlow(ConnectionsSheetState(authFlowActive = true))
+        val mockViewModel = mock<FinancialConnectionsSheetViewModel> {
+            on { state } doReturn MutableStateFlow(FinancialConnectionsSheetState(authFlowActive = true))
         }
         val scenario = activityScenario(mockViewModel)
         scenario.launch(intent).suspendOnActivity {
@@ -138,7 +138,7 @@ class ConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            ConnectionsSheetResult.Canceled::class.java
+            FinancialConnectionsSheetResult.Canceled::class.java
         )
     }
 
@@ -146,8 +146,8 @@ class ConnectionsSheetActivityTest {
      * When [InjectableActivityScenario.onActivity] triggers,
      * runs the given block within the provided [TestScope].
      */
-    private fun InjectableActivityScenario<ConnectionsSheetActivity>.suspendOnActivity(
-        block: suspend TestScope.(ConnectionsSheetActivity) -> Unit
+    private fun InjectableActivityScenario<FinancialConnectionsSheetActivity>.suspendOnActivity(
+        block: suspend TestScope.(FinancialConnectionsSheetActivity) -> Unit
     ) {
         this.onActivity {
             runTest {

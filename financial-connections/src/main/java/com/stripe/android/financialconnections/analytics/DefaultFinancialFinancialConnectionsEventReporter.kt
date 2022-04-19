@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
-import com.stripe.android.financialconnections.ConnectionsSheet
-import com.stripe.android.financialconnections.ConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -10,45 +10,45 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultConnectionsEventReporter @Inject constructor(
+internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext
-) : ConnectionsEventReporter {
+) : FinancialConnectionsEventReporter {
 
-    override fun onPresented(configuration: ConnectionsSheet.Configuration) {
+    override fun onPresented(configuration: FinancialConnectionsSheet.Configuration) {
         fireEvent(
-            ConnectionsAnalyticsEvent(
-                ConnectionsAnalyticsEvent.Code.SheetPresented,
+            FinancialConnectionsAnalyticsEvent(
+                FinancialConnectionsAnalyticsEvent.Code.SheetPresented,
                 mapOf(PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret)
             )
         )
     }
 
     override fun onResult(
-        configuration: ConnectionsSheet.Configuration,
-        connectionsSheetResult: ConnectionsSheetResult
+        configuration: FinancialConnectionsSheet.Configuration,
+        financialConnectionsSheetResult: FinancialConnectionsSheetResult
     ) {
-        val event = when (connectionsSheetResult) {
-            is ConnectionsSheetResult.Completed ->
-                ConnectionsAnalyticsEvent(
-                    ConnectionsAnalyticsEvent.Code.SheetClosed,
+        val event = when (financialConnectionsSheetResult) {
+            is FinancialConnectionsSheetResult.Completed ->
+                FinancialConnectionsAnalyticsEvent(
+                    FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret,
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
-            is ConnectionsSheetResult.Canceled ->
-                ConnectionsAnalyticsEvent(
-                    ConnectionsAnalyticsEvent.Code.SheetClosed,
+            is FinancialConnectionsSheetResult.Canceled ->
+                FinancialConnectionsAnalyticsEvent(
+                    FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret,
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
-            is ConnectionsSheetResult.Failed ->
-                ConnectionsAnalyticsEvent(
-                    ConnectionsAnalyticsEvent.Code.SheetFailed,
+            is FinancialConnectionsSheetResult.Failed ->
+                FinancialConnectionsAnalyticsEvent(
+                    FinancialConnectionsAnalyticsEvent.Code.SheetFailed,
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret,
                         PARAM_SESSION_RESULT to "failure"
@@ -59,7 +59,7 @@ internal class DefaultConnectionsEventReporter @Inject constructor(
         fireEvent(event)
     }
 
-    private fun fireEvent(event: ConnectionsAnalyticsEvent) {
+    private fun fireEvent(event: FinancialConnectionsAnalyticsEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(

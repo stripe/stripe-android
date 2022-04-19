@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
-import com.stripe.android.payments.connections.ConnectionsPaymentsProxy
+import com.stripe.android.payments.connections.FinancialConnectionsPaymentsProxy
 
 /**
  * No-UI activity that will handle collect bank account logic.
@@ -21,7 +21,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         CollectBankAccountContract.Args.fromIntent(intent)
     }
 
-    private lateinit var connectionsPaymentsProxy: ConnectionsPaymentsProxy
+    private lateinit var financialConnectionsPaymentsProxy: FinancialConnectionsPaymentsProxy
 
     internal var viewModelFactory: ViewModelProvider.Factory =
         CollectBankAccountViewModel.Factory(
@@ -47,14 +47,14 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
     }
 
     private fun initConnectionsPaymentsProxy() {
-        connectionsPaymentsProxy = ConnectionsPaymentsProxy.create(
+        financialConnectionsPaymentsProxy = FinancialConnectionsPaymentsProxy.create(
             activity = this,
             onComplete = viewModel::onConnectionsResult
         )
     }
 
     private fun OpenConnectionsFlow.launch() {
-        connectionsPaymentsProxy.present(
+        financialConnectionsPaymentsProxy.present(
             linkedAccountSessionClientSecret,
             publishableKey
         )

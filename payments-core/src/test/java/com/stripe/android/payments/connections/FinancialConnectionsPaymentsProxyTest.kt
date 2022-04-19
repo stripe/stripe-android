@@ -2,7 +2,7 @@ package com.stripe.android.payments.connections
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.stripe.android.financialconnections.ConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ConnectionsPaymentsProxyTest {
+class FinancialConnectionsPaymentsProxyTest {
     companion object {
         private const val CONNECTIONS_SHEET_CANONICAL_NAME =
             "com.stripe.android.connections.ConnectionsSheet"
@@ -21,7 +21,7 @@ class ConnectionsPaymentsProxyTest {
     private val mockFragment: Fragment = mock()
     private val mockActivity: AppCompatActivity = mock()
 
-    private class FakeProxy : ConnectionsPaymentsProxy {
+    private class FakeProxy : FinancialConnectionsPaymentsProxy {
         override fun present(linkAccountSessionClientSecret: String, publishableKey: String) {
             // noop
         }
@@ -32,32 +32,32 @@ class ConnectionsPaymentsProxyTest {
         whenever(mockIsConnectionsAvailable()).thenAnswer { false }
 
         assertTrue(
-            ConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.create(
                 fragment = mockFragment,
                 onComplete = {},
                 isConnectionsAvailable = mockIsConnectionsAvailable
-            ) is UnsupportedConnectionsPaymentsProxy
+            ) is UnsupportedFinancialConnectionsPaymentsProxy
         )
         assertTrue(
-            ConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.create(
                 activity = mockActivity,
                 onComplete = {},
                 isConnectionsAvailable = mockIsConnectionsAvailable
-            ) is UnsupportedConnectionsPaymentsProxy
+            ) is UnsupportedFinancialConnectionsPaymentsProxy
         )
     }
 
     @Test
     fun `connections SDK availability returns sdk when connections module is loaded`() {
         assertTrue(
-            ConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.create(
                 fragment = mockFragment,
                 onComplete = {},
                 provider = { FakeProxy() }
             ) is FakeProxy
         )
         assertTrue(
-            ConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.create(
                 activity = mockActivity,
                 onComplete = {},
                 provider = { FakeProxy() }
@@ -70,14 +70,14 @@ class ConnectionsPaymentsProxyTest {
         whenever(mockIsConnectionsAvailable()).thenAnswer { false }
 
         assertFailsWith<IllegalStateException> {
-            ConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.create(
                 fragment = mockFragment,
                 onComplete = {},
                 isConnectionsAvailable = mockIsConnectionsAvailable
             ).present("", "")
         }
         assertFailsWith<IllegalStateException> {
-            ConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.create(
                 activity = mockActivity,
                 onComplete = {},
                 isConnectionsAvailable = mockIsConnectionsAvailable
@@ -87,6 +87,9 @@ class ConnectionsPaymentsProxyTest {
 
     @Test
     fun `ensure ConnectionsSheet exists`() {
-        assertEquals(CONNECTIONS_SHEET_CANONICAL_NAME, ConnectionsSheet::class.qualifiedName)
+        assertEquals(
+            CONNECTIONS_SHEET_CANONICAL_NAME,
+            FinancialConnectionsSheet::class.qualifiedName
+        )
     }
 }

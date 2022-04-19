@@ -3,8 +3,8 @@ package com.stripe.android.financialconnections.analytics
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.ConnectionsSheet
-import com.stripe.android.financialconnections.ConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -32,13 +32,13 @@ class DefaultConnectionsEventReportTest {
         publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
     )
 
-    private val eventReporter = DefaultConnectionsEventReporter(
+    private val eventReporter = DefaultFinancialFinancialConnectionsEventReporter(
         analyticsRequestExecutor,
         analyticsRequestFactory,
         testDispatcher
     )
 
-    private val configuration = ConnectionsSheet.Configuration(
+    private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
@@ -68,7 +68,10 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for success`() {
-        eventReporter.onResult(configuration, ConnectionsSheetResult.Completed(linkAccountSession))
+        eventReporter.onResult(
+            configuration,
+            FinancialConnectionsSheetResult.Completed(linkAccountSession)
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
@@ -80,7 +83,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for cancelled`() {
-        eventReporter.onResult(configuration, ConnectionsSheetResult.Canceled)
+        eventReporter.onResult(configuration, FinancialConnectionsSheetResult.Canceled)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
@@ -92,7 +95,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for failure`() {
-        eventReporter.onResult(configuration, ConnectionsSheetResult.Failed(Exception()))
+        eventReporter.onResult(configuration, FinancialConnectionsSheetResult.Failed(Exception()))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.failed" &&

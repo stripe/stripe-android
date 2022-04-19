@@ -10,13 +10,13 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.financialconnections.databinding.ActivityFinancialconnectionsSheetBinding
 import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
-import com.stripe.android.financialconnections.databinding.ActivityConnectionsSheetBinding
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import java.security.InvalidParameterException
 
-internal class ConnectionsSheetActivity : AppCompatActivity() {
+internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     private val startForResult = registerForActivityResult(StartActivityForResult()) {
         viewModel.onActivityResult()
@@ -24,22 +24,22 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
 
     @VisibleForTesting
     internal val viewBinding by lazy {
-        ActivityConnectionsSheetBinding.inflate(layoutInflater)
+        ActivityFinancialconnectionsSheetBinding.inflate(layoutInflater)
     }
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
-        ConnectionsSheetViewModel.Factory(
+        FinancialConnectionsSheetViewModel.Factory(
             { application },
             { requireNotNull(starterArgs) },
             this,
             intent?.extras
         )
 
-    private val viewModel: ConnectionsSheetViewModel by viewModels { viewModelFactory }
+    private val viewModel: FinancialConnectionsSheetViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs: ConnectionsSheetContract.Args? by lazy {
-        ConnectionsSheetContract.Args.fromIntent(intent)
+    private val starterArgs: FinancialConnectionsSheetContract.Args? by lazy {
+        FinancialConnectionsSheetContract.Args.fromIntent(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +49,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             finishWithResult(
-                ConnectionsSheetResult.Failed(
+                FinancialConnectionsSheetResult.Failed(
                     IllegalArgumentException("ConnectionsSheet started without arguments.")
                 )
             )
@@ -58,7 +58,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
             try {
                 starterArgs.validate()
             } catch (e: InvalidParameterException) {
-                finishWithResult(ConnectionsSheetResult.Failed(e))
+                finishWithResult(FinancialConnectionsSheetResult.Failed(e))
                 return
             }
         }
@@ -87,7 +87,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         val uri = Uri.parse(this.url)
         startForResult.launch(
             CreateBrowserIntentForUrl(
-                context = this@ConnectionsSheetActivity,
+                context = this@FinancialConnectionsSheetActivity,
                 uri = uri,
             )
         )
@@ -111,13 +111,13 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
      * return canceled result
      */
     override fun onBackPressed() {
-        finishWithResult(ConnectionsSheetResult.Canceled)
+        finishWithResult(FinancialConnectionsSheetResult.Canceled)
     }
 
-    private fun finishWithResult(result: ConnectionsSheetResult) {
+    private fun finishWithResult(result: FinancialConnectionsSheetResult) {
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtras(ConnectionsSheetContract.Result(result).toBundle())
+            Intent().putExtras(FinancialConnectionsSheetContract.Result(result).toBundle())
         )
         finish()
     }

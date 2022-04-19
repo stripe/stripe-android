@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccou
 import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.moreLinkedAccountList
-import com.stripe.android.financialconnections.networking.FakeConnectionsRepository
+import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
 import com.stripe.android.core.exception.APIException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -20,7 +20,7 @@ import kotlin.test.assertFailsWith
 @RunWith(AndroidJUnit4::class)
 class FetchLinkAccountSessionTest {
 
-    private val repository = FakeConnectionsRepository(ApiKeyFixtures.MANIFEST)
+    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
     private val getLinkAccountSession = FetchLinkAccountSession(repository)
 
     @Test

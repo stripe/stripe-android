@@ -10,9 +10,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
-import com.stripe.android.financialconnections.analytics.ConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
-import com.stripe.android.financialconnections.di.DaggerConnectionsSheetComponent
+import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
 import com.stripe.android.financialconnections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.financialconnections.model.LinkAccountSession
@@ -26,18 +26,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class ConnectionsSheetViewModel @Inject constructor(
+internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val starterArgs: ConnectionsSheetContract.Args,
+    private val starterArgs: FinancialConnectionsSheetContract.Args,
     private val generateLinkAccountSessionManifest: GenerateLinkAccountSessionManifest,
     private val fetchLinkAccountSession: FetchLinkAccountSession,
     private val savedStateHandle: SavedStateHandle,
-    private val eventReporter: ConnectionsEventReporter
+    private val eventReporter: FinancialConnectionsEventReporter
 ) : ViewModel() {
 
     // on process recreation - restore saved fields from [SavedStateHandle].
-    private val _state = MutableStateFlow(ConnectionsSheetState().from(savedStateHandle))
-    internal val state: StateFlow<ConnectionsSheetState> = _state
+    private val _state = MutableStateFlow(FinancialConnectionsSheetState().from(savedStateHandle))
+    internal val state: StateFlow<FinancialConnectionsSheetState> = _state
 
     private val _viewEffect = MutableSharedFlow<ConnectionsSheetViewEffect>()
     internal val viewEffect: SharedFlow<ConnectionsSheetViewEffect> = _viewEffect
@@ -96,7 +96,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * the deeplink that redirects back to the app)
      *
      * We need to rely on a post-onNewIntent lifecycle callback to figure if the user completed
-     * or cancelled the web flow. [ConnectionsSheetState.activityRecreated] will be used to
+     * or cancelled the web flow. [FinancialConnectionsSheetState.activityRecreated] will be used to
      * figure which lifecycle callback happens after onNewIntent.
      *
      * @see onResume (we rely on this on regular flows)
@@ -114,7 +114,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
             viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
+                _viewEffect.emit(FinishWithResult(FinancialConnectionsSheetResult.Canceled))
             }
         }
     }
@@ -127,7 +127,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     internal fun onActivityResult() {
         if (_state.value.authFlowActive && _state.value.activityRecreated) {
             viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
+                _viewEffect.emit(FinishWithResult(FinancialConnectionsSheetResult.Canceled))
             }
         }
     }
@@ -135,14 +135,14 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     /**
      * On successfully completing the hosted auth flow and receiving the success callback intent,
      * fetch the updated [LinkAccountSession] model from the API and return that via the
-     * [ConnectionsSheetResult] and [ConnectionsSheetResultCallback]
+     * [FinancialConnectionsSheetResult] and [FinancialConnectionsSheetResultCallback]
      */
     private fun fetchLinkAccountSession() {
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchLinkAccountSession(starterArgs.configuration.linkAccountSessionClientSecret)
             }.onSuccess {
-                val result = ConnectionsSheetResult.Completed(it)
+                val result = FinancialConnectionsSheetResult.Completed(it)
                 eventReporter.onResult(starterArgs.configuration, result)
                 _viewEffect.emit(FinishWithResult(result))
             }.onFailure {
@@ -153,12 +153,12 @@ internal class ConnectionsSheetViewModel @Inject constructor(
 
     /**
      * If an error occurs during the connections sheet auth flow, return that error via the
-     * [ConnectionsSheetResultCallback] and [ConnectionsSheetResult.Failed].
+     * [FinancialConnectionsSheetResultCallback] and [FinancialConnectionsSheetResult.Failed].
      *
      * @param throwable the error encountered during the connections sheet auth flow
      */
     private suspend fun onFatal(throwable: Throwable) {
-        val result = ConnectionsSheetResult.Failed(throwable)
+        val result = FinancialConnectionsSheetResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
         _viewEffect.emit(FinishWithResult(result))
     }
@@ -166,17 +166,17 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     /**
      * If a user cancels the hosted auth flow either by closing the custom tab with the back button
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
-     * URL callback, notify the [ConnectionsSheetResultCallback] of [ConnectionsSheetResult.Canceled]
+     * URL callback, notify the [FinancialConnectionsSheetResultCallback] of [FinancialConnectionsSheetResult.Canceled]
      */
     private suspend fun onUserCancel() {
-        val result = ConnectionsSheetResult.Canceled
+        val result = FinancialConnectionsSheetResult.Canceled
         eventReporter.onResult(starterArgs.configuration, result)
         _viewEffect.emit(FinishWithResult(result))
     }
 
     /**
      * The hosted auth flow will redirect to a URL scheme stripe-auth://link-accounts which will be
-     * handled by the [ConnectionsSheetActivity] per the intent filter in the Android manifest and
+     * handled by the [FinancialConnectionsSheetActivity] per the intent filter in the Android manifest and
      * with the launch mode for the activity being `singleTask` it will trigger a new intent for the
      * activity which this method will receive
      *
@@ -197,8 +197,8 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     /**
      * Updates state AND saves persistable fields into [SavedStateHandle]
      */
-    private inline fun MutableStateFlow<ConnectionsSheetState>.updateAndPersist(
-        function: (ConnectionsSheetState) -> ConnectionsSheetState
+    private inline fun MutableStateFlow<FinancialConnectionsSheetState>.updateAndPersist(
+        function: (FinancialConnectionsSheetState) -> FinancialConnectionsSheetState
     ) {
         val previousValue = value
         update(function)
@@ -207,7 +207,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
 
     class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> ConnectionsSheetContract.Args,
+        private val starterArgsSupplier: () -> FinancialConnectionsSheetContract.Args,
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
@@ -218,7 +218,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            return DaggerConnectionsSheetComponent
+            return DaggerFinancialConnectionsSheetComponent
                 .builder()
                 .application(applicationSupplier())
                 .savedStateHandle(savedStateHandle)

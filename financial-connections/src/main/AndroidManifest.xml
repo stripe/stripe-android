@@ -6,7 +6,7 @@
 
     <application>
         <activity
-            android:name="com.stripe.android.financialconnections.ConnectionsSheetRedirectActivity"
+            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.stripe.android.financialconnections.ConnectionsSheetActivity"
+            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
             android:exported="false"
             android:theme="@style/StripeDefaultTheme" />
     </application>

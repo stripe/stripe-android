@@ -17,12 +17,12 @@ import java.io.BufferedReader
 import java.net.HttpURLConnection
 
 @ExperimentalCoroutinesApi
-class ConnectionsApiRepositoryTest {
+class FinancialConnectionsApiRepositoryTest {
 
     private val mockStripeNetworkClient = mock<StripeNetworkClient>()
     private val apiRequestFactory = mock<ApiRequest.Factory>()
 
-    private val connectionsApiRepository = ConnectionsApiRepository(
+    private val financialConnectionsApiRepository = FinancialFinancialConnectionsApiRepository(
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         stripeNetworkClient = mockStripeNetworkClient,
         apiRequestFactory = apiRequestFactory
@@ -37,7 +37,7 @@ class ConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = connectionsApiRepository.getLinkAccountSession("client_secret")
+            val result = financialConnectionsApiRepository.getLinkAccountSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(LinkedAccount::class.java)
         }
@@ -51,7 +51,7 @@ class ConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = connectionsApiRepository.getLinkAccountSession("client_secret")
+            val result = financialConnectionsApiRepository.getLinkAccountSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }

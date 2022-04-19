@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * The result of an attempt to complete a connections session
  */
-sealed class ConnectionsSheetResult : Parcelable {
+sealed class FinancialConnectionsSheetResult : Parcelable {
     /**
      * The customer completed the connections session.
      * @param linkAccountSession The link account session connected
@@ -15,13 +15,13 @@ sealed class ConnectionsSheetResult : Parcelable {
     @Parcelize
     data class Completed(
         val linkAccountSession: LinkAccountSession
-    ) : ConnectionsSheetResult()
+    ) : FinancialConnectionsSheetResult()
 
     /**
      * The customer canceled the connections session attempt.
      */
     @Parcelize
-    object Canceled : ConnectionsSheetResult()
+    object Canceled : FinancialConnectionsSheetResult()
 
     /**
      * The connections session attempt failed.
@@ -30,5 +30,5 @@ sealed class ConnectionsSheetResult : Parcelable {
     @Parcelize
     data class Failed(
         val error: Throwable
-    ) : ConnectionsSheetResult()
+    ) : FinancialConnectionsSheetResult()
 }

@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
 
-internal data class ConnectionsAnalyticsEvent(
+internal data class FinancialConnectionsAnalyticsEvent(
     val eventCode: Code,
     val additionalParams: Map<String, String> = emptyMap()
 ) : AnalyticsEvent {

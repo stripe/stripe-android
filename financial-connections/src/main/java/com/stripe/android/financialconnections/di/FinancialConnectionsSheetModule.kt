@@ -2,10 +2,10 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.core.os.LocaleListCompat
-import com.stripe.android.financialconnections.analytics.ConnectionsEventReporter
-import com.stripe.android.financialconnections.analytics.DefaultConnectionsEventReporter
-import com.stripe.android.financialconnections.repository.ConnectionsApiRepository
-import com.stripe.android.financialconnections.repository.ConnectionsRepository
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.DefaultFinancialFinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.repository.FinancialFinancialConnectionsApiRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -22,9 +22,9 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module(
-    includes = [ConnectionsSheetConfigurationModule::class]
+    includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
-internal object ConnectionsSheetModule {
+internal object FinancialConnectionsSheetModule {
 
     @Provides
     @Singleton
@@ -43,8 +43,8 @@ internal object ConnectionsSheetModule {
     @Provides
     @Singleton
     fun provideConnectionsRepository(
-        repository: ConnectionsApiRepository
-    ): ConnectionsRepository = repository
+        repository: FinancialFinancialConnectionsApiRepository
+    ): FinancialConnectionsRepository = repository
 
     @Provides
     @Singleton
@@ -54,8 +54,8 @@ internal object ConnectionsSheetModule {
     @Provides
     @Singleton
     fun provideEventReporter(
-        defaultConnectionsEventReporter: DefaultConnectionsEventReporter
-    ): ConnectionsEventReporter = defaultConnectionsEventReporter
+        defaultFinancialConnectionsEventReporter: DefaultFinancialFinancialConnectionsEventReporter
+    ): FinancialConnectionsEventReporter = defaultFinancialConnectionsEventReporter
 
     @Provides
     @Singleton

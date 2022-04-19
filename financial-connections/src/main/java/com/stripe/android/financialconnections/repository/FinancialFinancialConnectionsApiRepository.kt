@@ -25,11 +25,11 @@ import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class ConnectionsApiRepository @Inject constructor(
+internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory
-) : ConnectionsRepository {
+) : FinancialConnectionsRepository {
 
     @VisibleForTesting
     internal val json: Json = Json {

@@ -3,8 +3,8 @@ package com.stripe.android.payments.connections
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
-import com.stripe.android.financialconnections.ConnectionsSheet
-import com.stripe.android.financialconnections.ConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.payments.connections.reflection.DefaultIsConnectionsAvailable
 import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
 
@@ -12,7 +12,7 @@ import com.stripe.android.payments.connections.reflection.IsConnectionsAvailable
  * Proxy to access connections code safely in payments.
  *
  */
-internal interface ConnectionsPaymentsProxy {
+internal interface FinancialConnectionsPaymentsProxy {
     fun present(
         linkAccountSessionClientSecret: String,
         publishableKey: String
@@ -21,45 +21,55 @@ internal interface ConnectionsPaymentsProxy {
     companion object {
         fun create(
             fragment: Fragment,
-            onComplete: (ConnectionsSheetResult) -> Unit,
-            provider: () -> ConnectionsPaymentsProxy = {
-                DefaultConnectionsPaymentsProxy(ConnectionsSheet.create(fragment, onComplete))
+            onComplete: (FinancialConnectionsSheetResult) -> Unit,
+            provider: () -> FinancialConnectionsPaymentsProxy = {
+                DefaultFinancialConnectionsPaymentsProxy(
+                    FinancialConnectionsSheet.create(
+                        fragment,
+                        onComplete
+                    )
+                )
             },
             isConnectionsAvailable: IsConnectionsAvailable = DefaultIsConnectionsAvailable()
-        ): ConnectionsPaymentsProxy {
+        ): FinancialConnectionsPaymentsProxy {
             return if (isConnectionsAvailable()) {
                 provider()
             } else {
-                UnsupportedConnectionsPaymentsProxy()
+                UnsupportedFinancialConnectionsPaymentsProxy()
             }
         }
 
         fun create(
             activity: AppCompatActivity,
-            onComplete: (ConnectionsSheetResult) -> Unit,
-            provider: () -> ConnectionsPaymentsProxy = {
-                DefaultConnectionsPaymentsProxy(ConnectionsSheet.create(activity, onComplete))
+            onComplete: (FinancialConnectionsSheetResult) -> Unit,
+            provider: () -> FinancialConnectionsPaymentsProxy = {
+                DefaultFinancialConnectionsPaymentsProxy(
+                    FinancialConnectionsSheet.create(
+                        activity,
+                        onComplete
+                    )
+                )
             },
             isConnectionsAvailable: IsConnectionsAvailable = DefaultIsConnectionsAvailable()
-        ): ConnectionsPaymentsProxy {
+        ): FinancialConnectionsPaymentsProxy {
             return if (isConnectionsAvailable()) {
                 provider()
             } else {
-                UnsupportedConnectionsPaymentsProxy()
+                UnsupportedFinancialConnectionsPaymentsProxy()
             }
         }
     }
 }
 
-internal class DefaultConnectionsPaymentsProxy(
-    private val connectionsSheet: ConnectionsSheet
-) : ConnectionsPaymentsProxy {
+internal class DefaultFinancialConnectionsPaymentsProxy(
+    private val financialConnectionsSheet: FinancialConnectionsSheet
+) : FinancialConnectionsPaymentsProxy {
     override fun present(
         linkAccountSessionClientSecret: String,
         publishableKey: String
     ) {
-        connectionsSheet.present(
-            ConnectionsSheet.Configuration(
+        financialConnectionsSheet.present(
+            FinancialConnectionsSheet.Configuration(
                 linkAccountSessionClientSecret,
                 publishableKey
             )
@@ -67,7 +77,7 @@ internal class DefaultConnectionsPaymentsProxy(
     }
 }
 
-internal class UnsupportedConnectionsPaymentsProxy : ConnectionsPaymentsProxy {
+internal class UnsupportedFinancialConnectionsPaymentsProxy : FinancialConnectionsPaymentsProxy {
     override fun present(linkAccountSessionClientSecret: String, publishableKey: String) {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(

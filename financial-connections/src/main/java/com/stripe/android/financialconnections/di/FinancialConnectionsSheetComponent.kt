@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.ConnectionsSheetContract
-import com.stripe.android.financialconnections.ConnectionsSheetViewModel
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
 import dagger.BindsInstance
@@ -13,15 +13,15 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        ConnectionsSheetModule::class,
+        FinancialConnectionsSheetModule::class,
         CoroutineContextModule::class,
         LoggingModule::class
     ]
 )
-internal interface ConnectionsSheetComponent {
-    val viewModel: ConnectionsSheetViewModel
+internal interface FinancialConnectionsSheetComponent {
+    val viewModel: FinancialConnectionsSheetViewModel
 
-    fun inject(factory: ConnectionsSheetViewModel.Factory)
+    fun inject(factory: FinancialConnectionsSheetViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -32,8 +32,8 @@ internal interface ConnectionsSheetComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun configuration(configuration: ConnectionsSheetContract.Args): Builder
+        fun configuration(configuration: FinancialConnectionsSheetContract.Args): Builder
 
-        fun build(): ConnectionsSheetComponent
+        fun build(): FinancialConnectionsSheetComponent
     }
 }

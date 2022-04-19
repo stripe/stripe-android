@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
-import com.stripe.android.financialconnections.repository.ConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
 /**
@@ -9,14 +9,14 @@ import javax.inject.Inject
  * as well as the success and cancel callback URLs to verify.
  */
 internal class GenerateLinkAccountSessionManifest @Inject constructor(
-    private val connectionsRepository: ConnectionsRepository,
+    private val financialConnectionsRepository: FinancialConnectionsRepository,
 ) {
 
     suspend operator fun invoke(
         clientSecret: String,
         applicationId: String
     ): LinkAccountSessionManifest {
-        return connectionsRepository.generateLinkAccountSessionManifest(
+        return financialConnectionsRepository.generateLinkAccountSessionManifest(
             clientSecret = clientSecret,
             applicationId = applicationId
         )

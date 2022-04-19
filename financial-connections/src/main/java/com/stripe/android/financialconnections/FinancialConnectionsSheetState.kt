@@ -6,16 +6,16 @@ import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
 /**
  *  Class containing all of the data needed to represent the screen.
  */
-internal data class ConnectionsSheetState(
+internal data class FinancialConnectionsSheetState(
     val activityRecreated: Boolean = false,
     val manifest: LinkAccountSessionManifest? = null,
     val authFlowActive: Boolean = false
 ) {
 
     /**
-     * Restores existing persisted fields into the current [ConnectionsSheetState]
+     * Restores existing persisted fields into the current [FinancialConnectionsSheetState]
      */
-    internal fun from(savedStateHandle: SavedStateHandle): ConnectionsSheetState {
+    internal fun from(savedStateHandle: SavedStateHandle): FinancialConnectionsSheetState {
         return copy(
             manifest = savedStateHandle.get(KEY_MANIFEST) ?: manifest,
             authFlowActive = savedStateHandle.get(KEY_AUTHFLOW_ACTIVE) ?: authFlowActive,
@@ -25,7 +25,10 @@ internal data class ConnectionsSheetState(
     /**
      * Saves the persistable fields of this state that changed to the given [SavedStateHandle]
      */
-    internal fun to(savedStateHandle: SavedStateHandle, previousValue: ConnectionsSheetState) {
+    internal fun to(
+        savedStateHandle: SavedStateHandle,
+        previousValue: FinancialConnectionsSheetState
+    ) {
         if (previousValue.manifest != manifest)
             savedStateHandle.set(KEY_MANIFEST, manifest)
         if (previousValue.authFlowActive != authFlowActive)
@@ -53,9 +56,9 @@ internal sealed class ConnectionsSheetViewEffect {
     ) : ConnectionsSheetViewEffect()
 
     /**
-     * Finish [ConnectionsSheetActivity] with a given [ConnectionsSheetResult]
+     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetResult]
      */
     data class FinishWithResult(
-        val result: ConnectionsSheetResult
+        val result: FinancialConnectionsSheetResult
     ) : ConnectionsSheetViewEffect()
 }

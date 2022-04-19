@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import com.stripe.android.financialconnections.BuildConfig
-import com.stripe.android.financialconnections.ConnectionsSheet
-import com.stripe.android.financialconnections.ConnectionsSheetContract
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import dagger.Module
 import dagger.Provides
@@ -11,19 +11,19 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
-internal object ConnectionsSheetConfigurationModule {
+internal object FinancialConnectionsSheetConfigurationModule {
 
     @Provides
     @Singleton
     fun providesConfiguration(
-        args: ConnectionsSheetContract.Args
-    ): ConnectionsSheet.Configuration = args.configuration
+        args: FinancialConnectionsSheetContract.Args
+    ): FinancialConnectionsSheet.Configuration = args.configuration
 
     @Provides
     @Named(PUBLISHABLE_KEY)
     @Singleton
     fun providesPublishableKey(
-        configuration: ConnectionsSheet.Configuration
+        configuration: FinancialConnectionsSheet.Configuration
     ): String = configuration.publishableKey
 
     @Provides
