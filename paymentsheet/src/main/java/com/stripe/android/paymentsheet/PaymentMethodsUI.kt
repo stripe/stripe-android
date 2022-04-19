@@ -45,6 +45,10 @@ internal fun PaymentMethodsUI(
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
 
+    LaunchedEffect(selectedIndex){
+        state.scrollToItem(selectedIndex, 0)
+    }
+
     LaunchedEffect(isEnabled) {
         if (isEnabled) {
             state.reenableScrolling(scope)

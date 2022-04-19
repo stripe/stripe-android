@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -155,7 +156,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val liveMode: LiveData<Boolean> = _liveMode
 
     /**
-     * On [CardDataCollectionFragment] this is set every time the details in the add
+     * On [ComposeFormDataCollectionFragment] this is set every time the details in the add
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
@@ -348,9 +349,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun getAddFragmentSelectedLpm() =
-        savedStateHandle.getLiveData<SupportedPaymentMethod>(
+        savedStateHandle.getLiveData(
             SAVE_SELECTED_ADD_LPM,
-            SupportedPaymentMethod.Card
+            SupportedPaymentMethod.fromCode(
+                newLpm?.paymentMethodCreateParams?.typeCode
+            ) ?: SupportedPaymentMethod.Card
         )
 
     fun getAddFragmentSelectedLpmValue() =
@@ -379,7 +382,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    protected fun setupLink(stripeIntent: StripeIntent) {
+    protected fun setupLink(unused: StripeIntent) {
         // TODO(brnunes-stripe): Enable Link
         _isLinkEnabled.value = false
     }

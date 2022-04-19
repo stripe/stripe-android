@@ -23,6 +23,7 @@ internal data class FormFragmentArguments(
 
 internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
 
+    list.clear()
     initialPaymentMethodCreateParams?.let {
         addPath(it.toParamMap(), "")
     }
