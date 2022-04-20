@@ -8,7 +8,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 
-internal class PaymentSheetCollectBankAccountLauncher(
+internal class CollectBankAccountForPaymentSheetLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
 ) : CollectBankAccountLauncher {
 
@@ -46,8 +46,8 @@ internal class PaymentSheetCollectBankAccountLauncher(
         fun create(
             activity: ComponentActivity,
             callback: (CollectBankAccountResult) -> Unit
-        ): PaymentSheetCollectBankAccountLauncher {
-            return PaymentSheetCollectBankAccountLauncher(
+        ): CollectBankAccountForPaymentSheetLauncher {
+            return CollectBankAccountForPaymentSheetLauncher(
                 activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it)
                 }
@@ -57,8 +57,8 @@ internal class PaymentSheetCollectBankAccountLauncher(
         fun create(
             fragment: Fragment,
             callback: (CollectBankAccountResult) -> Unit
-        ): PaymentSheetCollectBankAccountLauncher {
-            return PaymentSheetCollectBankAccountLauncher(
+        ): CollectBankAccountForPaymentSheetLauncher {
+            return CollectBankAccountForPaymentSheetLauncher(
                 fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it)
                 }

@@ -34,6 +34,9 @@ class CollectBankAccountContract :
         )
     }
 
+    /**
+     * @param attachToIntent enable this to attach the link account session to the given intent
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val publishableKey: String,

@@ -109,7 +109,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
@@ -129,7 +129,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
@@ -177,7 +177,7 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(paymentIntent, connectionsLinkAccountSession))
+                    Completed(CollectBankAccountResponse(paymentIntent, linkAccountSession))
                 )
             )
         }
@@ -201,7 +201,7 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(setupIntent, connectionsLinkAccountSession))
+                    Completed(CollectBankAccountResponse(setupIntent, linkAccountSession))
                 )
             )
         }
