@@ -7,7 +7,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -50,11 +52,14 @@ internal fun ScanCardButtonUI(
         )
     ) {
         Image(
-            painter = painterResource(R.drawable.stripe_ic_camera),
+            painter = painterResource(R.drawable.ic_photo_camera),
             contentDescription = stringResource(
                 R.string.scan_card
             ),
-            colorFilter = ColorFilter.tint(PaymentsTheme.colors.material.primary)
+            colorFilter = ColorFilter.tint(PaymentsTheme.colors.material.primary),
+            modifier = Modifier
+                .width(18.dp)
+                .height(18.dp)
         )
         Text(
             stringResource(R.string.scan_card),
