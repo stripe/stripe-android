@@ -13,10 +13,10 @@ import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
-import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
@@ -75,9 +75,11 @@ class TestHardCodedLpms {
     fun testCard() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
-                billing= Billing.On,
+                billing = Billing.On,
                 paymentMethod = SupportedPaymentMethod.Card,
-                authorizationAction = null
+                authorizationAction = null,
+                saveForFutureUseCheckboxVisible = true,
+                saveCheckboxValue = false,
             )
         )
     }

@@ -63,50 +63,6 @@ class PaymentSheetPlaygroundViewModel(
         editor.apply()
     }
 
-    fun getSavedToggleState(): SavedToggles {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences(
-            sharedPreferencesName,
-            AppCompatActivity.MODE_PRIVATE
-        )
-        val customer = sharedPreferences.getString(
-            Toggle.Customer.key,
-            Toggle.Customer.default.toString()
-        )
-        val link = sharedPreferences.getBoolean(
-            Toggle.Link.key, Toggle.Link.default as Boolean
-        )
-        val googlePay = sharedPreferences.getBoolean(
-            Toggle.GooglePay.key,
-            Toggle.GooglePay.default as Boolean
-        )
-        val currency = sharedPreferences.getString(
-            Toggle.Currency.key,
-            Toggle.Currency.default.toString()
-        )
-        val mode = sharedPreferences.getString(
-            Toggle.Mode.key,
-            Toggle.Mode.default.toString()
-        )
-        val setShippingAddress = sharedPreferences.getBoolean(
-            Toggle.SetShippingAddress.key,
-            Toggle.SetShippingAddress.default as Boolean
-        )
-        val setAutomaticPaymentMethods = sharedPreferences.getBoolean(
-            Toggle.SetAutomaticPaymentMethods.key,
-            Toggle.SetAutomaticPaymentMethods.default as Boolean
-        )
-
-        return SavedToggles(
-            customer.toString(),
-            link,
-            googlePay,
-            currency.toString(),
-            mode.toString(),
-            setShippingAddress,
-            setAutomaticPaymentMethods
-        )
-    }
-
     /**
      * Calls the backend to prepare for checkout. The server creates a new Payment or Setup Intent
      * that will be confirmed on the client using Payment Sheet.

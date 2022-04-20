@@ -1,6 +1,7 @@
 package com.stripe.android.test.core
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
@@ -40,7 +41,7 @@ class PlaygroundTestDriver(
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
 ) {
     private var resultValue: String? = null
-    private val callbackLock = Semaphore(1)
+    private val paymentSheetFinishedLock = Semaphore(1)
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
@@ -48,21 +49,11 @@ class PlaygroundTestDriver(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
-
         this.selectors = Selectors(device, composeTestRule, testParameters)
         this.testParameters = testParameters
 
-        registerListeners()
-        setConfiguration(selectors)
+        setup(selectors)
         launchCustom()
-
-        // PaymentSheetActivity is now on screen
-        callbackLock.acquire()
-
-        // click add button if returning user
-        if (testParameters.customer == Customer.Returning) {
-            pressAdd()
-        }
 
         selectors.paymentSelection.click()
 
@@ -83,6 +74,7 @@ class PlaygroundTestDriver(
         }
 
         // press payment method
+        Log.e("MLB", "paymentSheetFinishedLock.acquire")
         TimeUnit.SECONDS.sleep(1) // TODO: add another idling resource to wait for this
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -93,8 +85,6 @@ class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
         assertWithMessage("Screenshots differ").that(getScreenshotBytes())
             .isEqualTo(populatedFieldsScreenshot)
-
-        callbackLock.release()
     }
 
     private fun pressAdd() {
@@ -107,6 +97,11 @@ class PlaygroundTestDriver(
         Espresso.pressBack()
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+    }
+
+    private fun setup(selectors: Selectors) {
+        registerListeners()
+        setConfiguration(selectors)
     }
 
     /**
@@ -122,15 +117,13 @@ class PlaygroundTestDriver(
         this.selectors = Selectors(device, composeTestRule, testParameters)
         this.testParameters = testParameters
 
-        registerListeners()
-        setConfiguration(selectors)
+        setup(selectors)
         launchComplete()
-
-        // PaymentSheetActivity is now on screen
-        callbackLock.acquire()
 
         selectors.paymentSelection.click()
 
+        // This takes a screenshot so that translation strings of placeholders
+        // and labels and design can all be verified
         takeScreenShot(
             fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
             testParameters.takeScreenshotOnLpmLoad
@@ -142,6 +135,9 @@ class PlaygroundTestDriver(
             populateCustomLpmFields
         ).populateFields()
 
+
+        // This takes a screenshot so that design and style can be verified after
+        // user input is entered.
         takeScreenShot(
             fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
             testParameters.takeScreenshotOnLpmLoad
@@ -160,8 +156,6 @@ class PlaygroundTestDriver(
         }
 
         doAuthorization()
-
-        callbackLock.release()
     }
 
     private fun verifyDeviceSupportsTestAuthorization(
@@ -199,19 +193,22 @@ class PlaygroundTestDriver(
             IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
 
             IdlingRegistry.getInstance().register(
-                activity.getMultiStepIdlingResource(),
-                activity.getSingleStepIdlingResource(),
+                activity.getMultiStepReadyIdlingResource(),
+                activity.getSingleStepReadyIdlingResource(),
+                activity.getMultiStepConfirmReadyIdlingResource(),
                 TransitionFragmentResource.getSingleStepIdlingResource()
             )
 
-            // Observe the result of the action
+            // Observe the result of the PaymentSheet completion
             activity.viewModel.status.observeForever {
                 resultValue = it
-                callbackLock.release()
+                Log.e("MLB", "paymentSheetFinishedLock.release")
+                paymentSheetFinishedLock.release()
 
                 IdlingRegistry.getInstance().unregister(
-                    activity.getMultiStepIdlingResource(),
-                    activity.getSingleStepIdlingResource(),
+                    activity.getMultiStepReadyIdlingResource(),
+                    activity.getSingleStepReadyIdlingResource(),
+                    activity.getMultiStepConfirmReadyIdlingResource(),
                     TransitionFragmentResource.getSingleStepIdlingResource()
                 )
             }
@@ -241,11 +238,20 @@ class PlaygroundTestDriver(
     internal fun launchComplete() {
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
         EspressoLabelIdButton(R.string.checkout_complete).click()
+
+        // PaymentSheetActivity is now on screen
+        Log.e("MLB", "paymentSheetFinishedLock.acquire")
+        paymentSheetFinishedLock.acquire()
     }
 
     private fun launchCustom() {
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
         EspressoIdButton(R.id.payment_method).click()
+
+        // PaymentSheetActivity is now on screen
+        Log.e("MLB", "paymentSheetFinishedLock.acquire")
+
+        paymentSheetFinishedLock.acquire()
     }
 
     private fun doAuthorization() {
@@ -307,10 +313,15 @@ class PlaygroundTestDriver(
         if (testParameters.authorizationAction == AuthorizeAction.Authorize
             || testParameters.authorizationAction == null
         ) {
-            callbackLock.acquire()
+            Log.e("MLB", "paymentSheetFinishedLock.acquire")
+
+            paymentSheetFinishedLock.acquire()
             assertThat(resultValue).isEqualTo(
                 PaymentSheetResult.Completed.toString()
             )
+            Log.e("MLB", "paymentSheetFinishedLock.release")
+
+            paymentSheetFinishedLock.release()
         }
     }
 

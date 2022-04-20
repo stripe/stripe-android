@@ -108,6 +108,5 @@ enum class GooglePayState {
  */
 enum class Customer {
     Guest,
-    New,
-    Returning
+    New
 }

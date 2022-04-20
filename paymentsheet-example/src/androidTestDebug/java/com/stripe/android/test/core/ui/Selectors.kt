@@ -45,7 +45,6 @@ class Selectors(
     val customer = when (testParameters.customer) {
         Customer.Guest -> EspressoLabelIdButton(R.string.customer_guest)
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
-        Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
     }
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
