@@ -111,7 +111,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Build
 	public fun <init> ()V
 	public final fun colorsDark (Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun colorsLight (Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
-	public final fun primaryButtonModifier (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButton;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
+	public final fun primaryButton (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButton;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun shapes (Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun typography (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 }
@@ -326,7 +326,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfigu
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButton : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonTypography;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonTypography;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public final fun component2 ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public final fun component3 ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;
@@ -347,15 +349,16 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButton : 
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (III)V
-	public final fun component1 ()I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Companion;
+	public fun <init> (Ljava/lang/Integer;II)V
+	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component2 ()I
 	public final fun component3 ()I
-	public final fun copy (III)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;IIIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public final fun copy (Ljava/lang/Integer;II)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;Ljava/lang/Integer;IIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBackground ()I
+	public final fun getBackground ()Ljava/lang/Integer;
 	public final fun getBorder ()I
 	public final fun getOnBackground ()I
 	public fun hashCode ()I
@@ -363,18 +366,25 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonCol
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Companion {
+	public final fun getDefaultDark ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public final fun getDefaultLight ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (FF)V
-	public final fun component1 ()F
-	public final fun component2 ()F
-	public final fun copy (FF)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;FFILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Float;
+	public final fun component2 ()Ljava/lang/Float;
+	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonShape;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBorderStrokeWidthDp ()F
-	public final fun getCornerRadiusDp ()F
+	public final fun getBorderStrokeWidthDp ()Ljava/lang/Float;
+	public final fun getCornerRadiusDp ()Ljava/lang/Float;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -383,7 +393,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonSha
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonTypography : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
 	public fun <init> (Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun copy (Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonTypography;
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonTypography;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonTypography;

@@ -76,21 +76,22 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
 
     PaymentsTheme.primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle.copy(
         colorsLight = PrimaryButtonColors(
-            background = Color(primaryButton.colorsLight.background),
+            background = Color(primaryButton.colorsLight.background ?: colorsLight.primary),
             onBackground = Color(primaryButton.colorsLight.onBackground),
             border = Color(primaryButton.colorsLight.border),
         ),
         colorsDark = PrimaryButtonColors(
-            background = Color(primaryButton.colorsDark.background),
+            background = Color(primaryButton.colorsDark.background ?: colorsDark.primary),
             onBackground = Color(primaryButton.colorsDark.onBackground),
             border = Color(primaryButton.colorsDark.border),
         ),
         shape = PrimaryButtonShape(
-            cornerRadius = primaryButton.shape.cornerRadiusDp,
-            borderStrokeWidth = primaryButton.shape.borderStrokeWidthDp,
+            cornerRadius = primaryButton.shape.cornerRadiusDp ?: shapes.cornerRadiusDp,
+            borderStrokeWidth =
+            primaryButton.shape.borderStrokeWidthDp ?: shapes.borderStrokeWidthDp,
         ),
         typography = PrimaryButtonTypography(
-            fontFamily = primaryButton.typography.fontResId
+            fontFamily = primaryButton.typography.fontResId ?: typography.fontResId
         )
     )
 }
