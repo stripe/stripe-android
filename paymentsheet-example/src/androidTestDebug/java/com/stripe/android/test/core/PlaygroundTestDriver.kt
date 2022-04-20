@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
 import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.EspressoIdButton
 import com.stripe.android.test.core.ui.EspressoLabelIdButton
 import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
@@ -71,19 +72,25 @@ class PlaygroundTestDriver(
             populateCustomLpmFields
         ).populateFields()
 
-        TimeUnit.SECONDS.sleep(1)
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
         val populatedFieldsScreenshot = getScreenshotBytes()
 
-        // press continue
-        selectors.buyButton.apply {
+        // press continue -- this is failing, can't find the id, and not seeing it in the ui dump
+        EspressoIdButton(R.id.continue_button).apply {
             scrollTo()
             click()
         }
 
         // press payment method
-        EspressoLabelIdButton(R.id.payment_method).click()
+        TimeUnit.SECONDS.sleep(1) // TODO: add another idling resource to wait for this
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+        EspressoIdButton(R.id.payment_method).click()
 
         TimeUnit.SECONDS.sleep(1)
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
         assertWithMessage("Screenshots differ").that(getScreenshotBytes())
             .isEqualTo(populatedFieldsScreenshot)
 
@@ -236,11 +243,10 @@ class PlaygroundTestDriver(
         EspressoLabelIdButton(R.string.checkout_complete).click()
     }
 
-    internal fun launchCustom() {
+    private fun launchCustom() {
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
-        EspressoLabelIdButton(R.id.payment_method).click()
+        EspressoIdButton(R.id.payment_method).click()
     }
-
 
     private fun doAuthorization() {
         selectors.apply {
