@@ -3,25 +3,26 @@ package com.stripe.android.connections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetContract
-import com.stripe.android.connections.ConnectionsSheetResult
-import com.stripe.android.connections.linkAccountSessionWithNoMoreAccounts
-import com.stripe.android.connections.utils.FakeActivityResultRegistry
-import com.stripe.android.connections.utils.TestFragment
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
+import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
+import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class DefaultConnectionsSheetLauncherTest {
+class DefaultFinancialConnectionsSheetLauncherTest {
 
-    private val configuration = ConnectionsSheet.Configuration("", "")
+    private val configuration = FinancialConnectionsSheet.Configuration("", "")
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
-            ConnectionsSheetContract.Result.Completed(
+            FinancialConnectionsSheetContract.Result.Completed(
                 linkAccountSession = linkAccountSessionWithNoMoreAccounts,
                 token = null
             )
@@ -31,8 +32,8 @@ class DefaultConnectionsSheetLauncherTest {
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<ConnectionsSheetResult>()
-                val launcher = DefaultConnectionsSheetLauncher(
+                val results = mutableListOf<FinancialConnectionsSheetResult>()
+                val launcher = DefaultFinancialConnectionsSheetLauncher(
                     fragment,
                     testRegistry
                 ) {
@@ -43,7 +44,7 @@ class DefaultConnectionsSheetLauncherTest {
                 launcher.present(configuration)
                 assertThat(results)
                     .containsExactly(
-                        ConnectionsSheetResult.Completed(
+                        FinancialConnectionsSheetResult.Completed(
                             linkAccountSessionWithNoMoreAccounts
                         )
                     )
@@ -53,14 +54,14 @@ class DefaultConnectionsSheetLauncherTest {
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Cancelled`() {
-        val testRegistry = FakeActivityResultRegistry(ConnectionsSheetContract.Result.Canceled)
+        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetContract.Result.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<ConnectionsSheetResult>()
-                val launcher = DefaultConnectionsSheetLauncher(
+                val results = mutableListOf<FinancialConnectionsSheetResult>()
+                val launcher = DefaultFinancialConnectionsSheetLauncher(
                     fragment,
                     testRegistry
                 ) {
@@ -69,7 +70,7 @@ class DefaultConnectionsSheetLauncherTest {
 
                 moveToState(Lifecycle.State.RESUMED)
                 launcher.present(configuration)
-                assertThat(results).containsExactly(ConnectionsSheetResult.Canceled)
+                assertThat(results).containsExactly(FinancialConnectionsSheetResult.Canceled)
             }
         }
     }

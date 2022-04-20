@@ -1,4 +1,4 @@
-package com.stripe.android.connections.model.serializer
+package com.stripe.android.financialconnections.model.serializer
 
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement

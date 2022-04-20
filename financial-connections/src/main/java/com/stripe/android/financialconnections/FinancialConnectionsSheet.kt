@@ -2,11 +2,11 @@ package com.stripe.android.financialconnections
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
-import com.stripe.android.connections.launcher.ConnectionsSheetForTokenLauncher
-import com.stripe.android.connections.launcher.ConnectionsSheetLauncher
-import com.stripe.android.connections.launcher.DefaultConnectionsSheetLauncher
+import com.stripe.android.connections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -80,10 +80,10 @@ class FinancialConnectionsSheet internal constructor(
          */
         fun createForToken(
             activity: ComponentActivity,
-            callback: (ConnectionsSheetForTokenResult) -> Unit
-        ): ConnectionsSheet {
-            return ConnectionsSheet(
-                ConnectionsSheetForTokenLauncher(activity, callback)
+            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(activity, callback)
             )
         }
 
@@ -95,10 +95,10 @@ class FinancialConnectionsSheet internal constructor(
          */
         fun createForToken(
             fragment: Fragment,
-            callback: (ConnectionsSheetForTokenResult) -> Unit
-        ): ConnectionsSheet {
-            return ConnectionsSheet(
-                ConnectionsSheetForTokenLauncher(fragment, callback)
+            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(fragment, callback)
             )
         }
     }

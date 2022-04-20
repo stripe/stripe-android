@@ -1,9 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ApiKeyFixtures
-import com.stripe.android.connections.model.BankAccount
-import com.stripe.android.connections.model.LinkedAccount
 import com.stripe.android.connections.test.readResourceAsString
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient

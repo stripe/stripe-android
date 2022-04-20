@@ -6,17 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ConnectionsSheetResult.Completed
-import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.connections.analytics.ConnectionsEventReporter
-import com.stripe.android.connections.domain.FetchLinkAccountSession
-import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
-import com.stripe.android.connections.model.LinkAccountSession
-import com.stripe.android.connections.model.LinkAccountSessionManifest
-import com.stripe.android.connections.model.LinkedAccountFixtures
-import com.stripe.android.connections.model.LinkedAccountList
+import com.stripe.android.connections.domain.FetchLinkAccountSessionForToken
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Completed
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
@@ -95,7 +86,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(eq(configuration), any<FinancialConnectionsSheetResult.Failed>())
+                .onResult(eq(configuration), any<FinancialConnectionsSheetContract.Result.Failed>())
         }
     }
 
@@ -113,7 +104,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(configuration, FinancialConnectionsSheetResult.Canceled)
+                .onResult(configuration, FinancialConnectionsSheetContract.Result.Canceled)
         }
     }
 
@@ -130,7 +121,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(FinishWithResult(FinancialConnectionsSheetResult.Canceled)).isEqualTo(
+                assertThat(FinishWithResult(FinancialConnectionsSheetContract.Result.Canceled)).isEqualTo(
                     awaitItem()
                 )
             }
@@ -151,7 +142,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 val viewEffect = awaitItem() as FinishWithResult
-                assertThat(viewEffect.result).isInstanceOf(FinancialConnectionsSheetResult.Failed::class.java)
+                assertThat(viewEffect.result).isInstanceOf(FinancialConnectionsSheetContract.Result.Failed::class.java)
             }
         }
 
@@ -173,7 +164,11 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(result = Completed(expectedLinkAccountSession))
+                    FinishWithResult(
+                        result = FinancialConnectionsSheetContract.Result.Completed(
+                            expectedLinkAccountSession
+                        )
+                    )
                 )
             }
         }
@@ -194,7 +189,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(FinancialConnectionsSheetResult.Failed(apiException))
+                    FinishWithResult(FinancialConnectionsSheetContract.Result.Failed(apiException))
                 )
             }
         }
@@ -214,7 +209,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(FinancialConnectionsSheetResult.Failed(APIException()))
+                    FinishWithResult(FinancialConnectionsSheetContract.Result.Failed(APIException()))
                 )
             }
         }
@@ -231,7 +226,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetResult.Canceled))
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetContract.Result.Canceled))
             }
         }
     }
@@ -250,7 +245,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetResult.Canceled))
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetContract.Result.Canceled))
             }
         }
     }

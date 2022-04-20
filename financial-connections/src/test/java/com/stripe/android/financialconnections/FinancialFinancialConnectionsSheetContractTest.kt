@@ -14,7 +14,7 @@ class FinancialFinancialConnectionsSheetContractTest {
     @Test
     fun `parseResult() with missing data should return failed result`() {
         assertThat(FinancialConnectionsSheetContract().parseResult(0, Intent()))
-            .isInstanceOf(ConnectionsSheetContract.Result.Failed::class.java)
+            .isInstanceOf(FinancialConnectionsSheetContract.Result.Failed::class.java)
     }
 
     @Test

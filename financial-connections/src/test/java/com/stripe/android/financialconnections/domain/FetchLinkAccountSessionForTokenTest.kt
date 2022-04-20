@@ -1,10 +1,10 @@
 package com.stripe.android.connections.domain
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ApiKeyFixtures
-import com.stripe.android.connections.model.LinkAccountSession
-import com.stripe.android.connections.networking.FakeConnectionsRepository
 import com.stripe.android.connections.test.readResourceAsString
+import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 @ExperimentalCoroutinesApi
 class FetchLinkAccountSessionForTokenTest {
 
-    private val repository = FakeConnectionsRepository(ApiKeyFixtures.MANIFEST)
+    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
     private val getLinkAccountSession = FetchLinkAccountSessionForToken(repository)
     private val json = Json {
         ignoreUnknownKeys = true

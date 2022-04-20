@@ -1,14 +1,14 @@
 package com.stripe.android.connections.domain
 
-import com.stripe.android.connections.model.LinkAccountSession
-import com.stripe.android.connections.repository.ConnectionsRepository
+import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.model.Token
 import com.stripe.android.model.parsers.TokenJsonParser
 import org.json.JSONObject
 import javax.inject.Inject
 
 internal class FetchLinkAccountSessionForToken @Inject constructor(
-    private val connectionsRepository: ConnectionsRepository
+    private val connectionsRepository: FinancialConnectionsRepository
 ) {
 
     /**

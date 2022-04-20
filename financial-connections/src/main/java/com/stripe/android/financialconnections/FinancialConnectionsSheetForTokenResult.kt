@@ -1,14 +1,14 @@
 package com.stripe.android.connections
 
 import android.os.Parcelable
-import com.stripe.android.connections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 
 /**
  * The result of an attempt to complete a connections session
  */
-sealed class ConnectionsSheetForTokenResult : Parcelable {
+sealed class FinancialConnectionsSheetForTokenResult : Parcelable {
     /**
      * The customer completed the connections session.
      * @param linkAccountSession The link account session connected
@@ -17,13 +17,13 @@ sealed class ConnectionsSheetForTokenResult : Parcelable {
     data class Completed(
         val linkAccountSession: LinkAccountSession,
         val token: Token
-    ) : ConnectionsSheetForTokenResult()
+    ) : FinancialConnectionsSheetForTokenResult()
 
     /**
      * The customer canceled the connections session attempt.
      */
     @Parcelize
-    object Canceled : ConnectionsSheetForTokenResult()
+    object Canceled : FinancialConnectionsSheetForTokenResult()
 
     /**
      * The connections session attempt failed.
@@ -32,5 +32,5 @@ sealed class ConnectionsSheetForTokenResult : Parcelable {
     @Parcelize
     data class Failed(
         val error: Throwable
-    ) : ConnectionsSheetForTokenResult()
+    ) : FinancialConnectionsSheetForTokenResult()
 }

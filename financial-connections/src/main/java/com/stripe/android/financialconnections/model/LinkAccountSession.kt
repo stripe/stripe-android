@@ -2,9 +2,8 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.connections.model.serializer.JsonAsStringSerializer
-import com.stripe.android.connections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.financialconnections.model.serializer.JsonAsStringSerializer
 import com.stripe.android.financialconnections.model.serializer.PaymentAccountSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName

@@ -3,26 +3,27 @@ package com.stripe.android.connections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetContract
-import com.stripe.android.connections.ConnectionsSheetForTokenResult
-import com.stripe.android.connections.bankAccountToken
-import com.stripe.android.connections.linkAccountSessionWithNoMoreAccounts
-import com.stripe.android.connections.utils.FakeActivityResultRegistry
-import com.stripe.android.connections.utils.TestFragment
+import com.stripe.android.connections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.bankAccountToken
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
+import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
+import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ConnectionsSheetForTokenLauncherTest {
+class FinancialConnectionsSheetForTokenLauncherTest {
 
-    private val configuration = ConnectionsSheet.Configuration("", "")
+    private val configuration = FinancialConnectionsSheet.Configuration("", "")
 
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
-            ConnectionsSheetContract.Result.Completed(
+            FinancialConnectionsSheetContract.Result.Completed(
                 linkAccountSession = linkAccountSessionWithNoMoreAccounts,
                 token = bankAccountToken
             )
@@ -32,8 +33,8 @@ class ConnectionsSheetForTokenLauncherTest {
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<ConnectionsSheetForTokenResult>()
-                val launcher = ConnectionsSheetForTokenLauncher(
+                val results = mutableListOf<FinancialConnectionsSheetForTokenResult>()
+                val launcher = FinancialConnectionsSheetForTokenLauncher(
                     fragment,
                     testRegistry
                 ) {
@@ -44,7 +45,7 @@ class ConnectionsSheetForTokenLauncherTest {
                 launcher.present(configuration)
                 assertThat(results)
                     .containsExactly(
-                        ConnectionsSheetForTokenResult.Completed(
+                        FinancialConnectionsSheetForTokenResult.Completed(
                             linkAccountSessionWithNoMoreAccounts,
                             bankAccountToken
                         )
@@ -55,14 +56,14 @@ class ConnectionsSheetForTokenLauncherTest {
 
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Cancelled`() {
-        val testRegistry = FakeActivityResultRegistry(ConnectionsSheetContract.Result.Canceled)
+        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetContract.Result.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<ConnectionsSheetForTokenResult>()
-                val launcher = ConnectionsSheetForTokenLauncher(
+                val results = mutableListOf<FinancialConnectionsSheetForTokenResult>()
+                val launcher = FinancialConnectionsSheetForTokenLauncher(
                     fragment,
                     testRegistry
                 ) {
@@ -71,7 +72,7 @@ class ConnectionsSheetForTokenLauncherTest {
 
                 moveToState(Lifecycle.State.RESUMED)
                 launcher.present(configuration)
-                assertThat(results).containsExactly(ConnectionsSheetForTokenResult.Canceled)
+                assertThat(results).containsExactly(FinancialConnectionsSheetForTokenResult.Canceled)
             }
         }
     }

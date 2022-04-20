@@ -6,7 +6,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.connections.ConnectionsSheetContract
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 
 @Suppress("UNCHECKED_CAST")
 internal object TestUtils {
@@ -19,7 +19,7 @@ internal object TestUtils {
 }
 
 internal class FakeActivityResultRegistry(
-    private val result: ConnectionsSheetContract.Result
+    private val result: FinancialConnectionsSheetContract.Result
 ) : ActivityResultRegistry() {
     override fun <I, O> onLaunch(
         requestCode: Int,

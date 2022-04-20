@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.connections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -39,12 +39,12 @@ internal class FinancialConnectionsSheetContract :
 
         @Parcelize
         data class Default(
-            override val configuration: ConnectionsSheet.Configuration
+            override val configuration: FinancialConnectionsSheet.Configuration
         ) : Args(configuration)
 
         @Parcelize
         data class ForToken(
-            override val configuration: ConnectionsSheet.Configuration
+            override val configuration: FinancialConnectionsSheet.Configuration
         ) : Args(configuration)
 
         fun validate() {
