@@ -1,7 +1,7 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
 include ':camera-core'
-include ':connections'
+include ':financial-connections'
 include ':example'
 include ':identity'
 include ':identity-example'

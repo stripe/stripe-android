@@ -13,7 +13,7 @@ class ByteScreenCaptureProcessor() : BasicScreenCaptureProcessor() {
         capture.bitmap.compress(capture.format, 100, byteArrayOutputStream)
         return ""
     }
-    private fun getBytes(): ByteArray {
+    fun getBytes(): ByteArray {
         return byteArrayOutputStream.toByteArray()
     }
 

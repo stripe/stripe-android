@@ -40,13 +40,13 @@ class TestReloadFields {
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
 
-    private val returningUser = TestParameters(
+    private val newUser = TestParameters(
         SupportedPaymentMethod.Bancontact,
-        Customer.Returning,
-        GooglePayState.On,
+        Customer.New,
+        GooglePayState.Off,
         Currency.EUR,
         IntentType.Pay,
-        Billing.On,
+        Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.On,
@@ -66,7 +66,7 @@ class TestReloadFields {
 
     @Test
     fun testStuff() {
-        testDriver.confirmComplete(returningUser) {}
+        testDriver.confirmCustom(newUser) {}
 
     }
 

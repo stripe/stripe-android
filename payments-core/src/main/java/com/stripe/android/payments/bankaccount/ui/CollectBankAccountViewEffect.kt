@@ -11,7 +11,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 internal sealed class CollectBankAccountViewEffect {
 
     /**
-     * Instruct the view to open the connections SDK flow.
+     * Instruct the view to open the financial connections SDK flow.
      */
     data class OpenConnectionsFlow(
         val publishableKey: String,

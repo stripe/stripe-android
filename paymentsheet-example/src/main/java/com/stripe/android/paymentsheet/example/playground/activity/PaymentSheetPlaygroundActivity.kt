@@ -154,7 +154,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 multiStepUIIdlingResource?.increment()
             } else {
                 singleStepUIIdlingResource?.decrement()
-                multiStepUIIdlingResource?.decrement()
             }
         }
 
@@ -168,20 +167,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         disableViews()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val (customer, link, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
-        setToggles(
-            customer,
-            link,
-            googlePay,
-            currency,
-            mode,
-            setShippingAddress,
-            setAutomaticPaymentMethods
-        )
     }
 
     override fun onPause() {
@@ -313,6 +298,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (success) {
             viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
+            multiStepUIIdlingResource?.decrement()
         } else {
             viewModel.status.value =
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"

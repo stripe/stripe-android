@@ -186,8 +186,9 @@ internal class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
 
-        assertThat(transitionTarget).hasSize(1)
+        assertThat(transitionTarget).hasSize(2)
         assertThat(transitionTarget[0].peekContent()).isNull()
+        assertThat(transitionTarget[1].peekContent()).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
     }
 
     @Test

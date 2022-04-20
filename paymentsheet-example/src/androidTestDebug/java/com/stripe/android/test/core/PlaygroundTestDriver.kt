@@ -10,11 +10,13 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
 import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.EspressoIdButton
 import com.stripe.android.test.core.ui.EspressoLabelIdButton
 import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
@@ -42,7 +44,7 @@ class PlaygroundTestDriver(
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
-    fun confirmComplete(
+    fun confirmCustom(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
@@ -51,22 +53,18 @@ class PlaygroundTestDriver(
         this.testParameters = testParameters
 
         registerListeners()
-        launchComplete(selectors)
+        setConfiguration(selectors)
+        launchCustom()
 
         // PaymentSheetActivity is now on screen
         callbackLock.acquire()
 
-        // click add button
-        pressAdd()
+        // click add button if returning user
+        if (testParameters.customer == Customer.Returning) {
+            pressAdd()
+        }
 
         selectors.paymentSelection.click()
-
-        val beforeByteScreenCaptureProcessor = ByteScreenCaptureProcessor()
-        val afterByteScreenCaptureProcessor = ByteScreenCaptureProcessor()
-        takeScreenShot(
-            fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
-            testParameters.takeScreenshotOnLpmLoad
-        )
 
         FieldPopulator(
             selectors,
@@ -74,24 +72,38 @@ class PlaygroundTestDriver(
             populateCustomLpmFields
         ).populateFields()
 
-        takeScreenShot(
-            fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
-            testParameters.takeScreenshotOnLpmLoad
-        )
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+        val populatedFieldsScreenshot = getScreenshotBytes()
 
-        pressBack()
+        // press continue -- this is failing, can't find the id, and not seeing it in the ui dump
+        EspressoIdButton(R.id.continue_button).apply {
+            scrollTo()
+            click()
+        }
 
-        pressAdd()
+        // press payment method
+        TimeUnit.SECONDS.sleep(1) // TODO: add another idling resource to wait for this
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+        EspressoIdButton(R.id.payment_method).click()
 
+        TimeUnit.SECONDS.sleep(1)
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+        assertWithMessage("Screenshots differ").that(getScreenshotBytes())
+            .isEqualTo(populatedFieldsScreenshot)
+
+        callbackLock.release()
     }
 
-    private fun pressAdd(){
+    private fun pressAdd() {
         selectors.addButton.performClick()
         Espresso.onIdle()
         composeTestRule.waitForIdle()
     }
 
-    private fun pressBack(){
+    private fun pressBack() {
         Espresso.pressBack()
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -111,7 +123,8 @@ class PlaygroundTestDriver(
         this.testParameters = testParameters
 
         registerListeners()
-        launchComplete(selectors)
+        setConfiguration(selectors)
+        launchComplete()
 
         // PaymentSheetActivity is now on screen
         callbackLock.acquire()
@@ -209,7 +222,7 @@ class PlaygroundTestDriver(
         launchPlayground.release()
     }
 
-    internal fun launchComplete(selectors: Selectors) {
+    internal fun setConfiguration(selectors: Selectors) {
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
@@ -223,8 +236,16 @@ class PlaygroundTestDriver(
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
 
+    }
+
+    internal fun launchComplete() {
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
         EspressoLabelIdButton(R.string.checkout_complete).click()
+    }
+
+    private fun launchCustom() {
+        EspressoLabelIdButton(R.string.reload_paymentsheet).click()
+        EspressoIdButton(R.id.payment_method).click()
     }
 
     private fun doAuthorization() {
@@ -291,6 +312,15 @@ class PlaygroundTestDriver(
                 PaymentSheetResult.Completed.toString()
             )
         }
+    }
+
+    private fun getScreenshotBytes(): ByteArray {
+        val byteScreenCaptureProcessor = ByteScreenCaptureProcessor()
+
+        val capture = Screenshot.capture()
+        capture.process(setOf(byteScreenCaptureProcessor))
+
+        return byteScreenCaptureProcessor.getBytes()
     }
 
     private fun takeScreenShot(

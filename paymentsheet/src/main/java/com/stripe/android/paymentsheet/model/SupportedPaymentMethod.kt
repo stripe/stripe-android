@@ -45,7 +45,6 @@ import com.stripe.android.ui.core.forms.PaypalForm
 import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SofortForm
 import kotlinx.parcelize.Parcelize
-import java.util.Locale
 
 /**
  * Enum defining all payment method types for which Payment Sheet can collect

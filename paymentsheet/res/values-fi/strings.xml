@@ -19,6 +19,8 @@
   <string name="stripe_google_pay_error_internal">Sisäinen virhe on tapahtunut.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Lisää</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortin tiedot</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Maa tai alue</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -36,6 +38,8 @@
   <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS -suoraveloitus</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kortti</string>
   <!-- Payment method brand name -->

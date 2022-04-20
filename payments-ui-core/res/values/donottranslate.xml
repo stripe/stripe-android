@@ -10,6 +10,7 @@
 <!--    <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>-->
 <!--    <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>-->
 
+    <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
 <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <!-- Message shown for Afterpay/Clearpay payments. Placeholder will be replaced with the installment amount,

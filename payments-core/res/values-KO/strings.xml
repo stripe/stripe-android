@@ -76,6 +76,15 @@
   <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt;으로 할부 결제하십시오.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">계좌 명의</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB 번호</string>
+  <!-- Legal text shown when using AUBECS.
+ -->
+  <string name="au_becs_mandate">은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및 &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;자동 이체 요청 서비스 계약&lt;/a&gt;에 동의하는 것이며, 또한 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156(“Stripe”)에서 BECS(Bulk Electronic Clearing System)를 통해 %s(이하 \"판매자\")의 대리로 판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다. 본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및\n    자동 이체 요청 서비스 계약에 동의하는 것이며, 또한\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156\n    (“Stripe”)에서 BECS(Bulk Electronic Clearing System)를\n    통해 %1$s(이하 \"판매자\")의 대리로 \n    판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다.\n    본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +158,6 @@
   <string name="title_payment_method">결제 수단</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">배송 방법 선택</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">입력하신 계좌 번호가 불완전합니다.</string>
 </resources>

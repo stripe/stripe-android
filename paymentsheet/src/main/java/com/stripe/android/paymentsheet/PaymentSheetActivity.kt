@@ -31,7 +31,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.getPrimaryColor
+import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -265,10 +265,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             .observe(this, buyButtonStateObserver)
 
         val buttonColor = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-            PaymentsTheme.primaryButtonModifierMutable.getPrimaryColor(baseContext)
+            PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
         )
         viewBinding.buyButton.setAppearanceConfiguration(
-            PaymentsTheme.primaryButtonModifierMutable,
+            PaymentsTheme.primaryButtonStyle,
             buttonColor
         )
 
