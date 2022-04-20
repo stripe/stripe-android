@@ -5,8 +5,6 @@
     -->
     <!-- Placeholder text for Account Number entry field for US Bank Account -->
     <string name="us_bank_account_widget_account_number">Account number</string>
-    <!-- Error string displayed to user when they have entered an incomplete account number. Account number refers to a US bank account number -->
-    <string name="us_bank_account_widget_account_number_incomplete">The account number you entered is incomplete.</string>
     <!-- Error string displayed to user when they enter in an invalid account number. Account number refers to a US bank account number -->
     <string name="us_bank_account_widget_account_number_invalid">The account number you entered is invalid.</string>
     <!-- Placeholder text for Routing Number entry field for US Bank Account -->
