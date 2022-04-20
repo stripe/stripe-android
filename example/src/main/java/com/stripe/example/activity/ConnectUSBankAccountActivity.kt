@@ -12,11 +12,6 @@ import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.databinding.ConnectBankAccountExampleActivityBinding
 
-/**
- * This example is currently work in progress. Do not use it as a reference.
- *
- * In order for this example to work, uncomment ConnectUSBankAccountActivity in LauncherActivity.kt
- */
 class ConnectUSBankAccountActivity : StripeIntentActivity() {
 
     private val viewBinding: ConnectBankAccountExampleActivityBinding by lazy {

@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getPrimaryColor
+import com.stripe.android.ui.core.getBackgroundColor
 
 /**
  * An `Activity` for selecting a payment option.
@@ -132,10 +132,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.config?.let {
             val buttonColor = it.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsTheme.primaryButtonModifierMutable.getPrimaryColor(baseContext)
+                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
             )
             viewBinding.continueButton.setAppearanceConfiguration(
-                PaymentsTheme.primaryButtonModifierMutable,
+                PaymentsTheme.primaryButtonStyle,
                 buttonColor
             )
         }

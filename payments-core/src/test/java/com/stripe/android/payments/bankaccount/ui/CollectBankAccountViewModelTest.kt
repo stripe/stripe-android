@@ -2,15 +2,17 @@ package com.stripe.android.payments.bankaccount.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.ConnectionsSheetResult
-import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
 import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
+import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
@@ -24,9 +26,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
@@ -35,6 +40,7 @@ class CollectBankAccountViewModelTest {
 
     private val createLinkAccountSession: CreateLinkAccountSession = mock()
     private val attachLinkAccountSession: AttachLinkAccountSession = mock()
+    private val retrieveStripeIntent: RetrieveStripeIntent = mock()
 
     private val publishableKey = "publishable_key"
     private val clientSecret = "client_secret"
@@ -47,7 +53,7 @@ class CollectBankAccountViewModelTest {
         id = linkedAccountSessionId
     )
 
-    private val connectionsLinkAccountSession = mock<LinkAccountSession> {
+    private val linkAccountSession = mock<LinkAccountSession> {
         on { this.clientSecret } doReturn "client_secret"
         on { this.id } doReturn linkedAccountSessionId
     }
@@ -93,6 +99,46 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
+    fun `init - when attachToIntent is false, attach is not called for payment intent`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(linkedAccountSession))
+            givenRetrieveStripeIntentReturns(Result.success(mock()))
+
+            // When
+            val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
+            viewModel.onConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+            )
+
+            // Then
+            cancelAndConsumeRemainingEvents()
+            verify(attachLinkAccountSession, never()).forPaymentIntent(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `init - when attachToIntent is false, attach is not called for setup intent`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenRetrieveStripeIntentReturns(Result.success(mock()))
+
+            // When
+            val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
+            viewModel.onConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+            )
+
+            // Then
+            cancelAndConsumeRemainingEvents()
+            verify(attachLinkAccountSession, never()).forSetupIntent(any(), any(), any())
+        }
+    }
+
+    @Test
     fun `init - when createLinkAccountSession fails, finish with error`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
@@ -125,13 +171,13 @@ class CollectBankAccountViewModelTest {
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(paymentIntent))
+                    Completed(CollectBankAccountResponse(paymentIntent, linkAccountSession))
                 )
             )
         }
@@ -149,13 +195,13 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(setupIntent))
+                    Completed(CollectBankAccountResponse(setupIntent, linkAccountSession))
                 )
             )
         }
@@ -173,7 +219,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+                FinancialConnectionsSheetResult.Completed(linkAccountSession)
             )
 
             // Then
@@ -243,6 +289,19 @@ class CollectBankAccountViewModelTest {
         }
     }
 
+    private fun givenRetrieveStripeIntentReturns(
+        result: Result<StripeIntent>
+    ) {
+        retrieveStripeIntent.stub {
+            onBlocking {
+                this(
+                    publishableKey = publishableKey,
+                    clientSecret = clientSecret
+                )
+            }.doReturn(result)
+        }
+    }
+
     private fun buildViewModel(
         viewEffect: MutableSharedFlow<CollectBankAccountViewEffect>,
         configuration: CollectBankAccountContract.Args
@@ -250,29 +309,36 @@ class CollectBankAccountViewModelTest {
         args = configuration,
         createLinkAccountSession = createLinkAccountSession,
         attachLinkAccountSession = attachLinkAccountSession,
+        retrieveStripeIntent = retrieveStripeIntent,
         logger = Logger.noop(),
         _viewEffect = viewEffect
     )
 
-    private fun paymentIntentConfiguration(): ForPaymentIntent {
+    private fun paymentIntentConfiguration(
+        attachToIntent: Boolean = true
+    ): ForPaymentIntent {
         return ForPaymentIntent(
             publishableKey = publishableKey,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
                 email
-            )
+            ),
+            attachToIntent = attachToIntent
         )
     }
 
-    private fun setupIntentConfiguration(): ForSetupIntent {
+    private fun setupIntentConfiguration(
+        attachToIntent: Boolean = true
+    ): ForSetupIntent {
         return ForSetupIntent(
             publishableKey = publishableKey,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
                 email
-            )
+            ),
+            attachToIntent = attachToIntent
         )
     }
 }
