@@ -1,6 +1,7 @@
-package com.stripe.android.payments.bankaccount
+package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -9,12 +10,12 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class StripeCollectBankAccountLauncherTest {
+class CollectBankAccountForPaymentSheetLauncherTest {
 
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
-    private val launcher = StripeCollectBankAccountLauncher(mockHostActivityLauncher)
+    private val launcher = CollectBankAccountForPaymentSheetLauncher(mockHostActivityLauncher)
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
@@ -29,7 +30,7 @@ class StripeCollectBankAccountLauncherTest {
                 publishableKey = PUBLISHABLE_KEY,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = false
             )
         )
     }
@@ -47,7 +48,7 @@ class StripeCollectBankAccountLauncherTest {
                 publishableKey = PUBLISHABLE_KEY,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
-                attachToIntent = true
+                attachToIntent = false
             )
         )
     }
