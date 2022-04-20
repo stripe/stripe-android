@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.connections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Canceled
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Completed
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Failed
@@ -61,7 +62,7 @@ internal class FinancialConnectionsSheetForTokenLauncher(
     }
 }
 
-private fun FinancialConnectionsSheetContract.Result.toExposedResult(): FinancialConnectionsSheetForTokenResult = when (this) {
+private fun Result.toExposedResult(): FinancialConnectionsSheetForTokenResult = when (this) {
     is Canceled -> FinancialConnectionsSheetForTokenResult.Canceled
     is Failed -> FinancialConnectionsSheetForTokenResult.Failed(error)
     is Completed -> FinancialConnectionsSheetForTokenResult.Completed(

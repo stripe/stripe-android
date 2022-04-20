@@ -195,7 +195,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * If a user cancels the hosted auth flow either by closing the custom tab with the back button
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
-     * URL callback, notify the [FinancialConnectionsSheetResultCallback] of [FinancialConnectionsSheetContract.Result.Canceled]
+     * URL callback, notify the [FinancialConnectionsSheetResultCallback] with [Canceled]
      */
     private suspend fun onUserCancel() {
         val result = Canceled
