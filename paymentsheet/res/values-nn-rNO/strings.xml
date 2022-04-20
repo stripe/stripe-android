@@ -19,6 +19,8 @@
   <string name="stripe_google_pay_error_internal">Ein intern feil oppstod.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Legg til</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformasjon</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -27,7 +29,7 @@
   <string name="stripe_paymentsheet_back">Tilbake</string>
   <string name="stripe_paymentsheet_close">Lukk</string>
   <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Hald fram</string>
+  <string name="stripe_paymentsheet_continue_button_label">Fortsett</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Eller betal ved å bruke</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -36,6 +38,8 @@
   <string name="stripe_paymentsheet_pay_button_label">Betal</string>
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kort</string>
   <!-- Payment method brand name -->

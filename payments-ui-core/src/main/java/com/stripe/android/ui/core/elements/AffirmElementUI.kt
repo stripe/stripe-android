@@ -17,7 +17,7 @@ fun AffirmElementUI() {
         imageGetter = mapOf(
             "affirm" to EmbeddableImage(
                 R.drawable.stripe_ic_affirm_logo,
-                R.string.affirm
+                R.string.stripe_paymentsheet_payment_method_affirm
             )
         ),
         modifier = Modifier.padding(bottom = 4.dp),

@@ -4,7 +4,7 @@ git fetch origin master:refs/remotes/origin/master
 echo -----Done fetching orign master
 
 # directory names that corresponds to a module that contains the task - this list needs to be manually updated when a new module is added/deleted
-TESTABLE_MODULES="payments payments-core payments-model paymentsheet wechatpay link stripecardscan identity connections stripe-core payments-ui-core camera-core"
+TESTABLE_MODULES="payments payments-core payments-model paymentsheet wechatpay link stripecardscan identity financial-connections stripe-core payments-ui-core camera-core"
 # a function to check if a dir is in TESTABLE_MODULES
 isTestableModule() {
   [[ $TESTABLE_MODULES =~ (^|[[:space:]])$1($|[[:space:]]) ]]
