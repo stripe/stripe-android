@@ -7,8 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.connections.ConnectionsSheetResult
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
@@ -75,14 +75,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    fun onConnectionsResult(result: ConnectionsSheetResult) {
+    fun onConnectionsResult(result: FinancialConnectionsSheetResult) {
         viewModelScope.launch {
             when (result) {
-                is ConnectionsSheetResult.Canceled ->
+                is FinancialConnectionsSheetResult.Canceled ->
                     finishWithResult(Cancelled)
-                is ConnectionsSheetResult.Failed ->
+                is FinancialConnectionsSheetResult.Failed ->
                     finishWithError(result.error)
-                is ConnectionsSheetResult.Completed ->
+                is FinancialConnectionsSheetResult.Completed ->
                     attachLinkAccountSessionToIntent(result.linkAccountSession.id)
             }
         }

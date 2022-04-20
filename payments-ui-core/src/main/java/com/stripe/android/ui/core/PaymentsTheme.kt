@@ -10,6 +10,7 @@ import android.text.TextPaint
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.MetricAffectingSpan
+import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
@@ -77,6 +78,33 @@ data class PaymentsTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PrimaryButtonStyle(
+    val colorsLight: PrimaryButtonColors,
+    val colorsDark: PrimaryButtonColors,
+    val shape: PrimaryButtonShape,
+    val typography: PrimaryButtonTypography
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PrimaryButtonColors(
+    val background: Color,
+    val onBackground: Color,
+    val border: Color,
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PrimaryButtonShape(
+    val cornerRadius: Float,
+    val borderStrokeWidth: Float,
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PrimaryButtonTypography(
+    @FontRes
+    val fontFamily: Int?
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsThemeDefaults {
     fun colors(isDark: Boolean): PaymentsColors {
         return if (isDark) colorsDark else colorsLight
@@ -130,6 +158,26 @@ object PaymentsThemeDefaults {
         largeFontSize = 16.sp,
         xLargeFontSize = 20.sp,
         fontFamily = null // We default to the default system font.
+    )
+
+    val primaryButtonStyle = PrimaryButtonStyle(
+        colorsLight = PrimaryButtonColors(
+            background = colors(false).primary,
+            onBackground = Color.White,
+            border = Color.Transparent
+        ),
+        colorsDark = PrimaryButtonColors(
+            background = colors(true).primary,
+            onBackground = Color.White,
+            border = Color.Transparent
+        ),
+        shape = PrimaryButtonShape(
+            cornerRadius = shapes.cornerRadius,
+            borderStrokeWidth = 0.0f,
+        ),
+        typography = PrimaryButtonTypography(
+            fontFamily = typography.fontFamily,
+        )
     )
 }
 
@@ -315,6 +363,8 @@ object PaymentsTheme {
         @ReadOnlyComposable
         get() = typographyMutable.toComposeTypography()
 
+    var primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle
+
     @Composable
     @ReadOnlyComposable
     fun getBorderStroke(isSelected: Boolean): BorderStroke {
@@ -392,5 +442,40 @@ fun Color.shouldUseDarkDynamicColor(): Boolean {
         false
     } else {
         contrastRatioToBlack > contrastRatioToWhite
+    }
+}
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getBackgroundColor(context: Context): Int {
+    val isDark = context.isSystemDarkTheme()
+    return (if (isDark) colorsDark else colorsLight).background.toArgb()
+}
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int {
+    val isDark = context.isSystemDarkTheme()
+    return (if (isDark) colorsDark else colorsLight).onBackground.toArgb()
+}
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
+    val isDark = context.isSystemDarkTheme()
+    return (if (isDark) colorsDark else colorsLight).border.toArgb()
+}
+
+@Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
+    val baseStyle = PaymentsTheme.typography.h5.copy(
+        color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
+    )
+    return if (typography.fontFamily != null) {
+        baseStyle.copy(fontFamily = FontFamily(Font(typography.fontFamily)))
+    } else {
+        baseStyle
     }
 }

@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
@@ -30,7 +29,9 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -263,12 +264,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
             .observe(this, buyButtonStateObserver)
 
-        viewBinding.buyButton.setDefaultBackGroundColor(
-            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeDefaults.colors(isSystemDarkTheme()).primary.toArgb()
-            )
+        val buttonColor = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
+            PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
         )
-        viewBinding.buyButton.setCornerRadius(PaymentsThemeDefaults.shapes.cornerRadius)
+        viewBinding.buyButton.setAppearanceConfiguration(
+            PaymentsTheme.primaryButtonStyle,
+            buttonColor
+        )
 
         viewBinding.buyButton.setOnClickListener {
             clearErrorMessages()
