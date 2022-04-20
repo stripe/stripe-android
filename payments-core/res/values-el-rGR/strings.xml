@@ -76,6 +76,15 @@
   <string name="address_zip_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Πληρώστε σταδιακά με &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Όνομα στον λογαριασμό</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Αριθμός BSB</string>
+  <!-- Legal text shown when using AUBECS.
+ -->
+  <string name="au_becs_mandate">Παρέχοντας τα στοιχεία του τραπεζικού λογαριασμού σας και επιβεβαιώνοντας την παρούσα πληρωμή, συμφωνείτε με το παρόν Αίτημα Άμεσης Χρέωσης και τη &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Σύμβαση παροχής υπηρεσιών Αιτήματος Άμεσης Χρέωσης&lt;/a&gt; και εξουσιοδοτείτε την Stripe Payments Australia Pty Ltd, με εταιρικό αριθμό ACN 160 180 343 και Αναγνωριστικό Αριθμό Χρήστη Άμεσης Χρέωσης 507156 («Stripe») να χρεώσει τον λογαριασμό σας μέσω του Bulk Electronic Clearing System (BECS) εκ μέρους της %s (ο «Έμπορος») για οποιαδήποτε ποσά, για τα οποία θα σας ενημερώνει χωριστά ο Έμπορος. Βεβαιώνετε ότι είστε δικαιούχος λογαριασμού ή εξουσιοδοτημένος υπογράφων για τον λογαριασμό που εμφανίζεται παραπάνω.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Παρέχοντας τα στοιχεία του αριθμού λογαριασμού σας και επιβεβαιώνοντας αυτήν την πληρωμή, συμφωνείτε με το παρόν\n    Αίτημα άμεσης χρέωσης και με τη σύμβαση παροχής υπηρεσιών Αιτήματος άμεσης χρέωσης και εξουσιοδοτείτε τη\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 με Αναγνωριστικό αριθμό χρήστη 507156 για την Άμεση χρέωση\n    (η «Stripe»), προκειμένου να χρεώνει τον λογαριασμό σας μέσω του συστήματος Bulk Electronic Clearing System (BECS) για\n    λογαριασμό της %1$s (ο «Έμπορος») για οποιαδήποτε ποσά που αναφέρει ο Έμπορος\n    μόνο σε εσάς. Επιβεβαιώνετε είτε ότι είστε ο δικαιούχος του λογαριασμού είτε εξουσιοδοτημένος\n    υπογράφων για τον προαναφερθέντα λογαριασμό.</string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +158,6 @@
   <string name="title_payment_method">Μέθοδος πληρωμής</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Επιλογή μεθόδου αποστολής</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Ο αριθμός λογαριασμού που εισαγάγατε είναι ελλιπής.</string>
 </resources>
