@@ -208,6 +208,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }.distinctUntilChanged()
 
+    private val _primaryButtonVisibility = MutableLiveData<Boolean>()
+    val primaryButtonVisibility: LiveData<Boolean>
+        get() = _primaryButtonVisibility
+
     init {
         TransitionFragmentResource.idlingResource?.increment()
         if (_savedSelection.value == null) {
@@ -374,6 +378,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
             }
         }
+    }
+
+    fun setPrimaryButtonVisibility(visible: Boolean) {
+        _primaryButtonVisibility.value = visible
     }
 
     protected fun setupLink(stripeIntent: StripeIntent) {

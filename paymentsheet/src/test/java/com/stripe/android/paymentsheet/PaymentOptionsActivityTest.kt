@@ -165,6 +165,28 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `toggles primary button visibility`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(createIntent()).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(activity.viewBinding.continueButton.isVisible)
+                .isTrue()
+
+            viewModel.setPrimaryButtonVisibility(false)
+
+            assertThat(activity.viewBinding.continueButton.isVisible)
+                .isFalse()
+
+            viewModel.setPrimaryButtonVisibility(true)
+
+            assertThat(activity.viewBinding.continueButton.isVisible)
+                .isTrue()
+        }
+    }
+
+    @Test
     fun `Verify Ready state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(

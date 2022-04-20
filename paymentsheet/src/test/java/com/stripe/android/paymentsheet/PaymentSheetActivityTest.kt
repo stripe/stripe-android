@@ -195,6 +195,28 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `toggles primary button visibility`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(activity.viewBinding.buttonContainer.isVisible)
+                .isTrue()
+
+            viewModel.setPrimaryButtonVisibility(false)
+
+            assertThat(activity.viewBinding.buttonContainer.isVisible)
+                .isFalse()
+
+            viewModel.setPrimaryButtonVisibility(true)
+
+            assertThat(activity.viewBinding.buttonContainer.isVisible)
+                .isTrue()
+        }
+    }
+
+    @Test
     fun `when back to Ready state should update PaymentSelection`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->

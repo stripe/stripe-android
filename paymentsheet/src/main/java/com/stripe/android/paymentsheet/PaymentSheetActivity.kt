@@ -251,6 +251,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
+        viewModel.primaryButtonVisibility.observe(this) {
+            viewBinding.buttonContainer.isVisible = it
+            viewBinding.buyButton.isVisible = it
+        }
+
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
                 viewBinding.buyButton.setLabel(requireNotNull(it).buildPayButtonLabel(resources))

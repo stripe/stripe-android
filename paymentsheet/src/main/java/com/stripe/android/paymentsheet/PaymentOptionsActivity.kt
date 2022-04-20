@@ -82,7 +82,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        setupContinueButton(viewBinding.continueButton)
+        setupContinueButton()
 
         viewModel.transition.observe(this) { event ->
             event?.getContentIfNotHandled()?.let { transitionTarget ->
@@ -125,7 +125,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun setupContinueButton(addButton: PrimaryButton) {
+    private fun setupContinueButton() {
+        viewModel.primaryButtonVisibility.observe(this) {
+            viewBinding.continueButton.isVisible = it
+        }
+
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
@@ -139,12 +143,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        addButton.setOnClickListener {
+        viewBinding.continueButton.setOnClickListener {
             viewModel.onUserSelection()
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
-            addButton.isEnabled = isEnabled
+            viewBinding.continueButton.isEnabled = isEnabled
         }
     }
 

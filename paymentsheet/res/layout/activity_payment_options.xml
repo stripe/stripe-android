@@ -91,8 +91,7 @@
                     <com.stripe.android.paymentsheet.ui.PrimaryButton
                         android:id="@+id/continue_button"
                         android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
-                        android:layout_marginStart="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
-                        android:layout_marginEnd="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+                        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                         android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
