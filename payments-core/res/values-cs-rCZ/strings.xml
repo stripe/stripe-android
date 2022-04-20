@@ -82,8 +82,7 @@
   <string name="au_becs_account_name">Jméno na účtu</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="au_becs_bsb_number">Číslo BSB</string>
-  <!-- Legal text shown when using AUBECS.
- -->
+  <!-- Legal text shown when using AUBECS. -->
   <string name="au_becs_mandate">Poskytnutím údajů o svém bankovním účtu a potvrzením této platby souhlasíte s touto žádostí o inkaso a se smlouvou o poskytování služeb &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Žádost o inkaso&lt;/a&gt; a zmocňujete společnost Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 („Stripe“) k inkasu z vašeho účtu prostřednictvím systému hromadného elektronického zúčtování (BECS) jménem%s („Obchodník“) za jakékoli částky, které vám obchodník zvlášť sdělí. Potvrzujete, že jste buď majitelem účtu, nebo oprávněnou osobou k podpisu na výše uvedeném účtu.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Poskytnutím údajů o svém bankovním účtu a potvrzením této platby souhlasíte\n    s tímto požadavkem přímého inkasa a smlouvou o službách inkasa, a autorizujete\n   Stripe Payments Australia Pty Ltd ACN 160 180 343, ID uživatele služby přímého inkasa 507156\n    („Stripe“) k inkasu z vašeho účtu prostřednictvím systému hromadného elektronického zúčtování (BECS) dne\n    jménem %1$s (dále jen „Obchodník“), a to jakýchkoli částek, které vám byly sděleny samostatně\n    obchodníkem. Potvrzujete, že jste buď držitelem účtu nebo autorizovaným\n    signatářem na výše uvedeném účtu.\n    </string>
