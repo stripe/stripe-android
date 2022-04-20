@@ -181,19 +181,29 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class Appearance(
-        // Describes the colors used while the system is in light mode
+        /**
+         * Describes the colors used while the system is in light mode
+         */
         val colorsLight: Colors = Colors.defaultLight,
 
-        // Describes the colors used while the system is in dark mode
+        /**
+         * Describes the colors used while the system is in dark mode
+         */
         val colorsDark: Colors = Colors.defaultDark,
 
-        // Describes the appearance of shapes
+        /**
+         * Describes the appearance of shapes
+         */
         val shapes: Shapes = Shapes.default,
 
-        // Describes the typography used for text.
+        /**
+         * Describes the typography used for text.
+         */
         val typography: Typography = Typography.default,
 
-        // Describes appearance of the primary button (e.g., the "Pay" button) in PaymentSheet
+        /**
+         * Describes the appearance of the primary button (e.g., the "Pay" button)
+         */
         val primaryButton: PrimaryButton = PrimaryButton()
     ) : Parcelable {
         fun getColors(isDark: Boolean): Colors {
@@ -218,47 +228,70 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class Colors(
-        // A primary color used throughout PaymentSheet
+        /**
+         * A primary color used throughout PaymentSheet
+         */
         @ColorInt
         val primary: Int,
 
-        // The color used for the surfaces (backgrounds) of PaymentSheet
+        /**
+         * The color used for the surfaces (backgrounds) of PaymentSheet
+         */
         @ColorInt
         val surface: Int,
 
-        // The color used for the background of inputs, tabs, and other components
+        /**
+         * The color used for the background of inputs, tabs, and other components
+         */
         @ColorInt
         val component: Int,
 
-        // The color used for borders of inputs, tabs, and other components
+        /**
+         * The color used for borders of inputs, tabs, and other components
+         */
         @ColorInt
         val componentBorder: Int,
 
-        // The color of the divider lines used inside inputs, tabs, and other components
+        /**
+         * The color of the divider lines used inside inputs, tabs, and other components
+         */
         @ColorInt
         val componentDivider: Int,
 
-        // The default color used for text and on other elements that live on components
+        /**
+         * The default color used for text and on other elements that live on components
+         */
         @ColorInt
         val onComponent: Int,
 
-        // The color used for items appearing over the background in Payment Sheet
+        /**
+         * The color used for items appearing over the background in Payment Sheet
+         */
         @ColorInt
         val onSurface: Int,
 
-        // The color used for text of secondary importance. For example, this color is used for the label above input fields
+        /**
+         * The color used for text of secondary importance.
+         * For example, this color is used for the label above input fields
+         */
         @ColorInt
         val subtitle: Int,
 
-        // The color used for input placeholder text
+        /**
+         * The color used for input placeholder text
+         */
         @ColorInt
         val placeholderText: Int,
 
-        // The color used for icons in PaymentSheet, such as the close or back icons
+        /**
+         * The color used for icons in PaymentSheet, such as the close or back icons
+         */
         @ColorInt
         val appBarIcon: Int,
 
-        // A color used to indicate errors or destructive actions in PaymentSheet
+        /**
+         * A color used to indicate errors or destructive actions in PaymentSheet
+         */
         @ColorInt
         val error: Int,
     ) : Parcelable {
@@ -295,10 +328,14 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class Shapes(
-        // The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet
+        /**
+         * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet
+         */
         val cornerRadiusDp: Float,
 
-        // The border used for inputs, tabs, and other components in PaymentSheet
+        /**
+         * The border used for inputs, tabs, and other components in PaymentSheet
+         */
         val borderStrokeWidthDp: Float,
     ) : Parcelable {
         companion object {
@@ -311,20 +348,30 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class Typography(
-        // The scale factor for all fonts in PaymentSheet, the default value is 1.0.
-        // When this value increases fonts will increase in size and decrease when this value is lowered
+        /**
+         * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
+         * When this value increases fonts will increase in size and decrease when this value is lowered
+         */
         val sizeScaleFactor: Float,
 
-        // Base weight for text
+        /**
+         * Base weight for text
+         */
         val normalWeight: Int,
 
-        // Medium weight for text
+        /**
+         * Medium weight for text
+         */
         val mediumWeight: Int,
 
-        // Bold weight for text
+        /**
+         * Bold weight for text
+         */
         val boldWeight: Int,
 
-        // The font used in text. This should be a resource ID value.
+        /**
+         * The font used in text. This should be a resource ID value.
+         */
         @FontRes
         val fontResId: Int?,
     ) : Parcelable {
@@ -341,26 +388,40 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class PrimaryButton(
-        // Describes the colors used while the system is in light mode
+        /**
+         * Describes the colors used while the system is in light mode
+         */
         val colorsLight: PrimaryButtonColors = PrimaryButtonColors.defaultLight,
-        // Describes the colors used while the system is in dark mode
+        /**
+         * Describes the colors used while the system is in dark mode
+         */
         val colorsDark: PrimaryButtonColors = PrimaryButtonColors.defaultDark,
-        // Describes the shape of the primary button.
+        /**
+         * Describes the shape of the primary button.
+         */
         val shape: PrimaryButtonShape = PrimaryButtonShape(),
-        // Describes the typography of the primary button.
+        /**
+         * Describes the typography of the primary button.
+         */
         val typography: PrimaryButtonTypography = PrimaryButtonTypography()
     ) : Parcelable
 
     @Parcelize
     data class PrimaryButtonColors(
-        // The background color of the primary button
-        // Note: if 'null' the Appearance.Colors.primary is used.
+        /**
+         * The background color of the primary button
+         * Note: If 'null', Appearance.Colors.primary is used.
+         */
         @ColorInt
         val background: Int?,
-        // The color appearing on the primary button
+        /**
+         * The color of the text and icon in the primary button
+         */
         @ColorInt
         val onBackground: Int,
-        // The border color of the primary button
+        /**
+         * The border color of the primary button
+         */
         @ColorInt
         val border: Int,
     ) : Parcelable {
@@ -382,18 +443,24 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class PrimaryButtonShape(
-        // The corner radius of the primary button
-        // Note: if 'null' the Appearance.Shapes.cornerRadiusDp is used.
+        /**
+         * The corner radius of the primary button
+         * Note: If 'null', Appearance.Shapes.cornerRadiusDp is used.
+         */
         val cornerRadiusDp: Float? = null,
-        // The border width of the primary button
-        // Note: if 'null' the Appearance.Shapes.borderStrokeWidthDp is used.
+        /**
+         * The border width of the primary button
+         * Note: If 'null', Appearance.Shapes.borderStrokeWidthDp is used.
+         */
         val borderStrokeWidthDp: Float? = null
     ) : Parcelable
 
     @Parcelize
     data class PrimaryButtonTypography(
-        // The font used in the primary button.
-        // Note: if 'null' the Appearance.Typography.fontResId is used.
+        /**
+         * The font used in the primary button.
+         * Note: If 'null', Appearance.Typography.fontResId is used.
+         */
         @FontRes
         val fontResId: Int? = null
     ) : Parcelable
