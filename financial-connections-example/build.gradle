@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-    implementation project(':connections')
+    implementation project(':financial-connections')
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"

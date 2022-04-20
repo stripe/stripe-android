@@ -1,4 +1,4 @@
-package com.stripe.android.connections.example.data
+package com.stripe.android.financialconnections.example.data
 
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient

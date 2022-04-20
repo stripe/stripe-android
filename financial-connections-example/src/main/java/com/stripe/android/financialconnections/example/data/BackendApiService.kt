@@ -1,6 +1,6 @@
-package com.stripe.android.connections.example.data
+package com.stripe.android.financialconnections.example.data
 
-import com.stripe.android.connections.example.data.model.CreateLinkAccountSessionResponse
+import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
 import retrofit2.http.POST
 
 interface BackendApiService {

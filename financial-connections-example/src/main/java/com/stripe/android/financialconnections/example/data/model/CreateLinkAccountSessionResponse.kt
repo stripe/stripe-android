@@ -1,4 +1,4 @@
-package com.stripe.android.connections.example.data.model
+package com.stripe.android.financialconnections.example.data.model
 
 import com.google.gson.annotations.SerializedName
 

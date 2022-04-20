@@ -1,26 +1,29 @@
-package com.stripe.android.connections.example
+package com.stripe.android.financialconnections.example
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetResult
-import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetExample
-import com.stripe.android.connections.example.data.BackendRepository
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Canceled
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Completed
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Failed
+import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenConnectionsSheetExample
+import com.stripe.android.financialconnections.example.data.BackendRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ConnectionsExampleViewModel : ViewModel() {
+class FinancialConnectionsExampleViewModel : ViewModel() {
 
     private val repository = BackendRepository()
 
-    private val _state = MutableStateFlow(ConnectionsExampleState())
-    val state: StateFlow<ConnectionsExampleState> = _state
+    private val _state = MutableStateFlow(FinancialConnectionsExampleState())
+    val state: StateFlow<FinancialConnectionsExampleState> = _state
 
-    private val _viewEffect = MutableSharedFlow<ConnectionsExampleViewEffect>()
-    val viewEffect: SharedFlow<ConnectionsExampleViewEffect> = _viewEffect
+    private val _viewEffect = MutableSharedFlow<FinancialConnectionsExampleViewEffect>()
+    val viewEffect: SharedFlow<FinancialConnectionsExampleViewEffect> = _viewEffect
 
     fun startLinkAccountSession() {
         viewModelScope.launch {
@@ -41,7 +44,7 @@ class ConnectionsExampleViewModel : ViewModel() {
                     }
                     _viewEffect.emit(
                         OpenConnectionsSheetExample(
-                            configuration = ConnectionsSheet.Configuration(
+                            configuration = FinancialConnectionsSheet.Configuration(
                                 it.clientSecret,
                                 it.publishableKey
                             )
@@ -60,17 +63,16 @@ class ConnectionsExampleViewModel : ViewModel() {
         }
     }
 
-    fun onConnectionsSheetResult(connectionsSheetResult: ConnectionsSheetResult) {
-        val statusText = when (connectionsSheetResult) {
-            is ConnectionsSheetResult.Completed -> {
-                connectionsSheetResult.linkAccountSession.linkedAccounts.linkedAccounts.joinToString(
-                    "\n"
-                ) {
+    fun onFinancialConnectionsSheetResult(result: FinancialConnectionsSheetResult) {
+        val statusText = when (result) {
+            is Completed -> {
+                val linkedAccountList = result.linkAccountSession.linkedAccounts
+                linkedAccountList.linkedAccounts.joinToString("\n") {
                     "${it.institutionName} - ${it.displayName} - ${it.last4} - ${it.category}/${it.subcategory}"
                 }
             }
-            is ConnectionsSheetResult.Failed -> "Failed! ${connectionsSheetResult.error}"
-            is ConnectionsSheetResult.Canceled -> "Cancelled!"
+            is Failed -> "Failed! ${result.error}"
+            is Canceled -> "Cancelled!"
         }
         viewModelScope.launch {
             setState { copy(status = statusText) }
@@ -80,7 +82,7 @@ class ConnectionsExampleViewModel : ViewModel() {
     /**
      * Helper function to mutate state.
      */
-    private suspend fun setState(block: ConnectionsExampleState.() -> ConnectionsExampleState) {
+    private suspend fun setState(block: FinancialConnectionsExampleState.() -> FinancialConnectionsExampleState) {
         val newState = block(state.value)
         _state.emit(newState)
     }

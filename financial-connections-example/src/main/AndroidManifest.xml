@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.stripe.android.connections.example">
+    package="com.stripe.android.financialconnections.example">
 
     <application
         android:allowBackup="true"
@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ConnectionsExampleActivity"
+            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsExampleActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
