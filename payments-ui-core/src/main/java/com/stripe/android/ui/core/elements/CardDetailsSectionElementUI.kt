@@ -12,7 +12,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
-import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanActivity
 
@@ -23,7 +22,6 @@ fun CardDetailsSectionElementUI(
     controller: CardDetailsSectionController,
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
-    val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -38,7 +36,7 @@ fun CardDetailsSectionElementUI(
                     heading()
                 }
         )
-        if (isStripeCardScanAvailable()) {
+        if (controller.isStripeCardScanAvailable()) {
             ScanCardButtonUI {
                 controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
                     it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
