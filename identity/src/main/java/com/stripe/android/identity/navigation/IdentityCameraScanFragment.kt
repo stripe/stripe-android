@@ -100,7 +100,9 @@ internal abstract class IdentityCameraScanFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.resetUploadedState()
+        if (!shouldStartFromBack()) {
+            identityViewModel.resetUploadedState()
+        }
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
