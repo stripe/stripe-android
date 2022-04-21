@@ -220,25 +220,31 @@ internal class PaymentSheetActivityTest {
             }
             idleLooper()
 
-            assertThat(paymentSelections.size)
+            val nonNullPaymentSelections = {
+                paymentSelections.filterNotNull()
+            }
+
+            assertThat(nonNullPaymentSelections().size)
                 .isEqualTo(1)
-            assertThat(paymentSelections[0])
+            assertThat(nonNullPaymentSelections()[0])
                 .isEqualTo(initialSelection)
 
             activity.viewBinding.googlePayButton.callOnClick()
+            idleLooper()
 
             // Updates PaymentSelection to Google Pay
-            assertThat(paymentSelections.size)
+            assertThat(nonNullPaymentSelections().size)
                 .isEqualTo(2)
-            assertThat(paymentSelections[1])
+            assertThat(nonNullPaymentSelections()[1])
                 .isEqualTo(PaymentSelection.GooglePay)
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            idleLooper()
 
             // Back to Ready state, should return to null PaymentSelection
-            assertThat(paymentSelections.size)
+            assertThat(nonNullPaymentSelections().size)
                 .isEqualTo(3)
-            assertThat(paymentSelections[0])
+            assertThat(nonNullPaymentSelections()[0])
                 .isEqualTo(initialSelection)
         }
     }
