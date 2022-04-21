@@ -54,6 +54,16 @@ internal object PaymentMethodCreateParamsFixtures {
         BILLING_DETAILS
     )
 
+    internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
+        PaymentMethodCreateParams.USBankAccount(
+            accountNumber = "000000",
+            routingNumber = "000123456",
+            accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+            accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL
+        ),
+        BILLING_DETAILS
+    )
+
     internal val BACS_DEBIT = PaymentMethodCreateParams.create(
         bacsDebit = PaymentMethodCreateParams.BacsDebit(
             accountNumber = "00012345",

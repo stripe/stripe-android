@@ -3,6 +3,10 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -27,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -344,6 +349,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
         primaryButtonEnabled.value = null
         savedStateHandle[SAVE_SELECTION] = selection
+        _notesText.value = when (selection) {
+            is PaymentSelection.Saved -> {
+                when (selection.paymentMethod.type) {
+                    PaymentMethod.Type.USBankAccount -> {
+                        R.string.us_bank_account_payment_sheet_saved_mandate
+                    }
+                    else -> null
+                }
+            }
+            else -> null
+        }
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {

@@ -902,6 +902,40 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
+        val viewModel = createViewModel()
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.US_BANK_ACCOUNT
+            )
+        )
+
+        assertThat(viewModel.mandateText.value)
+            .isEqualTo(R.string.us_bank_account_payment_sheet_saved_mandate)
+
+        viewModel.updateSelection(
+            PaymentSelection.New.GenericPaymentMethod(
+                iconResource = 0,
+                labelResource = 0,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        )
+
+        assertThat(viewModel.mandateText.value)
+            .isEqualTo(null)
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        assertThat(viewModel.mandateText.value)
+            .isEqualTo(null)
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
