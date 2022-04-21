@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         viewBinding.launchCompleteButton.setOnClickListener {
             startActivity(Intent(this, LaunchPaymentSheetCompleteActivity::class.java))
         }
+        viewBinding.launchCompleteButton.setOnClickListener {
+            startActivity(Intent(this, EspressoCustomLauncher::class.java))
+        }
 
         viewBinding.launchCustomButton.setOnClickListener {
             startActivity(Intent(this, LaunchPaymentSheetCustomActivity::class.java))

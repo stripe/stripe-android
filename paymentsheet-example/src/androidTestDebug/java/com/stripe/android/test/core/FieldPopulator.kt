@@ -3,6 +3,8 @@ package com.stripe.android.test.core
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
@@ -73,8 +75,10 @@ class FieldPopulator(
                                 }
                                 SimpleTextSpec.NAME -> {
                                     if (testParameters.billing == Billing.Off) {
-                                        selectors.getName()
-                                            .performTextInput("Jenny Rosen")
+                                        selectors.getName().apply {
+                                            performTextInput("Jenny Rosen")
+                                            performImeAction()
+                                        }
                                     }
                                 }
                                 is AddressSpec -> {
@@ -107,7 +111,10 @@ class FieldPopulator(
                                     selectors.getCardNumber().performTextInput("4242424242424242")
                                     selectors.composeTestRule.waitForIdle()
                                     selectors.getCardExpiration().performTextInput("1230")
-                                    selectors.getCardCvc().performTextInput("123")
+                                    selectors.getCardCvc().apply{
+                                        performTextInput("123")
+                                        performImeAction()
+                                    }
                                 }
                             }
                         }

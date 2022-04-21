@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
-import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 
 class PaymentSheetPlaygroundViewModel(

@@ -39,6 +39,10 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
+    val continueButton = EspressoIdButton(R.id.continue_button)
+    val complete = EspressoLabelIdButton(R.string.checkout_complete)
+    val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
+    val multiStepSelect = EspressoIdButton(R.id.payment_method)
     val saveForFutureCheckbox = composeTestRule
         .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
 

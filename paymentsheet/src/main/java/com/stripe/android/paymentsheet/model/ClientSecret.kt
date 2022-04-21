@@ -22,6 +22,7 @@ internal data class PaymentIntentClientSecret(
     override val value: String
 ) : ClientSecret() {
     override fun validate() {
+
         if (value.isBlank()) {
             throw InvalidParameterException(
                 "The PaymentIntent client_secret cannot be an empty string."

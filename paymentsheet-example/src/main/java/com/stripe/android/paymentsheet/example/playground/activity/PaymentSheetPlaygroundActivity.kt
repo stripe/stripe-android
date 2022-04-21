@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
 import kotlinx.coroutines.launch
 
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
@@ -84,9 +85,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     @Nullable
     private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
-
-    @Nullable
-    private var multiStepUIConfirmReadyIdlingResource: CountingIdlingResource? = null
 
     @Nullable
     private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
@@ -319,7 +317,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 0
             )
             viewBinding.customCheckoutButton.isEnabled = true
-//            multiStepUIConfirmReadyIdlingResource?.decrement()
+            if (MultiStepContinueIdlingResource.idlingResource?.isIdleNow == false) {
+                MultiStepContinueIdlingResource.idlingResource?.decrement()
+            }
         } else {
             viewBinding.paymentMethod.setText(R.string.select)
             viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
@@ -346,16 +346,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 CountingIdlingResource("multiStepUIReadyIdlingResource")
         }
         return multiStepUIReadyIdlingResource
-    }
-
-    @VisibleForTesting
-    @NonNull
-    fun getMultiStepConfirmReadyIdlingResource(): IdlingResource? {
-        if (multiStepUIConfirmReadyIdlingResource == null) {
-            multiStepUIConfirmReadyIdlingResource =
-                CountingIdlingResource("multiStepUIConfirmReadyIdlingResource")
-        }
-        return multiStepUIConfirmReadyIdlingResource
     }
 
     @VisibleForTesting

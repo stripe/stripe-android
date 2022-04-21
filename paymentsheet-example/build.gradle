@@ -12,6 +12,9 @@ def getBackendUrl() {
 dependencies {
     implementation project(':payments-core')
     implementation project(':paymentsheet')
+//    implementation "androidx.test.ext:junit-ktx:1.1.0"
+    androidTestImplementation 'androidx.test:core-ktx:1.1.0'
+
 
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
@@ -69,11 +72,11 @@ dependencies {
 
     // Espresso dependencies
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation ("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     debugImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
-    androidTestImplementation ("androidx.test.espresso:espresso-accessibility:$espressoVersion") {
+    androidTestImplementation("androidx.test.espresso:espresso-accessibility:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"
