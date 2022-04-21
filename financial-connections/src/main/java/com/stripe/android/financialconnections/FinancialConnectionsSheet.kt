@@ -78,7 +78,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param activity  the Activity that is presenting the connections sheet.
          * @param callback  called with the result of the connections session after the connections sheet is dismissed.
          */
-        fun createForToken(
+        private fun createForBankAccountToken(
             activity: ComponentActivity,
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {
@@ -93,7 +93,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          * @param callback called with the result of the payment after the payment sheet is dismissed.
          */
-        fun createForToken(
+        private fun createForBankAccountToken(
             fragment: Fragment,
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {
