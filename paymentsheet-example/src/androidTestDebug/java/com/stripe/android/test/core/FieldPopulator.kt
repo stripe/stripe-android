@@ -72,7 +72,7 @@ class FieldPopulator(
                                             performTextInput("jrosen@email.com")
                                             // This is called at the end of each field to remove
                                             // the focus so it appears as expected in screenshots
-                                            performImeAction()
+                                            
                                         }
                                     }
                                 }
@@ -80,7 +80,7 @@ class FieldPopulator(
                                     if (testParameters.billing == Billing.Off) {
                                         selectors.getName().apply {
                                             performTextInput("Jenny Rosen")
-                                            performImeAction()
+                                            
                                         }
                                     }
                                 }
@@ -95,7 +95,7 @@ class FieldPopulator(
                                             .performTextInput("12345")
                                         selectors.getState().apply{
                                             performTextInput("NY")
-                                            performImeAction()
+                                            
                                         }
                                     }
                                 }
@@ -110,7 +110,6 @@ class FieldPopulator(
                                         // TODO: This will not work when other countries are selected or defaulted
                                         selectors.getZip().apply {
                                             performTextInput("12345")
-                                            performImeAction()
                                         }
                                     }
                                 }
@@ -120,7 +119,7 @@ class FieldPopulator(
                                     selectors.getCardExpiration().performTextInput("1230")
                                     selectors.getCardCvc().apply {
                                         performTextInput("123")
-                                        performImeAction()
+                                        
                                     }
                                 }
                             }

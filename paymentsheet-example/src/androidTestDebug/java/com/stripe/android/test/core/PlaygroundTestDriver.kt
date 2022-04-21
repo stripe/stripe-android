@@ -9,24 +9,12 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.result.Result
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import com.google.gson.Gson
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
 import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
 import com.stripe.android.test.core.ui.BrowserUI
@@ -85,14 +73,28 @@ class PlaygroundTestDriver(
             populateCustomLpmFields
         ).populateFields()
 
+        // This has effect of clearing focus on fields
+        selectors.paymentSelection.click()
+
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+
+        // make sure when take a screenshot scroll to the bottom for the comparison
+        selectors.continueButton.scrollTo()
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
         takeScreenShot("first", true)
         val populatedFieldsScreenshot = getScreenshotBytes()
 
-        pressContinue()
+        waitForPlaygroundActivity()
 
         pressMultiStepSelect()
+
+        // make sure when take a screenshot scroll to the bottom for the comparison
+        selectors.continueButton.scrollTo()
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
 
         takeScreenShot("second", true)
         assertWithMessage("Screenshots differ").that(getScreenshotBytes())
@@ -164,7 +166,7 @@ class PlaygroundTestDriver(
         teardown()
     }
 
-    private fun pressBuy(){
+    private fun pressBuy() {
         selectors.buyButton.apply {
             scrollTo()
             click()
