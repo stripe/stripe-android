@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Jūsų pašto kodas yra netinkamas.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Jūsų pašto kodas yra netinkamas</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Mokėkite vėliau naudodami &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Sąskaitos turėtojo vardas ir pavardė</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB numeris</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Pateikdami savo banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šiuo tiesioginio debeto prašymu ir &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;tiesioginio debeto prašymo paslaugų sutartimi&lt;/a&gt; bei įgaliojate „Stripe Payments Australia Pty Ltd“, ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156 (toliau – „Stripe“) nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS) %s vardu (toliau – \„Pardavėjas\“) bet kokias sumas, atskirai jums nurodytas Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas pasirašyti minėtą sąskaitą asmuo.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia\n    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate\n    „Stripe Payments Australia Pty Ltd“, ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,\n    (toliau – „Stripe“) nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)\n    %1$s vardu (toliau – „Pardavėjas“) bet kokias sumas, atskirai jums nurodytas\n    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas\n    pasirašyti minėtą sąskaitą asmuo.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">Mokėjimo būdas</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Pasirinkti siuntimo būdą</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Įvedėte ne visą sąskaitos numerį.</string>
 </resources>

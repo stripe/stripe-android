@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Nieprawidłowy kod pocztowy</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Nieprawidłowy kod pocztowy</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Zapłać później, korzystając z &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Imię i nazwisko na rachunku</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Numer BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Podając dane swojego konta bankowego i potwierdzając tę płatność, wyrażasz zgodę na niniejsze żądanie polecenia zapłaty oraz &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;umowę dotyczącą usługi polecenia zapłaty&lt;/a&gt;, a także upoważniasz podmiot Stripe Payments Australia Pty Ltd ACN 160 180 343 o identyfikatorze użytkownika polecenia zapłaty 507156 („Stripe”) do obciążenia Twojego konta przez system Bulk Electronic Clearing System (BECS) w imieniu podmiotu %s („Sprzedawca”) na każdą kwotę osobno zakomunikowaną Ci przez Sprzedawcę. Potwierdzasz, że jesteś właścicielem konta lub upoważnionym sygnatariuszem wyżej wymienionego konta.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Podając dane konta bankowego i zatwierdzając tę płatność, wyrażasz zgodę na\n    niniejsze żądanie polecenia zapłaty i warunki umowy oraz upoważniasz podmiot\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 o numerze użytkownika Direct Debit 507156\n    („Stripe”) do obciążenia Twojego konta poprzez Bulk Electronic Clearing System (BECS) w\n    imieniu podmiotu %1$s („Partner handlowy”) na dowolną kwotę osobno zakomunikowaną Ci\n    przez Partnera handlowego. Zaświadczasz, że jesteś właścicielem konta lub upoważnioną\n    osobą podpisującą, reprezentującą wyżej wymienione konto.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">Metoda płatności</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Wybierz metodę przesyłki</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Podany numer konta jest niekompletny.</string>
 </resources>
