@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
-import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
@@ -113,6 +112,7 @@ class FieldPopulator(
                                     selectors.getCardExpiration().performTextInput("1230")
                                     selectors.getCardCvc().apply{
                                         performTextInput("123")
+                                        // TODO(MLB): Need to perform the right way so screenshot doesn't have the cursor
                                         performImeAction()
                                     }
                                 }

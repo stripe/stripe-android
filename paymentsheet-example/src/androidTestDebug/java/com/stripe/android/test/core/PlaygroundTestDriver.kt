@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
@@ -104,7 +103,7 @@ class PlaygroundTestDriver(
 
     private fun pressMultiStepSelect() {
         selectors.multiStepSelect.click()
-        waitForNotPlayground()
+        waitForNotPlaygroundActivity()
     }
 
     private fun pressContinue() {
@@ -113,7 +112,7 @@ class PlaygroundTestDriver(
             click()
         }
 
-        waitForPlayground()
+        waitForPlaygroundActivity()
     }
 
     /**
@@ -172,13 +171,21 @@ class PlaygroundTestDriver(
         }
     }
 
-    private fun waitForNotPlayground() {
+    /**
+     * Here we wait for an activity different from the playground to be in view.  We
+     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
+     * that would require exposing the activities publicly.
+     */
+    private fun waitForNotPlaygroundActivity() {
         while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
     }
 
-    private fun waitForPlayground() {
+    /**
+     * Here we wait for the Playground to come back into view.
+     */
+    private fun waitForPlaygroundActivity() {
         while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
@@ -206,7 +213,7 @@ class PlaygroundTestDriver(
         } ?: installedBrowsers.first()
     }
 
-    internal fun registerListeners() {
+    private fun registerListeners() {
         val launchPlayground = Semaphore(1)
         launchPlayground.acquire()
         // Setup the playground for scenario, and launch it.  We use the playground
@@ -271,7 +278,7 @@ class PlaygroundTestDriver(
         selectors.complete.click()
 
         // PaymentSheetActivity is now on screen
-        waitForNotPlayground()
+        waitForNotPlaygroundActivity()
     }
 
     private fun launchCustom() {
@@ -279,7 +286,7 @@ class PlaygroundTestDriver(
         selectors.multiStepSelect.click()
 
         // PaymentOptionsActivity is now on screen
-        waitForNotPlayground()
+        waitForNotPlaygroundActivity()
     }
 
     private fun doAuthorization() {
@@ -341,7 +348,7 @@ class PlaygroundTestDriver(
         if (testParameters.authorizationAction == AuthorizeAction.Authorize
             || testParameters.authorizationAction == null
         ) {
-            waitForPlayground()
+            waitForPlaygroundActivity()
             assertThat(resultValue).isEqualTo(
                 PaymentSheetResult.Completed.toString()
             )
@@ -370,7 +377,7 @@ class PlaygroundTestDriver(
         }
     }
 
-    private fun setup(testParameters: TestParameters) {
+    internal fun setup(testParameters: TestParameters) {
         this.testParameters = testParameters
         this.selectors = Selectors(device, composeTestRule, testParameters)
 
@@ -378,7 +385,7 @@ class PlaygroundTestDriver(
         setConfiguration(selectors)
     }
 
-    private fun teardown() {
+    internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 

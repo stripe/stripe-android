@@ -4,9 +4,8 @@ import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
 import androidx.test.runner.screenshot.ScreenCapture
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
-import java.io.OutputStream
 
-class ByteScreenCaptureProcessor() : BasicScreenCaptureProcessor() {
+class ByteScreenCaptureProcessor : BasicScreenCaptureProcessor() {
     val byteArrayOutputStream = ByteArrayOutputStream()
 
     override fun process(capture: ScreenCapture): String {

@@ -7,7 +7,7 @@ import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 
 open class EspressoIdButton(@IntegerRes val id: Int) {
-    open fun click() {
+    fun click() {
         Espresso.onView(ViewMatchers.withId(id)).perform(ViewActions.click())
     }
 
