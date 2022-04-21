@@ -346,18 +346,18 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Typography : and
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Companion;
-	public fun <init> (FIIII)V
+	public fun <init> (FIIILjava/lang/Integer;)V
 	public final fun component1 ()F
 	public final fun component2 ()I
 	public final fun component3 ()I
 	public final fun component4 ()I
-	public final fun component5 ()I
-	public final fun copy (FIIII)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;FIIIIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun copy (FIIILjava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;FIIILjava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBoldWeight ()I
-	public final fun getFontResId ()I
+	public final fun getFontResId ()Ljava/lang/Integer;
 	public final fun getMediumWeight ()I
 	public final fun getNormalWeight ()I
 	public final fun getSizeScaleFactor ()F
