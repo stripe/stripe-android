@@ -19,13 +19,15 @@
   <string name="stripe_google_pay_error_internal">Ilmnes sisemine tõrge.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ lisa</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kaardi andmed</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Riik või regioon</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Lisage makseteave</string>
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Tagasi</string>
-  <string name="stripe_paymentsheet_close">Sulge</string>
+  <string name="stripe_paymentsheet_close">Sule</string>
   <!-- Text for continue button -->
   <string name="stripe_paymentsheet_continue_button_label">Jätka</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -36,6 +38,8 @@
   <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS-i otsekorraldus</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kaart</string>
   <!-- Payment method brand name -->

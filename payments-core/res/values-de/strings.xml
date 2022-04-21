@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Ihre Postleitzahl ist ungültig.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Ihre Postleitzahl ist ungültig</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Ratenzahlung mit &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Name des/der Kontoinhaber/in</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB-Nummer</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Indem Sie Ihre Bankkontoinformationen angeben und diese Zahlung bestätigen, stimmen Sie dieser Lastschriftanfrage und der &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Dienstleistungsvereinbarung zu Lastschriftenanfragen&lt;/a&gt; zu und ermächtigen Stripe Payments Australia Pty Ltd ACN 160 180 343, Lastschriftnutzer-ID 507156 („Stripe“), Ihr Konto über das Bulk Electronic Clearing System (BECS) im Namen von %s (der \„Händler\“) mit jedem mit dem Händler separat abgesprochenen Betrag zu belasten. Sie bestätigen, dass Sie entweder Kontoinhaber/in oder Zeichnungsberechtigter/Zeichnungsberechtigte des oben angeführten Kontos sind.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Indem Sie Ihre Bankkontodetails angeben und diese Zahlung bestätigen, stimmen Sie dieser\n   Lastschriftanfrage und der Dienstleistungsvereinbarung zu Lastschriftenanfragen zu und autorisieren\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Lastschriftnutzer-ID, Nummer 507156\n    (\"Stripe\"), Ihr Konto über das Bulk Electronic Clearing System (BECS) im\n    Namen von %1$s (der \"Händler\") mit jedem mit dem Händler separat abgesprochenen\n    Betrag zu belasten. Sie bestätigen ferner, dass Sie entweder Kontoinhaber/in oder Zeichnungsberechtigter/Zeichnungsberechtigte\n    des oben angeführten Kontos sind.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">Zahlungsmethode</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Versandmethode auswählen</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Die von Ihnen eingegebene Kontonummer ist unvollständig.</string>
 </resources>

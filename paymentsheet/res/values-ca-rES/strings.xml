@@ -5,7 +5,7 @@
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">Elimina el compte bancari que acaba en %s</string>
   <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Cancel·lar</string>
+  <string name="cancel">Cancel·la</string>
   <!-- Done button title -->
   <string name="done">Fet</string>
   <!-- Button title to enter editing mode -->
@@ -19,15 +19,17 @@
   <string name="stripe_google_pay_error_internal">S\'ha produït un error intern.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Afegir</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Informació de targeta</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">País o regió</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Afegir la teva informació de pagament</string>
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Tornar</string>
-  <string name="stripe_paymentsheet_close">Tancar</string>
+  <string name="stripe_paymentsheet_close">Tanca</string>
   <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Continuar</string>
+  <string name="stripe_paymentsheet_continue_button_label">Continua</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">O pagar fent servir</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -36,6 +38,8 @@
   <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">Domiciliació bancària AU BECS</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Targeta</string>
   <!-- Payment method brand name -->
