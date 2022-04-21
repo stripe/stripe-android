@@ -6,9 +6,9 @@
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/top_app_bar"
-        style="@style/Widget.MaterialComponents.Toolbar.Primary"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
+        android:background="@color/viewfinder_border_center"
         app:layout_constraintBottom_toTopOf="@id/identity_nav_host"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

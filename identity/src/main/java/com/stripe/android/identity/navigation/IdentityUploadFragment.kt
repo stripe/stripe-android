@@ -29,6 +29,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
+import com.stripe.android.identity.utils.isNavigatedUpTo
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
@@ -95,14 +96,10 @@ internal abstract class IdentityUploadFragment(
      * For all other cases the upload state should be reset in order to reupload both front and back.
      */
     private fun maybeResetUploadedState() {
-        val isFromNavigateUp: Boolean = findNavController().currentDestination?.arguments?.get(
-            ARG_IS_NAVIGATED_UP_TO
-        )?.defaultValue as? Boolean == true
-
         val isPreviousEntryCouldNotCapture =
             findNavController().previousBackStackEntry?.destination?.id == R.id.couldNotCaptureFragment
 
-        if (isFromNavigateUp || !isPreviousEntryCouldNotCapture) {
+        if (findNavController().isNavigatedUpTo() || !isPreviousEntryCouldNotCapture) {
             identityViewModel.resetUploadedState()
         }
 
