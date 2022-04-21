@@ -3,6 +3,9 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.PrimaryButtonColors
+import com.stripe.android.ui.core.PrimaryButtonShape
+import com.stripe.android.ui.core.PrimaryButtonTypography
 import java.security.InvalidParameterException
 
 internal fun PaymentSheet.Configuration.validate() {
@@ -69,5 +72,26 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         fontWeightMedium = typography.mediumWeight,
         fontWeightBold = typography.boldWeight,
         fontSizeMultiplier = typography.sizeScaleFactor
+    )
+
+    PaymentsTheme.primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle.copy(
+        colorsLight = PrimaryButtonColors(
+            background = Color(primaryButton.colorsLight.background ?: colorsLight.primary),
+            onBackground = Color(primaryButton.colorsLight.onBackground),
+            border = Color(primaryButton.colorsLight.border),
+        ),
+        colorsDark = PrimaryButtonColors(
+            background = Color(primaryButton.colorsDark.background ?: colorsDark.primary),
+            onBackground = Color(primaryButton.colorsDark.onBackground),
+            border = Color(primaryButton.colorsDark.border),
+        ),
+        shape = PrimaryButtonShape(
+            cornerRadius = primaryButton.shape.cornerRadiusDp ?: shapes.cornerRadiusDp,
+            borderStrokeWidth =
+            primaryButton.shape.borderStrokeWidthDp ?: shapes.borderStrokeWidthDp,
+        ),
+        typography = PrimaryButtonTypography(
+            fontFamily = primaryButton.typography.fontResId ?: typography.fontResId
+        )
     )
 }
