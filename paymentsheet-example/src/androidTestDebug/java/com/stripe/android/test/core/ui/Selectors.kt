@@ -96,10 +96,6 @@ class Selectors(
 
     val buyButton = BuyButton(device)
 
-    val addButton = composeTestRule.onNodeWithText(
-        getResourceString(R.string.stripe_paymentsheet_add_payment_method_button_label)
-    )
-
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 
     fun browserIconAtPrompt(browser: BrowserUI) = UiAutomatorText(browser.name, device = device)

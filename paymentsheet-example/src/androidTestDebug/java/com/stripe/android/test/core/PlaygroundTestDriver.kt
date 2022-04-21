@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
@@ -104,7 +103,7 @@ class PlaygroundTestDriver(
 
     private fun pressMultiStepSelect() {
         selectors.multiStepSelect.click()
-        waitForNotPlayground()
+        waitForNotPlaygroundActivity()
     }
 
     private fun pressContinue() {
@@ -113,7 +112,7 @@ class PlaygroundTestDriver(
             click()
         }
 
-        waitForPlayground()
+        waitForPlaygroundActivity()
     }
 
     /**
@@ -172,13 +171,21 @@ class PlaygroundTestDriver(
         }
     }
 
-    private fun waitForNotPlayground() {
+    /**
+     * Here we wait for an activity different from the playground to be in view.  We
+     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
+     * that would require exposing the activities publicly.
+     */
+    private fun waitForNotPlaygroundActivity() {
         while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
     }
 
-    private fun waitForPlayground() {
+    /**
+     * Here we wait for the Playground to come back into view.
+     */
+    private fun waitForPlaygroundActivity() {
         while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
@@ -204,45 +211,6 @@ class PlaygroundTestDriver(
             Assume.assumeTrue(installedBrowsers.contains(it))
             it
         } ?: installedBrowsers.first()
-    }
-
-    internal fun registerListeners() {
-        val launchPlayground = Semaphore(1)
-        launchPlayground.acquire()
-        // Setup the playground for scenario, and launch it.  We use the playground
-        // so we don't have to implement another route to create a payment intent,
-        // the challenge is that we don't have access to the activity or it's viewmodels
-        val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
-        scenario.onActivity { activity ->
-
-            monitorCurrentActivity(activity.application)
-
-            IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
-            IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
-
-            IdlingRegistry.getInstance().register(
-                activity.getMultiStepReadyIdlingResource(),
-                activity.getSingleStepReadyIdlingResource(),
-                TransitionFragmentResource.getSingleStepIdlingResource(),
-                MultiStepContinueIdlingResource.getSingleStepIdlingResource()
-            )
-
-            // Observe the result of the PaymentSheet completion
-            activity.viewModel.status.observeForever {
-                resultValue = it
-
-                IdlingRegistry.getInstance().unregister(
-                    activity.getMultiStepReadyIdlingResource(),
-                    activity.getSingleStepReadyIdlingResource(),
-                    TransitionFragmentResource.getSingleStepIdlingResource(),
-                    MultiStepContinueIdlingResource.getSingleStepIdlingResource()
-                )
-            }
-            launchPlayground.release()
-        }
-
-        launchPlayground.acquire()
-        launchPlayground.release()
     }
 
     private fun monitorCurrentActivity(application: Application) {
@@ -271,7 +239,7 @@ class PlaygroundTestDriver(
         selectors.complete.click()
 
         // PaymentSheetActivity is now on screen
-        waitForNotPlayground()
+        waitForNotPlaygroundActivity()
     }
 
     private fun launchCustom() {
@@ -279,7 +247,7 @@ class PlaygroundTestDriver(
         selectors.multiStepSelect.click()
 
         // PaymentOptionsActivity is now on screen
-        waitForNotPlayground()
+        waitForNotPlaygroundActivity()
     }
 
     private fun doAuthorization() {
@@ -341,7 +309,7 @@ class PlaygroundTestDriver(
         if (testParameters.authorizationAction == AuthorizeAction.Authorize
             || testParameters.authorizationAction == null
         ) {
-            waitForPlayground()
+            waitForPlaygroundActivity()
             assertThat(resultValue).isEqualTo(
                 PaymentSheetResult.Completed.toString()
             )
@@ -370,66 +338,52 @@ class PlaygroundTestDriver(
         }
     }
 
-    private fun setup(testParameters: TestParameters) {
+    internal fun setup(testParameters: TestParameters) {
         this.testParameters = testParameters
         this.selectors = Selectors(device, composeTestRule, testParameters)
 
-        registerListeners()
+        val launchPlayground = Semaphore(1)
+        launchPlayground.acquire()
+
+        // Setup the playground for scenario, and launch it.  We use the playground
+        // so we don't have to implement another route to create a payment intent,
+        // the challenge is that we don't have access to the activity or it's viewmodels
+        val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
+        scenario.onActivity { activity ->
+
+            monitorCurrentActivity(activity.application)
+
+            IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
+            IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
+
+            IdlingRegistry.getInstance().register(
+                activity.getMultiStepReadyIdlingResource(),
+                activity.getSingleStepReadyIdlingResource(),
+//                TransitionFragmentResource.getSingleStepIdlingResource(),
+//                MultiStepContinueIdlingResource.getSingleStepIdlingResource()
+            )
+
+            // Observe the result of the PaymentSheet completion
+            activity.viewModel.status.observeForever {
+                resultValue = it
+
+                IdlingRegistry.getInstance().unregister(
+                    activity.getMultiStepReadyIdlingResource(),
+                    activity.getSingleStepReadyIdlingResource(),
+                    TransitionFragmentResource.getSingleStepIdlingResource(),
+                    MultiStepContinueIdlingResource.getSingleStepIdlingResource()
+                )
+            }
+            launchPlayground.release()
+        }
+
+        launchPlayground.acquire()
+        launchPlayground.release()
+
         setConfiguration(selectors)
     }
 
-    private fun teardown() {
+    internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
-    }
-
-    var customerConfig: PaymentSheet.CustomerConfiguration? = null
-    var clientSecret: String? = null
-    var checkoutMode: CheckoutMode? = null
-    var temporaryCustomerId: String? = null
-
-    fun processCheckoutRequest() {
-        val backendUrl = "https://mature-buttery-bumper.glitch.me/"
-        val mode = CheckoutMode.Payment
-        val customer = CheckoutCustomer.New
-        val requestBody = CheckoutRequest(
-            customer.value,
-            CheckoutCurrency.USD.value,
-            mode.value,
-            false,
-            false,
-            false
-        )
-
-        val httpAsync = Fuel.post(backendUrl + "checkout")
-            .jsonBody(Gson().toJson(requestBody))
-            .responseString { _, _, result ->
-                when (result) {
-                    is Result.Failure -> {
-                        AssertionError("Failed to call checkout")
-                    }
-                    is Result.Success -> {
-                        val checkoutResponse = Gson()
-                            .fromJson(result.get(), CheckoutResponse::class.java)
-                        checkoutMode = mode
-                        temporaryCustomerId = if (customer == CheckoutCustomer.New) {
-                            checkoutResponse.customerId
-                        } else {
-                            null
-                        }
-
-                        // Init PaymentConfiguration with the publishable key returned from the backend,
-                        // which will be used on all Stripe API calls
-                        PaymentConfiguration.init(
-                            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext,
-                            checkoutResponse.publishableKey
-                        )
-
-                        customerConfig = checkoutResponse.makeCustomerConfig()
-                        clientSecret = checkoutResponse.intentClientSecret
-                    }
-                }
-            }
-
-        httpAsync.join()
     }
 }

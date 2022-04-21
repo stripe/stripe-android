@@ -18,7 +18,7 @@
         <!-- Enables the Google Payment API -->
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
-            android:value="true"/>
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"
@@ -34,7 +34,6 @@
         <activity android:name=".samples.activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.EspressoCustomLauncher" />
     </application>
 
 </manifest>

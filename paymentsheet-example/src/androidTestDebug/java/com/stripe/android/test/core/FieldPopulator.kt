@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
-import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
@@ -69,8 +68,12 @@ class FieldPopulator(
                             when (sectionField) {
                                 is EmailSpec -> {
                                     if (testParameters.billing == Billing.Off) {
-                                        selectors.getEmail()
-                                            .performTextInput("jrosen@email.com")
+                                        selectors.getEmail().apply {
+                                            performTextInput("jrosen@email.com")
+                                            // This is called at the end of each field to remove
+                                            // the focus so it appears as expected in screenshots
+                                            performImeAction()
+                                        }
                                     }
                                 }
                                 SimpleTextSpec.NAME -> {
@@ -90,8 +93,10 @@ class FieldPopulator(
                                             .performTextInput("Albany")
                                         selectors.getZip()
                                             .performTextInput("12345")
-                                        selectors.getState()
-                                            .performTextInput("NY")
+                                        selectors.getState().apply{
+                                            performTextInput("NY")
+                                            performImeAction()
+                                        }
                                     }
                                 }
                                 is CountrySpec -> {}
@@ -103,15 +108,17 @@ class FieldPopulator(
                                 is CardBillingSpec -> {
                                     if (testParameters.billing == Billing.Off) {
                                         // TODO: This will not work when other countries are selected or defaulted
-                                        selectors.getZip()
-                                            .performTextInput("12345")
+                                        selectors.getZip().apply {
+                                            performTextInput("12345")
+                                            performImeAction()
+                                        }
                                     }
                                 }
                                 CardDetailsSpec -> {
                                     selectors.getCardNumber().performTextInput("4242424242424242")
                                     selectors.composeTestRule.waitForIdle()
                                     selectors.getCardExpiration().performTextInput("1230")
-                                    selectors.getCardCvc().apply{
+                                    selectors.getCardCvc().apply {
                                         performTextInput("123")
                                         performImeAction()
                                     }

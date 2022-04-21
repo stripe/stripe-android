@@ -1,21 +1,9 @@
 package com.stripe.android
 
-import android.app.Activity
-import android.app.Application
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.EspressoCustomLauncher
-import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
@@ -40,12 +28,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class TestReloadFields {
-
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
-
-//    @get:Rule
-//    val activityScenarioRule = ActivityScenarioRule(PaymentSheetPlaygroundActivity::class.java)
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
@@ -85,57 +69,6 @@ class TestReloadFields {
         testDriver.confirmCustom(newUser)
     }
 
-    @Test
-    fun testStuff2() {
-        testDriver.processCheckoutRequest()
-
-        val intent = Intent(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            EspressoCustomLauncher::class.java
-        ).apply {
-            putExtra("secret", testDriver.clientSecret!!)
-        }
-
-        launchActivity<EspressoCustomLauncher>(intent)
-            .onActivity { activity ->
-                activity.viewBinding.espressoLaunchButton.setOnClickListener {
-                    activity.paymentSheet?.presentWithPaymentIntent(
-                        testDriver.clientSecret!!,
-                        makeConfiguration()
-                    )
-                }
-            }
-
-        Espresso.onView(ViewMatchers.withText(R.string.paymentsheet))
-            .perform(ViewActions.click())
-
-        Espresso.onIdle()
-    }
-
-
-    private fun makeConfiguration(): PaymentSheet.Configuration {
-        val defaultBilling = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(
-                line1 = "123 Main Street",
-                line2 = null,
-                city = "Blackrock",
-                state = "Co. Dublin",
-                postalCode = "T37 F8HK",
-                country = "IE",
-            ),
-            email = "email@email.com",
-            name = "Jenny Rosen",
-            phone = "+18008675309"
-        ).takeIf { newUser.billing == Billing.On }
-
-        return PaymentSheet.Configuration(
-            merchantDisplayName = "Example, Inc.",
-            customer = testDriver.customerConfig,
-            googlePay = null,
-            defaultBillingDetails = defaultBilling,
-            allowsDelayedPaymentMethods = newUser.delayed == DelayedPMs.On
-        )
-    }
 
     companion object {
         // There exists only one screenshot processor so that all tests put
