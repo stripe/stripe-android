@@ -44,6 +44,7 @@
         <Button
             android:id="@+id/launch_connections_sheet_for_token"
             android:text="@string/launch_connections_sheet_token"
+            android:visibility="gone"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginEnd="16dp"
