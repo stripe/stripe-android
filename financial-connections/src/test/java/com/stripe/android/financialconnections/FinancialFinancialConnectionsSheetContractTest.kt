@@ -14,7 +14,7 @@ class FinancialFinancialConnectionsSheetContractTest {
     @Test
     fun `parseResult() with missing data should return failed result`() {
         assertThat(FinancialConnectionsSheetContract().parseResult(0, Intent()))
-            .isInstanceOf(FinancialConnectionsSheetResult.Failed::class.java)
+            .isInstanceOf(FinancialConnectionsSheetContract.Result.Failed::class.java)
     }
 
     @Test
@@ -23,7 +23,7 @@ class FinancialFinancialConnectionsSheetContractTest {
             ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        val args = FinancialConnectionsSheetContract.Args(configuration)
+        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
         args.validate()
     }
 
@@ -33,7 +33,7 @@ class FinancialFinancialConnectionsSheetContractTest {
             " ",
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        val args = FinancialConnectionsSheetContract.Args(configuration)
+        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
         assertFailsWith<InvalidParameterException>(
             "The link account session client secret cannot be an empty string."
         ) {
@@ -47,7 +47,7 @@ class FinancialFinancialConnectionsSheetContractTest {
             ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
             " "
         )
-        val args = FinancialConnectionsSheetContract.Args(configuration)
+        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
         assertFailsWith<InvalidParameterException>(
             "The publishable key cannot be an empty string."
         ) {
