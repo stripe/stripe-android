@@ -5,14 +5,23 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsExampleBinding
-import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenConnectionsSheetExample
+import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetForTokenExample
 
 class FinancialConnectionsExampleActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<FinancialConnectionsExampleViewModel>()
 
-    private lateinit var financialConnectionsSheet: FinancialConnectionsSheet
+    /**
+     * Instance used when connecting bank account to retrieve data.
+     */
+    private lateinit var financialConnectionsSheetForData: FinancialConnectionsSheet
+
+    /**
+     * Instance used when connecting bank account to retrieve a bank account token.
+     */
+    private lateinit var financialConnectionsSheetForToken: FinancialConnectionsSheet
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,14 +35,20 @@ class FinancialConnectionsExampleActivity : AppCompatActivity() {
 
     private fun ActivityFinancialconnectionsExampleBinding.setupViews() {
         setSupportActionBar(toolbar)
-        financialConnectionsSheet = FinancialConnectionsSheet.create(
+        financialConnectionsSheetForData = FinancialConnectionsSheet.create(
             activity = this@FinancialConnectionsExampleActivity,
             callback = viewModel::onFinancialConnectionsSheetResult
         )
+        // TODO@carlosmuvi uncomment when feature exposed.
+//        financialConnectionsSheetForData = FinancialConnectionsSheet.createForBankAccountToken(
+//            activity = this@FinancialConnectionsExampleActivity,
+//            callback = viewModel::onFinancialConnectionsSheetForBankAccountTokenResult
+//        )
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeViews() {
-        launchConnectionsSheet.setOnClickListener { viewModel.startLinkAccountSession() }
+        launchConnectionsSheet.setOnClickListener { viewModel.startLinkAccountSessionForData() }
+        launchConnectionsSheetForToken.setOnClickListener { viewModel.startLinkAccountSessionForToken() }
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeState() {
@@ -45,7 +60,10 @@ class FinancialConnectionsExampleActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
                 when (it) {
-                    is OpenConnectionsSheetExample -> financialConnectionsSheet.present(it.configuration)
+                    is OpenFinancialConnectionsSheetExample ->
+                        financialConnectionsSheetForData.present(it.configuration)
+                    is OpenFinancialConnectionsSheetForTokenExample ->
+                        financialConnectionsSheetForToken.present(it.configuration)
                 }
             }
         }
