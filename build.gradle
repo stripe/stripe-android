@@ -133,6 +133,6 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example", "financial-connections-example"]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
 }
