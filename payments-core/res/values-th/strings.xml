@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">ทยอยชำระเงินด้วย &lt;img src=\"affirm\"&gt;</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">ชื่อในบัญชี</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">หมายเลข BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ&lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ&lt;/a&gt; และอนุญาตให้ Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน Bulk Electronic Clearing System (BECS) ในนามของ %s (\\"ผู้ค้า\\") สำหรับจำนวนเงินใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่าตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ\n    ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ และอนุญาตให้\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน\n    Bulk Electronic Clearing System (BECS) ในนามของ %1$s (\"ผู้ค้า\") สำหรับจำนวนเงิน\n    ใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่า\n    ตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">วิธีการชำระเงิน</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">เลือกวิธีการจัดส่ง</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">หมายเลขบัญชีที่คุณป้อนไม่ครบถ้วน</string>
 </resources>

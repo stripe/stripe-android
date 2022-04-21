@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Pasta indekss nav derīgs.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Pasta indekss nav derīgs</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Maksāt pakāpeniski ar &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Konta īpašnieks</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB numurs</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs piekrītat šim tiešā debeta pieprasījumam un &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;tiešā debeta pieprasījuma pakalpojuma līgumam&lt;/a&gt;, kā arī pilnvarojat uzņēmumu Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156 (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS), lai uzņēmuma %s (turpmāk — \“Tirgotājs”\) vārdā debitētu jūsu kontu par jebkādām summām, par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs\n    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156\n    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),\n    lai uzņēmuma %1$s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,\n    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu\n    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">Maksājuma metode</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Atlasiet piegādes metodi</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Jūsu ievadītais konta numurs nav pilnīgs.</string>
 </resources>

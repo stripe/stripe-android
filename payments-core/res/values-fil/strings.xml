@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Ang iyong ZIP code ay di balido.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Ang iyong ZIP/Postal code ay di balido</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Magbayad ng over time gamit ang &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Pangalan sa account</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Numero ng BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Sa pagbibigay ng mga detalye ng iyong account sa bangko at pagkumpirma sa pagbabayad na ito, sumasang-ayon ka sa Kahilingan sa Direktang Debit na ito at sa &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;kasunduan sa serbisyo ng Kahilingan sa Direktang Debit&lt;/a&gt;, at pinahihintulutan ang Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (ang “Stripe”) para i-debit ang iyong account gamit ang Bulk Electronic Clearing System (BECS) sa ngalan ng %s (ang \\"Mangangalakal\\") para sa anumang halagang hiwalay na ipinaalam sa iyo ng Mangangalakal. Pinapatunayan mong isa kang may hawak ng account o isang awtorisadong tagalagda sa account na nakalista sa itaas.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Sa pagbibigay ng mga detalye ng iyong account sa bangko at pagkumpirma sa pagbabayad na ito, sumasang-ayon ka sa \n    kasunduan sa serbisyo ng Direct Debit Request at Direct Debit Request, at pinahihintulutan ang\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (“Stripe”) na magbawas sa iyong account gamit ang Bulk Electronic Clearing System (BECS)\n    sa ngalan ng %1$s (the \"Merchant\") para sa anumang mga halaga na hiwalay na ipinaalam sa iyo\n    ng Merchant. Pinatutunayan mo na ikaw ay alinman sa may-ari ng account o isang pinahihintulutan \n    na pumirma sa account na nakalista sa itaas.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">Paraan ng Pagbabayad</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Piliin ang Paraan ng Pagpapadala</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Ang numero ng account na inilagay mo ay kulang.</string>
 </resources>
