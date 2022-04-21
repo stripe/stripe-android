@@ -12,7 +12,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.stripe.android.connections.example"
+        applicationId "com.stripe.android.financialconnections.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
         versionCode 1
