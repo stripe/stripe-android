@@ -12,7 +12,6 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
@@ -60,45 +59,33 @@ class PlaygroundTestDriver(
 
     fun confirmCustom(
         testParameters: TestParameters,
-        populateCustomLpmFields: () -> Unit = {}
+        populateCustomLpmFields: () -> Unit = {},
+        verifyCustomLpmFields: () -> Unit = {}
     ) {
         setup(testParameters)
         launchCustom()
 
         selectors.paymentSelection.click()
 
-        FieldPopulator(
+        val fieldPopulator = FieldPopulator(
             selectors,
             testParameters,
-            populateCustomLpmFields
-        ).populateFields()
-
-        // This has effect of clearing focus on fields
-        selectors.paymentSelection.click()
+            populateCustomLpmFields,
+            verifyCustomLpmFields
+        )
+        fieldPopulator.populateFields()
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        // make sure when take a screenshot scroll to the bottom for the comparison
-        selectors.continueButton.scrollTo()
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        takeScreenShot("first", true)
-        val populatedFieldsScreenshot = getScreenshotBytes()
-
-        waitForPlaygroundActivity()
+        pressContinue()
 
         pressMultiStepSelect()
 
-        // make sure when take a screenshot scroll to the bottom for the comparison
-        selectors.continueButton.scrollTo()
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        takeScreenShot("second", true)
-        assertWithMessage("Screenshots differ").that(getScreenshotBytes())
-            .isEqualTo(populatedFieldsScreenshot)
+        fieldPopulator.verifyFields()
 
         teardown()
     }
@@ -142,7 +129,7 @@ class PlaygroundTestDriver(
         FieldPopulator(
             selectors,
             testParameters,
-            populateCustomLpmFields
+            populateCustomLpmFields,
         ).populateFields()
 
         // This takes a screenshot so that design and style can be verified after
@@ -246,6 +233,9 @@ class PlaygroundTestDriver(
 
     private fun launchCustom() {
         selectors.reload.click()
+        Espresso.onIdle()
+        selectors.composeTestRule.waitForIdle()
+
         selectors.multiStepSelect.click()
 
         // PaymentOptionsActivity is now on screen

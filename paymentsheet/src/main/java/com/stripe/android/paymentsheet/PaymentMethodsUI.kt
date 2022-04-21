@@ -45,7 +45,7 @@ internal fun PaymentMethodsUI(
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
 
-    LaunchedEffect(selectedIndex){
+    LaunchedEffect(selectedIndex) {
         state.scrollToItem(selectedIndex, 0)
     }
 
@@ -57,7 +57,10 @@ internal fun PaymentMethodsUI(
         }
     }
 
-    BoxWithConstraints {
+    BoxWithConstraints(
+        modifier = Modifier
+            .testTag(TEST_TAG_LIST + "1")
+    ) {
         val viewWidth = calculateViewWidth(
             this.maxWidth,
             paymentMethods.size

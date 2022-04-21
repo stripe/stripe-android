@@ -21,7 +21,6 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -105,9 +104,11 @@ class TestHardCodedLpms {
                 delayed = DelayedPMs.On
             )
         ) {
-
-            composeTestRule.onNodeWithText("IBAN")
-                .performTextInput("DE89370400440532013000")
+            composeTestRule.onNodeWithText("IBAN").apply {
+                performTextInput(
+                    "DE89370400440532013000"
+                )
+            }
         }
     }
 

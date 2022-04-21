@@ -1,8 +1,8 @@
 package com.stripe.android
 
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -67,6 +67,17 @@ class TestMultiStepFieldsReloaded {
     }
 
     @Test
+    fun testCard() {
+        testDriver.confirmCustom(
+            newUser.copy(
+                paymentMethod = SupportedPaymentMethod.Card,
+                saveCheckboxValue = false,
+                saveForFutureUseCheckboxVisible = true,
+            )
+        )
+    }
+
+    @Test
     fun testBancontact() {
         testDriver.confirmCustom(
             newUser.copy(
@@ -82,13 +93,23 @@ class TestMultiStepFieldsReloaded {
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
                 delayed = DelayedPMs.On,
                 authorizationAction = null
-            )
-        ) {
-            composeTestRule.onNodeWithText("IBAN").apply {
-                performTextInput("DE89370400440532013000")
-                performImeAction()
+            ),
+            populateCustomLpmFields = {
+                composeTestRule.onNodeWithText("IBAN").apply {
+                    performTextInput(
+                        "DE89370400440532013000"
+                    )
+                }
+            },
+            verifyCustomLpmFields = {
+                composeTestRule.onNodeWithText("IBAN").apply {
+                    assertContentDescriptionEquals(
+                        "DE89370400440532013000"
+                    )
+                }
             }
-        }
+
+        )
     }
 
     @Test
