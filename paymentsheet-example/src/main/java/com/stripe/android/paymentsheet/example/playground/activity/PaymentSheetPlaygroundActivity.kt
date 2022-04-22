@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
 import kotlinx.coroutines.launch
 
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
@@ -83,10 +84,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var flowController: PaymentSheet.FlowController
 
     @Nullable
-    private var multiStepUIIdlingResource: CountingIdlingResource? = null
+    private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     @Nullable
-    private var singleStepUIIdlingResource: CountingIdlingResource? = null
+    private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,10 +151,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
             if (it) {
-                singleStepUIIdlingResource?.increment()
-                multiStepUIIdlingResource?.increment()
+                singleStepUIReadyIdlingResource?.increment()
+                multiStepUIReadyIdlingResource?.increment()
             } else {
-                singleStepUIIdlingResource?.decrement()
+                singleStepUIReadyIdlingResource?.decrement()
             }
         }
 
@@ -298,7 +299,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (success) {
             viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
-            multiStepUIIdlingResource?.decrement()
+            multiStepUIReadyIdlingResource?.decrement()
+//            multiStepUIConfirmReadyIdlingResource?.increment()
         } else {
             viewModel.status.value =
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"
@@ -315,6 +317,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 0
             )
             viewBinding.customCheckoutButton.isEnabled = true
+            if (MultiStepContinueIdlingResource.idlingResource?.isIdleNow == false) {
+                MultiStepContinueIdlingResource.idlingResource?.decrement()
+            }
         } else {
             viewBinding.paymentMethod.setText(R.string.select)
             viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
@@ -333,24 +338,26 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     /**
      * Only called from test, creates and returns a new [SimpleIdlingResource].
      */
-
     @VisibleForTesting
     @NonNull
-    fun getMultiStepIdlingResource(): IdlingResource? {
-        if (multiStepUIIdlingResource == null) {
-            multiStepUIIdlingResource = CountingIdlingResource("multiStepUIIdlingResource")
+    fun getMultiStepReadyIdlingResource(): IdlingResource? {
+        if (multiStepUIReadyIdlingResource == null) {
+            multiStepUIReadyIdlingResource =
+                CountingIdlingResource("multiStepUIReadyIdlingResource")
         }
-        return multiStepUIIdlingResource
+        return multiStepUIReadyIdlingResource
     }
 
     @VisibleForTesting
     @NonNull
-    fun getSingleStepIdlingResource(): IdlingResource? {
-        if (singleStepUIIdlingResource == null) {
-            singleStepUIIdlingResource = CountingIdlingResource("singleStepUIIdlingResource")
+    fun getSingleStepReadyIdlingResource(): IdlingResource? {
+        if (singleStepUIReadyIdlingResource == null) {
+            singleStepUIReadyIdlingResource =
+                CountingIdlingResource("singleStepUIReadyIdlingResource")
         }
-        return singleStepUIIdlingResource
+        return singleStepUIReadyIdlingResource
     }
+
 
     companion object {
         private const val merchantName = "Example, Inc."

@@ -1,8 +1,10 @@
 package com.stripe.android.test.core
 
+import android.app.Activity
+import android.app.Application
 import android.graphics.Bitmap
+import android.os.Bundle
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
@@ -10,14 +12,11 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
 import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
 import com.stripe.android.test.core.ui.BrowserUI
-import com.stripe.android.test.core.ui.EspressoIdButton
-import com.stripe.android.test.core.ui.EspressoLabelIdButton
 import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
 import org.junit.Assume
@@ -40,73 +39,69 @@ class PlaygroundTestDriver(
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
 ) {
     private var resultValue: String? = null
-    private val callbackLock = Semaphore(1)
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
+    private val currentActivity = Array<Activity?>(1) { null }
+    private var application: Application? = null
+
+    private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+        override fun onActivityStarted(activity: Activity) {}
+        override fun onActivityPaused(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {}
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+        override fun onActivityDestroyed(activity: Activity) {}
+        override fun onActivityResumed(activity: Activity) {
+            currentActivity[0] = activity
+        }
+    }
+
     fun confirmCustom(
         testParameters: TestParameters,
-        populateCustomLpmFields: () -> Unit = {}
+        populateCustomLpmFields: () -> Unit = {},
+        verifyCustomLpmFields: () -> Unit = {}
     ) {
-
-        this.selectors = Selectors(device, composeTestRule, testParameters)
-        this.testParameters = testParameters
-
-        registerListeners()
-        setConfiguration(selectors)
+        setup(testParameters)
         launchCustom()
-
-        // PaymentSheetActivity is now on screen
-        callbackLock.acquire()
-
-        // click add button if returning user
-        if (testParameters.customer == Customer.Returning) {
-            pressAdd()
-        }
 
         selectors.paymentSelection.click()
 
-        FieldPopulator(
+        val fieldPopulator = FieldPopulator(
             selectors,
             testParameters,
-            populateCustomLpmFields
-        ).populateFields()
+            populateCustomLpmFields,
+            verifyCustomLpmFields
+        )
+        fieldPopulator.populateFields()
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
-        val populatedFieldsScreenshot = getScreenshotBytes()
 
-        // press continue -- this is failing, can't find the id, and not seeing it in the ui dump
-        EspressoIdButton(R.id.continue_button).apply {
+        pressContinue()
+
+        pressMultiStepSelect()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        fieldPopulator.verifyFields()
+
+        teardown()
+    }
+
+    private fun pressMultiStepSelect() {
+        selectors.multiStepSelect.click()
+        waitForNotPlaygroundActivity()
+    }
+
+    private fun pressContinue() {
+        selectors.continueButton.apply {
             scrollTo()
             click()
         }
 
-        // press payment method
-        TimeUnit.SECONDS.sleep(1) // TODO: add another idling resource to wait for this
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-        EspressoIdButton(R.id.payment_method).click()
-
-        TimeUnit.SECONDS.sleep(1)
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-        assertWithMessage("Screenshots differ").that(getScreenshotBytes())
-            .isEqualTo(populatedFieldsScreenshot)
-
-        callbackLock.release()
-    }
-
-    private fun pressAdd() {
-        selectors.addButton.performClick()
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-    }
-
-    private fun pressBack() {
-        Espresso.pressBack()
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
+        waitForPlaygroundActivity()
     }
 
     /**
@@ -119,18 +114,13 @@ class PlaygroundTestDriver(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
-        this.selectors = Selectors(device, composeTestRule, testParameters)
-        this.testParameters = testParameters
-
-        registerListeners()
-        setConfiguration(selectors)
+        setup(testParameters)
         launchComplete()
-
-        // PaymentSheetActivity is now on screen
-        callbackLock.acquire()
 
         selectors.paymentSelection.click()
 
+        // This takes a screenshot so that translation strings of placeholders
+        // and labels and design can all be verified
         takeScreenShot(
             fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
             testParameters.takeScreenshotOnLpmLoad
@@ -139,9 +129,11 @@ class PlaygroundTestDriver(
         FieldPopulator(
             selectors,
             testParameters,
-            populateCustomLpmFields
+            populateCustomLpmFields,
         ).populateFields()
 
+        // This takes a screenshot so that design and style can be verified after
+        // user input is entered.
         takeScreenShot(
             fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
             testParameters.takeScreenshotOnLpmLoad
@@ -154,14 +146,38 @@ class PlaygroundTestDriver(
             testParameters.useBrowser
         )
 
+        pressBuy()
+
+        doAuthorization()
+
+        teardown()
+    }
+
+    private fun pressBuy() {
         selectors.buyButton.apply {
             scrollTo()
             click()
         }
+    }
 
-        doAuthorization()
+    /**
+     * Here we wait for an activity different from the playground to be in view.  We
+     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
+     * that would require exposing the activities publicly.
+     */
+    private fun waitForNotPlaygroundActivity() {
+        while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+    }
 
-        callbackLock.release()
+    /**
+     * Here we wait for the Playground to come back into view.
+     */
+    private fun waitForPlaygroundActivity() {
+        while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
     }
 
     private fun verifyDeviceSupportsTestAuthorization(
@@ -186,43 +202,12 @@ class PlaygroundTestDriver(
         } ?: installedBrowsers.first()
     }
 
-    internal fun registerListeners() {
-        val launchPlayground = Semaphore(1)
-        launchPlayground.acquire()
-        // Setup the playground for scenario, and launch it.  We use the playground
-        // so we don't have to implement another route to create a payment intent,
-        // the challenge is that we don't have access to the activity or it's viewmodels
-        val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
-        scenario.onActivity { activity ->
-
-            IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
-            IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
-
-            IdlingRegistry.getInstance().register(
-                activity.getMultiStepIdlingResource(),
-                activity.getSingleStepIdlingResource(),
-                TransitionFragmentResource.getSingleStepIdlingResource()
-            )
-
-            // Observe the result of the action
-            activity.viewModel.status.observeForever {
-                resultValue = it
-                callbackLock.release()
-
-                IdlingRegistry.getInstance().unregister(
-                    activity.getMultiStepIdlingResource(),
-                    activity.getSingleStepIdlingResource(),
-                    TransitionFragmentResource.getSingleStepIdlingResource()
-                )
-            }
-            launchPlayground.release()
-        }
-
-        launchPlayground.acquire()
-        launchPlayground.release()
+    private fun monitorCurrentActivity(application: Application) {
+        this.application = application
+        application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
-    internal fun setConfiguration(selectors: Selectors) {
+    private fun setConfiguration(selectors: Selectors) {
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
@@ -239,13 +224,22 @@ class PlaygroundTestDriver(
     }
 
     internal fun launchComplete() {
-        EspressoLabelIdButton(R.string.reload_paymentsheet).click()
-        EspressoLabelIdButton(R.string.checkout_complete).click()
+        selectors.reload.click()
+        selectors.complete.click()
+
+        // PaymentSheetActivity is now on screen
+        waitForNotPlaygroundActivity()
     }
 
     private fun launchCustom() {
-        EspressoLabelIdButton(R.string.reload_paymentsheet).click()
-        EspressoIdButton(R.id.payment_method).click()
+        selectors.reload.click()
+        Espresso.onIdle()
+        selectors.composeTestRule.waitForIdle()
+
+        selectors.multiStepSelect.click()
+
+        // PaymentOptionsActivity is now on screen
+        waitForNotPlaygroundActivity()
     }
 
     private fun doAuthorization() {
@@ -307,7 +301,7 @@ class PlaygroundTestDriver(
         if (testParameters.authorizationAction == AuthorizeAction.Authorize
             || testParameters.authorizationAction == null
         ) {
-            callbackLock.acquire()
+            waitForPlaygroundActivity()
             assertThat(resultValue).isEqualTo(
                 PaymentSheetResult.Completed.toString()
             )
@@ -334,5 +328,54 @@ class PlaygroundTestDriver(
 
             capture.process(setOf(basicScreenCaptureProcessor))
         }
+    }
+
+    internal fun setup(testParameters: TestParameters) {
+        this.testParameters = testParameters
+        this.selectors = Selectors(device, composeTestRule, testParameters)
+
+        val launchPlayground = Semaphore(1)
+        launchPlayground.acquire()
+
+        // Setup the playground for scenario, and launch it.  We use the playground
+        // so we don't have to implement another route to create a payment intent,
+        // the challenge is that we don't have access to the activity or it's viewmodels
+        val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
+        scenario.onActivity { activity ->
+
+            monitorCurrentActivity(activity.application)
+
+            IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
+            IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
+
+            IdlingRegistry.getInstance().register(
+                activity.getMultiStepReadyIdlingResource(),
+                activity.getSingleStepReadyIdlingResource(),
+//                TransitionFragmentResource.getSingleStepIdlingResource(),
+//                MultiStepContinueIdlingResource.getSingleStepIdlingResource()
+            )
+
+            // Observe the result of the PaymentSheet completion
+            activity.viewModel.status.observeForever {
+                resultValue = it
+
+                IdlingRegistry.getInstance().unregister(
+                    activity.getMultiStepReadyIdlingResource(),
+                    activity.getSingleStepReadyIdlingResource(),
+                    TransitionFragmentResource.getSingleStepIdlingResource(),
+                    MultiStepContinueIdlingResource.getSingleStepIdlingResource()
+                )
+            }
+            launchPlayground.release()
+        }
+
+        launchPlayground.acquire()
+        launchPlayground.release()
+
+        setConfiguration(selectors)
+    }
+
+    internal fun teardown() {
+        application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 }

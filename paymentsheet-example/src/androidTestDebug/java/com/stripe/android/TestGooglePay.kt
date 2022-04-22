@@ -86,9 +86,11 @@ class TestGooglePay {
     fun testGooglePayWithOnlyCards() {
         verifyGooglePayDividerText(
             testParameters.copy(
+                paymentMethod = SupportedPaymentMethod.Card,
+                currency = Currency.USD,
                 intentType = IntentType.Setup, // This means only card will show
             ),
-            R.string.stripe_paymentsheet_or_pay_with_card
+            R.string.stripe_paymentsheet_or_pay_using
         )
     }
 
@@ -115,7 +117,7 @@ class TestGooglePay {
 
         Assume.assumeTrue("Google pay is available", googlePayAvailable)
         if (googlePayAvailable) {
-            testDriver.registerListeners()
+            testDriver.setup(testParameters)
             testDriver.launchComplete()
 
             selectors.getGoogleDividerText()
@@ -123,6 +125,7 @@ class TestGooglePay {
                 selectors.getResourceString(expectedText),
                     includeEditableText = false
             )
+            testDriver.teardown()
         }
     }
 }

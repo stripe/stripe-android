@@ -73,6 +73,31 @@ class TransitionFragmentResource {
     }
 }
 
+@VisibleForTesting
+class MultiStepContinueIdlingResource {
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        @Nullable
+        var idlingResource: CountingIdlingResource? = null
+
+        // This will only be called from test code
+        @VisibleForTesting
+        @NonNull
+        fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
+            if (idlingResource == null) {
+                idlingResource = try {
+                    Class.forName("androidx.test.espresso.Espresso")
+                    val countingIdlingResource = CountingIdlingResource("transition")
+                    countingIdlingResource
+                } catch (e: ClassNotFoundException) {
+                    null
+                }
+            }
+            return idlingResource
+        }
+    }
+}
+
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */

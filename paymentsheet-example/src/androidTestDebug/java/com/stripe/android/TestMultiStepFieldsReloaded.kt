@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
@@ -28,8 +29,9 @@ import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
+
 @RunWith(AndroidJUnit4::class)
-class TestHardCodedLpms {
+class TestMultiStepFieldsReloaded {
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
 
@@ -42,25 +44,13 @@ class TestHardCodedLpms {
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
 
-    companion object {
-        // There exists only one screenshot processor so that all tests put
-        // their files in the same directory.
-        private val screenshotProcessor = MyScreenCaptureProcessor()
-    }
-
-    @Before
-    fun before() {
-        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
-    }
-
     private val newUser = TestParameters(
         SupportedPaymentMethod.Bancontact,
         Customer.New,
-        GooglePayState.On,
+        GooglePayState.Off,
         Currency.EUR,
         IntentType.Pay,
-        Billing.On,
+        Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.On,
@@ -68,96 +58,101 @@ class TestHardCodedLpms {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
         authorizationAction = AuthorizeAction.Authorize,
-        takeScreenshotOnLpmLoad = true
     )
+
+    @Before
+    fun before() {
+        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
+    }
 
     @Test
     fun testCard() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                billing = Billing.On,
                 paymentMethod = SupportedPaymentMethod.Card,
-                authorizationAction = null,
-                saveForFutureUseCheckboxVisible = true,
                 saveCheckboxValue = false,
+                saveForFutureUseCheckboxVisible = true,
             )
         )
     }
 
     @Test
     fun testBancontact() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Bancontact,
-                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
 
     @Test
     fun testSepaDebit() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
-                authorizationAction = null,
-                automatic = Automatic.Off,
-                delayed = DelayedPMs.On
-            )
-        ) {
-            composeTestRule.onNodeWithText("IBAN").apply {
-                performTextInput(
-                    "DE89370400440532013000"
-                )
+                delayed = DelayedPMs.On,
+                authorizationAction = null
+            ),
+            populateCustomLpmFields = {
+                composeTestRule.onNodeWithText("IBAN").apply {
+                    performTextInput(
+                        "DE89370400440532013000"
+                    )
+                }
+            },
+            verifyCustomLpmFields = {
+                composeTestRule.onNodeWithText("IBAN").apply {
+                    assertContentDescriptionEquals(
+                        "DE89370400440532013000"
+                    )
+                }
             }
-        }
+
+        )
     }
 
     @Test
     fun testIdeal() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Ideal,
-                authorizationAction = AuthorizeAction.Authorize,
+                paymentMethod = SupportedPaymentMethod.Ideal
             )
         )
     }
 
     @Test
     fun testEps() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Eps,
-                authorizationAction = AuthorizeAction.Authorize,
+                paymentMethod = SupportedPaymentMethod.Eps
             )
         )
     }
 
     @Test
     fun testGiropay() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Giropay,
-                authorizationAction = AuthorizeAction.Authorize,
+                paymentMethod = SupportedPaymentMethod.Giropay
             )
         )
     }
 
     @Test
     fun testP24() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.P24,
-                authorizationAction = AuthorizeAction.Authorize,
+                paymentMethod = SupportedPaymentMethod.P24
             )
         )
     }
 
     @Test
     fun testAfterpay() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AfterpayClearpay,
-                authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.USD,
                 shipping = Shipping.On
             )
@@ -167,48 +162,46 @@ class TestHardCodedLpms {
     @Ignore("Ignored until ready to release")
 //    @Test
     fun testAffirm() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Affirm,
-                authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.USD,
-                shipping = Shipping.On,
-                automatic = Automatic.Off
             )
         )
     }
 
     @Ignore("Cannot be tested requires AU-based merchant")
     fun testAuBecsDD() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AuBecsDebit,
-                authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.USD,
-                shipping = Shipping.On
+                delayed = DelayedPMs.On,
+//                currency = Currency.AUD,
             )
         )
     }
 
     @Ignore("Complex authorization handling required")
     fun testKlarna() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Klarna,
-                authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.USD
+                paymentMethod = SupportedPaymentMethod.Klarna
             )
         )
     }
 
     @Ignore("Cannot be tested requires EU-based merchant")
     fun testPayPal() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.PayPal,
-                authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.USD
+                paymentMethod = SupportedPaymentMethod.PayPal
             )
         )
+    }
+
+    companion object {
+        // There exists only one screenshot processor so that all tests put
+        // their files in the same directory.
+        private val screenshotProcessor = MyScreenCaptureProcessor()
     }
 }
