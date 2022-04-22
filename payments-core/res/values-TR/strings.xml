@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Posta kodunuz geçersiz.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Posta kodunuz geçersiz</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">&lt;img src=\"affirm\"&gt; ile zaman içinde ödeyin.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Hesaptaki ad</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB numarası</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik Ödeme Talebini ve &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Otomatik Ödeme Talebi hizmet sözleşmesini&lt;/a&gt; kabul etmiş olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments Australia Pty Ltd ACN 160 180 343 (\"Stripe\") şirketine %s (\\"Satıcı\\") adına, Satıcı tarafından size iletilen herhangi bir tutarı Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik\n    Ödeme Talebini ve Otomatik Ödeme Talebi hizmet sözleşmesini kabul etmiş\n    olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments\n    Australia Pty Ltd ACN 160 180 343 (\"Stripe\")\n    şirketine %1$s (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı\n    Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için\n    yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -149,4 +157,6 @@
   <string name="title_payment_method">Ödeme Metodu</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Gönderi Metodunu Seçin</string>
+  <!-- Error description for incomplete account number -->
+  <string name="us_bank_account_widget_account_number_incomplete">Girdiğiniz hesap numarası eksik.</string>
 </resources>

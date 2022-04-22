@@ -28,14 +28,17 @@ import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.b64Encode
 import com.stripe.android.camera.framework.util.scaleAndCenterWithin
-import com.stripe.android.stripecardscan.framework.LOG_TAG
+import com.stripe.android.stripecardscan.framework.api.dto.ConfigurationStats
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsOCRRequest
+import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import com.stripe.android.stripecardscan.framework.util.encodeToJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
+
+private const val LOG_TAG = "StripeApi"
 
 private const val BASE_URL = "https://api.stripe.com/v1"
 internal val CARD_SCAN_RETRY_STATUS_CODES: Iterable<Int> = 500..599
@@ -58,6 +61,7 @@ internal fun uploadScanStatsCIV(
     device: Device,
     appDetails: AppDetails,
     scanStatistics: ScanStatistics,
+    scanConfig: ScanConfig,
 ) = GlobalScope.launch(Dispatchers.IO) {
     val statsPayload = StatsPayload(
         instanceId = instanceId,
@@ -65,6 +69,7 @@ internal fun uploadScanStatsCIV(
         device = ClientDevice.fromDevice(device),
         app = AppInfo.fromAppDetails(appDetails),
         scanStats = scanStatistics,
+        configuration = ConfigurationStats.fromScanConfig(scanConfig)
 // TODO: this should probably be reported as part of scanstats, but is not yet supported
 //        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
     )
@@ -104,6 +109,7 @@ internal fun uploadScanStatsOCR(
     device: Device,
     appDetails: AppDetails,
     scanStatistics: ScanStatistics,
+    scanConfig: ScanConfig,
 ) = GlobalScope.launch(Dispatchers.IO) {
     val statsPayload = StatsPayload(
         instanceId = instanceId,
@@ -111,6 +117,7 @@ internal fun uploadScanStatsOCR(
         device = ClientDevice.fromDevice(device),
         app = AppInfo.fromAppDetails(appDetails),
         scanStats = scanStatistics,
+        configuration = ConfigurationStats.fromScanConfig(scanConfig),
 // TODO: this should probably be reported as part of scanstats, but is not yet supported
 //        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
     )

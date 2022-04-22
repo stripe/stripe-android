@@ -16,12 +16,13 @@
     <string name="customer_guest">Guest</string>
     <string name="customer_new">New</string>
     <string name="customer_returning">Returning</string>
+    <string name="link">Link</string>
     <string name="google_pay">Google Pay</string>
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="checkout_mode">Checkout Mode</string>
     <string name="payment">Pay</string>
-    <string name="payment_with_setup">Pay w/setup</string>
+    <string name="payment_with_setup">P &amp; S</string>
     <string name="setup">Setup</string>
     <string name="reload_paymentsheet">Reload PaymentSheet</string>
     <string name="payment_method">Payment Method</string>

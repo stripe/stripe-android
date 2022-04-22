@@ -1,5 +1,4 @@
 public final class com/stripe/android/core/AppInfo : android/os/Parcelable {
-	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/core/AppInfo$Companion;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
@@ -40,7 +39,6 @@ public final class com/stripe/android/core/Logger$DefaultImpls {
 }
 
 public final class com/stripe/android/core/StripeError : com/stripe/android/core/model/StripeModel, java/io/Serializable {
-	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -67,7 +65,6 @@ public final class com/stripe/android/core/StripeError : com/stripe/android/core
 }
 
 public final class com/stripe/android/core/exception/APIConnectionException : com/stripe/android/core/exception/StripeException {
-	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/core/exception/APIConnectionException$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
@@ -79,39 +76,33 @@ public final class com/stripe/android/core/exception/APIConnectionException$Comp
 }
 
 public final class com/stripe/android/core/exception/APIException : com/stripe/android/core/exception/StripeException {
-	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
-	public static final field $stable I
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/InvalidRequestException : com/stripe/android/core/exception/StripeException {
-	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/PermissionException : com/stripe/android/core/exception/StripeException {
-	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/RateLimitException : com/stripe/android/core/exception/StripeException {
-	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public abstract class com/stripe/android/core/exception/StripeException : java/lang/Exception {
-	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/core/exception/StripeException$Companion;
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/Throwable;Ljava/lang/String;)V
@@ -162,7 +153,6 @@ public final class com/stripe/android/core/model/CountryCodeKt {
 }
 
 public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
-	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/core/model/StripeFilePurpose;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -191,7 +181,6 @@ public final class com/stripe/android/core/model/StripeFile : com/stripe/android
 }
 
 public final class com/stripe/android/core/model/StripeFileParams {
-	public static final field $stable I
 	public fun <init> (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)V
 	public final fun copy (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)Lcom/stripe/android/core/model/StripeFileParams;
 	public static synthetic fun copy$default (Lcom/stripe/android/core/model/StripeFileParams;Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;ILjava/lang/Object;)Lcom/stripe/android/core/model/StripeFileParams;
@@ -201,7 +190,6 @@ public final class com/stripe/android/core/model/StripeFileParams {
 }
 
 public final class com/stripe/android/core/model/StripeFileParams$FileLink : android/os/Parcelable {
-	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
 	public fun <init> (Z)V
@@ -246,7 +234,6 @@ public final class com/stripe/android/core/networking/ApiRequest_Options_Factory
 }
 
 public final class com/stripe/android/core/networking/ConnectionFactory$Default : com/stripe/android/core/networking/ConnectionFactory {
-	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/core/networking/ConnectionFactory$Default;
 	public synthetic fun create (Lcom/stripe/android/core/networking/StripeRequest;)Lcom/stripe/android/core/networking/StripeConnection;
 	public fun createForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;)Lcom/stripe/android/core/networking/StripeConnection;
@@ -275,22 +262,12 @@ public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory
 	public static fun newInstance ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
 }
 
-public abstract class com/stripe/android/core/networking/StripeConnection$AbstractConnection : com/stripe/android/core/networking/StripeConnection {
-	public static final field $stable I
-	public fun <init> (Ljavax/net/ssl/HttpsURLConnection;)V
-	public fun close ()V
-	public synthetic fun getResponse ()Lcom/stripe/android/core/networking/StripeResponse;
-	public synthetic fun getResponseCode ()I
-}
-
 public final class com/stripe/android/core/networking/StripeConnection$Default : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
-	public static final field $stable I
 	public synthetic fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
 	public fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/core/networking/StripeConnection$FileConnection : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
-	public static final field $stable I
 	public fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/io/File;
 	public synthetic fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
 }
@@ -318,7 +295,6 @@ public final class com/stripe/android/core/networking/StripeResponseKtxKt {
 }
 
 public final class com/stripe/android/core/version/StripeSdkVersion {
-	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/core/version/StripeSdkVersion;
 	public static final field VERSION Ljava/lang/String;
 	public static final field VERSION_NAME Ljava/lang/String;

@@ -77,7 +77,8 @@ internal class StripeCollectBankAccountLauncher constructor(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret,
-                configuration = configuration
+                configuration = configuration,
+                attachToIntent = true
             )
         )
     }
@@ -91,7 +92,8 @@ internal class StripeCollectBankAccountLauncher constructor(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = publishableKey,
                 clientSecret = clientSecret,
-                configuration = configuration
+                configuration = configuration,
+                attachToIntent = true
             )
         )
     }

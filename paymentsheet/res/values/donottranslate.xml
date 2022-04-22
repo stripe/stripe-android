@@ -8,14 +8,9 @@
     <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
     <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
     <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
-    <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
-    <string name="stripe_paymentsheet_payment_method_au_becs_debit">AuBecsDebit</string>
 
     <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>
 
     <!-- Label indicating the payment intent is in testmode -->
     <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>
-
-    <!-- Card details entry form header title -->
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
 </resources>

@@ -127,6 +127,7 @@ internal class ConsentFragment(
                 identityViewModel,
                 collectedDataParam,
                 ClearDataParam.CONSENT_TO_DOC_SELECT,
+                fromFragment = R.id.consentFragment,
                 shouldNotSubmit = { true },
                 notSubmitBlock = {
                     navigateToDocSelection()

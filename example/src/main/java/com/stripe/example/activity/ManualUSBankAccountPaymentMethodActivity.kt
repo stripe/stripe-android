@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.StripeApiBeta
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -38,15 +37,9 @@ import com.stripe.example.StripeFactory
 import com.stripe.example.theme.DefaultExampleTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/**
- * This example is currently work in progress. Do not use it as a reference.
- *
- * In order for this example to work uncomment ManualUSBankAccountPaymentMethodActivity
- * in LauncherActivity.kt
- */
 class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     private val stripe by lazy {
-        StripeFactory(this, betas = setOf(StripeApiBeta.USBankAccount)).create()
+        StripeFactory(this).create()
     }
 
     private var paymentIntentSecret: String? = null
@@ -55,7 +48,7 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     private val verifyCallback = object : ApiResultCallback<StripeIntent> {
         override fun onSuccess(result: StripeIntent) {
             viewModel.inProgress.value = false
-            viewModel.status.value += "Account verified with \n\n$result\n"
+            viewModel.status.value += "Attempted to verify with \n\n$result\n"
         }
 
         override fun onError(e: Exception) {
@@ -345,15 +338,15 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
         if (inProgress) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
-        if (status.isNotEmpty()) {
-            Text(text = status)
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .verticalScroll(scrollState)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .verticalScroll(scrollState)
+        ) {
+            if (status.isNotEmpty()) {
+                Text(text = status)
+            } else {
                 Text(text = "Enter verification details from your bank account.")
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -390,8 +383,8 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
                     onClick = {
                         verifyWithMicrodeposits(
                             descriptorCode = descriptorCode.value,
-                            firstAmount = firstAmount.value.toInt(),
-                            secondAmount = secondAmount.value.toInt()
+                            firstAmount = firstAmount.value.toIntOrNull() ?: 0,
+                            secondAmount = secondAmount.value.toIntOrNull() ?: 0
                         )
                     }
                 )

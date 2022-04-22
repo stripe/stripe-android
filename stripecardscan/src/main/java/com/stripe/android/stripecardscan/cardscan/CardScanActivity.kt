@@ -28,6 +28,7 @@ import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
+import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
@@ -332,7 +333,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             scanId = Stats.scanId,
             device = Device.fromContext(this),
             appDetails = AppDetails.fromContext(this),
-            scanStatistics = ScanStatistics.fromStats()
+            scanStatistics = ScanStatistics.fromStats(),
+            scanConfig = ScanConfig(0),
         )
         super.closeScanner()
     }

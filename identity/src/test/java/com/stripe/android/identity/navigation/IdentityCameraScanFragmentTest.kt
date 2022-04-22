@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MediatorLiveData
@@ -36,6 +37,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -74,6 +76,7 @@ class IdentityCameraScanFragmentTest {
     ) : IdentityCameraScanFragment(
         identityScanViewModelFactory, identityViewModelFactory
     ) {
+        override val fragmentId = R.id.IDScanFragment
         var currentState: IdentityScanState? = null
         var onCameraReadyIsCalled = false
 
@@ -92,6 +95,13 @@ class IdentityCameraScanFragmentTest {
 
         override fun updateUI(identityScanState: IdentityScanState) {
             currentState = identityScanState
+        }
+    }
+
+    @Test
+    fun `when viewCreated uploadedState is reset`() {
+        launchTestFragment().onFragment {
+            verify(mockIdentityViewModel).resetUploadedState()
         }
     }
 
@@ -194,13 +204,27 @@ class IdentityCameraScanFragmentTest {
         verify(mockScanFlow).cancelFlow()
     }
 
-    private fun launchTestFragment() = launchFragmentInContainer(
-        themeResId = R.style.Theme_MaterialComponents
-    ) {
-        TestFragment(
-            viewModelFactoryFor(mockIdentityScanViewModel),
-            viewModelFactoryFor(mockIdentityViewModel),
-            mockCameraView
-        )
+    @Test
+    fun `when shouldStartFromBack don't reset upload state`() {
+        launchTestFragment(shouldStartFromBack = true)
+        verify(mockIdentityViewModel, times(0)).resetUploadedState()
     }
+
+    @Test
+    fun `when not shouldStartFromBack reset upload state`() {
+        launchTestFragment(shouldStartFromBack = false)
+        verify(mockIdentityViewModel).resetUploadedState()
+    }
+
+    private fun launchTestFragment(shouldStartFromBack: Boolean = false) =
+        launchFragmentInContainer(
+            bundleOf(IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
+            themeResId = R.style.Theme_MaterialComponents
+        ) {
+            TestFragment(
+                viewModelFactoryFor(mockIdentityScanViewModel),
+                viewModelFactoryFor(mockIdentityViewModel),
+                mockCameraView
+            )
+        }
 }

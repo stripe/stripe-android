@@ -39,6 +39,9 @@ class CardImageVerificationDemoActivity : AppCompatActivity() {
             CardImageVerificationSheet.create(
                 this,
                 settings.publishableKey,
+                config = CardImageVerificationSheet.Configuration(
+                    strictModeFrames = CardImageVerificationSheet.Configuration.StrictModeFrameCount.Low
+                ),
                 cardImageVerificationResultCallback = this::onScanFinished
             )
 
