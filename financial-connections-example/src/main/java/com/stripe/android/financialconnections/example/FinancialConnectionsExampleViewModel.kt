@@ -56,8 +56,8 @@ class FinancialConnectionsExampleViewModel : ViewModel() {
                     _viewEffect.emit(
                         OpenFinancialConnectionsSheetForTokenExample(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                linkAccountSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey
                             )
                         )
                     )
