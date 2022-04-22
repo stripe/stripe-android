@@ -1,6 +1,9 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
 
+### Financial Connections
+* [CHANGED] [4887](https://github.com/stripe/stripe-android/pull/4887) Renamed Connections to Financial Connections.
+
 ## 20.1.0 - 2022-04-18
 This release includes several Payments and PaymentSheet bug fixes.
 
