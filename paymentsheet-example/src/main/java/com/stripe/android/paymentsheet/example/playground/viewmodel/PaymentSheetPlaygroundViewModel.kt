@@ -45,7 +45,8 @@ class PaymentSheetPlaygroundViewModel(
         currency: String,
         mode: String,
         setShippingAddress: Boolean,
-        setAutomaticPaymentMethods: Boolean
+        setAutomaticPaymentMethods: Boolean,
+        setDelayedPaymentMethods: Boolean,
     ) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
             sharedPreferencesName,
@@ -60,6 +61,7 @@ class PaymentSheetPlaygroundViewModel(
         editor.putString(Toggle.Mode.key, mode)
         editor.putBoolean(Toggle.SetShippingAddress.key, setShippingAddress)
         editor.putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
+        editor.putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
         editor.apply()
     }
 
@@ -96,6 +98,11 @@ class PaymentSheetPlaygroundViewModel(
             Toggle.SetAutomaticPaymentMethods.default as Boolean
         )
 
+        val setDelayedPaymentMethods = sharedPreferences.getBoolean(
+            Toggle.SetDelayedPaymentMethods.key,
+            Toggle.SetDelayedPaymentMethods.default as Boolean
+        )
+
         return SavedToggles(
             customer.toString(),
             link,
@@ -103,7 +110,8 @@ class PaymentSheetPlaygroundViewModel(
             currency.toString(),
             mode.toString(),
             setShippingAddress,
-            setAutomaticPaymentMethods
+            setAutomaticPaymentMethods,
+            setDelayedPaymentMethods
         )
     }
 

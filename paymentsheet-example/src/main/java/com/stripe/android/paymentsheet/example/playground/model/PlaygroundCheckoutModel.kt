@@ -22,7 +22,8 @@ data class SavedToggles(
     val currency: String,
     val mode: String,
     val setShippingAddress: Boolean,
-    val setAutomaticPaymentMethods: Boolean
+    val setAutomaticPaymentMethods: Boolean,
+    val setDelayedPaymentMethods: Boolean
 )
 
 enum class Toggle(val key: String, val default: Any) {
@@ -32,7 +33,8 @@ enum class Toggle(val key: String, val default: Any) {
     Currency("currency", CheckoutCurrency.USD.value),
     Mode("mode", CheckoutMode.Payment.value),
     SetShippingAddress("setShippingAddress", true),
-    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true)
+    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
+    SetDelayedPaymentMethods("setDelayedPaymentMethods", false)
 }
 
 sealed class CheckoutCustomer(val value: String) {
