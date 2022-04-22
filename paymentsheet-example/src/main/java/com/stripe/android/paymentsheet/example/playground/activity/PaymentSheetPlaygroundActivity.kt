@@ -76,6 +76,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val setShippingAddress: Boolean
         get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
 
+    private val setDefaultBillingAddress: Boolean
+        get() = viewBinding.defaultBillingRadioGroup.checkedRadioButtonId == R.id.default_billing_on_button
+
     private val setAutomaticPaymentMethods: Boolean
         get() = viewBinding.automaticPmGroup.checkedRadioButtonId == R.id.automatic_pm_on_button
 
@@ -111,6 +114,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 Toggle.Currency.default.toString(),
                 Toggle.Mode.default.toString(),
                 Toggle.SetShippingAddress.default as Boolean,
+                Toggle.SetDefaultBillingAddress.default as Boolean,
                 Toggle.SetAutomaticPaymentMethods.default as Boolean,
                 Toggle.SetDelayedPaymentMethods.default as Boolean,
             )
@@ -176,7 +180,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val (customer, link, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods, setDelayedPaymentMethods) = viewModel.getSavedToggleState()
+        val (customer, link, googlePay, currency, mode, setShippingAddress, setDefaultBillingAddress, setAutomaticPaymentMethods, setDelayedPaymentMethods) = viewModel.getSavedToggleState()
         setToggles(
             customer,
             link,
@@ -184,6 +188,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             currency,
             mode,
             setShippingAddress,
+            setDefaultBillingAddress,
             setAutomaticPaymentMethods,
             setDelayedPaymentMethods
         )
@@ -198,6 +203,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             currency.value,
             mode.value,
             setShippingAddress,
+            setDefaultBillingAddress,
             setAutomaticPaymentMethods,
             setDelayedPaymentMethods
         )
@@ -210,6 +216,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         currency: String?,
         mode: String?,
         setShippingAddress: Boolean,
+        setDefaultBillingAddress: Boolean,
         setAutomaticPaymentMethods: Boolean,
         setDelayedPaymentMethods: Boolean,
     ) {
@@ -244,6 +251,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         when (setShippingAddress) {
             true -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
             false -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
+        }
+
+        when (setDefaultBillingAddress) {
+            true -> viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_on_button)
+            false -> viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_off_button)
         }
 
         when (setAutomaticPaymentMethods) {
