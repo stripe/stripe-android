@@ -3,7 +3,8 @@
 This release adds card scanning to PaymentSheet.
 
 ### PaymentSheet
-* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Remove font resource to save space and default to system default
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Card-scanning in PaymentSheet
 
 Dependencies updated:
 * [4901](https://github.com/stripe/stripe-android/pull/4901) Bump navigation-compose from 2.5.0-alpha04 to 2.5.0-beta01 (#4901)
