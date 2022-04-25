@@ -12,7 +12,7 @@ import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
-import com.stripe.android.ui.core.elements.CardDetailsSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
@@ -71,6 +71,7 @@ class TransformSpecToElements(
                     it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
+                is CardDetailsSectionSpec -> it.transform(context)
                 is BsbSpec -> it.transform()
             }
         }
@@ -129,7 +130,6 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
-                is CardDetailsSpec -> it.transform(context)
                 is CardBillingSpec -> it.transform(addressRepository)
                 is AuBankAccountNumberSpec -> it.transform()
             }

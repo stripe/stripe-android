@@ -25,6 +25,7 @@ This release patches on a crash on PaymentLauncher, updates the package name of 
 changes the public API for CardImageVerificationSheet and releases Identity SDK.
 
 ### Payments (`com.stripe:stripe-android`)
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Added card-scanning feature to PaymentSheet
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
 * [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on
   PaymentSheet to use Compose.
