@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -198,6 +199,9 @@ internal class PaymentSheetActivityTest {
     fun `when back to Ready state should update PaymentSelection`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
             // New valid card
             val initialSelection = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -212,32 +216,17 @@ internal class PaymentSheetActivityTest {
                 )
             )
 
-            val paymentSelections = mutableListOf<PaymentSelection?>()
-            viewModel.selection.observeForever { paymentSelection ->
-                paymentSelections.add(paymentSelection)
-            }
-            idleLooper()
-
-            assertThat(paymentSelections.size)
-                .isEqualTo(1)
-            assertThat(paymentSelections[0])
-                .isEqualTo(initialSelection)
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
 
             activity.viewBinding.googlePayButton.callOnClick()
 
             // Updates PaymentSelection to Google Pay
-            assertThat(paymentSelections.size)
-                .isEqualTo(2)
-            assertThat(paymentSelections[1])
-                .isEqualTo(PaymentSelection.GooglePay)
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(PaymentSelection.GooglePay)
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-            // Back to Ready state, should return to null PaymentSelection
-            assertThat(paymentSelections.size)
-                .isEqualTo(3)
-            assertThat(paymentSelections[0])
-                .isEqualTo(initialSelection)
+            // Back to Ready state, should return to initial PaymentSelection
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
         }
     }
 

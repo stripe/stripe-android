@@ -197,11 +197,24 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
             replace(
                 R.id.payment_method_fragment_container,
-                ComposeFormDataCollectionFragment::class.java,
+                fragmentForPaymentMethod(paymentMethod),
                 args
             )
         }
     }
+
+    private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
+        when (paymentMethod.type) {
+            // TODO(jameswoo-stripe): add us_bank_account payment method form fragment
+//            PaymentMethod.Type.USBankAccount -> {
+//                if (sheetViewModel is PaymentSheetViewModel) {
+//                    USBankAccountFormForPaymentSheetFragment::class.java
+//                } else {
+//                    USBankAccountFormForPaymentOptionsFragment::class.java
+//                }
+//            }
+            else -> ComposeFormDataCollectionFragment::class.java
+        }
 
     private fun getFragment() =
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)

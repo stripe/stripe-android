@@ -56,9 +56,9 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
-     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetResult]
+     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetContract.Result]
      */
     data class FinishWithResult(
-        val result: FinancialConnectionsSheetResult
+        val result: FinancialConnectionsSheetContract.Result
     ) : FinancialConnectionsSheetViewEffect()
 }

@@ -5,14 +5,6 @@ public final class com/stripe/android/identity/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/identity/IdentityActivity$inlined$sam$i$androidx_navigation_ui_AppBarConfiguration_OnNavigateUpListener$0 : androidx/navigation/ui/AppBarConfiguration$OnNavigateUpListener, kotlin/jvm/internal/FunctionAdapter {
-	public fun <init> (Lkotlin/jvm/functions/Function0;)V
-	public final fun equals (Ljava/lang/Object;)Z
-	public final fun getFunctionDelegate ()Lkotlin/Function;
-	public final fun hashCode ()I
-	public final synthetic fun onNavigateUp ()Z
-}
-
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
 	public abstract fun present (Ljava/lang/String;Ljava/lang/String;)V
