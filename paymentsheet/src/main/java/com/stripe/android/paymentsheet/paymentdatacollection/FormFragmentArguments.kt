@@ -28,10 +28,6 @@ internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, St
         addPath(it.toParamMap(), "")
     }
 
-    // TODO: Test want to make sure the paymentMethodCreateParams take precedence over the
-    // paymentSheet Billing once established
-
-    // TODO: Need to determine why the paymentsheetPaymentMethodCreateParams never clear
     return mapOf(
         IdentifierSpec.Name to this.billingDetails?.name,
         IdentifierSpec.Email to this.billingDetails?.email,
