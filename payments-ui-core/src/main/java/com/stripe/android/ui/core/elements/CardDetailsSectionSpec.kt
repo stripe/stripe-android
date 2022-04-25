@@ -17,5 +17,5 @@ data class CardDetailsSectionSpec(
             context,
             initialValues,
             identifier
-    )
+        )
 }
