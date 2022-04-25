@@ -35,6 +35,11 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 
     kotlinOptions {
@@ -44,6 +49,7 @@ android {
 
 dependencies {
     implementation project(':financial-connections')
+    implementation project(':financial-connections-compose')
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
@@ -54,6 +60,11 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+
+    // Jetpack Compose
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"

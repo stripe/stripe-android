@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
+import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP
 import androidx.fragment.app.Fragment
 import com.stripe.android.connections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
@@ -15,7 +17,7 @@ import kotlinx.parcelize.Parcelize
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
  */
-class FinancialConnectionsSheet internal constructor(
+class FinancialConnectionsSheet @RestrictTo(LIBRARY_GROUP) constructor(
     private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher
 ) {
     /**

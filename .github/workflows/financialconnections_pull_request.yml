@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'financial-connections/**'
+      - 'financial-connections-compose/**'
       - 'stripe-core/**'
       - 'payments-model/**'
       - 'dependencies.gradle'

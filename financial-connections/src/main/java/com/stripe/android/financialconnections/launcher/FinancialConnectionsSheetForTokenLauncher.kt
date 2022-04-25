@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.launcher
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.connections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -13,7 +14,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Failed
 import org.jetbrains.annotations.TestOnly
 
-internal class FinancialConnectionsSheetForTokenLauncher(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FinancialConnectionsSheetForTokenLauncher(
     private val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetContract.Args>
 ) : FinancialConnectionsSheetLauncher {
 
@@ -60,13 +62,19 @@ internal class FinancialConnectionsSheetForTokenLauncher(
             )
         )
     }
+
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun Result.toExposedResult(): FinancialConnectionsSheetForTokenResult {
+            return when (this) {
+                is Canceled -> FinancialConnectionsSheetForTokenResult.Canceled
+                is Failed -> FinancialConnectionsSheetForTokenResult.Failed(error)
+                is Completed -> FinancialConnectionsSheetForTokenResult.Completed(
+                    linkAccountSession = linkAccountSession,
+                    token = requireNotNull(token)
+                )
+            }
+        }
+    }
 }
 
-private fun Result.toExposedResult(): FinancialConnectionsSheetForTokenResult = when (this) {
-    is Canceled -> FinancialConnectionsSheetForTokenResult.Canceled
-    is Failed -> FinancialConnectionsSheetForTokenResult.Failed(error)
-    is Completed -> FinancialConnectionsSheetForTokenResult.Completed(
-        linkAccountSession = linkAccountSession,
-        token = requireNotNull(token)
-    )
-}

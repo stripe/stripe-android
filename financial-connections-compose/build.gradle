@@ -1,0 +1,39 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'checkstyle'
+
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
+dependencies {
+    api project(":financial-connections")
+
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+android {
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+    }
+}
+
+ext {
+    artifactId = "financial-connections-compose"
+    artifactName = "financial-connections-compose"
+    artifactDescrption = "Compose support for the Stripe Financial Connections Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

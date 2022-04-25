@@ -5,13 +5,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
+import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP
 import androidx.core.os.bundleOf
 import com.stripe.android.financialconnections.model.LinkAccountSession
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 
-internal class FinancialConnectionsSheetContract :
+@RestrictTo(LIBRARY_GROUP) class FinancialConnectionsSheetContract :
     ActivityResultContract<FinancialConnectionsSheetContract.Args, FinancialConnectionsSheetContract.Result>() {
 
     override fun createIntent(
@@ -67,7 +69,7 @@ internal class FinancialConnectionsSheetContract :
         }
     }
 
-    internal sealed class Result : Parcelable {
+    @RestrictTo(LIBRARY_GROUP) sealed class Result : Parcelable {
         /**
          * The customer completed the connections session.
          * @param linkAccountSession The link account session connected

@@ -3,14 +3,20 @@ package com.stripe.android.financialconnections.launcher
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.annotation.RestrictTo
+import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Canceled
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Completed
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Failed
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResultCallback
 import org.jetbrains.annotations.TestOnly
 
-internal class DefaultFinancialConnectionsSheetLauncher(
+@RestrictTo(LIBRARY_GROUP)
+class DefaultFinancialConnectionsSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetContract.Args>
 ) : FinancialConnectionsSheetLauncher {
 
@@ -57,13 +63,19 @@ internal class DefaultFinancialConnectionsSheetLauncher(
             )
         )
     }
+
+    companion object {
+        @RestrictTo(LIBRARY_GROUP)
+        fun FinancialConnectionsSheetContract.Result.toExposedResult(): FinancialConnectionsSheetResult {
+            return when (this) {
+                is FinancialConnectionsSheetContract.Result.Canceled -> Canceled
+                is FinancialConnectionsSheetContract.Result.Failed -> Failed(error)
+                is FinancialConnectionsSheetContract.Result.Completed -> Completed(
+                    linkAccountSession = linkAccountSession,
+                )
+            }
+        }
+    }
 }
 
-private fun FinancialConnectionsSheetContract.Result.toExposedResult(): FinancialConnectionsSheetResult =
-    when (this) {
-        is FinancialConnectionsSheetContract.Result.Canceled -> FinancialConnectionsSheetResult.Canceled
-        is FinancialConnectionsSheetContract.Result.Failed -> FinancialConnectionsSheetResult.Failed(error)
-        is FinancialConnectionsSheetContract.Result.Completed -> FinancialConnectionsSheetResult.Completed(
-            linkAccountSession = linkAccountSession,
-        )
-    }
+
