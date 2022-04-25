@@ -102,7 +102,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
     }
 
-    fun convertPixelsToDp(px: Int, resources: Resources): Dp {
+    private fun convertPixelsToDp(px: Int, resources: Resources): Dp {
         return (px / (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).dp
     }
 
@@ -147,8 +147,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
-                        injectorKey = "testInjectorKeyAddFragmentTest",
-                        initialPaymentMethodCreateParams = null
+                        injectorKey = "testInjectorKeyAddFragmentTest"
                     )
                 )
         }.recreate().onFragment { fragment ->
@@ -175,11 +174,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     )
                 )
         }
-    }
-
-    @Test
-    fun `getFormArgumentTests with newLpm set and not set`(){
-        assertTrue(false)
     }
 
     @Test
