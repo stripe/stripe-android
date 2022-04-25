@@ -12,9 +12,7 @@ def getBackendUrl() {
 dependencies {
     implementation project(':payments-core')
     implementation project(':paymentsheet')
-//    implementation "androidx.test.ext:junit-ktx:1.1.0"
-    androidTestImplementation 'androidx.test:core-ktx:1.1.0'
-
+    implementation project(':stripecardscan')
 
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
@@ -59,6 +57,7 @@ dependencies {
 
     // Core library
     androidTestImplementation "androidx.test:core:$androidTestVersion"
+    androidTestImplementation 'androidx.test:core-ktx:1.1.0'
 
     // AndroidJUnitRunner and JUnit Rules
     androidTestImplementation "androidx.test:runner:$androidTestVersion"

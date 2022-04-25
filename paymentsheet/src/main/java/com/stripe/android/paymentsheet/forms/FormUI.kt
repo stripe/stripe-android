@@ -22,6 +22,8 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.BsbElement
 import com.stripe.android.ui.core.elements.BsbElementUI
 import com.stripe.android.ui.core.elements.EmptyFormElement
@@ -85,6 +87,9 @@ internal fun FormInternal(
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
                         is MandateTextElement -> MandateTextUI(element)
+                        is CardDetailsSectionElement -> CardDetailsSectionElementUI(
+                            enabled, element.controller, hiddenIdentifiers
+                        )
                         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
                         is EmptyFormElement -> {}
                     }
