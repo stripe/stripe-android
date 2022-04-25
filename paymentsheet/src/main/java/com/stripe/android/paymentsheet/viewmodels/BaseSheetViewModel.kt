@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -141,6 +142,25 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
+    private val _primaryButtonText = MutableLiveData<String>()
+    val primaryButtonText: LiveData<String>
+        get() = _primaryButtonText
+
+    private val primaryButtonEnabled = MutableLiveData<Boolean?>()
+
+    private val _primaryButtonOnPress = MutableLiveData<() -> Unit>()
+    val primaryButtonOnPress: LiveData<() -> Unit>
+        get() = _primaryButtonOnPress
+
+    @VisibleForTesting
+    @StringRes
+    internal val _notesText = MutableLiveData<Int?>()
+    internal val notesText: LiveData<Int?>
+        @StringRes get() = _notesText
+
+    private var initialPrimaryButtonText: String? = null
+    private var initialPrimaryButtonOnPress: () -> Unit = {}
+
     protected var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
@@ -170,12 +190,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
+            primaryButtonEnabled,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = buttonsEnabled.value == true &&
-                    selection.value != null
+                value = primaryButtonEnabled.value
+                    ?: (
+                        buttonsEnabled.value == true &&
+                            selection.value != null
+                        )
             }
         }
     }.distinctUntilChanged()
@@ -302,6 +326,32 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
 
         logger.warning(message)
+    }
+
+    fun updatePrimaryButtonText(text: String, initial: Boolean = false) {
+        if (initial) {
+            initialPrimaryButtonText = text
+        }
+        _primaryButtonText.value = text
+    }
+
+    fun updatePrimaryButtonEnabled(enabled: Boolean) {
+        primaryButtonEnabled.value = enabled
+    }
+
+    fun updatePrimaryButtonOnPress(initial: Boolean = false, onPress: () -> Unit) {
+        if (initial) {
+            initialPrimaryButtonOnPress = onPress
+        }
+        _primaryButtonOnPress.value = onPress
+    }
+
+    fun resetPrimaryButton() {
+        initialPrimaryButtonText?.let {
+            _primaryButtonText.value = it
+        }
+        primaryButtonEnabled.value = null
+        _primaryButtonOnPress.value = initialPrimaryButtonOnPress
     }
 
     fun updateSelection(selection: PaymentSelection?) {

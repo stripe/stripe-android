@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -12,9 +13,12 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.style.TextAlign
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -31,6 +35,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
@@ -133,6 +138,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         setupBuyButton()
         setupTopContainer()
+        setupNotes()
 
         linkButton.apply {
             onClick = viewModel::launchLink
@@ -253,11 +259,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun setupBuyButton() {
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
-                viewBinding.buyButton.setLabel(requireNotNull(it).buildPayButtonLabel(resources))
+                viewModel.updatePrimaryButtonText(
+                    initial = true,
+                    text = requireNotNull(it).buildPayButtonLabel(resources)
+                )
             }
         } else {
-            viewBinding.buyButton.setLabel(
-                resources.getString(R.string.stripe_setup_button_label)
+            viewModel.updatePrimaryButtonText(
+                initial = true,
+                text = resources.getString(R.string.stripe_setup_button_label)
             )
         }
 
@@ -272,13 +282,23 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             buttonColor
         )
 
-        viewBinding.buyButton.setOnClickListener {
-            clearErrorMessages()
-            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
-        }
-
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             viewBinding.buyButton.isEnabled = isEnabled
+        }
+
+        viewModel.primaryButtonOnPress.observe(this) { action ->
+            viewBinding.buyButton.setOnClickListener {
+                action()
+            }
+        }
+
+        viewModel.primaryButtonText.observe(this) { text ->
+            viewBinding.buyButton.setLabel(text)
+        }
+
+        viewModel.updatePrimaryButtonOnPress(initial = true) {
+            clearErrorMessages()
+            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
     }
 
@@ -306,6 +326,34 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
             googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
             topContainer.isVisible = visible
+        }
+    }
+
+    private fun setupNotes() {
+        viewModel.notesText.observe(this) { stringRes ->
+            val showNotes = stringRes != null
+            stringRes?.let {
+                viewBinding.notes.setContent {
+                    Html(
+                        html = getString(stringRes),
+                        imageGetter = mapOf(),
+                        color = PaymentsTheme.colors.subtitle,
+                        style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
+                    )
+                }
+            }
+            viewBinding.notes.isVisible = showNotes
+            viewBinding.buttonContainer.updateLayoutParams {
+                (this as? LinearLayout.LayoutParams)?.updateMargins(
+                    bottom = if (showNotes) {
+                        0
+                    } else {
+                        resources.getDimensionPixelSize(
+                            R.dimen.stripe_paymentsheet_button_container_spacing_bottom
+                        )
+                    }
+                )
+            }
         }
     }
 
