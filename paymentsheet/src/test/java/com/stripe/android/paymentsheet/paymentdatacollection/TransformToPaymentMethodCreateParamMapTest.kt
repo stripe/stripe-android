@@ -73,39 +73,6 @@ class TransformToPaymentMethodCreateParamMapTest {
         )
     }
 
-    // TODO: Make sure we are testing actual production code here.
-    @Test
-    fun `PaymentMethodCreateParams to Identifier to String map`() {
-        val map = mapOf(
-            "billing_details" to mapOf(
-                "name" to "joe",
-                "email" to "joe@gmail.com",
-                "address" to mapOf(
-                    "country" to "US"
-                )
-            )
-        )
-        addPath(map, "")
-        println(list.toMap())
-    }
-
-    val list = mutableListOf<Pair<String, String>>()
-    private fun addPath(map: Map<String, Any>, path: String) {
-        for (entry in map.entries) {
-            if (entry.value is String) {
-                list.add(addPathKey(path, entry.key) to entry.value as String)
-            } else if (entry.value is Map<*, *>) {
-                addPath(entry.value as Map<String, Any>, addPathKey(path, entry.key))
-            }
-        }
-    }
-
-    private fun addPathKey(original: String, add: String) = if (original.isEmpty()) {
-        add
-    } else {
-        "$original[$add]"
-    }
-
     @Test
     fun `transform to payment method params`() {
         val formFieldValues = FormFieldValues(
