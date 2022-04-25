@@ -2,7 +2,6 @@ package com.stripe.android.identity.navigation
 
 import android.content.Context
 import android.view.View
-import androidx.activity.OnBackPressedCallback
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
@@ -44,16 +43,6 @@ internal class ErrorFragment(
                         Failed(failedReason)
                     )
                 }
-                requireActivity().onBackPressedDispatcher.addCallback(
-                    this,
-                    object : OnBackPressedCallback(true) {
-                        override fun handleOnBackPressed() {
-                            verificationFlowFinishable.finishWithResult(
-                                Failed(failedReason)
-                            )
-                        }
-                    }
-                )
             } ?: run {
                 bottomButton.setOnClickListener {
                     val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int

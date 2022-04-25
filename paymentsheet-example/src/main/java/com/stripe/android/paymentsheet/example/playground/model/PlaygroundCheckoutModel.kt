@@ -22,7 +22,9 @@ enum class Toggle(val key: String, val default: Any) {
     Currency("currency", CheckoutCurrency.USD.value),
     Mode("mode", CheckoutMode.Payment.value),
     SetShippingAddress("setShippingAddress", true),
-    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true)
+    SetDefaultBillingAddress("setDefaultBillingAddress", true),
+    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
+    SetDelayedPaymentMethods("setDelayedPaymentMethods", false)
 }
 
 sealed class CheckoutCustomer(val value: String) {

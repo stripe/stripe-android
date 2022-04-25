@@ -82,8 +82,7 @@
   <string name="au_becs_account_name">Nome sul conto</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="au_becs_bsb_number">Numero BSB</string>
-  <!-- Legal text shown when using AUBECS.
- -->
+  <!-- Legal text shown when using AUBECS. -->
   <string name="au_becs_mandate">Fornendo i dati del tuo conto bancario e confermando il pagamento, accetti la presente richiesta di addebito diretto e il &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;contratto di servizio per la richiesta di addebito diretto&lt;/a&gt; e autorizzi Stripe Payments Australia Pty Ltd ACN 160 180 343 con numero ID utente per l\'addebito diretto 507156 (\"Stripe\") ad addebitare sul tuo conto tramite il Bulk Electronic Clearing System (BECS) per conto di %s (\"Esercente\") qualsiasi importo che ti viene comunicato separatamente dall\'Esercente. Dichiari di essere un titolare del conto o un firmatario autorizzato per il conto sopra elencato.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Fornendo i dati del tuo conto bancario e confermando il pagamento, accetti la presente\n    richiesta di addebito diretto e il contratto di servizio per la richiesta di addebito diretto e autorizzi\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 con numero ID utente per l\'addebito diretto 507156\n    (“Stripe”) ad addebitare sul tuo conto tramite il Bulk Electronic Clearing System (BECS) per\n    conto di %1$s (\"Esercente\") qualsiasi importo che ti viene comunicato separatamente\n    dall\'Esercente. Dichiari di essere un titolare del conto o un firmatario \n    autorizzato per il conto sopra elencato.\n    </string>

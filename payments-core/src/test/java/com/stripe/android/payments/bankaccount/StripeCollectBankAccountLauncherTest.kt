@@ -28,7 +28,8 @@ class StripeCollectBankAccountLauncherTest {
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = PUBLISHABLE_KEY,
                 clientSecret = CLIENT_SECRET,
-                configuration = CONFIGURATION
+                configuration = CONFIGURATION,
+                attachToIntent = true
             )
         )
     }
@@ -45,7 +46,8 @@ class StripeCollectBankAccountLauncherTest {
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = PUBLISHABLE_KEY,
                 clientSecret = CLIENT_SECRET,
-                configuration = CONFIGURATION
+                configuration = CONFIGURATION,
+                attachToIntent = true
             )
         )
     }

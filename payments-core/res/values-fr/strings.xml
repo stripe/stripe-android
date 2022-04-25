@@ -82,8 +82,7 @@
   <string name="au_becs_account_name">Nom du titulaire du compte</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="au_becs_bsb_number">Numéro BSB</string>
-  <!-- Legal text shown when using AUBECS.
- -->
+  <!-- Legal text shown when using AUBECS. -->
   <string name="au_becs_mandate">En fournissant vos coordonnées bancaires et en confirmant ce paiement, vous acceptez cette demande de prélèvement automatique et le &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Contrat d\'utilisaton du service de demande de prélèvement automatique&lt;/a&gt;. Vous autorisez également Stripe Payments Australia Pty Ltd ACN 160 180 343 ID d\'utilisateur de prélèvement automatique 507156 (“Stripe”) à débiter votre compte par le biais du Bulk Electronic Clearing System (BECS) pour le compte du %s (the \\"Marchand\\") pour tout montant vous ayant été communiqué individuellement par le Marchand. Vous certifiez être le titulaire du compte ou un signataire autorisé du compte indiqué ci-dessus.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    En fournissant vos données bancaires et en confirmant ce paiement, vous acceptez cette\n    demande de prélèvement automatique et les conditions d\'utilisation du service correspondantes, et autorisez\n    Stripe Account Australia Pty Ltd, ACN 160 180 343, ID de compte de prélèvement numéro 507156\n    (\"Stripe\"), à débiter votre compte par le biais du système de prélèvement BECS\n    pour le compte de %1$s (le \"marchand\") pour tout montant vous étant communiqué séparément\n    par ce dernier. Vous certifiez que vous êtes le titulaire ou un signataire autorisé\n    du compte susmentionné.\n    </string>
