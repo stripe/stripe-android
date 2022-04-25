@@ -17,7 +17,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `Verify the first field in error is returned in error flow`() {
-        val cardController = CardDetailsController(context)
+        val cardController = CardDetailsController(context, emptyMap())
 
         val flowValues = mutableListOf<FieldError?>()
         cardController.error.asLiveData()

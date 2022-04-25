@@ -1,5 +1,7 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
+### PaymentSheet
+* [FIXED] [4909](https://github.com/stripe/stripe-android/pull/4909) In the multi-step flow when re-opening to a new card the form will pre-populate.  Also the default billing address will pre-populate in the form.
 
 ## 20.1.0 - 2022-04-18
 This release includes several Payments and PaymentSheet bug fixes.

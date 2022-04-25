@@ -10,10 +10,11 @@ import kotlinx.parcelize.Parcelize
 data class BsbSpec(
     override val identifier: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
 ) : FormItemSpec(), RequiredItemSpec, Parcelable {
-    fun transform(): BsbElement =
+    fun transform(initialValues: Map<IdentifierSpec, String?>): BsbElement =
         BsbElement(
             this.identifier,
-            banks
+            banks,
+            initialValues[this.identifier]
         )
 }
 

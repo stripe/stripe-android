@@ -21,7 +21,6 @@ internal class TransformSpecToElement @Inject constructor(
             resourceRepository = resourceRepository,
             initialValues = formFragmentArguments.getInitialValuesMap(),
             amount = formFragmentArguments.amount,
-            country = formFragmentArguments.billingDetails?.address?.country,
             saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
             merchantName = formFragmentArguments.merchantName,
             context = context

@@ -75,30 +75,31 @@ class TransformToPaymentMethodCreateParamMapTest {
 
     @Test
     fun `transform to payment method params`() {
+        val formFieldValues = FormFieldValues(
+            mapOf(
+                IdentifierSpec.Name to FormFieldEntry(
+                    "joe",
+                    true
+                ),
+                IdentifierSpec.Email to FormFieldEntry(
+                    "joe@gmail.com",
+                    true
+                ),
+                IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    "US",
+                    true
+                ),
+                IdentifierSpec.Line1 to FormFieldEntry(
+                    "123 Main Street",
+                    true
+                ),
+            ),
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
         val paymentMethodParams = TransformToPaymentMethodCreateParams()
             .transform(
-                FormFieldValues(
-                    mapOf(
-                        IdentifierSpec.Name to FormFieldEntry(
-                            "joe",
-                            true
-                        ),
-                        IdentifierSpec.Email to FormFieldEntry(
-                            "joe@gmail.com",
-                            true
-                        ),
-                        IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
-                            "US",
-                            true
-                        ),
-                        IdentifierSpec.Line1 to FormFieldEntry(
-                            "123 Main Street",
-                            true
-                        ),
-                    ),
-                    showsMandate = false,
-                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
-                ),
+                formFieldValues,
                 PaymentMethod.Type.Sofort,
             )
 

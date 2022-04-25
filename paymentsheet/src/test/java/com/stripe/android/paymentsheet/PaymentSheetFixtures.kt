@@ -48,7 +48,7 @@ internal object PaymentSheetFixtures {
         paymentMethods = emptyList(),
         config = CONFIG_GOOGLEPAY,
         isGooglePayReady = false,
-        newCard = null,
+        newLpm = null,
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,

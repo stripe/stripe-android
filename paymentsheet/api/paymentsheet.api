@@ -754,13 +754,13 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 }
 
-public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource {
+public final class com/stripe/android/paymentsheet/viewmodels/MultiStepContinueIdlingResource {
 	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion;
+	public static final field Companion Lcom/stripe/android/paymentsheet/viewmodels/MultiStepContinueIdlingResource$Companion;
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion {
+public final class com/stripe/android/paymentsheet/viewmodels/MultiStepContinueIdlingResource$Companion {
 	public final fun getIdlingResource ()Landroidx/test/espresso/idling/CountingIdlingResource;
 	public final fun getSingleStepIdlingResource ()Landroidx/test/espresso/IdlingResource;
 	public final fun setIdlingResource (Landroidx/test/espresso/idling/CountingIdlingResource;)V

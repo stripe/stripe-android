@@ -14,15 +14,17 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsElementTest {
 
-    private val context = ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+    private val context =
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
 
     @Test
     fun `test form field values returned and expiration date parsing`() {
-        val cardController = CardDetailsController(context)
+        val cardController = CardDetailsController(context, emptyMap())
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             context,
-            cardController
+            initialValues = emptyMap(),
+            cardController,
         )
 
         val flowValues = mutableListOf<List<Pair<IdentifierSpec, FormFieldEntry>>>()
@@ -43,7 +45,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.Generic("card[cvc]") to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                 IdentifierSpec.Generic("card[exp_month]") to FormFieldEntry("1", true),
-                IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("30", true),
+                IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("2030", true),
             )
         )
     }
