@@ -230,7 +230,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         @VisibleForTesting
-        internal fun getFormArguments(
+        fun getFormArguments(
             showPaymentMethod: SupportedPaymentMethod,
             stripeIntent: StripeIntent,
             config: PaymentSheet.Configuration?,

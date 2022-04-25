@@ -19,9 +19,12 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_MINIMUM
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -102,7 +105,106 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
     }
 
-    fun convertPixelsToDp(px: Int, resources: Resources): Dp {
+    @Test
+    fun `getFormArguments newLPM with customer requested save and Generic`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
+        }
+        val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+            PaymentMethod.Type.Bancontact,
+            mapOf(
+                "type" to "bancontact",
+                "billing_details" to mapOf(
+                    "name" to "Jenny Rosen"
+                )
+            ),
+            emptySet()
+        )
+        val actualFromArguments = BaseAddPaymentMethodFragment.getFormArguments(
+            SupportedPaymentMethod.Bancontact,
+            paymentIntent,
+            CONFIG_MINIMUM,
+            MERCHANT_DISPLAY_NAME,
+            Amount(50, "USD"),
+            "testInjectorKey",
+            PaymentSelection.New.GenericPaymentMethod(
+                R.string.stripe_paymentsheet_payment_method_bancontact,
+                R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                paymentMethodCreateParams,
+                PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        )
+
+        assertThat(actualFromArguments.initialPaymentMethodCreateParams)
+            .isEqualTo(paymentMethodCreateParams)
+        assertThat(actualFromArguments.showCheckbox)
+            .isFalse()
+        assertThat(actualFromArguments.showCheckboxControlledFields)
+            .isFalse()
+    }
+
+    @Test
+    fun `getFormArguments newLPM WITH customer requested save and Card`() {
+        val actualFromArguments = testCardFormArguments(
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+
+        assertThat(actualFromArguments.showCheckboxControlledFields)
+            .isTrue()
+    }
+
+    @Test
+    fun `getFormArguments newLPM WITH NO customer requested save and Card`() {
+        val actualFromArguments = testCardFormArguments(
+            PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        assertThat(actualFromArguments.showCheckboxControlledFields)
+            .isFalse()
+    }
+
+    private fun testCardFormArguments(customerReuse: PaymentSelection.CustomerRequestedSave): FormFragmentArguments {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
+        }
+        val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+            PaymentMethod.Type.Card,
+            mapOf(
+                "type" to "card",
+                "card" to mapOf(
+                    "cvc" to "123",
+                    "number" to "4242424242424242",
+                    "exp_date" to "1250"
+                ),
+                "billing_details" to mapOf(
+                    "address" to mapOf(
+                        "country" to "Jenny Rosen"
+                    )
+                )
+            ),
+            emptySet()
+        )
+        val actualFromArguments = BaseAddPaymentMethodFragment.getFormArguments(
+            SupportedPaymentMethod.Card,
+            paymentIntent,
+            CONFIG_MINIMUM,
+            MERCHANT_DISPLAY_NAME,
+            Amount(50, "USD"),
+            "testInjectorKey",
+            PaymentSelection.New.Card(
+                paymentMethodCreateParams,
+                CardBrand.Visa,
+                customerReuse
+            )
+        )
+
+        assertThat(actualFromArguments.initialPaymentMethodCreateParams)
+            .isEqualTo(paymentMethodCreateParams)
+
+        return actualFromArguments
+    }
+
+    private fun convertPixelsToDp(px: Int, resources: Resources): Dp {
         return (px / (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).dp
     }
 
@@ -209,7 +311,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         paymentMethod = SupportedPaymentMethod.Card,
                         amount = createAmount(),
                         showCheckbox = true,
-                        showCheckboxControlledFields = true,
+                        showCheckboxControlledFields = false,
                         billingDetails = null
                     ),
                 )
@@ -244,7 +346,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         paymentMethod = SupportedPaymentMethod.Card,
                         amount = createAmount(),
                         showCheckbox = true,
-                        showCheckboxControlledFields = true,
+                        showCheckboxControlledFields = false,
                         billingDetails = null
                     ),
                 )
