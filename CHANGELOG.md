@@ -11,6 +11,9 @@ Dependencies updated:
 * [4899](https://github.com/stripe/stripe-android/pull/4899) Bump leakcanary-android from 2.8.1 to 2.9.1 (#4899)
 * [4871](https://github.com/stripe/stripe-android/pull/4871) Bump dokka-gradle-plugin from 1.6.10 to 1.6.20 (#4871)
 
+### Financial Connections
+* [CHANGED] [4887](https://github.com/stripe/stripe-android/pull/4887) Renamed Connections to Financial Connections.
+
 ## 20.1.0 - 2022-04-18
 This release includes several Payments and PaymentSheet bug fixes.
 
