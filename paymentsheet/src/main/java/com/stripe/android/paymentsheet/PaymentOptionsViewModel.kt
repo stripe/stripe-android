@@ -16,6 +16,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -113,7 +114,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun processExistingCard(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        if (paymentSelection is PaymentSelection.Saved &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
+            _mandateText.value = R.string.us_bank_account_payment_sheet_saved_mandate
+        } else {
+            _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        }
     }
 
     private fun processNewCard(paymentSelection: PaymentSelection) {
