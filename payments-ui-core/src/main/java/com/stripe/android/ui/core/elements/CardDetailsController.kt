@@ -33,7 +33,7 @@ internal class CardDetailsController constructor(
         SimpleTextFieldController(
             DateConfig(),
             initialValue = initialValues[IdentifierSpec.Generic("card[exp_month]")] +
-                initialValues[IdentifierSpec.Generic("card[exp_year]")]
+                initialValues[IdentifierSpec.Generic("card[exp_year]")]?.takeLast(2)
         ),
     )
 

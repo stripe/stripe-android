@@ -28,10 +28,6 @@ internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, St
         addPath(it.toParamMap(), "")
     }
 
-    // TODO: Test want to make sure the paymentMethodCreateParams take precedence over the
-    // paymentSheet Billing once established
-
-    // TODO: Need to determine why the paymentsheetPaymentMethodCreateParams never clear
     return mapOf(
         IdentifierSpec.Name to this.billingDetails?.name,
         IdentifierSpec.Email to this.billingDetails?.email,
@@ -45,13 +41,19 @@ internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, St
     ).plus(list.toMap())
 }
 
-private val list = mutableListOf<Pair<IdentifierSpec, String>>()
-private fun addPath(map: Map<String, Any>, path: String) {
+private val list = mutableListOf<Pair<IdentifierSpec, String?>>()
+private fun addPath(map: Map<String, Any?>, path: String) {
     for (entry in map.entries) {
-        if (entry.value is String) {
-            list.add(IdentifierSpec.get(addPathKey(path, entry.key)) to entry.value as String)
-        } else if (entry.value is Map<*, *>) {
-            addPath(entry.value as Map<String, Any>, addPathKey(path, entry.key))
+        when (entry.value) {
+            null -> {
+                list.add(IdentifierSpec.get(addPathKey(path, entry.key)) to null)
+            }
+            is String -> {
+                list.add(IdentifierSpec.get(addPathKey(path, entry.key)) to entry.value as String)
+            }
+            is Map<*, *> -> {
+                addPath(entry.value as Map<String, Any>, addPathKey(path, entry.key))
+            }
         }
     }
 }

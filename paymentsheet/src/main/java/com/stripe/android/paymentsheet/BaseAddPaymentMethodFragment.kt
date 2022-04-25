@@ -265,13 +265,19 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
                 injectorKey = injectorKey,
-                initialPaymentMethodCreateParams = if (newLpm?.paymentMethodCreateParams?.typeCode == showPaymentMethod.type.code) {
+                initialPaymentMethodCreateParams =
+                if (newLpm?.paymentMethodCreateParams?.typeCode ==
+                    showPaymentMethod.type.code
+                ) {
                     when (newLpm) {
                         is PaymentSelection.New.GenericPaymentMethod -> {
                             newLpm.paymentMethodCreateParams
                         }
                         is PaymentSelection.New.Card -> {
                             newLpm.paymentMethodCreateParams
+                        }
+                        else -> {
+                            null
                         }
                     }
                 } else {
