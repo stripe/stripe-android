@@ -38,7 +38,6 @@ class FieldPopulator(
             if (testParameters.saveCheckboxValue) {
                 selectors.saveForFutureCheckbox.assertIsOn()
             } else {
-                // TODO(MLB): THis will be fixed in a follow up review.
                 selectors.saveForFutureCheckbox.assertIsOff()
             }
         } else {
