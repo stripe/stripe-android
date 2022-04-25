@@ -79,7 +79,10 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_APPLICATION_ID to applicationId
             ),
         )
-        return executeRequest(financialConnectionsRequest, FinancialConnectionsSessionManifest.serializer())
+        return executeRequest(
+            financialConnectionsRequest,
+            FinancialConnectionsSessionManifest.serializer()
+        )
     }
 
     private suspend fun <Response> executeRequest(
@@ -137,26 +140,14 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
         internal const val PARAMS_APPLICATION_ID = "application_id"
 
-        /**
-         * @return `https://api.stripe.com/v1/link_account_sessions/list_accounts`
-         */
-        internal val listAccountsUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("list_accounts")
+        internal const val listAccountsUrl: String =
+            "$API_HOST/v1/financial_connections/list_accounts"
 
-        /**
-         * @return `https://api.stripe.com/v1/link_account_sessions/generate_hosted_url`
-         */
-        internal val generateHostedUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("generate_hosted_url")
+        internal const val generateHostedUrl: String =
+            "$API_HOST/v1/financial_connections/generate_hosted_url"
 
-        internal val sessionReceiptUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("session_receipt")
+        internal const val sessionReceiptUrl: String =
+            "$API_HOST/v1/financial_connections/session_receipt"
 
-        private fun getApiUrl(path: String): String {
-            return "$API_HOST/v1/link_account_sessions/$path"
-        }
     }
 }
