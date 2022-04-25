@@ -108,7 +108,6 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$City : com
 }
 
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion {
-	public final fun get (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 }
 
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$Country : com/stripe/android/ui/core/elements/IdentifierSpec {

@@ -19,7 +19,7 @@ class FormFragmentArgumentsTest {
             postalCode = "T37 F8HK",
             country = "IE",
 
-            ),
+        ),
         "email.email.com",
         "Jenny Smith"
     )
