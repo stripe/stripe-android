@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-internal data class LinkAccountSessionManifest(
+internal data class FinancialConnectionsSessionManifest(
     @SerialName("hosted_auth_url") val hostedAuthUrl: String,
     @SerialName("success_url") val successUrl: String,
     @SerialName("cancel_url") val cancelUrl: String

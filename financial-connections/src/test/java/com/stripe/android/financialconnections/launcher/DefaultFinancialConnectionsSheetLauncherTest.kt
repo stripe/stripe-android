@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
-import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
@@ -23,7 +23,7 @@ class DefaultFinancialConnectionsSheetLauncherTest {
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
             FinancialConnectionsSheetContract.Result.Completed(
-                linkAccountSession = linkAccountSessionWithNoMoreAccounts,
+                financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts,
                 token = null
             )
         )
@@ -45,7 +45,7 @@ class DefaultFinancialConnectionsSheetLauncherTest {
                 assertThat(results)
                     .containsExactly(
                         FinancialConnectionsSheetResult.Completed(
-                            linkAccountSessionWithNoMoreAccounts
+                            financialConnectionsSessionWithNoMoreAccounts
                         )
                     )
             }

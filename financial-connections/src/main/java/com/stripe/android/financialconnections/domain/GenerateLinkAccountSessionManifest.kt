@@ -1,11 +1,11 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
 /**
- * Fetches the [LinkAccountSessionManifest] from the Stripe API to get the hosted auth flow URL
+ * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
  * as well as the success and cancel callback URLs to verify.
  */
 internal class GenerateLinkAccountSessionManifest @Inject constructor(
@@ -15,7 +15,7 @@ internal class GenerateLinkAccountSessionManifest @Inject constructor(
     suspend operator fun invoke(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest {
+    ): FinancialConnectionsSessionManifest {
         return financialConnectionsRepository.generateLinkAccountSessionManifest(
             clientSecret = clientSecret,
             applicationId = applicationId

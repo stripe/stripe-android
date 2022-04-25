@@ -12,8 +12,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
 import com.stripe.android.financialconnections.domain.GenerateLinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.LinkedAccountFixtures
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,7 +36,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val manifest = LinkAccountSessionManifest(
+    private val manifest = FinancialConnectionsSessionManifest(
         ApiKeyFixtures.HOSTED_AUTH_URL,
         ApiKeyFixtures.SUCCESS_URL,
         ApiKeyFixtures.CANCEL_URL
@@ -272,7 +272,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
         it.data = Uri.parse(ApiKeyFixtures.CANCEL_URL)
     }
 
-    private fun linkAccountSession() = LinkAccountSession(
+    private fun linkAccountSession() = FinancialConnectionsSession(
         id = "las_no_more",
         clientSecret = configuration.linkAccountSessionClientSecret,
         livemode = true,

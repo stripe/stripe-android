@@ -3,8 +3,8 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
-import com.stripe.android.model.CreateLinkAccountSessionParams
+import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -16,13 +16,13 @@ import org.mockito.kotlin.whenever
 import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
-class CreateLinkAccountSessionTest {
+class CreateFinancialConnectionsSessionTest {
 
     private val stripeRepository = mock<StripeRepository>()
-    private val createLinkAccountSession = CreateLinkAccountSession(stripeRepository)
+    private val createFinancialConnectionsSession = CreateFinancialConnectionsSession(stripeRepository)
 
     private val customerName = "name"
-    private val linkedAccountSession = BankConnectionsLinkedAccountSession(
+    private val linkedAccountSession = FinancialConnectionsSession(
         "session_secret",
         "session_id"
     )
@@ -36,8 +36,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithPaymentIntentReturns { linkedAccountSession }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forPaymentIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -45,9 +45,9 @@ class CreateLinkAccountSessionTest {
                 )
 
             // Then
-            verify(stripeRepository).createPaymentIntentLinkAccountSession(
+            verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = "pi_1234",
-                params = CreateLinkAccountSessionParams(
+                params = CreateFinancialConnectionsSessionParams(
                     clientSecret,
                     customerName,
                     null
@@ -67,8 +67,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithPaymentIntentReturns { null }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forPaymentIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -76,9 +76,9 @@ class CreateLinkAccountSessionTest {
                 )
 
             // Then
-            verify(stripeRepository).createPaymentIntentLinkAccountSession(
+            verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = "pi_1234",
-                params = CreateLinkAccountSessionParams(
+                params = CreateFinancialConnectionsSessionParams(
                     clientSecret,
                     customerName,
                     null
@@ -101,8 +101,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithPaymentIntentReturns { throw expectedException }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forPaymentIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -110,12 +110,12 @@ class CreateLinkAccountSessionTest {
                 )
 
             // Then
-            verify(stripeRepository).createPaymentIntentLinkAccountSession(
+            verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = "pi_1234",
-                params = CreateLinkAccountSessionParams(
-                    clientSecret,
-                    customerName,
-                    null
+                params = CreateFinancialConnectionsSessionParams(
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = null
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -132,8 +132,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithPaymentIntentReturns { linkedAccountSession }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forPaymentIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -154,8 +154,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithSetupIntentReturns { linkedAccountSession }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forSetupIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -163,9 +163,9 @@ class CreateLinkAccountSessionTest {
                 )
 
             // Then
-            verify(stripeRepository).createSetupIntentLinkAccountSession(
+            verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
-                params = CreateLinkAccountSessionParams(
+                params = CreateFinancialConnectionsSessionParams(
                     clientSecret,
                     customerName,
                     null
@@ -185,8 +185,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithSetupIntentReturns { null }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forSetupIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -194,9 +194,9 @@ class CreateLinkAccountSessionTest {
                 )
 
             // Then
-            verify(stripeRepository).createSetupIntentLinkAccountSession(
+            verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
-                params = CreateLinkAccountSessionParams(
+                params = CreateFinancialConnectionsSessionParams(
                     clientSecret,
                     customerName,
                     null
@@ -218,8 +218,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithSetupIntentReturns { throw expectedException }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forSetupIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -227,9 +227,9 @@ class CreateLinkAccountSessionTest {
                 )
 
             // Then
-            verify(stripeRepository).createSetupIntentLinkAccountSession(
+            verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
-                params = CreateLinkAccountSessionParams(
+                params = CreateFinancialConnectionsSessionParams(
                     clientSecret,
                     customerName,
                     null
@@ -249,8 +249,8 @@ class CreateLinkAccountSessionTest {
             givenCreateSessionWithSetupIntentReturns { linkedAccountSession }
 
             // When
-            val paymentIntent: Result<BankConnectionsLinkedAccountSession> =
-                createLinkAccountSession.forSetupIntent(
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
@@ -263,10 +263,10 @@ class CreateLinkAccountSessionTest {
     }
 
     private suspend fun givenCreateSessionWithPaymentIntentReturns(
-        session: () -> BankConnectionsLinkedAccountSession?
+        session: () -> FinancialConnectionsSession?
     ) {
         whenever(
-            stripeRepository.createPaymentIntentLinkAccountSession(
+            stripeRepository.createPaymentIntentFinancialConnectionsSession(
                 any(),
                 any(),
                 any(),
@@ -275,10 +275,10 @@ class CreateLinkAccountSessionTest {
     }
 
     private suspend fun givenCreateSessionWithSetupIntentReturns(
-        session: () -> BankConnectionsLinkedAccountSession?
+        session: () -> FinancialConnectionsSession?
     ) {
         whenever(
-            stripeRepository.createSetupIntentLinkAccountSession(
+            stripeRepository.createSetupIntentFinancialConnectionsSession(
                 any(),
                 any(),
                 any(),

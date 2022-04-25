@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkedAccount
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.model.ListLinkedAccountParams
@@ -19,7 +19,7 @@ internal class FetchLinkAccountSession @Inject constructor(
      *
      * @return LinkAccountSession with all linked accounts
      */
-    suspend operator fun invoke(clientSecret: String): LinkAccountSession {
+    suspend operator fun invoke(clientSecret: String): FinancialConnectionsSession {
         val linkAccountSession = financialConnectionsRepository.getLinkAccountSession(clientSecret)
         if (linkAccountSession.linkedAccounts.hasMore) {
             val accounts = mutableListOf<LinkedAccount>()
@@ -37,7 +37,7 @@ internal class FetchLinkAccountSession @Inject constructor(
                 accounts.addAll(nextLinkedAccountList.linkedAccounts)
             }
 
-            return LinkAccountSession(
+            return FinancialConnectionsSession(
                 id = linkAccountSession.id,
                 clientSecret = linkAccountSession.clientSecret,
                 linkedAccounts = LinkedAccountList(

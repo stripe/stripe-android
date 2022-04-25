@@ -4,9 +4,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.linkAccountSessionWithMoreAccounts
-import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.financialConnectionsSessionWithMoreAccounts
+import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.moreLinkedAccountList
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
@@ -18,7 +18,7 @@ import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
-class FetchLinkAccountSessionTest {
+class FetchFinancialConnectionsSessionTest {
 
     private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
     private val getLinkAccountSession = FetchLinkAccountSession(repository)
@@ -28,14 +28,14 @@ class FetchLinkAccountSessionTest {
         runTest {
             // Given
             val clientSecret = "clientSecret"
-            repository.getLinkAccountSessionResultProvider =
-                { linkAccountSessionWithNoMoreAccounts }
+            repository.getFinancialConnectionsSessionResultProvider =
+                { financialConnectionsSessionWithNoMoreAccounts }
 
             // When
-            val result: LinkAccountSession = getLinkAccountSession(clientSecret)
+            val result: FinancialConnectionsSession = getLinkAccountSession(clientSecret)
 
             // Then
-            assertThat(result).isEqualTo(linkAccountSessionWithNoMoreAccounts)
+            assertThat(result).isEqualTo(financialConnectionsSessionWithNoMoreAccounts)
         }
 
     @Test
@@ -43,22 +43,22 @@ class FetchLinkAccountSessionTest {
         runTest {
             // Given
             val clientSecret = "clientSecret"
-            repository.getLinkAccountSessionResultProvider = { linkAccountSessionWithMoreAccounts }
+            repository.getFinancialConnectionsSessionResultProvider = { financialConnectionsSessionWithMoreAccounts }
             repository.getLinkedAccountsResultProvider = { moreLinkedAccountList }
 
             // When
-            val result: LinkAccountSession = getLinkAccountSession(clientSecret)
+            val result: FinancialConnectionsSession = getLinkAccountSession(clientSecret)
 
             // Then
             val combinedAccounts = listOf(
                 // Original account list with hasMore == true
-                linkAccountSessionWithMoreAccounts.linkedAccounts.linkedAccounts,
+                financialConnectionsSessionWithMoreAccounts.linkedAccounts.linkedAccounts,
                 // Next and last linked accounts page.
                 moreLinkedAccountList.linkedAccounts
             ).flatten()
 
             assertThat(result).isEqualTo(
-                linkAccountSessionWithMoreAccounts.copy(
+                financialConnectionsSessionWithMoreAccounts.copy(
                     linkedAccounts = LinkedAccountList(
                         linkedAccounts = combinedAccounts,
                         hasMore = false,
@@ -75,23 +75,23 @@ class FetchLinkAccountSessionTest {
         // Given
         assertFailsWith<APIException> {
             val clientSecret = "clientSecret"
-            repository.getLinkAccountSessionResultProvider =
-                { linkAccountSessionWithMoreAccounts }
+            repository.getFinancialConnectionsSessionResultProvider =
+                { financialConnectionsSessionWithMoreAccounts }
             repository.getLinkedAccountsResultProvider = { throw APIException() }
 
             // When
-            val result: LinkAccountSession = getLinkAccountSession(clientSecret)
+            val result: FinancialConnectionsSession = getLinkAccountSession(clientSecret)
 
             // Then
             val combinedAccounts = listOf(
                 // Original account list with hasMore == true
-                linkAccountSessionWithMoreAccounts.linkedAccounts.linkedAccounts,
+                financialConnectionsSessionWithMoreAccounts.linkedAccounts.linkedAccounts,
                 // Next and last linked accounts page.
                 moreLinkedAccountList.linkedAccounts
             ).flatten()
 
             assertThat(result).isEqualTo(
-                linkAccountSessionWithMoreAccounts.copy(
+                financialConnectionsSessionWithMoreAccounts.copy(
                     linkedAccounts = LinkedAccountList(
                         linkedAccounts = combinedAccounts,
                         hasMore = false,

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -70,11 +70,11 @@ internal class FinancialConnectionsSheetContract :
     internal sealed class Result : Parcelable {
         /**
          * The customer completed the connections session.
-         * @param linkAccountSession The link account session connected
+         * @param financialConnectionsSession The link account session connected
          */
         @Parcelize
         data class Completed(
-            val linkAccountSession: LinkAccountSession,
+            val financialConnectionsSession: FinancialConnectionsSession,
             val token: Token? = null
         ) : Result()
 

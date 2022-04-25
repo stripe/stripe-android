@@ -3,7 +3,7 @@ package com.stripe.android.connections.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connections.test.readResourceAsString
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -12,7 +12,7 @@ import org.junit.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
-class FetchLinkAccountSessionForTokenTest {
+class FetchFinancialConnectionsSessionForTokenTest {
 
     private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
     private val getLinkAccountSession = FetchLinkAccountSessionForToken(repository)
@@ -25,9 +25,9 @@ class FetchLinkAccountSessionForTokenTest {
         runTest {
             // Given
             val clientSecret = "clientSecret"
-            repository.getLinkAccountSessionResultProvider = {
+            repository.getFinancialConnectionsSessionResultProvider = {
                 json.decodeFromString(
-                    LinkAccountSession.serializer(),
+                    FinancialConnectionsSession.serializer(),
                     readResourceAsString("json/linked_account_session_with_token.json")
                 )
             }
@@ -44,9 +44,9 @@ class FetchLinkAccountSessionForTokenTest {
         runTest {
             // Given
             val clientSecret = "clientSecret"
-            repository.getLinkAccountSessionResultProvider = {
+            repository.getFinancialConnectionsSessionResultProvider = {
                 json.decodeFromString(
-                    LinkAccountSession.serializer(),
+                    FinancialConnectionsSession.serializer(),
                     readResourceAsString("json/linked_account_session_payment_account_as_bank_account.json")
                 )
             }

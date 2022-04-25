@@ -15,8 +15,8 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 import kotlinx.serialization.KSerializer
@@ -56,7 +56,7 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
 
     override suspend fun getLinkAccountSession(
         clientSecret: String
-    ): LinkAccountSession {
+    ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = sessionReceiptUrl,
             options = options,
@@ -64,13 +64,13 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_CLIENT_SECRET to clientSecret
             ),
         )
-        return executeRequest(financialConnectionsRequest, LinkAccountSession.serializer())
+        return executeRequest(financialConnectionsRequest, FinancialConnectionsSession.serializer())
     }
 
     override suspend fun generateLinkAccountSessionManifest(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest {
+    ): FinancialConnectionsSessionManifest {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = generateHostedUrl,
             options = options,
@@ -79,7 +79,7 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_APPLICATION_ID to applicationId
             ),
         )
-        return executeRequest(financialConnectionsRequest, LinkAccountSessionManifest.serializer())
+        return executeRequest(financialConnectionsRequest, FinancialConnectionsSessionManifest.serializer())
     }
 
     private suspend fun <Response> executeRequest(

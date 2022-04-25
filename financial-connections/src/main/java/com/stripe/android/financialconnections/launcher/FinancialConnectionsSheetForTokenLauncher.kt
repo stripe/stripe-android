@@ -66,7 +66,7 @@ private fun Result.toExposedResult(): FinancialConnectionsSheetForTokenResult = 
     is Canceled -> FinancialConnectionsSheetForTokenResult.Canceled
     is Failed -> FinancialConnectionsSheetForTokenResult.Failed(error)
     is Completed -> FinancialConnectionsSheetForTokenResult.Completed(
-        linkAccountSession = linkAccountSession,
+        financialConnectionsSession = financialConnectionsSession,
         token = requireNotNull(token)
     )
 }

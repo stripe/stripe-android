@@ -5,7 +5,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
@@ -14,7 +14,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.CreateLinkAccountSessionParams
+import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -333,37 +333,37 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun attachLinkAccountSessionToPaymentIntent(
+    override suspend fun attachFinancialConnectionsSessionToPaymentIntent(
         clientSecret: String,
         paymentIntentId: String,
-        linkAccountSessionId: String,
+        financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options
     ): PaymentIntent? {
         return null
     }
 
-    override suspend fun attachLinkAccountSessionToSetupIntent(
+    override suspend fun attachFinancialConnectionsSessionToSetupIntent(
         clientSecret: String,
         setupIntentId: String,
-        linkAccountSessionId: String,
+        financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent? {
         return null
     }
 
-    override suspend fun createPaymentIntentLinkAccountSession(
+    override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
-        params: CreateLinkAccountSessionParams,
+        params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): BankConnectionsLinkedAccountSession? {
+    ): FinancialConnectionsSession? {
         return null
     }
 
-    override suspend fun createSetupIntentLinkAccountSession(
+    override suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
-        params: CreateLinkAccountSessionParams,
+        params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): BankConnectionsLinkedAccountSession? {
+    ): FinancialConnectionsSession? {
         return null
     }
 

@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  */
 @Parcelize
 @Serializable
-data class LinkAccountSession internal constructor(
+data class FinancialConnectionsSession internal constructor(
     @SerialName("client_secret")
     val clientSecret: String,
 

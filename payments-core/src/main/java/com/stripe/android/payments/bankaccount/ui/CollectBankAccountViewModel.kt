@@ -9,11 +9,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
-import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
-import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
+import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
+import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
@@ -34,8 +34,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private val args: CollectBankAccountContract.Args,
     private val _viewEffect: MutableSharedFlow<CollectBankAccountViewEffect>,
     // injected instances
-    private val createLinkAccountSession: CreateLinkAccountSession,
-    private val attachLinkAccountSession: AttachLinkAccountSession,
+    private val createFinancialConnectionsSession: CreateFinancialConnectionsSession,
+    private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession,
     private val retrieveStripeIntent: RetrieveStripeIntent,
     private val logger: Logger
 ) : ViewModel() {
@@ -44,20 +44,20 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            createLinkAccountSession()
+            createFinancialConnectionsSession()
         }
     }
 
-    private suspend fun createLinkAccountSession() {
+    private suspend fun createFinancialConnectionsSession() {
         when (val configuration = args.configuration) {
             is CollectBankAccountConfiguration.USBankAccount -> when (args) {
-                is ForPaymentIntent -> createLinkAccountSession.forPaymentIntent(
+                is ForPaymentIntent -> createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     customerName = configuration.name,
                     customerEmail = configuration.email
                 )
-                is ForSetupIntent -> createLinkAccountSession.forSetupIntent(
+                is ForSetupIntent -> createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     customerName = configuration.name,
@@ -87,9 +87,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     finishWithError(result.error)
                 is FinancialConnectionsSheetResult.Completed ->
                     if (args.attachToIntent) {
-                        attachLinkAccountSessionToIntent(result.linkAccountSession)
+                        attachFinancialConnectionsSessionToIntent(result.financialConnectionsSession)
                     } else {
-                        finishWithLinkAccountSession(result.linkAccountSession)
+                        finishWithFinancialConnectionsSession(result.financialConnectionsSession)
                     }
             }
         }
@@ -99,7 +99,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun finishWithLinkAccountSession(linkAccountSession: LinkAccountSession) {
+    private fun finishWithFinancialConnectionsSession(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
             retrieveStripeIntent(
                 args.publishableKey,
@@ -109,7 +109,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     Completed(
                         CollectBankAccountResponse(
                             intent = stripeIntent,
-                            linkAccountSession = linkAccountSession
+                            financialConnectionsSession = financialConnectionsSession
                         )
                     )
                 )
@@ -119,21 +119,21 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    private fun attachLinkAccountSessionToIntent(linkAccountSession: LinkAccountSession) {
+    private fun attachFinancialConnectionsSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
             when (args) {
-                is ForPaymentIntent -> attachLinkAccountSession.forPaymentIntent(
+                is ForPaymentIntent -> attachFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
-                    linkedAccountSessionId = linkAccountSession.id
+                    linkedAccountSessionId = financialConnectionsSession.id
                 )
-                is ForSetupIntent -> attachLinkAccountSession.forSetupIntent(
+                is ForSetupIntent -> attachFinancialConnectionsSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
-                    linkedAccountSessionId = linkAccountSession.id
+                    linkedAccountSessionId = financialConnectionsSession.id
                 )
             }
-                .mapCatching { Completed(CollectBankAccountResponse(it, linkAccountSession)) }
+                .mapCatching { Completed(CollectBankAccountResponse(it, financialConnectionsSession)) }
                 .onSuccess { result: Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)

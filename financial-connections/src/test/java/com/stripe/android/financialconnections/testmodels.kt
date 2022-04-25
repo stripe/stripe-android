@@ -1,13 +1,13 @@
 package com.stripe.android.financialconnections
 
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkedAccountFixtures
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.Token
 import java.util.Date
 
-val linkAccountSessionWithNoMoreAccounts = LinkAccountSession(
+val financialConnectionsSessionWithNoMoreAccounts = FinancialConnectionsSession(
     id = "las_no_more",
     clientSecret = ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
     linkedAccounts = LinkedAccountList(
@@ -22,7 +22,7 @@ val linkAccountSessionWithNoMoreAccounts = LinkAccountSession(
     livemode = true
 )
 
-val linkAccountSessionWithMoreAccounts = LinkAccountSession(
+val financialConnectionsSessionWithMoreAccounts = FinancialConnectionsSession(
     id = "las_has_more",
     clientSecret = ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
     linkedAccounts = LinkedAccountList(

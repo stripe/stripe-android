@@ -1,19 +1,19 @@
 package com.stripe.android.financialconnections.networking
 
-import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 import com.stripe.android.financialconnections.moreLinkedAccountList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
 internal class FakeFinancialConnectionsRepository(
-    private val manifest: LinkAccountSessionManifest,
+    private val manifest: FinancialConnectionsSessionManifest,
 ) : FinancialConnectionsRepository {
 
-    var getLinkAccountSessionResultProvider: () -> LinkAccountSession =
-        { linkAccountSessionWithNoMoreAccounts }
+    var getFinancialConnectionsSessionResultProvider: () -> FinancialConnectionsSession =
+        { financialConnectionsSessionWithNoMoreAccounts }
     var getLinkedAccountsResultProvider: () -> LinkedAccountList = { moreLinkedAccountList }
 
     override suspend fun getLinkedAccounts(
@@ -22,10 +22,10 @@ internal class FakeFinancialConnectionsRepository(
 
     override suspend fun getLinkAccountSession(
         clientSecret: String
-    ): LinkAccountSession = getLinkAccountSessionResultProvider()
+    ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
 
     override suspend fun generateLinkAccountSessionManifest(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest = manifest
+    ): FinancialConnectionsSessionManifest = manifest
 }

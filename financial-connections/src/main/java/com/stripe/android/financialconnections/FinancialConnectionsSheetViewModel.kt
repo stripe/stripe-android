@@ -19,8 +19,8 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
 import com.stripe.android.financialconnections.domain.GenerateLinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -57,7 +57,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     /**
-     * Fetches the [LinkAccountSessionManifest] from the Stripe API to get the hosted auth flow URL
+     * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
      * as well as the success and cancel callback URLs to verify.
      */
     private fun fetchManifest() {
@@ -81,7 +81,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param manifest the manifest containing the hosted auth flow URL to launch
      *
      */
-    private suspend fun openAuthFlow(manifest: LinkAccountSessionManifest) {
+    private suspend fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
         // stores manifest in state for future references.
         _state.updateAndPersist {
             it.copy(
@@ -142,7 +142,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * For regular connections flows requesting a link account session:
      *
      * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [LinkAccountSession] model from the API
+     * fetch the updated [FinancialConnectionsSession] model from the API
      * and return it back as a [Completed] result.
      */
     private fun fetchLinkAccountSession() {
@@ -163,7 +163,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * For connections flows requesting an account [com.stripe.android.model.Token]:
      *
      * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [LinkAccountSession] and the generated [com.stripe.android.model.Token]
+     * fetch the updated [FinancialConnectionsSession] and the generated [com.stripe.android.model.Token]
      * and return it back as a [Completed] result.
      */
     private fun fetchLinkAccountSessionForToken() {

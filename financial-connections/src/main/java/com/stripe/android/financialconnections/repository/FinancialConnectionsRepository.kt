@@ -4,8 +4,8 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.LinkedAccountList
 import com.stripe.android.financialconnections.model.ListLinkedAccountParams
 
@@ -28,7 +28,7 @@ internal interface FinancialConnectionsRepository {
     )
     suspend fun getLinkAccountSession(
         clientSecret: String
-    ): LinkAccountSession
+    ): FinancialConnectionsSession
 
     @Throws(
         AuthenticationException::class,
@@ -39,5 +39,5 @@ internal interface FinancialConnectionsRepository {
     suspend fun generateLinkAccountSessionManifest(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest
+    ): FinancialConnectionsSessionManifest
 }

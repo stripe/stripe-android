@@ -1,29 +1,29 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
-import com.stripe.android.model.CreateLinkAccountSessionParams
+import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
-internal class CreateLinkAccountSession @Inject constructor(
+internal class CreateFinancialConnectionsSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
 
     /**
-     * Creates a LinkAccountSession for the given [PaymentIntent] secret.
+     * Creates a [FinancialConnectionsSession] for the given [PaymentIntent] secret.
      */
     suspend fun forPaymentIntent(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
         customerEmail: String?,
-    ): Result<BankConnectionsLinkedAccountSession> = kotlin.runCatching {
-        stripeRepository.createPaymentIntentLinkAccountSession(
+    ): Result<FinancialConnectionsSession> = kotlin.runCatching {
+        stripeRepository.createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
-            params = CreateLinkAccountSessionParams(
+            params = CreateFinancialConnectionsSessionParams(
                 clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmail
@@ -33,17 +33,17 @@ internal class CreateLinkAccountSession @Inject constructor(
     }.mapCatching { it ?: throw InternalError("Error creating session for PaymentIntent") }
 
     /**
-     * Creates a LinkAccountSession for the given [SetupIntent] secret.
+     * Creates a [FinancialConnectionsSession] for the given [SetupIntent] secret.
      */
     suspend fun forSetupIntent(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
         customerEmail: String?,
-    ): Result<BankConnectionsLinkedAccountSession> = kotlin.runCatching {
-        stripeRepository.createSetupIntentLinkAccountSession(
+    ): Result<FinancialConnectionsSession> = kotlin.runCatching {
+        stripeRepository.createSetupIntentFinancialConnectionsSession(
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
-            params = CreateLinkAccountSessionParams(
+            params = CreateFinancialConnectionsSessionParams(
                 clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmail

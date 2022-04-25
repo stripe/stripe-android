@@ -1,6 +1,6 @@
 package com.stripe.android.connections.domain
 
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.model.Token
 import com.stripe.android.model.parsers.TokenJsonParser
@@ -12,13 +12,13 @@ internal class FetchLinkAccountSessionForToken @Inject constructor(
 ) {
 
     /**
-     * Fetches the [LinkAccountSession] and its nested [Token].
+     * Fetches the [FinancialConnectionsSession] and its nested [Token].
      *
      * @param clientSecret the link account session client secret
      *
-     * @return pair of [LinkAccountSession] and [Token]
+     * @return pair of [FinancialConnectionsSession] and [Token]
      */
-    suspend operator fun invoke(clientSecret: String): Pair<LinkAccountSession, Token> {
+    suspend operator fun invoke(clientSecret: String): Pair<FinancialConnectionsSession, Token> {
         val linkAccountSession = connectionsRepository.getLinkAccountSession(clientSecret)
         val parsedToken =
             linkAccountSession.bankAccountToken?.let { TokenJsonParser().parse(JSONObject(it)) }

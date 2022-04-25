@@ -1,7 +1,7 @@
 package com.stripe.android.connections
 
 import android.os.Parcelable
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 
@@ -11,11 +11,11 @@ import kotlinx.parcelize.Parcelize
 sealed class FinancialConnectionsSheetForTokenResult : Parcelable {
     /**
      * The customer completed the connections session.
-     * @param linkAccountSession The link account session connected
+     * @param financialConnectionsSession The link account session connected
      */
     @Parcelize
     data class Completed(
-        val linkAccountSession: LinkAccountSession,
+        val financialConnectionsSession: FinancialConnectionsSession,
         val token: Token
     ) : FinancialConnectionsSheetForTokenResult()
 
