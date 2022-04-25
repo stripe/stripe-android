@@ -157,6 +157,4 @@
   <string name="title_payment_method">Metode Pembayaran</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Pilih Metode Pengiriman</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">Nomor rekening yang Anda masukkan tidak lengkap.</string>
 </resources>

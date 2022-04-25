@@ -157,6 +157,4 @@
   <string name="title_payment_method">Paraan ng Pagbabayad</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Piliin ang Paraan ng Pagpapadala</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">Ang numero ng account na inilagay mo ay kulang.</string>
 </resources>

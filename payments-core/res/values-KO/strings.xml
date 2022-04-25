@@ -157,6 +157,4 @@
   <string name="title_payment_method">결제 수단</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">배송 방법 선택</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">입력하신 계좌 번호가 불완전합니다.</string>
 </resources>
