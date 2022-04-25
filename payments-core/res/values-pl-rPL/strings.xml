@@ -157,6 +157,4 @@
   <string name="title_payment_method">Metoda płatności</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Wybierz metodę przesyłki</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">Podany numer konta jest niekompletny.</string>
 </resources>

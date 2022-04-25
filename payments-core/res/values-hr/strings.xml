@@ -157,6 +157,4 @@
   <string name="title_payment_method">Način plaćanja</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Odaberite način otpreme</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">Uneseni broj računa je nepotpun.</string>
 </resources>
