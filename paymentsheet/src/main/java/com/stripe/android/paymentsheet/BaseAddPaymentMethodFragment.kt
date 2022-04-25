@@ -170,13 +170,18 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
-                initialPaymentMethodCreateParams = if (sheetViewModel.newLpm?.paymentMethodCreateParams?.typeCode == paymentMethod.type.code) {
+                initialPaymentMethodCreateParams =
+                if (sheetViewModel.newLpm?.paymentMethodCreateParams?.typeCode ==
+                    paymentMethod.type.code
+                ) {
                     when (sheetViewModel.newLpm) {
                         is PaymentSelection.New.GenericPaymentMethod -> {
-                            (sheetViewModel.newLpm as PaymentSelection.New.GenericPaymentMethod).paymentMethodCreateParams
+                            (sheetViewModel.newLpm as PaymentSelection.New.GenericPaymentMethod)
+                                .paymentMethodCreateParams
                         }
                         is PaymentSelection.New.Card -> {
-                            (sheetViewModel.newLpm as PaymentSelection.New.Card).paymentMethodCreateParams
+                            (sheetViewModel.newLpm as PaymentSelection.New.Card)
+                                .paymentMethodCreateParams
                         }
                         else -> {
                             null

@@ -73,7 +73,7 @@ class TransformToPaymentMethodCreateParamMapTest {
         )
     }
 
-    //TODO: Make sure we are testing actual production code here.
+    // TODO: Make sure we are testing actual production code here.
     @Test
     fun `PaymentMethodCreateParams to Identifier to String map`() {
         val map = mapOf(
