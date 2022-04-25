@@ -218,7 +218,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_us_bank_account,
         R.drawable.stripe_ic_paymentsheet_pm_bank,
         USBankAccountRequirement,
-        USBankAccountParamKey,
         USBankAccountForm
     )
 
