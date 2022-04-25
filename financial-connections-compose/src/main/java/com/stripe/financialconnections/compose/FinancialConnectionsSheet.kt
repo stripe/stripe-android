@@ -39,7 +39,7 @@ fun FinancialConnectionsSheet.Companion.createComposable(
  * so it should be called as part of Compose initialization path.
  */
 @Composable
-fun FinancialConnectionsSheet.Companion.createComposableForToken(
+private fun FinancialConnectionsSheet.Companion.createComposableForToken(
     callback: (FinancialConnectionsSheetForTokenResult) -> Unit
 ): FinancialConnectionsSheet = FinancialConnectionsSheet(
     FinancialConnectionsSheetForTokenLauncher(

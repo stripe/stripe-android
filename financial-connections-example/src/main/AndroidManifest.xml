@@ -9,14 +9,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsExampleActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:exported="true">
+            android:name=".FinancialConnectionsHomeActivity"
+            android:exported="true"
+            android:label="@string/title_activity_financial_connections_home"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".FinancialConnectionsExampleActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".FinancialConnectionsComposeExampleActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
