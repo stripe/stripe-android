@@ -14,8 +14,6 @@ import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
-import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
@@ -351,8 +349,6 @@ class PlaygroundTestDriver(
             IdlingRegistry.getInstance().register(
                 activity.getMultiStepReadyIdlingResource(),
                 activity.getSingleStepReadyIdlingResource(),
-//                TransitionFragmentResource.getSingleStepIdlingResource(),
-//                MultiStepContinueIdlingResource.getSingleStepIdlingResource()
             )
 
             // Observe the result of the PaymentSheet completion
@@ -362,8 +358,6 @@ class PlaygroundTestDriver(
                 IdlingRegistry.getInstance().unregister(
                     activity.getMultiStepReadyIdlingResource(),
                     activity.getSingleStepReadyIdlingResource(),
-                    TransitionFragmentResource.getSingleStepIdlingResource(),
-                    MultiStepContinueIdlingResource.getSingleStepIdlingResource()
                 )
             }
             launchPlayground.release()

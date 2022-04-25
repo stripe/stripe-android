@@ -49,31 +49,6 @@ import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 @VisibleForTesting
-class TransitionFragmentResource {
-    companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Nullable
-        var idlingResource: CountingIdlingResource? = null
-
-        // This will only be called from test code
-        @VisibleForTesting
-        @NonNull
-        fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
-            if (idlingResource == null) {
-                idlingResource = try {
-                    Class.forName("androidx.test.espresso.Espresso")
-                    val countingIdlingResource = CountingIdlingResource("transition")
-                    countingIdlingResource
-                } catch (e: ClassNotFoundException) {
-                    null
-                }
-            }
-            return idlingResource
-        }
-    }
-}
-
-@VisibleForTesting
 class MultiStepContinueIdlingResource {
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -235,7 +210,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }.distinctUntilChanged()
 
     init {
-        TransitionFragmentResource.idlingResource?.increment()
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
@@ -299,9 +273,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
-        if (TransitionFragmentResource.idlingResource?.isIdleNow == false) {
-            TransitionFragmentResource.idlingResource?.decrement()
-        }
         _transition.postValue(Event(target))
     }
 
