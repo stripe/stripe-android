@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.forms.SIRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
+import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.AffirmForm
@@ -57,6 +58,8 @@ import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.SofortParamKey
 import com.stripe.android.ui.core.forms.AuBecsDebitForm
 import com.stripe.android.ui.core.forms.AuBecsDebitParamKey
+import com.stripe.android.ui.core.forms.USBankAccountForm
+import com.stripe.android.ui.core.forms.USBankAccountParamKey
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -238,6 +241,17 @@ sealed class SupportedPaymentMethod(
         AuBecsDebitRequirement,
         AuBecsDebitParamKey,
         AuBecsDebitForm
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @Parcelize
+    object USBankAccount : SupportedPaymentMethod(
+        PaymentMethod.Type.USBankAccount,
+        R.string.stripe_paymentsheet_payment_method_us_bank_account,
+        R.drawable.stripe_ic_paymentsheet_pm_bank,
+        USBankAccountRequirement,
+        USBankAccountParamKey,
+        USBankAccountForm
     )
 
     /**
@@ -427,6 +441,7 @@ sealed class SupportedPaymentMethod(
                 AfterpayClearpay,
                 // Affirm // TODO: uncomment once we are ready to go live
                 // AuBecsDebit // TODO: uncomment once we are ready to go live
+                // USBankAccount // TODO: uncomment once we are ready to go live
             )
         }
 
