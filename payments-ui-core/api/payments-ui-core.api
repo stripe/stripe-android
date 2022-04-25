@@ -19,6 +19,15 @@ public final class com/stripe/android/ui/core/address/AddressFieldElementReposit
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
 }
 
+public final class com/stripe/android/ui/core/databinding/ActivityCardScanBinding : androidx/viewbinding/ViewBinding {
+	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
+}
+
 public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
 }
 
@@ -40,6 +49,15 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 }
 
 public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/CardDetailsSectionController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;)V
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
@@ -282,6 +300,11 @@ public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;ZLjava/lang/String;Landroid/content/Context;)V
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
+}
+
+public final class com/stripe/android/ui/core/forms/USBankAccountSpecKt {
+	public static final fun getUSBankAccountForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getUSBankAccountParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory : dagger/internal/Factory {

@@ -21,6 +21,7 @@ if (System.getenv("JITPACK")) {
 dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
+    compileOnly project(":stripecardscan")
 
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.0'
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
@@ -63,6 +64,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation project(':stripecardscan')
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
@@ -102,6 +104,7 @@ android {
 
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 
     testOptions {
