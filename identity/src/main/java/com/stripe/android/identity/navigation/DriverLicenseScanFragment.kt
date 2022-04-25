@@ -37,6 +37,7 @@ internal class DriverLicenseScanFragment(
                     startScanning(DL_BACK)
                 }
                 DL_BACK -> {
+                    continueButton.toggleToLoading()
                     collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
                 }
                 else -> {

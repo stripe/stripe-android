@@ -147,7 +147,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
-                        injectorKey = "testInjectorKeyAddFragmentTest"
+                        injectorKey = "testInjectorKeyAddFragmentTest",
+                        initialPaymentMethodCreateParams = null
                     )
                 )
         }.recreate().onFragment { fragment ->
@@ -174,6 +175,11 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     )
                 )
         }
+    }
+
+    @Test
+    fun `getFormArgumentTests with newLpm set and not set`(){
+        assertTrue(false)
     }
 
     @Test

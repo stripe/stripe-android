@@ -22,6 +22,7 @@
 
 # financial connections sdk
 /financial-connections/ @carlosmuvi-stripe
+/financial-connections-example/ @carlosmuvi-stripe
 
 # shared modules
 /stripe-core/ @ccen-stripe

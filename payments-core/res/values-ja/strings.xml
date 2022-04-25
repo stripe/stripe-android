@@ -82,8 +82,7 @@
   <string name="au_becs_account_name">口座名義人</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="au_becs_bsb_number">BSB 番号</string>
-  <!-- Legal text shown when using AUBECS.
- -->
+  <!-- Legal text shown when using AUBECS. -->
   <string name="au_becs_mandate">銀行口座情報を提供し、この支払いを確認することにより、お客様はこのダイレクトデビットのリクエストと&lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;ダイレクトデビットリクエスト利用規約&lt;/a&gt;に同意し、Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (以下「Stripe」) が、 %s (「加盟店」) に代わって、加盟店から別途通知された金額について、Bulk Electronic Clearing System (BECS) を使用してお客様の口座から引き落としを行うことを承認したものとします。また、お客様が上記の口座の名義人または承認された署名者であることを保証したものとみなされます。</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    お客様の銀行情報を提供し、この支払いを確認することで、お客様はこの口座引き落とし依頼およびダイレクトデビットリクエスト利用規約 \n    に同意し、\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (「Stripe」) が、%1$s (「加盟店」) の代理として、加盟店から別途連絡された金額について、Bulk \n    Electronic Clearing System (BECS 振替) を通して口座引き落としを行うことを承認するものとします。お客様が上\n    記の口座の口座名義人または承認された署名者であることを、\n    お客様は証明するものとします。\n    </string>

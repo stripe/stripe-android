@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify

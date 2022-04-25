@@ -1,0 +1,46 @@
+{
+  "id": "las_dhgfsklhgfkdsjhgk",
+  "object": "link_account_session",
+  "client_secret": "las_client_secret_ldafjlfkjlsfadkjk",
+  "linked_accounts": {
+    "object": "list",
+    "data": [
+    ],
+    "has_more": false,
+    "total_count": 0,
+    "url": "/v1/linked_accounts"
+  },
+  "livemode": true,
+  "bank_account_token": {
+    "id": "tok_1F4ACMCRMbs6FrXf6fPqLnN7",
+    "object": "token",
+    "card": {
+      "id": "card_1F4AzKCRMbs6FrXf1nX87nde",
+      "object": "card",
+      "address_city": null,
+      "address_country": null,
+      "address_line1": null,
+      "address_line1_check": null,
+      "address_line2": null,
+      "address_state": null,
+      "address_zip": null,
+      "address_zip_check": null,
+      "brand": "Visa",
+      "country": "US",
+      "cvc_check": null,
+      "dynamic_last4": "4242",
+      "exp_month": 12,
+      "exp_year": 2024,
+      "funding": "credit",
+      "last4": "1234",
+      "metadata": {},
+      "name": "Stripe Johnson",
+      "tokenization_method": "android_pay"
+    },
+    "client_ip": "74.125.113.96",
+    "created": 1565029974,
+    "livemode": false,
+    "type": "card",
+    "used": false
+  }
+}
