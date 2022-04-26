@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -12,12 +11,9 @@ import androidx.annotation.IdRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.style.TextAlign
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
@@ -29,7 +25,6 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 
 /**
@@ -70,6 +65,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val notesView: ComposeView by lazy { viewBinding.notes }
+    override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +87,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         setupContinueButton()
-        setupNotes()
 
         viewModel.transition.observe(this) { event ->
             event?.getContentIfNotHandled()?.let { transitionTarget ->
@@ -172,34 +168,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.updatePrimaryButtonOnPress(initial = true) {
             viewModel.onUserSelection()
-        }
-    }
-
-    private fun setupNotes() {
-        viewModel.notesText.observe(this) { stringRes ->
-            val showNotes = stringRes != null
-            stringRes?.let {
-                viewBinding.notes.setContent {
-                    Html(
-                        html = getString(stringRes),
-                        imageGetter = mapOf(),
-                        color = PaymentsTheme.colors.subtitle,
-                        style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
-                    )
-                }
-            }
-            viewBinding.notes.isVisible = showNotes
-            viewBinding.continueButton.updateLayoutParams {
-                (this as? FrameLayout.LayoutParams)?.updateMargins(
-                    bottom = if (showNotes) {
-                        0
-                    } else {
-                        resources.getDimensionPixelSize(
-                            R.dimen.stripe_paymentsheet_button_container_spacing_bottom
-                        )
-                    }
-                )
-            }
         }
     }
 
