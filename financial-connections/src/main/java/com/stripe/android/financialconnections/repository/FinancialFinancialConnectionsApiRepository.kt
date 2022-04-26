@@ -141,12 +141,12 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
         internal const val PARAMS_APPLICATION_ID = "application_id"
 
         internal const val listAccountsUrl: String =
-            "$API_HOST/v1/financial_connections/list_accounts"
+            "$API_HOST/v1/link_account_sessions/list_accounts"
 
         internal const val generateHostedUrl: String =
-            "$API_HOST/v1/financial_connections/generate_hosted_url"
+            "$API_HOST/v1/link_account_sessions/generate_hosted_url"
 
         internal const val sessionReceiptUrl: String =
-            "$API_HOST/v1/financial_connections/session_receipt"
+            "$API_HOST/v1/link_account_sessions/session_receipt"
     }
 }
