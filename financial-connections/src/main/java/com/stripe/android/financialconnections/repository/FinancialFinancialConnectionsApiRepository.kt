@@ -148,6 +148,5 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
 
         internal const val sessionReceiptUrl: String =
             "$API_HOST/v1/financial_connections/session_receipt"
-
     }
 }

@@ -1,8 +1,8 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository

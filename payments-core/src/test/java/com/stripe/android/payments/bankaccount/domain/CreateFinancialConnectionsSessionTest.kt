@@ -3,8 +3,8 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
