@@ -15,42 +15,60 @@ sealed class IdentifierSpec(val value: String) : Parcelable {
 
     // Needed to pre-populate forms
     @Parcelize
-    object Name : IdentifierSpec("name")
+    object Name : IdentifierSpec("billing_details[name]")
 
     @Parcelize
-    object CardBrand : IdentifierSpec("card_brand_code")
+    object CardBrand : IdentifierSpec("card[brand]")
 
     @Parcelize
-    object CardNumber : IdentifierSpec("number")
+    object CardNumber : IdentifierSpec("card[number]")
 
     @Parcelize
-    object Email : IdentifierSpec("email")
+    object Email : IdentifierSpec("billing_details[email]")
 
     @Parcelize
-    object Phone : IdentifierSpec("phone")
+    object Phone : IdentifierSpec("billing_details[phone]")
 
     @Parcelize
-    object Line1 : IdentifierSpec("line1")
+    object Line1 : IdentifierSpec("billing_details[address][line1]")
 
     @Parcelize
-    object Line2 : IdentifierSpec("line2")
+    object Line2 : IdentifierSpec("billing_details[address][line2]")
 
     @Parcelize
-    object City : IdentifierSpec("city")
+    object City : IdentifierSpec("billing_details[address][city]")
 
     @Parcelize
-    object PostalCode : IdentifierSpec("postal_code")
+    object PostalCode : IdentifierSpec("billing_details[address][postal_code]")
 
     @Parcelize
-    object State : IdentifierSpec("state")
+    object State : IdentifierSpec("billing_details[address][state]")
 
     @Parcelize
-    object Country : IdentifierSpec("country")
+    object Country : IdentifierSpec("billing_details[address][country]")
 
     // Unique extracting functionality
     @Parcelize
     object SaveForFutureUse : IdentifierSpec("save_for_future_use")
 
-    @Parcelize
-    object PreFilledParameterMap : IdentifierSpec("save_for_future_use")
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        fun get(value: String) = when (value) {
+            CardBrand.value -> CardBrand
+            CardNumber.value -> CardNumber
+            City.value -> City
+            Country.value -> Country
+            Email.value -> Email
+            Line1.value -> Line1
+            Line2.value -> Line2
+            Name.value -> Name
+            Phone.value -> Phone
+            PostalCode.value -> PostalCode
+            SaveForFutureUse.value -> SaveForFutureUse
+            State.value -> State
+            else -> {
+                Generic(value)
+            }
+        }
+    }
 }

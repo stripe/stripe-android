@@ -8,6 +8,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
@@ -29,6 +30,7 @@ import com.stripe.android.ui.core.getBackgroundColor
 /**
  * An `Activity` for selecting a payment option.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
@@ -125,7 +127,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun setupContinueButton(addButton: PrimaryButton) {
+    private fun setupContinueButton(continueButton: PrimaryButton) {
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
@@ -139,12 +141,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        addButton.setOnClickListener {
+        continueButton.setOnClickListener {
             viewModel.onUserSelection()
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
-            addButton.isEnabled = isEnabled
+            continueButton.isEnabled = isEnabled
         }
     }
 

@@ -19,6 +19,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -105,10 +107,12 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val formViewModel = formFragment.formViewModel
             viewLifecycleOwner.lifecycleScope.launch {
                 formViewModel.completeFormValues.collect { formFieldValues ->
+                    // if the formFieldValues is a change either null or new values for the
+                    // newLpm then we should clear it out --- but what happens if we cancel -- selection should
+                    // have the correct value
                     sheetViewModel.updateSelection(
                         transformToPaymentSelection(
                             formFieldValues,
-                            formFragment.paramKeySpec,
                             sheetViewModel.getAddFragmentSelectedLpmValue()
                         )
                     )
@@ -165,7 +169,27 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
-                injectorKey = sheetViewModel.injectorKey
+                injectorKey = sheetViewModel.injectorKey,
+                initialPaymentMethodCreateParams =
+                if (sheetViewModel.newLpm?.paymentMethodCreateParams?.typeCode ==
+                    paymentMethod.type.code
+                ) {
+                    when (sheetViewModel.newLpm) {
+                        is PaymentSelection.New.GenericPaymentMethod -> {
+                            (sheetViewModel.newLpm as PaymentSelection.New.GenericPaymentMethod)
+                                .paymentMethodCreateParams
+                        }
+                        is PaymentSelection.New.Card -> {
+                            (sheetViewModel.newLpm as PaymentSelection.New.Card)
+                                .paymentMethodCreateParams
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+                } else {
+                    null
+                }
             )
         )
 
@@ -206,29 +230,36 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         @VisibleForTesting
         internal fun transformToPaymentSelection(
             formFieldValues: FormFieldValues?,
-            paramKey: Map<String, Any?>,
             selectedPaymentMethodResources: SupportedPaymentMethod,
         ) = formFieldValues?.let {
-            transformToPaymentMethodCreateParams.transform(formFieldValues, paramKey)
-                ?.run {
-                    if (this.typeCode == "card") {
-                        PaymentSelection.New.Card(
-                            paymentMethodCreateParams = this,
-                            brand = CardBrand.fromCode(
-                                formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
-                            ),
-                            customerRequestedSave = formFieldValues.userRequestedReuse
+            transformToPaymentMethodCreateParams.transform(
+                formFieldValues.copy(
+                    fieldValuePairs = it.fieldValuePairs
+                        .filterNot { entry ->
+                            entry.key == IdentifierSpec.SaveForFutureUse ||
+                                entry.key == IdentifierSpec.CardBrand
+                        }
+                ),
+                selectedPaymentMethodResources.type
+            ).run {
+                if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
+                    PaymentSelection.New.Card(
+                        paymentMethodCreateParams = this,
+                        brand = CardBrand.fromCode(
+                            formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
+                        ),
+                        customerRequestedSave = formFieldValues.userRequestedReuse
 
-                        )
-                    } else {
-                        PaymentSelection.New.GenericPaymentMethod(
-                            selectedPaymentMethodResources.displayNameResource,
-                            selectedPaymentMethodResources.iconResource,
-                            this,
-                            customerRequestedSave = formFieldValues.userRequestedReuse
-                        )
-                    }
+                    )
+                } else {
+                    PaymentSelection.New.GenericPaymentMethod(
+                        selectedPaymentMethodResources.displayNameResource,
+                        selectedPaymentMethodResources.iconResource,
+                        this,
+                        customerRequestedSave = formFieldValues.userRequestedReuse
+                    )
                 }
+            }
         }
 
         @VisibleForTesting
@@ -238,7 +269,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            @InjectorKey injectorKey: String
+            @InjectorKey injectorKey: String,
+            initialPaymentMethodCreateParams: PaymentMethodCreateParams?
         ): FormFragmentArguments {
 
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
@@ -250,7 +282,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
-                injectorKey = injectorKey
+                injectorKey = injectorKey,
+                initialPaymentMethodCreateParams = initialPaymentMethodCreateParams
             )
         }
     }

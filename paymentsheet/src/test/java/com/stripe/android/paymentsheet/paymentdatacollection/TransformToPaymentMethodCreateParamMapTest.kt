@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams.Companion.addPath
+import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams.Companion.getKeys
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import org.junit.Test
@@ -14,7 +17,7 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        IdentifierSpec.Generic("bank") to FormFieldEntry(
+                        IdentifierSpec.Generic("ideal[bank]") to FormFieldEntry(
                             "abn_amro",
                             true
                         )
@@ -22,90 +25,100 @@ class TransformToPaymentMethodCreateParamMapTest {
                     showsMandate = false,
                     userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
                 ),
-                mapOf(
-                    "type" to "ideal",
-                    "billing_details" to billingParams,
-                    "ideal" to mapOf("bank" to null)
-                ),
+                PaymentMethod.Type.Ideal,
             )
 
-        assertThat(paymentMethodParams?.toParamMap().toString().replace("\\s".toRegex(), ""))
+        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
             .isEqualTo(
                 """
-                    {type=ideal,billing_details={address={city=null,country=null,line1=null,line2=null,postal_code=null,state=null},name=null,email=null,phone=null},ideal={bank=abn_amro}}
+                    {type=ideal,ideal={bank=abn_amro}}
                 """.trimIndent()
             )
     }
 
     @Test
-    fun `transform to payment method params`() {
-        val paymentMethodParams = TransformToPaymentMethodCreateParams()
-            .transform(
-                FormFieldValues(
-                    mapOf(
-                        IdentifierSpec.Name to FormFieldEntry(
-                            "joe",
-                            true
-                        ),
-                        IdentifierSpec.Email to FormFieldEntry(
-                            "joe@gmail.com",
-                            true
-                        ),
-                        IdentifierSpec.Generic("country") to FormFieldEntry(
-                            "US",
-                            true
-                        ),
-                    ),
-                    showsMandate = false,
-                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
+    fun `test function`() {
+        val map: MutableMap<String, Any?> = mutableMapOf("type" to "card")
+        FormFieldValues(
+            mapOf(
+                IdentifierSpec.Name to FormFieldEntry(
+                    "joe",
+                    true
                 ),
-                mapOf(
-                    "type" to "sofort",
-                    "billing_details" to billingParams,
-                    "sofort" to mapOf("country" to null)
+                IdentifierSpec.Email to FormFieldEntry(
+                    "joe@gmail.com",
+                    true
                 ),
+                IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    "US",
+                    true
+                ),
+            ),
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
+        ).fieldValuePairs.entries.forEach {
+            addPath(map, getKeys(it.key.value), it.value.value)
+        }
+        assertThat(map).isEqualTo(
+            mapOf(
+                "type" to "card",
+                "billing_details" to mapOf(
+                    "name" to "joe",
+                    "email" to "joe@gmail.com",
+                    "address" to mapOf(
+                        "country" to "US"
+                    )
+                )
             )
-
-        assertThat(
-            paymentMethodParams?.toParamMap().toString().replace("\\s".toRegex(), "")
-        ).isEqualTo(
-            """
-                {
-                  type=sofort,
-                  billing_details={
-                    address={
-                      city=null,
-                      country=US,
-                      line1=null,
-                      line2=null,
-                      postal_code=null,
-                      state=null
-                    },
-                    name=joe,
-                    email=joe@gmail.com,
-                    phone=null
-                  },
-                  sofort={country=US}
-                }
-            """.replace("\\s".toRegex(), "")
         )
     }
 
-    companion object {
-        val addressParams: MutableMap<String, Any?> = mutableMapOf(
-            "city" to null,
-            "country" to null,
-            "line1" to null,
-            "line2" to null,
-            "postal_code" to null,
-            "state" to null,
+    @Test
+    fun `transform to payment method params`() {
+        val formFieldValues = FormFieldValues(
+            mapOf(
+                IdentifierSpec.Name to FormFieldEntry(
+                    "joe",
+                    true
+                ),
+                IdentifierSpec.Email to FormFieldEntry(
+                    "joe@gmail.com",
+                    true
+                ),
+                IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    "US",
+                    true
+                ),
+                IdentifierSpec.Line1 to FormFieldEntry(
+                    "123 Main Street",
+                    true
+                ),
+            ),
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
+        val paymentMethodParams = TransformToPaymentMethodCreateParams()
+            .transform(
+                formFieldValues,
+                PaymentMethod.Type.Sofort,
+            )
 
-        val billingParams: MutableMap<String, Any?> = mutableMapOf(
-            "address" to addressParams,
-            "name" to null,
-            "email" to null,
-            "phone" to null,
+        assertThat(
+            paymentMethodParams.toParamMap().toString()
+        ).isEqualTo(
+            "{" +
+                "type=sofort, " +
+                "billing_details={" +
+                "name=joe, " +
+                "email=joe@gmail.com, " +
+                "address={country=US, " +
+                "line1=123 Main Street" +
+                "}" +
+                "}, " +
+                "sofort={" +
+                "country=US" +
+                "}" +
+                "}"
         )
     }
 }

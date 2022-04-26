@@ -13,7 +13,8 @@ import kotlinx.coroutines.flow.combine
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
     context: Context,
-    val controller: CardDetailsController = CardDetailsController(context),
+    initialValues: Map<IdentifierSpec, String?>,
+    val controller: CardDetailsController = CardDetailsController(context, initialValues),
 ) : SectionMultiFieldElement(identifier) {
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
@@ -43,7 +44,7 @@ internal class CardDetailsElement(
             val newString = convertTo4DigitDate(date)
             if (newString.length == 4) {
                 month = requireNotNull(newString.take(2).toIntOrNull())
-                year = requireNotNull(newString.takeLast(2).toIntOrNull())
+                year = requireNotNull(newString.takeLast(2).toIntOrNull()) + 2000
             }
         }
 
@@ -51,10 +52,10 @@ internal class CardDetailsElement(
             controller.numberElement.identifier to number,
             controller.cvcElement.identifier to cvc,
             IdentifierSpec.CardBrand to FormFieldEntry(brand.code, true),
-            IdentifierSpec.Generic("exp_month") to expirationDate.copy(
+            IdentifierSpec.Generic("card[exp_month]") to expirationDate.copy(
                 value = month.toString()
             ),
-            IdentifierSpec.Generic("exp_year") to expirationDate.copy(
+            IdentifierSpec.Generic("card[exp_year]") to expirationDate.copy(
                 value = year.toString()
             )
         )

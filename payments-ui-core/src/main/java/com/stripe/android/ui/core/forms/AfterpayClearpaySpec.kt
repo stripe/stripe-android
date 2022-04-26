@@ -9,14 +9,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
-import com.stripe.android.ui.core.elements.billingParams
 import com.stripe.android.ui.core.elements.supportedBillingCountries
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val AfterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
-    "type" to "afterpay_clearpay",
-    "billing_details" to billingParams
-)
 
 internal val afterpayClearpayHeader = AfterpayClearpayTextSpec(
     IdentifierSpec.Generic("afterpay_clearpay_header")

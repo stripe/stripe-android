@@ -27,7 +27,7 @@ class AddressControllerTest {
                 emailController
             ),
             IbanElement(
-                IdentifierSpec.Generic("iban"),
+                IdentifierSpec.Generic("sepa_debit[iban]"),
                 ibanController
             )
         )

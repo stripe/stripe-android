@@ -351,7 +351,7 @@ internal class DefaultFlowControllerTest {
                     paymentMethods = emptyList(),
                     config = null,
                     isGooglePayReady = false,
-                    newCard = null,
+                    newLpm = null,
                     statusBarColor = ContextCompat.getColor(
                         activity,
                         R.color.stripe_toolbar_color_default_dark
