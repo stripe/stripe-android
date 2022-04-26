@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenConnectionsSheetExample
 import com.stripe.financialconnections.compose.createComposable
 
 class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
@@ -27,13 +28,13 @@ class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ComposeScreen()
+            FinancialConnectionsScreen()
         }
     }
 
 
     @Composable
-    fun ComposeScreen() {
+    private fun FinancialConnectionsScreen() {
         val state: FinancialConnectionsExampleState by viewModel.state.collectAsState()
         val sideEffect: FinancialConnectionsExampleViewEffect? by viewModel.viewEffect.collectAsState(
             null
@@ -43,21 +44,19 @@ class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
 
         LaunchedEffect(sideEffect) {
             when (val effect = sideEffect) {
-                is FinancialConnectionsExampleViewEffect.OpenConnectionsSheetExample -> launcher.present(
-                    effect.configuration
-                )
+                is OpenConnectionsSheetExample -> launcher.present(effect.configuration)
                 null -> Unit
             }
         }
 
-        ComposeScreenUI(
+        FinancialConnectionsContent(
             state = state,
             onButtonClick = { viewModel.startLinkAccountSession() }
         )
     }
 
     @Composable
-    fun ComposeScreenUI(
+    fun FinancialConnectionsContent(
         state: FinancialConnectionsExampleState,
         onButtonClick: () -> Unit
     ) {
