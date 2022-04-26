@@ -3,6 +3,18 @@
 ### PaymentSheet
 * [FIXED] [4909](https://github.com/stripe/stripe-android/pull/4909) In the multi-step flow when re-opening to a new card the form will pre-populate.  Also the default billing address will pre-populate in the form.
 
+## 20.2.0 - 2022-04-25
+This release adds card scanning to PaymentSheet.
+
+### PaymentSheet
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Card-scanning in PaymentSheet
+
+### Financial Connections
+* [CHANGED] [4887](https://github.com/stripe/stripe-android/pull/4887) Renamed Connections to Financial Connections.
+### PaymentSheet
+* [FIXED] [4909](https://github.com/stripe/stripe-android/pull/4909) In the multi-step flow when re-opening to a new card the form will pre-populate.  Also the default billing address will pre-populate in the form.
+
 ## 20.1.0 - 2022-04-18
 This release includes several Payments and PaymentSheet bug fixes.
 

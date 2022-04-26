@@ -3,9 +3,6 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -16,7 +13,6 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkActivityContract
@@ -47,31 +43,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
-
-@VisibleForTesting
-class MultiStepContinueIdlingResource {
-    companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Nullable
-        var idlingResource: CountingIdlingResource? = null
-
-        // This will only be called from test code
-        @VisibleForTesting
-        @NonNull
-        fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
-            if (idlingResource == null) {
-                idlingResource = try {
-                    Class.forName("androidx.test.espresso.Espresso")
-                    val countingIdlingResource = CountingIdlingResource("transition")
-                    countingIdlingResource
-                } catch (e: ClassNotFoundException) {
-                    null
-                }
-            }
-            return idlingResource
-        }
-    }
-}
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.

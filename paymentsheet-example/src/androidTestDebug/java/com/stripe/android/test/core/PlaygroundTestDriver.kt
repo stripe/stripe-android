@@ -306,15 +306,6 @@ class PlaygroundTestDriver(
         }
     }
 
-    private fun getScreenshotBytes(): ByteArray {
-        val byteScreenCaptureProcessor = ByteScreenCaptureProcessor()
-
-        val capture = Screenshot.capture()
-        capture.process(setOf(byteScreenCaptureProcessor))
-
-        return byteScreenCaptureProcessor.getBytes()
-    }
-
     private fun takeScreenShot(
         fileName: String,
         takeScreenshotOnLpmLoad: Boolean

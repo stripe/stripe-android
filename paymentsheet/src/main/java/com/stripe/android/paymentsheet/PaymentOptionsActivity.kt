@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.MultiStepContinueIdlingResource
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.getBackgroundColor
 
@@ -144,7 +143,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         continueButton.setOnClickListener {
             viewModel.onUserSelection()
-            MultiStepContinueIdlingResource.idlingResource?.increment()
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->

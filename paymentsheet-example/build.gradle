@@ -52,7 +52,6 @@ dependencies {
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomator"
 
     testImplementation "junit:junit:$junitVersion"
-
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 

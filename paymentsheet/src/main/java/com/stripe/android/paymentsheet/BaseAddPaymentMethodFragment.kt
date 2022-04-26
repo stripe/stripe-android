@@ -259,7 +259,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 paymentMethod = showPaymentMethod,
                 showCheckbox = layoutFormDescriptor.showCheckbox,
                 showCheckboxControlledFields = newLpm?.let {
-                    newLpm.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
+                    newLpm.customerRequestedSave ==
+                        PaymentSelection.CustomerRequestedSave.RequestReuse
                 } ?: layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
@@ -275,9 +276,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         }
                         is PaymentSelection.New.Card -> {
                             newLpm.paymentMethodCreateParams
-                        }
-                        else -> {
-                            null
                         }
                     }
                 } else {
