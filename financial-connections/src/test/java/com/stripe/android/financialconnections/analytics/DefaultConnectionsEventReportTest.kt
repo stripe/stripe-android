@@ -7,8 +7,8 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.LinkedAccountList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
@@ -39,15 +39,15 @@ class DefaultConnectionsEventReportTest {
     )
 
     private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
     private val financialConnectionsSession = FinancialConnectionsSession(
         "las_1234567890",
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
-        LinkedAccountList(
-            linkedAccounts = emptyList(),
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+        FinancialConnectionsAccountList(
+            financialConnectionsAccounts = emptyList(),
             hasMore = false,
             url = "url",
             count = 0
@@ -61,7 +61,7 @@ class DefaultConnectionsEventReportTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.presented" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }
@@ -76,7 +76,7 @@ class DefaultConnectionsEventReportTest {
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
                     req.params["session_result"] == "completed" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }
@@ -88,7 +88,7 @@ class DefaultConnectionsEventReportTest {
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
                     req.params["session_result"] == "cancelled" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }
@@ -100,7 +100,7 @@ class DefaultConnectionsEventReportTest {
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.failed" &&
                     req.params["session_result"] == "failure" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }

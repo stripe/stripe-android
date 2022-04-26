@@ -15,17 +15,17 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.financialconnections.model.ListLinkedAccountParams
+import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
+internal class FinancialConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory
@@ -43,18 +43,18 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
         apiKey = publishableKey
     )
 
-    override suspend fun getLinkedAccounts(
-        listLinkedAccountParams: ListLinkedAccountParams
-    ): LinkedAccountList {
+    override suspend fun getFinancialConnectionsAccounts(
+        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
+    ): FinancialConnectionsAccountList {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = listAccountsUrl,
             options = options,
-            params = listLinkedAccountParams.toParamMap()
+            params = getFinancialConnectionsAcccountsParams.toParamMap()
         )
-        return executeRequest(financialConnectionsRequest, LinkedAccountList.serializer())
+        return executeRequest(financialConnectionsRequest, FinancialConnectionsAccountList.serializer())
     }
 
-    override suspend fun getLinkAccountSession(
+    override suspend fun getFinancialConnectionsSession(
         clientSecret: String
     ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createGet(
@@ -67,7 +67,7 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
         return executeRequest(financialConnectionsRequest, FinancialConnectionsSession.serializer())
     }
 
-    override suspend fun generateLinkAccountSessionManifest(
+    override suspend fun generateFinancialConnectionsSessionManifest(
         clientSecret: String,
         applicationId: String
     ): FinancialConnectionsSessionManifest {

@@ -10,7 +10,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import kotlinx.parcelize.Parcelize
 
 /**
- * A drop in class to present the Link Account Session Auth Flow.
+ * A drop in class to present the Financial Connections Auth Flow.
  *
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
@@ -21,12 +21,12 @@ class FinancialConnectionsSheet internal constructor(
     /**
      * Configuration for a [FinancialConnectionsSheet]
      *
-     * @param linkAccountSessionClientSecret the client secret for the Link Account Session
+     * @param financialConnectionsSessionClientSecret the session client secret
      * @param publishableKey the Stripe publishable key
      */
     @Parcelize
     data class Configuration(
-        val linkAccountSessionClientSecret: String,
+        val financialConnectionsSessionClientSecret: String,
         val publishableKey: String,
     ) : Parcelable
 

@@ -3,6 +3,7 @@ package com.stripe.android.connections.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connections.test.readResourceAsString
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,7 +16,7 @@ import kotlin.test.assertFailsWith
 class FetchFinancialConnectionsSessionForTokenTest {
 
     private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
-    private val getLinkAccountSession = FetchLinkAccountSessionForToken(repository)
+    private val fetchFinancialConnectionsSessionForToken = FetchFinancialConnectionsSessionForToken(repository)
     private val json = Json {
         ignoreUnknownKeys = true
     }
@@ -33,7 +34,7 @@ class FetchFinancialConnectionsSessionForTokenTest {
             }
 
             // When
-            val (_, token) = getLinkAccountSession(clientSecret)
+            val (_, token) = fetchFinancialConnectionsSessionForToken(clientSecret)
 
             // Then
             assertThat(token.id).isEqualTo("tok_1F4ACMCRMbs6FrXf6fPqLnN7")
@@ -53,7 +54,7 @@ class FetchFinancialConnectionsSessionForTokenTest {
 
             // Then
             assertFailsWith<Exception> {
-                getLinkAccountSession(clientSecret)
+                fetchFinancialConnectionsSessionForToken(clientSecret)
             }
         }
 }

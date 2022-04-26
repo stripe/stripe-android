@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * A Linked Account represents an account that exists outside of Stripe,
+ * A FinancialConnectionsAccount represents an account that exists outside of Stripe,
  * to which you have been granted some degree of access.
  *
  * @param category
@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * If `category` is `investment` or `other`, this will be `other`.
  * @param supportedPaymentMethodTypes
  * The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
- * that can be created from this LinkedAccount.
+ * that can be created from this FinancialConnectionsAccount.
  * @param accountholder
  * @param balance The most recent information about the account's balance.
  * @param balanceRefresh The state of the most recent attempt to refresh the account balance.
@@ -36,7 +36,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 @Suppress("unused")
-data class LinkedAccount(
+data class FinancialConnectionsAccount(
 
     @SerialName("category")
     val category: Category = Category.UNKNOWN,
@@ -69,7 +69,7 @@ data class LinkedAccount(
     val subcategory: Subcategory = Subcategory.UNKNOWN,
 
     /* The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
-     that can be created from this LinkedAccount. */
+     that can be created from this FinancialConnectionsAccount. */
     @SerialName("supported_payment_method_types")
     val supportedPaymentMethodTypes: List<SupportedPaymentMethodTypes>,
 
@@ -180,7 +180,7 @@ data class LinkedAccount(
 
     /**
      * The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
-     * that can be created from this LinkedAccount.
+     * that can be created from this FinancialConnectionsAccount.
      *
      * Values: link,usBankAccount
      */

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  *
  * @param clientSecret
  * @param id
- * @param linkedAccounts
+ * @param accounts
  * @param livemode
  * @param paymentAccount
  * @param returnUrl
@@ -29,7 +29,7 @@ data class FinancialConnectionsSession internal constructor(
     val id: String,
 
     @SerialName("linked_accounts")
-    val linkedAccounts: LinkedAccountList,
+    val accounts: FinancialConnectionsAccountList,
 
     @SerialName("livemode")
     val livemode: Boolean,

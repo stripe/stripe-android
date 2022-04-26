@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 sealed class FinancialConnectionsSheetResult : Parcelable {
     /**
      * The customer completed the connections session.
-     * @param financialConnectionsSession The link account session connected
+     * @param financialConnectionsSession The financial connections session connected
      */
     @Parcelize
     data class Completed(

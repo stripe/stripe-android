@@ -33,7 +33,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = FinancialConnectionsSheetContract()
     private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
     private val args = FinancialConnectionsSheetContract.Args.Default(configuration)
@@ -45,9 +45,9 @@ class FinancialFinancialConnectionsSheetActivityTest {
             applicationId = "com.example.test",
             starterArgs = args,
             savedStateHandle = SavedStateHandle(),
-            generateLinkAccountSessionManifest = mock(),
-            fetchLinkAccountSession = mock(),
-            fetchLinkAccountSessionForToken = mock(),
+            generateFinancialConnectionsSessionManifest = mock(),
+            fetchFinancialConnectionsSession = mock(),
+            fetchFinancialConnectionsSessionForToken = mock(),
             eventReporter = mock()
         )
     }

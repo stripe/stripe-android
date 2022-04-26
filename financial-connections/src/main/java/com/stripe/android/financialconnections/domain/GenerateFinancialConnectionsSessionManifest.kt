@@ -8,7 +8,7 @@ import javax.inject.Inject
  * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
  * as well as the success and cancel callback URLs to verify.
  */
-internal class GenerateLinkAccountSessionManifest @Inject constructor(
+internal class GenerateFinancialConnectionsSessionManifest @Inject constructor(
     private val financialConnectionsRepository: FinancialConnectionsRepository,
 ) {
 
@@ -16,7 +16,7 @@ internal class GenerateLinkAccountSessionManifest @Inject constructor(
         clientSecret: String,
         applicationId: String
     ): FinancialConnectionsSessionManifest {
-        return financialConnectionsRepository.generateLinkAccountSessionManifest(
+        return financialConnectionsRepository.generateFinancialConnectionsSessionManifest(
             clientSecret = clientSecret,
             applicationId = applicationId
         )

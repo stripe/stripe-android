@@ -17,9 +17,9 @@ import kotlinx.serialization.Serializable
  */
 @Parcelize
 @Serializable
-data class LinkedAccountList(
+data class FinancialConnectionsAccountList(
     @SerialName("data")
-    val linkedAccounts: List<LinkedAccount>,
+    val financialConnectionsAccounts: List<FinancialConnectionsAccount>,
 
     /* True if this list has another page of items after this one that can be fetched. */
     @SerialName("has_more")

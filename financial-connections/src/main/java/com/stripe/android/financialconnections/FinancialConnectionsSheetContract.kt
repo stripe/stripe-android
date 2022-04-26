@@ -48,9 +48,9 @@ internal class FinancialConnectionsSheetContract :
         ) : Args(configuration)
 
         fun validate() {
-            if (configuration.linkAccountSessionClientSecret.isBlank()) {
+            if (configuration.financialConnectionsSessionClientSecret.isBlank()) {
                 throw InvalidParameterException(
-                    "The link account session client secret cannot be an empty string."
+                    "The session client secret cannot be an empty string."
                 )
             }
             if (configuration.publishableKey.isBlank()) {
@@ -70,7 +70,7 @@ internal class FinancialConnectionsSheetContract :
     internal sealed class Result : Parcelable {
         /**
          * The customer completed the connections session.
-         * @param financialConnectionsSession The link account session connected
+         * @param financialConnectionsSession The financial connections session connected
          */
         @Parcelize
         data class Completed(

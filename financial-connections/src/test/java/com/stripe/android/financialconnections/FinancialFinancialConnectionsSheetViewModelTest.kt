@@ -6,16 +6,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.domain.FetchLinkAccountSessionForToken
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
-import com.stripe.android.financialconnections.domain.GenerateLinkAccountSessionManifest
+import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountFixtures
-import com.stripe.android.financialconnections.model.LinkedAccountList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -33,7 +33,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
     private val manifest = FinancialConnectionsSessionManifest(
@@ -41,9 +41,9 @@ class FinancialFinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.SUCCESS_URL,
         ApiKeyFixtures.CANCEL_URL
     )
-    private val fetchLinkAccountSession = mock<FetchLinkAccountSession>()
-    private val fetchLinkAccountSessionForToken = mock<FetchLinkAccountSessionForToken>()
-    private val generateLinkAccountSessionManifest = mock<GenerateLinkAccountSessionManifest>()
+    private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
+    private val fetchFinancialConnectionsSessionForToken = mock<FetchFinancialConnectionsSessionForToken>()
+    private val generateFinancialConnectionsSessionManifest = mock<GenerateFinancialConnectionsSessionManifest>()
 
     @Test
     fun `init - eventReporter fires onPresented`() {
@@ -60,7 +60,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 savedStateHandle = SavedStateHandle()
             )
 
-            verify(generateLinkAccountSessionManifest).invoke(any(), any())
+            verify(generateFinancialConnectionsSessionManifest).invoke(any(), any())
         }
 
     @Test
@@ -71,7 +71,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 savedStateHandle = SavedStateHandle().also { it.set("key_manifest", manifest) }
             )
 
-            verifyNoInteractions(generateLinkAccountSessionManifest)
+            verifyNoInteractions(generateFinancialConnectionsSessionManifest)
         }
     }
 
@@ -94,7 +94,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - intent with cancel url should fire analytics event and set cancel result`() {
         runTest {
             // Given
-            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
             val viewModel = createViewModel(configuration)
             val cancelIntent = cancelIntent()
 
@@ -112,7 +112,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with cancel URL received, then finish with Result#Cancel`() =
         runTest {
             // Given
-            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
             val viewModel = createViewModel(configuration)
             viewModel.viewEffect.test {
                 // When
@@ -150,9 +150,9 @@ class FinancialFinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with success, then finish with Result#Success`() =
         runTest {
             // Given
-            val expectedLinkAccountSession = linkAccountSession()
-            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
-            whenever(fetchLinkAccountSession(any())).thenReturn(expectedLinkAccountSession)
+            val expectedSession = financialConnectionsSession()
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
 
             val viewModel = createViewModel(configuration)
             viewModel.viewEffect.test {
@@ -166,7 +166,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
                 assertThat(awaitItem()).isEqualTo(
                     FinishWithResult(
                         result = FinancialConnectionsSheetContract.Result.Completed(
-                            expectedLinkAccountSession
+                            expectedSession
                         )
                     )
                 )
@@ -178,8 +178,8 @@ class FinancialFinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             val apiException = APIException()
-            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
-            whenever(fetchLinkAccountSession.invoke(any())).thenAnswer { throw apiException }
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(fetchFinancialConnectionsSession.invoke(any())).thenAnswer { throw apiException }
             val viewModel = createViewModel(configuration)
             viewModel.viewEffect.test {
                 // When
@@ -198,8 +198,8 @@ class FinancialFinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when error fetching account session, then finish with Result#Failed`() =
         runTest {
             // Given
-            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
-            whenever(fetchLinkAccountSession(any())).thenAnswer { throw APIException() }
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(fetchFinancialConnectionsSession(any())).thenAnswer { throw APIException() }
             val viewModel = createViewModel(configuration)
             viewModel.viewEffect.test {
                 // When
@@ -254,7 +254,7 @@ class FinancialFinancialConnectionsSheetViewModelTest {
     fun `init - when repository returns manifest, manifest fetched and stored in state`() {
         runTest {
             // Given
-            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
 
             // When
             val viewModel = createViewModel(configuration)
@@ -272,18 +272,18 @@ class FinancialFinancialConnectionsSheetViewModelTest {
         it.data = Uri.parse(ApiKeyFixtures.CANCEL_URL)
     }
 
-    private fun linkAccountSession() = FinancialConnectionsSession(
+    private fun financialConnectionsSession() = FinancialConnectionsSession(
         id = "las_no_more",
-        clientSecret = configuration.linkAccountSessionClientSecret,
+        clientSecret = configuration.financialConnectionsSessionClientSecret,
         livemode = true,
-        linkedAccounts = LinkedAccountList(
+        accounts = FinancialConnectionsAccountList(
             hasMore = false,
             count = 2,
             url = "url",
             totalCount = 2,
-            linkedAccounts = listOf(
-                LinkedAccountFixtures.CREDIT_CARD,
-                LinkedAccountFixtures.CHECKING_ACCOUNT
+            financialConnectionsAccounts = listOf(
+                FinancialConnectionsAccountFixtures.CREDIT_CARD,
+                FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
             ),
         )
     )
@@ -297,9 +297,9 @@ class FinancialFinancialConnectionsSheetViewModelTest {
             applicationId = "com.example.app",
             starterArgs = args,
             savedStateHandle = savedStateHandle,
-            generateLinkAccountSessionManifest = generateLinkAccountSessionManifest,
-            fetchLinkAccountSession = fetchLinkAccountSession,
-            fetchLinkAccountSessionForToken = fetchLinkAccountSessionForToken,
+            generateFinancialConnectionsSessionManifest = generateFinancialConnectionsSessionManifest,
+            fetchFinancialConnectionsSession = fetchFinancialConnectionsSession,
+            fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,
             eventReporter = eventReporter
         )
     }
