@@ -57,6 +57,7 @@ dependencies {
 
     // Core library
     androidTestImplementation "androidx.test:core:$androidTestVersion"
+    androidTestImplementation 'androidx.test:core-ktx:1.1.0'
 
     // AndroidJUnitRunner and JUnit Rules
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
@@ -70,11 +71,11 @@ dependencies {
 
     // Espresso dependencies
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation ("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     debugImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
-    androidTestImplementation ("androidx.test.espresso:espresso-accessibility:$espressoVersion") {
+    androidTestImplementation("androidx.test.espresso:espresso-accessibility:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"

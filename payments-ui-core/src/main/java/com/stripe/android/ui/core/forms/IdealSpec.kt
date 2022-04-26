@@ -11,18 +11,6 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.SupportedBankType
-import com.stripe.android.ui.core.elements.billingParams
-
-internal val idealParams: MutableMap<String, Any?> = mutableMapOf(
-    "bank" to null,
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val IdealParamKey: MutableMap<String, Any?> = mutableMapOf(
-    "type" to "ideal",
-    "billing_details" to billingParams,
-    "ideal" to idealParams
-)
 
 internal val idealNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
@@ -32,7 +20,7 @@ internal val idealEmailSection = SectionSpec(IdentifierSpec.Email, EmailSpec)
 internal val idealBankSection = SectionSpec(
     IdentifierSpec.Generic("bank_section"),
     BankDropdownSpec(
-        IdentifierSpec.Generic("bank"),
+        IdentifierSpec.Generic("ideal[bank]"),
         R.string.ideal_bank,
         SupportedBankType.Ideal
     )

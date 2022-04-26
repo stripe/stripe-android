@@ -157,6 +157,4 @@
   <string name="title_payment_method">Betalningsmetod</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Välj leveransmetod</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">Kontonumret du angav är ofullständigt.</string>
 </resources>

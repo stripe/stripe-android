@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -13,22 +14,19 @@ internal class TransformToPaymentMethodCreateParams {
      */
     fun transform(
         formFieldValues: FormFieldValues,
-        paramKey: Map<String, Any?>
+        type: PaymentMethod.Type
     ) = transformToPaymentMethodCreateParamsMap(
         formFieldValues,
-        paramKey
+        type
     )
         .filterOutNullValues()
         .toMap()
         .run {
-            PaymentMethod.Type.fromCode(this["type"] as String)
-                ?.let {
-                    PaymentMethodCreateParams.createWithOverride(
-                        it,
-                        overrideParamMap = this,
-                        productUsage = setOf("PaymentSheet")
-                    )
-                }
+            PaymentMethodCreateParams.createWithOverride(
+                type,
+                overrideParamMap = this,
+                productUsage = setOf("PaymentSheet")
+            )
         }
 
     /**
@@ -42,7 +40,7 @@ internal class TransformToPaymentMethodCreateParams {
      */
     private fun transformToPaymentMethodCreateParamsMap(
         formFieldValues: FormFieldValues,
-        mapStructure: Map<String, Any?>,
+        type: PaymentMethod.Type,
     ): MutableMap<String, Any?> {
         val destMap = mutableMapOf<String, Any?>()
 
@@ -50,64 +48,74 @@ internal class TransformToPaymentMethodCreateParams {
             .mapValues { entry -> entry.value.value }
             .mapKeys { it.key.value }
 
-        createMap(mapStructure, destMap, formKeyValueMap)
+        createMap(type, destMap, formKeyValueMap)
         return destMap
     }
 
     companion object {
         /**
-         * This function will look for each of the keys in the mapStructure and
-         * if the formField contains a key that matches it will populate the value.
+         * This function will take the identifier from the form field entry, separate it on
+         * square braces and construct a map from it.
          *
          * For example:
-         * mapStructure = {
-         *   "name": null
-         *   billing = {
-         *      address = {
-         *         "name": null
-         *      }
-         *   }
-         * }
          * formFieldValues = {
-         *   "name": "John Smith"
+         *   "billing_details\[name\]": "John Smith"
+         *   "billing_details\[address\]\[line1\]": "123 Main Street"
          * }
          *
          * will return a map of:
          * dest = {
-         *   "name": "John Smith"
-         *   billing = {
+         *   billing_details = {
+         *      name: "John Smith"
          *      address = {
-         *         "name": "John Smith"
+         *         line1 = "123 Main Street"
          *      }
          *   }
          * }
          */
         @Suppress("UNCHECKED_CAST")
         private fun createMap(
-            mapStructure: Map<String, Any?>,
+            type: PaymentMethod.Type,
             dest: MutableMap<String, Any?>,
             formFieldKeyValues: Map<String, String?>
         ) {
-            mapStructure.keys.forEach { key ->
-                when {
-                    mapStructure[key] == null -> {
-                        dest[key] = formFieldKeyValues[key]
+            addPath(dest, listOf("type"), type.code)
+
+            formFieldKeyValues.entries
+                .forEach {
+                    // Sofort is the only known LPM that requires the country in the
+                    // billing_details[address][country] and the sofort[country] fields.
+                    if (type == PaymentMethod.Type.Sofort &&
+                        it.key == "billing_details[address][country]"
+                    ) {
+                        addPath(dest, listOf("sofort", "country"), it.value)
                     }
-                    mapStructure[key] is MutableMap<*, *> -> {
-                        val newDestMap = mutableMapOf<String, Any?>()
-                        dest[key] = newDestMap
-                        createMap(
-                            mapStructure[key] as MutableMap<String, Any?>,
-                            newDestMap,
-                            formFieldKeyValues
-                        )
-                    }
-                    else -> {
-                        dest[key] = mapStructure[key]
-                    }
+                    addPath(dest, getKeys(it.key), it.value)
                 }
+        }
+
+        @VisibleForTesting
+        internal fun addPath(map: MutableMap<String, Any?>, keys: List<String>, value: String?) {
+            val key = keys[0]
+            if (keys.size == 1) {
+                map[key] = value
+            } else {
+                var mapValueOfKey = map[key] as? MutableMap<String, Any?>
+                if (mapValueOfKey == null) {
+                    mapValueOfKey = mutableMapOf()
+                    map[key] = mapValueOfKey
+                }
+                addPath(mapValueOfKey, keys.subList(1, keys.size), value)
             }
         }
+
+        @VisibleForTesting
+        internal fun getKeys(string: String) =
+            ("[*" + "([A-Za-z_0-9]+)" + "]*").toRegex().findAll(string)
+                .map { it.groupValues }
+                .flatten()
+                .filterNot { it.isEmpty() }
+                .toList()
     }
 }
 
