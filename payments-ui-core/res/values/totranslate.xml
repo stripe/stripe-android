@@ -5,4 +5,7 @@
     -->
     <!-- Card details section title for card form entry -->
     <string name="card_information" tools:ignore="ExtraTranslation">Card information</string>
+
+    <!-- Scan card button -->
+    <string name="scan_card" tools:ignore="ExtraTranslation">Scan card</string>
 </resources>

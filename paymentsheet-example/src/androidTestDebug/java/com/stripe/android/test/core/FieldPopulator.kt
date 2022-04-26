@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
-import com.stripe.android.ui.core.elements.CardDetailsSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
@@ -95,6 +95,16 @@ class FieldPopulator(
     private fun verifyPlatformLpmFields(values: Values = Values()) {
         formSpec.items.forEach {
             when (it) {
+                is CardDetailsSectionSpec -> {
+                    selectors.getCardNumber()
+                        .assertContentDescriptionEquals(values.cardNumber)
+                    selectors.getCardExpiration()
+                        .assertContentDescriptionEquals(values.cardExpiration)
+                    selectors.getCardCvc()
+                        .assertContentDescriptionEquals(
+                            values.cardCvc.replace("\\d".toRegex(), "$0 ")
+                        )
+                }
                 is SectionSpec -> {
                     if (!expectFieldToBeHidden(testParameters.saveCheckboxValue, it)) {
                         it.fields.forEach { sectionField ->
@@ -137,16 +147,6 @@ class FieldPopulator(
                                             .assertContentDescriptionEquals(values.zip)
                                     }
                                 }
-                                CardDetailsSpec -> {
-                                    selectors.getCardNumber()
-                                        .assertContentDescriptionEquals(values.cardNumber)
-                                    selectors.getCardExpiration()
-                                        .assertContentDescriptionEquals(values.cardExpiration)
-                                    selectors.getCardCvc()
-                                        .assertContentDescriptionEquals(
-                                            values.cardCvc.replace("\\d".toRegex(), "$0 ")
-                                        )
-                                }
                             }
                         }
                     }
@@ -158,6 +158,16 @@ class FieldPopulator(
     private fun populatePlatformLpmFields(values: Values = Values()) {
         formSpec.items.forEach {
             when (it) {
+                is CardDetailsSectionSpec -> {
+                    selectors.getCardNumber().performTextInput(values.cardNumber)
+                    selectors.composeTestRule.waitForIdle()
+                    selectors.getCardExpiration()
+                        .performTextInput(values.cardExpiration)
+                    selectors.getCardCvc().apply {
+                        performTextInput(values.cardCvc)
+
+                    }
+                }
                 is SectionSpec -> {
                     if (!expectFieldToBeHidden(testParameters.saveCheckboxValue, it)) {
                         it.fields.forEach { sectionField ->
@@ -207,16 +217,6 @@ class FieldPopulator(
                                         selectors.getZip().apply {
                                             performTextInput(values.zip)
                                         }
-                                    }
-                                }
-                                CardDetailsSpec -> {
-                                    selectors.getCardNumber().performTextInput(values.cardNumber)
-                                    selectors.composeTestRule.waitForIdle()
-                                    selectors.getCardExpiration()
-                                        .performTextInput(values.cardExpiration)
-                                    selectors.getCardCvc().apply {
-                                        performTextInput(values.cardCvc)
-
                                     }
                                 }
                             }
