@@ -7,8 +7,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
-import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher.Companion.toExposedResult as toExposedResultForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
+import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher.Companion.toExposedResult as toExposedResultForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher.Companion.toExposedResult as toExposedResultForToken
 
 /**
