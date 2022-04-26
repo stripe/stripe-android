@@ -1,7 +1,7 @@
 package com.stripe.financialconnections.compose
 
-import androidx.compose.runtime.Composable
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.Composable
 import com.stripe.android.connections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
  * so it should be called as part of Compose initialization path.
  */
 @Composable
+@Suppress("UnusedPrivateMember")
 fun FinancialConnectionsSheet.Companion.createComposable(
     callback: (FinancialConnectionsSheetResult) -> Unit
 ): FinancialConnectionsSheet = FinancialConnectionsSheet(
@@ -39,6 +40,7 @@ fun FinancialConnectionsSheet.Companion.createComposable(
  * so it should be called as part of Compose initialization path.
  */
 @Composable
+@Suppress("UnusedPrivateMember")
 private fun FinancialConnectionsSheet.Companion.createComposableForToken(
     callback: (FinancialConnectionsSheetForTokenResult) -> Unit
 ): FinancialConnectionsSheet = FinancialConnectionsSheet(
