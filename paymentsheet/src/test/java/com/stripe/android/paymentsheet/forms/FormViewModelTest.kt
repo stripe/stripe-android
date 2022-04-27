@@ -363,7 +363,6 @@ internal class FormViewModelTest {
         val emailElement =
             getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-
         nameElement?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)

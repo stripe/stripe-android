@@ -5,7 +5,6 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
 
 internal val sofortCountrySection =
     SectionSpec(
