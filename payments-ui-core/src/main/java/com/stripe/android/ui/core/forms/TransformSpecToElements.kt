@@ -74,6 +74,7 @@ class TransformSpecToElements(
                 is BsbSpec -> it.transform(initialValues)
                 is EmailSpec -> it.transform(initialValues)
                 is NameSpec -> it.transform(initialValues)
+                is AuBankAccountNumberSpec -> it.transform(initialValues)
             }
         }
 
@@ -128,7 +129,6 @@ class TransformSpecToElements(
                     initialValues
                 )
                 is CardBillingSpec -> it.transform(addressRepository, initialValues)
-                is AuBankAccountNumberSpec -> it.transform(initialValues)
             }
         }
 }

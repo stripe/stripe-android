@@ -25,11 +25,6 @@ internal val auBecsDebitNameSection = SectionSpec(
 
 internal val auBecsBsbNumberSection = BsbSpec()
 
-internal val auBecsDebitAccountNumberSection = SectionSpec(
-    IdentifierSpec.Generic("account_number_section"),
-    AuBankAccountNumberSpec
-)
-
 internal val auBecsDebitCustomMandate = AuBecsDebitMandateTextSpec(
     IdentifierSpec.Generic("au_becs_mandate")
 )
@@ -38,7 +33,7 @@ internal val auBecsDebitCustomMandate = AuBecsDebitMandateTextSpec(
 val AuBecsDebitForm = LayoutSpec.create(
     EmailSpec(),
     auBecsBsbNumberSection,
-    auBecsDebitAccountNumberSection,
+    AuBankAccountNumberSpec(),
     auBecsDebitNameSection,
     auBecsDebitCustomMandate
 )

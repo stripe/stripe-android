@@ -119,6 +119,7 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.name)
                     }
                 }
+                is AuBankAccountNumberSpec -> {}
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
@@ -137,7 +138,6 @@ class FieldPopulator(
                             }
                             is CountrySpec -> {}
                             is SimpleTextSpec -> {}
-                            AuBankAccountNumberSpec -> {}
                             is BankDropdownSpec -> {}
                             IbanSpec -> {}
                             is KlarnaCountrySpec -> {}
@@ -184,6 +184,7 @@ class FieldPopulator(
                         }
                     }
                 }
+                is AuBankAccountNumberSpec -> {}
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
@@ -206,7 +207,6 @@ class FieldPopulator(
                             }
                             is CountrySpec -> {}
                             is SimpleTextSpec -> {}
-                            AuBankAccountNumberSpec -> {}
                             is BankDropdownSpec -> {}
                             IbanSpec -> {}
                             is KlarnaCountrySpec -> {}
