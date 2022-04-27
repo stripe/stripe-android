@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -101,11 +102,16 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
     }
 
+    // Coroutine listening for Locations
+    private var job: Job? = null
+
     private fun attachComposeFragmentViewModel(fragment: Fragment) {
+        job?.cancel()
+
         (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
             // Need to access the formViewModel so it is constructed.
             val formViewModel = formFragment.formViewModel
-            viewLifecycleOwner.lifecycleScope.launch {
+            job = viewLifecycleOwner.lifecycleScope.launch {
                 formViewModel.completeFormValues.collect { formFieldValues ->
                     // if the formFieldValues is a change either null or new values for the
                     // newLpm then we should clear it out --- but what happens if we cancel -- selection should
