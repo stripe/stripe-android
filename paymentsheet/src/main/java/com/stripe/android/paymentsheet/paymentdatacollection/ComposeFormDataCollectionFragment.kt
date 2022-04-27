@@ -29,13 +29,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         )
     }
 
-    val paramKeySpec by lazy {
-        requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
-                ?.paymentMethod?.paramKey
-        )
-    }
-
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             resource = resources,
@@ -58,6 +51,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
+        setPadding(0, 18, 0, 0)
 
         setContent {
             PaymentsTheme {

@@ -1,7 +1,8 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
 include ':camera-core'
-include ':connections'
+include ':financial-connections'
+include ':financial-connections-example'
 include ':example'
 include ':identity'
 include ':identity-example'
@@ -16,3 +17,4 @@ include ':stripecardscan-example'
 include ':stripe-core'
 include ':stripe-test-e2e'
 include ':wechatpay'
+include ':payments-model'

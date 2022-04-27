@@ -6,8 +6,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.StripeApiBeta
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -156,15 +154,14 @@ internal class EndToEndTest {
 
     @Test
     fun `test us_bank_account payment intent flow with amounts`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey, betas = setOf(StripeApiBeta.USBankAccount))
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Create a PaymentIntent on the backend
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("us_bank_account")
-                ),
-                version = "${ApiVersion.API_VERSION_CODE};us_bank_account_beta=v2"
+                )
             )
         )
 
@@ -218,15 +215,14 @@ internal class EndToEndTest {
 
     @Test(expected = InvalidRequestException::class)
     fun `test us_bank_account payment intent flow with amounts fails`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey, betas = setOf(StripeApiBeta.USBankAccount))
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Create a PaymentIntent on the backend
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("us_bank_account")
-                ),
-                version = "${ApiVersion.API_VERSION_CODE};us_bank_account_beta=v2"
+                )
             )
         )
 
@@ -266,15 +262,14 @@ internal class EndToEndTest {
 
     @Test
     fun `test us_bank_account payment intent flow with desciptor code`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey, betas = setOf(StripeApiBeta.USBankAccount))
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Create a PaymentIntent on the backend
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("us_bank_account")
-                ),
-                version = "${ApiVersion.API_VERSION_CODE};us_bank_account_beta=v2"
+                )
             )
         )
 
@@ -327,15 +322,14 @@ internal class EndToEndTest {
 
     @Test
     fun `test us_bank_account setup intent flow with amounts`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey, betas = setOf(StripeApiBeta.USBankAccount))
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Create a SetupIntent on the backend
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("us_bank_account")
-                ),
-                version = "${ApiVersion.API_VERSION_CODE};us_bank_account_beta=v2"
+                )
             )
         )
 
@@ -381,15 +375,14 @@ internal class EndToEndTest {
 
     @Test(expected = InvalidRequestException::class)
     fun `test us_bank_account setup intent flow with amounts fails`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey, betas = setOf(StripeApiBeta.USBankAccount))
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Create a SetupIntent on the backend
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("us_bank_account")
-                ),
-                version = "${ApiVersion.API_VERSION_CODE};us_bank_account_beta=v2"
+                )
             )
         )
 
@@ -426,15 +419,14 @@ internal class EndToEndTest {
 
     @Test
     fun `test us_bank_account setup intent flow with descriptor code`() = runTest {
-        val stripe = Stripe(context, settings.publishableKey, betas = setOf(StripeApiBeta.USBankAccount))
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Create a SetupIntent on the backend
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("us_bank_account")
-                ),
-                version = "${ApiVersion.API_VERSION_CODE};us_bank_account_beta=v2"
+                )
             )
         )
 

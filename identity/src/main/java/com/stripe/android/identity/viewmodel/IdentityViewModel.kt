@@ -30,7 +30,9 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
-import com.stripe.android.identity.utils.PairMediatorLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -38,12 +40,142 @@ import java.io.File
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
 internal class IdentityViewModel(
-    internal val args: IdentityVerificationSheetContract.Args,
+    internal val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityRepository: IdentityRepository,
     private val idDetectorFetcher: IDDetectorFetcher,
-    private val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityIO: IdentityIO
 ) : ViewModel() {
+
+    /**
+     * Indicates the update states of 4 images.
+     */
+    internal data class UploadState(
+        val frontHighResResult: Resource<UploadedResult> = Resource.loading(),
+        val frontLowResResult: Resource<UploadedResult> = Resource.loading(),
+        val backHighResResult: Resource<UploadedResult> = Resource.loading(),
+        val backLowResResult: Resource<UploadedResult> = Resource.loading()
+    ) {
+
+        fun update(
+            isHighRes: Boolean,
+            isFront: Boolean,
+            newResult: UploadedResult
+        ) = if (isHighRes) {
+            if (isFront) {
+                this.copy(
+                    frontHighResResult = Resource.success(newResult)
+                )
+            } else {
+                this.copy(
+                    backHighResResult = Resource.success(newResult)
+                )
+            }
+        } else {
+            if (isFront) {
+                this.copy(
+                    frontLowResResult = Resource.success(newResult)
+                )
+            } else {
+                this.copy(
+                    backLowResResult = Resource.success(newResult)
+                )
+            }
+        }
+
+        fun updateError(
+            isHighRes: Boolean,
+            isFront: Boolean,
+            message: String,
+            throwable: Throwable
+        ) = if (isHighRes) {
+            if (isFront) {
+                this.copy(
+                    frontHighResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            } else {
+                this.copy(
+                    backHighResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            }
+        } else {
+            if (isFront) {
+                this.copy(
+                    frontLowResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            } else {
+                this.copy(
+                    backLowResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            }
+        }
+
+        fun isAnyLoading() =
+            frontHighResResult.status == Status.LOADING ||
+                backHighResResult.status == Status.LOADING ||
+                frontLowResResult.status == Status.LOADING ||
+                backLowResResult.status == Status.LOADING
+
+        fun isFrontLoading() =
+            frontHighResResult.status == Status.LOADING ||
+                frontLowResResult.status == Status.LOADING
+
+        fun hasError() =
+            frontHighResResult.status == Status.ERROR ||
+                backHighResResult.status == Status.ERROR ||
+                frontLowResResult.status == Status.ERROR ||
+                backHighResResult.status == Status.ERROR
+
+        fun getError(): Throwable {
+            StringBuilder().let { errorMessageBuilder ->
+                if (frontHighResResult.status == Status.ERROR) {
+                    errorMessageBuilder.appendLine(frontHighResResult.message)
+                }
+                if (frontLowResResult.status == Status.ERROR) {
+                    errorMessageBuilder.appendLine(frontLowResResult.message)
+                }
+                if (backHighResResult.status == Status.ERROR) {
+                    errorMessageBuilder.appendLine(backHighResResult.message)
+                }
+                if (backLowResResult.status == Status.ERROR) {
+                    errorMessageBuilder.appendLine(backLowResResult.message)
+                }
+                return IllegalStateException(errorMessageBuilder.toString())
+            }
+        }
+
+        fun isFrontUploaded() =
+            frontHighResResult.status == Status.SUCCESS &&
+                frontLowResResult.status == Status.SUCCESS
+
+        fun isBothUploaded() =
+            frontHighResResult.status == Status.SUCCESS &&
+                backHighResResult.status == Status.SUCCESS &&
+                frontLowResResult.status == Status.SUCCESS &&
+                backLowResResult.status == Status.SUCCESS
+
+        fun isFrontHighResUploaded() =
+            frontHighResResult.status == Status.SUCCESS
+
+        fun isBackHighResUploaded() =
+            backHighResResult.status == Status.SUCCESS
+
+        fun isHighResUploaded() = isFrontHighResUploaded() && isBackHighResUploaded()
+    }
+
+    /**
+     * Wrapper class for the uploaded param.
+     */
+    internal data class UploadedResult(
+        val uploadedStripeFile: StripeFile,
+        val scores: List<Float>?,
+        val uploadMethod: UploadMethod
+    )
+
+    /**
+     * StateFlow to track the upload status of high/low resolution image of front and back.
+     */
+    private val _uploadedState = MutableStateFlow(UploadState())
+    val uploadState: StateFlow<UploadState> = _uploadedState
 
     /**
      * Response for initial VerificationPage, used for building UI.
@@ -56,48 +188,6 @@ internal class IdentityViewModel(
      */
     private val _idDetectorModelFile = MutableLiveData<Resource<File>>()
     val idDetectorModelFile: LiveData<Resource<File>> = _idDetectorModelFile
-
-    /**
-     * Wrapper class for the uploaded param.
-     */
-    internal data class UploadedResult(
-        val uploadedStripeFile: StripeFile,
-        val scores: List<Float>?,
-        val uploadMethod: UploadMethod
-    )
-
-    /**
-     * [LiveData]s to indicate the uploading status of high/low res image of front/back
-     */
-    private val _frontHighResUploaded =
-        MutableLiveData<Resource<UploadedResult>>()
-    internal val frontHighResUploaded: LiveData<Resource<UploadedResult>> =
-        _frontHighResUploaded
-
-    private val _backHighResUploaded =
-        MutableLiveData<Resource<UploadedResult>>()
-    internal val backHighResUploaded: LiveData<Resource<UploadedResult>> =
-        _backHighResUploaded
-
-    private val _frontLowResUploaded =
-        MutableLiveData<Resource<UploadedResult>>()
-    private val frontLowResUploaded: LiveData<Resource<UploadedResult>> =
-        _frontLowResUploaded
-
-    private val _backLowResUploaded =
-        MutableLiveData<Resource<UploadedResult>>()
-    private val backLowResUploaded: LiveData<Resource<UploadedResult>> =
-        _backLowResUploaded
-
-    /**
-     * [LiveData]s to aggregate the uploading status of front, back or both
-     */
-    internal val frontUploaded =
-        PairMediatorLiveData(frontHighResUploaded, frontLowResUploaded)
-    private val backUploaded =
-        PairMediatorLiveData(backHighResUploaded, backLowResUploaded)
-    internal val bothUploaded = PairMediatorLiveData(frontUploaded, backUploaded)
-    internal val highResUploaded = PairMediatorLiveData(frontHighResUploaded, backHighResUploaded)
 
     /**
      * Wrapper for both page and model
@@ -144,6 +234,15 @@ internal class IdentityViewModel(
     }
 
     /**
+     * Reset uploaded state to loading state.
+     */
+    internal fun resetUploadedState() {
+        _uploadedState.update {
+            UploadState()
+        }
+    }
+
+    /**
      * Upload high_res of an image Uri manually picked from local file storage or taken from camera.
      */
     internal fun uploadManualResult(
@@ -162,11 +261,12 @@ internal class IdentityViewModel(
                 maxDimension = docCapturePage.highResImageMaxDimension,
                 compressionQuality = docCapturePage.highResImageCompressionQuality
             ),
-            resultLiveData = if (isFront) _frontHighResUploaded else _backHighResUploaded,
             filePurpose = requireNotNull(
                 StripeFilePurpose.fromCode(docCapturePage.filePurpose)
             ),
-            uploadMethod = uploadMethod
+            uploadMethod = uploadMethod,
+            isHighRes = true,
+            isFront = isFront
         )
     }
 
@@ -252,21 +352,13 @@ internal class IdentityViewModel(
         ).let { imageFile ->
             uploadImageAndNotify(
                 imageFile = imageFile,
-                resultLiveData =
-                when {
-                    isHighRes && isFront -> _frontHighResUploaded
-                    isHighRes && !isFront -> _backHighResUploaded
-                    !isHighRes && isFront -> _frontLowResUploaded
-                    !isHighRes && !isFront -> _backLowResUploaded
-                    else -> throw IllegalStateException(
-                        "Illegal state: isHighRes=$isHighRes, isFront=$isFront"
-                    )
-                },
                 filePurpose = requireNotNull(
                     StripeFilePurpose.fromCode(docCapturePage.filePurpose)
                 ),
                 uploadMethod = UploadMethod.AUTOCAPTURE,
-                scores = scores
+                scores = scores,
+                isHighRes = isHighRes,
+                isFront = isFront
             )
         }
     }
@@ -276,12 +368,12 @@ internal class IdentityViewModel(
      */
     private fun uploadImageAndNotify(
         imageFile: File,
-        resultLiveData: MutableLiveData<Resource<UploadedResult>>,
         filePurpose: StripeFilePurpose,
         uploadMethod: UploadMethod,
-        scores: List<Float>? = null
+        scores: List<Float>? = null,
+        isHighRes: Boolean,
+        isFront: Boolean
     ) {
-        resultLiveData.postValue(Resource.loading())
         viewModelScope.launch {
             runCatching {
                 identityRepository.uploadImage(
@@ -292,23 +384,27 @@ internal class IdentityViewModel(
                 )
             }.fold(
                 onSuccess = { uploadedStripeFile ->
-                    resultLiveData.postValue(
-                        Resource.success(
-                            UploadedResult(
+                    _uploadedState.update { currentState ->
+                        currentState.update(
+                            isHighRes = isHighRes,
+                            isFront = isFront,
+                            newResult = UploadedResult(
                                 uploadedStripeFile,
                                 scores,
                                 uploadMethod
                             )
                         )
-                    )
+                    }
                 },
                 onFailure = {
-                    resultLiveData.postValue(
-                        Resource.error(
-                            "Failed to upload file : ${imageFile.name}",
+                    _uploadedState.update { currentState ->
+                        currentState.updateError(
+                            isHighRes = isHighRes,
+                            isFront = isFront,
+                            message = "Failed to upload file : ${imageFile.name}",
                             throwable = it
                         )
-                    )
+                    }
                 }
             )
         }
@@ -344,8 +440,8 @@ internal class IdentityViewModel(
             runCatching {
                 _verificationPage.postValue(Resource.loading())
                 identityRepository.retrieveVerificationPage(
-                    args.verificationSessionId,
-                    args.ephemeralKeySecret
+                    verificationArgs.verificationSessionId,
+                    verificationArgs.ephemeralKeySecret
                 )
             }.fold(
                 onSuccess = {
@@ -358,7 +454,7 @@ internal class IdentityViewModel(
                     _verificationPage.postValue(
                         Resource.error(
                             "Failed to retrieve verification page with " +
-                                "sessionID: ${args.verificationSessionId} and ephemeralKey: ${args.ephemeralKeySecret}",
+                                "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: ${verificationArgs.ephemeralKeySecret}",
                             it
                         ),
                     )
@@ -403,8 +499,8 @@ internal class IdentityViewModel(
         clearDataParam: ClearDataParam
     ) =
         identityRepository.postVerificationPageData(
-            args.verificationSessionId,
-            args.ephemeralKeySecret,
+            verificationArgs.verificationSessionId,
+            verificationArgs.ephemeralKeySecret,
             collectedDataParam,
             clearDataParam
         )
@@ -418,24 +514,22 @@ internal class IdentityViewModel(
     )
     suspend fun postVerificationPageSubmit() =
         identityRepository.postVerificationPageSubmit(
-            args.verificationSessionId,
-            args.ephemeralKeySecret
+            verificationArgs.verificationSessionId,
+            verificationArgs.ephemeralKeySecret
         )
 
     internal class IdentityViewModelFactory(
-        private val args: IdentityVerificationSheetContract.Args,
         private val identityRepository: IdentityRepository,
         private val idDetectorFetcher: IDDetectorFetcher,
-        private val verificationArgs: IdentityVerificationSheetContract.Args,
+        private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
         private val identityIO: IdentityIO
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return IdentityViewModel(
-                args,
+                verificationArgsSupplier(),
                 identityRepository,
                 idDetectorFetcher,
-                verificationArgs,
                 identityIO
             ) as T
         }

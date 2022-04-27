@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">O seu código postal é inválido.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">O seu código postal é inválido</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Pagar ao longo do tempo com &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Nome na conta</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Número de BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Ao fornecer os seus dados de conta bancária e ao confirmar este pagamento, declara que concorda com este Pedido de Débito Direto e com o &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;contrato de serviços de Pedido de Débito Direto&lt;/a&gt; e autoriza a Stripe Payments Australia Pty Ltd ACN 160 180 343, número de ID de Utilizador de Débito Direto 507156 (“Stripe”) a debitar a sua conta através do Sistema BECS (Bulk Electronic Clearing System) em nome de %s (o \\"Comerciante\\") em quaisquer montantes comunicados separadamente a si pelo Comerciante. Certifica ainda que é um titular da conta ou um signatário autorizado da conta acima indicada.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Ao fornecer os seus dados de conta bancária e ao confirmar este pagamento, declara que concorda com este\n    Pedido de Débito Direto e com o contrato de serviços de Pedido de Débito Direto e autoriza a\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, número de ID de Utilizador de Débito Direto 507156\n    (“Stripe”) a debitar a sua conta através do Sistema BECS (Bulk Electronic Clearing System) em\n    nome de %1$s (o \"Comerciante\") em quaisquer montantes comunicados separadamente a si\n    pelo Comerciante. Certifica ainda que é um titular da conta ou um signatário autorizado\n    da conta acima indicada.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->

@@ -12,9 +12,14 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class CountrySpec(val onlyShowCountryCodes: Set<String> = emptySet()) :
     SectionFieldSpec(IdentifierSpec.Country) {
-    fun transform(country: String?): SectionFieldElement =
+    fun transform(
+        initialValues: Map<IdentifierSpec, String?>
+    ): SectionFieldElement =
         CountryElement(
             this.identifier,
-            DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
+            DropdownFieldController(
+                CountryConfig(this.onlyShowCountryCodes),
+                initialValue = initialValues[this.identifier]
+            )
         )
 }

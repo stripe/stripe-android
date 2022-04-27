@@ -9,8 +9,8 @@ au_becs_debit, true, false, on_session, false, card/au_becs_debit, false, false,
 au_becs_debit, true, false, on_session, false, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, true, true, null, false, card/au_becs_debit, false, true, oneTime, true
 au_becs_debit, true, true, null, false, card/eps/au_becs_debit, false, true, oneTime, true
-au_becs_debit, true, false, null, false, card/au_becs_debit, false, true, oneTime, true
-au_becs_debit, true, false, null, false, card/eps/au_becs_debit, false, true, oneTime, true
+au_becs_debit, true, false, null, false, card/au_becs_debit, false, false, not available, false
+au_becs_debit, true, false, null, false, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, false, true, off_session, false, card/au_becs_debit, false, false, not available, false
 au_becs_debit, false, true, off_session, false, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, false, false, off_session, false, card/au_becs_debit, false, false, not available, false
@@ -21,8 +21,8 @@ au_becs_debit, false, false, on_session, false, card/au_becs_debit, false, false
 au_becs_debit, false, false, on_session, false, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, false, true, null, false, card/au_becs_debit, false, true, oneTime, true
 au_becs_debit, false, true, null, false, card/eps/au_becs_debit, false, true, oneTime, true
-au_becs_debit, false, false, null, false, card/au_becs_debit, false, true, oneTime, true
-au_becs_debit, false, false, null, false, card/eps/au_becs_debit, false, true, oneTime, true
+au_becs_debit, false, false, null, false, card/au_becs_debit, false, false, not available, false
+au_becs_debit, false, false, null, false, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, true, true, off_session, true, card/au_becs_debit, false, false, not available, false
 au_becs_debit, true, true, off_session, true, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, true, false, off_session, true, card/au_becs_debit, false, false, not available, false
@@ -33,8 +33,8 @@ au_becs_debit, true, false, on_session, true, card/au_becs_debit, false, false, 
 au_becs_debit, true, false, on_session, true, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, true, true, null, true, card/au_becs_debit, false, true, oneTime, true
 au_becs_debit, true, true, null, true, card/eps/au_becs_debit, false, true, oneTime, true
-au_becs_debit, true, false, null, true, card/au_becs_debit, false, true, oneTime, true
-au_becs_debit, true, false, null, true, card/eps/au_becs_debit, false, true, oneTime, true
+au_becs_debit, true, false, null, true, card/au_becs_debit, false, false, not available, false
+au_becs_debit, true, false, null, true, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, false, true, off_session, true, card/au_becs_debit, false, false, not available, false
 au_becs_debit, false, true, off_session, true, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, false, false, off_session, true, card/au_becs_debit, false, false, not available, false
@@ -45,5 +45,5 @@ au_becs_debit, false, false, on_session, true, card/au_becs_debit, false, false,
 au_becs_debit, false, false, on_session, true, card/eps/au_becs_debit, false, false, not available, false
 au_becs_debit, false, true, null, true, card/au_becs_debit, false, true, oneTime, true
 au_becs_debit, false, true, null, true, card/eps/au_becs_debit, false, true, oneTime, true
-au_becs_debit, false, false, null, true, card/au_becs_debit, false, true, oneTime, true
-au_becs_debit, false, false, null, true, card/eps/au_becs_debit, false, true, oneTime, true
+au_becs_debit, false, false, null, true, card/au_becs_debit, false, false, not available, false
+au_becs_debit, false, false, null, true, card/eps/au_becs_debit, false, false, not available, false

@@ -39,7 +39,7 @@ class AddressElementTest {
             "JP",
             listOf(
                 IbanElement(
-                    IdentifierSpec.Generic("iban"),
+                    IdentifierSpec.Generic("sepa_debit[iban]"),
                     SimpleTextFieldController(IbanConfig())
                 )
             )
@@ -131,7 +131,7 @@ class AddressElementTest {
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
         firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Generic("iban")])
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Generic("sepa_debit[iban]")])
             .isEqualTo(
                 FormFieldEntry("DE89370400440532013000", true)
             )

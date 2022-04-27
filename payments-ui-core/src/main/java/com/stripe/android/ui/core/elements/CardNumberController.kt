@@ -12,6 +12,7 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,17 +26,20 @@ internal class CardNumberController constructor(
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    initialValue: String?,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
 
     @JvmOverloads
     constructor(
         cardTextFieldConfig: CardNumberConfig,
-        context: Context
+        context: Context,
+        initialValue: String?
     ) : this(
         cardTextFieldConfig,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
-        Dispatchers.IO
+        Dispatchers.IO,
+        initialValue = initialValue
     )
 
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
@@ -54,7 +58,8 @@ internal class CardNumberController constructor(
     override val contentDescription: Flow<String> = _fieldValue
 
     internal val cardBrandFlow = _fieldValue.map {
-        accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
+        accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
+            ?: CardBrand.Unknown
     }
 
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
@@ -72,7 +77,9 @@ internal class CardNumberController constructor(
         cardTextFieldConfig.determineState(
             brand,
             fieldValue,
-            accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(fieldValue)
+            accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
+                fieldValue
+            )
         )
     }
     override val fieldState: Flow<TextFieldState> = _fieldState
@@ -87,7 +94,8 @@ internal class CardNumberController constructor(
         object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {
                 newAccountRange?.panLength?.let { panLength ->
-                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = panLength
+                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
+                        panLength
                 }
             }
         }
@@ -116,7 +124,7 @@ internal class CardNumberController constructor(
         }
 
     init {
-        onValueChange("")
+        onRawValueChange(initialValue ?: "")
     }
 
     /**
@@ -137,5 +145,12 @@ internal class CardNumberController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    internal fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
+        // Don't need to populate the card number if the result is Canceled or Failed
+        if (cardScanSheetResult is CardScanSheetResult.Completed) {
+            onRawValueChange(cardScanSheetResult.scannedCard.pan)
+        }
     }
 }

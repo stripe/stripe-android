@@ -15,22 +15,16 @@ enum class CheckoutCurrency(val value: String) {
     AUD("aud")
 }
 
-data class SavedToggles(
-    val customer: String,
-    val googlePay: Boolean,
-    val currency: String,
-    val mode: String,
-    val setShippingAddress: Boolean,
-    val setAutomaticPaymentMethods: Boolean
-)
-
 enum class Toggle(val key: String, val default: Any) {
     Customer("customer", CheckoutCustomer.Guest.value),
+    Link("link", true),
     GooglePay("googlePayConfig", true),
     Currency("currency", CheckoutCurrency.USD.value),
     Mode("mode", CheckoutMode.Payment.value),
     SetShippingAddress("setShippingAddress", true),
-    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true)
+    SetDefaultBillingAddress("setDefaultBillingAddress", true),
+    SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
+    SetDelayedPaymentMethods("setDelayedPaymentMethods", false)
 }
 
 sealed class CheckoutCustomer(val value: String) {
@@ -46,7 +40,8 @@ data class CheckoutRequest(
     val currency: String,
     val mode: String,
     val set_shipping_address: Boolean,
-    val automatic_payment_methods: Boolean
+    val automatic_payment_methods: Boolean,
+    val use_link: Boolean
 )
 
 @Serializable

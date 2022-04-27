@@ -1,4 +1,10 @@
 # Migration Guide
+
+## Migrating from versions < 20.2.0
+
+- Changes to `CollectBankAccountLauncher`
+  * Required, dependent artifact `com.stripe.connections` has been renamed to `com.stripe.financial-connections`.
+  
 ## Migrating from versions < 20.0.0
 - The following classes' packages are changed
   * `com.stripe.android.AppInfo` -> `com.stripe.android.core.AppInfo`

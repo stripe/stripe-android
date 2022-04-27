@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Nastavení aplikace</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Zadní strana řidičského průkazu</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Je vybrána zadní strana řidičského průkazu</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Zadní strana průkazu totožnosti</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Je vybrána zadní strana průkazu totožnosti</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Povolení k použití fotoaparátu</string>
+  <string name="camera_permission_rationale">Tato aplikace pomocí fotoaparátu skenuje vaše doklady totožnosti a pořizuje fotografie k ověření vaší totožnosti.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Zaškrtávací políčko k označení úspěšného zachycení dokumentu</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Zvolte fotku</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Nepodařilo se nám pořídit vysoce kvalitní snímek.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Můžete to zkusit znovu nebo nahrát obrázek ze svého zařízení.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Nebylo možné pořídit obrázek</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Ikona hodin</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Řidičský průkaz</string>
+  <!-- Text for error labels -->
+  <string name="error">Chyba</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Nahrávání souboru</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Nahrajte prosím obrázky přední a zadní strany vašeho řidičského průkazu</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Nahrajte prosím obrázky přední a zadní strany vašeho průkazu totožnosti</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Nahrajte prosím obrázek vašeho cestovního pasu</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Přední strana řidičského průkazu</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Je vybrána přední strana řidičského průkazu</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Přední strana průkazu totožnosti</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Je vybrána přední strana průkazu totožnosti</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Zpět</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Potřebujeme povolení k použití vašeho fotoaparátu. V nastavení aplikace povolte přístup k fotoaparátu.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Držte rovně, probíhá skenování</string>
+  <!-- display name for ID -->
+  <string name="id_card">ID</string>
+  <!-- Continue button text -->
+  <string name="kontinue">pokračovat</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Načítání</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Pas</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Je vybrán pas</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Převraťte řidičský průkaz na druhou stranu</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Umístěte řidičský průkaz do středu rámečku</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Převraťte průkaz totožnosti na druhou stranu</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Umístěte průkaz totožnosti do středu rámečku</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Umístěte pas do středu rámečku</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Naskenováno</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Vybrat</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Pořídit fotku</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Zkusit znovu</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Došlo k neočekávané chybě -- zkuste to znovu za několik sekund</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Nahrát zadní stranu řidičského průkazu</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Nahrát přední stranu řidičského průkazu</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Nahrát zadní stranu průkazu totožnosti</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Nahrát přední stranu průkazu totožnosti</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Nahrát pas</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Můžete také ručně nahrát fotografii %1$s</string>
+</resources>

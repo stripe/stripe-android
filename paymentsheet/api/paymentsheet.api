@@ -14,11 +14,11 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCal
 }
 
 public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/PaymentOptionContract$Args;Lkotlin/jvm/functions/Function1;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lkotlin/coroutines/CoroutineContext;Landroid/app/Application;Lcom/stripe/android/core/Logger;Ljava/lang/String;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/PaymentOptionContract$Args;Lkotlin/jvm/functions/Function1;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lkotlin/coroutines/CoroutineContext;Landroid/app/Application;Lcom/stripe/android/core/Logger;Ljava/lang/String;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/link/injection/LinkPaymentLauncherFactory;)Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -313,11 +313,11 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheetResu
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheetViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/app/Application;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Ldagger/Lazy;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lcom/stripe/android/paymentsheet/PrefsRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/lang/String;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
+	public static fun newInstance (Landroid/app/Application;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Ldagger/Lazy;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;Lcom/stripe/android/paymentsheet/PrefsRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/lang/String;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/link/injection/LinkPaymentLauncherFactory;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheetViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -351,6 +351,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
+	public final field header Landroidx/compose/ui/platform/ComposeView;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
 	public final field testmode Landroid/widget/TextView;
@@ -371,10 +372,15 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
 	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
+	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
+	public final field header Landroidx/compose/ui/platform/ComposeView;
+	public final field linkButton Lcom/stripe/android/link/ui/LinkViewButton;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
 	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
+	public final field topContainer Landroid/widget/LinearLayout;
+	public final field topMessage Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
@@ -400,16 +406,11 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 }
 
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding : androidx/viewbinding/ViewBinding {
-	public final field addPaymentMethodHeader Landroidx/compose/ui/platform/ComposeView;
-	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
-	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
-	public final field message Landroid/widget/TextView;
 	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;
-	public final field topContainer Landroid/widget/LinearLayout;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
 }
@@ -423,7 +424,6 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 }
 
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding : androidx/viewbinding/ViewBinding {
-	public final field header Landroidx/compose/ui/platform/ComposeView;
 	public final field recycler Landroidx/recyclerview/widget/RecyclerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
@@ -752,17 +752,5 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public fun get ()Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
-}
-
-public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion;
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion {
-	public final fun getIdlingResource ()Landroidx/test/espresso/idling/CountingIdlingResource;
-	public final fun getSingleStepIdlingResource ()Landroidx/test/espresso/IdlingResource;
-	public final fun setIdlingResource (Landroidx/test/espresso/idling/CountingIdlingResource;)V
 }
 

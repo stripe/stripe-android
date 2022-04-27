@@ -5,14 +5,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
@@ -46,20 +44,6 @@ internal class ConsentFragment(
         consentViewModelFactory
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(
-            this,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    verificationFlowFinishable.finishWithResult(
-                        IdentityVerificationSheet.VerificationFlowResult.Canceled
-                    )
-                }
-            }
-        )
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -68,7 +52,7 @@ internal class ConsentFragment(
         binding = ConsentFragmentBinding.inflate(inflater, container, false)
 
         consentViewModel.loadUriIntoImageView(
-            identityViewModel.args.brandLogo,
+            identityViewModel.verificationArgs.brandLogo,
             binding.merchantLogo
         )
 
@@ -127,6 +111,7 @@ internal class ConsentFragment(
                 identityViewModel,
                 collectedDataParam,
                 ClearDataParam.CONSENT_TO_DOC_SELECT,
+                fromFragment = R.id.consentFragment,
                 shouldNotSubmit = { true },
                 notSubmitBlock = {
                     navigateToDocSelection()

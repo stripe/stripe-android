@@ -3,7 +3,6 @@ package com.stripe.android.identity
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_JSON_STRING
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
-import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 import kotlinx.serialization.json.Json
 
@@ -29,23 +28,6 @@ internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = Verificatio
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = true
-)
-
-internal val ERROR_VERIFICATION_PAGE_DATA = VerificationPageData(
-    id = "id",
-    objectType = "type",
-    requirements = VerificationPageDataRequirements(
-        errors = listOf(
-            VerificationPageDataRequirementError(
-                body = ERROR_BODY,
-                backButtonText = ERROR_BUTTON_TEXT,
-                requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
-                title = ERROR_TITLE
-            )
-        )
-    ),
-    status = VerificationPageData.Status.VERIFIED,
-    submitted = false
 )
 
 internal val json: Json = Json {

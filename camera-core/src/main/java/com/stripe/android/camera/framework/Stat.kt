@@ -23,7 +23,7 @@ object Stats {
     var scanId: String? = null
         private set
 
-    val logTag = Stats::class.java.simpleName
+    private val logTag = Stats::class.java.simpleName
 
     private var persistentRepeatingTasks:
         MutableMap<String, MutableMap<String, RepeatingTaskStats>> = mutableMapOf()

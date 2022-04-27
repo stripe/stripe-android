@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
@@ -16,9 +17,11 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_P
 import com.stripe.android.identity.ERROR_BODY
 import com.stripe.android.identity.ERROR_BUTTON_TEXT
 import com.stripe.android.identity.ERROR_TITLE
-import com.stripe.android.identity.ERROR_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
+import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
+import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -32,36 +35,173 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class NavigationUtilsTest {
     @Test
-    fun `postVerificationPageDataAndMaybeSubmit navigates to error fragment when has error`() {
-        runBlocking {
-            val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any(), any())).thenReturn(
-                    ERROR_VERIFICATION_PAGE_DATA
-                )
-            }
+    fun `postVerificationPageDataAndMaybeSubmit from consent navigates to error fragment when has BIOMETRICCONSENT error `() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_BIOMETRICCONSENT,
+            R.id.consentFragment,
+            R.id.consentFragment
+        )
+    }
 
-            launchFragment { navController, fragment ->
-                fragment.postVerificationPageDataAndMaybeSubmit(
-                    mockIdentityViewModel,
-                    mock(),
-                    mock(),
-                    { true },
-                    {}
-                )
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from passportUpload navigates to error fragment when has IDDOCUMENT error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.passportUploadFragment,
+            R.id.passportUploadFragment
+        )
 
-                requireNotNull(navController.backStack.last().arguments).let { arguments ->
-                    assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
-                        .isEqualTo(ERROR_TITLE)
-                    assertThat(arguments[ErrorFragment.ARG_ERROR_CONTENT])
-                        .isEqualTo(ERROR_BODY)
-                    assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION])
-                        .isEqualTo(R.id.action_errorFragment_to_consentFragment)
-                    assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT])
-                        .isEqualTo(ERROR_BUTTON_TEXT)
-                }
-                assertThat(navController.currentDestination?.id)
-                    .isEqualTo(R.id.errorFragment)
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.passportUploadFragment,
+            R.id.passportUploadFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from idUpload navigates to error fragment when has IDDOCUMENT error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.IDUploadFragment,
+            R.id.IDUploadFragment
+        )
+
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.IDUploadFragment,
+            R.id.IDUploadFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from driverLicenseUpload navigates to error fragment when has IDDOCUMENT error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.driverLicenseUploadFragment,
+            R.id.driverLicenseUploadFragment
+        )
+
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.driverLicenseUploadFragment,
+            R.id.driverLicenseUploadFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from passportScan navigates to error fragment when has IDDOCUMENT error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.passportScanFragment,
+            R.id.passportScanFragment
+        )
+
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.passportScanFragment,
+            R.id.passportScanFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from idScan navigates to error fragment when has IDDOCUMENT error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.IDScanFragment,
+            R.id.IDScanFragment
+        )
+
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.IDScanFragment,
+            R.id.IDScanFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from driverLicenseScan navigates to error fragment when has IDDOCUMENT error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.driverLicenseScanFragment,
+            R.id.driverLicenseScanFragment
+        )
+
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.driverLicenseScanFragment,
+            R.id.driverLicenseScanFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit from docSelection navigates to error fragment when has IDDOCUMENTTYPE error`() {
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTTYPE,
+            R.id.docSelectionFragment,
+            R.id.docSelectionFragment
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeSubmit navigates to error fragment with default destination when error type doesn't match`() {
+        // only uploadFragment and scanFragment could possible have IDDOCUMENTFRONT or IDDOCUMENTBACK errors,
+        // all other fragments should return with default destination when error returns with this type.
+
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.consentFragment,
+            ErrorFragment.UNEXPECTED_DESTINATION
+        )
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.consentFragment,
+            ErrorFragment.UNEXPECTED_DESTINATION
+        )
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
+            R.id.docSelectionFragment,
+            ErrorFragment.UNEXPECTED_DESTINATION
+        )
+        testPostVerificationPageDataAndMaybeSubmitWithError(
+            ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
+            R.id.docSelectionFragment,
+            ErrorFragment.UNEXPECTED_DESTINATION
+        )
+    }
+
+    private fun testPostVerificationPageDataAndMaybeSubmitWithError(
+        errorResponse: VerificationPageData,
+        @IdRes fromFragment: Int,
+        @IdRes backButtonDestination: Int
+    ) = runBlocking {
+        val mockIdentityViewModel = mock<IdentityViewModel>().also {
+            whenever(it.postVerificationPageData(any(), any())).thenReturn(
+                errorResponse
+            )
+        }
+
+        launchFragment { navController, fragment ->
+            fragment.postVerificationPageDataAndMaybeSubmit(
+                mockIdentityViewModel,
+                mock(),
+                mock(),
+                fromFragment,
+                { true },
+                {}
+            )
+
+            requireNotNull(navController.backStack.last().arguments).let { arguments ->
+                assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
+                    .isEqualTo(ERROR_TITLE)
+                assertThat(arguments[ErrorFragment.ARG_ERROR_CONTENT])
+                    .isEqualTo(ERROR_BODY)
+                assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION])
+                    .isEqualTo(backButtonDestination)
+                assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT])
+                    .isEqualTo(ERROR_BUTTON_TEXT)
             }
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.errorFragment)
         }
     }
 
@@ -79,6 +219,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { true },
                     {}
                 )
@@ -104,6 +245,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { true },
                     {
                         blockExecuted = true
@@ -132,6 +274,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { false },
                     {}
                 )
@@ -150,7 +293,7 @@ internal class NavigationUtilsTest {
                 )
 
                 whenever(it.postVerificationPageSubmit()).thenReturn(
-                    ERROR_VERIFICATION_PAGE_DATA
+                    ERROR_VERIFICATION_PAGE_DATA_BIOMETRICCONSENT
                 )
             }
 
@@ -159,6 +302,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { false },
                     {}
                 )
@@ -169,7 +313,7 @@ internal class NavigationUtilsTest {
                     assertThat(arguments[ErrorFragment.ARG_ERROR_CONTENT])
                         .isEqualTo(ERROR_BODY)
                     assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION])
-                        .isEqualTo(R.id.action_errorFragment_to_consentFragment)
+                        .isEqualTo(R.id.consentFragment)
                     assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT])
                         .isEqualTo(ERROR_BUTTON_TEXT)
                 }
@@ -197,6 +341,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { false },
                     {}
                 )
@@ -225,6 +370,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { false },
                     {}
                 )
@@ -253,6 +399,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
+                    R.id.consentFragment,
                     { false },
                     {}
                 )
@@ -287,5 +434,75 @@ internal class NavigationUtilsTest {
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ) = View(context)
+    }
+
+    internal companion object {
+        internal val ERROR_VERIFICATION_PAGE_DATA_BIOMETRICCONSENT = VerificationPageData(
+            id = "id",
+            objectType = "type",
+            requirements = VerificationPageDataRequirements(
+                errors = listOf(
+                    VerificationPageDataRequirementError(
+                        body = ERROR_BODY,
+                        backButtonText = ERROR_BUTTON_TEXT,
+                        requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
+                        title = ERROR_TITLE
+                    )
+                )
+            ),
+            status = VerificationPageData.Status.VERIFIED,
+            submitted = false
+        )
+
+        internal val ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK = VerificationPageData(
+            id = "id",
+            objectType = "type",
+            requirements = VerificationPageDataRequirements(
+                errors = listOf(
+                    VerificationPageDataRequirementError(
+                        body = ERROR_BODY,
+                        backButtonText = ERROR_BUTTON_TEXT,
+                        requirement = VerificationPageDataRequirementError.Requirement.IDDOCUMENTBACK,
+                        title = ERROR_TITLE
+                    )
+                )
+            ),
+            status = VerificationPageData.Status.VERIFIED,
+            submitted = false
+        )
+
+        internal val ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT = VerificationPageData(
+            id = "id",
+            objectType = "type",
+            requirements = VerificationPageDataRequirements(
+                errors = listOf(
+                    VerificationPageDataRequirementError(
+                        body = ERROR_BODY,
+                        backButtonText = ERROR_BUTTON_TEXT,
+                        requirement = VerificationPageDataRequirementError.Requirement.IDDOCUMENTFRONT,
+                        title = ERROR_TITLE
+                    )
+                )
+            ),
+            status = VerificationPageData.Status.VERIFIED,
+            submitted = false
+        )
+
+        internal val ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTTYPE = VerificationPageData(
+            id = "id",
+            objectType = "type",
+            requirements = VerificationPageDataRequirements(
+                errors = listOf(
+                    VerificationPageDataRequirementError(
+                        body = ERROR_BODY,
+                        backButtonText = ERROR_BUTTON_TEXT,
+                        requirement = VerificationPageDataRequirementError.Requirement.IDDOCUMENTTYPE,
+                        title = ERROR_TITLE
+                    )
+                )
+            ),
+            status = VerificationPageData.Status.VERIFIED,
+            submitted = false
+        )
     }
 }

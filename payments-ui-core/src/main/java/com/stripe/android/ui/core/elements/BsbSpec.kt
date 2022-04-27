@@ -1,20 +1,24 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-object BsbSpec : SectionFieldSpec(IdentifierSpec.Generic("bsb_number")) {
-    fun transform(): SectionFieldElement =
-        SimpleTextElement(
+data class BsbSpec(
+    override val identifier: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
+) : FormItemSpec(), RequiredItemSpec, Parcelable {
+    fun transform(initialValues: Map<IdentifierSpec, String?>): BsbElement =
+        BsbElement(
             this.identifier,
-            SimpleTextFieldController(BsbConfig(banks))
+            banks,
+            initialValues[this.identifier]
         )
 }
 
-internal val banks: List<BecsDebitBanks.Bank> = listOf(
+private val banks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("00", "Stripe Test Bank"),
     BecsDebitBanks.Bank("10", "BankSA (division of Westpac Bank)"),
     BecsDebitBanks.Bank("11", "St George Bank (division of Westpac Bank)"),

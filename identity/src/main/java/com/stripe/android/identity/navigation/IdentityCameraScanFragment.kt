@@ -8,13 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.camera.DefaultCameraErrorListener
@@ -38,6 +41,7 @@ import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -51,6 +55,9 @@ internal abstract class IdentityCameraScanFragment(
 ) : Fragment() {
     protected val identityScanViewModel: IdentityScanViewModel by viewModels { identityCameraScanViewModelFactory }
     protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
+
+    @get:IdRes
+    protected abstract val fragmentId: Int
 
     @VisibleForTesting
     internal lateinit var cameraAdapter: Camera1Adapter
@@ -93,6 +100,9 @@ internal abstract class IdentityCameraScanFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (!shouldStartFromBack()) {
+            identityViewModel.resetUploadedState()
+        }
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
@@ -230,89 +240,57 @@ internal abstract class IdentityCameraScanFragment(
     }
 
     /**
-     * Observe for [IdentityViewModel.bothUploaded],
-     * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
+     * Collect the [IdentityViewModel.uploadState] and update UI accordingly.
+     *
+     * Try to [postVerificationPageDataAndMaybeSubmit] when all images are uploaded and navigates
+     * to error when error occurs.
      */
-    protected fun observeAndUploadForBothSides(type: CollectedDataParam.Type) =
-        identityViewModel.bothUploaded.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    it.data?.let { uploadedFiles ->
-                        lifecycleScope.launch {
-                            runCatching {
-                                postVerificationPageDataAndMaybeSubmit(
-                                    identityViewModel = identityViewModel,
-                                    collectedDataParam =
-                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                        type = type,
-                                        frontHighResResult = uploadedFiles.first.first,
-                                        frontLowResResult = uploadedFiles.first.second,
-                                        backHighResResult = uploadedFiles.second.first,
-                                        backLowResResult = uploadedFiles.second.second,
-                                    ),
-                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                    shouldNotSubmit = { false }
-                                )
-                            }.onFailure { throwable ->
-                                Log.d(
-                                    TAG,
-                                    "fail to submit uploaded files: $throwable"
-                                )
-                                navigateToDefaultErrorFragment()
+    protected fun collectUploadedStateAndUploadForBothSides(type: CollectedDataParam.Type) =
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                identityViewModel.uploadState.collectLatest {
+                    when {
+                        it.hasError() -> {
+                            Log.e(TAG, "Fail to upload files: ${it.getError()}")
+                            navigateToDefaultErrorFragment()
+                        }
+                        it.isAnyLoading() -> {
+                            continueButton.toggleToLoading()
+                        }
+                        it.isBothUploaded() -> {
+                            lifecycleScope.launch {
+                                runCatching {
+                                    postVerificationPageDataAndMaybeSubmit(
+                                        identityViewModel = identityViewModel,
+                                        collectedDataParam =
+                                        CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                            type = type,
+                                            frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                            frontLowResResult = requireNotNull(it.frontLowResResult.data),
+                                            backHighResResult = requireNotNull(it.backHighResResult.data),
+                                            backLowResResult = requireNotNull(it.backLowResResult.data)
+                                        ),
+                                        fromFragment = fragmentId,
+                                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                        shouldNotSubmit = { false }
+                                    )
+                                }.onFailure { throwable ->
+                                    Log.e(
+                                        TAG,
+                                        "fail to submit uploaded files: $throwable"
+                                    )
+                                    navigateToDefaultErrorFragment()
+                                }
                             }
                         }
-                    }
-                }
-                Status.ERROR -> {
-                    Log.e(TAG, "Fail to upload files: ${it.throwable}")
-                    navigateToDefaultErrorFragment()
-                }
-                Status.LOADING -> {
-                    continueButton.toggleToLoading()
-                }
-            }
-        }
-
-    /**
-     * Observe for [IdentityViewModel.frontUploaded],
-     * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
-     */
-    protected fun observeAndUploadForFrontSide(type: CollectedDataParam.Type) =
-        identityViewModel.frontUploaded.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    it.data?.let { uploadedFiles ->
-                        val frontHighResResult = uploadedFiles.first
-                        val frontLowResResult = uploadedFiles.second
-                        lifecycleScope.launch {
-                            runCatching {
-                                postVerificationPageDataAndMaybeSubmit(
-                                    identityViewModel = identityViewModel,
-                                    collectedDataParam =
-                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                        type,
-                                        frontHighResResult,
-                                        frontLowResResult
-                                    ),
-                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                    shouldNotSubmit = { false }
-                                )
-                            }.onFailure { throwable ->
-                                Log.d(
-                                    PassportScanFragment.TAG,
-                                    "fail to submit uploaded files: $throwable"
-                                )
-                                navigateToDefaultErrorFragment()
-                            }
+                        else -> {
+                            Log.e(
+                                TAG,
+                                "observeAndUploadForBothSides reaches unexpected upload state: $it"
+                            )
+                            navigateToDefaultErrorFragment()
                         }
                     }
-                }
-                Status.ERROR -> {
-                    Log.e(PassportScanFragment.TAG, "Fail to upload files: ${it.throwable}")
-                    navigateToDefaultErrorFragment()
-                }
-                Status.LOADING -> {
-                    continueButton.toggleToLoading()
                 }
             }
         }

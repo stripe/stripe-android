@@ -19,6 +19,8 @@ internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val fragmentId = R.id.driverLicenseScanFragment
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (shouldStartFromBack()) {
@@ -35,7 +37,8 @@ internal class DriverLicenseScanFragment(
                     startScanning(DL_BACK)
                 }
                 DL_BACK -> {
-                    observeAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
+                    continueButton.toggleToLoading()
+                    collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
                 }
                 else -> {
                     Log.e(
