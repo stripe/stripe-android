@@ -159,6 +159,11 @@ internal fun NavController.navigateUpAndSetArgForUploadFragment() {
     navigateUp()
 }
 
+internal fun NavController.isNavigatedUpTo(): Boolean {
+    return this.currentDestination?.arguments?.get(ARG_IS_NAVIGATED_UP_TO)?.defaultValue
+        as? Boolean == true
+}
+
 private fun NavController.isBackingToUploadFragment() =
     previousBackStackEntry?.destination?.id == R.id.IDUploadFragment ||
         previousBackStackEntry?.destination?.id == R.id.passportUploadFragment ||

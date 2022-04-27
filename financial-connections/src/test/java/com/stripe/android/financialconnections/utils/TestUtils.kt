@@ -1,7 +1,12 @@
 package com.stripe.android.financialconnections.utils
 
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 
 @Suppress("UNCHECKED_CAST")
 internal object TestUtils {
@@ -12,3 +17,21 @@ internal object TestUtils {
         }
     }
 }
+
+internal class FakeActivityResultRegistry(
+    private val result: FinancialConnectionsSheetContract.Result
+) : ActivityResultRegistry() {
+    override fun <I, O> onLaunch(
+        requestCode: Int,
+        contract: ActivityResultContract<I, O>,
+        input: I,
+        options: ActivityOptionsCompat?
+    ) {
+        dispatchResult(
+            requestCode,
+            result
+        )
+    }
+}
+
+internal class TestFragment : Fragment()

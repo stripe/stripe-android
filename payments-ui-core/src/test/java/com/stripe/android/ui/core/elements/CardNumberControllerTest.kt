@@ -25,7 +25,7 @@ internal class CardNumberControllerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val cardNumberController = CardNumberController(
-        CardNumberConfig(), FakeCardAccountRangeRepository(), testDispatcher
+        CardNumberConfig(), FakeCardAccountRangeRepository(), testDispatcher, initialValue = null
     )
 
     @After
@@ -115,7 +115,8 @@ internal class CardNumberControllerTest {
 
                 override val loading: Flow<Boolean> = flowOf(false)
             },
-            testDispatcher
+            testDispatcher,
+            initialValue = null
         )
         cardNumberController.onValueChange("42424242424242424242")
         idleLooper()

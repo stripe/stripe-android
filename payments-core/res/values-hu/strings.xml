@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Irányítószáma érvénytelen.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Irányítószáma érvénytelen.</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Fizessen később a következővel:&lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">A számlán szereplő név</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB-szám</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Bankszámlaadatainak megadásával és a kifizetés jóváhagyásával Ön elfogadja ezt a Beszedési igényt és a &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Beszedési igény szolgáltatást&lt;/a&gt;, és felhatalmazza a Stripe Payments Australia Pty Ltd ACN 160 180 343 beszedési szolgáltatót, amelynek azonosítója 507156 („Stripe”), hogy megterhelje számláját a Bulk Electronic Clearing System (BECS) rendszeren keresztül a(z) %s (a „Kereskedő”) nevében minden olyan összeg vonatkozásában, amelyet a Kereskedő külön közölt Önnel. Ön tanúsítja, hogy vagy számlatulajdonosa vagy egy aláírási meghatalmazottja a fent említett számlának.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Bankszámlaadatainak megadásával és a kifizetés jóváhagyásával Ön elfogadja ezt a\n   Beszedési igényt és a Beszedési igény szolgáltatást, és felhatalmazza a \n    Stripe Payments Australia Pty Ltd ACN 160 180 343 beszedési szolgáltatót, amelynek azonosítója 507156\n    (“Stripe”), hogy megterhelje számláját a Bulk Electronic Clearing System (BECS) rendszeren keresztül \n    a(z) %1$s (a \"Kereskedő\") nevében minden olyan összeg vonatkozásában, amelyet a \n    Kereskedő külön közölt Önnel. Ön tanúsítja, hogy vagy számlatulajdonosa vagy egy aláírási meghatalmazottja\n    a fent említett számlának.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->

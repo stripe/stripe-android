@@ -36,7 +36,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
         ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val args = FinancialConnectionsSheetContract.Args(configuration)
+    private val args = FinancialConnectionsSheetContract.Args.Default(configuration)
     private val intent = contract.createIntent(context, args)
     private val viewModel = createViewModel()
 
@@ -47,6 +47,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
             savedStateHandle = SavedStateHandle(),
             generateLinkAccountSessionManifest = mock(),
             fetchLinkAccountSession = mock(),
+            fetchLinkAccountSessionForToken = mock(),
             eventReporter = mock()
         )
     }
@@ -72,7 +73,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            FinancialConnectionsSheetResult.Failed::class.java
+            FinancialConnectionsSheetContract.Result.Failed::class.java
         )
     }
 
@@ -80,7 +81,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
     fun `onCreate() with invalid args returns Failed result`() {
         val scenario = activityScenario()
         val configuration = FinancialConnectionsSheet.Configuration("", "")
-        val args = FinancialConnectionsSheetContract.Args(configuration)
+        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
         val intent = contract.createIntent(context, args)
         scenario.launch(intent)
         assertThat(
@@ -89,7 +90,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            FinancialConnectionsSheetResult.Failed::class.java
+            FinancialConnectionsSheetContract.Result.Failed::class.java
         )
     }
 
@@ -138,7 +139,7 @@ class FinancialFinancialConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            FinancialConnectionsSheetResult.Canceled::class.java
+            FinancialConnectionsSheetContract.Result.Canceled::class.java
         )
     }
 

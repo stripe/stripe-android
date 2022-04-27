@@ -142,7 +142,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
 
-    override var newCard: PaymentSelection.New.Card? = null
+    override var newLpm: PaymentSelection.New? = null
 
     @VisibleForTesting
     internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null

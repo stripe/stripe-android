@@ -44,7 +44,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:3.0.0'
+    implementation 'com.squareup.okio:okio:3.1.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
@@ -53,7 +53,7 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"

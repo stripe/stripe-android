@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowMetrics
+import android.widget.FrameLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
@@ -24,8 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -33,9 +37,11 @@ import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
@@ -60,6 +66,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
     abstract val testModeIndicator: TextView
+    abstract val notesView: ComposeView
+    abstract val primaryButton: PrimaryButton
 
     abstract fun setActivityResult(result: ResultType)
 
@@ -121,6 +129,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
         setupHeader()
+        setupPrimaryButton()
+        setupNotes()
 
         viewModel.showLinkVerificationDialog.observe(this) { show ->
             if (show) {
@@ -223,6 +233,48 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                         modifier = Modifier.padding(bottom = 2.dp)
                     )
                 }
+            }
+        }
+    }
+
+    private fun setupPrimaryButton() {
+        viewModel.primaryButtonOnClick.observe(this) { action ->
+            primaryButton.setOnClickListener {
+                action()
+            }
+        }
+        viewModel.primaryButtonText.observe(this) { text ->
+            primaryButton.setLabel(text)
+        }
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            primaryButton.isEnabled = isEnabled
+        }
+    }
+
+    private fun setupNotes() {
+        viewModel.notesText.observe(this) { text ->
+            val showNotes = text != null
+            text?.let {
+                notesView.setContent {
+                    Html(
+                        html = text,
+                        imageGetter = mapOf(),
+                        color = PaymentsTheme.colors.subtitle,
+                        style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
+                    )
+                }
+            }
+            notesView.isVisible = showNotes
+            primaryButton.updateLayoutParams {
+                (this as? FrameLayout.LayoutParams)?.updateMargins(
+                    bottom = if (showNotes) {
+                        0
+                    } else {
+                        resources.getDimensionPixelSize(
+                            R.dimen.stripe_paymentsheet_button_container_spacing_bottom
+                        )
+                    }
+                )
             }
         }
     }

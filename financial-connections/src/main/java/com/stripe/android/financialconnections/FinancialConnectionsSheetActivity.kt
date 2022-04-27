@@ -49,7 +49,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             finishWithResult(
-                FinancialConnectionsSheetResult.Failed(
+                FinancialConnectionsSheetContract.Result.Failed(
                     IllegalArgumentException("ConnectionsSheet started without arguments.")
                 )
             )
@@ -58,7 +58,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
             try {
                 starterArgs.validate()
             } catch (e: InvalidParameterException) {
-                finishWithResult(FinancialConnectionsSheetResult.Failed(e))
+                finishWithResult(FinancialConnectionsSheetContract.Result.Failed(e))
                 return
             }
         }
@@ -111,13 +111,13 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
      * return canceled result
      */
     override fun onBackPressed() {
-        finishWithResult(FinancialConnectionsSheetResult.Canceled)
+        finishWithResult(FinancialConnectionsSheetContract.Result.Canceled)
     }
 
-    private fun finishWithResult(result: FinancialConnectionsSheetResult) {
+    private fun finishWithResult(result: FinancialConnectionsSheetContract.Result) {
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtras(FinancialConnectionsSheetContract.Result(result).toBundle())
+            Intent().putExtras(result.toBundle())
         )
         finish()
     }

@@ -10,6 +10,7 @@ import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -47,7 +48,8 @@ import com.stripe.android.ui.core.PaymentsTheme
 
 private const val LINK_TAG = "URL"
 
-internal data class EmbeddableImage(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddableImage(
     @DrawableRes val id: Int,
     @StringRes val contentDescription: Int
 )
@@ -58,7 +60,8 @@ internal data class EmbeddableImage(
  * The source value in the img tab, must map to something in the imageGetter.
  */
 @Composable
-internal fun Html(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Html(
     html: String,
     imageGetter: Map<String, EmbeddableImage>,
     modifier: Modifier = Modifier,

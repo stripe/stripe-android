@@ -13,6 +13,7 @@ import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -42,7 +43,11 @@ internal class SignUpViewModel @Inject constructor(
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
 
     val merchantName: String = args.merchantName
-    val emailElement: SectionFieldElement = EmailSpec.transform(prefilledEmail)
+    val emailElement: SectionFieldElement = EmailSpec.transform(
+        mapOf(
+            IdentifierSpec.Email to prefilledEmail
+        )
+    )
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

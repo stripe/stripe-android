@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod.Companion.shouldTintOnSelection
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
+import com.stripe.android.ui.core.MeasureComposableWidth
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
 
@@ -45,6 +46,10 @@ internal fun PaymentMethodsUI(
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
 
+    LaunchedEffect(selectedIndex) {
+        state.scrollToItem(selectedIndex, 0)
+    }
+
     LaunchedEffect(isEnabled) {
         if (isEnabled) {
             state.reenableScrolling(scope)
@@ -53,7 +58,10 @@ internal fun PaymentMethodsUI(
         }
     }
 
-    BoxWithConstraints {
+    BoxWithConstraints(
+        modifier = Modifier
+            .testTag(TEST_TAG_LIST + "1")
+    ) {
         val viewWidth = calculateViewWidth(
             this.maxWidth,
             paymentMethods.size
@@ -116,39 +124,52 @@ internal fun PaymentMethodUI(
     modifier: Modifier = Modifier,
     onItemSelectedListener: (Int) -> Unit
 ) {
-    SectionCard(
-        isSelected = isSelected,
-        modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-            .height(60.dp)
-            .width(viewWidth)
-            .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
-            .selectable(
-                selected = isSelected,
-                enabled = isEnabled,
-                onClick = {
-                    onItemSelectedListener(itemIndex)
-                }
-            )
-    ) {
-        Column {
-            val color = if (isSelected) PaymentsTheme.colors.material.primary
-            else PaymentsTheme.colors.onComponent
+    val color = if (isSelected) PaymentsTheme.colors.material.primary
+    else PaymentsTheme.colors.onComponent
 
-            val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                colorFilter = colorFilter,
-                modifier = Modifier
-                    .padding(top = ADD_PM_DEFAULT_PADDING.dp, start = ADD_PM_DEFAULT_PADDING.dp)
-            )
-            LpmSelectorText(
-                text = title,
-                isEnabled = isEnabled,
-                textColor = color,
-                modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
-            )
+    val lpmTextSelector: @Composable () -> Unit = {
+        LpmSelectorText(
+            text = title,
+            isEnabled = isEnabled,
+            textColor = color,
+            modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
+        )
+    }
+
+    MeasureComposableWidth(composable = lpmTextSelector) { lpmSelectorTextWidth ->
+        SectionCard(
+            isSelected = isSelected,
+            modifier = modifier
+                .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+                .height(60.dp)
+                .width(
+                    maxOf(
+                        viewWidth,
+                        lpmSelectorTextWidth +
+                            (CARD_HORIZONTAL_PADDING.dp * 2) +
+                            ADD_PM_DEFAULT_PADDING.dp
+                    )
+                )
+                .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
+                .selectable(
+                    selected = isSelected,
+                    enabled = isEnabled,
+                    onClick = {
+                        onItemSelectedListener(itemIndex)
+                    }
+                )
+        ) {
+            Column {
+                val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    colorFilter = colorFilter,
+                    modifier = Modifier
+                        .padding(top = ADD_PM_DEFAULT_PADDING.dp, start = ADD_PM_DEFAULT_PADDING.dp)
+                )
+                lpmTextSelector()
+            }
         }
     }
 }
