@@ -198,7 +198,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.selection.observe(this) {
             clearErrorMessages()
+            setupBuyButton()
         }
+
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .observe(this, buyButtonStateObserver)
     }
 
     private fun onTransitionTarget(
@@ -256,20 +260,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun setupBuyButton() {
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
-                viewModel.updatePrimaryButtonText(
-                    initial = true,
-                    text = requireNotNull(it).buildPayButtonLabel(resources)
+                viewBinding.buyButton.setLabel(
+                    requireNotNull(it).buildPayButtonLabel(resources)
                 )
             }
         } else {
-            viewModel.updatePrimaryButtonText(
-                initial = true,
-                text = resources.getString(R.string.stripe_setup_button_label)
+            viewBinding.buyButton.setLabel(
+                resources.getString(R.string.stripe_setup_button_label)
             )
         }
-
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyButtonStateObserver)
 
         val buttonColor = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
             PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
@@ -279,7 +278,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             buttonColor
         )
 
-        viewModel.updatePrimaryButtonOnClick(initial = true) {
+        viewBinding.buyButton.setOnClickListener {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }

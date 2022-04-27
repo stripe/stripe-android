@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -152,14 +151,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val primaryButtonOnClick: LiveData<() -> Unit>
         get() = _primaryButtonOnClick
 
-    @VisibleForTesting
-    @StringRes
-    internal val _notesText = MutableLiveData<Int?>()
-    internal val notesText: LiveData<Int?>
-        @StringRes get() = _notesText
-
-    private var initialPrimaryButtonText: String? = null
-    private var initialPrimaryButtonOnPress: () -> Unit = {}
+    private val _notesText = MutableLiveData<String?>()
+    internal val notesText: LiveData<String?>
+        get() = _notesText
 
     protected var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -328,10 +322,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         logger.warning(message)
     }
 
-    fun updatePrimaryButtonText(text: String, initial: Boolean = false) {
-        if (initial) {
-            initialPrimaryButtonText = text
-        }
+    fun updatePrimaryButtonText(text: String) {
         _primaryButtonText.value = text
     }
 
@@ -339,25 +330,19 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         primaryButtonEnabled.value = enabled
     }
 
-    fun updatePrimaryButtonOnClick(initial: Boolean = false, onPress: () -> Unit) {
-        if (initial) {
-            initialPrimaryButtonOnPress = onPress
-        }
+    fun updatePrimaryButtonOnClick(onPress: () -> Unit) {
         _primaryButtonOnClick.value = onPress
     }
 
-    fun resetPrimaryButton() {
-        initialPrimaryButtonText?.let {
-            _primaryButtonText.value = it
-        }
-        primaryButtonEnabled.value = null
-        _primaryButtonOnClick.value = initialPrimaryButtonOnPress
+    fun updateNotes(text: String?) {
+        _notesText.value = text
     }
 
     fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newLpm = selection
         }
+        primaryButtonEnabled.value = null
         savedStateHandle[SAVE_SELECTION] = selection
     }
 

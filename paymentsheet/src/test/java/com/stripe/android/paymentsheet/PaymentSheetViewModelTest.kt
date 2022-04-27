@@ -815,7 +815,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(isEnabled)
             .isFalse()
 
-        viewModel.resetPrimaryButton()
+        viewModel.updateSelection(mock())
         assertThat(isEnabled)
             .isTrue()
     }

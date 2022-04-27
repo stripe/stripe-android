@@ -926,7 +926,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
-            viewModel.resetPrimaryButton()
+            viewModel.updateSelection(mock())
             assertThat(activity.viewBinding.buyButton.externalLabel)
                 .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
@@ -940,7 +940,11 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel._notesText.value = R.string.stripe_paymentsheet_payment_method_us_bank_account
+            viewModel.updateNotes(
+                context.getString(
+                    R.string.stripe_paymentsheet_payment_method_us_bank_account
+                )
+            )
             assertThat(activity.viewBinding.notes.isVisible).isTrue()
         }
     }
@@ -952,7 +956,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel._notesText.value = null
+            viewModel.updateNotes(null)
             assertThat(activity.viewBinding.notes.isVisible).isFalse()
         }
     }

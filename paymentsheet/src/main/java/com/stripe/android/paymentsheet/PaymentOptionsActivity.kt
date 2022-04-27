@@ -118,6 +118,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
+        viewModel.selection.observe(this) {
+            setupContinueButton()
+        }
+
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
@@ -143,12 +147,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewModel.updatePrimaryButtonText(
-            initial = true,
-            text = getString(R.string.stripe_paymentsheet_continue_button_label)
+        viewBinding.continueButton.setLabel(
+            getString(R.string.stripe_paymentsheet_continue_button_label)
         )
 
-        viewModel.updatePrimaryButtonOnClick(initial = true) {
+        viewBinding.continueButton.setOnClickListener {
             viewModel.onUserSelection()
         }
     }

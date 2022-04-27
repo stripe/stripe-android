@@ -231,12 +231,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     private fun setupNotes() {
-        viewModel.notesText.observe(this) { stringRes ->
-            val showNotes = stringRes != null
-            stringRes?.let {
+        viewModel.notesText.observe(this) { text ->
+            val showNotes = text != null
+            text?.let {
                 notesView.setContent {
                     Html(
-                        html = getString(stringRes),
+                        html = text,
                         imageGetter = mapOf(),
                         color = PaymentsTheme.colors.subtitle,
                         style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
