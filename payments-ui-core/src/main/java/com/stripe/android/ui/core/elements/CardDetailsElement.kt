@@ -16,7 +16,6 @@ internal class CardDetailsElement(
     initialValues: Map<IdentifierSpec, String?>,
     val controller: CardDetailsController = CardDetailsController(context, initialValues),
 ) : SectionMultiFieldElement(identifier) {
-
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 

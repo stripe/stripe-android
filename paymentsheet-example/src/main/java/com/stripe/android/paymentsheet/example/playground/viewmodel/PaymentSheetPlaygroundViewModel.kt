@@ -90,12 +90,7 @@ class PaymentSheetPlaygroundViewModel(
             mode.value,
             setShippingAddress,
             setAutomaticPaymentMethod,
-            linkEnabled,
-            when (currency.value) {
-                "aud" -> "AU"
-                "eur" -> "US"
-                else -> null
-            }
+            linkEnabled
         )
 
         Fuel.post(backendUrl + "checkout")
