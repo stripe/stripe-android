@@ -12,9 +12,8 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,11 +39,7 @@ internal class SignUpViewModel @Inject constructor(
 ) : ViewModel() {
     val merchantName: String = args.merchantName
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(
-        mapOf(
-            IdentifierSpec.Email to prefilledEmail
-        )
-    )
+    val emailElement = EmailElement(initialValue = prefilledEmail)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -129,7 +124,7 @@ internal class SignUpViewModel @Inject constructor(
             navigator.navigateTo(LinkScreen.Verification)
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
-            emailElement.setRawValue(mapOf(EmailSpec.identifier to ""))
+            emailElement.setRawValue(mapOf(IdentifierSpec.Email to ""))
         }
     }
 

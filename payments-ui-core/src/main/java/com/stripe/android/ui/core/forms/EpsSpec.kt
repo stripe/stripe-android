@@ -7,13 +7,8 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.SupportedBankType
 
-internal val epsNameSection = SectionSpec(
-    IdentifierSpec.Generic("name_section"),
-    NameSpec
-)
 internal val epsBankSection =
     SectionSpec(
         IdentifierSpec.Generic("bank_section"),
@@ -26,6 +21,6 @@ internal val epsBankSection =
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val EpsForm = LayoutSpec.create(
-    epsNameSection,
+    NameSpec(),
     epsBankSection
 )

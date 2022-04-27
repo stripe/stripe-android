@@ -8,9 +8,11 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-object NameSpec : SectionFieldSpec(IdentifierSpec.Name) {
-    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionFieldElement =
-        SimpleTextElement(
+data class NameSpec(
+    override val identifier: IdentifierSpec = IdentifierSpec.Name
+) : FormItemSpec(), RequiredItemSpec {
+    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionElement {
+        val sectionFieldElement = SimpleTextElement(
             this.identifier,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
@@ -21,4 +23,13 @@ object NameSpec : SectionFieldSpec(IdentifierSpec.Name) {
                 initialValue = initialValues[this.identifier]
             ),
         )
+        return SectionElement(
+            IdentifierSpec.Generic(identifier.value + "_section"),
+            sectionFieldElement,
+            SectionController(
+                null,
+                listOf(sectionFieldElement.sectionFieldErrorController())
+            )
+        )
+    }
 }

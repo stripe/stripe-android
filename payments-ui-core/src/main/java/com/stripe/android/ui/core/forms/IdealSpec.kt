@@ -7,13 +7,8 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.SupportedBankType
 
-internal val idealNameSection = SectionSpec(
-    IdentifierSpec.Generic("name_section"),
-    NameSpec
-)
 internal val idealBankSection = SectionSpec(
     IdentifierSpec.Generic("bank_section"),
     BankDropdownSpec(
@@ -25,6 +20,6 @@ internal val idealBankSection = SectionSpec(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val IdealForm = LayoutSpec.create(
-    idealNameSection,
+    NameSpec(),
     idealBankSection,
 )

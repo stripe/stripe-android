@@ -72,6 +72,8 @@ class TransformSpecToElements(
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(context, initialValues)
                 is BsbSpec -> it.transform(initialValues)
+                is EmailSpec -> it.transform(initialValues)
+                is NameSpec -> it.transform(initialValues)
             }
         }
 
@@ -111,8 +113,6 @@ class TransformSpecToElements(
     ) =
         this.map {
             when (it) {
-                is EmailSpec -> it.transform(initialValues)
-                is NameSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
                 is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
@@ -129,7 +129,6 @@ class TransformSpecToElements(
                 )
                 is CardBillingSpec -> it.transform(addressRepository, initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
-
             }
         }
 }

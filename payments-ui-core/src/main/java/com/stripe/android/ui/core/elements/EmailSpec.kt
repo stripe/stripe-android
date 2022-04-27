@@ -5,13 +5,21 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-object EmailSpec : SectionFieldSpec(IdentifierSpec.Email) {
-    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionFieldElement =
-        EmailElement(
+data class EmailSpec(
+    override val identifier: IdentifierSpec = IdentifierSpec.Email
+) : FormItemSpec(), RequiredItemSpec {
+    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionElement {
+        val sectionFieldElement = EmailElement(
             this.identifier,
-            SimpleTextFieldController(
-                EmailConfig(),
-                initialValue = initialValues[IdentifierSpec.Email]
-            ),
+            initialValue = initialValues[IdentifierSpec.Email]
         )
+        return SectionElement(
+            IdentifierSpec.Generic(identifier.value + "_section"),
+            sectionFieldElement,
+            SectionController(
+                null,
+                listOf(sectionFieldElement.sectionFieldErrorController())
+            )
+        )
+    }
 }

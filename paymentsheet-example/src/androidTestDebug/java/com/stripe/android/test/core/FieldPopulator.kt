@@ -18,7 +18,6 @@ import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
@@ -108,21 +107,21 @@ class FieldPopulator(
                             values.cardCvc.replace("\\d".toRegex(), "$0 ")
                         )
                 }
+                is EmailSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getEmail()
+                            .assertContentDescriptionEquals(values.email)
+                    }
+                }
+                is NameSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getName()
+                            .assertContentDescriptionEquals(values.name)
+                    }
+                }
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
-                            is EmailSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getEmail()
-                                        .assertContentDescriptionEquals(values.email)
-                                }
-                            }
-                            SimpleTextSpec.NAME -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getName()
-                                        .assertContentDescriptionEquals(values.name)
-                                }
-                            }
                             is AddressSpec -> {
                                 if (testParameters.billing == Billing.Off) {
                                     // TODO: This will not work when other countries are selected or defaulted
@@ -169,25 +168,25 @@ class FieldPopulator(
 
                     }
                 }
+                is EmailSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getEmail().apply {
+                            performClick()
+                            performTextInput(values.email)
+                        }
+                    }
+                }
+                is NameSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getName().apply {
+                            performTextInput(values.name)
+
+                        }
+                    }
+                }
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
-                            is EmailSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getEmail().apply {
-                                        performClick()
-                                        performTextInput(values.email)
-                                    }
-                                }
-                            }
-                            SimpleTextSpec.NAME -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getName().apply {
-                                        performTextInput(values.name)
-
-                                    }
-                                }
-                            }
                             is AddressSpec -> {
                                 if (testParameters.billing == Billing.Off) {
                                     // TODO: This will not work when other countries are selected or defaulted

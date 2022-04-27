@@ -14,7 +14,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmailElement
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,10 +90,9 @@ internal class SignUpScreenTest {
             DefaultLinkTheme {
                 SignUpBody(
                     merchantName = "Example, Inc.",
-                    emailElement = EmailSpec.transform(""),
-                    signUpState = signUpState,
-                    onSignUpClick = {}
-                )
+                    emailElement = EmailElement(initialValue = ""),
+                    signUpState = signUpState
+                ) {}
             }
         }
 

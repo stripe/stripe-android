@@ -36,7 +36,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SectionController
@@ -50,14 +50,11 @@ private fun SignUpBodyPreview() {
     DefaultLinkTheme {
         SignUpBody(
             merchantName = "Example, Inc.",
-            emailElement = EmailSpec.transform(
-                mapOf(
-                    IdentifierSpec.Email to "email"
-                )
+            emailElement = EmailElement(
+                initialValue = "email"
             ),
-            signUpState = SignUpState.InputtingPhone,
-            onSignUpClick = {}
-        )
+            signUpState = SignUpState.InputtingPhone
+        ) {}
     }
 }
 
@@ -86,7 +83,7 @@ internal fun SignUpBody(
 @Composable
 internal fun SignUpBody(
     merchantName: String,
-    emailElement: SectionFieldElement,
+    emailElement: EmailElement,
     signUpState: SignUpState,
     onSignUpClick: (String) -> Unit
 ) {

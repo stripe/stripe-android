@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -12,7 +11,6 @@ data class SectionElement(
     val fields: List<SectionFieldElement>,
     override val controller: SectionController
 ) : FormElement() {
-    @VisibleForTesting
     constructor(
         identifier: IdentifierSpec,
         field: SectionFieldElement,

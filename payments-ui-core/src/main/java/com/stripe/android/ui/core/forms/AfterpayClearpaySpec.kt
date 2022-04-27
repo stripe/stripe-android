@@ -9,18 +9,11 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
 internal val afterpayClearpayHeader = AfterpayClearpayTextSpec(
     IdentifierSpec.Generic("afterpay_clearpay_header")
 )
-internal val afterpayClearpayNameSection = SectionSpec(
-    IdentifierSpec.Generic("name_section"),
-    NameSpec
-)
-internal val afterpayClearpayEmailSection =
-    SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
 
 internal val afterpayClearpayBillingSection = SectionSpec(
     IdentifierSpec.Generic("address_section"),
@@ -34,7 +27,7 @@ internal val afterpayClearpayBillingSection = SectionSpec(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val AfterpayClearpayForm = LayoutSpec.create(
     afterpayClearpayHeader,
-    afterpayClearpayNameSection,
-    afterpayClearpayEmailSection,
+    NameSpec(),
+    EmailSpec(),
     afterpayClearpayBillingSection
 )

@@ -32,7 +32,7 @@ internal class CardBillingAddressElementTest {
             listOf(
                 EmailElement(
                     IdentifierSpec.Email,
-                    SimpleTextFieldController(EmailConfig())
+                    controller = SimpleTextFieldController(EmailConfig())
                 )
             )
         )
