@@ -19,7 +19,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
  * so it should be called as part of Compose initialization path.
  */
 @Composable
-@Suppress("UnusedPrivateMember")
 fun FinancialConnectionsSheet.Companion.createComposable(
     callback: (FinancialConnectionsSheetResult) -> Unit
 ): FinancialConnectionsSheet = FinancialConnectionsSheet(
