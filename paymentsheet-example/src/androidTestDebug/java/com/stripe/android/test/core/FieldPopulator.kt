@@ -50,6 +50,9 @@ class FieldPopulator(
         populatePlatformLpmFields()
         populateCustomLpmFields()
 
+        selectors.composeTestRule.waitForIdle()
+        Espresso.onIdle()
+
         Espresso.closeSoftKeyboard()
 
         if (testParameters.saveForFutureUseCheckboxVisible) {

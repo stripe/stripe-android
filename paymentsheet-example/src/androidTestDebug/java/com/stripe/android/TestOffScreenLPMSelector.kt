@@ -21,7 +21,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TEST_IBAN_NUMBER
 import com.stripe.android.test.core.TestParameters
-import org.junit.After
+import com.stripe.android.test.core.TestWatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +35,9 @@ class TestOffScreenLPMSelector {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val testWatcher = TestWatcher()
 
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
@@ -63,6 +66,7 @@ class TestOffScreenLPMSelector {
                 saveForFutureUseCheckboxVisible = false,
                 useBrowser = Browser.Chrome,
                 authorizationAction = null,
+                takeScreenshotOnLpmLoad = true
             )
         ) {
             composeTestRule.onNodeWithText("IBAN")

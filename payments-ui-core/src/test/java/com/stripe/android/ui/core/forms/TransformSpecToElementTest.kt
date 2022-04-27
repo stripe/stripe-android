@@ -218,35 +218,6 @@ internal class TransformSpecToElementTest {
         assertThat(staticTextElement.identifier).isEqualTo(staticText.identifier)
     }
 
-    @Test
-    fun `Add a save for future use section spec sets the mandate element correctly`() =
-        runBlocking {
-            val mandate = StaticTextSpec(
-                IdentifierSpec.Generic("mandate"),
-                R.string.sepa_mandate,
-            )
-            val hiddenIdentifiers = listOf(nameSection, mandate)
-            val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
-            val formElement = transformSpecToElements.transform(
-                listOf(saveForFutureUseSpec)
-            )
-
-            val saveForFutureUseElement =
-                formElement.first() as SaveForFutureUseElement
-            val saveForFutureUseController = saveForFutureUseElement.controller
-
-            assertThat(saveForFutureUseElement.identifier)
-                .isEqualTo(saveForFutureUseSpec.identifier)
-
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
-
-            saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
-                .isEqualTo(
-                    hiddenIdentifiers.map { it.identifier }
-                )
-        }
-
     companion object {
         val IDEAL_BANK_CONFIG = BankDropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
