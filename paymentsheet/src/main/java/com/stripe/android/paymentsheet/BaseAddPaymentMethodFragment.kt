@@ -40,6 +40,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
+    // Coroutine listening for completed form events
+    private var composeFragmentFieldValues: Job? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -102,16 +105,18 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
     }
 
-    // Coroutine listening for Locations
-    private var job: Job? = null
+    override fun onStop() {
+        super.onStop()
+        composeFragmentFieldValues?.cancel()
+    }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {
-        job?.cancel()
+        composeFragmentFieldValues?.cancel()
 
         (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
             // Need to access the formViewModel so it is constructed.
             val formViewModel = formFragment.formViewModel
-            job = viewLifecycleOwner.lifecycleScope.launch {
+            composeFragmentFieldValues = viewLifecycleOwner.lifecycleScope.launch {
                 formViewModel.completeFormValues.collect { formFieldValues ->
                     // if the formFieldValues is a change either null or new values for the
                     // newLpm then we should clear it out --- but what happens if we cancel -- selection should
