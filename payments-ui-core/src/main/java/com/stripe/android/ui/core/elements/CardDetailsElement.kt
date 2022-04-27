@@ -45,7 +45,7 @@ internal class CardDetailsElement(
             val newString = convertTo4DigitDate(date)
             if (newString.length == 4) {
                 month = requireNotNull(newString.take(2).toIntOrNull())
-                year = requireNotNull(newString.takeLast(2).toIntOrNull())
+                year = requireNotNull(newString.takeLast(2).toIntOrNull()) + 2000
             }
         }
 

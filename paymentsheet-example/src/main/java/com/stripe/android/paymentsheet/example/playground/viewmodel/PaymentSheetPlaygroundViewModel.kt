@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
-import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 
 class PaymentSheetPlaygroundViewModel(
@@ -45,7 +44,9 @@ class PaymentSheetPlaygroundViewModel(
         currency: String,
         mode: String,
         setShippingAddress: Boolean,
-        setAutomaticPaymentMethods: Boolean
+        setDefaultBillingAddress: Boolean,
+        setAutomaticPaymentMethods: Boolean,
+        setDelayedPaymentMethods: Boolean,
     ) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
             sharedPreferencesName,
@@ -59,52 +60,10 @@ class PaymentSheetPlaygroundViewModel(
         editor.putString(Toggle.Currency.key, currency)
         editor.putString(Toggle.Mode.key, mode)
         editor.putBoolean(Toggle.SetShippingAddress.key, setShippingAddress)
+        editor.putBoolean(Toggle.SetDefaultBillingAddress.key, setDefaultBillingAddress)
         editor.putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
+        editor.putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
         editor.apply()
-    }
-
-    fun getSavedToggleState(): SavedToggles {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences(
-            sharedPreferencesName,
-            AppCompatActivity.MODE_PRIVATE
-        )
-        val customer = sharedPreferences.getString(
-            Toggle.Customer.key,
-            Toggle.Customer.default.toString()
-        )
-        val link = sharedPreferences.getBoolean(
-            Toggle.Link.key, Toggle.Link.default as Boolean
-        )
-        val googlePay = sharedPreferences.getBoolean(
-            Toggle.GooglePay.key,
-            Toggle.GooglePay.default as Boolean
-        )
-        val currency = sharedPreferences.getString(
-            Toggle.Currency.key,
-            Toggle.Currency.default.toString()
-        )
-        val mode = sharedPreferences.getString(
-            Toggle.Mode.key,
-            Toggle.Mode.default.toString()
-        )
-        val setShippingAddress = sharedPreferences.getBoolean(
-            Toggle.SetShippingAddress.key,
-            Toggle.SetShippingAddress.default as Boolean
-        )
-        val setAutomaticPaymentMethods = sharedPreferences.getBoolean(
-            Toggle.SetAutomaticPaymentMethods.key,
-            Toggle.SetAutomaticPaymentMethods.default as Boolean
-        )
-
-        return SavedToggles(
-            customer.toString(),
-            link,
-            googlePay,
-            currency.toString(),
-            mode.toString(),
-            setShippingAddress,
-            setAutomaticPaymentMethods
-        )
     }
 
     /**

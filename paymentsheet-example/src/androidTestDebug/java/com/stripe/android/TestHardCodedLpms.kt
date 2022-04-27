@@ -72,6 +72,19 @@ class TestHardCodedLpms {
     )
 
     @Test
+    fun testCard() {
+        testDriver.confirmNewOrGuestComplete(
+            newUser.copy(
+                billing = Billing.On,
+                paymentMethod = SupportedPaymentMethod.Card,
+                authorizationAction = null,
+                saveForFutureUseCheckboxVisible = true,
+                saveCheckboxValue = false,
+            )
+        )
+    }
+
+    @Test
     fun testBancontact() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
@@ -88,11 +101,14 @@ class TestHardCodedLpms {
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
                 authorizationAction = null,
                 automatic = Automatic.Off,
-                delayed = DelayedPMs.On,
+                delayed = DelayedPMs.On
             )
         ) {
-            composeTestRule.onNodeWithText("IBAN")
-                .performTextInput("DE89370400440532013000")
+            composeTestRule.onNodeWithText("IBAN").apply {
+                performTextInput(
+                    "DE89370400440532013000"
+                )
+            }
         }
     }
 

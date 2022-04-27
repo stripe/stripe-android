@@ -109,8 +109,8 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             Intent(context, CardScanActivity::class.java)
                 .putExtra(INTENT_PARAM_REQUEST, input)
 
-        private fun parseResult(intent: Intent): CardScanSheetResult =
-            intent.getParcelableExtra(INTENT_PARAM_RESULT)
+        private fun parseResult(intent: Intent?): CardScanSheetResult =
+            intent?.getParcelableExtra(INTENT_PARAM_RESULT)
                 ?: CardScanSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
@@ -139,7 +139,7 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             override fun parseResult(
                 resultCode: Int,
                 intent: Intent?,
-            ) = this@Companion.parseResult(requireNotNull(intent))
+            ) = this@Companion.parseResult(intent)
         }
     }
 

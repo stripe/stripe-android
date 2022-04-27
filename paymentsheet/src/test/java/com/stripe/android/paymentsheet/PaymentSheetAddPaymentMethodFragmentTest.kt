@@ -102,7 +102,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
     }
 
-    fun convertPixelsToDp(px: Int, resources: Resources): Dp {
+    private fun convertPixelsToDp(px: Int, resources: Resources): Dp {
         return (px / (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).dp
     }
 

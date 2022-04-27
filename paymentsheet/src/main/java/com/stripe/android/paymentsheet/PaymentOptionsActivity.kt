@@ -8,8 +8,8 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -24,12 +24,13 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.PaymentsThemeConfig
-import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.getBackgroundColor
 
 /**
  * An `Activity` for selecting a payment option.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
@@ -126,22 +127,26 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun setupContinueButton(addButton: PrimaryButton) {
+    private fun setupContinueButton(continueButton: PrimaryButton) {
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        viewBinding.continueButton.setDefaultBackGroundColor(
-            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
+        viewModel.config?.let {
+            val buttonColor = it.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
             )
-        )
+            viewBinding.continueButton.setAppearanceConfiguration(
+                PaymentsTheme.primaryButtonStyle,
+                buttonColor
+            )
+        }
 
-        addButton.setOnClickListener {
+        continueButton.setOnClickListener {
             viewModel.onUserSelection()
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
-            addButton.isEnabled = isEnabled
+            continueButton.isEnabled = isEnabled
         }
     }
 

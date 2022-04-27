@@ -107,6 +107,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val formViewModel = formFragment.formViewModel
             viewLifecycleOwner.lifecycleScope.launch {
                 formViewModel.completeFormValues.collect { formFieldValues ->
+                    // if the formFieldValues is a change either null or new values for the
+                    // newLpm then we should clear it out --- but what happens if we cancel -- selection should
+                    // have the correct value
                     sheetViewModel.updateSelection(
                         transformToPaymentSelection(
                             formFieldValues,
@@ -183,11 +186,24 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
             replace(
                 R.id.payment_method_fragment_container,
-                ComposeFormDataCollectionFragment::class.java,
+                fragmentForPaymentMethod(paymentMethod),
                 args
             )
         }
     }
+
+    private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
+        when (paymentMethod.type) {
+            // TODO(jameswoo-stripe): add us_bank_account payment method form fragment
+//            PaymentMethod.Type.USBankAccount -> {
+//                if (sheetViewModel is PaymentSheetViewModel) {
+//                    USBankAccountFormForPaymentSheetFragment::class.java
+//                } else {
+//                    USBankAccountFormForPaymentOptionsFragment::class.java
+//                }
+//            }
+            else -> ComposeFormDataCollectionFragment::class.java
+        }
 
     private fun getFragment() =
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)

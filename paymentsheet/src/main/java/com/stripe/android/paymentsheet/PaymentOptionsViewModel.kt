@@ -69,10 +69,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private var hasTransitionToUnsavedCard = false
     private val shouldTransitionToUnsavedCard: Boolean
         get() =
-            !hasTransitionToUnsavedCard &&
-                newLpm?.let {
-                    it.customerRequestedSave != PaymentSelection.CustomerRequestedSave.RequestReuse
-                } ?: false
+            !hasTransitionToUnsavedCard && newLpm != null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady

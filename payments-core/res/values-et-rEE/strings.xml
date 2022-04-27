@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Sihtnumber on kehtetu.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Sihtnumber on kehtetu.</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Maksa aja jooksul makseviisiga &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Nimi kontol</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB-number</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Esitades oma pangakonto andmed ja kinnitades selle makse, nõustute käesoleva otsekorralduse taotluse ja &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;otsekorralduse taotluse teenuselepinguga&lt;/a&gt; ning volitate ettevõtet Stripe Payments Australia Pty Ltd ACN 160 180 343, otsekorralduse kasutaja ID number 507156 („Stripe“), sooritama teenuse Bulk Electronic Clearing System (BECS) kaudu %s (\„Kaupleja\“) nimel makseid teie kontolt kooskõlas teie ja Kaupleja vahel kokku lepitud summades. Te kinnitate, et olete ülalnimetatud konto omanik või volitatud allkirjaõiguslik isik.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Esitades oma pangakonto andmed ja kinnitades selle makse, nõustute käesoleva\n    otsekorralduse taotluse ja otsekorralduse taotluse teenuselepinguga ning volitate ettevõtet\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, otsekorralduse kasutaja ID number 507156\n    („Stripe“), sooritama teenuse Bulk Electronic Clearing System (BECS)\n    kaudu %1$s („Kaupleja“) nimel makseid teie kontolt kooskõlas teie ja Kaupleja\n    vahel kokku lepitud summades. Te kinnitate, et olete ülalnimetatud konto\n    omanik või volitatud allkirjaõiguslik isik.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -103,7 +111,7 @@
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s, lõpeb nr-ga %2$s</string>
   <!-- Text for close button -->
-  <string name="close">Sulge</string>
+  <string name="close">Sule</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Kustuta makseviis</string>
   <string name="delete_payment_method_prompt_title">Kas kustutada makseviis?</string>

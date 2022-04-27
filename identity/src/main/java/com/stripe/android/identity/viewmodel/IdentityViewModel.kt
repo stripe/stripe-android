@@ -40,10 +40,9 @@ import java.io.File
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
 internal class IdentityViewModel(
-    internal val args: IdentityVerificationSheetContract.Args,
+    internal val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityRepository: IdentityRepository,
     private val idDetectorFetcher: IDDetectorFetcher,
-    private val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityIO: IdentityIO
 ) : ViewModel() {
 
@@ -441,8 +440,8 @@ internal class IdentityViewModel(
             runCatching {
                 _verificationPage.postValue(Resource.loading())
                 identityRepository.retrieveVerificationPage(
-                    args.verificationSessionId,
-                    args.ephemeralKeySecret
+                    verificationArgs.verificationSessionId,
+                    verificationArgs.ephemeralKeySecret
                 )
             }.fold(
                 onSuccess = {
@@ -455,7 +454,7 @@ internal class IdentityViewModel(
                     _verificationPage.postValue(
                         Resource.error(
                             "Failed to retrieve verification page with " +
-                                "sessionID: ${args.verificationSessionId} and ephemeralKey: ${args.ephemeralKeySecret}",
+                                "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: ${verificationArgs.ephemeralKeySecret}",
                             it
                         ),
                     )
@@ -500,8 +499,8 @@ internal class IdentityViewModel(
         clearDataParam: ClearDataParam
     ) =
         identityRepository.postVerificationPageData(
-            args.verificationSessionId,
-            args.ephemeralKeySecret,
+            verificationArgs.verificationSessionId,
+            verificationArgs.ephemeralKeySecret,
             collectedDataParam,
             clearDataParam
         )
@@ -515,24 +514,22 @@ internal class IdentityViewModel(
     )
     suspend fun postVerificationPageSubmit() =
         identityRepository.postVerificationPageSubmit(
-            args.verificationSessionId,
-            args.ephemeralKeySecret
+            verificationArgs.verificationSessionId,
+            verificationArgs.ephemeralKeySecret
         )
 
     internal class IdentityViewModelFactory(
-        private val args: IdentityVerificationSheetContract.Args,
         private val identityRepository: IdentityRepository,
         private val idDetectorFetcher: IDDetectorFetcher,
-        private val verificationArgs: IdentityVerificationSheetContract.Args,
+        private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
         private val identityIO: IdentityIO
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return IdentityViewModel(
-                args,
+                verificationArgsSupplier(),
                 identityRepository,
                 idDetectorFetcher,
-                verificationArgs,
                 identityIO
             ) as T
         }

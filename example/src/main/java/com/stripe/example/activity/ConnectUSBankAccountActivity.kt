@@ -12,11 +12,6 @@ import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.databinding.ConnectBankAccountExampleActivityBinding
 
-/**
- * This example is currently work in progress. Do not use it as a reference.
- *
- * In order for this example to work, uncomment ConnectUSBankAccountActivity in LauncherActivity.kt
- */
 class ConnectUSBankAccountActivity : StripeIntentActivity() {
 
     private val viewBinding: ConnectBankAccountExampleActivityBinding by lazy {
@@ -34,12 +29,15 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
         launcher = CollectBankAccountLauncher.create(
             this
         ) { result: CollectBankAccountResult ->
+            viewModel.inProgress.postValue(false)
             when (result) {
                 is CollectBankAccountResult.Completed -> {
                     viewModel.status
                         .postValue(
                             "Attached bank account to paymentIntent." +
-                                " secret: ${result.response.intent.clientSecret}. Confirming..."
+                                " secret: ${result.response.intent.clientSecret}. Attempting to " +
+                                "confirm payment intent. You should have webhooks setup to check" +
+                                " the final state of this payment intent."
                         )
                     confirmPaymentIntent(
                         ConfirmPaymentIntentParams.create(

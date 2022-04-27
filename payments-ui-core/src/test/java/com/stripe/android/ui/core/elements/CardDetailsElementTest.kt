@@ -45,7 +45,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.Generic("card[cvc]") to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                 IdentifierSpec.Generic("card[exp_month]") to FormFieldEntry("1", true),
-                IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("30", true),
+                IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("2030", true),
             )
         )
     }
