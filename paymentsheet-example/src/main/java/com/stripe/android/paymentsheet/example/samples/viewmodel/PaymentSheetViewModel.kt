@@ -15,6 +15,7 @@ internal class PaymentSheetViewModel(
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
     val exampleCheckoutResponse = MutableLiveData<ExampleCheckoutResponse>()
+    val appearance = MutableLiveData(PaymentSheet.Appearance())
 
     fun statusDisplayed() {
         status.value = ""
