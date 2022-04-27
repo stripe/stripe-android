@@ -127,6 +127,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
         setupHeader()
+        setupPrimaryButton()
         setupNotes()
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
@@ -212,6 +213,20 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                     )
                 }
             }
+        }
+    }
+
+    private fun setupPrimaryButton() {
+        viewModel.primaryButtonOnClick.observe(this) { action ->
+            primaryButton.setOnClickListener {
+                action()
+            }
+        }
+        viewModel.primaryButtonText.observe(this) { text ->
+            primaryButton.setLabel(text)
+        }
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            primaryButton.isEnabled = isEnabled
         }
     }
 

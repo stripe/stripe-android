@@ -279,21 +279,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             buttonColor
         )
 
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            viewBinding.buyButton.isEnabled = isEnabled
-        }
-
-        viewModel.primaryButtonOnPress.observe(this) { action ->
-            viewBinding.buyButton.setOnClickListener {
-                action()
-            }
-        }
-
-        viewModel.primaryButtonText.observe(this) { text ->
-            viewBinding.buyButton.setLabel(text)
-        }
-
-        viewModel.updatePrimaryButtonOnPress(initial = true) {
+        viewModel.updatePrimaryButtonOnClick(initial = true) {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }

@@ -143,30 +143,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewModel.primaryButtonOnPress.observe(this) { action ->
-            viewBinding.continueButton.setOnClickListener {
-                action()
-            }
-        }
-
-        viewModel.primaryButtonText.observe(this) { text ->
-            viewBinding.continueButton.setLabel(text)
-        }
-
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            viewBinding.continueButton.isEnabled = isEnabled
-        }
-
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            viewBinding.continueButton.isEnabled = isEnabled
-        }
-
         viewModel.updatePrimaryButtonText(
             initial = true,
             text = getString(R.string.stripe_paymentsheet_continue_button_label)
         )
 
-        viewModel.updatePrimaryButtonOnPress(initial = true) {
+        viewModel.updatePrimaryButtonOnClick(initial = true) {
             viewModel.onUserSelection()
         }
     }

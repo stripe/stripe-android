@@ -148,9 +148,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val primaryButtonEnabled = MutableLiveData<Boolean?>()
 
-    private val _primaryButtonOnPress = MutableLiveData<() -> Unit>()
-    val primaryButtonOnPress: LiveData<() -> Unit>
-        get() = _primaryButtonOnPress
+    private val _primaryButtonOnClick = MutableLiveData<() -> Unit>()
+    val primaryButtonOnClick: LiveData<() -> Unit>
+        get() = _primaryButtonOnClick
 
     @VisibleForTesting
     @StringRes
@@ -339,11 +339,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         primaryButtonEnabled.value = enabled
     }
 
-    fun updatePrimaryButtonOnPress(initial: Boolean = false, onPress: () -> Unit) {
+    fun updatePrimaryButtonOnClick(initial: Boolean = false, onPress: () -> Unit) {
         if (initial) {
             initialPrimaryButtonOnPress = onPress
         }
-        _primaryButtonOnPress.value = onPress
+        _primaryButtonOnClick.value = onPress
     }
 
     fun resetPrimaryButton() {
@@ -351,7 +351,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             _primaryButtonText.value = it
         }
         primaryButtonEnabled.value = null
-        _primaryButtonOnPress.value = initialPrimaryButtonOnPress
+        _primaryButtonOnClick.value = initialPrimaryButtonOnPress
     }
 
     fun updateSelection(selection: PaymentSelection?) {
