@@ -780,7 +780,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
+    fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() {
         var isEnabled = false
         viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
         viewModel.ctaEnabled.observeForever {
@@ -802,6 +802,22 @@ internal class PaymentSheetViewModelTest {
         viewModel.setEditing(true)
         assertThat(isEnabled)
             .isFalse()
+
+        viewModel.updatePrimaryButtonEnabled(true)
+        assertThat(isEnabled)
+            .isTrue()
+
+        viewModel.updatePrimaryButtonEnabled(false)
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.updateSelection(mock())
+        assertThat(isEnabled)
+            .isTrue()
     }
 
     @Test
