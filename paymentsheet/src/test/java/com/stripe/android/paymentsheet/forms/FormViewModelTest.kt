@@ -22,6 +22,7 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -30,7 +31,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SofortForm
@@ -62,7 +62,7 @@ internal class FormViewModelTest {
         SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
     private val nameSection = SectionSpec(
         IdentifierSpec.Generic("name_section"),
-        NAME
+        NameSpec
     )
     private val countrySection = SectionSpec(
         IdentifierSpec.Generic("country_section"),
@@ -344,7 +344,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 SectionSpec(
                     IdentifierSpec.Generic("name_section"),
-                    NAME
+                    NameSpec
                 ),
                 SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec),
                 SectionSpec(
@@ -374,7 +374,7 @@ internal class FormViewModelTest {
                 ?.value
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
                 ?.value
         ).isEqualTo("joe")
         assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
@@ -384,7 +384,7 @@ internal class FormViewModelTest {
         emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
         ).isNull()
     }
 

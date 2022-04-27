@@ -6,13 +6,14 @@ import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.SupportedBankType
 
 internal val p24NameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
-    SimpleTextSpec.NAME
+    NameSpec
 )
 internal val p24EmailSection = SectionSpec(
     IdentifierSpec.Generic("email_section"),

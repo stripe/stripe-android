@@ -24,6 +24,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
@@ -111,6 +112,7 @@ class TransformSpecToElements(
         this.map {
             when (it) {
                 is EmailSpec -> it.transform(initialValues)
+                is NameSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
                 is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
@@ -127,6 +129,7 @@ class TransformSpecToElements(
                 )
                 is CardBillingSpec -> it.transform(addressRepository, initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
+
             }
         }
 }

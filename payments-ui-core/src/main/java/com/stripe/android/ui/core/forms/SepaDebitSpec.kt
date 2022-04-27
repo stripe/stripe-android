@@ -8,13 +8,14 @@ import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
 internal val sepaDebitNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
-    SimpleTextSpec.NAME
+    NameSpec
 )
 internal val sepaDebitEmailSection = SectionSpec(
     IdentifierSpec.Generic("email_section"),
