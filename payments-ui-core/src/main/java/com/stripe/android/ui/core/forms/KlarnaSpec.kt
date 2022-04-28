@@ -13,14 +13,10 @@ internal val klarnaHeader = StaticTextSpec(
     identifier = IdentifierSpec.Generic("klarna_header"),
     stringResId = KlarnaHelper.getKlarnaHeader(),
 )
-internal val klarnaBillingSection = SectionSpec(
-    IdentifierSpec.Generic("country_section"),
-    KlarnaCountrySpec()
-)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val KlarnaForm = LayoutSpec.create(
     klarnaHeader,
     EmailSpec(),
-    klarnaBillingSection
+    KlarnaCountrySpec()
 )

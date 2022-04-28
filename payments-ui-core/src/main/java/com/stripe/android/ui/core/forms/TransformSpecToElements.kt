@@ -48,7 +48,7 @@ class TransformSpecToElements(
     private val context: Context
 ) {
     fun transform(
-        list: List<FormItemSpec>
+        list: List<FormItemSpec>,
     ): List<FormElement> =
         list.map {
             when (it) {
@@ -58,7 +58,6 @@ class TransformSpecToElements(
                 )
                 is SectionSpec -> it.transform(
                     initialValues,
-                    amount?.currencyCode,
                     resourceRepository.getBankRepository(),
                     resourceRepository.getAddressRepository()
                 )
@@ -76,18 +75,20 @@ class TransformSpecToElements(
                 is NameSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
+                is KlarnaCountrySpec -> it.transform(
+                    amount?.currencyCode,
+                    initialValues
+                )
             }
         }
 
     private fun SectionSpec.transform(
         initialValues: Map<IdentifierSpec, String?>,
-        currencyCode: String?,
         bankRepository: BankRepository,
         addressRepository: AddressFieldElementRepository
     ): SectionElement {
         val fieldElements = this.fields.transform(
             initialValues,
-            currencyCode,
             bankRepository,
             addressRepository
         )
@@ -109,7 +110,6 @@ class TransformSpecToElements(
      */
     private fun List<SectionFieldSpec>.transform(
         initialValues: Map<IdentifierSpec, String?>,
-        currencyCode: String?,
         bankRepository: BankRepository,
         addressRepository: AddressFieldElementRepository
     ) =
@@ -122,10 +122,6 @@ class TransformSpecToElements(
                     addressRepository
                 )
                 is CountrySpec -> it.transform(
-                    initialValues
-                )
-                is KlarnaCountrySpec -> it.transform(
-                    currencyCode,
                     initialValues
                 )
                 is CardBillingSpec -> it.transform(addressRepository, initialValues)

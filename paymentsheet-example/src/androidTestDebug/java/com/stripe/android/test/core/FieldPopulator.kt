@@ -121,6 +121,7 @@ class FieldPopulator(
                 }
                 is AuBankAccountNumberSpec -> {}
                 is IbanSpec -> {}
+                is KlarnaCountrySpec -> {}
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
@@ -140,7 +141,6 @@ class FieldPopulator(
                             is CountrySpec -> {}
                             is SimpleTextSpec -> {}
                             is BankDropdownSpec -> {}
-                            is KlarnaCountrySpec -> {}
                             is CardBillingSpec -> {
                                 if (testParameters.billing == Billing.Off) {
                                     // TODO: This will not work when other countries are selected or defaulted
@@ -186,6 +186,7 @@ class FieldPopulator(
                 }
                 is AuBankAccountNumberSpec -> {}
                 is IbanSpec -> {}
+                is KlarnaCountrySpec -> {}
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
@@ -209,7 +210,6 @@ class FieldPopulator(
                             is CountrySpec -> {}
                             is SimpleTextSpec -> {}
                             is BankDropdownSpec -> {}
-                            is KlarnaCountrySpec -> {}
                             is CardBillingSpec -> {
                                 if (testParameters.billing == Billing.Off) {
                                     // TODO: This will not work when other countries are selected or defaulted
