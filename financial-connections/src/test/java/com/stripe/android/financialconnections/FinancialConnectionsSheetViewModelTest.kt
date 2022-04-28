@@ -29,7 +29,7 @@ import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
-class FinancialFinancialConnectionsSheetViewModelTest {
+class FinancialConnectionsSheetViewModelTest {
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(

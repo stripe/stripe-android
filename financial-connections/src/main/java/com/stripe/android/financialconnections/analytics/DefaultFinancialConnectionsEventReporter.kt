@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constructor(
+internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext

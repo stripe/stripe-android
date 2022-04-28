@@ -10,7 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.financialconnections.analytics.DefaultFinancialFinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -54,7 +54,7 @@ internal object FinancialConnectionsSheetModule {
     @Provides
     @Singleton
     fun provideEventReporter(
-        defaultFinancialConnectionsEventReporter: DefaultFinancialFinancialConnectionsEventReporter
+        defaultFinancialConnectionsEventReporter: DefaultFinancialConnectionsEventReporter
     ): FinancialConnectionsEventReporter = defaultFinancialConnectionsEventReporter
 
     @Provides

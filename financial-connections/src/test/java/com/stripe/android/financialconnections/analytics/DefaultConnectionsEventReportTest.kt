@@ -32,7 +32,7 @@ class DefaultConnectionsEventReportTest {
         publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
     )
 
-    private val eventReporter = DefaultFinancialFinancialConnectionsEventReporter(
+    private val eventReporter = DefaultFinancialConnectionsEventReporter(
         analyticsRequestExecutor,
         analyticsRequestFactory,
         testDispatcher

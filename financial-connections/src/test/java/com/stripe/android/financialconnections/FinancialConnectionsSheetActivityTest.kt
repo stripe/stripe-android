@@ -28,7 +28,7 @@ import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class FinancialFinancialConnectionsSheetActivityTest {
+class FinancialConnectionsSheetActivityTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = FinancialConnectionsSheetContract()

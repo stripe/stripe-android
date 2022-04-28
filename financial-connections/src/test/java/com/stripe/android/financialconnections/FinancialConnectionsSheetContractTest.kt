@@ -9,7 +9,7 @@ import java.security.InvalidParameterException
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class FinancialFinancialConnectionsSheetContractTest {
+class FinancialConnectionsSheetContractTest {
 
     @Test
     fun `parseResult() with missing data should return failed result`() {
