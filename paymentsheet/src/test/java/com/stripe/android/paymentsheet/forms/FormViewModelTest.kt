@@ -58,12 +58,8 @@ import javax.inject.Provider
 @FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
-    private val emailSection =
-        SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
-    private val nameSection = SectionSpec(
-        IdentifierSpec.Generic("name_section"),
-        NameSpec
-    )
+    private val emailSection = EmailSpec()
+    private val nameSection = NameSpec()
     private val countrySection = SectionSpec(
         IdentifierSpec.Generic("country_section"),
         CountrySpec()
@@ -155,7 +151,7 @@ internal class FormViewModelTest {
         assertThat(values[0]).isTrue()
 
         formViewModel.setSaveForFutureUse(false)
-        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.identifier))
 
         assertThat(values[1]).isFalse()
     }
@@ -231,12 +227,12 @@ internal class FormViewModelTest {
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
             .filterIsInstance(SaveForFutureUseController::class.java).first()
 
-        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.identifier))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
-            nameSection.fields.first().identifier.value
+            nameSection.identifier.value
         )
     }
 
@@ -269,7 +265,7 @@ internal class FormViewModelTest {
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs
         ).containsKey(
-            emailSection.fields[0].identifier
+            emailSection.identifier
         )
 
         saveForFutureUseController.onValueChange(false)
@@ -308,7 +304,7 @@ internal class FormViewModelTest {
         // Verify formFieldValues is null because the email is required and invalid
         assertThat(formViewModel.completeFormValues.first()).isNull()
 
-        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.identifier))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues is not null even though the email is invalid
@@ -342,11 +338,8 @@ internal class FormViewModelTest {
         )
         val formViewModel = FormViewModel(
             LayoutSpec.create(
-                SectionSpec(
-                    IdentifierSpec.Generic("name_section"),
-                    NameSpec
-                ),
-                SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec),
+                NameSpec(),
+                EmailSpec(),
                 SectionSpec(
                     IdentifierSpec.Generic("country_section"),
                     CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
@@ -442,7 +435,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(EmailSpec.identifier)
+                        ?.get(emailSection.identifier)
                         ?.value
                 ).isNotNull()
             } else {
@@ -451,7 +444,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(EmailSpec.identifier)
+                        ?.get(emailSection.identifier)
                         ?.value
                 ).isNull()
             }
@@ -482,7 +475,7 @@ internal class FormViewModelTest {
             R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.identifier)
                 ?.value
         ).isNull()
 
@@ -491,7 +484,7 @@ internal class FormViewModelTest {
             R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.identifier)
                 ?.value
         ).isNull()
 
@@ -500,7 +493,7 @@ internal class FormViewModelTest {
             R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.identifier)
                 ?.value
         ).isNull()
 
@@ -518,7 +511,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(EmailSpec.identifier)
+                            ?.get(emailSection.identifier)
                             ?.value
                     ).isNotNull()
                 } else {
@@ -527,7 +520,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(EmailSpec.identifier)
+                            ?.get(emailSection.identifier)
                             ?.value
                     ).isNull()
                 }

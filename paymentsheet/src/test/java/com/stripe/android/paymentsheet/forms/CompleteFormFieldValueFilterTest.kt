@@ -44,7 +44,7 @@ class CompleteFormFieldValueFilterTest {
                 identifier = IdentifierSpec.Generic("email_section"),
                 EmailElement(
                     IdentifierSpec.Email,
-                    emailController
+                    controller = emailController
                 ),
                 SectionController(emailController.label.first(), listOf(emailController))
             )
