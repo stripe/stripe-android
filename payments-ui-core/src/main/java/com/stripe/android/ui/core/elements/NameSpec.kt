@@ -11,8 +11,8 @@ import kotlinx.parcelize.Parcelize
 data class NameSpec(
     override val identifier: IdentifierSpec = IdentifierSpec.Name
 ) : FormItemSpec(), RequiredItemSpec {
-    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionElement {
-        val sectionFieldElement = SimpleTextElement(
+    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
+        SimpleTextElement(
             this.identifier,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
@@ -23,13 +23,5 @@ data class NameSpec(
                 initialValue = initialValues[this.identifier]
             ),
         )
-        return SectionElement(
-            IdentifierSpec.Generic(identifier.value + "_section"),
-            sectionFieldElement,
-            SectionController(
-                null,
-                listOf(sectionFieldElement.sectionFieldErrorController())
-            )
-        )
-    }
+    )
 }

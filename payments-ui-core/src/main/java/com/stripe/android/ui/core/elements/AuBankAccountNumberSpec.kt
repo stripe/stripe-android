@@ -10,22 +10,13 @@ class AuBankAccountNumberSpec(
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
-    ): SectionElement {
-        val sectionFieldElement =
-            SimpleTextElement(
-                this.identifier,
-                SimpleTextFieldController(
-                    AuBankAccountNumberConfig(),
-                    initialValue = initialValues[this.identifier]
-                )
-            )
-        return SectionElement(
-            IdentifierSpec.Generic(identifier.value + "_section"),
-            sectionFieldElement,
-            SectionController(
-                null,
-                listOf(sectionFieldElement.sectionFieldErrorController())
+    ) = createSectionElement(
+        SimpleTextElement(
+            this.identifier,
+            SimpleTextFieldController(
+                AuBankAccountNumberConfig(),
+                initialValue = initialValues[this.identifier]
             )
         )
-    }
+    )
 }

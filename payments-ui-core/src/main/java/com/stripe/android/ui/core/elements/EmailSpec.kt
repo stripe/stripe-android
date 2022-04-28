@@ -8,18 +8,10 @@ import kotlinx.parcelize.Parcelize
 data class EmailSpec(
     override val identifier: IdentifierSpec = IdentifierSpec.Email
 ) : FormItemSpec(), RequiredItemSpec {
-    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionElement {
-        val sectionFieldElement = EmailElement(
+    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
+        EmailElement(
             this.identifier,
             initialValue = initialValues[IdentifierSpec.Email]
         )
-        return SectionElement(
-            IdentifierSpec.Generic(identifier.value + "_section"),
-            sectionFieldElement,
-            SectionController(
-                null,
-                listOf(sectionFieldElement.sectionFieldErrorController())
-            )
-        )
-    }
+    )
 }

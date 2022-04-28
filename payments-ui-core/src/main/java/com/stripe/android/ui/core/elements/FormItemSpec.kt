@@ -7,4 +7,14 @@ import androidx.annotation.RestrictTo
  * This is used to define each section in the visual form layout specification
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class FormItemSpec : Parcelable
+sealed class FormItemSpec : Parcelable {
+    internal fun createSectionElement(sectionFieldElement: SectionFieldElement) =
+        SectionElement(
+            IdentifierSpec.Generic("${sectionFieldElement.identifier.value}_section"),
+            sectionFieldElement,
+            SectionController(
+                null,
+                listOf(sectionFieldElement.sectionFieldErrorController())
+            )
+        )
+}
