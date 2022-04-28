@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-data class ListLinkedAccountParams(
+data class GetFinancialConnectionsAcccountsParams(
     @SerialName("client_secret") private val clientSecret: String,
     @SerialName("starting_after") private val startingAfterAccountId: String?,
 ) : Parcelable {

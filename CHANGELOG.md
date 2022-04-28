@@ -1,5 +1,12 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
+
+### Payments
+
+* [CHANGED] [4910](https://github.com/stripe/stripe-android/pull/4910) Some changes affecting CollectBankAccountLauncher (ACH)
+  * `CollectBankAccountResponse#LinkAccountSession` to `FinancialConnectionsSession`
+  * `LinkedAccount` to `FinancialConnectionsAccount`.
+
 ### PaymentSheet
 * [FIXED] [4909](https://github.com/stripe/stripe-android/pull/4909) In the multi-step flow when re-opening to a new card the form will pre-populate.  Also the default billing address will pre-populate in the form.
 

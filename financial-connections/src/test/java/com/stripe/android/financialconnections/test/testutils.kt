@@ -1,4 +1,4 @@
-package com.stripe.android.connections.test
+package com.stripe.android.financialconnections.test
 
 import java.io.BufferedReader
 

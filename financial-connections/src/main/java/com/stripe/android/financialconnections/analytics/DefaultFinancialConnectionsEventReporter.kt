@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constructor(
+internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext
@@ -20,7 +20,7 @@ internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constru
         fireEvent(
             FinancialConnectionsAnalyticsEvent(
                 FinancialConnectionsAnalyticsEvent.Code.SheetPresented,
-                mapOf(PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret)
+                mapOf(PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret)
             )
         )
     }
@@ -34,7 +34,7 @@ internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constru
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
-                        PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret,
+                        PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
@@ -42,7 +42,7 @@ internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constru
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
-                        PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret,
+                        PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
@@ -50,7 +50,7 @@ internal class DefaultFinancialFinancialConnectionsEventReporter @Inject constru
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetFailed,
                     mapOf(
-                        PARAM_CLIENT_SECRET to configuration.linkAccountSessionClientSecret,
+                        PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "failure"
                     )
                 )

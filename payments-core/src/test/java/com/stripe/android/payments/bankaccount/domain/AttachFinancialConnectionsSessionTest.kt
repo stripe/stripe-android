@@ -17,10 +17,10 @@ import org.mockito.kotlin.whenever
 import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
-class AttachLinkAccountSessionTest {
+class AttachFinancialConnectionsSessionTest {
 
     private val stripeRepository = mock<StripeRepository>()
-    private val attachLinkAccountSession = AttachLinkAccountSession(stripeRepository)
+    private val attachFinancialConnectionsSession = AttachFinancialConnectionsSession(stripeRepository)
 
     @Test
     fun `forPaymentIntent - given repository succeeds, linkedSession attached and paymentIntent returned`() {
@@ -35,17 +35,17 @@ class AttachLinkAccountSessionTest {
             givenAttachPaymentIntentReturns { paymentIntent }
 
             // When
-            val result: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            verify(stripeRepository).attachLinkAccountSessionToPaymentIntent(
+            verify(stripeRepository).attachFinancialConnectionsSessionToPaymentIntent(
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
-                linkAccountSessionId = linkedAccountSessionId,
+                financialConnectionsSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
@@ -62,17 +62,17 @@ class AttachLinkAccountSessionTest {
             givenAttachPaymentIntentReturns { null }
 
             // When
-            val result: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            verify(stripeRepository).attachLinkAccountSessionToPaymentIntent(
+            verify(stripeRepository).attachFinancialConnectionsSessionToPaymentIntent(
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
-                linkAccountSessionId = linkedAccountSessionId,
+                financialConnectionsSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
             assertThat(result.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
@@ -90,17 +90,17 @@ class AttachLinkAccountSessionTest {
             givenAttachPaymentIntentReturns { throw expectedException }
 
             // When
-            val result: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            verify(stripeRepository).attachLinkAccountSessionToPaymentIntent(
+            verify(stripeRepository).attachFinancialConnectionsSessionToPaymentIntent(
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
-                linkAccountSessionId = linkedAccountSessionId,
+                financialConnectionsSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -118,7 +118,7 @@ class AttachLinkAccountSessionTest {
             givenAttachPaymentIntentReturns { paymentIntent }
 
             // When
-            val result: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -142,17 +142,17 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { setupIntent }
 
             // When
-            val result: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val result: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            verify(stripeRepository).attachLinkAccountSessionToSetupIntent(
+            verify(stripeRepository).attachFinancialConnectionsSessionToSetupIntent(
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
-                linkAccountSessionId = linkedAccountSessionId,
+                financialConnectionsSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
@@ -169,17 +169,17 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { null }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            verify(stripeRepository).attachLinkAccountSessionToSetupIntent(
+            verify(stripeRepository).attachFinancialConnectionsSessionToSetupIntent(
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
-                linkAccountSessionId = linkedAccountSessionId,
+                financialConnectionsSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
             assertThat(setupIntent.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
@@ -197,17 +197,17 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { throw expectedException }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            verify(stripeRepository).attachLinkAccountSessionToSetupIntent(
+            verify(stripeRepository).attachFinancialConnectionsSessionToSetupIntent(
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
-                linkAccountSessionId = linkedAccountSessionId,
+                financialConnectionsSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
             assertThat(setupIntent.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -225,7 +225,7 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { resultSetupIntent }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -238,7 +238,7 @@ class AttachLinkAccountSessionTest {
 
     private suspend fun givenAttachPaymentIntentReturns(paymentIntent: () -> PaymentIntent?) {
         whenever(
-            stripeRepository.attachLinkAccountSessionToPaymentIntent(
+            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
                 any(),
                 any(),
                 any(),
@@ -249,7 +249,7 @@ class AttachLinkAccountSessionTest {
 
     private suspend fun givenAttachSetupIntentReturns(setupIntent: () -> SetupIntent?) {
         whenever(
-            stripeRepository.attachLinkAccountSessionToSetupIntent(
+            stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
                 any(),
                 any(),
                 any(),
