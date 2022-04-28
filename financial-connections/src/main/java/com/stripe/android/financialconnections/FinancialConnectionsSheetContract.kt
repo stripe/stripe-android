@@ -100,8 +100,8 @@ internal class FinancialConnectionsSheetContract :
 
     companion object {
         const val EXTRA_ARGS =
-            "com.stripe.android.connections.ConnectionsSheetContract.extra_args"
+            "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_args"
         private const val EXTRA_RESULT =
-            "com.stripe.android.connections.ConnectionsSheetContract.extra_result"
+            "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_result"
     }
 }

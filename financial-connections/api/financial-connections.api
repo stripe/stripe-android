@@ -1,43 +1,3 @@
-public abstract class com/stripe/android/connections/FinancialConnectionsSheetForTokenResult : android/os/Parcelable {
-}
-
-public final class com/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Canceled : com/stripe/android/connections/FinancialConnectionsSheetForTokenResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Canceled;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Completed : com/stripe/android/connections/FinancialConnectionsSheetForTokenResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;)V
-	public final fun component1 ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public final fun component2 ()Lcom/stripe/android/model/Token;
-	public final fun copy (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;)Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Completed;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;ILjava/lang/Object;)Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Completed;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFinancialConnectionsSession ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public final fun getToken ()Lcom/stripe/android/model/Token;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Failed : com/stripe/android/connections/FinancialConnectionsSheetForTokenResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/connections/FinancialConnectionsSheetForTokenResult$Failed;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/financialconnections/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -66,6 +26,46 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFinancialConnectionsSessionClientSecret ()Ljava/lang/String;
 	public final fun getPublishableKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult : android/os/Parcelable {
+}
+
+public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled : com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed : com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;)V
+	public final fun component1 ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
+	public final fun component2 ()Lcom/stripe/android/model/Token;
+	public final fun copy (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFinancialConnectionsSession ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
+	public final fun getToken ()Lcom/stripe/android/model/Token;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed : com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V

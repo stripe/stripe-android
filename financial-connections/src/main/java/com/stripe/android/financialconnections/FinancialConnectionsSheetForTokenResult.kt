@@ -1,4 +1,4 @@
-package com.stripe.android.connections
+package com.stripe.android.financialconnections
 
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession

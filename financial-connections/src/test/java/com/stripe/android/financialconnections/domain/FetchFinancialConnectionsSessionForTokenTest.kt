@@ -1,11 +1,10 @@
-package com.stripe.android.connections.domain
+package com.stripe.android.financialconnections.domain
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.test.readResourceAsString
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
+import com.stripe.android.financialconnections.test.readResourceAsString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
