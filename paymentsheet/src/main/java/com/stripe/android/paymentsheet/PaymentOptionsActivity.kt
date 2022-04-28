@@ -65,6 +65,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val notesView: ComposeView by lazy { viewBinding.notes }
+    override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +86,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        setupContinueButton(viewBinding.continueButton)
+        setupContinueButton()
 
         viewModel.transition.observe(this) { event ->
             event?.getContentIfNotHandled()?.let { transitionTarget ->
@@ -116,6 +118,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
+        viewModel.selection.observe(this) {
+            setupContinueButton()
+        }
+
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
@@ -127,7 +133,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun setupContinueButton(continueButton: PrimaryButton) {
+    private fun setupContinueButton() {
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
@@ -141,12 +147,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        continueButton.setOnClickListener {
-            viewModel.onUserSelection()
-        }
+        viewBinding.continueButton.setLabel(
+            getString(R.string.stripe_paymentsheet_continue_button_label)
+        )
 
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            continueButton.isEnabled = isEnabled
+        viewBinding.continueButton.setOnClickListener {
+            viewModel.onUserSelection()
         }
     }
 

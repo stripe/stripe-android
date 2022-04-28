@@ -81,10 +81,6 @@ dependencies {
 
     testImplementation "junit:junit:$junitVersion"
 
-    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-
-
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 

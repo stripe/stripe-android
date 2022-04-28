@@ -876,6 +876,91 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Buy button should be enabled when primaryButtonEnabled is true`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonEnabled(true)
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Buy button should be disabled when primaryButtonEnabled is false`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonEnabled(false)
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `Buy button text should update when primaryButtonText updates`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonText("Some text")
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+        }
+    }
+
+    @Test
+    fun `Buy button should go back to initial state after resetPrimaryButton called`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._viewState.value = PaymentSheetViewState.Reset(null)
+
+            viewModel.updatePrimaryButtonText("Some text")
+            viewModel.updatePrimaryButtonEnabled(false)
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+            viewModel.updateSelection(mock())
+            assertThat(activity.viewBinding.buyButton.externalLabel)
+                .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is visible`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateNotes(
+                context.getString(
+                    R.string.stripe_paymentsheet_payment_method_us_bank_account
+                )
+            )
+            assertThat(activity.viewBinding.notes.isVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is gone`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateNotes(null)
+            assertThat(activity.viewBinding.notes.isVisible).isFalse()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
