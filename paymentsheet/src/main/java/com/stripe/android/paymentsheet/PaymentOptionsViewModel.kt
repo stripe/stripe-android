@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcompo
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import javax.inject.Inject
@@ -96,10 +97,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved, PaymentSelection.GooglePay -> processExistingCard(
-                    paymentSelection
-                )
-                is PaymentSelection.New -> processNewCard(paymentSelection)
+                is PaymentSelection.Saved -> {
+                    if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
+                        processExistingPaymentMethod(
+                            paymentSelection
+                        )
+                    }
+                }
+                is PaymentSelection.GooglePay -> processExistingPaymentMethod(paymentSelection)
+                is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
         }
     }
@@ -112,17 +118,43 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _processing.value = false
     }
 
-    private fun processExistingCard(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
-        if (paymentSelection is PaymentSelection.Saved &&
-            paymentSelection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-            _mandateText.value = R.string.us_bank_account_payment_sheet_saved_mandate
-        } else {
-            _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+    override fun updateSelection(selection: PaymentSelection?) {
+        super.updateSelection(selection)
+
+        when (selection) {
+            is PaymentSelection.Saved -> {
+                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
+                    updateNotes(
+                        getApplication<Application>().getString(
+                            R.string.us_bank_account_payment_sheet_saved_mandate
+                        )
+                    )
+                    updatePrimaryButtonUIState(
+                        PrimaryButton.UIState(
+                            label = getApplication<Application>().getString(
+                                R.string.stripe_paymentsheet_continue_button_label
+                            ),
+                            visible = true,
+                            enabled = true,
+                            onClick = {
+                                processExistingPaymentMethod(selection)
+                            }
+                        )
+                    )
+                }
+            }
+            else -> {
+                // no-op
+            }
         }
     }
 
-    private fun processNewCard(paymentSelection: PaymentSelection) {
+    private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
+        prefsRepository.savePaymentSelection(paymentSelection)
+        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+    }
+
+    private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }

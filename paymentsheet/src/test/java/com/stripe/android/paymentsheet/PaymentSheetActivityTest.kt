@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
@@ -86,6 +87,13 @@ internal class PaymentSheetActivityTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
         )
+    )
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
     )
 
     @BeforeTest
@@ -883,7 +891,11 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel.updatePrimaryButtonEnabled(true)
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    enabled = true
+                )
+            )
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
         }
     }
@@ -895,7 +907,11 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel.updatePrimaryButtonEnabled(false)
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    enabled = false
+                )
+            )
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
     }
@@ -907,7 +923,11 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel.updatePrimaryButtonText("Some text")
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    label = "Some text"
+                )
+            )
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
         }
     }
@@ -921,8 +941,12 @@ internal class PaymentSheetActivityTest {
 
             viewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
-            viewModel.updatePrimaryButtonText("Some text")
-            viewModel.updatePrimaryButtonEnabled(false)
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    label = "Some text",
+                    enabled = false
+                )
+            )
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 

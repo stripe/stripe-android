@@ -3,10 +3,6 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
-import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -31,7 +27,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -39,6 +34,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
@@ -146,15 +142,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
-    private val _primaryButtonText = MutableLiveData<String>()
-    val primaryButtonText: LiveData<String>
-        get() = _primaryButtonText
-
-    private val primaryButtonEnabled = MutableLiveData<Boolean?>()
-
-    private val _primaryButtonOnClick = MutableLiveData<() -> Unit>()
-    val primaryButtonOnClick: LiveData<() -> Unit>
-        get() = _primaryButtonOnClick
+    /**
+     * Use this to override the current UI state of the primary button. The UI state is reset every
+     * time the payment selection is changed.
+     */
+    private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
+    val primaryButtonUIState: LiveData<PrimaryButton.UIState?>
+        get() = _primaryButtonUIState
 
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?>
@@ -189,12 +183,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            primaryButtonEnabled,
+            _primaryButtonUIState,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = primaryButtonEnabled.value
+                value = _primaryButtonUIState.value?.enabled
                     ?: (
                         buttonsEnabled.value == true &&
                             selection.value != null
@@ -327,39 +321,23 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         logger.warning(message)
     }
 
-    fun updatePrimaryButtonText(text: String) {
-        _primaryButtonText.value = text
-    }
-
-    fun updatePrimaryButtonEnabled(enabled: Boolean) {
-        primaryButtonEnabled.value = enabled
-    }
-
-    fun updatePrimaryButtonOnClick(onPress: () -> Unit) {
-        _primaryButtonOnClick.value = onPress
+    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
+        _primaryButtonUIState.value = state
     }
 
     fun updateNotes(text: String?) {
         _notesText.value = text
     }
 
-    fun updateSelection(selection: PaymentSelection?) {
+    open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newLpm = selection
         }
-        primaryButtonEnabled.value = null
+
         savedStateHandle[SAVE_SELECTION] = selection
-        _notesText.value = when (selection) {
-            is PaymentSelection.Saved -> {
-                when (selection.paymentMethod.type) {
-                    PaymentMethod.Type.USBankAccount -> {
-                        R.string.us_bank_account_payment_sheet_saved_mandate
-                    }
-                    else -> null
-                }
-            }
-            else -> null
-        }
+
+        updateNotes(null)
+        updatePrimaryButtonUIState(null)
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {

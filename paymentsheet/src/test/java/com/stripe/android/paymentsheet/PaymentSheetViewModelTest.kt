@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -38,6 +39,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -80,6 +82,13 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
+    )
 
     @Captor
     private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
@@ -803,11 +812,19 @@ internal class PaymentSheetViewModelTest {
         assertThat(isEnabled)
             .isFalse()
 
-        viewModel.updatePrimaryButtonEnabled(true)
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = true
+            )
+        )
         assertThat(isEnabled)
             .isTrue()
 
-        viewModel.updatePrimaryButtonEnabled(false)
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = false
+            )
+        )
         assertThat(isEnabled)
             .isFalse()
 
@@ -911,8 +928,12 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.mandateText.value)
-            .isEqualTo(R.string.us_bank_account_payment_sheet_saved_mandate)
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(
+                ApplicationProvider.getApplicationContext<Context?>().getString(
+                    R.string.us_bank_account_payment_sheet_saved_mandate
+                )
+            )
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
@@ -923,7 +944,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.mandateText.value)
+        assertThat(viewModel.notesText.value)
             .isEqualTo(null)
 
         viewModel.updateSelection(
@@ -932,7 +953,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.mandateText.value)
+        assertThat(viewModel.notesText.value)
             .isEqualTo(null)
     }
 

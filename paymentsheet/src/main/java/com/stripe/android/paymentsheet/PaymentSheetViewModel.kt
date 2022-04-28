@@ -32,6 +32,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -351,6 +352,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             },
             onFailure = ::onFatal
         )
+    }
+
+    override fun updateSelection(selection: PaymentSelection?) {
+        super.updateSelection(selection)
+
+        when (selection) {
+            is PaymentSelection.Saved -> {
+                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
+                    updateNotes(
+                        getApplication<Application>().getString(
+                            R.string.us_bank_account_payment_sheet_saved_mandate
+                        )
+                    )
+                }
+            }
+            else -> {
+                // no-op
+            }
+        }
     }
 
     override fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
