@@ -89,7 +89,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setActivityResult(
@@ -285,29 +284,32 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupTopContainer() {
-        googlePayDivider.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                GooglePayDividerUi(
-                    context.resources.getString(
-                        if (viewModel.supportedPaymentMethods.size == 1 &&
-                            viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
-                        ) {
-                            R.string.stripe_paymentsheet_or_pay_with_card
-                        } else {
-                            R.string.stripe_paymentsheet_or_pay_using
-                        }
-                    )
-                )
-            }
-        }
-
         setupGooglePayButton()
-
+        val dividerText = resources.getString(
+            if (viewModel.supportedPaymentMethods.size == 1 &&
+                viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
+            ) {
+                R.string.stripe_paymentsheet_or_pay_with_card
+            } else {
+                R.string.stripe_paymentsheet_or_pay_using
+            }
+        )
         viewModel.showTopContainer.observe(this) { visible ->
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
             googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
             topContainer.isVisible = visible
+            // We have to set the UI after we know it's visible. Setting UI on a GONE or INVISIBLE
+            // view will cause tests to hang indefinitely.
+            if (visible) {
+                googlePayDivider.apply {
+                    setViewCompositionStrategy(
+                        ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                    )
+                    setContent {
+                        GooglePayDividerUi(dividerText)
+                    }
+                }
+            }
         }
     }
 
