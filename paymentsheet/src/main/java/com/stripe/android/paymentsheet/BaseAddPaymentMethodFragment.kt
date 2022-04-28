@@ -88,48 +88,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
-        }
-
-        // If the activity was destroyed and recreated then we need to re-attach the fragment,
-        // as attach will not be called again.
-        childFragmentManager.fragments.forEach { fragment ->
-            attachComposeFragmentViewModel(fragment)
-        }
-
-        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            attachComposeFragmentViewModel(fragment)
-        }
-
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        composeFragmentFieldValues?.cancel()
-    }
-
-    private fun attachComposeFragmentViewModel(fragment: Fragment) {
-        composeFragmentFieldValues?.cancel()
-
-        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-            // Need to access the formViewModel so it is constructed.
-            val formViewModel = formFragment.formViewModel
-            composeFragmentFieldValues = viewLifecycleOwner.lifecycleScope.launch {
-                formViewModel.completeFormValues.collect { formFieldValues ->
-                    // if the formFieldValues is a change either null or new values for the
-                    // newLpm then we should clear it out --- but what happens if we cancel -- selection should
-                    // have the correct value
-                    sheetViewModel.updateSelection(
-                        transformToPaymentSelection(
-                            formFieldValues,
-                            sheetViewModel.getAddFragmentSelectedLpmValue()
-                        )
-                    )
-                }
-            }
-        }
     }
 
     private fun setupRecyclerView(
@@ -172,6 +131,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
+        args.putBoolean(
+            ComposeFormDataCollectionFragment.ACTIVITY_IS_PAYMENT_OPTIONS,
+            activity is PaymentOptionsActivity
+        )
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
             getFormArguments(
@@ -236,42 +199,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-        private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
-
-        @VisibleForTesting
-        internal fun transformToPaymentSelection(
-            formFieldValues: FormFieldValues?,
-            selectedPaymentMethodResources: SupportedPaymentMethod,
-        ) = formFieldValues?.let {
-            transformToPaymentMethodCreateParams.transform(
-                formFieldValues.copy(
-                    fieldValuePairs = it.fieldValuePairs
-                        .filterNot { entry ->
-                            entry.key == IdentifierSpec.SaveForFutureUse ||
-                                entry.key == IdentifierSpec.CardBrand
-                        }
-                ),
-                selectedPaymentMethodResources.type
-            ).run {
-                if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
-                    PaymentSelection.New.Card(
-                        paymentMethodCreateParams = this,
-                        brand = CardBrand.fromCode(
-                            formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
-                        ),
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-
-                    )
-                } else {
-                    PaymentSelection.New.GenericPaymentMethod(
-                        selectedPaymentMethodResources.displayNameResource,
-                        selectedPaymentMethodResources.iconResource,
-                        this,
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-                    )
-                }
-            }
-        }
 
         @VisibleForTesting
         internal fun getFormArguments(
