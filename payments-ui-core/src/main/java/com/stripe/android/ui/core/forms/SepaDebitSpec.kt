@@ -12,10 +12,6 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
-internal val sepaDebitIbanSection = SectionSpec(
-    IdentifierSpec.Generic("iban_section"),
-    IbanSpec
-)
 internal val sepaDebitMandate = MandateTextSpec(
     IdentifierSpec.Generic("mandate"),
     R.string.sepa_mandate
@@ -33,7 +29,7 @@ internal val sepaBillingSection = SectionSpec(
 val SepaDebitForm = LayoutSpec.create(
     NameSpec(),
     EmailSpec(),
-    sepaDebitIbanSection,
+    IbanSpec(),
     sepaBillingSection,
     sepaDebitMandate,
 )

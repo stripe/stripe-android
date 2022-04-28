@@ -75,6 +75,7 @@ class TransformSpecToElements(
                 is EmailSpec -> it.transform(initialValues)
                 is NameSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
+                is IbanSpec -> it.transform(initialValues)
             }
         }
 
@@ -114,7 +115,6 @@ class TransformSpecToElements(
     ) =
         this.map {
             when (it) {
-                is IbanSpec -> it.transform(initialValues)
                 is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
