@@ -6,7 +6,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
-internal class AttachLinkAccountSession @Inject constructor(
+internal class AttachFinancialConnectionsSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
 
@@ -21,8 +21,8 @@ internal class AttachLinkAccountSession @Inject constructor(
         linkedAccountSessionId: String,
         clientSecret: String,
     ): Result<PaymentIntent> = kotlin.runCatching {
-        stripeRepository.attachLinkAccountSessionToPaymentIntent(
-            linkAccountSessionId = linkedAccountSessionId,
+        stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
+            financialConnectionsSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
             requestOptions = ApiRequest.Options(publishableKey)
@@ -40,8 +40,8 @@ internal class AttachLinkAccountSession @Inject constructor(
         linkedAccountSessionId: String,
         clientSecret: String,
     ): Result<SetupIntent> = kotlin.runCatching {
-        stripeRepository.attachLinkAccountSessionToSetupIntent(
-            linkAccountSessionId = linkedAccountSessionId,
+        stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
+            financialConnectionsSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
             requestOptions = ApiRequest.Options(publishableKey)

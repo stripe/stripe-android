@@ -15,17 +15,17 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.financialconnections.model.ListLinkedAccountParams
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
+internal class FinancialConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory
@@ -43,20 +43,20 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
         apiKey = publishableKey
     )
 
-    override suspend fun getLinkedAccounts(
-        listLinkedAccountParams: ListLinkedAccountParams
-    ): LinkedAccountList {
+    override suspend fun getFinancialConnectionsAccounts(
+        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
+    ): FinancialConnectionsAccountList {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = listAccountsUrl,
             options = options,
-            params = listLinkedAccountParams.toParamMap()
+            params = getFinancialConnectionsAcccountsParams.toParamMap()
         )
-        return executeRequest(financialConnectionsRequest, LinkedAccountList.serializer())
+        return executeRequest(financialConnectionsRequest, FinancialConnectionsAccountList.serializer())
     }
 
-    override suspend fun getLinkAccountSession(
+    override suspend fun getFinancialConnectionsSession(
         clientSecret: String
-    ): LinkAccountSession {
+    ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = sessionReceiptUrl,
             options = options,
@@ -64,13 +64,13 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_CLIENT_SECRET to clientSecret
             ),
         )
-        return executeRequest(financialConnectionsRequest, LinkAccountSession.serializer())
+        return executeRequest(financialConnectionsRequest, FinancialConnectionsSession.serializer())
     }
 
-    override suspend fun generateLinkAccountSessionManifest(
+    override suspend fun generateFinancialConnectionsSessionManifest(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest {
+    ): FinancialConnectionsSessionManifest {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = generateHostedUrl,
             options = options,
@@ -79,7 +79,10 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_APPLICATION_ID to applicationId
             ),
         )
-        return executeRequest(financialConnectionsRequest, LinkAccountSessionManifest.serializer())
+        return executeRequest(
+            financialConnectionsRequest,
+            FinancialConnectionsSessionManifest.serializer()
+        )
     }
 
     private suspend fun <Response> executeRequest(
@@ -137,26 +140,13 @@ internal class FinancialFinancialConnectionsApiRepository @Inject constructor(
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
         internal const val PARAMS_APPLICATION_ID = "application_id"
 
-        /**
-         * @return `https://api.stripe.com/v1/link_account_sessions/list_accounts`
-         */
-        internal val listAccountsUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("list_accounts")
+        internal const val listAccountsUrl: String =
+            "$API_HOST/v1/link_account_sessions/list_accounts"
 
-        /**
-         * @return `https://api.stripe.com/v1/link_account_sessions/generate_hosted_url`
-         */
-        internal val generateHostedUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("generate_hosted_url")
+        internal const val generateHostedUrl: String =
+            "$API_HOST/v1/link_account_sessions/generate_hosted_url"
 
-        internal val sessionReceiptUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("session_receipt")
-
-        private fun getApiUrl(path: String): String {
-            return "$API_HOST/v1/link_account_sessions/$path"
-        }
+        internal const val sessionReceiptUrl: String =
+            "$API_HOST/v1/link_account_sessions/session_receipt"
     }
 }

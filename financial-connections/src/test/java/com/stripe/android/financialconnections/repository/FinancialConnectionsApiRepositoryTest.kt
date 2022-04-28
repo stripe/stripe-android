@@ -1,13 +1,13 @@
 package com.stripe.android.financialconnections.repository
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connections.test.readResourceAsString
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.LinkedAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.test.readResourceAsString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -22,14 +22,14 @@ class FinancialConnectionsApiRepositoryTest {
     private val mockStripeNetworkClient = mock<StripeNetworkClient>()
     private val apiRequestFactory = mock<ApiRequest.Factory>()
 
-    private val financialConnectionsApiRepository = FinancialFinancialConnectionsApiRepository(
+    private val financialConnectionsApiRepository = FinancialConnectionsApiRepository(
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         stripeNetworkClient = mockStripeNetworkClient,
         apiRequestFactory = apiRequestFactory
     )
 
     @Test
-    fun `getLinkAccountSession - when paymentAccount is LinkedAccount, deserializes correct type`() =
+    fun `getFinancialConnectionsSession - paymentAccount is FinancialConnectionsAccount`() =
         runTest {
             givenGetRequestReturns(
                 readResourceAsString(
@@ -37,13 +37,13 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getLinkAccountSession("client_secret")
+            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
-            assertThat(result.paymentAccount).isInstanceOf(LinkedAccount::class.java)
+            assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
 
     @Test
-    fun `getLinkAccountSession - when paymentAccount is BankAccount, deserializes correct type`() =
+    fun `getFinancialConnectionsSession - paymentAccount is BankAccount`() =
         runTest {
             givenGetRequestReturns(
                 readResourceAsString(
@@ -51,7 +51,7 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getLinkAccountSession("client_secret")
+            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }

@@ -14,14 +14,14 @@ import kotlinx.serialization.Serializable
  *
  * @param clientSecret
  * @param id
- * @param linkedAccounts
+ * @param accounts
  * @param livemode
  * @param paymentAccount
  * @param returnUrl
  */
 @Parcelize
 @Serializable
-data class LinkAccountSession internal constructor(
+data class FinancialConnectionsSession internal constructor(
     @SerialName("client_secret")
     val clientSecret: String,
 
@@ -29,7 +29,7 @@ data class LinkAccountSession internal constructor(
     val id: String,
 
     @SerialName("linked_accounts")
-    val linkedAccounts: LinkedAccountList,
+    val accounts: FinancialConnectionsAccountList,
 
     @SerialName("livemode")
     val livemode: Boolean,

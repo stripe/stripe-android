@@ -1,31 +1,31 @@
 package com.stripe.android.financialconnections.networking
 
-import com.stripe.android.financialconnections.linkAccountSessionWithNoMoreAccounts
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.financialconnections.model.ListLinkedAccountParams
-import com.stripe.android.financialconnections.moreLinkedAccountList
+import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.moreFinancialConnectionsAccountList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
 internal class FakeFinancialConnectionsRepository(
-    private val manifest: LinkAccountSessionManifest,
+    private val manifest: FinancialConnectionsSessionManifest,
 ) : FinancialConnectionsRepository {
 
-    var getLinkAccountSessionResultProvider: () -> LinkAccountSession =
-        { linkAccountSessionWithNoMoreAccounts }
-    var getLinkedAccountsResultProvider: () -> LinkedAccountList = { moreLinkedAccountList }
+    var getFinancialConnectionsSessionResultProvider: () -> FinancialConnectionsSession =
+        { financialConnectionsSessionWithNoMoreAccounts }
+    var getAccountsResultProvider: () -> FinancialConnectionsAccountList = { moreFinancialConnectionsAccountList }
 
-    override suspend fun getLinkedAccounts(
-        listLinkedAccountParams: ListLinkedAccountParams
-    ): LinkedAccountList = getLinkedAccountsResultProvider()
+    override suspend fun getFinancialConnectionsAccounts(
+        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
+    ): FinancialConnectionsAccountList = getAccountsResultProvider()
 
-    override suspend fun getLinkAccountSession(
+    override suspend fun getFinancialConnectionsSession(
         clientSecret: String
-    ): LinkAccountSession = getLinkAccountSessionResultProvider()
+    ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
 
-    override suspend fun generateLinkAccountSessionManifest(
+    override suspend fun generateFinancialConnectionsSessionManifest(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest = manifest
+    ): FinancialConnectionsSessionManifest = manifest
 }

@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-internal data class CreateLinkAccountSessionParams(
+internal data class CreateFinancialConnectionsSessionParams(
     val clientSecret: String,
     val customerName: String,
     val customerEmailAddress: String?,

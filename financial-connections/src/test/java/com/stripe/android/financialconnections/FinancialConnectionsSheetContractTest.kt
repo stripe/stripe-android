@@ -9,7 +9,7 @@ import java.security.InvalidParameterException
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class FinancialFinancialConnectionsSheetContractTest {
+class FinancialConnectionsSheetContractTest {
 
     @Test
     fun `parseResult() with missing data should return failed result`() {
@@ -20,7 +20,7 @@ class FinancialFinancialConnectionsSheetContractTest {
     @Test
     fun `validate() valid args`() {
         val configuration = FinancialConnectionsSheet.Configuration(
-            ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+            ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
         val args = FinancialConnectionsSheetContract.Args.Default(configuration)
@@ -28,14 +28,14 @@ class FinancialFinancialConnectionsSheetContractTest {
     }
 
     @Test
-    fun `validate() missing link account session client secret`() {
+    fun `validate() missing session client secret`() {
         val configuration = FinancialConnectionsSheet.Configuration(
             " ",
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
         val args = FinancialConnectionsSheetContract.Args.Default(configuration)
         assertFailsWith<InvalidParameterException>(
-            "The link account session client secret cannot be an empty string."
+            "The financial connections session client secret cannot be an empty string."
         ) {
             args.validate()
         }
@@ -44,7 +44,7 @@ class FinancialFinancialConnectionsSheetContractTest {
     @Test
     fun `validate() missing publishable key`() {
         val configuration = FinancialConnectionsSheet.Configuration(
-            ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+            ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             " "
         )
         val args = FinancialConnectionsSheetContract.Args.Default(configuration)
