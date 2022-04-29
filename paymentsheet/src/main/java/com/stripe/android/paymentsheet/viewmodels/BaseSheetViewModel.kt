@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
@@ -145,15 +146,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _contentVisible = MutableLiveData(true)
     internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
 
-    private val _primaryButtonText = MutableLiveData<String>()
-    val primaryButtonText: LiveData<String>
-        get() = _primaryButtonText
-
-    private val primaryButtonEnabled = MutableLiveData<Boolean?>()
-
-    private val _primaryButtonOnClick = MutableLiveData<() -> Unit>()
-    val primaryButtonOnClick: LiveData<() -> Unit>
-        get() = _primaryButtonOnClick
+    /**
+     * Use this to override the current UI state of the primary button. The UI state is reset every
+     * time the payment selection is changed.
+     */
+    private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
+    val primaryButtonUIState: LiveData<PrimaryButton.UIState?>
+        get() = _primaryButtonUIState
 
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?>
@@ -192,12 +191,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            primaryButtonEnabled,
+            _primaryButtonUIState,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = primaryButtonEnabled.value
+                value = _primaryButtonUIState.value?.enabled
                     ?: (
                         buttonsEnabled.value == true &&
                             selection.value != null
@@ -330,28 +329,23 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         logger.warning(message)
     }
 
-    fun updatePrimaryButtonText(text: String) {
-        _primaryButtonText.value = text
+    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
+        _primaryButtonUIState.value = state
     }
 
-    fun updatePrimaryButtonEnabled(enabled: Boolean) {
-        primaryButtonEnabled.value = enabled
-    }
-
-    fun updatePrimaryButtonOnClick(onPress: () -> Unit) {
-        _primaryButtonOnClick.value = onPress
-    }
-
-    fun updateNotes(text: String?) {
+    fun updateBelowButtonText(text: String?) {
         _notesText.value = text
     }
 
-    fun updateSelection(selection: PaymentSelection?) {
+    open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newLpm = selection
         }
-        primaryButtonEnabled.value = null
+
         savedStateHandle[SAVE_SELECTION] = selection
+
+        updateBelowButtonText(null)
+        updatePrimaryButtonUIState(null)
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {

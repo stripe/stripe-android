@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,6 +50,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
@@ -304,6 +306,7 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             val savedPaymentMethod = item as Item.SavedPaymentMethod
+            val labelIcon = savedPaymentMethod.paymentMethod.getLabelIcon()
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
             val removeTitle = itemView.resources.getString(
                 R.string.stripe_paymentsheet_remove_pm,
@@ -322,6 +325,7 @@ internal class PaymentOptionsAdapter(
                     isSelected = isSelected,
                     isEnabled = isEnabled,
                     iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+                    labelIcon = labelIcon,
                     labelText = labelText,
                     removePmDialogTitle = removeTitle,
                     description = item.getDescription(itemView.resources),
@@ -478,6 +482,10 @@ internal class PaymentOptionsAdapter(
                     R.string.bank_account_ending_in,
                     paymentMethod.sepaDebit?.last4
                 )
+                PaymentMethod.Type.USBankAccount -> resources.getString(
+                    R.string.bank_account_ending_in,
+                    paymentMethod.usBankAccount?.last4
+                )
                 else -> ""
             }
 
@@ -511,6 +519,7 @@ internal fun PaymentOptionUi(
     isEditing: Boolean,
     isEnabled: Boolean,
     iconRes: Int,
+    @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
     removePmDialogTitle: String = "",
     description: String,
@@ -623,6 +632,7 @@ internal fun PaymentOptionUi(
         }
 
         LpmSelectorText(
+            icon = labelIcon,
             text = labelText,
             textColor = PaymentsTheme.colors.material.onSurface,
             isEnabled = isEnabled,

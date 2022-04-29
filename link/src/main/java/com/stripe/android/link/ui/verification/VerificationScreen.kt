@@ -74,6 +74,20 @@ internal fun VerificationBodyFullFlow(
 }
 
 @Composable
+internal fun VerificationBodyFullFlow(
+    linkAccount: LinkAccount,
+    injector: NonFallbackInjector
+) {
+    VerificationBody(
+        headerStringResId = R.string.verification_header,
+        messageStringResId = R.string.verification_message,
+        showChangeEmailMessage = true,
+        linkAccount = linkAccount,
+        injector = injector
+    )
+}
+
+@Composable
 internal fun VerificationBody(
     @StringRes headerStringResId: Int,
     @StringRes messageStringResId: Int,

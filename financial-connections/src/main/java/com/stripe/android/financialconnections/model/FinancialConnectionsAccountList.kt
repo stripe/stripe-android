@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FinancialConnectionsAccountList(
     @SerialName("data")
-    val financialConnectionsAccounts: List<FinancialConnectionsAccount>,
+    val data: List<FinancialConnectionsAccount>,
 
     /* True if this list has another page of items after this one that can be fetched. */
     @SerialName("has_more")

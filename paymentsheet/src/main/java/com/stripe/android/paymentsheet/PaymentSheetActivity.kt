@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -75,6 +76,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
+    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
     private val topContainer by lazy { viewBinding.topContainer }
@@ -279,6 +281,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
+
+        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun setupTopContainer() {

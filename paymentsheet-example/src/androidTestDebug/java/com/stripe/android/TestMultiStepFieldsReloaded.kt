@@ -71,7 +71,7 @@ class TestMultiStepFieldsReloaded {
         testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Card,
-                saveCheckboxValue = false,
+                saveCheckboxValue = true,
                 saveForFutureUseCheckboxVisible = true,
             )
         )
