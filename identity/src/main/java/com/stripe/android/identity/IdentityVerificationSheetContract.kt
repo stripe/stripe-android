@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.core.injection.InjectorKey
 import kotlinx.parcelize.Parcelize
 
 internal class IdentityVerificationSheetContract :
@@ -15,7 +16,8 @@ internal class IdentityVerificationSheetContract :
     internal data class Args(
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
-        val brandLogo: Uri
+        val brandLogo: Uri,
+        @InjectorKey val injectorKey: String
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

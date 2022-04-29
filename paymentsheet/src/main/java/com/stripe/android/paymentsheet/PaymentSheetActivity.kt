@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -74,6 +75,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
+    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
     private val topContainer by lazy { viewBinding.topContainer }
@@ -89,7 +91,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setActivityResult(
@@ -283,32 +284,37 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
+
+        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun setupTopContainer() {
-        googlePayDivider.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                GooglePayDividerUi(
-                    context.resources.getString(
-                        if (viewModel.supportedPaymentMethods.size == 1 &&
-                            viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
-                        ) {
-                            R.string.stripe_paymentsheet_or_pay_with_card
-                        } else {
-                            R.string.stripe_paymentsheet_or_pay_using
-                        }
-                    )
-                )
-            }
-        }
-
         setupGooglePayButton()
-
+        val dividerText = resources.getString(
+            if (viewModel.supportedPaymentMethods.size == 1 &&
+                viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
+            ) {
+                R.string.stripe_paymentsheet_or_pay_with_card
+            } else {
+                R.string.stripe_paymentsheet_or_pay_using
+            }
+        )
         viewModel.showTopContainer.observe(this) { visible ->
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
             googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
             topContainer.isVisible = visible
+            // We have to set the UI after we know it's visible. Setting UI on a GONE or INVISIBLE
+            // view will cause tests to hang indefinitely.
+            if (visible) {
+                googlePayDivider.apply {
+                    setViewCompositionStrategy(
+                        ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                    )
+                    setContent {
+                        GooglePayDividerUi(dividerText)
+                    }
+                }
+            }
         }
     }
 

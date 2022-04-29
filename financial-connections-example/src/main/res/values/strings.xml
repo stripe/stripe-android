@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Financial Connections Example</string>
-    <string name="launch_connections_sheet">Link Account</string>
+    <string name="launch_connections_sheet">Connect an Account</string>
 </resources>

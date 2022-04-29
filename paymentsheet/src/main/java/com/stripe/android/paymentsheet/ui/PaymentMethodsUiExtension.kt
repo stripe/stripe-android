@@ -5,12 +5,14 @@ import androidx.annotation.DrawableRes
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int? = when (type) {
     PaymentMethod.Type.Card -> card?.brand?.getCardBrandIcon()
         ?: R.drawable.stripe_ic_paymentsheet_card_unknown
     PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_pm_sepa_debit
+    PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
     else -> null
 }
 
@@ -32,6 +34,15 @@ internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type)
         R.string.paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
     )
+    PaymentMethod.Type.USBankAccount -> resources.getString(
+        R.string.paymentsheet_payment_method_item_card_number,
+        usBankAccount?.last4
+    )
+    else -> null
+}
+
+internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
+    PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_bank
     else -> null
 }
 

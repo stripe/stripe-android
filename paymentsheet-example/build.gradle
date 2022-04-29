@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'shot'
 }
 
 // Read values from gradle.properties or system environment variable
@@ -115,7 +116,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl()

@@ -562,6 +562,7 @@ public final class com/stripe/android/paymentsheet/analytics/DefaultEventReporte
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding : androidx/viewbinding/ViewBinding {
 	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
 	public final field bottomSheet Landroid/widget/LinearLayout;
+	public final field bottomSpacer Landroid/view/View;
 	public final field continueButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
@@ -582,6 +583,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding : androidx/viewbinding/ViewBinding {
 	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
 	public final field bottomSheet Landroid/widget/LinearLayout;
+	public final field bottomSpacer Landroid/view/View;
 	public final field buttonContainer Landroid/widget/FrameLayout;
 	public final field buyButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;

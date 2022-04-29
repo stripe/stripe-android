@@ -1,0 +1,33 @@
+{
+  "id": "las_dhgfsklhgfkdsjhgk",
+  "object": "link_account_session",
+  "client_secret": "las_client_secret_ldafjlfkjlsfadkjk",
+  "linked_accounts": {
+    "object": "list",
+    "data": [
+      {
+        "id": "la_dfsdfasfds",
+        "object": "linked_account",
+        "balance": null,
+        "balance_refresh": null,
+        "category": "credit",
+        "created": 1648749414,
+        "display_name": "CREDIT CARD",
+        "institution_name": "Chase",
+        "last4": "5579",
+        "livemode": true,
+        "permissions": [
+          "payment_method"
+        ],
+        "status": "active",
+        "subcategory": "credit_card",
+        "supported_payment_method_types": [
+        ]
+      }
+    ],
+    "has_more": false,
+    "total_count": 0,
+    "url": "/v1/linked_accounts"
+  },
+  "livemode": true
+}

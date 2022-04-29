@@ -11,7 +11,6 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
@@ -25,9 +24,10 @@ import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
+import javax.inject.Inject
 
-internal class DefaultIdentityRepository(
-    private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(),
+internal class DefaultIdentityRepository @Inject constructor(
+    private val stripeNetworkClient: StripeNetworkClient,
     private val identityIO: IdentityIO
 ) : IdentityRepository {
 

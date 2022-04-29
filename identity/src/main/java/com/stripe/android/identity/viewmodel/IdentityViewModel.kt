@@ -1,5 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -11,13 +12,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.camera.AppSettingsOpenable
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.camera.IDDetectorAggregator
+import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
+import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
 import com.stripe.android.identity.ml.BoundingBox
+import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.IDDetectorFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
@@ -35,15 +44,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
-internal class IdentityViewModel(
+
+internal class IdentityViewModel @Inject constructor(
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityRepository: IdentityRepository,
     private val idDetectorFetcher: IDDetectorFetcher,
-    private val identityIO: IdentityIO
+    private val identityIO: IdentityIO,
+    val identityFragmentFactory: IdentityFragmentFactory
 ) : ViewModel() {
 
     /**
@@ -519,19 +532,36 @@ internal class IdentityViewModel(
         )
 
     internal class IdentityViewModelFactory(
-        private val identityRepository: IdentityRepository,
-        private val idDetectorFetcher: IDDetectorFetcher,
+        val context: Context,
         private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
-        private val identityIO: IdentityIO
-    ) : ViewModelProvider.Factory {
+        private val cameraPermissionEnsureable: CameraPermissionEnsureable,
+        private val appSettingsOpenable: AppSettingsOpenable,
+        private val verificationFlowFinishable: VerificationFlowFinishable,
+    ) : ViewModelProvider.Factory, Injectable<Context> {
+        @Inject
+        lateinit var subComponentBuilderProvider: Provider<IdentityViewModelSubcomponent.Builder>
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdentityViewModel(
-                verificationArgsSupplier(),
-                identityRepository,
-                idDetectorFetcher,
-                identityIO
-            ) as T
+            val args = verificationArgsSupplier()
+            injectWithFallback(
+                args.injectorKey,
+                context
+            )
+
+            return subComponentBuilderProvider.get()
+                .args(args)
+                .cameraPermissionEnsureable(cameraPermissionEnsureable)
+                .appSettingsOpenable(appSettingsOpenable)
+                .verificationFlowFinishable(verificationFlowFinishable)
+                .identityViewModelFactory(this)
+                .build().viewModel as T
+        }
+
+        override fun fallbackInitialize(context: Context) {
+            DaggerIdentityViewModelFactoryComponent.builder()
+                .context(context)
+                .build().inject(this)
         }
     }
 
