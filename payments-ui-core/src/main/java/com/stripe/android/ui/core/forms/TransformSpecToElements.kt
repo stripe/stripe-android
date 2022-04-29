@@ -8,7 +8,6 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
-import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
@@ -25,10 +24,6 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionController
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionFieldSpec
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -55,7 +50,6 @@ class TransformSpecToElements(
                     saveForFutureUseInitialValue,
                     merchantName
                 )
-                is SectionSpec -> it.transform(initialValues)
                 is StaticTextSpec -> it.transform()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AfterpayClearpayTextSpec ->
@@ -89,36 +83,6 @@ class TransformSpecToElements(
                     resourceRepository.getBankRepository(),
                     initialValues[it.identifier]
                 )
-            }
-        }
-
-    private fun SectionSpec.transform(
-        initialValues: Map<IdentifierSpec, String?>
-    ): SectionElement {
-        val fieldElements = this.fields.transform(
-            initialValues
-        )
-
-        // The controller of the section element will be the same as the field element
-        // as there is only a single field in a section
-        return SectionElement(
-            this.identifier,
-            fieldElements,
-            SectionController(
-                this.title,
-                fieldElements.map { it.sectionFieldErrorController() }
-            )
-        )
-    }
-
-    /**
-     * This function will transform a list of specs into a list of elements
-     */
-    private fun List<SectionFieldSpec>.transform(
-        initialValues: Map<IdentifierSpec, String?>
-    ) =
-        this.map {
-            when (it) {
                 is SimpleTextSpec -> it.transform(initialValues)
             }
         }

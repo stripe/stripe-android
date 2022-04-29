@@ -18,7 +18,6 @@ import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
 class FieldPopulator(
@@ -144,13 +143,7 @@ class FieldPopulator(
                     }
                 }
                 is BankDropdownSpec -> {}
-                is SectionSpec -> {
-                    it.fields.forEach { sectionField ->
-                        when (sectionField) {
-                            is SimpleTextSpec -> {}
-                        }
-                    }
-                }
+                is SimpleTextSpec -> {}
             }
         }
     }
@@ -214,12 +207,9 @@ class FieldPopulator(
                     }
                 }
                 is BankDropdownSpec -> {}
-                is SectionSpec -> {
-                    it.fields.forEach { sectionField ->
-                        when (sectionField) {
-                            is SimpleTextSpec -> {}
-                        }
-                    }
+                is SimpleTextSpec -> {
+                    // TODO: For AU Becs which uses this we won't know how to select the item
+                    // consider using the label to find the element.
                 }
             }
         }

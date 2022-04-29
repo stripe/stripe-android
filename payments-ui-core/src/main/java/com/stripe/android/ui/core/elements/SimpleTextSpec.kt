@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.ui.core.R
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
@@ -16,20 +15,10 @@ data class SimpleTextSpec(
     val capitalization: @RawValue KeyboardCapitalization,
     val keyboardType: @RawValue KeyboardType,
     val showOptionalLabel: Boolean = false
-) : SectionFieldSpec(identifier) {
-
-    companion object {
-        val NAME = SimpleTextSpec(
-            IdentifierSpec.Name,
-            label = R.string.address_label_name,
-            capitalization = KeyboardCapitalization.Words,
-            keyboardType = KeyboardType.Text
-        )
-    }
-
+) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         initialValues: Map<IdentifierSpec, String?> = mapOf()
-    ): SectionSingleFieldElement =
+    ) = createSectionElement(
         SimpleTextElement(
             this.identifier,
             SimpleTextFieldController(
@@ -42,4 +31,5 @@ data class SimpleTextSpec(
                 showOptionalLabel = this.showOptionalLabel
             )
         )
+    )
 }

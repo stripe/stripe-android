@@ -10,7 +10,6 @@ import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -18,14 +17,11 @@ val AuBecsDebitForm = LayoutSpec.create(
     EmailSpec(),
     BsbSpec(),
     AuBankAccountNumberSpec(),
-    SectionSpec(
-        IdentifierSpec.Generic("name_section"),
-        SimpleTextSpec(
-            IdentifierSpec.Name,
-            label = R.string.au_becs_account_name,
-            capitalization = KeyboardCapitalization.Words,
-            keyboardType = KeyboardType.Text
-        )
+    SimpleTextSpec(
+        IdentifierSpec.Name,
+        label = R.string.au_becs_account_name,
+        capitalization = KeyboardCapitalization.Words,
+        keyboardType = KeyboardType.Text
     ),
     AuBecsDebitMandateTextSpec()
 )

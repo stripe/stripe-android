@@ -19,14 +19,12 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -129,31 +127,13 @@ internal class FormViewModel @Inject internal constructor(
         externalHiddenIdentifiers.value = identifierSpecs
     }
 
-    private val sectionToFieldIdentifierMap = layout.items
-        .filterIsInstance<SectionSpec>()
-        .associate { sectionSpec ->
-            sectionSpec.identifier to sectionSpec.fields.map {
-                it.identifier
-            }
-        }
-
     internal val hiddenIdentifiers = combine(
         cardBillingElement.map {
             it?.hiddenIdentifiers ?: flowOf(emptyList())
         }.flattenConcat(),
         externalHiddenIdentifiers
     ) { cardBillingIdentifiers, saveFutureUseIdentifiers ->
-        val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
-        // For hidden *section* identifiers, list of identifiers of elements in the section
-        val identifiers = sectionToFieldIdentifierMap
-            .filter { idControllerPair ->
-                hiddenIdentifiers.contains(idControllerPair.key)
-            }
-            .flatMap { sectionToSectionFieldEntry ->
-                sectionToSectionFieldEntry.value
-            }
-
-        hiddenIdentifiers.plus(identifiers)
+        saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden

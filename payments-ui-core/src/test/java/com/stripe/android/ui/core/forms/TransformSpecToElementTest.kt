@@ -18,7 +18,6 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
@@ -132,15 +131,12 @@ internal class TransformSpecToElementTest {
     fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(
-                SectionSpec(
-                    IdentifierSpec.Generic("simple_section"),
-                    SimpleTextSpec(
-                        IdentifierSpec.Generic("simple"),
-                        R.string.address_label_name,
-                        showOptionalLabel = true,
-                        keyboardType = KeyboardType.Text,
-                        capitalization = KeyboardCapitalization.Words
-                    )
+                SimpleTextSpec(
+                    IdentifierSpec.Generic("simple"),
+                    R.string.address_label_name,
+                    showOptionalLabel = true,
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Words
                 )
             )
         )
