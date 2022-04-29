@@ -456,7 +456,7 @@ internal class DriverLicenseScanFragmentTest {
 
     private fun launchDriverLicenseFragment(shouldStartFromBack: Boolean = false) =
         launchFragmentInContainer(
-            bundleOf(IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
+            bundleOf(IdentityDocumentScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
             themeResId = R.style.Theme_MaterialComponents
         ) {
             DriverLicenseScanFragment(

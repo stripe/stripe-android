@@ -20,7 +20,7 @@ import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
-import com.stripe.android.identity.navigation.IdentityCameraScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
+import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
