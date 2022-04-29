@@ -46,7 +46,7 @@ class DefaultConnectionsEventReportTest {
     private val financialConnectionsSession = FinancialConnectionsSession(
         clientSecret = "las_1234567890",
         id = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        _accountsNew = FinancialConnectionsAccountList(
+        accountsNew = FinancialConnectionsAccountList(
             financialConnectionsAccounts = emptyList(),
             hasMore = false,
             url = "url",
