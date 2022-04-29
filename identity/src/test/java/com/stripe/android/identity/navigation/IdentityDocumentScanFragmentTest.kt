@@ -46,7 +46,7 @@ import java.io.File
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class IdentityCameraScanFragmentTest {
+class IdentityDocumentScanFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
@@ -73,7 +73,7 @@ class IdentityCameraScanFragmentTest {
         identityScanViewModelFactory: ViewModelProvider.Factory,
         identityViewModelFactory: ViewModelProvider.Factory,
         private val cameraViewParam: CameraView
-    ) : IdentityCameraScanFragment(
+    ) : IdentityDocumentScanFragment(
         identityScanViewModelFactory, identityViewModelFactory
     ) {
         override val fragmentId = R.id.IDScanFragment
@@ -218,7 +218,7 @@ class IdentityCameraScanFragmentTest {
 
     private fun launchTestFragment(shouldStartFromBack: Boolean = false) =
         launchFragmentInContainer(
-            bundleOf(IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
+            bundleOf(IdentityDocumentScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
             themeResId = R.style.Theme_MaterialComponents
         ) {
             TestFragment(

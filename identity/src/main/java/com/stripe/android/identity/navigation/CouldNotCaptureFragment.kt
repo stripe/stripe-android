@@ -4,7 +4,7 @@ import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
-import com.stripe.android.identity.navigation.IdentityCameraScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
+import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToUploadFragment
 

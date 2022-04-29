@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 internal class PassportScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(
+) : IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {

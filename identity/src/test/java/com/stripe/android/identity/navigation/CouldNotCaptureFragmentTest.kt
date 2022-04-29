@@ -127,7 +127,7 @@ internal class CouldNotCaptureFragmentTest {
 
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK]
+                [IdentityDocumentScanFragment.ARG_SHOULD_START_FROM_BACK]
             ).isEqualTo(shouldStartFromBack)
         }
     }
