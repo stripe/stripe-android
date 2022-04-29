@@ -313,12 +313,19 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
 
+        val appearance: PaymentSheet.Appearance = intent.extras?.get(APPEARANCE_EXTRA)?.let {
+            it as PaymentSheet.Appearance
+        } ?: run {
+            PaymentSheet.Appearance()
+        }
+
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
-            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
+            appearance = appearance
         )
     }
 
@@ -384,6 +391,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
+        const val APPEARANCE_EXTRA = "Appearance"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
     }
