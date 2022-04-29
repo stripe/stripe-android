@@ -11,19 +11,7 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
-import com.stripe.android.ui.core.elements.billingParams
 import com.stripe.android.ui.core.elements.supportedBillingCountries
-
-internal val sepaDebitParams: MutableMap<String, Any?> = mutableMapOf(
-    "iban" to null
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val SepaDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
-    "type" to "sepa_debit",
-    "billing_details" to billingParams,
-    "sepa_debit" to sepaDebitParams
-)
 
 internal val sepaDebitNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),

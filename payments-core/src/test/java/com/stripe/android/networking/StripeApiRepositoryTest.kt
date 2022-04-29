@@ -30,7 +30,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
-import com.stripe.android.model.CreateLinkAccountSessionParams
+import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -1815,7 +1815,7 @@ internal class StripeApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val clientSecret = "pi_client_secret_123"
-            val response = create().attachLinkAccountSessionToPaymentIntent(
+            val response = create().attachFinancialConnectionsSessionToPaymentIntent(
                 clientSecret,
                 "pi_12345",
                 "las_123456",
@@ -1832,7 +1832,7 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `attachLinkAccountSessionToSetupIntent attaches LAS to SI`() =
+    fun `attachFinancialConnectionsSessionToSetupIntent attaches LAS to SI`() =
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -1866,7 +1866,7 @@ internal class StripeApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val clientSecret = "si_client_secret_123"
-            val response = create().attachLinkAccountSessionToSetupIntent(
+            val response = create().attachFinancialConnectionsSessionToSetupIntent(
                 clientSecret,
                 "si_12345",
                 "las_123456",
@@ -1883,7 +1883,7 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `paymentIntentsLinkAccountSession() sends all parameters`() = runTest {
+    fun `paymentIntentsFinancialConnectionsSession() sends all parameters`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             PaymentIntentFixtures.PI_LINK_ACCOUNT_SESSION_JSON.toString(),
@@ -1896,9 +1896,9 @@ internal class StripeApiRepositoryTest {
         val id = "pi_1234"
         val customerName = "John Doe"
         val customerEmailAddress = "johndoe@gmail.com"
-        create().createPaymentIntentLinkAccountSession(
+        create().createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = id,
-            params = CreateLinkAccountSessionParams(
+            params = CreateFinancialConnectionsSessionParams(
                 clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmailAddress
@@ -1926,7 +1926,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `setupIntentsLinkAccountSession() sends all parameters`() = runTest {
+    fun `setupIntentsFinancialConnectionsSession() sends all parameters`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             PaymentIntentFixtures.SI_LINK_ACCOUNT_SESSION_JSON.toString(),
@@ -1939,9 +1939,9 @@ internal class StripeApiRepositoryTest {
         val id = "seti_1234"
         val customerName = "John Doe"
         val customerEmailAddress = "johndoe@gmail.com"
-        create().createSetupIntentLinkAccountSession(
+        create().createSetupIntentFinancialConnectionsSession(
             setupIntentId = id,
-            params = CreateLinkAccountSessionParams(
+            params = CreateFinancialConnectionsSessionParams(
                 clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmailAddress

@@ -11,6 +11,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
@@ -107,11 +108,12 @@ internal class ConsentFragmentTest {
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.args).thenReturn(
+        whenever(it.verificationArgs).thenReturn(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId = VERIFICATION_SESSION_ID,
                 ephemeralKeySecret = EPHEMERAL_KEY,
-                brandLogo = BRAND_LOGO
+                brandLogo = BRAND_LOGO,
+                injectorKey = DUMMY_INJECTOR_KEY
             )
         )
     }

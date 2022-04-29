@@ -39,7 +39,7 @@ interface IdentityVerificationSheet {
         fun toBundle() = bundleOf(EXTRA to this)
 
         internal companion object {
-            private const val EXTRA = "extra_args"
+            internal const val EXTRA = "extra_args"
 
             fun fromIntent(intent: Intent?): VerificationFlowResult {
                 return intent?.getParcelableExtra(EXTRA)

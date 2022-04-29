@@ -15,7 +15,7 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_FRONT
 internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(
+) : IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
@@ -37,6 +37,7 @@ internal class DriverLicenseScanFragment(
                     startScanning(DL_BACK)
                 }
                 DL_BACK -> {
+                    continueButton.toggleToLoading()
                     collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
                 }
                 else -> {

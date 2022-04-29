@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 internal class CvcController constructor(
     private val cvcTextFieldConfig: CvcConfig,
     cardBrandFlow: Flow<CardBrand>,
+    initialValue: String?,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
@@ -73,7 +74,7 @@ internal class CvcController constructor(
     override val loading: Flow<Boolean> = MutableStateFlow(false)
 
     init {
-        onValueChange("")
+        onRawValueChange(initialValue ?: "")
     }
 
     /**

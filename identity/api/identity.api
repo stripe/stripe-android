@@ -5,14 +5,6 @@ public final class com/stripe/android/identity/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/identity/IdentityActivity$inlined$sam$i$androidx_navigation_ui_AppBarConfiguration_OnNavigateUpListener$0 : androidx/navigation/ui/AppBarConfiguration$OnNavigateUpListener, kotlin/jvm/internal/FunctionAdapter {
-	public fun <init> (Lkotlin/jvm/functions/Function0;)V
-	public final fun equals (Ljava/lang/Object;)Z
-	public final fun getFunctionDelegate ()Lkotlin/Function;
-	public final fun hashCode ()I
-	public final synthetic fun onNavigateUp ()Z
-}
-
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
 	public abstract fun present (Ljava/lang/String;Ljava/lang/String;)V
@@ -165,18 +157,18 @@ public final class com/stripe/android/identity/databinding/IdentityActivityBindi
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
 }
 
-public final class com/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding : androidx/viewbinding/ViewBinding {
+public final class com/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field cameraViewCard Lcom/google/android/material/card/MaterialCardView;
 	public final field checkMarkView Landroid/widget/ImageView;
 	public final field headerTitle Landroid/widget/TextView;
 	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field message Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
 }
 
 public final class com/stripe/android/identity/databinding/IdentityUploadFragmentBinding : androidx/viewbinding/ViewBinding {
@@ -208,6 +200,48 @@ public final class com/stripe/android/identity/databinding/LoadingButtonBinding 
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/identity/databinding/LoadingButtonBinding;
 }
 
+public final class com/stripe/android/identity/injection/DaggerIdentityVerificationSheetComponent : com/stripe/android/identity/injection/IdentityVerificationSheetComponent {
+	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityVerificationSheetComponent$Builder;
+	public fun inject (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
+}
+
+public final class com/stripe/android/identity/injection/DaggerIdentityViewModelFactoryComponent : com/stripe/android/identity/injection/IdentityViewModelFactoryComponent {
+	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityViewModelFactoryComponent$Builder;
+	public fun inject (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
+}
+
+public final class com/stripe/android/identity/injection/IdentityCommonModule_Companion_ProvideStripeNetworkClientFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/identity/injection/IdentityCommonModule_Companion_ProvideStripeNetworkClientFactory;
+	public fun get ()Lcom/stripe/android/core/networking/StripeNetworkClient;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideStripeNetworkClient ()Lcom/stripe/android/core/networking/StripeNetworkClient;
+}
+
+public final class com/stripe/android/identity/navigation/IdentityFragmentFactory_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory_Factory;
+	public fun get ()Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/camera/CameraPermissionEnsureable;Lcom/stripe/android/camera/AppSettingsOpenable;Lcom/stripe/android/identity/VerificationFlowFinishable;Lcom/stripe/android/identity/viewmodel/IdentityScanViewModel$IdentityScanViewModelFactory;Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;Lcom/stripe/android/identity/viewmodel/ConsentFragmentViewModel$ConsentFragmentViewModelFactory;Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;
+}
+
+public final class com/stripe/android/identity/networking/DefaultIDDetectorFetcher_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/networking/DefaultIDDetectorFetcher_Factory;
+	public fun get ()Lcom/stripe/android/identity/networking/DefaultIDDetectorFetcher;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/identity/networking/IdentityRepository;Lcom/stripe/android/identity/utils/IdentityIO;)Lcom/stripe/android/identity/networking/DefaultIDDetectorFetcher;
+}
+
+public final class com/stripe/android/identity/networking/DefaultIdentityRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/networking/DefaultIdentityRepository_Factory;
+	public fun get ()Lcom/stripe/android/identity/networking/DefaultIdentityRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/core/networking/StripeNetworkClient;Lcom/stripe/android/identity/utils/IdentityIO;)Lcom/stripe/android/identity/networking/DefaultIdentityRepository;
+}
+
 public final class com/stripe/android/identity/utils/ContentUriResult {
 	public fun <init> (Landroid/net/Uri;Ljava/lang/String;)V
 	public final fun component1 ()Landroid/net/Uri;
@@ -221,7 +255,51 @@ public final class com/stripe/android/identity/utils/ContentUriResult {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/identity/viewmodel/CameraErrorViewModel : androidx/lifecycle/ViewModel {
+public final class com/stripe/android/identity/utils/DefaultIdentityIO_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/identity/utils/DefaultIdentityIO_Factory;
+	public fun get ()Lcom/stripe/android/identity/utils/DefaultIdentityIO;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/Context;)Lcom/stripe/android/identity/utils/DefaultIdentityIO;
+}
+
+public final class com/stripe/android/identity/viewmodel/ConsentFragmentViewModel_ConsentFragmentViewModelFactory_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/viewmodel/ConsentFragmentViewModel_ConsentFragmentViewModelFactory_Factory;
+	public fun get ()Lcom/stripe/android/identity/viewmodel/ConsentFragmentViewModel$ConsentFragmentViewModelFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/identity/utils/IdentityIO;Lcom/stripe/android/identity/networking/IdentityRepository;)Lcom/stripe/android/identity/viewmodel/ConsentFragmentViewModel$ConsentFragmentViewModelFactory;
+}
+
+public final class com/stripe/android/identity/viewmodel/IdentityScanViewModel_IdentityScanViewModelFactory_Factory : dagger/internal/Factory {
 	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/identity/viewmodel/IdentityScanViewModel_IdentityScanViewModelFactory_Factory;
+	public fun get ()Lcom/stripe/android/identity/viewmodel/IdentityScanViewModel$IdentityScanViewModelFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance ()Lcom/stripe/android/identity/viewmodel/IdentityScanViewModel$IdentityScanViewModelFactory;
+}
+
+public final class com/stripe/android/identity/viewmodel/IdentityUploadViewModel_FrontBackUploadViewModelFactory_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel_FrontBackUploadViewModelFactory_Factory;
+	public fun get ()Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/identity/utils/IdentityIO;)Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;
+}
+
+public final class com/stripe/android/identity/viewmodel/IdentityViewModel_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/viewmodel/IdentityViewModel_Factory;
+	public fun get ()Lcom/stripe/android/identity/viewmodel/IdentityViewModel;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/identity/IdentityVerificationSheetContract$Args;Lcom/stripe/android/identity/networking/IdentityRepository;Lcom/stripe/android/identity/networking/IDDetectorFetcher;Lcom/stripe/android/identity/utils/IdentityIO;Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;)Lcom/stripe/android/identity/viewmodel/IdentityViewModel;
+}
+
+public final class com/stripe/android/identity/viewmodel/IdentityViewModel_IdentityViewModelFactory_MembersInjector : dagger/MembersInjector {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
+	public fun injectMembers (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
+	public synthetic fun injectMembers (Ljava/lang/Object;)V
+	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;Ljavax/inject/Provider;)V
 }
 

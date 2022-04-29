@@ -10,9 +10,10 @@ com.stripe.android.camera.framework.time
 com.stripe.android.camera.framework.util
 com.stripe.android.camera.scanui
 com.stripe.android.camera.scanui.util
-module:connections
+module:financial-connections
 com.stripe.android.connections
-com.stripe.android.connections.model
+com.stripe.android.financialconnections
+com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
 com.stripe.android.identity.utils

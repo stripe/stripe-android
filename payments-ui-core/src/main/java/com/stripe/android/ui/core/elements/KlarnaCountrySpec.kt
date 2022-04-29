@@ -9,11 +9,15 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class KlarnaCountrySpec : SectionFieldSpec(IdentifierSpec.Country) {
-    fun transform(currencyCode: String?, country: String?): SectionFieldElement =
+    fun transform(
+        currencyCode: String?,
+        initialValues: Map<IdentifierSpec, String?>
+    ): SectionFieldElement =
         CountryElement(
             this.identifier,
             DropdownFieldController(
-                CountryConfig(KlarnaHelper.getAllowedCountriesForCurrency(currencyCode)), country
+                CountryConfig(KlarnaHelper.getAllowedCountriesForCurrency(currencyCode)),
+                initialValues[IdentifierSpec.Country]
             )
         )
 }

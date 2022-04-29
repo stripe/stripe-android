@@ -3,10 +3,13 @@ package com.stripe.android.financialconnections
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
+import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import kotlinx.parcelize.Parcelize
 
 /**
- * A drop in class to present the Link Account Session Auth Flow.
+ * A drop in class to present the Financial Connections Auth Flow.
  *
  * This *must* be called unconditionally, as part of initialization path,
  * typically as a field initializer of an Activity or Fragment.
@@ -17,12 +20,12 @@ class FinancialConnectionsSheet internal constructor(
     /**
      * Configuration for a [FinancialConnectionsSheet]
      *
-     * @param linkAccountSessionClientSecret the client secret for the Link Account Session
+     * @param financialConnectionsSessionClientSecret the session client secret
      * @param publishableKey the Stripe publishable key
      */
     @Parcelize
     data class Configuration(
-        val linkAccountSessionClientSecret: String,
+        val financialConnectionsSessionClientSecret: String,
         val publishableKey: String,
     ) : Parcelable
 
@@ -65,6 +68,38 @@ class FinancialConnectionsSheet internal constructor(
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
                 DefaultFinancialConnectionsSheetLauncher(fragment, callback)
+            )
+        }
+
+        /**
+         * Constructor to be used when launching the connections sheet from an Activity.
+         *
+         * @param activity  the Activity that is presenting the connections sheet.
+         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
+         */
+        @Suppress("UnusedPrivateMember")
+        private fun createForBankAccountToken(
+            activity: ComponentActivity,
+            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(activity, callback)
+            )
+        }
+
+        /**
+         * Constructor to be used when launching the payment sheet from a Fragment.
+         *
+         * @param fragment the Fragment that is presenting the payment sheet.
+         * @param callback called with the result of the payment after the payment sheet is dismissed.
+         */
+        @Suppress("UnusedPrivateMember")
+        private fun createForBankAccountToken(
+            fragment: Fragment,
+            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(fragment, callback)
             )
         }
     }

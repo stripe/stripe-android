@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  *
  * @param type
  * @param account
- * @param customer ID of the Customer this LinkedAccount belongs to. Present if and only if `type` is `customer`.
+ * @param customer ID of the Customer this account belongs to. Present if and only if `type` is `customer`.
  */
 @Parcelize
 @Serializable
@@ -24,7 +24,7 @@ data class AccountHolder(
     @SerialName("account")
     val account: String? = null,
 
-    /* ID of the Customer this LinkedAccount belongs to. Present if and only if `type` is `customer`. */
+    /* ID of the Customer this account belongs to. Present if and only if `type` is `customer`. */
     @SerialName("customer")
     val customer: String? = null
 

@@ -11,8 +11,6 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
@@ -26,9 +24,10 @@ import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
+import javax.inject.Inject
 
-internal class DefaultIdentityRepository(
-    private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(),
+internal class DefaultIdentityRepository @Inject constructor(
+    private val stripeNetworkClient: StripeNetworkClient,
     private val identityIO: IdentityIO
 ) : IdentityRepository {
 
@@ -42,11 +41,20 @@ internal class DefaultIdentityRepository(
     private val stripeErrorJsonParser = StripeErrorJsonParser()
     private val stripeFileJsonParser = StripeFileJsonParser()
 
+    private val apiRequestFactory = ApiRequest.Factory(
+        apiVersion = IDENTITY_STRIPE_API_VERSION_WITH_BETA_HEADER
+    )
+
     override suspend fun retrieveVerificationPage(
         id: String,
         ephemeralKey: String
     ): VerificationPage = executeRequestWithKSerializer(
-        RetrieveVerificationPageRequest(id, ephemeralKey),
+        apiRequestFactory.createGet(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            )
+        ),
         VerificationPage.serializer()
     )
 
@@ -56,14 +64,14 @@ internal class DefaultIdentityRepository(
         collectedDataParam: CollectedDataParam,
         clearDataParam: ClearDataParam
     ): VerificationPageData = executeRequestWithKSerializer(
-        PostVerificationPageDataRequest(
-            id,
-            ephemeralKey,
-            QueryStringFactory.createFromParamsWithEmptyValues(
-                mapOf(
-                    collectedDataParam.createCollectedDataParamEntry(json),
-                    clearDataParam.createCollectedDataParamEntry(json)
-                )
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$DATA",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                collectedDataParam.createCollectedDataParamEntry(json),
+                clearDataParam.createCollectedDataParamEntry(json)
             )
         ),
         VerificationPageData.serializer()
@@ -73,7 +81,12 @@ internal class DefaultIdentityRepository(
         id: String,
         ephemeralKey: String
     ): VerificationPageData = executeRequestWithKSerializer(
-        PostVerificationPageSubmitRequest(id, ephemeralKey),
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$SUBMIT",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey,
+            ),
+        ),
         VerificationPageData.serializer()
     )
 
@@ -216,4 +229,9 @@ internal class DefaultIdentityRepository(
             )
         }
     )
+
+    internal companion object {
+        const val SUBMIT = "submit"
+        const val DATA = "data"
+    }
 }

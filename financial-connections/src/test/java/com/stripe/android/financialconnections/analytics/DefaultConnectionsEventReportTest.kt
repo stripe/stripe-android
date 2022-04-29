@@ -6,9 +6,9 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkedAccountList
+import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
@@ -32,22 +32,22 @@ class DefaultConnectionsEventReportTest {
         publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
     )
 
-    private val eventReporter = DefaultFinancialFinancialConnectionsEventReporter(
+    private val eventReporter = DefaultFinancialConnectionsEventReporter(
         analyticsRequestExecutor,
         analyticsRequestFactory,
         testDispatcher
     )
 
     private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val linkAccountSession = LinkAccountSession(
+    private val financialConnectionsSession = FinancialConnectionsSession(
         "las_1234567890",
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
-        LinkedAccountList(
-            linkedAccounts = emptyList(),
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+        FinancialConnectionsAccountList(
+            financialConnectionsAccounts = emptyList(),
             hasMore = false,
             url = "url",
             count = 0
@@ -61,7 +61,7 @@ class DefaultConnectionsEventReportTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.presented" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }
@@ -70,37 +70,37 @@ class DefaultConnectionsEventReportTest {
     fun `onResult() should fire analytics request with expected event value for success`() {
         eventReporter.onResult(
             configuration,
-            FinancialConnectionsSheetResult.Completed(linkAccountSession)
+            FinancialConnectionsSheetContract.Result.Completed(financialConnectionsSession)
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
                     req.params["session_result"] == "completed" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }
 
     @Test
     fun `onResult() should fire analytics request with expected event value for cancelled`() {
-        eventReporter.onResult(configuration, FinancialConnectionsSheetResult.Canceled)
+        eventReporter.onResult(configuration, FinancialConnectionsSheetContract.Result.Canceled)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
                     req.params["session_result"] == "cancelled" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }
 
     @Test
     fun `onResult() should fire analytics request with expected event value for failure`() {
-        eventReporter.onResult(configuration, FinancialConnectionsSheetResult.Failed(Exception()))
+        eventReporter.onResult(configuration, FinancialConnectionsSheetContract.Result.Failed(Exception()))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.failed" &&
                     req.params["session_result"] == "failure" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET
+                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
             }
         )
     }

@@ -10,6 +10,7 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 internal class ConsentFragmentViewModel(
     private val identityIO: IdentityIO,
@@ -39,7 +40,7 @@ internal class ConsentFragmentViewModel(
         }
     }
 
-    internal class ConsentFragmentViewModelFactory(
+    internal class ConsentFragmentViewModelFactory @Inject constructor(
         private val identityIO: IdentityIO,
         private val identityRepository: IdentityRepository
     ) : ViewModelProvider.Factory {

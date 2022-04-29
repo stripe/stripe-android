@@ -144,6 +144,15 @@
                         android:text="@string/stripe_paymentsheet_pay_button_label"
                         android:layout_marginVertical="2dp" />
                 </FrameLayout>
+
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/notes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginVertical="2dp"
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+                    android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

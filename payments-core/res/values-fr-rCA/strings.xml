@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Votre code postal n\'est pas valide.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Votre code postal n\'est pas valide</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Payez par versements échelonnés avec &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Nom du titulaire du compte</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Numéro BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">En fournissant vos coordonnées bancaires et en confirmant ce paiement, vous acceptez cette demande de prélèvement automatique et le &lt;a href=\\"https://stripe.com/au-becs-dd-service-agreement/legal\\"&gt;Contrat d\'utlisation du service de demande de prélèvement automatique&lt;/a&gt;. Vous autorisez également Stripe Payments Australia Pty Ltd ACN 160 180 343 ID d\'utilisateur de prélèvement automatique 507156 (“Stripe”) à débiter votre compte par le biais du Bulk Electronic Clearing System (BECS) pour le compte du %s (the \\"Marchand\\") pour tout montant vous ayant été communiqué individuellement par le Marchand. Vous certifiez être le titulaire du compte ou un signataire autorisé du compte indiqué ci-dessus.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    En fournissant les informations sur votre compte bancaire et en confirmant ce paiement, vous acceptez\n    cette demande de prélèvement automatique et les Conditions d\'utilisation du service de demande de prélèvement automatique et autorisez\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 ID utilisateur du prélèvement automatique 507156\n    (« Stripe ») à débiter votre compte par le biais du Bulk Electronic Clearing System (BECS) en\n    faveur de %1$s (le « marchand ») de tout montant qui vous a été communiqué\n    directement par le marchand. Vous attestez que vous êtes titulaire du compte ou un signataire\n    autorisé du compte désigné ci-dessus.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->

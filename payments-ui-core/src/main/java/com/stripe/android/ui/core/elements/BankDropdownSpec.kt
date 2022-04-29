@@ -11,14 +11,15 @@ data class BankDropdownSpec(
     @StringRes val label: Int,
     val bankType: SupportedBankType
 ) : SectionFieldSpec(identifier) {
-    fun transform(bankRepository: BankRepository): SectionFieldElement =
+    fun transform(bankRepository: BankRepository, initialValue: String?): SectionFieldElement =
         SimpleDropdownElement(
             this.identifier,
             DropdownFieldController(
                 SimpleDropdownConfig(
                     label,
                     bankRepository.get(this.bankType)
-                )
+                ),
+                initialValue = initialValue
             )
         )
 }

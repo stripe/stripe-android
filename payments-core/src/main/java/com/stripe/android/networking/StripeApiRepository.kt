@@ -38,7 +38,6 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -48,8 +47,9 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.CreateLinkAccountSessionParams
+import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -64,12 +64,12 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.parsers.BankConnectionsLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
+import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -1346,35 +1346,35 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun createPaymentIntentLinkAccountSession(
+    override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
-        params: CreateLinkAccountSessionParams,
+        params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): BankConnectionsLinkedAccountSession? {
+    ): FinancialConnectionsSession? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                url = getPaymentIntentLinkAccountSessionUrl(paymentIntentId),
+                url = getPaymentIntentFinancialConnectionsSessionUrl(paymentIntentId),
                 options = requestOptions,
                 params = params.toMap()
             ),
-            BankConnectionsLinkAccountSessionJsonParser(),
+            FinancialConnectionsSessionJsonParser(),
         ) {
             // no-op
         }
     }
 
-    override suspend fun createSetupIntentLinkAccountSession(
+    override suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
-        params: CreateLinkAccountSessionParams,
+        params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): BankConnectionsLinkedAccountSession? {
+    ): FinancialConnectionsSession? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                url = getSetupIntentLinkAccountSessionUrl(setupIntentId),
+                url = getSetupIntentFinancialConnectionsSessionUrl(setupIntentId),
                 options = requestOptions,
                 params = params.toMap()
             ),
-            BankConnectionsLinkAccountSessionJsonParser(),
+            FinancialConnectionsSessionJsonParser(),
         ) {
             // no-op
         }
@@ -1385,7 +1385,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      */
     @VisibleForTesting
     @JvmSynthetic
-    internal fun getPaymentIntentLinkAccountSessionUrl(paymentIntentId: String): String {
+    internal fun getPaymentIntentFinancialConnectionsSessionUrl(paymentIntentId: String): String {
         return getApiUrl("payment_intents/%s/link_account_sessions", paymentIntentId)
     }
 
@@ -1394,24 +1394,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      */
     @VisibleForTesting
     @JvmSynthetic
-    internal fun getSetupIntentLinkAccountSessionUrl(setupIntentId: String): String {
+    internal fun getSetupIntentFinancialConnectionsSessionUrl(setupIntentId: String): String {
         return getApiUrl("setup_intents/%s/link_account_sessions", setupIntentId)
     }
 
     /**
      * Attaches the Link Account Session to the Payment Intent
      */
-    override suspend fun attachLinkAccountSessionToPaymentIntent(
+    override suspend fun attachFinancialConnectionsSessionToPaymentIntent(
         clientSecret: String,
         paymentIntentId: String,
-        linkAccountSessionId: String,
+        financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachLinkAccountSessionToPaymentIntentUrl(
+                getAttachFinancialConnectionsSessionToPaymentIntentUrl(
                     paymentIntentId,
-                    linkAccountSessionId
+                    financialConnectionsSessionId
                 ),
                 requestOptions,
                 mapOf(
@@ -1427,15 +1427,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Attaches the Link Account Session to the Setup Intent
      */
-    override suspend fun attachLinkAccountSessionToSetupIntent(
+    override suspend fun attachFinancialConnectionsSessionToSetupIntent(
         clientSecret: String,
         setupIntentId: String,
-        linkAccountSessionId: String,
+        financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachLinkAccountSessionToSetupIntentUrl(setupIntentId, linkAccountSessionId),
+                getAttachFinancialConnectionsSessionToSetupIntentUrl(setupIntentId, financialConnectionsSessionId),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
@@ -1998,35 +1998,35 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:paymentIntentId/
-         * link_account_sessions/:linkAccountSessionId/attach`
+         * link_account_sessions/:financialConnectionsSessionId/attach`
          */
         @VisibleForTesting
         @JvmSynthetic
-        internal fun getAttachLinkAccountSessionToPaymentIntentUrl(
+        internal fun getAttachFinancialConnectionsSessionToPaymentIntentUrl(
             paymentIntentId: String,
-            linkAccountSessionId: String
+            financialConnectionsSessionId: String
         ): String {
             return getApiUrl(
                 "payment_intents/%s/link_account_sessions/%s/attach",
                 paymentIntentId,
-                linkAccountSessionId
+                financialConnectionsSessionId
             )
         }
 
         /**
          * @return `https://api.stripe.com/v1/setup_intents/:setupIntentId/
-         * link_account_sessions/:linkAccountSessionId/attach`
+         * link_account_sessions/:financialConnectionsSessionId/attach`
          */
         @VisibleForTesting
         @JvmSynthetic
-        internal fun getAttachLinkAccountSessionToSetupIntentUrl(
+        internal fun getAttachFinancialConnectionsSessionToSetupIntentUrl(
             setupIntentId: String,
-            linkAccountSessionId: String
+            financialConnectionsSessionId: String
         ): String {
             return getApiUrl(
                 "setup_intents/%s/link_account_sessions/%s/attach",
                 setupIntentId,
-                linkAccountSessionId
+                financialConnectionsSessionId
             )
         }
 

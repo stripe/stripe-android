@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
  */
 internal interface FinancialConnectionsPaymentsProxy {
     fun present(
-        linkAccountSessionClientSecret: String,
+        financialConnectionsSessionClientSecret: String,
         publishableKey: String
     )
 
@@ -63,12 +63,12 @@ internal class DefaultFinancialConnectionsPaymentsProxy(
     private val financialConnectionsSheet: FinancialConnectionsSheet
 ) : FinancialConnectionsPaymentsProxy {
     override fun present(
-        linkAccountSessionClientSecret: String,
+        financialConnectionsSessionClientSecret: String,
         publishableKey: String
     ) {
         financialConnectionsSheet.present(
             FinancialConnectionsSheet.Configuration(
-                linkAccountSessionClientSecret,
+                financialConnectionsSessionClientSecret,
                 publishableKey
             )
         )
@@ -76,7 +76,7 @@ internal class DefaultFinancialConnectionsPaymentsProxy(
 }
 
 internal class UnsupportedFinancialConnectionsPaymentsProxy : FinancialConnectionsPaymentsProxy {
-    override fun present(linkAccountSessionClientSecret: String, publishableKey: String) {
+    override fun present(financialConnectionsSessionClientSecret: String, publishableKey: String) {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(
                 "Missing financial-connections dependency, please add it to your apps build.gradle"

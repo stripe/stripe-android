@@ -7,17 +7,16 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -25,6 +24,18 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * Host activity to perform Identity verification.
  */
 internal class IdentityActivity : CameraPermissionCheckingActivity(), VerificationFlowFinishable {
+    @VisibleForTesting
+    internal lateinit var navController: NavController
+
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory =
+        IdentityViewModel.IdentityViewModelFactory(
+            this,
+            { starterArgs },
+            this,
+            this,
+            this
+        )
     private val binding by lazy {
         IdentityActivityBinding.inflate(layoutInflater)
     }
@@ -35,46 +46,19 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
         }
     }
 
-    private val identityFragmentFactory: IdentityFragmentFactory by lazy {
-        IdentityFragmentFactory(
+    private val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
+
+    private val onBackPressedCallback by lazy {
+        IdentityActivityOnBackPressedCallback(
             this,
-            this,
-            this,
-            starterArgs,
-            this
+            navController
         )
     }
-
-    private lateinit var navController: NavController
-
-    @VisibleForTesting
-    internal val viewModelFactory: ViewModelProvider.Factory by lazy {
-        identityFragmentFactory.identityViewModelFactory
-    }
-
-    @VisibleForTesting
-    internal val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
-
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
-
-        override fun handleOnBackPressed() {
-            navController.navigateUpAndSetArgForUploadFragment()
-        }
-    }
-
-    private fun isConsentFragment(destination: NavDestination) =
-        destination.id == R.id.consentFragment
-
-    private fun isErrorFragmentWithFailedReason(
-        destination: NavDestination,
-        args: Bundle?
-    ) = destination.id == R.id.errorFragment &&
-        args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        supportFragmentManager.fragmentFactory = identityFragmentFactory
+        supportFragmentManager.fragmentFactory = identityViewModel.identityFragmentFactory
         setUpNavigationController()
         identityViewModel.retrieveAndBufferVerificationPage()
     }
@@ -89,42 +73,11 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
 
         navController.setGraph(R.navigation.identity_nav_graph)
 
-        onBackPressedDispatcher.addCallback(onBackPressedCallback)
-        navController.addOnDestinationChangedListener { _, destination, args ->
-            // By default clicking back is the same as clicking navigate up.
-            // When currently destination is ConsentFragment or ErrorFragment, the back press
-            // behavior will be handled in the Fragment itself.
-            onBackPressedCallback.isEnabled =
-                !isConsentFragment(destination) &&
-                !isErrorFragmentWithFailedReason(destination, args)
-        }
-        binding.topAppBar.setupWithNavController(
-            navController,
-            AppBarConfiguration(
-                // navController.navigateUp() won't work on the two fragments because -
-                //  consentFragment - it's the very first fragment of the navigation graph
-                //  errorFragment - it's sometimes triggered by an error that needs to terminate
-                //    verification flow(e.g incorrect network response). navigateUp would re-trigger
-                //    the same error and let navController re-navigate to the errorFragment,
-                //    creating a endless loop.
-                //
-                // Since we can't override the behavior of navController.navigateUp(), when
-                // navigationDestination is on these two fragment, disable the up button to
-                // prevent navController.navigateUp() being called.
-                //
-                // Note: system back button can be still pressed on these two fragments, they have
-                // corresponding logic to end verification flow in different ways.
-                topLevelDestinationIds = setOf(
-                    R.id.consentFragment,
-                    R.id.errorFragment
-                )
-            )
-        )
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        binding.topAppBar.setNavigationOnClickListener {
-            // clicking up button on app bar should have the same behavior as clicking device back
-            // button
-            navController.navigateUpAndSetArgForUploadFragment()
+        navController.addOnDestinationChangedListener { _, destination, args ->
+            onBackPressedCallback.updateState(destination, args)
+            binding.topAppBar.updateState(destination, args)
         }
     }
 
@@ -156,8 +109,114 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
         // no-op
     }
 
+    /**
+     * Handles Toolbar's navigation button behavior based on current navigation status.
+     */
+    private fun MaterialToolbar.updateState(destination: NavDestination, args: Bundle?) {
+        when {
+            // Display cross icon on consent fragment, clicking it finishes the flow with Canceled
+            isConsentFragment(destination) -> {
+                this.navigationIcon =
+                    AppCompatResources.getDrawable(
+                        this@IdentityActivity,
+                        R.drawable.ic_baseline_close_24
+                    )
+                this.setNavigationOnClickListener {
+                    finishWithResult(
+                        VerificationFlowResult.Canceled
+                    )
+                }
+            }
+            // Display cross icon on error fragment with failed reason, clicking it finishes the flow with Failed
+            isErrorFragmentWithFailedReason(destination, args) -> {
+                this.navigationIcon = AppCompatResources.getDrawable(
+                    this@IdentityActivity,
+                    R.drawable.ic_baseline_close_24
+                )
+                this.setNavigationOnClickListener {
+                    finishWithResult(
+                        VerificationFlowResult.Failed(
+                            requireNotNull(
+                                args?.getSerializable(
+                                    ErrorFragment.ARG_FAILED_REASON
+                                ) as? Throwable
+                            ) {
+                                "Failed to get failedReason from $args"
+                            }
+                        )
+                    )
+                }
+            }
+            // Otherwise display back arrow icon, cliking it navigates up
+            else -> {
+                this.navigationIcon =
+                    AppCompatResources.getDrawable(
+                        this@IdentityActivity,
+                        R.drawable.ic_baseline_arrow_back_24
+                    )
+                this.setNavigationOnClickListener {
+                    navController.navigateUpAndSetArgForUploadFragment()
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles back button behavior based on current navigation status.
+     */
+    private class IdentityActivityOnBackPressedCallback(
+        private val verificationFlowFinishable: VerificationFlowFinishable,
+        private val navController: NavController
+    ) : OnBackPressedCallback(true) {
+        private var destination: NavDestination? = null
+        private var args: Bundle? = null
+
+        fun updateState(destination: NavDestination, args: Bundle?) {
+            this.destination = destination
+            this.args = args
+        }
+
+        override fun handleOnBackPressed() {
+            when {
+                // On consent fragment, clicking back finishes the flow with Canceled
+                isConsentFragment(destination) -> {
+                    verificationFlowFinishable.finishWithResult(
+                        VerificationFlowResult.Canceled
+                    )
+                }
+                // On error fragment with failed reason, clicking back finishes the flow with Failed
+                isErrorFragmentWithFailedReason(destination, args) -> {
+                    verificationFlowFinishable.finishWithResult(
+                        VerificationFlowResult.Failed(
+                            requireNotNull(
+                                args?.getSerializable(
+                                    ErrorFragment.ARG_FAILED_REASON
+                                ) as? Throwable
+                            ) {
+                                "Failed to get failedReason from $args"
+                            }
+                        )
+                    )
+                }
+                // On other fragments, clicking back navigates up
+                else -> {
+                    navController.navigateUpAndSetArgForUploadFragment()
+                }
+            }
+        }
+    }
+
     private companion object {
         const val EMPTY_ARG_ERROR =
             "IdentityActivity was started without arguments"
+
+        private fun isConsentFragment(destination: NavDestination?) =
+            destination?.id == R.id.consentFragment
+
+        private fun isErrorFragmentWithFailedReason(
+            destination: NavDestination?,
+            args: Bundle?
+        ) = destination?.id == R.id.errorFragment &&
+            args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
     }
 }

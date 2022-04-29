@@ -19,8 +19,8 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
-import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
-import com.stripe.android.identity.navigation.IdentityCameraScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
+import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
+import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -132,7 +132,7 @@ internal class IDScanFragmentTest {
                 .thenReturn(IdentityScanState.ScanType.ID_FRONT)
 
             // button clicked
-            IdentityCameraScanFragmentBinding.bind(idScanFragment.requireView()).kontinue
+            IdentityDocumentScanFragmentBinding.bind(idScanFragment.requireView()).kontinue
                 .findViewById<Button>(R.id.button).callOnClick()
 
             // verify start to scan back
@@ -380,7 +380,7 @@ internal class IDScanFragmentTest {
         )
     }
 
-    private fun simulateBothSidesScanned(afterScannedBlock: (TestNavHostController, IdentityCameraScanFragmentBinding) -> Unit) {
+    private fun simulateBothSidesScanned(afterScannedBlock: (TestNavHostController, IdentityDocumentScanFragmentBinding) -> Unit) {
         launchIDScanFragment().onFragment { idScanFragment ->
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
@@ -408,7 +408,7 @@ internal class IDScanFragmentTest {
             )
 
             // click continue, scan back
-            val binding = IdentityCameraScanFragmentBinding.bind(idScanFragment.requireView())
+            val binding = IdentityDocumentScanFragmentBinding.bind(idScanFragment.requireView())
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
             // mock success of back scan
@@ -446,11 +446,11 @@ internal class IDScanFragmentTest {
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
         shouldStartFromBack: Boolean = false,
-        check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
+        check: (binding: IdentityDocumentScanFragmentBinding, context: Context) -> Unit
     ) {
         launchIDScanFragment(shouldStartFromBack).onFragment {
             displayStateChanged.postValue((newScanState to mock()))
-            check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
+            check(IdentityDocumentScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }
     }
 
