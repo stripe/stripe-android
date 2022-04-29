@@ -30,6 +30,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -55,6 +56,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
+    abstract val linkAuthView: ComposeView
     abstract val scrollView: ScrollView
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
@@ -127,6 +129,25 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         setupHeader()
         setupPrimaryButton()
         setupNotes()
+
+        viewModel.showLinkVerificationDialog.observe(this) { show ->
+            if (show) {
+                linkAuthView.setContent {
+                    LinkVerificationDialog(
+                        linkLauncher = viewModel.linkLauncher,
+                        onDialogDismissed = viewModel::onLinkVerificationDismissed,
+                        onVerificationCompleted = {
+                            viewModel.launchLink()
+                            viewModel.onLinkVerificationDismissed()
+                        }
+                    )
+                }
+            }
+        }
+
+        viewModel.contentVisible.observe(this) {
+            scrollView.isVisible = it
+        }
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener

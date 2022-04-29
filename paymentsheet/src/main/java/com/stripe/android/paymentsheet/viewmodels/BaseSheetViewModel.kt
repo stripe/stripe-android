@@ -142,6 +142,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
+    @VisibleForTesting
+    internal val _contentVisible = MutableLiveData(true)
+    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
+
     /**
      * Use this to override the current UI state of the primary button. The UI state is reset every
      * time the payment selection is changed.
@@ -156,6 +160,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     protected var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
+    val linkLauncher = linkPaymentLauncherFactory.create(merchantName, null)
+
+    private val _showLinkVerificationDialog = MutableLiveData(false)
+    val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
 
     /**
      * This should be initialized from the starter args, and then from that
@@ -361,6 +369,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         editing.value = isEditing
     }
 
+    fun setContentVisible(visible: Boolean) {
+        _contentVisible.value = visible
+    }
+
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
@@ -380,19 +392,48 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     protected fun setupLink(unused: StripeIntent) {
         // TODO(brnunes-stripe): Enable Link
+//        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
+//            viewModelScope.launch {
+//                when (linkLauncher.setup(stripeIntent)) {
+//                    AccountStatus.Verified -> launchLink()
+//                    AccountStatus.VerificationStarted,
+//                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
+//                    AccountStatus.SignedOut -> {}
+//                }
+//                _isLinkEnabled.value = true
+//            }
+//        } else {
         _isLinkEnabled.value = false
+//        }
+    }
+
+    fun onLinkVerificationDismissed() {
+        _showLinkVerificationDialog.value = false
+    }
+
+    fun launchLink() {
+        linkActivityResultLauncher?.let { activityResultLauncher ->
+            linkLauncher.present(
+                activityResultLauncher
+            )
+            onLinkLaunched()
+        }
     }
 
     /**
      * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
      * accordingly.
      */
-    abstract fun onLinkLaunched()
+    open fun onLinkLaunched() {
+        setContentVisible(false)
+    }
 
     /**
      * Method called with the result of a Link payment.
      */
-    abstract fun onLinkPaymentResult(result: LinkActivityResult)
+    open fun onLinkPaymentResult(result: LinkActivityResult) {
+        setContentVisible(true)
+    }
 
     abstract fun onUserCancel()
 

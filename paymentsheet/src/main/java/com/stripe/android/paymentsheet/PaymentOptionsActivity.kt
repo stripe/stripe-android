@@ -60,6 +60,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }

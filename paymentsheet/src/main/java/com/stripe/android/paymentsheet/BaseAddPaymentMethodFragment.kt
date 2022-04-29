@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -84,7 +85,24 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            viewBinding.linkInlineSignup.isEnabled = !isProcessing
             (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
+        }
+
+        viewBinding.linkInlineSignup.apply {
+            linkLauncher = sheetViewModel.linkLauncher
+        }
+
+        // isLinkEnabled is set during initialization and never changes, so we can just use the
+        // current value
+        sheetViewModel.isLinkEnabled.value?.takeIf { it }?.let {
+            lifecycleScope.launch {
+                sheetViewModel.linkLauncher.accountStatus.collect {
+                    // Show inline sign up view only if user is logged out
+                    viewBinding.linkInlineSignup.isVisible = it == AccountStatus.SignedOut ||
+                        viewBinding.linkInlineSignup.hasUserInteracted
+                }
+            }
         }
 
         // If the activity was destroyed and recreated then we need to re-attach the fragment,

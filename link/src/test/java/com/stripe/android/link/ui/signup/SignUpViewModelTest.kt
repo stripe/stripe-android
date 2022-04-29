@@ -218,7 +218,7 @@ class SignUpViewModelTest {
         args: LinkActivityContract.Args = defaultArgs
     ) = SignUpViewModel(
         args = args,
-        prefilledEmail = prefilledEmail,
+        customerEmail = prefilledEmail,
         linkAccountManager = linkAccountManager,
         logger = Logger.noop(),
         navigator = navigator

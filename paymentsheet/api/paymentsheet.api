@@ -353,6 +353,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
 	public final field header Landroidx/compose/ui/platform/ComposeView;
+	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
 	public final field message Landroid/widget/TextView;
 	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
@@ -377,7 +378,8 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
 	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
 	public final field header Landroidx/compose/ui/platform/ComposeView;
-	public final field linkButton Lcom/stripe/android/link/ui/LinkViewButton;
+	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
+	public final field linkButton Lcom/stripe/android/link/ui/LinkButtonView;
 	public final field message Landroid/widget/TextView;
 	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
@@ -410,6 +412,7 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 }
 
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding : androidx/viewbinding/ViewBinding {
+	public final field linkInlineSignup Lcom/stripe/android/link/ui/inline/LinkInlineSignupView;
 	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
