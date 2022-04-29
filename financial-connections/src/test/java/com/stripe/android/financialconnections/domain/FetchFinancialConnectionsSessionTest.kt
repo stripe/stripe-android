@@ -59,7 +59,7 @@ class FetchFinancialConnectionsSessionTest {
 
             assertThat(result).isEqualTo(
                 financialConnectionsSessionWithMoreAccounts.copy(
-                    accounts = FinancialConnectionsAccountList(
+                    accountsNew = FinancialConnectionsAccountList(
                         financialConnectionsAccounts = combinedAccounts,
                         hasMore = false,
                         count = combinedAccounts.size,
@@ -92,7 +92,7 @@ class FetchFinancialConnectionsSessionTest {
 
             assertThat(result).isEqualTo(
                 financialConnectionsSessionWithMoreAccounts.copy(
-                    accounts = FinancialConnectionsAccountList(
+                    accountsNew = FinancialConnectionsAccountList(
                         financialConnectionsAccounts = combinedAccounts,
                         hasMore = false,
                         totalCount = combinedAccounts.size,

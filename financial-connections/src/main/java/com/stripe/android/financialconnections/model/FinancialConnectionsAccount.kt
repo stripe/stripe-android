@@ -73,9 +73,6 @@ data class FinancialConnectionsAccount(
     @SerialName("supported_payment_method_types")
     val supportedPaymentMethodTypes: List<SupportedPaymentMethodTypes>,
 
-    @SerialName("accountholder")
-    val accountholder: AccountHolder? = null,
-
     /* The most recent information about the account's balance. */
     @SerialName("balance")
     val balance: Balance? = null,
@@ -221,6 +218,7 @@ data class FinancialConnectionsAccount(
     }
 
     companion object {
-        const val OBJECT = "linked_account"
+        internal const val OBJECT_OLD = "linked_account"
+        internal const val OBJECT_NEW = "financial_connections.account"
     }
 }
