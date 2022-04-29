@@ -9,7 +9,9 @@ import com.stripe.android.ui.core.elements.RowController
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
-import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.ui.core.elements.SimpleTextElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -150,16 +152,18 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
 internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
     val countryAddressElements = this.mapNotNull { addressField ->
         addressField.type?.let {
-            SimpleTextSpec(
+            SimpleTextElement(
                 addressField.type.identifierSpec,
-                addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                capitalization = it.capitalization,
-                keyboardType = getKeyboard(addressField.schema),
-                showOptionalLabel = !addressField.required
+                SimpleTextFieldController(
+                    SimpleTextFieldConfig(
+                        label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                        capitalization = it.capitalization,
+                        keyboard = getKeyboard(addressField.schema)
+                    ),
+                    showOptionalLabel = !addressField.required
+                )
             )
         }
-    }.map {
-        it.transform()
     }
 
     // Put it in a single row
