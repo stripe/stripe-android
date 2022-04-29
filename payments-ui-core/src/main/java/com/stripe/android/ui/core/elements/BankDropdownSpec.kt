@@ -10,8 +10,8 @@ data class BankDropdownSpec(
     override val identifier: IdentifierSpec,
     @StringRes val label: Int,
     val bankType: SupportedBankType
-) : SectionFieldSpec(identifier) {
-    fun transform(bankRepository: BankRepository, initialValue: String?): SectionFieldElement =
+) : FormItemSpec(), RequiredItemSpec {
+    fun transform(bankRepository: BankRepository, initialValue: String?) = createSectionElement(
         SimpleDropdownElement(
             this.identifier,
             DropdownFieldController(
@@ -22,4 +22,5 @@ data class BankDropdownSpec(
                 initialValue = initialValue
             )
         )
+    )
 }

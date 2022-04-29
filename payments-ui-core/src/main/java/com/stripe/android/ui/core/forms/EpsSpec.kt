@@ -6,21 +6,14 @@ import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SupportedBankType
-
-internal val epsBankSection =
-    SectionSpec(
-        IdentifierSpec.Generic("bank_section"),
-        BankDropdownSpec(
-            IdentifierSpec.Generic("eps[bank]"),
-            R.string.eps_bank,
-            SupportedBankType.Eps
-        )
-    )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val EpsForm = LayoutSpec.create(
     NameSpec(),
-    epsBankSection
+    BankDropdownSpec(
+        IdentifierSpec.Generic("eps[bank]"),
+        R.string.eps_bank,
+        SupportedBankType.Eps
+    )
 )

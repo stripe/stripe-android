@@ -55,10 +55,7 @@ class TransformSpecToElements(
                     saveForFutureUseInitialValue,
                     merchantName
                 )
-                is SectionSpec -> it.transform(
-                    initialValues,
-                    resourceRepository.getBankRepository()
-                )
+                is SectionSpec -> it.transform(initialValues)
                 is StaticTextSpec -> it.transform()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AfterpayClearpayTextSpec ->
@@ -88,16 +85,18 @@ class TransformSpecToElements(
                     initialValues,
                     resourceRepository.getAddressRepository()
                 )
+                is BankDropdownSpec -> it.transform(
+                    resourceRepository.getBankRepository(),
+                    initialValues[it.identifier]
+                )
             }
         }
 
     private fun SectionSpec.transform(
-        initialValues: Map<IdentifierSpec, String?>,
-        bankRepository: BankRepository
+        initialValues: Map<IdentifierSpec, String?>
     ): SectionElement {
         val fieldElements = this.fields.transform(
-            initialValues,
-            bankRepository
+            initialValues
         )
 
         // The controller of the section element will be the same as the field element
@@ -116,12 +115,10 @@ class TransformSpecToElements(
      * This function will transform a list of specs into a list of elements
      */
     private fun List<SectionFieldSpec>.transform(
-        initialValues: Map<IdentifierSpec, String?>,
-        bankRepository: BankRepository
+        initialValues: Map<IdentifierSpec, String?>
     ) =
         this.map {
             when (it) {
-                is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
             }
         }

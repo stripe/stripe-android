@@ -143,11 +143,11 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.state)
                     }
                 }
+                is BankDropdownSpec -> {}
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
                             is SimpleTextSpec -> {}
-                            is BankDropdownSpec -> {}
                         }
                     }
                 }
@@ -213,11 +213,11 @@ class FieldPopulator(
                         }
                     }
                 }
+                is BankDropdownSpec -> {}
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
                             is SimpleTextSpec -> {}
-                            is BankDropdownSpec -> {}
                         }
                     }
                 }

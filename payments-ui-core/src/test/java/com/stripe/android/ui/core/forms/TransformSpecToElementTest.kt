@@ -71,31 +71,6 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Section with multiple fields contains all fields in the section element`() {
-        val formElement = transformSpecToElements.transform(
-            listOf(
-                SectionSpec(
-                    IdentifierSpec.Generic("multifield_section"),
-                    listOf(
-                        SimpleTextSpec(
-                            label = R.string.acc_label_zip,
-                            capitalization = KeyboardCapitalization.None,
-                            keyboardType = KeyboardType.Ascii,
-                            identifier = IdentifierSpec.Name
-                        ),
-                        IDEAL_BANK_CONFIG
-                    )
-                )
-            )
-        )
-
-        val sectionElement = formElement[0] as SectionElement
-        assertThat(sectionElement.fields.size).isEqualTo(2)
-        assertThat(sectionElement.fields[0]).isInstanceOf(SimpleTextElement::class.java)
-        assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdownElement::class.java)
-    }
-
-    @Test
     fun `Adding a country section sets up the section and country elements correctly`() =
         runBlocking {
             val countrySection = CountrySpec(onlyShowCountryCodes = setOf("AT"))
@@ -120,10 +95,7 @@ internal class TransformSpecToElementTest {
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() =
         runBlocking {
-            val idealSection = SectionSpec(
-                IdentifierSpec.Generic("ideal_section"),
-                IDEAL_BANK_CONFIG
-            )
+            val idealSection = IDEAL_BANK_CONFIG
             val formElement = transformSpecToElements.transform(
                 listOf(idealSection)
             )
@@ -134,7 +106,7 @@ internal class TransformSpecToElementTest {
             // Verify the correct config is setup for the controller
             assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
 
-            assertThat(idealSectionElement.identifier.value).isEqualTo("ideal_section")
+            assertThat(idealSectionElement.identifier.value).isEqualTo("ideal[bank]_section")
 
             assertThat(idealElement.identifier.value).isEqualTo("ideal[bank]")
         }
