@@ -19,6 +19,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -81,10 +82,16 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val sheetViewModel by if (activity is PaymentOptionsActivity) {
-            activityViewModels<PaymentOptionsViewModel>()
-        } else {
-            activityViewModels<PaymentSheetViewModel>()
+        val sheetViewModel by when (activity) {
+            is PaymentOptionsActivity -> {
+                activityViewModels<PaymentOptionsViewModel>()
+            }
+            is PaymentSheetActivity -> {
+                activityViewModels<PaymentSheetViewModel>()
+            }
+            else -> {
+                return
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -105,7 +112,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                     )
                 }
         }
-
 
         /**
          * Informs the fragment whether PaymentSheet is in a processing state, so the fragment knows it
