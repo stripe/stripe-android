@@ -20,8 +20,9 @@
 /identity/ @ccen-stripe @awush-stripe
 /identity-example/ @ccen-stripe @awush-stripe
 
-# connections sdk
-/connections/ @carlosmuvi-stripe
+# financial connections sdk
+/financial-connections/ @carlosmuvi-stripe
+/financial-connections-example/ @carlosmuvi-stripe
 
 # shared modules
 /stripe-core/ @ccen-stripe

@@ -147,7 +147,7 @@ internal fun Fragment.navigateToUploadFragment(
  * This makes it possible to tell in upload fragment whether it is reached through
  * [NavController.navigateUp] or [NavController.navigate].
  */
-internal fun NavController.navigateUpAndSetArgForUploadFragment() {
+internal fun NavController.navigateUpAndSetArgForUploadFragment(): Boolean {
     if (isBackingToUploadFragment()) {
         previousBackStackEntry?.destination?.addArgument(
             ARG_IS_NAVIGATED_UP_TO,
@@ -156,7 +156,12 @@ internal fun NavController.navigateUpAndSetArgForUploadFragment() {
                 .build()
         )
     }
-    navigateUp()
+    return navigateUp()
+}
+
+internal fun NavController.isNavigatedUpTo(): Boolean {
+    return this.currentDestination?.arguments?.get(ARG_IS_NAVIGATED_UP_TO)?.defaultValue
+        as? Boolean == true
 }
 
 private fun NavController.isBackingToUploadFragment() =

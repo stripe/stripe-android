@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
@@ -71,6 +72,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val notesView: ComposeView by lazy { viewBinding.notes }
+    override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
 
     private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
     private val topContainer by lazy { viewBinding.topContainer }
@@ -196,7 +199,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.selection.observe(this) {
             clearErrorMessages()
+            setupBuyButton()
         }
+
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .observe(this, buyButtonStateObserver)
     }
 
     private fun onTransitionTarget(
@@ -254,16 +261,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun setupBuyButton() {
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
-                viewBinding.buyButton.setLabel(requireNotNull(it).buildPayButtonLabel(resources))
+                viewBinding.buyButton.setLabel(
+                    requireNotNull(it).buildPayButtonLabel(resources)
+                )
             }
         } else {
             viewBinding.buyButton.setLabel(
                 resources.getString(R.string.stripe_setup_button_label)
             )
         }
-
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyButtonStateObserver)
 
         val buttonColor = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
             PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
@@ -276,10 +282,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewBinding.buyButton.setOnClickListener {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
-        }
-
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            viewBinding.buyButton.isEnabled = isEnabled
         }
     }
 

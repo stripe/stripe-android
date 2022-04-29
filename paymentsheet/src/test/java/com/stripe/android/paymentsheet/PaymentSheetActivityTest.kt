@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -198,6 +199,9 @@ internal class PaymentSheetActivityTest {
     fun `when back to Ready state should update PaymentSelection`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
             // New valid card
             val initialSelection = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -212,32 +216,17 @@ internal class PaymentSheetActivityTest {
                 )
             )
 
-            val paymentSelections = mutableListOf<PaymentSelection?>()
-            viewModel.selection.observeForever { paymentSelection ->
-                paymentSelections.add(paymentSelection)
-            }
-            idleLooper()
-
-            assertThat(paymentSelections.size)
-                .isEqualTo(1)
-            assertThat(paymentSelections[0])
-                .isEqualTo(initialSelection)
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
 
             activity.viewBinding.googlePayButton.callOnClick()
 
             // Updates PaymentSelection to Google Pay
-            assertThat(paymentSelections.size)
-                .isEqualTo(2)
-            assertThat(paymentSelections[1])
-                .isEqualTo(PaymentSelection.GooglePay)
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(PaymentSelection.GooglePay)
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-            // Back to Ready state, should return to null PaymentSelection
-            assertThat(paymentSelections.size)
-                .isEqualTo(3)
-            assertThat(paymentSelections[0])
-                .isEqualTo(initialSelection)
+            // Back to Ready state, should return to initial PaymentSelection
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
         }
     }
 
@@ -884,6 +873,91 @@ internal class PaymentSheetActivityTest {
 
             viewModel._liveMode.value = false
             assertThat(activity.viewBinding.testmode.isVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `Buy button should be enabled when primaryButtonEnabled is true`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonEnabled(true)
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Buy button should be disabled when primaryButtonEnabled is false`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonEnabled(false)
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `Buy button text should update when primaryButtonText updates`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonText("Some text")
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+        }
+    }
+
+    @Test
+    fun `Buy button should go back to initial state after resetPrimaryButton called`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._viewState.value = PaymentSheetViewState.Reset(null)
+
+            viewModel.updatePrimaryButtonText("Some text")
+            viewModel.updatePrimaryButtonEnabled(false)
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+            viewModel.updateSelection(mock())
+            assertThat(activity.viewBinding.buyButton.externalLabel)
+                .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is visible`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateNotes(
+                context.getString(
+                    R.string.stripe_paymentsheet_payment_method_us_bank_account
+                )
+            )
+            assertThat(activity.viewBinding.notes.isVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is gone`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateNotes(null)
+            assertThat(activity.viewBinding.notes.isVisible).isFalse()
         }
     }
 

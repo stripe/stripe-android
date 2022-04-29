@@ -107,7 +107,7 @@ internal class ConsentFragmentTest {
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.args).thenReturn(
+        whenever(it.verificationArgs).thenReturn(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId = VERIFICATION_SESSION_ID,
                 ephemeralKeySecret = EPHEMERAL_KEY,

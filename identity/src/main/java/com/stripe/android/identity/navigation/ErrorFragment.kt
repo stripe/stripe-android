@@ -2,7 +2,6 @@ package com.stripe.android.identity.navigation
 
 import android.content.Context
 import android.view.View
-import androidx.activity.OnBackPressedCallback
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
@@ -44,25 +43,17 @@ internal class ErrorFragment(
                         Failed(failedReason)
                     )
                 }
-                requireActivity().onBackPressedDispatcher.addCallback(
-                    this,
-                    object : OnBackPressedCallback(true) {
-                        override fun handleOnBackPressed() {
-                            verificationFlowFinishable.finishWithResult(
-                                Failed(failedReason)
-                            )
-                        }
-                    }
-                )
             } ?: run {
                 bottomButton.setOnClickListener {
                     val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int
                     if (destination == UNEXPECTED_DESTINATION) {
-                        findNavController().navigate(DEFAULT_BACK_BUTTON_DESTINATION)
+                        findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
                     } else {
                         findNavController().let { navController ->
-                            while (navController.currentDestination?.id != destination) {
-                                navController.navigateUpAndSetArgForUploadFragment()
+                            var shouldContinueNavigateUp = true
+                            while (shouldContinueNavigateUp && navController.currentDestination?.id != destination) {
+                                shouldContinueNavigateUp =
+                                    navController.navigateUpAndSetArgForUploadFragment()
                             }
                         }
                     }
@@ -86,7 +77,7 @@ internal class ErrorFragment(
         // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
         internal const val UNEXPECTED_DESTINATION = -1
 
-        private val DEFAULT_BACK_BUTTON_DESTINATION =
+        private val DEFAULT_BACK_BUTTON_NAVIGATION =
             R.id.action_errorFragment_to_consentFragment
 
         fun NavController.navigateToErrorFragmentWithRequirementError(
@@ -116,7 +107,7 @@ internal class ErrorFragment(
                 bundleOf(
                     ARG_ERROR_TITLE to context.getString(R.string.error),
                     ARG_ERROR_CONTENT to context.getString(R.string.unexpected_error_try_again),
-                    ARG_GO_BACK_BUTTON_DESTINATION to R.id.action_errorFragment_to_consentFragment,
+                    ARG_GO_BACK_BUTTON_DESTINATION to R.id.consentFragment,
                     ARG_GO_BACK_BUTTON_TEXT to context.getString(R.string.go_back)
                 )
             )

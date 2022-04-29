@@ -29,13 +29,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         )
     }
 
-    val paramKeySpec by lazy {
-        requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
-                ?.paymentMethod?.paramKey
-        )
-    }
-
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             resource = resources,

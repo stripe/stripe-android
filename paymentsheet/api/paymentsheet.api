@@ -568,6 +568,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
 	public final field header Landroidx/compose/ui/platform/ComposeView;
 	public final field message Landroid/widget/TextView;
+	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
 	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
@@ -591,6 +592,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field header Landroidx/compose/ui/platform/ComposeView;
 	public final field linkButton Lcom/stripe/android/link/ui/LinkViewButton;
 	public final field message Landroid/widget/TextView;
+	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
 	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
@@ -967,17 +969,5 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public fun get ()Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
-}
-
-public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion;
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion {
-	public final fun getIdlingResource ()Landroidx/test/espresso/idling/CountingIdlingResource;
-	public final fun getSingleStepIdlingResource ()Landroidx/test/espresso/IdlingResource;
-	public final fun setIdlingResource (Landroidx/test/espresso/idling/CountingIdlingResource;)V
 }
 

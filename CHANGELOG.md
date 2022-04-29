@@ -1,5 +1,17 @@
 # CHANGELOG
 ## x.x.x - xxxx-xx-xx
+### PaymentSheet
+* [FIXED] [4909](https://github.com/stripe/stripe-android/pull/4909) In the multi-step flow when re-opening to a new card the form will pre-populate.  Also the default billing address will pre-populate in the form.
+
+## 20.2.0 - 2022-04-25
+This release adds card scanning to PaymentSheet.
+
+### PaymentSheet
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Card-scanning in PaymentSheet
+
+### Financial Connections
+* [CHANGED] [4887](https://github.com/stripe/stripe-android/pull/4887) Renamed Connections to Financial Connections.
 
 ## 20.1.0 - 2022-04-18
 This release includes several Payments and PaymentSheet bug fixes.
@@ -25,6 +37,7 @@ This release patches on a crash on PaymentLauncher, updates the package name of 
 changes the public API for CardImageVerificationSheet and releases Identity SDK.
 
 ### Payments (`com.stripe:stripe-android`)
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Added card-scanning feature to PaymentSheet
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
 * [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on
   PaymentSheet to use Compose.
@@ -32,7 +45,7 @@ changes the public API for CardImageVerificationSheet and releases Identity SDK.
 ### Identity (`com.stripe:identity`)
 * [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
 
-### Connections (`com.stripe:connection`)
+### Financial Connections (`com.stripe:financial-connections`)
 * [ADDED] [4818](https://github.com/stripe/stripe-mandroid/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
 
 ### CardScan (`com.stripe:stripecardscan`)
