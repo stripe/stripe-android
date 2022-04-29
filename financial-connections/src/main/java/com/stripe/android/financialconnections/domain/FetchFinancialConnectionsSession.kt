@@ -40,7 +40,7 @@ internal class FetchFinancialConnectionsSession @Inject constructor(
             return FinancialConnectionsSession(
                 id = session.id,
                 clientSecret = session.clientSecret,
-                accounts = FinancialConnectionsAccountList(
+                _accountsNew = FinancialConnectionsAccountList(
                     financialConnectionsAccounts = accounts,
                     hasMore = nextAccountList.hasMore,
                     url = nextAccountList.url,

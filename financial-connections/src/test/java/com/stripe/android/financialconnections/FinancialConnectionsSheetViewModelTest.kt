@@ -276,7 +276,7 @@ class FinancialConnectionsSheetViewModelTest {
         id = "las_no_more",
         clientSecret = configuration.financialConnectionsSessionClientSecret,
         livemode = true,
-        accounts = FinancialConnectionsAccountList(
+        _accountsNew = FinancialConnectionsAccountList(
             hasMore = false,
             count = 2,
             url = "url",
