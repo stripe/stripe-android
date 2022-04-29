@@ -759,7 +759,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCount ()Ljava/lang/Integer;
-	public final fun getFinancialConnectionsAccounts ()Ljava/util/List;
+	public final fun getData ()Ljava/util/List;
 	public final fun getHasMore ()Z
 	public final fun getTotalCount ()Ljava/lang/Integer;
 	public final fun getUrl ()Ljava/lang/String;

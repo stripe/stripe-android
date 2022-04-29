@@ -281,7 +281,7 @@ class FinancialConnectionsSheetViewModelTest {
             count = 2,
             url = "url",
             totalCount = 2,
-            financialConnectionsAccounts = listOf(
+            data = listOf(
                 FinancialConnectionsAccountFixtures.CREDIT_CARD,
                 FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
             ),

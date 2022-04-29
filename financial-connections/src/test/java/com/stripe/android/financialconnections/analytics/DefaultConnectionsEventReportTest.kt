@@ -47,7 +47,7 @@ class DefaultConnectionsEventReportTest {
         clientSecret = "las_1234567890",
         id = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         accountsNew = FinancialConnectionsAccountList(
-            financialConnectionsAccounts = emptyList(),
+            data = emptyList(),
             hasMore = false,
             url = "url",
             count = 0
