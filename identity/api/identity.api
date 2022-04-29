@@ -157,18 +157,18 @@ public final class com/stripe/android/identity/databinding/IdentityActivityBindi
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
 }
 
-public final class com/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding : androidx/viewbinding/ViewBinding {
+public final class com/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field cameraViewCard Lcom/google/android/material/card/MaterialCardView;
 	public final field checkMarkView Landroid/widget/ImageView;
 	public final field headerTitle Landroid/widget/TextView;
 	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field message Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityCameraScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
 }
 
 public final class com/stripe/android/identity/databinding/IdentityUploadFragmentBinding : androidx/viewbinding/ViewBinding {

@@ -14,7 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
+import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
@@ -35,7 +35,7 @@ internal abstract class IdentityDocumentScanFragment(
 ) : IdentityCameraScanFragment(
     identityCameraScanViewModelFactory, identityViewModelFactory
 ) {
-    protected lateinit var binding: IdentityCameraScanFragmentBinding
+    protected lateinit var binding: IdentityDocumentScanFragmentBinding
     protected lateinit var headerTitle: TextView
     protected lateinit var messageView: TextView
     protected lateinit var continueButton: LoadingButton
@@ -46,7 +46,7 @@ internal abstract class IdentityDocumentScanFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = IdentityCameraScanFragmentBinding.inflate(inflater, container, false)
+        binding = IdentityDocumentScanFragmentBinding.inflate(inflater, container, false)
         cameraView = binding.cameraView
 
         cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
