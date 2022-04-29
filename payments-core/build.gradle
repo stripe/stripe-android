@@ -3,7 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'kotlin-kapt'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
-// touch
+
 dependencies {
     api project(":stripe-core")
     api project(":payments-model")
