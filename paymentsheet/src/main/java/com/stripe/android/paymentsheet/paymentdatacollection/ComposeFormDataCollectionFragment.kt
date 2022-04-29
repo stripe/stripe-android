@@ -36,6 +36,8 @@ import kotlinx.coroutines.launch
  */
 @OptIn(FlowPreview::class)
 internal class ComposeFormDataCollectionFragment : Fragment() {
+    private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
+
     private val formLayout by lazy {
         requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
@@ -153,7 +155,5 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         val ACTIVITY_IS_PAYMENT_OPTIONS =
             "com.stripe.android.paymentsheet.activity_is_payment_options"
         const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
-
-        private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
     }
 }
