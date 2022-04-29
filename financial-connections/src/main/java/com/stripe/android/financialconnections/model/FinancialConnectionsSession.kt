@@ -50,7 +50,7 @@ data class FinancialConnectionsSession internal constructor(
 ) : StripeModel, Parcelable {
 
     val accounts: FinancialConnectionsAccountList
-        get() = _accountsOld ?: _accountsNew!!
+        get() = _accountsNew ?: _accountsOld!!
 }
 
 @Serializable(with = PaymentAccountSerializer::class)
