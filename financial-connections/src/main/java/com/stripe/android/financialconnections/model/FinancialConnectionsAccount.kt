@@ -73,9 +73,6 @@ data class FinancialConnectionsAccount(
     @SerialName("supported_payment_method_types")
     val supportedPaymentMethodTypes: List<SupportedPaymentMethodTypes>,
 
-    @SerialName("accountholder")
-    val accountholder: AccountHolder? = null,
-
     /* The most recent information about the account's balance. */
     @SerialName("balance")
     val balance: Balance? = null,

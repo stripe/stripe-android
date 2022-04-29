@@ -29,7 +29,10 @@ data class FinancialConnectionsSession internal constructor(
     val id: String,
 
     @SerialName("linked_accounts")
-    val accounts: FinancialConnectionsAccountList,
+    private val _accountsOld: FinancialConnectionsAccountList? = null,
+
+    @SerialName("accounts")
+    private val _accountsNew: FinancialConnectionsAccountList? = null,
 
     @SerialName("livemode")
     val livemode: Boolean,
@@ -44,7 +47,11 @@ data class FinancialConnectionsSession internal constructor(
     @SerialName("bank_account_token")
     @Serializable(with = JsonAsStringSerializer::class)
     internal val bankAccountToken: String? = null
-) : StripeModel, Parcelable
+) : StripeModel, Parcelable {
+
+    val accounts: FinancialConnectionsAccountList
+        get() = _accountsOld ?: _accountsNew!!
+}
 
 @Serializable(with = PaymentAccountSerializer::class)
 sealed class PaymentAccount : Parcelable
