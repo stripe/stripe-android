@@ -360,7 +360,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateNotes(
+                    updateBelowButtonText(
                         getApplication<Application>().getString(
                             R.string.us_bank_account_payment_sheet_saved_mandate
                         )

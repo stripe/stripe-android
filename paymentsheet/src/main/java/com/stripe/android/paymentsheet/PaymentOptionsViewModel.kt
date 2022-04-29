@@ -98,6 +98,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
             when (paymentSelection) {
                 is PaymentSelection.Saved -> {
+                    // We don't want the USBankAccount selection to close the payment sheet right
+                    // away, the user needs to accept a mandate
                     if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
                         processExistingPaymentMethod(
                             paymentSelection
@@ -124,7 +126,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateNotes(
+                    updateBelowButtonText(
                         getApplication<Application>().getString(
                             R.string.us_bank_account_payment_sheet_saved_mandate
                         )

@@ -964,7 +964,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel.updateNotes(
+            viewModel.updateBelowButtonText(
                 context.getString(
                     R.string.stripe_paymentsheet_payment_method_us_bank_account
                 )
@@ -980,7 +980,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel.updateNotes(null)
+            viewModel.updateBelowButtonText(null)
             assertThat(activity.viewBinding.notes.isVisible).isFalse()
         }
     }

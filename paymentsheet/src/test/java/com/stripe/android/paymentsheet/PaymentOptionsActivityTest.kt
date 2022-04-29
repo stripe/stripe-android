@@ -353,7 +353,7 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel.updateNotes(
+                viewModel.updateBelowButtonText(
                     ApplicationProvider.getApplicationContext<Context>().getString(
                         com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_us_bank_account
                     )
@@ -371,7 +371,7 @@ class PaymentOptionsActivityTest {
         ).use {
             idleLooper()
             it.onActivity { activity ->
-                viewModel.updateNotes(null)
+                viewModel.updateBelowButtonText(null)
                 assertThat(activity.viewBinding.notes.isVisible).isFalse()
             }
         }

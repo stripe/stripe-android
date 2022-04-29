@@ -325,7 +325,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _primaryButtonUIState.value = state
     }
 
-    fun updateNotes(text: String?) {
+    fun updateBelowButtonText(text: String?) {
         _notesText.value = text
     }
 
@@ -336,7 +336,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         savedStateHandle[SAVE_SELECTION] = selection
 
-        updateNotes(null)
+        updateBelowButtonText(null)
         updatePrimaryButtonUIState(null)
     }
 
