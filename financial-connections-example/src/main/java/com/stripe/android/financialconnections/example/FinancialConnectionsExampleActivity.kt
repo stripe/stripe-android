@@ -33,7 +33,7 @@ class FinancialConnectionsExampleActivity : AppCompatActivity() {
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeViews() {
-        launchConnectionsSheet.setOnClickListener { viewModel.startLinkAccountSession() }
+        launchConnectionsSheet.setOnClickListener { viewModel.startFinancialConnectionsSession() }
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeState() {

@@ -64,6 +64,6 @@ private fun FinancialConnectionsSheetContract.Result.toExposedResult(): Financia
         is FinancialConnectionsSheetContract.Result.Canceled -> FinancialConnectionsSheetResult.Canceled
         is FinancialConnectionsSheetContract.Result.Failed -> FinancialConnectionsSheetResult.Failed(error)
         is FinancialConnectionsSheetContract.Result.Completed -> FinancialConnectionsSheetResult.Completed(
-            linkAccountSession = linkAccountSession,
+            financialConnectionsSession = financialConnectionsSession,
         )
     }

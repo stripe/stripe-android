@@ -5,13 +5,13 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
-import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.identity.networking.PostVerificationPageDataRequest.Companion.DATA
-import com.stripe.android.identity.networking.PostVerificationPageSubmitRequest.Companion.SUBMIT
+import com.stripe.android.identity.networking.DefaultIdentityRepository.Companion.DATA
+import com.stripe.android.identity.networking.DefaultIdentityRepository.Companion.SUBMIT
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -67,7 +67,8 @@ class DefaultIdentityRepositoryTest {
 
             val request = requestCaptor.firstValue
 
-            assertThat(request).isInstanceOf(RetrieveVerificationPageRequest::class.java)
+            assertThat(request).isInstanceOf(ApiRequest::class.java)
+            assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
             assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID")
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
         }
@@ -100,15 +101,14 @@ class DefaultIdentityRepositoryTest {
 
             val request = requestCaptor.firstValue
 
-            assertThat(request).isInstanceOf(PostVerificationPageDataRequest::class.java)
+            assertThat(request).isInstanceOf(ApiRequest::class.java)
+            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
             assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$DATA")
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
-            assertThat((request as PostVerificationPageDataRequest).encodedData).isEqualTo(
-                QueryStringFactory.createFromParamsWithEmptyValues(
-                    mapOf(
-                        collectedDataParam.createCollectedDataParamEntry(identityRepository.json),
-                        clearDataParam.createCollectedDataParamEntry(identityRepository.json)
-                    )
+            assertThat((request as ApiRequest).params).isEqualTo(
+                mapOf(
+                    collectedDataParam.createCollectedDataParamEntry(identityRepository.json),
+                    clearDataParam.createCollectedDataParamEntry(identityRepository.json)
                 )
             )
         }
@@ -133,9 +133,11 @@ class DefaultIdentityRepositoryTest {
 
             val request = requestCaptor.firstValue
 
-            assertThat(request).isInstanceOf(PostVerificationPageSubmitRequest::class.java)
+            assertThat(request).isInstanceOf(ApiRequest::class.java)
+            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
             assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$SUBMIT")
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+            assertThat((request as ApiRequest).params).isNull()
         }
     }
 

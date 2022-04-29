@@ -141,6 +141,20 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
+    private val _primaryButtonText = MutableLiveData<String>()
+    val primaryButtonText: LiveData<String>
+        get() = _primaryButtonText
+
+    private val primaryButtonEnabled = MutableLiveData<Boolean?>()
+
+    private val _primaryButtonOnClick = MutableLiveData<() -> Unit>()
+    val primaryButtonOnClick: LiveData<() -> Unit>
+        get() = _primaryButtonOnClick
+
+    private val _notesText = MutableLiveData<String?>()
+    internal val notesText: LiveData<String?>
+        get() = _notesText
+
     protected var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
@@ -170,12 +184,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
+            primaryButtonEnabled,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = buttonsEnabled.value == true &&
-                    selection.value != null
+                value = primaryButtonEnabled.value
+                    ?: (
+                        buttonsEnabled.value == true &&
+                            selection.value != null
+                        )
             }
         }
     }.distinctUntilChanged()
@@ -304,10 +322,27 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         logger.warning(message)
     }
 
+    fun updatePrimaryButtonText(text: String) {
+        _primaryButtonText.value = text
+    }
+
+    fun updatePrimaryButtonEnabled(enabled: Boolean) {
+        primaryButtonEnabled.value = enabled
+    }
+
+    fun updatePrimaryButtonOnClick(onPress: () -> Unit) {
+        _primaryButtonOnClick.value = onPress
+    }
+
+    fun updateNotes(text: String?) {
+        _notesText.value = text
+    }
+
     fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newLpm = selection
         }
+        primaryButtonEnabled.value = null
         savedStateHandle[SAVE_SELECTION] = selection
     }
 

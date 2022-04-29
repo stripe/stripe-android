@@ -2,8 +2,9 @@ package com.stripe.android.identity.networking
 
 import com.stripe.android.identity.utils.IdentityIO
 import java.io.File
+import javax.inject.Inject
 
-internal class DefaultIDDetectorFetcher(
+internal class DefaultIDDetectorFetcher @Inject constructor(
     private val identityRepository: IdentityRepository,
     private val identityIO: IdentityIO
 ) :

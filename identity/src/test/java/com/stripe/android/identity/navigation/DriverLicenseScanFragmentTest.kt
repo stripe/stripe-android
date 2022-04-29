@@ -19,7 +19,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
-import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
+import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -131,7 +131,7 @@ internal class DriverLicenseScanFragmentTest {
                 .thenReturn(IdentityScanState.ScanType.DL_FRONT)
 
             // button clicked
-            IdentityCameraScanFragmentBinding.bind(driverLicenseScanFragment.requireView()).kontinue
+            IdentityDocumentScanFragmentBinding.bind(driverLicenseScanFragment.requireView()).kontinue
                 .findViewById<Button>(R.id.button).callOnClick()
 
             // verify start to scan back
@@ -401,7 +401,7 @@ internal class DriverLicenseScanFragmentTest {
         )
     }
 
-    private fun simulateBothSidesScanned(afterScannedBlock: (TestNavHostController, IdentityCameraScanFragmentBinding) -> Unit) {
+    private fun simulateBothSidesScanned(afterScannedBlock: (TestNavHostController, IdentityDocumentScanFragmentBinding) -> Unit) {
         launchDriverLicenseFragment().onFragment { driverLicenseScanFragment ->
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
@@ -430,7 +430,7 @@ internal class DriverLicenseScanFragmentTest {
 
             // click continue, scan back
             val binding =
-                IdentityCameraScanFragmentBinding.bind(driverLicenseScanFragment.requireView())
+                IdentityDocumentScanFragmentBinding.bind(driverLicenseScanFragment.requireView())
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
             // mock success of back scan
@@ -456,7 +456,7 @@ internal class DriverLicenseScanFragmentTest {
 
     private fun launchDriverLicenseFragment(shouldStartFromBack: Boolean = false) =
         launchFragmentInContainer(
-            bundleOf(IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
+            bundleOf(IdentityDocumentScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
             themeResId = R.style.Theme_MaterialComponents
         ) {
             DriverLicenseScanFragment(
@@ -468,11 +468,11 @@ internal class DriverLicenseScanFragmentTest {
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
         shouldStartFromBack: Boolean = false,
-        check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
+        check: (binding: IdentityDocumentScanFragmentBinding, context: Context) -> Unit
     ) {
         launchDriverLicenseFragment(shouldStartFromBack).onFragment {
             displayStateChanged.postValue((newScanState to mock()))
-            check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
+            check(IdentityDocumentScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }
     }
 

@@ -22,11 +22,12 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
 /**
  * Default implementation of [IdentityIO].
  */
-internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
+internal class DefaultIdentityIO @Inject constructor(private val context: Context) : IdentityIO {
     override fun createInternalFileUri(): ContentUriResult {
         createImageFile().also { file ->
             return ContentUriResult(

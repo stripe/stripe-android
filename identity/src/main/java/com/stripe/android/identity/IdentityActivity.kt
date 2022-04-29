@@ -17,7 +17,6 @@ import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -26,17 +25,17 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  */
 internal class IdentityActivity : CameraPermissionCheckingActivity(), VerificationFlowFinishable {
     @VisibleForTesting
-    internal var identityFragmentFactory = IdentityFragmentFactory(
-        this,
-        this,
-        this,
-        { starterArgs },
-        this
-    )
-
-    @VisibleForTesting
     internal lateinit var navController: NavController
 
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory =
+        IdentityViewModel.IdentityViewModelFactory(
+            this,
+            { starterArgs },
+            this,
+            this,
+            this
+        )
     private val binding by lazy {
         IdentityActivityBinding.inflate(layoutInflater)
     }
@@ -45,10 +44,6 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
         requireNotNull(IdentityVerificationSheetContract.Args.fromIntent(intent)) {
             EMPTY_ARG_ERROR
         }
-    }
-
-    private val viewModelFactory: ViewModelProvider.Factory by lazy {
-        identityFragmentFactory.identityViewModelFactory
     }
 
     private val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
@@ -63,7 +58,7 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        supportFragmentManager.fragmentFactory = identityFragmentFactory
+        supportFragmentManager.fragmentFactory = identityViewModel.identityFragmentFactory
         setUpNavigationController()
         identityViewModel.retrieveAndBufferVerificationPage()
     }

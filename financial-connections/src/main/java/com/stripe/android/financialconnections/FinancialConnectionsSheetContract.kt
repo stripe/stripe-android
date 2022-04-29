@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.financialconnections.model.LinkAccountSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.Token
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -48,9 +48,9 @@ internal class FinancialConnectionsSheetContract :
         ) : Args(configuration)
 
         fun validate() {
-            if (configuration.linkAccountSessionClientSecret.isBlank()) {
+            if (configuration.financialConnectionsSessionClientSecret.isBlank()) {
                 throw InvalidParameterException(
-                    "The link account session client secret cannot be an empty string."
+                    "The session client secret cannot be an empty string."
                 )
             }
             if (configuration.publishableKey.isBlank()) {
@@ -70,11 +70,11 @@ internal class FinancialConnectionsSheetContract :
     internal sealed class Result : Parcelable {
         /**
          * The customer completed the connections session.
-         * @param linkAccountSession The link account session connected
+         * @param financialConnectionsSession The financial connections session connected
          */
         @Parcelize
         data class Completed(
-            val linkAccountSession: LinkAccountSession,
+            val financialConnectionsSession: FinancialConnectionsSession,
             val token: Token? = null
         ) : Result()
 
@@ -100,8 +100,8 @@ internal class FinancialConnectionsSheetContract :
 
     companion object {
         const val EXTRA_ARGS =
-            "com.stripe.android.connections.ConnectionsSheetContract.extra_args"
+            "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_args"
         private const val EXTRA_RESULT =
-            "com.stripe.android.connections.ConnectionsSheetContract.extra_result"
+            "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_result"
     }
 }

@@ -6,11 +6,13 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
@@ -18,10 +20,15 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.InjectableActivityScenario
 import com.stripe.android.identity.utils.injectableActivityScenario
 import com.stripe.android.identity.utils.isNavigatedUpTo
+import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 
@@ -30,18 +37,29 @@ internal class IdentityActivityTest {
     private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
     private val mockAppSettingsOpenable = mock<AppSettingsOpenable>()
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
-    private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { verificationArgs }.thenReturn(ARGS)
-    }
+    private val mockIdentityViewModelFactory = mock<IdentityViewModel.IdentityViewModelFactory>()
 
     private val testIdentityFragmentFactory = IdentityFragmentFactory(
-        ApplicationProvider.getApplicationContext(),
         mockCameraPermissionEnsureable,
         mockAppSettingsOpenable,
-        { ARGS },
         mockVerificationFlowFinishable,
-        identityViewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
+        IdentityScanViewModel.IdentityScanViewModelFactory(),
+        IdentityUploadViewModel.FrontBackUploadViewModelFactory(mock()),
+        ConsentFragmentViewModel.ConsentFragmentViewModelFactory(mock(), mock()),
+        mockIdentityViewModelFactory
     )
+
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { verificationArgs }.thenReturn(ARGS)
+        on { identityFragmentFactory }.thenReturn(testIdentityFragmentFactory)
+    }
+
+    @Before
+    fun setUpViewModelFactory() {
+        whenever(mockIdentityViewModelFactory.create(IdentityViewModel::class.java)).thenReturn(
+            mockIdentityViewModel
+        )
+    }
 
     @Test
     fun `clicking navigation button on consent finishes with Canceled`() {
@@ -277,7 +295,7 @@ internal class IdentityActivityTest {
     ) {
         val injectableActivityScenario = injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                identityFragmentFactory = testIdentityFragmentFactory
+                viewModelFactory = mockIdentityViewModelFactory as ViewModelProvider.Factory
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(
@@ -313,7 +331,8 @@ internal class IdentityActivityTest {
         val ARGS = IdentityVerificationSheetContract.Args(
             VERIFICATION_SESSION_ID,
             EAK,
-            BRAND_LOGO
+            BRAND_LOGO,
+            DUMMY_INJECTOR_KEY
         )
     }
 }
