@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONT
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.BankRepository
@@ -48,6 +49,13 @@ class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = createViewModel()
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
+    )
 
     @BeforeTest
     fun setup() {
@@ -271,7 +279,11 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel.updatePrimaryButtonEnabled(true)
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        enabled = true
+                    )
+                )
                 assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
             }
         }
@@ -284,7 +296,11 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel.updatePrimaryButtonEnabled(false)
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        enabled = false
+                    )
+                )
                 assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
             }
         }
@@ -297,21 +313,29 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel.updatePrimaryButtonText("Some text")
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        label = "Some text"
+                    )
+                )
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
             }
         }
     }
 
     @Test
-    fun `ContinueButton should go back to initial state after resetPrimaryButton called`() {
+    fun `ContinueButton should go back to initial state after updating selection`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel.updatePrimaryButtonText("Some text")
-                viewModel.updatePrimaryButtonEnabled(false)
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        label = "Some text",
+                        enabled = false
+                    )
+                )
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
                 assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
 
@@ -329,7 +353,7 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel.updateNotes(
+                viewModel.updateBelowButtonText(
                     ApplicationProvider.getApplicationContext<Context>().getString(
                         com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_us_bank_account
                     )
@@ -347,7 +371,7 @@ class PaymentOptionsActivityTest {
         ).use {
             idleLooper()
             it.onActivity { activity ->
-                viewModel.updateNotes(null)
+                viewModel.updateBelowButtonText(null)
                 assertThat(activity.viewBinding.notes.isVisible).isFalse()
             }
         }
