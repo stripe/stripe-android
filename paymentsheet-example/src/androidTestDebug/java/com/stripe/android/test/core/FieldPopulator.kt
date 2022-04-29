@@ -130,22 +130,22 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.zip)
                     }
                 }
+                is AddressSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getLine1()
+                            .assertContentDescriptionEquals(values.line1)
+                        selectors.getCity()
+                            .assertContentDescriptionEquals(values.city)
+                        selectors.getZip()
+                            .assertContentDescriptionEquals(values.zip)
+                        selectors.getState()
+                            .assertContentDescriptionEquals(values.state)
+                    }
+                }
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
-                            is AddressSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getLine1()
-                                        .assertContentDescriptionEquals(values.line1)
-                                    selectors.getCity()
-                                        .assertContentDescriptionEquals(values.city)
-                                    selectors.getZip()
-                                        .assertContentDescriptionEquals(values.zip)
-                                    selectors.getState()
-                                        .assertContentDescriptionEquals(values.state)
-                                }
-                            }
                             is SimpleTextSpec -> {}
                             is BankDropdownSpec -> {}
                         }
@@ -196,26 +196,26 @@ class FieldPopulator(
                         }
                     }
                 }
+                is AddressSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getLine1().apply {
+                            performClick()
+                            performTextInput(values.line1)
+                        }
+                        selectors.getCity()
+                            .performTextInput(values.city)
+                        selectors.getZip()
+                            .performTextInput(values.zip)
+                        selectors.getState().apply {
+                            performTextInput(values.state)
+
+                        }
+                    }
+                }
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
-                            is AddressSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getLine1().apply {
-                                        performClick()
-                                        performTextInput(values.line1)
-                                    }
-                                    selectors.getCity()
-                                        .performTextInput(values.city)
-                                    selectors.getZip()
-                                        .performTextInput(values.zip)
-                                    selectors.getState().apply {
-                                        performTextInput(values.state)
-
-                                    }
-                                }
-                            }
                             is SimpleTextSpec -> {}
                             is BankDropdownSpec -> {}
                         }

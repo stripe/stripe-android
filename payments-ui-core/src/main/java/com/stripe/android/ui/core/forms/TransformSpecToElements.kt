@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.forms
 
 import android.content.Context
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -58,8 +57,7 @@ class TransformSpecToElements(
                 )
                 is SectionSpec -> it.transform(
                     initialValues,
-                    resourceRepository.getBankRepository(),
-                    resourceRepository.getAddressRepository()
+                    resourceRepository.getBankRepository()
                 )
                 is StaticTextSpec -> it.transform()
                 is MandateTextSpec -> it.transform(merchantName)
@@ -82,19 +80,24 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(
                     initialValues
                 )
-                is CardBillingSpec -> it.transform(resourceRepository.getAddressRepository(), initialValues)
+                is CardBillingSpec -> it.transform(
+                    resourceRepository.getAddressRepository(),
+                    initialValues
+                )
+                is AddressSpec -> it.transform(
+                    initialValues,
+                    resourceRepository.getAddressRepository()
+                )
             }
         }
 
     private fun SectionSpec.transform(
         initialValues: Map<IdentifierSpec, String?>,
-        bankRepository: BankRepository,
-        addressRepository: AddressFieldElementRepository
+        bankRepository: BankRepository
     ): SectionElement {
         val fieldElements = this.fields.transform(
             initialValues,
-            bankRepository,
-            addressRepository
+            bankRepository
         )
 
         // The controller of the section element will be the same as the field element
@@ -114,17 +117,12 @@ class TransformSpecToElements(
      */
     private fun List<SectionFieldSpec>.transform(
         initialValues: Map<IdentifierSpec, String?>,
-        bankRepository: BankRepository,
-        addressRepository: AddressFieldElementRepository
+        bankRepository: BankRepository
     ) =
         this.map {
             when (it) {
                 is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
-                is AddressSpec -> it.transform(
-                    initialValues,
-                    addressRepository
-                )
             }
         }
 }
