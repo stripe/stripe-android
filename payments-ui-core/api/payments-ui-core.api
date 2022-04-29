@@ -221,82 +221,6 @@ public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/NewLpms {
-	public static final field $stable I
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/ui/core/elements/NewSpec {
-	public static final field $stable I
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/ui/core/elements/NewSpec$Behavior {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/elements/NewSpec$Behavior$Companion;
-	public synthetic fun <init> (ILjava/lang/String;ZLjava/util/List;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;ZLjava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
-	public final fun component3 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;ZLjava/util/List;)Lcom/stripe/android/ui/core/elements/NewSpec$Behavior;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/NewSpec$Behavior;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/NewSpec$Behavior;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAsync ()Z
-	public final fun getCode ()Ljava/lang/String;
-	public final fun getFields ()Ljava/util/List;
-	public fun hashCode ()I
-	public final fun serialize ()Lkotlinx/serialization/json/JsonElement;
-	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/NewSpec$Behavior;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
-}
-
-public final class com/stripe/android/ui/core/elements/NewSpec$Behavior$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/NewSpec$Behavior$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/NewSpec$Behavior;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/NewSpec$Behavior;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/NewSpec$Behavior$Companion {
-	public final fun deserialize-IoAF18A (Ljava/lang/String;)Ljava/lang/Object;
-	public final fun getModule ()Lkotlinx/serialization/modules/SerializersModule;
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public abstract class com/stripe/android/ui/core/elements/NewSpec$Field {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/elements/NewSpec$Field$Companion;
-	public fun <init> ()V
-	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public abstract fun getPayment_method_data_path ()Ljava/lang/String;
-	public abstract fun getProperty ()Lcom/stripe/android/ui/core/elements/NewSpec$Property;
-	public abstract fun isOptional ()Z
-	public abstract fun transform (Lcom/stripe/android/ui/core/elements/NewSpec$Property;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/lang/String;Lcom/stripe/android/ui/core/Amount;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/ui/core/elements/FormElement;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/NewSpec$Field;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
-}
-
-public final class com/stripe/android/ui/core/elements/NewSpec$Field$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public abstract class com/stripe/android/ui/core/elements/NewSpec$Property {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/elements/NewSpec$Property$Companion;
-	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/NewSpec$Property;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
-}
-
-public final class com/stripe/android/ui/core/elements/NewSpec$Property$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
 	public static final field SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
@@ -308,10 +232,6 @@ public final class com/stripe/android/ui/core/elements/SectionUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {
-}
-
-public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion {
-	public final fun getNAME ()Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
 }
 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
