@@ -71,11 +71,25 @@ class FinancialConnectionsApiRepositoryTest {
         }
 
     @Test
-    fun `getFinancialConnectionsSession - paymentAccount is FinancialConnectionsAccount`() =
+    fun `getFinancialConnectionsSession - paymentAccount is LinkedAccount`() =
         runTest {
             givenGetRequestReturns(
                 readResourceAsString(
                     "json/linked_account_session_payment_account_as_linked_account.json"
+                )
+            )
+
+            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+
+            assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
+        }
+
+    @Test
+    fun `getFinancialConnectionsSession - paymentAccount is FinancialConnectionsAccount`() =
+        runTest {
+            givenGetRequestReturns(
+                readResourceAsString(
+                    "json/linked_account_session_payment_account_as_financial_account.json"
                 )
             )
 

@@ -218,6 +218,7 @@ data class FinancialConnectionsAccount(
     }
 
     companion object {
-        const val OBJECT = "linked_account"
+        const val OBJECT_OLD = "linked_account"
+        const val OBJECT_NEW = "financial_connections.account"
     }
 }
