@@ -869,7 +869,9 @@ constructor(
     }
 
     @Parcelize
-    data class USBankAccount internal constructor(
+    data class USBankAccount
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Account holder type
          *

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  *
  * @param clientSecret
  * @param id
- * @param accounts
+ * @param accounts / linked_accounts (controlled by a beta flag)
  * @param livemode
  * @param paymentAccount
  * @param returnUrl
@@ -29,7 +29,10 @@ data class FinancialConnectionsSession internal constructor(
     val id: String,
 
     @SerialName("linked_accounts")
-    val accounts: FinancialConnectionsAccountList,
+    internal val accountsOld: FinancialConnectionsAccountList? = null,
+
+    @SerialName("accounts")
+    internal val accountsNew: FinancialConnectionsAccountList? = null,
 
     @SerialName("livemode")
     val livemode: Boolean,
@@ -44,7 +47,11 @@ data class FinancialConnectionsSession internal constructor(
     @SerialName("bank_account_token")
     @Serializable(with = JsonAsStringSerializer::class)
     internal val bankAccountToken: String? = null
-) : StripeModel, Parcelable
+) : StripeModel, Parcelable {
+
+    val accounts: FinancialConnectionsAccountList
+        get() = accountsNew ?: accountsOld!!
+}
 
 @Serializable(with = PaymentAccountSerializer::class)
 sealed class PaymentAccount : Parcelable

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -68,6 +69,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
+    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,7 +129,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
                     viewBinding.continueButton.isVisible =
-                        fragment is PaymentOptionsAddPaymentMethodFragment
+                        fragment is PaymentOptionsAddPaymentMethodFragment ||
+                        viewModel.primaryButtonUIState.value?.visible == true
                 }
             },
             false

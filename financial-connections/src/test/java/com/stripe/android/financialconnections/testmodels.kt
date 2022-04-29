@@ -10,7 +10,7 @@ import java.util.Date
 val financialConnectionsSessionWithNoMoreAccounts = FinancialConnectionsSession(
     id = "las_no_more",
     clientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-    accounts = FinancialConnectionsAccountList(
+    accountsNew = FinancialConnectionsAccountList(
         listOf(
             FinancialConnectionsAccountFixtures.CREDIT_CARD,
             FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
@@ -25,8 +25,8 @@ val financialConnectionsSessionWithNoMoreAccounts = FinancialConnectionsSession(
 val financialConnectionsSessionWithMoreAccounts = FinancialConnectionsSession(
     id = "las_has_more",
     clientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-    accounts = FinancialConnectionsAccountList(
-        financialConnectionsAccounts = listOf(
+    accountsNew = FinancialConnectionsAccountList(
+        data = listOf(
             FinancialConnectionsAccountFixtures.CREDIT_CARD,
             FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
         ),
@@ -39,7 +39,7 @@ val financialConnectionsSessionWithMoreAccounts = FinancialConnectionsSession(
 )
 
 val moreFinancialConnectionsAccountList = FinancialConnectionsAccountList(
-    financialConnectionsAccounts = listOf(FinancialConnectionsAccountFixtures.SAVINGS_ACCOUNT),
+    data = listOf(FinancialConnectionsAccountFixtures.SAVINGS_ACCOUNT),
     hasMore = false,
     url = "url",
     count = 1,

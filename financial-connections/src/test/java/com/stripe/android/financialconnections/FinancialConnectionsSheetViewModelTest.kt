@@ -276,12 +276,12 @@ class FinancialConnectionsSheetViewModelTest {
         id = "las_no_more",
         clientSecret = configuration.financialConnectionsSessionClientSecret,
         livemode = true,
-        accounts = FinancialConnectionsAccountList(
+        accountsNew = FinancialConnectionsAccountList(
             hasMore = false,
             count = 2,
             url = "url",
             totalCount = 2,
-            financialConnectionsAccounts = listOf(
+            data = listOf(
                 FinancialConnectionsAccountFixtures.CREDIT_CARD,
                 FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
             ),

@@ -52,15 +52,15 @@ class FetchFinancialConnectionsSessionTest {
             // Then
             val combinedAccounts = listOf(
                 // Original account list with hasMore == true
-                financialConnectionsSessionWithMoreAccounts.accounts.financialConnectionsAccounts,
+                financialConnectionsSessionWithMoreAccounts.accounts.data,
                 // Next and last connected accounts page.
-                moreFinancialConnectionsAccountList.financialConnectionsAccounts
+                moreFinancialConnectionsAccountList.data
             ).flatten()
 
             assertThat(result).isEqualTo(
                 financialConnectionsSessionWithMoreAccounts.copy(
-                    accounts = FinancialConnectionsAccountList(
-                        financialConnectionsAccounts = combinedAccounts,
+                    accountsNew = FinancialConnectionsAccountList(
+                        data = combinedAccounts,
                         hasMore = false,
                         count = combinedAccounts.size,
                         totalCount = combinedAccounts.size,
@@ -85,15 +85,15 @@ class FetchFinancialConnectionsSessionTest {
             // Then
             val combinedAccounts = listOf(
                 // Original account list with hasMore == true
-                financialConnectionsSessionWithMoreAccounts.accounts.financialConnectionsAccounts,
+                financialConnectionsSessionWithMoreAccounts.accounts.data,
                 // Next and last connected accounts page.
-                moreFinancialConnectionsAccountList.financialConnectionsAccounts
+                moreFinancialConnectionsAccountList.data
             ).flatten()
 
             assertThat(result).isEqualTo(
                 financialConnectionsSessionWithMoreAccounts.copy(
-                    accounts = FinancialConnectionsAccountList(
-                        financialConnectionsAccounts = combinedAccounts,
+                    accountsNew = FinancialConnectionsAccountList(
+                        data = combinedAccounts,
                         hasMore = false,
                         totalCount = combinedAccounts.size,
                         url = "url"

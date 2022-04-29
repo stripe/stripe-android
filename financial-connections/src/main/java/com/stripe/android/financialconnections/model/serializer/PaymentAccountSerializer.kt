@@ -14,7 +14,8 @@ internal object PaymentAccountSerializer :
 
     override fun selectDeserializer(element: JsonElement): KSerializer<out PaymentAccount> {
         return when (element.objectValue) {
-            FinancialConnectionsAccount.OBJECT -> FinancialConnectionsAccount.serializer()
+            FinancialConnectionsAccount.OBJECT_OLD,
+            FinancialConnectionsAccount.OBJECT_NEW -> FinancialConnectionsAccount.serializer()
             else -> BankAccount.serializer()
         }
     }
