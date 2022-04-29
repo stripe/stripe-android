@@ -123,6 +123,13 @@ class FieldPopulator(
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CountrySpec -> {}
+                is CardBillingSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getZip()
+                            .assertContentDescriptionEquals(values.zip)
+                    }
+                }
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
@@ -141,13 +148,6 @@ class FieldPopulator(
                             }
                             is SimpleTextSpec -> {}
                             is BankDropdownSpec -> {}
-                            is CardBillingSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getZip()
-                                        .assertContentDescriptionEquals(values.zip)
-                                }
-                            }
                         }
                     }
                 }
@@ -188,6 +188,14 @@ class FieldPopulator(
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CountrySpec -> {}
+                is CardBillingSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getZip().apply {
+                            performTextInput(values.zip)
+                        }
+                    }
+                }
                 is SectionSpec -> {
                     it.fields.forEach { sectionField ->
                         when (sectionField) {
@@ -210,14 +218,6 @@ class FieldPopulator(
                             }
                             is SimpleTextSpec -> {}
                             is BankDropdownSpec -> {}
-                            is CardBillingSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getZip().apply {
-                                        performTextInput(values.zip)
-                                    }
-                                }
-                            }
                         }
                     }
                 }

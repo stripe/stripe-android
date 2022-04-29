@@ -82,6 +82,7 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(
                     initialValues
                 )
+                is CardBillingSpec -> it.transform(resourceRepository.getAddressRepository(), initialValues)
             }
         }
 
@@ -124,7 +125,6 @@ class TransformSpecToElements(
                     initialValues,
                     addressRepository
                 )
-                is CardBillingSpec -> it.transform(addressRepository, initialValues)
             }
         }
 }

@@ -8,12 +8,15 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class FormItemSpec : Parcelable {
-    internal fun createSectionElement(sectionFieldElement: SectionFieldElement) =
+    internal fun createSectionElement(
+        sectionFieldElement: SectionFieldElement,
+        label: Int? = null
+    ) =
         SectionElement(
             IdentifierSpec.Generic("${sectionFieldElement.identifier.value}_section"),
             sectionFieldElement,
             SectionController(
-                null,
+                label,
                 listOf(sectionFieldElement.sectionFieldErrorController())
             )
         )
