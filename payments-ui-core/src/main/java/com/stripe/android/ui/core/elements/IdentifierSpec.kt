@@ -24,6 +24,9 @@ sealed class IdentifierSpec(val value: String) : Parcelable {
     object CardNumber : IdentifierSpec("card[number]")
 
     @Parcelize
+    object CardCvc : IdentifierSpec("card[cvc]")
+
+    @Parcelize
     object Email : IdentifierSpec("billing_details[email]")
 
     @Parcelize

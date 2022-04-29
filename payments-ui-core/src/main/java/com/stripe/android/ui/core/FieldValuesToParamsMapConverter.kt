@@ -1,58 +1,59 @@
-package com.stripe.android.paymentsheet.paymentdatacollection
+package com.stripe.android.ui.core
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.FormFieldEntry
 
 /**
- * This class will transform the fields in a form into a structure as defined by a map.
+ * This class converts the fields in a form into a structure as defined by a map.
  */
-internal class TransformToPaymentMethodCreateParams {
-    /**
-     * This function will convert formFieldValue to PaymentMethodCreateParams.
-     */
-    fun transform(
-        formFieldValues: FormFieldValues,
-        type: PaymentMethod.Type
-    ) = transformToPaymentMethodCreateParamsMap(
-        formFieldValues,
-        type
-    )
-        .filterOutNullValues()
-        .toMap()
-        .run {
-            PaymentMethodCreateParams.createWithOverride(
-                type,
-                overrideParamMap = this,
-                productUsage = setOf("PaymentSheet")
-            )
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FieldValuesToParamsMapConverter {
+    companion object {
+        /**
+         * This function will convert fieldValuePairs to PaymentMethodCreateParams.
+         */
+        fun transformToPaymentMethodCreateParams(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            type: PaymentMethod.Type
+        ) = transformToParamsMap(
+            fieldValuePairs,
+            type
+        )
+            .filterOutNullValues()
+            .toMap()
+            .run {
+                PaymentMethodCreateParams.createWithOverride(
+                    type,
+                    overrideParamMap = this,
+                    productUsage = setOf("PaymentSheet")
+                )
+            }
+
+        /**
+         * This function will put the field values as defined in the fieldValuePairs into a map
+         * according to their keys.
+         *
+         * @param: formFieldValues: These are the fields and their values and based on the algorithm of this function
+         * will be put into a map according to the IdentifierSpec keys.
+         */
+        private fun transformToParamsMap(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+            type: PaymentMethod.Type,
+        ): MutableMap<String, Any?> {
+            val destMap = mutableMapOf<String, Any?>()
+
+            val formKeyValueMap = fieldValuePairs
+                .mapValues { entry -> entry.value.value }
+                .mapKeys { it.key.value }
+
+            createMap(type, destMap, formKeyValueMap)
+            return destMap
         }
 
-    /**
-     * This function will put the field values as defined in the formFieldValues into a map
-     * according to the mapLayout structure.
-     *
-     * @param: mapLayout: This is a map of keys (strings) and their values (String or another map).  This defines
-     * how the resulting map should look with no values in it.
-     * @param: formFieldValues: These are the fields and their values and based on the algorithm of this function
-     * will be put into a map according to the mapStructure
-     */
-    private fun transformToPaymentMethodCreateParamsMap(
-        formFieldValues: FormFieldValues,
-        type: PaymentMethod.Type,
-    ): MutableMap<String, Any?> {
-        val destMap = mutableMapOf<String, Any?>()
-
-        val formKeyValueMap = formFieldValues.fieldValuePairs
-            .mapValues { entry -> entry.value.value }
-            .mapKeys { it.key.value }
-
-        createMap(type, destMap, formKeyValueMap)
-        return destMap
-    }
-
-    companion object {
         /**
          * This function will take the identifier from the form field entry, separate it on
          * square braces and construct a map from it.

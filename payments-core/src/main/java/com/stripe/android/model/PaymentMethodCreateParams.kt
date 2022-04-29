@@ -456,6 +456,7 @@ data class PaymentMethodCreateParams internal constructor(
     data class Link(
         internal var paymentDetailsId: String,
         internal var consumerSessionClientSecret: String,
+        internal var extraParams: Map<String, @RawValue Any>? = null,
         internal var paymentMethodOptions: Map<String, Map<String, String>>? = null
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -464,6 +465,8 @@ data class PaymentMethodCreateParams internal constructor(
                 PARAM_CREDENTIALS to mapOf(
                     PARAM_CONSUMER_SESSION_CLIENT_SECRET to consumerSessionClientSecret
                 )
+            ).plus(
+                extraParams ?: emptyMap()
             ).plus(
                 paymentMethodOptions?.let {
                     mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it)
@@ -854,11 +857,17 @@ data class PaymentMethodCreateParams internal constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
+            extraParams: Map<String, @RawValue Any>? = null,
             paymentMethodOptions: Map<String, Map<String, String>>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
-                link = Link(paymentDetailsId, consumerSessionClientSecret, paymentMethodOptions)
+                link = Link(
+                    paymentDetailsId,
+                    consumerSessionClientSecret,
+                    extraParams,
+                    paymentMethodOptions
+                )
             )
         }
 

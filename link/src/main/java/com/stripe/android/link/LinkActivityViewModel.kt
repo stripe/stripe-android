@@ -14,6 +14,8 @@ import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.ui.paymentmethod.FormViewModel
+import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
@@ -148,6 +150,8 @@ internal class LinkActivityViewModel @Inject internal constructor(
                         is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
                         is VerificationViewModel.Factory -> viewModelComponent.inject(injectable)
                         is WalletViewModel.Factory -> viewModelComponent.inject(injectable)
+                        is PaymentMethodViewModel.Factory -> viewModelComponent.inject(injectable)
+                        is FormViewModel.Factory -> viewModelComponent.inject(injectable)
                         else -> {
                             throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                         }

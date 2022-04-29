@@ -21,6 +21,8 @@ import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
+import com.stripe.android.link.ui.paymentmethod.FormViewModel
+import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
@@ -28,6 +30,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
@@ -51,7 +54,8 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     @UIContext uiContext: CoroutineContext,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
-    stripeRepository: StripeRepository
+    stripeRepository: StripeRepository,
+    resourceRepository: ResourceRepository
 ) : NonFallbackInjectable {
     private var args: LinkActivityContract.Args? = null
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
@@ -63,6 +67,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .analyticsRequestFactory(paymentAnalyticsRequestFactory)
         .analyticsRequestExecutor(analyticsRequestExecutor)
         .stripeRepository(stripeRepository)
+        .resourceRepository(resourceRepository)
         .enableLogging(enableLogging)
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)
@@ -137,6 +142,8 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
                     is VerificationViewModel.Factory -> component.inject(injectable)
                     is WalletViewModel.Factory -> component.inject(injectable)
                     is InlineSignupViewModel.Factory -> component.inject(injectable)
+                    is PaymentMethodViewModel.Factory -> component.inject(injectable)
+                    is FormViewModel.Factory -> component.inject(injectable)
                     else -> {
                         throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                     }

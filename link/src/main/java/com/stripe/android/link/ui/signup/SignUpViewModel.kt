@@ -43,11 +43,8 @@ internal class SignUpViewModel @Inject constructor(
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
 
     val merchantName: String = args.merchantName
-    val emailElement: SectionFieldElement = EmailSpec.transform(
-        mapOf(
-            IdentifierSpec.Email to prefilledEmail
-        )
-    )
+    val emailElement: SectionFieldElement =
+        EmailSpec.transform(mapOf(IdentifierSpec.Email to prefilledEmail))
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

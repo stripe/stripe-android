@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -49,16 +50,18 @@ import com.stripe.android.ui.core.elements.SectionFieldElement
 @Composable
 private fun SignUpBodyPreview() {
     DefaultLinkTheme {
-        SignUpBody(
-            merchantName = "Example, Inc.",
-            emailElement = EmailSpec.transform(
-                mapOf(
-                    IdentifierSpec.Email to "email"
-                )
-            ),
-            signUpState = SignUpState.InputtingPhone,
-            onSignUpClick = {}
-        )
+        Surface {
+            SignUpBody(
+                merchantName = "Example, Inc.",
+                emailElement = EmailSpec.transform(
+                    mapOf(
+                        IdentifierSpec.Email to "email"
+                    )
+                ),
+                signUpState = SignUpState.InputtingPhone,
+                onSignUpClick = {}
+            )
+        }
     }
 }
 

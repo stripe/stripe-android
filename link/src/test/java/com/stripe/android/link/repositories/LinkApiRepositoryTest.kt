@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.networking.StripeRepository
@@ -245,6 +246,51 @@ class LinkApiRepositoryTest {
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.listPaymentDetails("secret")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `createPaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerPaymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(emptyMap())
+
+        linkRepository.createPaymentDetails(
+            consumerPaymentDetailsCreateParams,
+            secret
+        )
+
+        verify(stripeRepository).createPaymentDetails(
+            eq(secret),
+            eq(consumerPaymentDetailsCreateParams),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `createPaymentDetails returns successful result`() = runTest {
+        val paymentDetails = mock<ConsumerPaymentDetails>()
+        whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
+            .thenReturn(paymentDetails)
+
+        val result = linkRepository.createPaymentDetails(
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap()),
+            "secret"
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(paymentDetails)
+    }
+
+    @Test
+    fun `createPaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.createPaymentDetails(
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap()),
+            "secret"
+        )
 
         assertThat(result.isFailure).isTrue()
     }

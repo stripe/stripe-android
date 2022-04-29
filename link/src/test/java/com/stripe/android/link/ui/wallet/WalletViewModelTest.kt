@@ -7,9 +7,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
@@ -185,7 +183,7 @@ class WalletViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        WeakMapInjectorRegistry.register(injector, DUMMY_INJECTOR_KEY)
+
         val factory = WalletViewModel.Factory(
             mock(),
             injector
@@ -193,8 +191,6 @@ class WalletViewModelTest {
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(WalletViewModel::class.java)
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
-
-        WeakMapInjectorRegistry.staticCacheMap.clear()
     }
 
     private fun createViewModel() =

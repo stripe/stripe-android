@@ -396,7 +396,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    protected fun setupLink(unused: StripeIntent) {
+    protected fun setupLink(stripeIntent: StripeIntent) {
         // TODO(brnunes-stripe): Enable Link
 //        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
 //            viewModelScope.launch {

@@ -1,14 +1,12 @@
-package com.stripe.android.link.ui.wallet
+package com.stripe.android.link.ui.paymentmethod
 
 import android.content.res.Resources
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
@@ -24,13 +22,21 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.FormFieldEntry
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
-internal class WalletViewModel @Inject constructor(
+/**
+ * ViewModel that controls the PaymentMethodScreen, managing what payment method form to show and
+ * the user interaction for adding a payment method.
+ */
+internal class PaymentMethodViewModel @Inject constructor(
     args: LinkActivityContract.Args,
     val linkAccount: LinkAccount,
     private val linkRepository: LinkRepository,
@@ -41,25 +47,11 @@ internal class WalletViewModel @Inject constructor(
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
-    private val _paymentDetails =
-        MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
-    val paymentDetails: StateFlow<List<ConsumerPaymentDetails.PaymentDetails>> = _paymentDetails
+    private val _isProcessing = MutableStateFlow(false)
+    val isProcessing: Flow<Boolean> = _isProcessing
+    val isEnabled: Flow<Boolean> = _isProcessing.map { !it }
 
-    val isProcessing = MutableLiveData(false)
-
-    init {
-        viewModelScope.launch {
-            linkRepository.listPaymentDetails(linkAccount.clientSecret).fold(
-                onSuccess = { response ->
-                    response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
-                        .takeIf { it.isNotEmpty() }?.let {
-                            _paymentDetails.value = it
-                        } ?: addNewPaymentMethod()
-                },
-                onFailure = ::onError
-            )
-        }
-    }
+    val paymentMethod = SupportedPaymentMethod.Card()
 
     fun payButtonLabel(resources: Resources) = when (stripeIntent) {
         is PaymentIntent -> Amount(
@@ -69,11 +61,46 @@ internal class WalletViewModel @Inject constructor(
         is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
     }
 
-    fun completePayment(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
-        isProcessing.value = true
+    fun startPayment(nullableFormValues: Map<IdentifierSpec, FormFieldEntry>?) {
+        nullableFormValues?.let { formValues ->
+            val createParams = paymentMethod.createParams(
+                FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+                    formValues,
+                    paymentMethod.type
+                )
+            )
 
+            viewModelScope.launch {
+                _isProcessing.emit(true)
+                linkRepository.createPaymentDetails(
+                    createParams,
+                    linkAccount.clientSecret
+                ).fold(
+                    onSuccess = {
+                        completePayment(it, paymentMethod, formValues)
+                    },
+                    onFailure = ::onError
+                )
+            }
+        }
+    }
+
+    fun payAnotherWay() {
+        navigator.dismiss()
+        linkAccountManager.logout()
+    }
+
+    private fun completePayment(
+        paymentDetails: ConsumerPaymentDetails,
+        paymentMethod: SupportedPaymentMethod,
+        formValues: Map<IdentifierSpec, FormFieldEntry>
+    ) {
         val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-            .create(linkAccount.clientSecret, selectedPaymentDetails)
+            .create(
+                linkAccount.clientSecret,
+                paymentDetails.paymentDetails.first(),
+                paymentMethod.extraConfirmationParams(formValues)
+            )
         confirmationManager.confirmStripeIntent(params) { result ->
             result.fold(
                 onSuccess = { paymentResult ->
@@ -91,21 +118,13 @@ internal class WalletViewModel @Inject constructor(
                 onFailure = ::onError
             )
 
-            isProcessing.value = false
+            _isProcessing.tryEmit(false)
         }
-    }
-
-    fun payAnotherWay() {
-        navigator.dismiss()
-        linkAccountManager.logout()
-    }
-
-    fun addNewPaymentMethod() {
-        navigator.navigateTo(LinkScreen.PaymentMethod)
     }
 
     private fun onError(error: Throwable) {
         logger.error(error.localizedMessage ?: "Internal error.")
+        _isProcessing.tryEmit(false)
         // TODO(brnunes-stripe): Add localized error messages, show them in UI.
     }
 
@@ -123,7 +142,7 @@ internal class WalletViewModel @Inject constructor(
             injector.inject(this)
             return subComponentBuilderProvider.get()
                 .linkAccount(linkAccount)
-                .build().walletViewModel as T
+                .build().paymentMethodViewModel as T
         }
     }
 }

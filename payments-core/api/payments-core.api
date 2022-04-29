@@ -1949,6 +1949,29 @@ public abstract class com/stripe/android/model/ConsumerPaymentDetails$PaymentDet
 	public fun isDefault ()Z
 }
 
+public abstract class com/stripe/android/model/ConsumerPaymentDetailsCreateParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Companion;
+	public synthetic fun <init> (Lcom/stripe/android/model/PaymentMethod$Type;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun toParamMap ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card : com/stripe/android/model/ConsumerPaymentDetailsCreateParams {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion;
+	public fun <init> (Ljava/util/Map;)V
+	public fun describeContents ()I
+	public fun toParamMap ()Ljava/util/Map;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion {
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Companion {
+}
+
 public final class com/stripe/android/model/ConsumerSession$VerificationSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -3211,7 +3234,7 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createKlarna$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static synthetic fun createLink$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createLink$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createOxxo$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -3268,10 +3291,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Ideal : an
 public final class com/stripe/android/model/PaymentMethodCreateParams$Link : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams$Link;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Link;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams$Link;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams$Link;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Link;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams$Link;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
