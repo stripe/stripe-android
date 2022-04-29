@@ -37,6 +37,7 @@ import com.stripe.android.link.ui.signup.PhoneCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +47,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 private fun Preview() {
     LinkInlineSignup(
         merchantName = "Example, Inc.",
-        emailElement = EmailSpec.transform("email"),
+        emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email")),
         signUpState = SignUpState.InputtingEmail,
         isExpanded = true,
         toggleExpanded = {},
