@@ -157,6 +157,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.setOnClickListener {
             viewModel.onUserSelection()
         }
+
+        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun onTransitionTarget(
