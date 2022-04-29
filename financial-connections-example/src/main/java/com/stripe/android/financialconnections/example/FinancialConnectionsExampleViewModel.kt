@@ -67,7 +67,7 @@ class FinancialConnectionsExampleViewModel : ViewModel() {
         val statusText = when (result) {
             is Completed -> {
                 val accountList = result.financialConnectionsSession.accounts
-                accountList.financialConnectionsAccounts.joinToString("\n") {
+                accountList.data.joinToString("\n") {
                     "${it.institutionName} - ${it.displayName} - ${it.last4} - ${it.category}/${it.subcategory}"
                 }
             }

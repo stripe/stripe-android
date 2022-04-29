@@ -23,25 +23,25 @@ internal class FetchFinancialConnectionsSession @Inject constructor(
         val session = financialConnectionsRepository.getFinancialConnectionsSession(clientSecret)
         if (session.accounts.hasMore) {
             val accounts = mutableListOf<FinancialConnectionsAccount>()
-            accounts.addAll(session.accounts.financialConnectionsAccounts)
+            accounts.addAll(session.accounts.data)
 
             var nextAccountList = financialConnectionsRepository.getFinancialConnectionsAccounts(
                 GetFinancialConnectionsAcccountsParams(clientSecret, accounts.last().id)
             )
-            accounts.addAll(nextAccountList.financialConnectionsAccounts)
+            accounts.addAll(nextAccountList.data)
 
             while (nextAccountList.hasMore && accounts.size < FinancialConnectionsSheetViewModel.MAX_ACCOUNTS) {
                 nextAccountList = financialConnectionsRepository.getFinancialConnectionsAccounts(
                     GetFinancialConnectionsAcccountsParams(clientSecret, accounts.last().id)
                 )
-                accounts.addAll(nextAccountList.financialConnectionsAccounts)
+                accounts.addAll(nextAccountList.data)
             }
 
             return FinancialConnectionsSession(
                 id = session.id,
                 clientSecret = session.clientSecret,
                 accountsNew = FinancialConnectionsAccountList(
-                    financialConnectionsAccounts = accounts,
+                    data = accounts,
                     hasMore = nextAccountList.hasMore,
                     url = nextAccountList.url,
                     count = accounts.size,

@@ -39,7 +39,7 @@ class FinancialConnectionsApiRepositoryTest {
 
             val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
-            assertThat(result.accounts.financialConnectionsAccounts.size).isEqualTo(1)
+            assertThat(result.accounts.data.size).isEqualTo(1)
         }
 
     @Test
@@ -53,7 +53,7 @@ class FinancialConnectionsApiRepositoryTest {
 
             val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
-            assertThat(result.accounts.financialConnectionsAccounts.size).isEqualTo(1)
+            assertThat(result.accounts.data.size).isEqualTo(1)
         }
 
     @Test
