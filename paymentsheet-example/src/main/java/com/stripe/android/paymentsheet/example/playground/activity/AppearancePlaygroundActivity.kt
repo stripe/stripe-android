@@ -185,6 +185,9 @@ internal class AppearancePlaygroundActivity : BasePaymentSheetActivity() {
             CustomizationCard("Typography") {
                 Typography(currentAppearance)
             }
+            CustomizationCard("PrimaryButton") {
+                PrimaryButton(currentAppearance)
+            }
         }
     }
 
@@ -365,6 +368,104 @@ internal class AppearancePlaygroundActivity : BasePaymentSheetActivity() {
     }
 
     @Composable
+    private fun PrimaryButton(
+        currentAppearance: PaymentSheet.Appearance
+    ) {
+        val currentButton = currentAppearance.primaryButton
+
+        val currentBackground = currentButton.colorsLight.background?.let {
+            Color(it)
+        } ?: run {
+            Color(currentAppearance.colorsLight.primary)
+        }
+        ColorItem(label = "background", currentColor = currentBackground) {
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    colorsLight = currentButton.colorsLight.copy(
+                        background = it.toArgb()
+                    ),
+                    colorsDark = currentButton.colorsDark.copy(
+                        background = it.toArgb()
+                    )
+                )
+            )
+        }
+
+        Divider()
+        ColorItem(label = "onBackground", currentColor = Color(currentButton.colorsLight.onBackground)) {
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    colorsLight = currentButton.colorsLight.copy(
+                        onBackground = it.toArgb()
+                    ),
+                    colorsDark = currentButton.colorsDark.copy(
+                        onBackground = it.toArgb()
+                    )
+                )
+            )
+        }
+
+        Divider()
+        ColorItem(label = "border", currentColor = Color(currentButton.colorsLight.border)) {
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    colorsLight = currentButton.colorsLight.copy(
+                        border = it.toArgb()
+                    ),
+                    colorsDark = currentButton.colorsDark.copy(
+                        border = it.toArgb()
+                    )
+                )
+            )
+        }
+
+        val currentCornerRadius = currentButton.shape.cornerRadiusDp
+            ?: currentAppearance.shapes.cornerRadiusDp
+        Divider()
+        IncrementDecrementItem("cornerRadiusDp", currentCornerRadius) {
+            viewModel.appearance.postValue(
+                currentAppearance.copy(
+                    primaryButton = currentButton.copy(
+                        shape = currentButton.shape.copy(
+                            cornerRadiusDp = it
+                        )
+                    )
+                )
+            )
+        }
+
+        val currentBorderStrokeWidth = currentButton.shape.borderStrokeWidthDp
+            ?: currentAppearance.shapes.borderStrokeWidthDp
+        Divider()
+        IncrementDecrementItem("borderStrokeWidthDp", currentBorderStrokeWidth) {
+            viewModel.appearance.postValue(
+                currentAppearance.copy(
+                    primaryButton = currentButton.copy(
+                        shape = currentButton.shape.copy(
+                            borderStrokeWidthDp = it
+                        )
+                    )
+                )
+            )
+        }
+
+        val currentFontFamily = currentButton.typography.fontResId
+            ?: currentAppearance.typography.fontResId
+        Divider()
+        FontDropDown(currentFontFamily) {
+            viewModel.appearance.postValue(
+                currentAppearance.copy(
+                    primaryButton = currentButton.copy(
+                        typography = currentButton.typography.copy(
+                            fontResId = it
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    @Composable
     private fun ColorItem(label: String, currentColor: Color, onColorPicked: (Color) -> PaymentSheet.Appearance) {
         val openDialog = remember { mutableStateOf(false) }
         ColorPicker(openDialog, currentColor) {
@@ -527,7 +628,7 @@ internal class AppearancePlaygroundActivity : BasePaymentSheetActivity() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = BASE_PADDING)
+                    .padding(all = BASE_PADDING)
                     .wrapContentSize(Alignment.TopStart)
             ) {
                 Text(
