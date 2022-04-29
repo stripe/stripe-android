@@ -79,6 +79,9 @@ class TransformSpecToElements(
                     amount?.currencyCode,
                     initialValues
                 )
+                is CountrySpec -> it.transform(
+                    initialValues
+                )
             }
         }
 
@@ -120,9 +123,6 @@ class TransformSpecToElements(
                 is AddressSpec -> it.transform(
                     initialValues,
                     addressRepository
-                )
-                is CountrySpec -> it.transform(
-                    initialValues
                 )
                 is CardBillingSpec -> it.transform(addressRepository, initialValues)
             }

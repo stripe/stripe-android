@@ -29,7 +29,6 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.SepaDebitForm
@@ -60,10 +59,7 @@ import javax.inject.Provider
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
     private val nameSection = NameSpec()
-    private val countrySection = SectionSpec(
-        IdentifierSpec.Generic("country_section"),
-        CountrySpec()
-    )
+    private val countrySection = CountrySpec()
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(), com.stripe.android.ui.core.R.style.StripeDefaultTheme
     )
@@ -340,10 +336,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 NameSpec(),
                 EmailSpec(),
-                SectionSpec(
-                    IdentifierSpec.Generic("country_section"),
-                    CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
-                ),
+                CountrySpec(onlyShowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                 SaveForFutureUseSpec()
             ),
             args,

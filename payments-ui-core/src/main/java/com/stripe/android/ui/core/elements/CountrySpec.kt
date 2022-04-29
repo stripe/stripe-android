@@ -10,11 +10,13 @@ import kotlinx.parcelize.Parcelize
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class CountrySpec(val onlyShowCountryCodes: Set<String> = emptySet()) :
-    SectionFieldSpec(IdentifierSpec.Country) {
+data class CountrySpec(
+    override val identifier: IdentifierSpec = IdentifierSpec.Country,
+    val onlyShowCountryCodes: Set<String> = emptySet()
+) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
-    ): SectionFieldElement =
+    ) = createSectionElement(
         CountryElement(
             this.identifier,
             DropdownFieldController(
@@ -22,4 +24,5 @@ data class CountrySpec(val onlyShowCountryCodes: Set<String> = emptySet()) :
                 initialValue = initialValues[this.identifier]
             )
         )
+    )
 }

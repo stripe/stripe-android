@@ -77,7 +77,12 @@ internal class TransformSpecToElementTest {
                 SectionSpec(
                     IdentifierSpec.Generic("multifield_section"),
                     listOf(
-                        CountrySpec(),
+                        SimpleTextSpec(
+                            label = R.string.acc_label_zip,
+                            capitalization = KeyboardCapitalization.None,
+                            keyboardType = KeyboardType.Ascii,
+                            identifier = IdentifierSpec.Name
+                        ),
                         IDEAL_BANK_CONFIG
                     )
                 )
@@ -86,17 +91,14 @@ internal class TransformSpecToElementTest {
 
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
-        assertThat(sectionElement.fields[0]).isInstanceOf(CountryElement::class.java)
+        assertThat(sectionElement.fields[0]).isInstanceOf(SimpleTextElement::class.java)
         assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdownElement::class.java)
     }
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() =
         runBlocking {
-            val countrySection = SectionSpec(
-                IdentifierSpec.Generic("country_section"),
-                CountrySpec(onlyShowCountryCodes = setOf("AT"))
-            )
+            val countrySection = CountrySpec(onlyShowCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
                 listOf(countrySection)
             )
@@ -110,7 +112,7 @@ internal class TransformSpecToElementTest {
             // Verify the correct config is setup for the controller
             assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
 
-            assertThat(countrySectionElement.identifier.value).isEqualTo("country_section")
+            assertThat(countrySectionElement.identifier.value).isEqualTo("billing_details[address][country]_section")
 
             assertThat(countryElement.identifier.value).isEqualTo("billing_details[address][country]")
         }
