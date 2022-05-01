@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,6 +30,7 @@ import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.paymentmethod.PaymentMethodBody
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
@@ -117,13 +117,11 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
                             composable(LinkScreen.PaymentMethod.route) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .fillMaxHeight(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "<Placeholder>\nAdd new payment method")
+                                linkAccount?.let { account ->
+                                    PaymentMethodBody(
+                                        account,
+                                        viewModel.injector
+                                    )
                                 }
                             }
                         }

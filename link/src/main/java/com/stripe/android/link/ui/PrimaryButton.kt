@@ -20,6 +20,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
@@ -29,6 +31,8 @@ internal enum class PrimaryButtonState {
     Disabled,
     Processing
 }
+
+internal const val progressIndicatorTestTag = "CircularProgressIndicator"
 
 @Composable
 internal fun PrimaryButton(
@@ -62,7 +66,11 @@ internal fun PrimaryButton(
             ) {
                 if (state == PrimaryButtonState.Processing) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .semantics {
+                                testTag = progressIndicatorTestTag
+                            },
                         color = MaterialTheme.linkColors.buttonLabel,
                         strokeWidth = 2.dp
                     )

@@ -26,4 +26,6 @@
     <string name="wallet_default">Default</string>
     <string name="wallet_add_new_payment_method">Add a new payment method</string>
     <string name="wallet_pay_another_way">Pay another way</string>
+
+    <string name="pm_add_new_card">Add a new card</string>
 </resources>
