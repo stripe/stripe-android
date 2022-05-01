@@ -30,6 +30,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -235,6 +236,46 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/consumers/sessions/lookup",
             StripeApiRepository.consumerSessionLookupUrl
+        )
+    }
+
+    @Test
+    fun testConsumerSignUpUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/accounts/sign_up",
+            StripeApiRepository.consumerSignUpUrl
+        )
+    }
+
+    @Test
+    fun testStartConsumerVerificationUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/sessions/start_verification",
+            StripeApiRepository.startConsumerVerificationUrl
+        )
+    }
+
+    @Test
+    fun testConfirmConsumerVerificationUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/sessions/confirm_verification",
+            StripeApiRepository.confirmConsumerVerificationUrl
+        )
+    }
+
+    @Test
+    fun testLogoutConsumerUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/sessions/log_out",
+            StripeApiRepository.logoutConsumerUrl
+        )
+    }
+
+    @Test
+    fun testConsumerPaymentDetailsUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/payment_details",
+            StripeApiRepository.consumerPaymentDetailsUrl
         )
     }
 
@@ -1754,6 +1795,48 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `createPaymentDetails() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
+            )
+            create().createPaymentDetails(
+                clientSecret,
+                paymentDetailsCreateParams,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                assertEquals(this["active"], false)
+                assertEquals(this["type"], "card")
+                withNestedParams("billing_address") {
+                    assertEquals(this["country_code"], "US")
+                    assertEquals(this["postal_code"], "94111")
+                }
+                withNestedParams("card") {
+                    assertEquals(this["number"], "4242424242424242")
+                    assertEquals(this["exp_month"], 1)
+                    assertEquals(this["exp_year"], 2024)
+                }
+            }
+        }
+
+    @Test
     fun `listPaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
@@ -1980,7 +2063,8 @@ internal class StripeApiRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
-        val clientSecret = PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
+        val clientSecret =
+            PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
         create().verifyPaymentIntentWithMicrodeposits(
             clientSecret = clientSecret,
             firstAmount = 12,
@@ -2007,39 +2091,41 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `verifyPaymentIntentWithMicrodeposits() with descriptorCode sends all parameters`() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
+    fun `verifyPaymentIntentWithMicrodeposits() with descriptorCode sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
 
-        val clientSecret = PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
-        create().verifyPaymentIntentWithMicrodeposits(
-            clientSecret = clientSecret,
-            descriptorCode = "some_description",
-            DEFAULT_OPTIONS
-        )
+            val clientSecret =
+                PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
+            create().verifyPaymentIntentWithMicrodeposits(
+                clientSecret = clientSecret,
+                descriptorCode = "some_description",
+                DEFAULT_OPTIONS
+            )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
 
-        val request = apiRequestArgumentCaptor.firstValue
-        val params = requireNotNull(request.params)
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
 
-        assertEquals(
-            "https://api.stripe.com/v1/payment_intents/" +
-                PaymentIntent.ClientSecret(clientSecret).paymentIntentId +
-                "/verify_microdeposits",
-            request.baseUrl
-        )
+            assertEquals(
+                "https://api.stripe.com/v1/payment_intents/" +
+                    PaymentIntent.ClientSecret(clientSecret).paymentIntentId +
+                    "/verify_microdeposits",
+                request.baseUrl
+            )
 
-        with(params) {
-            assertEquals(clientSecret, this["client_secret"])
-            assertEquals("some_description", this["descriptor_code"])
+            with(params) {
+                assertEquals(clientSecret, this["client_secret"])
+                assertEquals("some_description", this["descriptor_code"])
+            }
         }
-    }
 
     @Test
     fun `verifySetupIntentWithMicrodeposits() with amounts sends all parameters`() = runTest {
@@ -2051,7 +2137,8 @@ internal class StripeApiRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
-        val clientSecret = SetupIntentFixtures.SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
+        val clientSecret =
+            SetupIntentFixtures.SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
         create().verifySetupIntentWithMicrodeposits(
             clientSecret = clientSecret,
             firstAmount = 12,
@@ -2078,39 +2165,41 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `verifySetupIntentWithMicrodeposits() with descriptorCode sends all parameters`() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            SetupIntentFixtures.SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
+    fun `verifySetupIntentWithMicrodeposits() with descriptorCode sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                SetupIntentFixtures.SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
 
-        val clientSecret = SetupIntentFixtures.SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
-        create().verifySetupIntentWithMicrodeposits(
-            clientSecret = clientSecret,
-            descriptorCode = "some_description",
-            DEFAULT_OPTIONS
-        )
+            val clientSecret =
+                SetupIntentFixtures.SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED.clientSecret!!
+            create().verifySetupIntentWithMicrodeposits(
+                clientSecret = clientSecret,
+                descriptorCode = "some_description",
+                DEFAULT_OPTIONS
+            )
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
 
-        val request = apiRequestArgumentCaptor.firstValue
-        val params = requireNotNull(request.params)
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
 
-        assertEquals(
-            "https://api.stripe.com/v1/setup_intents/" +
-                SetupIntent.ClientSecret(clientSecret).setupIntentId +
-                "/verify_microdeposits",
-            request.baseUrl
-        )
+            assertEquals(
+                "https://api.stripe.com/v1/setup_intents/" +
+                    SetupIntent.ClientSecret(clientSecret).setupIntentId +
+                    "/verify_microdeposits",
+                request.baseUrl
+            )
 
-        with(params) {
-            assertEquals(clientSecret, this["client_secret"])
-            assertEquals("some_description", this["descriptor_code"])
+            with(params) {
+                assertEquals(clientSecret, this["client_secret"])
+                assertEquals("some_description", this["descriptor_code"])
+            }
         }
-    }
 
     /**
      * Helper DSL to validate nested params.
