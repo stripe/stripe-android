@@ -25,12 +25,10 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 /**
- * This class stores the visual field layout for the [Form] and then sets up the controller
- * for all the fields on screen.  When all fields are reported as complete, the completeFormValues
- * emits the valid payment method.
+ * ViewModel that manages the user interaction with the payment method data collection form.
+ * When all fields are reported as complete, [completeFormValues] emits the valid payment method.
  *
- * @param: paymentMethod holds a representation of the layout in [SupportedPaymentMethod.formSpec],
- * which is used to display the UI fields on screen.
+ * @param: formSpec A representation of the layout which is used to display the UI fields on screen.
  */
 internal class FormViewModel @Inject internal constructor(
     private val formSpec: LayoutSpec,
@@ -72,6 +70,9 @@ internal class FormViewModel @Inject internal constructor(
             ?.firstOrNull()
     }
 
+    /**
+     * List of field identifiers which should not be visible.
+     */
     val hiddenIdentifiers = cardBillingElement.map {
         it?.hiddenIdentifiers ?: flowOf(emptyList())
     }.flattenConcat().map {
@@ -87,6 +88,9 @@ internal class FormViewModel @Inject internal constructor(
         it.plus(identifiers)
     }
 
+    /**
+     * Emits a map of the form values when the form content is valid, null otherwise.
+     */
     val completeFormValues = combine(
         elements.filterNotNull().map { elementsList ->
             combine(

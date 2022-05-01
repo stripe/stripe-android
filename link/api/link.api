@@ -162,11 +162,11 @@ public final class com/stripe/android/link/injection/DaggerLinkViewModelFactoryC
 }
 
 public final class com/stripe/android/link/injection/FormViewModelModule_Companion_ProvideTransformSpecToElementsFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/FormViewModelModule_Companion_ProvideTransformSpecToElementsFactory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/FormViewModelModule_Companion_ProvideTransformSpecToElementsFactory;
 	public fun get ()Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
+	public static fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Lcom/stripe/android/link/LinkActivityContract$Args;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
 }
 
 public final class com/stripe/android/link/injection/LinkPaymentLauncherFactory_Impl : com/stripe/android/link/injection/LinkPaymentLauncherFactory {
