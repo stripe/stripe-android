@@ -142,10 +142,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
-        args.putBoolean(
-            ComposeFormDataCollectionFragment.ACTIVITY_IS_PAYMENT_OPTIONS,
-            activity is PaymentOptionsActivity
-        )
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
             getFormArguments(

@@ -158,8 +158,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
     }
 
     internal companion object {
-        val ACTIVITY_IS_PAYMENT_OPTIONS =
-            "com.stripe.android.paymentsheet.activity_is_payment_options"
         const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }
