@@ -45,6 +45,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -1316,6 +1317,30 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerPaymentDetailsUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "active" to false
+                ).plus(
+                    paymentDetailsCreateParams.toParamMap()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser()
         ) {
             // no-op
         }
