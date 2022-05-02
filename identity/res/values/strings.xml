@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">App Settings</string>
   <!-- Description of back of driver's license image -->
