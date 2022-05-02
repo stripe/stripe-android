@@ -4,8 +4,11 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentSelection : Parcelable {
@@ -33,11 +36,32 @@ internal sealed class PaymentSelection : Parcelable {
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New() {
+            @IgnoredOnParcel
             val last4: String = (
                 (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                ["number"] as String
+                    ["number"] as String
                 )
                 .takeLast(4)
+        }
+
+        @Parcelize
+        data class Link(
+            val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams
+        ) : New() {
+            @IgnoredOnParcel
+            override val customerRequestedSave = CustomerRequestedSave.NoRequest
+
+            @IgnoredOnParcel
+            @DrawableRes
+            val iconResource = when (paymentDetails) {
+                is ConsumerPaymentDetails.Card -> paymentDetails.brand.getCardBrandIcon()
+            }
+
+            @IgnoredOnParcel
+            val label = when (paymentDetails) {
+                is ConsumerPaymentDetails.Card -> paymentDetails.last4
+            }
         }
 
         @Parcelize

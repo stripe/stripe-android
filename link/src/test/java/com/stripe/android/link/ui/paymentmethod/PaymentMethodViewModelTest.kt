@@ -23,6 +23,7 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -66,6 +67,7 @@ class PaymentMethodViewModelTest {
     fun before() {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
+        whenever(args.completePayment).thenReturn(true)
         whenever(linkAccount.clientSecret).thenReturn(clientSecret)
     }
 
@@ -96,42 +98,68 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `startPayment completes payment when PaymentDetails creation succeeds`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+    fun `startPayment completes payment when PaymentDetails creation succeeds and completePayment is true`() =
+        runTest {
+            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
+                .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
 
-        createViewModel().startPayment(cardFormFieldValues)
+            createViewModel().startPayment(cardFormFieldValues)
 
-        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
-        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+            val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+            verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
 
-        assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
-            mapOf(
-                "client_secret" to args.stripeIntent.clientSecret,
-                "use_stripe_sdk" to false,
-                "mandate_data" to mapOf(
-                    "customer_acceptance" to mapOf(
-                        "type" to "online",
-                        "online" to mapOf(
-                            "infer_from_client" to true
+            assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
+                mapOf(
+                    "client_secret" to args.stripeIntent.clientSecret,
+                    "use_stripe_sdk" to false,
+                    "mandate_data" to mapOf(
+                        "customer_acceptance" to mapOf(
+                            "type" to "online",
+                            "online" to mapOf(
+                                "infer_from_client" to true
+                            )
                         )
-                    )
-                ),
-                "payment_method_data" to mapOf(
-                    "type" to "link",
-                    "link" to mapOf(
-                        "payment_details_id" to "QAAAKJ6",
-                        "credentials" to mapOf(
-                            "consumer_session_client_secret" to clientSecret
-                        ),
-                        "card" to mapOf(
-                            "cvc" to "123"
+                    ),
+                    "payment_method_data" to mapOf(
+                        "type" to "link",
+                        "link" to mapOf(
+                            "payment_details_id" to "QAAAKJ6",
+                            "credentials" to mapOf(
+                                "consumer_session_client_secret" to clientSecret
+                            ),
+                            "card" to mapOf(
+                                "cvc" to "123"
+                            )
                         )
                     )
                 )
             )
-        )
-    }
+        }
+
+    @Test
+    fun `startPayment returns PaymentMethodCreateParams when PaymentDetails creation succeeds and completePayment is false`() =
+        runTest {
+            whenever(args.completePayment).thenReturn(false)
+            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
+                .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+
+            createViewModel().startPayment(cardFormFieldValues)
+
+            val paramsCaptor = argumentCaptor<LinkActivityResult>()
+            verify(navigator).dismiss(paramsCaptor.capture())
+
+            val paymentDetails =
+                PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first()
+            assertThat(paramsCaptor.firstValue).isEqualTo(
+                LinkActivityResult.Success.Selected(
+                    paymentDetails,
+                    PaymentMethodCreateParams.createLink(
+                        paymentDetails.id,
+                        clientSecret
+                    )
+                )
+            )
+        }
 
     @Test
     fun `startPayment dismisses Link on success`() = runTest {
@@ -153,7 +181,7 @@ class PaymentMethodViewModelTest {
 
         createViewModel().startPayment(cardFormFieldValues)
 
-        verify(navigator).dismiss(LinkActivityResult.Success)
+        verify(navigator).dismiss(LinkActivityResult.Success.Completed)
     }
 
     @Test
@@ -209,22 +237,6 @@ class PaymentMethodViewModelTest {
 
         verify(navigator).dismiss()
         verify(linkAccountManager).logout()
-    }
-
-    @Test
-    fun `When PaymentIntent then button label displays amount`() {
-        val label = createViewModel().payButtonLabel(getContext().resources)
-
-        assertThat(label).isEqualTo("Pay $10.99")
-    }
-
-    @Test
-    fun `When SetupIntent then button label displays set up`() {
-        whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.SI_NEXT_ACTION_REDIRECT)
-
-        val label = createViewModel().payButtonLabel(getContext().resources)
-
-        assertThat(label).isEqualTo("Set up")
     }
 
     @Test

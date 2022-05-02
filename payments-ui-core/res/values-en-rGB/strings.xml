@@ -70,8 +70,12 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Save for future %s payments</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Scan card</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Continue</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Pay %s</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

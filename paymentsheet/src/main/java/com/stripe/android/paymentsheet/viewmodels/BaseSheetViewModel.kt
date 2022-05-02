@@ -18,6 +18,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -390,21 +391,25 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    protected fun setupLink(unused: StripeIntent) {
-        // TODO(brnunes-stripe): Enable Link
-//        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
-//            viewModelScope.launch {
-//                when (linkLauncher.setup(stripeIntent)) {
-//                    AccountStatus.Verified -> launchLink()
-//                    AccountStatus.VerificationStarted,
-//                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
-//                    AccountStatus.SignedOut -> {}
-//                }
-//                _isLinkEnabled.value = true
-//            }
-//        } else {
+    @Suppress("UNREACHABLE_CODE")
+    protected fun setupLink(stripeIntent: StripeIntent, completePayment: Boolean) {
+        // TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
         _isLinkEnabled.value = false
-//        }
+        return
+
+        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
+            viewModelScope.launch {
+                when (linkLauncher.setup(stripeIntent, completePayment)) {
+                    AccountStatus.Verified -> launchLink()
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
+                    AccountStatus.SignedOut -> {}
+                }
+                _isLinkEnabled.value = true
+            }
+        } else {
+            _isLinkEnabled.value = false
+        }
     }
 
     fun onLinkVerificationDismissed() {

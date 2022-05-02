@@ -152,7 +152,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewBinding.continueButton.setLabel(
-            getString(R.string.stripe_paymentsheet_continue_button_label)
+            getString(R.string.stripe_continue_button_label)
         )
 
         viewBinding.continueButton.setOnClickListener {

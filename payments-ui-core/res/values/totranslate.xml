@@ -8,7 +8,4 @@
 
     <!-- Mandate for us_bank_account when using saved payment method -->
     <string name="us_bank_account_payment_sheet_saved_mandate">By continuing you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/ach-payments/authorization\">these terms&lt;/a>.</string>
-
-    <!-- Scan card button -->
-    <string name="scan_card" tools:ignore="ExtraTranslation">Scan card</string>
 </resources>

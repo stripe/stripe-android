@@ -75,7 +75,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
-        setupLink(args.stripeIntent)
+        setupLink(args.stripeIntent, false)
         setStripeIntent(args.stripeIntent)
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
@@ -118,8 +118,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onLinkPaymentResult(result: LinkActivityResult) {
-        super.onLinkPaymentResult(result)
-        _processing.value = false
+        when (result) {
+            is LinkActivityResult.Success.Selected -> {
+                val linkSelection = PaymentSelection.New.Link(
+                    result.paymentDetails, result.paymentMethodCreateParams
+                )
+                updateSelection(linkSelection)
+                onUserSelection()
+            }
+            else -> {
+                super.onLinkPaymentResult(result)
+                _processing.value = false
+            }
+        }
     }
 
     override fun updateSelection(selection: PaymentSelection?) {
@@ -136,7 +147,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     updatePrimaryButtonUIState(
                         PrimaryButton.UIState(
                             label = getApplication<Application>().getString(
-                                R.string.stripe_paymentsheet_continue_button_label
+                                R.string.stripe_continue_button_label
                             ),
                             visible = true,
                             enabled = true,

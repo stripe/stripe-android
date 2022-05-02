@@ -34,6 +34,15 @@ internal class PaymentOptionFactory(
                     )
                 )
             }
+            is PaymentSelection.New.Link -> {
+                PaymentOption(
+                    drawableResourceId = selection.iconResource,
+                    label = createCardLabel(
+                        resources,
+                        selection.label
+                    )
+                )
+            }
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
