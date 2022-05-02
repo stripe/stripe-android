@@ -19,11 +19,8 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
@@ -31,8 +28,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -86,7 +81,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             viewBinding.linkInlineSignup.isEnabled = !isProcessing
-            (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
         }
 
         viewBinding.linkInlineSignup.apply {
@@ -105,37 +99,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-        // If the activity was destroyed and recreated then we need to re-attach the fragment,
-        // as attach will not be called again.
-        childFragmentManager.fragments.forEach { fragment ->
-            attachComposeFragmentViewModel(fragment)
-        }
-
-        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            attachComposeFragmentViewModel(fragment)
-        }
-
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
-    }
-
-    private fun attachComposeFragmentViewModel(fragment: Fragment) {
-        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-            // Need to access the formViewModel so it is constructed.
-            val formViewModel = formFragment.formViewModel
-            viewLifecycleOwner.lifecycleScope.launch {
-                formViewModel.completeFormValues.collect { formFieldValues ->
-                    // if the formFieldValues is a change either null or new values for the
-                    // newLpm then we should clear it out --- but what happens if we cancel -- selection should
-                    // have the correct value
-                    sheetViewModel.updateSelection(
-                        transformToPaymentSelection(
-                            formFieldValues,
-                            sheetViewModel.getAddFragmentSelectedLpmValue()
-                        )
-                    )
-                }
-            }
-        }
     }
 
     private fun setupRecyclerView(
@@ -223,39 +187,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-
-        @VisibleForTesting
-        internal fun transformToPaymentSelection(
-            formFieldValues: FormFieldValues?,
-            selectedPaymentMethodResources: SupportedPaymentMethod,
-        ) = formFieldValues?.let {
-            FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-                formFieldValues.fieldValuePairs
-                    .filterNot { entry ->
-                        entry.key == IdentifierSpec.SaveForFutureUse ||
-                            entry.key == IdentifierSpec.CardBrand
-                    },
-                selectedPaymentMethodResources.type
-            ).run {
-                if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
-                    PaymentSelection.New.Card(
-                        paymentMethodCreateParams = this,
-                        brand = CardBrand.fromCode(
-                            formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
-                        ),
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-
-                    )
-                } else {
-                    PaymentSelection.New.GenericPaymentMethod(
-                        selectedPaymentMethodResources.displayNameResource,
-                        selectedPaymentMethodResources.iconResource,
-                        this,
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-                    )
-                }
-            }
-        }
 
         @VisibleForTesting
         fun getFormArguments(
