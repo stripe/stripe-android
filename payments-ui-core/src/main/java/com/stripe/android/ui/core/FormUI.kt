@@ -47,7 +47,6 @@ fun FormUI(
 
     Column(
         modifier = Modifier.fillMaxWidth(1f)
-
     ) {
         elements?.let {
             it.forEachIndexed { _, element ->

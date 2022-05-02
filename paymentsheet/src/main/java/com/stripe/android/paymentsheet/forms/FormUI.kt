@@ -44,25 +44,30 @@ internal fun FormInternal(
         elementsFlow,
         lastTextFieldIdentifierFlow
     ) {
-        Row(
-            modifier = Modifier
-                .height(
-                    dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
-                )
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            val isDark = PaymentsTheme.colors.material.surface.shouldUseDarkDynamicColor()
-            CircularProgressIndicator(
-                modifier = Modifier.size(
-                    dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
-                ),
-                color = if (isDark) Color.Black else Color.White,
-                strokeWidth = dimensionResource(
-                    R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
-                )
+        Loading()
+    }
+}
+
+@Composable
+private fun Loading() {
+    Row(
+        modifier = Modifier
+            .height(
+                dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
             )
-        }
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        val isDark = PaymentsTheme.colors.material.surface.shouldUseDarkDynamicColor()
+        CircularProgressIndicator(
+            modifier = Modifier.size(
+                dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
+            ),
+            color = if (isDark) Color.Black else Color.White,
+            strokeWidth = dimensionResource(
+                R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
+            )
+        )
     }
 }
