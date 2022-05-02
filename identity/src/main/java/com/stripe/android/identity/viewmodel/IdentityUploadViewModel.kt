@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
+import javax.inject.Inject
 
 /**
  * ViewModel to upload front and back image of a document either through camera or from local
@@ -72,7 +73,7 @@ internal class IdentityUploadViewModel(
         backImageChooser.chooseImage(onImageChosen)
     }
 
-    internal class FrontBackUploadViewModelFactory(
+    internal class FrontBackUploadViewModelFactory @Inject constructor(
         private val identityIO: IdentityIO
     ) :
         ViewModelProvider.Factory {

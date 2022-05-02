@@ -30,7 +30,7 @@ internal class LinkApiRepository @Inject constructor(
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
         authSessionCookie: String?
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {

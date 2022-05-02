@@ -234,7 +234,7 @@ class SupportedPaymentMethodTest {
                 formType = when {
                     formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "oneTime"
                     formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == true -> "merchantRequiredSave"
-                    formShowsSaveCheckbox == true && formShowsCheckboxControlledFields == true -> "userSelectedSave"
+                    formShowsSaveCheckbox == true -> "userSelectedSave"
                     else -> "not available"
                 }
             )

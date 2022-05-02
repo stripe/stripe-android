@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONT
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.BankRepository
@@ -35,7 +36,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 
@@ -49,6 +49,13 @@ class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = createViewModel()
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
+    )
 
     @BeforeTest
     fun setup() {
@@ -261,6 +268,111 @@ class PaymentOptionsActivityTest {
 
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            }
+        }
+    }
+
+    @Test
+    fun `ContinueButton should be enabled when primaryButtonEnabled is true`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        enabled = true
+                    )
+                )
+                assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `ContinueButton should be disabled when primaryButtonEnabled is false`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        enabled = false
+                    )
+                )
+                assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun `ContinueButton text should update when primaryButtonText updates`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        label = "Some text"
+                    )
+                )
+                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
+            }
+        }
+    }
+
+    @Test
+    fun `ContinueButton should go back to initial state after updating selection`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                viewModel.updatePrimaryButtonUIState(
+                    primaryButtonUIState.copy(
+                        label = "Some text",
+                        enabled = false
+                    )
+                )
+                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
+                assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
+
+                viewModel.updateSelection(mock())
+                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Continue")
+                assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `notes visibility is visible`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                viewModel.updateBelowButtonText(
+                    ApplicationProvider.getApplicationContext<Context>().getString(
+                        com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_us_bank_account
+                    )
+                )
+                assertThat(activity.viewBinding.notes.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `notes visibility is gone`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            idleLooper()
+            it.onActivity { activity ->
+                viewModel.updateBelowButtonText(null)
+                assertThat(activity.viewBinding.notes.isVisible).isFalse()
             }
         }
     }

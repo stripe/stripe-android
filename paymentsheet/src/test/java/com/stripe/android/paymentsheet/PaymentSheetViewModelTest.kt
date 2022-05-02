@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -38,6 +39,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -80,6 +82,13 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
+    )
 
     @Captor
     private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
@@ -780,7 +789,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
+    fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() {
         var isEnabled = false
         viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
         viewModel.ctaEnabled.observeForever {
@@ -802,6 +811,30 @@ internal class PaymentSheetViewModelTest {
         viewModel.setEditing(true)
         assertThat(isEnabled)
             .isFalse()
+
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = true
+            )
+        )
+        assertThat(isEnabled)
+            .isTrue()
+
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = false
+            )
+        )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.updateSelection(mock())
+        assertThat(isEnabled)
+            .isTrue()
     }
 
     @Test
@@ -884,6 +917,44 @@ internal class PaymentSheetViewModelTest {
             SupportedPaymentMethod.SepaDebit,
             SupportedPaymentMethod.Sofort
         )
+    }
+
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
+        val viewModel = createViewModel()
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.US_BANK_ACCOUNT
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(
+                ApplicationProvider.getApplicationContext<Context?>().getString(
+                    R.string.us_bank_account_payment_sheet_saved_mandate
+                )
+            )
+
+        viewModel.updateSelection(
+            PaymentSelection.New.GenericPaymentMethod(
+                iconResource = 0,
+                labelResource = 0,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(null)
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(null)
     }
 
     private fun createViewModel(

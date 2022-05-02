@@ -34,6 +34,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
+import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -94,6 +95,9 @@ internal fun SignUpBody(
         LocalFocusManager.current.clearFocus()
     }
 
+    var phoneNumber by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,13 +128,38 @@ internal fun SignUpBody(
         AnimatedVisibility(
             visible = signUpState == SignUpState.InputtingPhone
         ) {
-            PhoneCollectionSection(onSignUpClick)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // TODO(brnunes-stripe): Migrate to phone number collection element
+                PhoneCollectionSection(
+                    phoneNumber = phoneNumber,
+                    onPhoneNumberChanged = {
+                        phoneNumber = it
+                    }
+                )
+                LinkTerms(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
+                    textAlign = TextAlign.Center
+                )
+                PrimaryButton(
+                    label = stringResource(R.string.sign_up),
+                    state = if (phoneNumber.length == 10) {
+                        PrimaryButtonState.Enabled
+                    } else {
+                        PrimaryButtonState.Disabled
+                    }
+                ) {
+                    onSignUpClick(phoneNumber)
+                    keyboardController?.hide()
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun EmailCollectionSection(
+internal fun EmailCollectionSection(
     emailElement: SectionFieldElement,
     signUpState: SignUpState
 ) {
@@ -173,13 +202,10 @@ private fun EmailCollectionSection(
 }
 
 @Composable
-private fun PhoneCollectionSection(
-    onSignUpClick: (String) -> Unit
+internal fun PhoneCollectionSection(
+    phoneNumber: String,
+    onPhoneNumberChanged: (String) -> Unit
 ) {
-    // TODO(brnunes-stripe): Migrate to phone number collection element
-    var phone by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -188,10 +214,8 @@ private fun PhoneCollectionSection(
             TextField(
                 modifier = Modifier
                     .fillMaxWidth(),
-                value = phone,
-                onValueChange = {
-                    phone = it
-                },
+                value = phoneNumber,
+                onValueChange = onPhoneNumberChanged,
                 label = {
                     Text(text = "Mobile Number")
                 },
@@ -203,25 +227,6 @@ private fun PhoneCollectionSection(
                 ),
                 singleLine = true
             )
-        }
-        Text(
-            text = stringResource(R.string.sign_up_terms),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.caption
-        )
-        PrimaryButton(
-            label = stringResource(R.string.sign_up),
-            state = if (phone.length == 10) {
-                PrimaryButtonState.Enabled
-            } else {
-                PrimaryButtonState.Disabled
-            }
-        ) {
-            onSignUpClick(phone)
-            keyboardController?.hide()
         }
     }
 }

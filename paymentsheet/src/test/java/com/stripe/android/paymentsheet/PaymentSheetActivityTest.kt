@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
@@ -86,6 +87,13 @@ internal class PaymentSheetActivityTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
         )
+    )
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
     )
 
     @BeforeTest
@@ -873,6 +881,107 @@ internal class PaymentSheetActivityTest {
 
             viewModel._liveMode.value = false
             assertThat(activity.viewBinding.testmode.isVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `Buy button should be enabled when primaryButtonEnabled is true`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    enabled = true
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Buy button should be disabled when primaryButtonEnabled is false`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    enabled = false
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `Buy button text should update when primaryButtonText updates`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    label = "Some text"
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+        }
+    }
+
+    @Test
+    fun `Buy button should go back to initial state after resetPrimaryButton called`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._viewState.value = PaymentSheetViewState.Reset(null)
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    label = "Some text",
+                    enabled = false
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+            viewModel.updateSelection(mock())
+            assertThat(activity.viewBinding.buyButton.externalLabel)
+                .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is visible`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateBelowButtonText(
+                context.getString(
+                    R.string.stripe_paymentsheet_payment_method_us_bank_account
+                )
+            )
+            assertThat(activity.viewBinding.notes.isVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is gone`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateBelowButtonText(null)
+            assertThat(activity.viewBinding.notes.isVisible).isFalse()
         }
     }
 

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
@@ -95,6 +96,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
+        if (shouldUseDarkMode != null) {
+            val mode = if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            AppCompatDelegate.setDefaultNightMode(mode)
+        }
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
@@ -377,6 +383,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
 
     companion object {
+        const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
     }

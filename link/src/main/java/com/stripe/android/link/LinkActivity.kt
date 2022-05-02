@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -19,23 +20,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.signup.SignUpBody
-import com.stripe.android.link.ui.verification.VerificationBody
+import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 internal class LinkActivity : ComponentActivity() {
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory =
+        LinkActivityViewModel.Factory(
+            applicationSupplier = { application },
+            starterArgsSupplier = { requireNotNull(starterArgs) }
+        )
 
-    private val viewModel: LinkActivityViewModel by viewModels {
-        LinkActivityViewModel.Factory(application) { requireNotNull(starterArgs) }
-    }
+    private val viewModel: LinkActivityViewModel by viewModels { viewModelFactory }
 
     @VisibleForTesting
     lateinit var navController: NavHostController
@@ -66,7 +76,7 @@ internal class LinkActivity : ComponentActivity() {
                             onCloseButtonClick = { dismiss() }
                         )
 
-                        NavHost(navController, viewModel.startDestination) {
+                        NavHost(navController, LinkScreen.Loading.route) {
                             composable(LinkScreen.Loading.route) {
                                 Box(
                                     modifier = Modifier
@@ -92,7 +102,7 @@ internal class LinkActivity : ComponentActivity() {
                             }
                             composable(LinkScreen.Verification.route) {
                                 linkAccount?.let { account ->
-                                    VerificationBody(
+                                    VerificationBodyFullFlow(
                                         account,
                                         viewModel.injector
                                     )
@@ -113,7 +123,7 @@ internal class LinkActivity : ComponentActivity() {
                                         .fillMaxHeight(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = "<Placholder>\nAdd new payment method")
+                                    Text(text = "<Placeholder>\nAdd new payment method")
                                 }
                             }
                         }
@@ -124,6 +134,25 @@ internal class LinkActivity : ComponentActivity() {
 
         viewModel.navigator.onDismiss = ::dismiss
         viewModel.setupPaymentLauncher(this)
+
+        // Navigate to the initial screen once the view has been laid out.
+        window.decorView.rootView.viewTreeObserver.addOnGlobalLayoutListener(
+            object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    lifecycleScope.launch {
+                        viewModel.navigator.navigateTo(
+                            target = when (viewModel.linkAccountManager.accountStatus.first()) {
+                                AccountStatus.Verified -> LinkScreen.Wallet
+                                AccountStatus.NeedsVerification,
+                                AccountStatus.VerificationStarted -> LinkScreen.Verification
+                                AccountStatus.SignedOut -> LinkScreen.SignUp()
+                            },
+                            clearBackStack = true
+                        )
+                    }
+                    window.decorView.rootView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
     }
 
     override fun onDestroy() {

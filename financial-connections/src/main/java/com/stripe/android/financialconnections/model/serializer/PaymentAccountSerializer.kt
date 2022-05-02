@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.model.serializer
 
 import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.LinkedAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PaymentAccount
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
@@ -14,7 +14,8 @@ internal object PaymentAccountSerializer :
 
     override fun selectDeserializer(element: JsonElement): KSerializer<out PaymentAccount> {
         return when (element.objectValue) {
-            LinkedAccount.OBJECT -> LinkedAccount.serializer()
+            FinancialConnectionsAccount.OBJECT_OLD,
+            FinancialConnectionsAccount.OBJECT_NEW -> FinancialConnectionsAccount.serializer()
             else -> BankAccount.serializer()
         }
     }
