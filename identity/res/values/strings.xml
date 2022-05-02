@@ -95,4 +95,18 @@
   <string name="upload_dialog_title_passport">Upload passport</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Position your face in the center of the frame</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Capturing…</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">Selfie captures are complete</string>
+  <!-- Title of selfie capture -->
+  <string name="selfie_captures">Selfie captures</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Mask color to flash selfie</string>
+  <!-- Consent message to allow stripe uses the image to improve biometric verification technology -->
+  <string name="allow_image_collection">Allow Stripe to use your image to improve our biometric verification technology. You can remove Stripe\'s permissions at any time by contacting Stripe. Learn how Stripe uses data</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">one selfie captured</string>
 </resources>
