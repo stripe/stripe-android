@@ -12,6 +12,11 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.ui.core.elements.OTPSpec
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -36,6 +41,24 @@ internal class VerificationViewModel @Inject constructor(
     init {
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
+        }
+    }
+
+    val otpElement = OTPSpec.transform()
+
+    private val otpCode: StateFlow<String?> = otpElement.getFormFieldValueFlow()
+        .map {
+            it.map { field -> field.second }
+                .takeIf { entries -> entries.all { entry -> entry.isComplete } }
+                ?.map { entry -> entry.value }
+                ?.joinToString("")
+        }.stateIn(viewModelScope, SharingStarted.Lazily, "")
+
+    init {
+        viewModelScope.launch {
+            otpCode.collect { code ->
+                code?.let { onVerificationCodeEntered(code) }
+            }
         }
     }
 

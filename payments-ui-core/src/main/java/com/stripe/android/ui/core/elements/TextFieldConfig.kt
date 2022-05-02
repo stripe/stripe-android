@@ -15,7 +15,7 @@ sealed interface TextFieldConfig {
     val debugLabel: String
 
     /** This is the label to describe the field */
-    val label: Int
+    val label: Int?
 
     /** This is the type of keyboard to use for this field */
     val keyboard: KeyboardType

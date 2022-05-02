@@ -31,6 +31,8 @@ class Settings(context: Context) {
          * Note: only necessary if not configured via `gradle.properties`.
          */
         private const val BASE_URL =
+//            "https://capricious-ballistic-anaconda.glitch.me/"
+//            "https://knowledgeable-oasis-hide.glitch.me/"
             "https://stripe-mobile-payment-sheet-test-playground-v6.glitch.me/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
