@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
@@ -37,8 +38,6 @@ import kotlinx.coroutines.launch
  */
 @OptIn(FlowPreview::class)
 internal class ComposeFormDataCollectionFragment : Fragment() {
-    private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
-
     private val formLayout by lazy {
         requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
@@ -127,14 +126,12 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         formFieldValues: FormFieldValues?,
         selectedPaymentMethodResources: SupportedPaymentMethod,
     ) = formFieldValues?.let {
-        transformToPaymentMethodCreateParams.transform(
-            formFieldValues.copy(
-                fieldValuePairs = it.fieldValuePairs
-                    .filterNot { entry ->
-                        entry.key == IdentifierSpec.SaveForFutureUse ||
-                            entry.key == IdentifierSpec.CardBrand
-                    }
-            ),
+        FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+            formFieldValues.fieldValuePairs
+                .filterNot { entry ->
+                    entry.key == IdentifierSpec.SaveForFutureUse ||
+                        entry.key == IdentifierSpec.CardBrand
+                },
             selectedPaymentMethodResources.type
         ).run {
             if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
