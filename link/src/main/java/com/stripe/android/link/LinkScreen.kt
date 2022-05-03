@@ -15,7 +15,7 @@ internal sealed class LinkScreen(
     object PaymentMethod : LinkScreen("PaymentMethod")
 
     class SignUp(email: String? = null) :
-        LinkScreen("SignUp?${email?.let { "$it=${it.urlEncode()}" }}") {
+        LinkScreen("SignUp${email?.let { "?$emailArg=${it.urlEncode()}" } ?: ""}") {
         override val route = super.route
 
         companion object {

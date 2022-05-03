@@ -289,6 +289,43 @@ internal object PaymentMethodFixtures {
     )
 
     val AU_BECS_DEBIT = PaymentMethodJsonParser().parse(AU_BECS_DEBIT_JSON)
+
+    val US_BANK_ACCOUNT_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1Kr4seLu5o3P18ZperrPnk39",
+            "object": "payment_method",
+            "us_bank_account": {
+                "account_holder_type": "individual",
+                "account_type": "checking",
+                "bank_name": "STRIPE TEST BANK",
+                "fingerprint": "FFDMA0xfhBjWSZLu",
+                "last4": "6789",
+                "routing_number": "110000000"
+            },
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": "jenny.rosen@example.com",
+                "name": "Jenny Rosen",
+                "phone": null
+            },
+            "created": 1583356750,
+            "customer": null,
+            "livemode": false,
+            "metadata": null,
+            "type": "us_bank_account"
+        }
+        """.trimIndent()
+    )
+
+    val US_BANK_ACCOUNT = PaymentMethodJsonParser().parse(US_BANK_ACCOUNT_JSON)
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """

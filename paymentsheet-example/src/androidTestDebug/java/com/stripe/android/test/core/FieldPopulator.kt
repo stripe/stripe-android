@@ -1,8 +1,8 @@
 package com.stripe.android.test.core
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -33,10 +33,9 @@ class FieldPopulator(
         if (testParameters.saveForFutureUseCheckboxVisible) {
             selectors.saveForFutureCheckbox.assertExists()
             if (testParameters.saveCheckboxValue) {
-                selectors.saveForFutureCheckbox.assertIsSelected()
+                selectors.saveForFutureCheckbox.assertIsOn()
             } else {
-                // TODO(MLB): THis will be fixed in a follow up review.
-//                selectors.saveForFutureCheckbox.assertIsNotSelected()
+                selectors.saveForFutureCheckbox.assertIsOff()
             }
         } else {
             selectors.saveForFutureCheckbox.assertDoesNotExist()

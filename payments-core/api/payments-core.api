@@ -1949,6 +1949,29 @@ public abstract class com/stripe/android/model/ConsumerPaymentDetails$PaymentDet
 	public fun isDefault ()Z
 }
 
+public abstract class com/stripe/android/model/ConsumerPaymentDetailsCreateParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Companion;
+	public synthetic fun <init> (Lcom/stripe/android/model/PaymentMethod$Type;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun toParamMap ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card : com/stripe/android/model/ConsumerPaymentDetailsCreateParams {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion;
+	public fun <init> (Ljava/util/Map;)V
+	public fun describeContents ()I
+	public fun toParamMap ()Ljava/util/Map;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion {
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Companion {
+}
+
 public final class com/stripe/android/model/ConsumerSession$VerificationSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -4881,20 +4904,20 @@ public final class com/stripe/android/payments/bankaccount/di/DaggerCollectBankA
 	public fun inject (Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel$Factory;)V
 }
 
-public final class com/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession_Factory : dagger/internal/Factory {
+public final class com/stripe/android/payments/bankaccount/domain/AttachFinancialConnectionsSession_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession_Factory;
-	public fun get ()Lcom/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/domain/AttachFinancialConnectionsSession_Factory;
+	public fun get ()Lcom/stripe/android/payments/bankaccount/domain/AttachFinancialConnectionsSession;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/AttachFinancialConnectionsSession;
 }
 
-public final class com/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession_Factory : dagger/internal/Factory {
+public final class com/stripe/android/payments/bankaccount/domain/CreateFinancialConnectionsSession_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession_Factory;
-	public fun get ()Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/domain/CreateFinancialConnectionsSession_Factory;
+	public fun get ()Lcom/stripe/android/payments/bankaccount/domain/CreateFinancialConnectionsSession;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/payments/bankaccount/domain/CreateFinancialConnectionsSession;
 }
 
 public final class com/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent_Factory : dagger/internal/Factory {
@@ -4920,15 +4943,15 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/LinkAccountSession;)V
+	public fun <init> (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)V
 	public final fun component1 ()Lcom/stripe/android/model/StripeIntent;
-	public final fun component2 ()Lcom/stripe/android/financialconnections/model/LinkAccountSession;
-	public final fun copy (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/LinkAccountSession;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/LinkAccountSession;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
+	public final fun component2 ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
+	public final fun copy (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFinancialConnectionsSession ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
 	public final fun getIntent ()Lcom/stripe/android/model/StripeIntent;
-	public final fun getLinkAccountSession ()Lcom/stripe/android/financialconnections/model/LinkAccountSession;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -4981,7 +5004,7 @@ public final class com/stripe/android/payments/bankaccount/ui/CollectBankAccount
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel_Factory;
 	public fun get ()Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;Lkotlinx/coroutines/flow/MutableSharedFlow;Lcom/stripe/android/payments/bankaccount/domain/CreateLinkAccountSession;Lcom/stripe/android/payments/bankaccount/domain/AttachLinkAccountSession;Lcom/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
+	public static fun newInstance (Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;Lkotlinx/coroutines/flow/MutableSharedFlow;Lcom/stripe/android/payments/bankaccount/domain/CreateFinancialConnectionsSession;Lcom/stripe/android/payments/bankaccount/domain/AttachFinancialConnectionsSession;Lcom/stripe/android/payments/bankaccount/domain/RetrieveStripeIntent;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
 }
 
 public final class com/stripe/android/payments/core/ActivityResultLauncherHost$DefaultImpls {

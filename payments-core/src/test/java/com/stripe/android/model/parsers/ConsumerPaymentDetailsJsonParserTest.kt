@@ -9,7 +9,27 @@ import kotlin.test.assertEquals
 class ConsumerPaymentDetailsJsonParserTest {
 
     @Test
-    fun `parse card payment details`() {
+    fun `parse single card payment details`() {
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser()
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Card(
+                        id = "QAAAKJ6",
+                        isDefault = true,
+                        expiryYear = 2023,
+                        expiryMonth = 12,
+                        brand = CardBrand.MasterCard,
+                        last4 = "4444"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `parse multiple card payment details`() {
         assertEquals(
             ConsumerPaymentDetailsJsonParser().parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
             ConsumerPaymentDetails(

@@ -4,10 +4,10 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkedAccountList
-import com.stripe.android.financialconnections.model.ListLinkedAccountParams
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 
 internal interface FinancialConnectionsRepository {
     @Throws(
@@ -16,9 +16,9 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun getLinkedAccounts(
-        listLinkedAccountParams: ListLinkedAccountParams
-    ): LinkedAccountList
+    suspend fun getFinancialConnectionsAccounts(
+        getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
+    ): FinancialConnectionsAccountList
 
     @Throws(
         AuthenticationException::class,
@@ -26,9 +26,9 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun getLinkAccountSession(
+    suspend fun getFinancialConnectionsSession(
         clientSecret: String
-    ): LinkAccountSession
+    ): FinancialConnectionsSession
 
     @Throws(
         AuthenticationException::class,
@@ -36,8 +36,8 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun generateLinkAccountSessionManifest(
+    suspend fun generateFinancialConnectionsSessionManifest(
         clientSecret: String,
         applicationId: String
-    ): LinkAccountSessionManifest
+    ): FinancialConnectionsSessionManifest
 }

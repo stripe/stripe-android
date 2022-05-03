@@ -32,6 +32,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -121,10 +122,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @VisibleForTesting
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
-
-    @VisibleForTesting
-    internal val _contentVisible = MutableLiveData(true)
-    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
     internal fun getButtonStateObservable(
@@ -302,7 +299,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun resetViewState(userErrorMessage: String? = null) {
         _viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        savedStateHandle.set(SAVE_PROCESSING, false)
+        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
@@ -312,7 +309,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         this.checkoutIdentifier = checkoutIdentifier
-        savedStateHandle.set(SAVE_PROCESSING, true)
+        savedStateHandle[SAVE_PROCESSING] = true
         _viewState.value = PaymentSheetViewState.StartProcessing
     }
 
@@ -353,6 +350,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    override fun updateSelection(selection: PaymentSelection?) {
+        super.updateSelection(selection)
+
+        when (selection) {
+            is PaymentSelection.Saved -> {
+                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
+                    updateBelowButtonText(
+                        getApplication<Application>().getString(
+                            R.string.us_bank_account_payment_sheet_saved_mandate
+                        )
+                    )
+                }
+            }
+            else -> {
+                // no-op
+            }
+        }
+    }
+
     override fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
         super.registerFromActivity(activityResultCaller)
         paymentLauncher = paymentLauncherFactory.create(
@@ -370,10 +386,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentLauncher = null
     }
 
-    fun setContentVisible(visible: Boolean) {
-        _contentVisible.value = visible
-    }
-
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -388,14 +400,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun launchLink() {
-    }
-
     override fun onLinkLaunched() {
+        super.onLinkLaunched()
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
 
     override fun onLinkPaymentResult(result: LinkActivityResult) {
+        super.onLinkPaymentResult(result)
         onPaymentResult(result.convertToPaymentResult())
     }
 

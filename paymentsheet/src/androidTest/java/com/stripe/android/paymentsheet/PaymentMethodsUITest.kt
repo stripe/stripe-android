@@ -65,6 +65,31 @@ internal class PaymentMethodsUITest {
     }
 
     @Test
+    fun testUSBankAccount() {
+        composeTestRule.setContent {
+            PaymentMethodsUI(
+                paymentMethods = listOf(
+                    SupportedPaymentMethod.Bancontact,
+                    SupportedPaymentMethod.Sofort,
+                    SupportedPaymentMethod.AfterpayClearpay,
+                    SupportedPaymentMethod.USBankAccount
+                ),
+                selectedIndex = 4,
+                isEnabled = true,
+                onItemSelectedListener = {}
+            )
+        }
+
+        // Expect the value to be equal to the width of the screen
+        // minus the left and right padding for each card
+        // calculateViewWidth(
+        //     composeTestRule.activity.resources.displayMetrics,
+        //     paymentMethods.size
+        // ) - (CARD_HORIZONTAL_PADDING.dp * 2)
+        usBankAccount.assertWidthIsEqualTo(116.0.dp)
+    }
+
+    @Test
     fun testPmItemIsDisabledWhenListDisabled() {
         val enableListControl = MutableStateFlow(true)
         composeTestRule.setContent {
@@ -158,6 +183,13 @@ internal class PaymentMethodsUITest {
         get() = composeTestRule.onNodeWithTag(
             TEST_TAG_LIST + composeTestRule.activity.resources.getString(
                 SupportedPaymentMethod.Eps.displayNameResource
+            )
+        )
+
+    private val usBankAccount
+        get() = composeTestRule.onNodeWithTag(
+            TEST_TAG_LIST + composeTestRule.activity.resources.getString(
+                SupportedPaymentMethod.USBankAccount.displayNameResource
             )
         )
 

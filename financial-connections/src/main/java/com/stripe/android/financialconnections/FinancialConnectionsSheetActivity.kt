@@ -107,7 +107,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
     }
 
     /**
-     * If the back button is pressed during the manifest fetch or link account session fetch
+     * If the back button is pressed during the manifest fetch or session fetch
      * return canceled result
      */
     override fun onBackPressed() {

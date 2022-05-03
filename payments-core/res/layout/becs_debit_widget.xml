@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionNext"
-                    android:drawableStart="@drawable/stripe_ic_bank" />
+                    android:drawableStart="@drawable/stripe_ic_bank_becs" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout

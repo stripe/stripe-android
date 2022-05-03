@@ -20,7 +20,7 @@ class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val labe
             .performScrollToNode(hasText(resource.getString(label)))
         composeTestRule.waitForIdle()
         composeTestRule
-            .onNodeWithText(resource.getString(label))
+            .onNodeWithTag(TEST_TAG_LIST + resource.getString(label))
             .assertIsDisplayed()
             .assertIsEnabled()
             .performClick()

@@ -253,7 +253,7 @@ sealed class SupportedPaymentMethod(
         val userSelectableSave = LayoutFormDescriptor(
             formSpec,
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            showCheckboxControlledFields = false
         )
 
         if (!stripeIntent.paymentMethodTypes.contains(type.code)) {

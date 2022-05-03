@@ -15,7 +15,7 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 internal class IDScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(
+) : IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {

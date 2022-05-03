@@ -16,12 +16,14 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import javax.inject.Inject
@@ -95,28 +97,68 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved, PaymentSelection.GooglePay -> processExistingCard(
-                    paymentSelection
-                )
-                is PaymentSelection.New -> processNewCard(paymentSelection)
+                is PaymentSelection.Saved -> {
+                    // We don't want the USBankAccount selection to close the payment sheet right
+                    // away, the user needs to accept a mandate
+                    if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
+                        processExistingPaymentMethod(
+                            paymentSelection
+                        )
+                    }
+                }
+                is PaymentSelection.GooglePay -> processExistingPaymentMethod(paymentSelection)
+                is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
         }
     }
 
     override fun onLinkLaunched() {
+        super.onLinkLaunched()
         _processing.value = true
     }
 
     override fun onLinkPaymentResult(result: LinkActivityResult) {
+        super.onLinkPaymentResult(result)
         _processing.value = false
     }
 
-    private fun processExistingCard(paymentSelection: PaymentSelection) {
+    override fun updateSelection(selection: PaymentSelection?) {
+        super.updateSelection(selection)
+
+        when (selection) {
+            is PaymentSelection.Saved -> {
+                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
+                    updateBelowButtonText(
+                        getApplication<Application>().getString(
+                            R.string.us_bank_account_payment_sheet_saved_mandate
+                        )
+                    )
+                    updatePrimaryButtonUIState(
+                        PrimaryButton.UIState(
+                            label = getApplication<Application>().getString(
+                                R.string.stripe_paymentsheet_continue_button_label
+                            ),
+                            visible = true,
+                            enabled = true,
+                            onClick = {
+                                processExistingPaymentMethod(selection)
+                            }
+                        )
+                    )
+                }
+            }
+            else -> {
+                // no-op
+            }
+        }
+    }
+
+    private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
-    private fun processNewCard(paymentSelection: PaymentSelection) {
+    private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }

@@ -5,6 +5,9 @@ public final class com/stripe/android/ui/core/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/ui/core/MeasureComposableWidthKt {
+}
+
 public final class com/stripe/android/ui/core/PaymentsThemeKt {
 }
 
@@ -99,6 +102,9 @@ public final class com/stripe/android/ui/core/elements/H4TextKt {
 }
 
 public final class com/stripe/android/ui/core/elements/H6TextKt {
+}
+
+public final class com/stripe/android/ui/core/elements/HtmlKt {
 }
 
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardBrand : com/stripe/android/ui/core/elements/IdentifierSpec {

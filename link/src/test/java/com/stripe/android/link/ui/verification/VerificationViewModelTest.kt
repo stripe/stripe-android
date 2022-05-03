@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +33,9 @@ class VerificationViewModelTest {
     private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
     private val logger = Logger.noop()
-    private val linkAccount = mock<LinkAccount>()
+    private val linkAccount = mock<LinkAccount>().apply {
+        whenever(accountStatus).thenReturn(AccountStatus.VerificationStarted)
+    }
 
     @Test
     fun `onResendCodeClicked triggers verification start`() = runTest {
@@ -40,7 +43,7 @@ class VerificationViewModelTest {
             .thenReturn(Result.success(mock()))
 
         val viewModel = createViewModel()
-        viewModel.onResendCodeClicked()
+        viewModel.startVerification()
 
         verify(linkAccountManager).startVerification()
     }

@@ -21,7 +21,7 @@ class FinancialConnectionsPaymentsProxyTest {
     private val mockActivity: AppCompatActivity = mock()
 
     private class FakeProxy : FinancialConnectionsPaymentsProxy {
-        override fun present(linkAccountSessionClientSecret: String, publishableKey: String) {
+        override fun present(financialConnectionsSessionClientSecret: String, publishableKey: String) {
             // noop
         }
     }
