@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,15 +46,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Preview
 @Composable
 private fun Preview() {
-    LinkInlineSignup(
-        merchantName = "Example, Inc.",
-        emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email")),
-        signUpState = SignUpState.InputtingEmail,
-        isExpanded = true,
-        toggleExpanded = {},
-        onPhoneInputCompleted = {},
-        onUserInteracted = {}
-    )
+    DefaultLinkTheme {
+        Surface {
+            LinkInlineSignup(
+                merchantName = "Example, Inc.",
+                emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email@me.co")),
+                signUpState = SignUpState.InputtingEmail,
+                isExpanded = true,
+                toggleExpanded = {},
+                onPhoneInputCompleted = {},
+                onUserInteracted = {}
+            )
+        }
+    }
 }
 
 @Composable
