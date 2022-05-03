@@ -1,8 +1,8 @@
 # CHANGELOG
-## x.x.x - xxxx-xx-xx
+## 20.2.1 - 2022-05-03
+This release contains bug fixes in PaymentSheet and Payments.
 
 ### Payments
-
 * [CHANGED] [4910](https://github.com/stripe/stripe-android/pull/4910) Some changes affecting CollectBankAccountLauncher (ACH)
   * `CollectBankAccountResponse#LinkAccountSession` to `FinancialConnectionsSession`
   * `LinkedAccount` to `FinancialConnectionsAccount`.
