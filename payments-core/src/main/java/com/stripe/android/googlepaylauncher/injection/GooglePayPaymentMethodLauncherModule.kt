@@ -13,6 +13,7 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [GooglePayPaymentMethodLauncherViewModelSubcomponent::class]
 )
+@SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class GooglePayPaymentMethodLauncherModule {
     @Binds
     @Singleton

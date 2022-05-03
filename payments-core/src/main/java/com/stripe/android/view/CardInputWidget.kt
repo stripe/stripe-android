@@ -1037,6 +1037,7 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    @SuppressWarnings("UnnecessaryAbstractClass")
     private abstract class CardFieldAnimation : Animation() {
         init {
             duration = ANIMATION_LENGTH
