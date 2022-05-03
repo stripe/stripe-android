@@ -28,8 +28,6 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">戻る</string>
   <string name="stripe_paymentsheet_close">閉じる</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">続ける</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

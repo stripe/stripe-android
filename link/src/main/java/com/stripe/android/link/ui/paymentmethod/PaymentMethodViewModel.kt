@@ -1,13 +1,11 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -18,10 +16,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -37,7 +32,7 @@ import javax.inject.Provider
  * how the user interacts with it to add a new payment method.
  */
 internal class PaymentMethodViewModel @Inject constructor(
-    args: LinkActivityContract.Args,
+    val args: LinkActivityContract.Args,
     val linkAccount: LinkAccount,
     private val linkRepository: LinkRepository,
     private val linkAccountManager: LinkAccountManager,
@@ -52,14 +47,6 @@ internal class PaymentMethodViewModel @Inject constructor(
     val isEnabled: Flow<Boolean> = _isProcessing.map { !it }
 
     val paymentMethod = SupportedPaymentMethod.Card()
-
-    fun payButtonLabel(resources: Resources) = when (stripeIntent) {
-        is PaymentIntent -> Amount(
-            requireNotNull(stripeIntent.amount),
-            requireNotNull(stripeIntent.currency)
-        ).buildPayButtonLabel(resources)
-        is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
-    }
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
         val createParams = paymentMethod.createParams(
@@ -76,7 +63,14 @@ internal class PaymentMethodViewModel @Inject constructor(
                 linkAccount.clientSecret
             ).fold(
                 onSuccess = {
-                    completePayment(it, paymentMethod, formValues)
+                    val paymentDetails = it.paymentDetails.first()
+                    if (args.completePayment) {
+                        completePayment(paymentDetails, paymentMethod, formValues)
+                    } else {
+                        val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                            .createPaymentMethodCreateParams(linkAccount.clientSecret, paymentDetails)
+                        navigator.dismiss(LinkActivityResult.Success.Selected(paymentDetails, params))
+                    }
                 },
                 onFailure = ::onError
             )
@@ -89,14 +83,14 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private fun completePayment(
-        paymentDetails: ConsumerPaymentDetails,
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         paymentMethod: SupportedPaymentMethod,
         formValues: Map<IdentifierSpec, FormFieldEntry>
     ) {
         val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-            .create(
+            .createConfirmStripeIntentParams(
                 linkAccount.clientSecret,
-                paymentDetails.paymentDetails.first(),
+                paymentDetails,
                 paymentMethod.extraConfirmationParams(formValues)
             )
 
@@ -111,7 +105,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             onError(paymentResult.throwable)
                         }
                         is PaymentResult.Completed ->
-                            navigator.dismiss(LinkActivityResult.Success)
+                            navigator.dismiss(LinkActivityResult.Success.Completed)
                     }
                 },
                 onFailure = ::onError

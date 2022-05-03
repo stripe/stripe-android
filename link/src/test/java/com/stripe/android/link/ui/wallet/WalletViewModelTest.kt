@@ -56,6 +56,7 @@ class WalletViewModelTest {
     fun before() {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
+        whenever(args.completePayment).thenReturn(true)
     }
 
     @Test
@@ -87,28 +88,35 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `When PaymentIntent then button label displays amount`() {
-        val label = createViewModel().payButtonLabel(getContext().resources)
-
-        assertThat(label).isEqualTo("Pay $10.99")
-    }
-
-    @Test
-    fun `When SetupIntent then button label displays set up`() {
-        whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.SI_NEXT_ACTION_REDIRECT)
-
-        val label = createViewModel().payButtonLabel(getContext().resources)
-
-        assertThat(label).isEqualTo("Set up")
-    }
-
-    @Test
-    fun `completePayment starts payment confirmation`() {
+    fun `onSelectedPaymentDetails returns PaymentMethodCreateParams when completePayment is false`() {
+        whenever(args.completePayment).thenReturn(false)
         val clientSecret = "client_secret"
         whenever(linkAccount.clientSecret).thenReturn(clientSecret)
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
-        createViewModel().completePayment(paymentDetails)
+        createViewModel().onSelectedPaymentDetails(paymentDetails)
+
+        val paramsCaptor = argumentCaptor<LinkActivityResult>()
+        verify(navigator).dismiss(paramsCaptor.capture())
+
+        assertThat(paramsCaptor.firstValue).isEqualTo(
+            LinkActivityResult.Success.Selected(
+                paymentDetails,
+                PaymentMethodCreateParams.createLink(
+                    paymentDetails.id,
+                    clientSecret
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `onSelectedPaymentDetails starts payment confirmation when completePayment is true`() {
+        val clientSecret = "client_secret"
+        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+
+        createViewModel().onSelectedPaymentDetails(paymentDetails)
 
         val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
         verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
@@ -125,7 +133,7 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `completePayment dismisses on success`() = runTest {
+    fun `onSelectedPaymentDetails dismisses on success`() = runTest {
         whenever(confirmationManager.confirmStripeIntent(any(), any())).thenAnswer { invocation ->
             (invocation.getArgument(1) as? PaymentConfirmationCallback)?.let {
                 it(Result.success(PaymentResult.Completed))
@@ -136,9 +144,9 @@ class WalletViewModelTest {
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
-        createViewModel().completePayment(paymentDetails)
+        createViewModel().onSelectedPaymentDetails(paymentDetails)
 
-        verify(navigator).dismiss(LinkActivityResult.Success)
+        verify(navigator).dismiss(LinkActivityResult.Success.Completed)
     }
 
     @Test

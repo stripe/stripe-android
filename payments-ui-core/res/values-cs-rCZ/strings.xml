@@ -70,8 +70,12 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Uložit pro budoucí platby %s</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Naskenovat kartu</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Tím, že zadáte informace o platbě a potvrdíte tuto platbu, udělujete společnosti (A) %s a Stripe, našemu poskytovateli platebních služeb, oprávnění zaslat do vaší banky pokyny k zatížení vašeho účtu a (B) vaší bance zatížit váš účet na základě těchto pokynů. V rámci svých práv máte nárok na refundaci od banky na základě smluvních podmínek vaší smlouvy s bankou. Refundaci je nutné nárokovat během 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat od banky.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Pokračovat</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Zaplatit %s</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

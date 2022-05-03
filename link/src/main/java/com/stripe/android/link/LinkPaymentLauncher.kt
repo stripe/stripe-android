@@ -101,9 +101,17 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      *
      * This will fetch the user's account if they're already logged in, or lookup the email passed
      * in during instantiation.
+     *
+     * @param stripeIntent the PaymentIntent or SetupIntent
+     * @param completePayment whether the payment should be completed, or the selected payment
+     *  method should be returned as a result.
+     *
      */
-    suspend fun setup(stripeIntent: StripeIntent): AccountStatus {
-        val component = setupDependencies(stripeIntent)
+    suspend fun setup(
+        stripeIntent: StripeIntent,
+        completePayment: Boolean
+    ): AccountStatus {
+        val component = setupDependencies(stripeIntent, completePayment)
         accountStatus = component.linkAccountManager.accountStatus
         linkAccountManager = component.linkAccountManager
         return accountStatus.first()
@@ -116,9 +124,13 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         activityResultLauncher.launch(args)
     }
 
-    private fun setupDependencies(stripeIntent: StripeIntent): LinkPaymentLauncherComponent {
+    private fun setupDependencies(
+        stripeIntent: StripeIntent,
+        completePayment: Boolean
+    ): LinkPaymentLauncherComponent {
         val args = LinkActivityContract.Args(
             stripeIntent,
+            completePayment,
             merchantName,
             customerEmail,
             LinkActivityContract.Args.InjectionParams(

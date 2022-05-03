@@ -27,17 +27,18 @@ internal class PaymentMethodScreenTest {
                 LinkActivityContract.EXTRA_ARGS,
                 LinkActivityContract.Args(
                     StripeIntentFixtures.PI_SUCCEEDED,
+                    true,
                     "Merchant, Inc"
                 )
             )
         }
     }
 
-    private val payButtonLabel = "Pay $10.99"
+    private val primaryButtonLabel = "Pay $10.99"
     private val payAnotherWayButtonLabel = "Pay another way"
 
     @Test
-    fun buy_button_shows_progress_indicator_when_processing() {
+    fun primary_button_shows_progress_indicator_when_processing() {
         setContent(isProcessing = true)
         onProgressIndicator().assertExists()
     }
@@ -55,14 +56,14 @@ internal class PaymentMethodScreenTest {
             }
         )
 
-        onPayButton().assertDoesNotExist()
+        onPrimaryButton().assertDoesNotExist()
         onPayAnotherWayButton().performClick()
 
         assertThat(count).isEqualTo(0)
     }
 
     @Test
-    fun pay_button_does_not_trigger_event_when_disabled() {
+    fun primary_button_does_not_trigger_event_when_disabled() {
         var count = 0
         setContent(
             isProcessing = false,
@@ -72,7 +73,7 @@ internal class PaymentMethodScreenTest {
             }
         )
 
-        onPayButton().performClick()
+        onPrimaryButton().performClick()
 
         assertThat(count).isEqualTo(0)
     }
@@ -100,16 +101,16 @@ internal class PaymentMethodScreenTest {
         DefaultLinkTheme {
             PaymentMethodBody(
                 isProcessing = isProcessing,
-                payButtonLabel = payButtonLabel,
-                payButtonEnabled = payButtonEnabled,
-                onPayButtonClick = onPayButtonClick,
+                primaryButtonLabel = primaryButtonLabel,
+                primaryButtonEnabled = payButtonEnabled,
+                onPrimaryButtonClick = onPayButtonClick,
                 onPayAnotherWayClick = onPayAnotherWayClick,
                 formContent = {}
             )
         }
     }
 
-    private fun onPayButton() = composeTestRule.onNodeWithText(payButtonLabel)
+    private fun onPrimaryButton() = composeTestRule.onNodeWithText(primaryButtonLabel)
     private fun onPayAnotherWayButton() = composeTestRule.onNodeWithText(payAnotherWayButtonLabel)
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
 }

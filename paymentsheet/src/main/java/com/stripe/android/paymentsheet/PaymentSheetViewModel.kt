@@ -240,9 +240,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntentValidator.requireValid(stripeIntent)
         }.fold(
             onSuccess = {
-                savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
+                savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
                 updatePaymentMethods(stripeIntent)
-                setupLink(stripeIntent)
+                setupLink(stripeIntent, true)
                 resetViewState()
             },
             onFailure = ::onFatal

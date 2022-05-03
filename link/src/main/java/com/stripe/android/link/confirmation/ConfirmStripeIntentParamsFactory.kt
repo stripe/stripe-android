@@ -11,16 +11,22 @@ import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.RawValue
 
 /**
- * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams] from a
- * [ConsumerPaymentDetails.PaymentDetails].
+ * Factory class for creating [PaymentMethodCreateParams] and [ConfirmPaymentIntentParams] or
+ * [ConfirmSetupIntentParams] from a [ConsumerPaymentDetails.PaymentDetails].
  */
 internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams> {
 
-    abstract fun create(
+    abstract fun createConfirmStripeIntentParams(
         consumerSessionClientSecret: String,
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         extraParams: Map<String, @RawValue Any>? = null
     ): T
+
+    abstract fun createPaymentMethodCreateParams(
+        consumerSessionClientSecret: String,
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        extraParams: Map<String, @RawValue Any>? = null
+    ): PaymentMethodCreateParams
 
     companion object {
         fun createFactory(stripeIntent: StripeIntent) =
@@ -34,33 +40,53 @@ internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeInte
 internal class ConfirmPaymentIntentParamsFactory(
     private val paymentIntent: PaymentIntent
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
-    override fun create(
+    override fun createConfirmStripeIntentParams(
         consumerSessionClientSecret: String,
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         extraParams: Map<String, @RawValue Any>?
     ) = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-        PaymentMethodCreateParams.createLink(
-            selectedPaymentDetails.id,
+        createPaymentMethodCreateParams(
             consumerSessionClientSecret,
+            selectedPaymentDetails,
             extraParams
         ),
         paymentIntent.clientSecret!!
+    )
+
+    override fun createPaymentMethodCreateParams(
+        consumerSessionClientSecret: String,
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        extraParams: Map<String, Any>?
+    ) = PaymentMethodCreateParams.createLink(
+        selectedPaymentDetails.id,
+        consumerSessionClientSecret,
+        extraParams
     )
 }
 
 internal class ConfirmSetupIntentParamsFactory(
     private val setupIntent: SetupIntent
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
-    override fun create(
+    override fun createConfirmStripeIntentParams(
         consumerSessionClientSecret: String,
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         extraParams: Map<String, @RawValue Any>?
     ) = ConfirmSetupIntentParams.Companion.create(
-        PaymentMethodCreateParams.createLink(
-            selectedPaymentDetails.id,
+        createPaymentMethodCreateParams(
             consumerSessionClientSecret,
+            selectedPaymentDetails,
             extraParams
         ),
         setupIntent.clientSecret!!
+    )
+
+    override fun createPaymentMethodCreateParams(
+        consumerSessionClientSecret: String,
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        extraParams: Map<String, Any>?
+    ) = PaymentMethodCreateParams.createLink(
+        selectedPaymentDetails.id,
+        consumerSessionClientSecret,
+        extraParams
     )
 }

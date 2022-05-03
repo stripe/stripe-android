@@ -27,6 +27,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.primaryButtonLabel
 
 @Preview
 @Composable
@@ -35,9 +36,9 @@ private fun PaymentMethodBodyPreview() {
         Surface {
             PaymentMethodBody(
                 isProcessing = false,
-                payButtonLabel = "Pay $10.99",
-                payButtonEnabled = true,
-                onPayButtonClick = {},
+                primaryButtonLabel = "Pay $10.99",
+                primaryButtonEnabled = true,
+                onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
             ) {}
         }
@@ -62,9 +63,9 @@ internal fun PaymentMethodBody(
 
     PaymentMethodBody(
         isProcessing = isProcessing,
-        payButtonLabel = viewModel.payButtonLabel(LocalContext.current.resources),
-        payButtonEnabled = formValues != null,
-        onPayButtonClick = {
+        primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+        primaryButtonEnabled = formValues != null,
+        onPrimaryButtonClick = {
             formValues?.let {
                 viewModel.startPayment(it)
             }
@@ -81,9 +82,9 @@ internal fun PaymentMethodBody(
 @Composable
 internal fun PaymentMethodBody(
     isProcessing: Boolean,
-    payButtonLabel: String,
-    payButtonEnabled: Boolean,
-    onPayButtonClick: () -> Unit,
+    primaryButtonLabel: String,
+    primaryButtonEnabled: Boolean,
+    onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
@@ -104,14 +105,14 @@ internal fun PaymentMethodBody(
         )
         formContent()
         PrimaryButton(
-            label = payButtonLabel,
+            label = primaryButtonLabel,
             state = when {
                 isProcessing -> PrimaryButtonState.Processing
-                payButtonEnabled -> PrimaryButtonState.Enabled
+                primaryButtonEnabled -> PrimaryButtonState.Enabled
                 else -> PrimaryButtonState.Disabled
             },
             icon = R.drawable.stripe_ic_lock,
-            onButtonClick = onPayButtonClick
+            onButtonClick = onPrimaryButtonClick
         )
         TextButton(
             onClick = onPayAnotherWayClick,

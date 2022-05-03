@@ -28,8 +28,6 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Înapoi</string>
   <string name="stripe_paymentsheet_close">Închidere</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Continuare</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Sau folosiți ca metodă de plată</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
