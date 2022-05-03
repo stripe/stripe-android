@@ -57,7 +57,7 @@ internal class FormViewModel @Inject internal constructor(
     private val sectionToFieldIdentifierMap = formSpec.items
         .filterIsInstance<SectionSpec>()
         .associate { sectionSpec ->
-            sectionSpec.identifier to sectionSpec.fields.map {
+            sectionSpec.api_path to sectionSpec.fields.map {
                 it.identifier
             }
         }
