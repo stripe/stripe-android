@@ -8,8 +8,8 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 internal data class AfterpayClearpayTextSpec(
-    override val identifier: IdentifierSpec
+    override val api_path: IdentifierSpec
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(amount: Amount): FormElement =
-        AfterpayClearpayHeaderElement(this.identifier, amount)
+        AfterpayClearpayHeaderElement(this.api_path, amount)
 }

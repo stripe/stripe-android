@@ -13,7 +13,7 @@ sealed class FormItemSpec : Parcelable {
         label: Int? = null
     ) =
         SectionElement(
-            IdentifierSpec.Generic("${sectionFieldElement.identifier.value}_section"),
+            IdentifierSpec.Generic("${sectionFieldElement.identifier.v1}_section"),
             sectionFieldElement,
             SectionController(
                 label,

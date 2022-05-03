@@ -6,11 +6,11 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class EmailSpec(
-    override val identifier: IdentifierSpec = IdentifierSpec.Email
+    override val api_path: IdentifierSpec = IdentifierSpec.Email
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         EmailElement(
-            this.identifier,
+            this.api_path,
             initialValue = initialValues[IdentifierSpec.Email]
         )
     )

@@ -9,18 +9,18 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class NameSpec(
-    override val identifier: IdentifierSpec = IdentifierSpec.Name
+    override val api_path: IdentifierSpec = IdentifierSpec.Name
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         SimpleTextElement(
-            this.identifier,
+            this.api_path,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
                     label = R.string.address_label_name,
                     capitalization = KeyboardCapitalization.Words,
                     keyboard = KeyboardType.Text
                 ),
-                initialValue = initialValues[this.identifier]
+                initialValue = initialValues[this.api_path]
             ),
         )
     )

@@ -147,7 +147,7 @@ internal class FormViewModelTest {
         assertThat(values[0]).isTrue()
 
         formViewModel.setSaveForFutureUse(false)
-        formViewModel.addHiddenIdentifiers(listOf(emailSection.identifier))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.api_path))
 
         assertThat(values[1]).isFalse()
     }
@@ -197,7 +197,7 @@ internal class FormViewModelTest {
         )
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
             null
         )
     }
@@ -223,12 +223,12 @@ internal class FormViewModelTest {
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
             .filterIsInstance(SaveForFutureUseController::class.java).first()
 
-        formViewModel.addHiddenIdentifiers(listOf(emailSection.identifier))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.api_path))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
-            nameSection.identifier.value
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
+            nameSection.api_path.v1
         )
     }
 
@@ -261,14 +261,14 @@ internal class FormViewModelTest {
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs
         ).containsKey(
-            emailSection.identifier
+            emailSection.api_path
         )
 
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.identifier
+            emailSection.api_path
         )
     }
 
@@ -300,7 +300,7 @@ internal class FormViewModelTest {
         // Verify formFieldValues is null because the email is required and invalid
         assertThat(formViewModel.completeFormValues.first()).isNull()
 
-        formViewModel.addHiddenIdentifiers(listOf(emailSection.identifier))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.api_path))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues is not null even though the email is invalid
@@ -310,7 +310,7 @@ internal class FormViewModelTest {
             completeFormFieldValues
         ).isNotNull()
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.identifier
+            emailSection.api_path
         )
         assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
             PaymentSelection.CustomerRequestedSave.RequestNoReuse
@@ -428,7 +428,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.identifier)
+                        ?.get(emailSection.api_path)
                         ?.value
                 ).isNotNull()
             } else {
@@ -437,7 +437,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.identifier)
+                        ?.get(emailSection.api_path)
                         ?.value
                 ).isNull()
             }
@@ -468,7 +468,7 @@ internal class FormViewModelTest {
             R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
                 ?.value
         ).isNull()
 
@@ -477,7 +477,7 @@ internal class FormViewModelTest {
             R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
                 ?.value
         ).isNull()
 
@@ -486,7 +486,7 @@ internal class FormViewModelTest {
             R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.identifier)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
                 ?.value
         ).isNull()
 
@@ -504,7 +504,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(emailSection.identifier)
+                            ?.get(emailSection.api_path)
                             ?.value
                     ).isNotNull()
                 } else {
@@ -513,7 +513,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(emailSection.identifier)
+                            ?.get(emailSection.api_path)
                             ?.value
                     ).isNull()
                 }

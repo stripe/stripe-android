@@ -6,16 +6,16 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class AuBankAccountNumberSpec(
-    override val identifier: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[account_number]")
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[account_number]")
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(
         SimpleTextElement(
-            this.identifier,
+            this.api_path,
             SimpleTextFieldController(
                 AuBankAccountNumberConfig(),
-                initialValue = initialValues[this.identifier]
+                initialValue = initialValues[this.api_path]
             )
         )
     )

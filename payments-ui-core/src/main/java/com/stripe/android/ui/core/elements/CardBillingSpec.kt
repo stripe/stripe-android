@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Parcelize
 data class CardBillingSpec(
-    override val identifier: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
     val countryCodes: Set<String>
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(

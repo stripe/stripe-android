@@ -81,7 +81,7 @@ class TransformSpecToElements(
                 )
                 is BankDropdownSpec -> it.transform(
                     resourceRepository.getBankRepository(),
-                    initialValues[it.identifier]
+                    initialValues[it.api_path]
                 )
                 is SimpleTextSpec -> it.transform(initialValues)
             }

@@ -10,7 +10,7 @@ import kotlinx.parcelize.RawValue
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class SimpleTextSpec(
-    override val identifier: IdentifierSpec,
+    override val api_path: IdentifierSpec,
     @StringRes val label: Int,
     val capitalization: @RawValue KeyboardCapitalization,
     val keyboardType: @RawValue KeyboardType,
@@ -20,14 +20,14 @@ data class SimpleTextSpec(
         initialValues: Map<IdentifierSpec, String?> = mapOf()
     ) = createSectionElement(
         SimpleTextElement(
-            this.identifier,
+            this.api_path,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
                     label = this.label,
                     capitalization = this.capitalization,
                     keyboard = this.keyboardType
                 ),
-                initialValue = initialValues[this.identifier],
+                initialValue = initialValues[this.api_path],
                 showOptionalLabel = this.showOptionalLabel
             )
         )

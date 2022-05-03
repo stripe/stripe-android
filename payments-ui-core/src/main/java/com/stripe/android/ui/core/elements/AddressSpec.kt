@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class AddressSpec(
-    override val identifier: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
     val countryCodes: Set<String>
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
@@ -16,7 +16,7 @@ data class AddressSpec(
         addressRepository: AddressFieldElementRepository
     ) = createSectionElement(
         AddressElement(
-            identifier,
+            api_path,
             addressRepository,
             initialValues,
             countryCodes = countryCodes
