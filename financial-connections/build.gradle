@@ -32,7 +32,7 @@ dependencies {
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    testImplementation 'app.cash.turbine:turbine:0.7.0'
+    testImplementation 'app.cash.turbine:turbine:0.8.0'
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"

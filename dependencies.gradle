@@ -11,5 +11,5 @@ ext.configs = [
 ]
 
 ext.testLibs = [
-        turbine: "app.cash.turbine:turbine:0.7.0"
+        turbine: "app.cash.turbine:turbine:0.8.0"
 ]
