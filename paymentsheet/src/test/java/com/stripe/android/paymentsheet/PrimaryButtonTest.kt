@@ -36,11 +36,6 @@ class PrimaryButtonTest {
     }
 
     @Test
-    fun `force failure to test failure endpoint`(){
-        assertThat(true).isFalse()
-    }
-
-    @Test
     fun `onFinishingState() should clear any tint and restore onReadyState()`() {
         primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
         primaryButton.updateState(

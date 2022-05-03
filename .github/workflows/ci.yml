@@ -69,10 +69,6 @@ jobs:
         with:
           name: unit-test-report
           path: payments-core/build/reports/tests/testDebugUnitTest/
-      - name: Notify failure endpoint
-        id: notifyFailureEndpoint
-        if: failure()
-        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
 
   end-to-end-tests:
     name: End-to-end tests
