@@ -86,7 +86,7 @@ ext {
     androidTestJunitVersion = '1.1.3'
     truthVersion = '1.1.3'
     junitVersion = '4.13.2'
-    robolectricVersion = '4.7.3'
+    robolectricVersion = '4.8'
     mockitoCoreVersion = '4.5.1'
     mockitoKotlinVersion = '4.0.0'
     espressoVersion = '3.4.0'
