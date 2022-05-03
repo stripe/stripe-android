@@ -57,7 +57,7 @@ class TransformToPaymentMethodCreateParamMapTest {
             showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         ).fieldValuePairs.entries.forEach {
-            addPath(map, getKeys(it.key.value), it.value.value)
+            addPath(map, getKeys(it.key.v1), it.value.value)
         }
         assertThat(map).isEqualTo(
             mapOf(

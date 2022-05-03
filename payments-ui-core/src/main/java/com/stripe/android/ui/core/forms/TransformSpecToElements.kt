@@ -90,7 +90,7 @@ class TransformSpecToElements(
         // The controller of the section element will be the same as the field element
         // as there is only a single field in a section
         return SectionElement(
-            this.identifier,
+            this.api_path,
             fieldElements,
             SectionController(
                 this.title,
