@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,8 +46,6 @@ internal fun TextField(
     imeAction: ImeAction,
     enabled: Boolean
 ) {
-    Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
-
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
     val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
