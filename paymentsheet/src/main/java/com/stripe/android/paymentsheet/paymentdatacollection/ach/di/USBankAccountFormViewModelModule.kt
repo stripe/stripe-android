@@ -11,9 +11,10 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
-@Module
-internal object USBankAccountFormModule {
-
+@Module(
+    subcomponents = [USBankAccountFormViewModelSubcomponent::class]
+)
+internal class USBankAccountFormViewModelModule {
     @Provides
     fun providesAppContext(application: Application): Context = application
 

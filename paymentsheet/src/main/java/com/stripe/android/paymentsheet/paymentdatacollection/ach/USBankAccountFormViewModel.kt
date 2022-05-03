@@ -10,6 +10,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.core.networking.ApiRequest
@@ -28,6 +32,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -44,6 +49,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
@@ -115,7 +121,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 _currentScreenState.update {
                                     USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                         intentId = intentId,
-                                        linkedAccountId =
+                                        linkAccountId =
                                         result.response.financialConnectionsSession.id,
                                         bankName = paymentAccount.bankName,
                                         displayName = paymentAccount.bankName,
@@ -132,7 +138,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 _currentScreenState.update {
                                     USBankAccountFormScreenState.MandateCollection(
                                         intentId = intentId,
-                                        linkedAccountId =
+                                        linkAccountId =
                                         result.response.financialConnectionsSession.id,
                                         bankName = paymentAccount.institutionName,
                                         displayName = paymentAccount.displayName,
@@ -187,7 +193,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun attach(
         clientSecret: ClientSecret,
         intentId: String,
-        linkedAccountId: String
+        linkAccountId: String
     ) {
         viewModelScope.launch {
             when (clientSecret) {
@@ -195,7 +201,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
                         clientSecret.value,
                         intentId,
-                        linkedAccountId,
+                        linkAccountId,
                         ApiRequest.Options(
                             apiKey = lazyPaymentConfig.get().publishableKey,
                             stripeAccount = lazyPaymentConfig.get().stripeAccountId
@@ -206,7 +212,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
                         clientSecret.value,
                         intentId,
-                        linkedAccountId,
+                        linkAccountId,
                         ApiRequest.Options(
                             apiKey = lazyPaymentConfig.get().publishableKey,
                             stripeAccount = lazyPaymentConfig.get().stripeAccountId
@@ -220,7 +226,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 last4?.let { last4 ->
                     bankName?.let { bankName ->
                         _currentScreenState.update {
-                            USBankAccountFormScreenState.Finished(last4, bankName)
+                            USBankAccountFormScreenState.Finished(linkAccountId, last4, bankName)
                         }
                     }
                 }
@@ -270,12 +276,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         collectBankAccountLauncher = null
     }
 
-    class Factory(
+    internal class Factory(
         private val applicationSupplier: () -> Application,
         private val argsSupplier: () -> Args,
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val application: Application,
+        )
+
+        @Inject
+        lateinit var subComponentBuilderProvider:
+            Provider<USBankAccountFormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -283,18 +297,29 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            return DaggerUSBankAccountFormComponent.builder()
-                .application(applicationSupplier())
-                .configuration(argsSupplier())
+            val args = argsSupplier()
+
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+
+            return subComponentBuilderProvider.get()
+                .configuration(args)
                 .savedStateHandle(savedStateHandle)
-                .build()
-                .viewModel as T
+                .build().viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            DaggerUSBankAccountFormComponent
+                .builder()
+                .application(arg.application)
+                .injectorKey(DUMMY_INJECTOR_KEY)
+                .build().inject(this)
         }
     }
 
     data class Args(
         val formArgs: FormFragmentArguments,
         val isPaymentSheet: Boolean,
+        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 
     private companion object {

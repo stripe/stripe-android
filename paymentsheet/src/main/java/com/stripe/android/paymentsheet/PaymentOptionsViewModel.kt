@@ -63,6 +63,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
+    private val _error = MutableLiveData<String>()
+    internal val error: LiveData<String>
+        get() = _error
+
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newLpm = args.newLpm
@@ -99,9 +103,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onError(@StringRes error: Int?) {
         error?.let {
-            onFatal(
-                Throwable(getApplication<Application>().getString(error))
-            )
+            _error.value = getApplication<Application>().getString(error)
         }
     }
 

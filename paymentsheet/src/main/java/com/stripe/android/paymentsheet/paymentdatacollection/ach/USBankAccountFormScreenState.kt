@@ -9,7 +9,7 @@ sealed class USBankAccountFormScreenState {
     ) : USBankAccountFormScreenState()
     data class MandateCollection(
         val intentId: String,
-        val linkedAccountId: String,
+        val linkAccountId: String,
         val bankName: String?,
         val displayName: String?,
         val last4: String?,
@@ -17,16 +17,17 @@ sealed class USBankAccountFormScreenState {
     ) : USBankAccountFormScreenState()
     data class VerifyWithMicrodeposits(
         val intentId: String,
-        val linkedAccountId: String,
+        val linkAccountId: String,
         val bankName: String?,
         val displayName: String?,
         val last4: String?,
         val saveForFutureUse: Boolean
     ) : USBankAccountFormScreenState()
     data class ConfirmIntent(
-        val intent: ConfirmStripeIntentParams
+        val confirmIntentParams: ConfirmStripeIntentParams
     ) : USBankAccountFormScreenState()
     data class Finished(
+        val linkAccountId: String,
         val last4: String,
         val bankName: String
     ) : USBankAccountFormScreenState()

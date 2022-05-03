@@ -25,13 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -57,7 +58,9 @@ import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Fragment that displays a form for us_bank_account payment data collection
@@ -148,169 +151,85 @@ internal class USBankAccountFormFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        lifecycleScope.launchWhenStarted {
-            viewModel.requiredFields.collect {
-                sheetViewModel?.updatePrimaryButtonUIState(
-                    sheetViewModel?.primaryButtonUIState?.value?.copy(
-                        enabled = it
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.requiredFields.collect {
+                    sheetViewModel?.updatePrimaryButtonUIState(
+                        sheetViewModel?.primaryButtonUIState?.value?.copy(
+                            enabled = it
+                        )
                     )
-                )
+                }
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.saveForFutureUse.collect { saved ->
-                updateMandateText(
-                    if (saved) {
-                        getString(
-                            R.string.us_bank_account_payment_sheet_mandate_save,
-                            formattedMerchantName()
-                        )
-                    } else {
-                        getString(R.string.us_bank_account_payment_sheet_mandate_continue)
-                    }
-                )
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.currentScreenState.collect { screenState ->
-                when (screenState) {
-                    is USBankAccountFormScreenState.NameAndEmailCollection -> {
-                        setContent {
-                            PaymentsTheme {
-                                NameAndEmailCollectionScreen(screenState.error)
-                            }
-                        }
-                        updatePrimaryButton(
-                            text = getString(
-                                R.string.us_bank_account_payment_sheet_primary_button_continue
-                            ),
-                            onClick = {
-                                clientSecret?.let {
-                                    viewModel.collectBankAccount(it)
-                                }
-                            },
-                            enabled = viewModel.requiredFields.stateIn(this).value,
-                        )
-                        updateMandateText(null)
-                    }
-                    is USBankAccountFormScreenState.MandateCollection -> {
-                        setContent {
-                            PaymentsTheme {
-                                MandateCollectionScreen(
-                                    screenState.bankName,
-                                    screenState.displayName,
-                                    screenState.last4
-                                )
-                            }
-                        }
-                        updatePrimaryButton(
-                            text = if (isPaymentSheet) {
-                                sheetViewModel
-                                    ?.amount
-                                    ?.value
-                                    ?.buildPayButtonLabel(context.resources)
-                            } else {
-                                getString(
-                                    R.string.us_bank_account_payment_sheet_primary_button_continue
-                                )
-                            },
-                            onClick = {
-                                clientSecret?.let {
-                                    viewModel.attach(
-                                        clientSecret = it,
-                                        intentId = screenState.intentId,
-                                        linkedAccountId = screenState.linkedAccountId
-                                    )
-                                }
-                            },
-                            shouldProcess = isPaymentSheet
-                        )
-                        updateMandateText(
-                            if (screenState.saveForFutureUse) {
-                                getString(
-                                    R.string.us_bank_account_payment_sheet_mandate_save,
-                                    formattedMerchantName()
-                                )
-                            } else {
-                                getString(
-                                    R.string.us_bank_account_payment_sheet_mandate_continue
-                                )
-                            }
-                        )
-                    }
-                    is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                        setContent {
-                            PaymentsTheme {
-                                VerifyWithMicrodepositsScreen(
-                                    screenState.bankName,
-                                    screenState.displayName,
-                                    screenState.last4
-                                )
-                            }
-                        }
-                        updatePrimaryButton(
-                            text = if (isPaymentSheet) {
-                                sheetViewModel
-                                    ?.amount
-                                    ?.value
-                                    ?.buildPayButtonLabel(context.resources)
-                            } else {
-                                getString(
-                                    R.string.us_bank_account_payment_sheet_primary_button_continue
-                                )
-                            },
-                            onClick = {
-                                clientSecret?.let {
-                                    viewModel.attach(
-                                        clientSecret = it,
-                                        intentId = screenState.intentId,
-                                        linkedAccountId = screenState.linkedAccountId
-                                    )
-                                }
-                            },
-                            shouldProcess = isPaymentSheet
-                        )
-                        updateMandateText(
-                            if (screenState.saveForFutureUse) {
-                                getString(
-                                    R.string.us_bank_account_payment_sheet_mandate_save,
-                                    formattedMerchantName()
-                                )
-                            } else {
-                                getString(
-                                    R.string.us_bank_account_payment_sheet_mandate_continue
-                                )
-                            }
-                        )
-                    }
-                    is USBankAccountFormScreenState.ConfirmIntent -> {
-                        (sheetViewModel as? PaymentSheetViewModel)
-                            ?.confirmStripeIntent(screenState.intent)
-                    }
-                    is USBankAccountFormScreenState.Finished -> {
-                        sheetViewModel?.updateSelection(
-                            PaymentSelection.New.GenericPaymentMethod(
-                                label = getString(
-                                    R.string.paymentsheet_payment_method_item_card_number,
-                                    screenState.last4
-                                ),
-                                labelResource =
-                                R.string.stripe_paymentsheet_payment_method_us_bank_account,
-                                iconResource = TransformToBankIcon(
-                                    screenState.bankName
-                                ),
-                                paymentMethodCreateParams =
-                                PaymentMethodCreateParams.createUSBankAccount(
-                                    PaymentMethod.BillingDetails(
-                                        name = viewModel.name.value,
-                                        email = viewModel.email.value
-                                    )
-                                ),
-                                customerRequestedSave =
-                                PaymentSelection.CustomerRequestedSave.RequestReuse
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.saveForFutureUse.collect { saved ->
+                    updateMandateText(
+                        if (saved) {
+                            getString(
+                                R.string.us_bank_account_payment_sheet_mandate_save,
+                                formattedMerchantName()
                             )
-                        )
-                        sheetViewModel?.onFinish()
+                        } else {
+                            getString(R.string.us_bank_account_payment_sheet_mandate_continue)
+                        }
+                    )
+                }
+            }
+        }
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.currentScreenState.collect { screenState ->
+                    when (screenState) {
+                        is USBankAccountFormScreenState.NameAndEmailCollection -> {
+                            renderNameAndEmailCollectionScreen(screenState, this)
+                        }
+                        is USBankAccountFormScreenState.MandateCollection -> {
+                            renderMandateCollectionScreen(screenState)
+                        }
+                        is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
+                            renderVerifyWithMicrodepositsScreen(screenState)
+                        }
+                        is USBankAccountFormScreenState.ConfirmIntent -> {
+                            (sheetViewModel as? PaymentSheetViewModel)
+                                ?.confirmStripeIntent(screenState.confirmIntentParams)
+                        }
+                        is USBankAccountFormScreenState.Finished -> {
+                            sheetViewModel?.updateSelection(
+                                PaymentSelection.New.GenericPaymentMethod(
+                                    label = getString(
+                                        R.string.paymentsheet_payment_method_item_card_number,
+                                        screenState.last4
+                                    ),
+                                    labelResource =
+                                    R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                                    iconResource = TransformToBankIcon(
+                                        screenState.bankName
+                                    ),
+                                    paymentMethodCreateParams =
+                                    PaymentMethodCreateParams.create(
+                                        usBankAccount = PaymentMethodCreateParams.USBankAccount(
+                                            linkAccountSessionId = screenState.linkAccountId
+                                        ),
+                                        billingDetails = PaymentMethod.BillingDetails(
+                                            name = viewModel.name.value,
+                                            email = viewModel.email.value
+                                        )
+                                    ),
+                                    customerRequestedSave = if (formArgs.showCheckbox) {
+                                        if (viewModel.saveForFutureUse.value) {
+                                            PaymentSelection.CustomerRequestedSave.RequestReuse
+                                        } else {
+                                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                                        }
+                                    } else {
+                                        PaymentSelection.CustomerRequestedSave.NoRequest
+                                    }
+                                )
+                            )
+                            sheetViewModel?.onFinish()
+                        }
                     }
                 }
             }
@@ -320,6 +239,125 @@ internal class USBankAccountFormFragment : Fragment() {
     override fun onDetach() {
         viewModel.onDestroy()
         super.onDetach()
+    }
+
+    private suspend fun ComposeView.renderNameAndEmailCollectionScreen(
+        screenState: USBankAccountFormScreenState.NameAndEmailCollection,
+        coroutineScope: CoroutineScope
+    ) {
+        setContent {
+            PaymentsTheme {
+                NameAndEmailCollectionScreen(screenState.error)
+            }
+        }
+        updatePrimaryButton(
+            text = getString(
+                R.string.us_bank_account_payment_sheet_primary_button_continue
+            ),
+            onClick = {
+                clientSecret?.let {
+                    viewModel.collectBankAccount(it)
+                }
+            },
+            enabled = viewModel.requiredFields.stateIn(coroutineScope).value,
+        )
+        updateMandateText(null)
+    }
+
+    private fun ComposeView.renderMandateCollectionScreen(
+        screenState: USBankAccountFormScreenState.MandateCollection
+    ) {
+        setContent {
+            PaymentsTheme {
+                MandateCollectionScreen(
+                    screenState.bankName,
+                    screenState.displayName,
+                    screenState.last4
+                )
+            }
+        }
+        updatePrimaryButton(
+            text = if (isPaymentSheet) {
+                sheetViewModel
+                    ?.amount
+                    ?.value
+                    ?.buildPayButtonLabel(context.resources)
+            } else {
+                getString(
+                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                )
+            },
+            onClick = {
+                clientSecret?.let {
+                    viewModel.attach(
+                        clientSecret = it,
+                        intentId = screenState.intentId,
+                        linkAccountId = screenState.linkAccountId
+                    )
+                }
+            },
+            shouldProcess = isPaymentSheet
+        )
+        updateMandateText(
+            if (screenState.saveForFutureUse) {
+                getString(
+                    R.string.us_bank_account_payment_sheet_mandate_save,
+                    formattedMerchantName()
+                )
+            } else {
+                getString(
+                    R.string.us_bank_account_payment_sheet_mandate_continue
+                )
+            }
+        )
+    }
+
+    private fun ComposeView.renderVerifyWithMicrodepositsScreen(
+        screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
+    ) {
+        setContent {
+            PaymentsTheme {
+                VerifyWithMicrodepositsScreen(
+                    screenState.bankName,
+                    screenState.displayName,
+                    screenState.last4
+                )
+            }
+        }
+        updatePrimaryButton(
+            text = if (isPaymentSheet) {
+                sheetViewModel
+                    ?.amount
+                    ?.value
+                    ?.buildPayButtonLabel(context.resources)
+            } else {
+                getString(
+                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                )
+            },
+            onClick = {
+                clientSecret?.let {
+                    viewModel.attach(
+                        clientSecret = it,
+                        intentId = screenState.intentId,
+                        linkAccountId = screenState.linkAccountId
+                    )
+                }
+            },
+            shouldProcess = isPaymentSheet
+        )
+        updateMandateText(
+            if (screenState.saveForFutureUse) {
+                getString(
+                    R.string.us_bank_account_payment_sheet_mandate_save,
+                    formattedMerchantName()
+                )
+            } else {
+                getString(
+                    R.string.us_bank_account_payment_sheet_mandate_continue
+                )
+            }
+        )
     }
 
     @Composable
@@ -413,7 +451,7 @@ internal class USBankAccountFormFragment : Fragment() {
         last4: String?
     ) {
         val openDialog = remember { mutableStateOf(false) }
-        val bankIcon = TransformToBankIcon(bankName ?: "")
+        val bankIcon = TransformToBankIcon(bankName)
 
         Column(
             Modifier.fillMaxWidth().padding(bottom = 8.dp)
@@ -438,7 +476,7 @@ internal class USBankAccountFormFragment : Fragment() {
                                 .height(40.dp)
                                 .width(56.dp)
                         )
-                        Text(text = "$displayName ••••$last4", fontWeight = FontWeight.Bold)
+                        Text(text = "$displayName ••••$last4")
                     }
                     Image(
                         painter = painterResource(R.drawable.stripe_ic_clear),
@@ -514,8 +552,8 @@ internal class USBankAccountFormFragment : Fragment() {
         return formArgs.merchantName.trimEnd { it == '.' }
     }
 
-    private fun updateMandateText(text: String?) {
-        val microdepositText =
+    private fun updateMandateText(mandateText: String?) {
+        val microdepositsText =
             if (viewModel.currentScreenState.value
                 is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
@@ -524,11 +562,11 @@ internal class USBankAccountFormFragment : Fragment() {
                     formattedMerchantName()
                 )
             } else ""
-        val updatedText = text?.let {
+        val updatedText = mandateText?.let {
             """
-                $microdepositText
+                $microdepositsText
                 
-                $text
+                $mandateText
             """.trimIndent()
         } ?: run { null }
         sheetViewModel?.updateBelowButtonText(updatedText)
