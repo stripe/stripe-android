@@ -1,5 +1,5 @@
 # CHANGELOG
-## 20.3.0 - 2022-05-03
+## 20.2.1 - 2022-05-03
 This release contains bug fixes in PaymentSheet and Payments.
 
 ### Payments
