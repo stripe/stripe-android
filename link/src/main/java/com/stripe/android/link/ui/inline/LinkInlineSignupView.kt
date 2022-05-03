@@ -180,6 +180,9 @@ class LinkInlineSignupView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : AbstractComposeView(context, attrs, defStyle) {
 
+    override var shouldCreateCompositionOnAttachedToWindow: Boolean = false
+        private set
+
     var linkLauncher: LinkPaymentLauncher? = null
 
     /**
