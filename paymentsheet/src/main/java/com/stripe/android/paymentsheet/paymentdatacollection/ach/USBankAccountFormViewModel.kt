@@ -53,12 +53,24 @@ import javax.inject.Provider
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
+    private val application: Application,
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _currentScreenState: MutableStateFlow<USBankAccountFormScreenState> =
-        MutableStateFlow(USBankAccountFormScreenState.NameAndEmailCollection())
+        MutableStateFlow(
+            USBankAccountFormScreenState.NameAndEmailCollection(
+                primaryButtonText = application.getString(
+                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                ),
+                primaryButtonOnClick = {
+                    args.clientSecret?.let {
+                        collectBankAccount(it)
+                    }
+                }
+            )
+        )
     val currentScreenState: StateFlow<USBankAccountFormScreenState>
         get() = _currentScreenState
 
@@ -120,13 +132,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 last4 = paymentAccount.last4
                                 _currentScreenState.update {
                                     USBankAccountFormScreenState.VerifyWithMicrodeposits(
-                                        intentId = intentId,
-                                        linkAccountId =
-                                        result.response.financialConnectionsSession.id,
                                         bankName = paymentAccount.bankName,
                                         displayName = paymentAccount.bankName,
                                         last4 = paymentAccount.last4,
-                                        saveForFutureUse = saveForFutureUse.value
+                                        primaryButtonText = buildPrimaryButtonText(),
+                                        primaryButtonOnClick = {
+                                            args.clientSecret?.let {
+                                                attach(
+                                                    clientSecret = it,
+                                                    intentId = intentId,
+                                                    linkAccountId =
+                                                    result.response.financialConnectionsSession.id
+                                                )
+                                            }
+                                        },
+                                        mandateText = buildMandateText()
                                     )
                                 }
                             }
@@ -136,14 +156,23 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 bankName = paymentAccount.institutionName
                                 last4 = paymentAccount.last4
                                 _currentScreenState.update {
+                                    this.args.formArgs.amount
                                     USBankAccountFormScreenState.MandateCollection(
-                                        intentId = intentId,
-                                        linkAccountId =
-                                        result.response.financialConnectionsSession.id,
                                         bankName = paymentAccount.institutionName,
                                         displayName = paymentAccount.displayName,
                                         last4 = paymentAccount.last4,
-                                        saveForFutureUse = saveForFutureUse.value
+                                        primaryButtonText = buildPrimaryButtonText(),
+                                        primaryButtonOnClick = {
+                                            args.clientSecret?.let {
+                                                attach(
+                                                    clientSecret = it,
+                                                    intentId = intentId,
+                                                    linkAccountId =
+                                                    result.response.financialConnectionsSession.id
+                                                )
+                                            }
+                                        },
+                                        mandateText = buildMandateText()
                                     )
                                 }
                             }
@@ -267,13 +296,53 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
         _currentScreenState.update {
-            USBankAccountFormScreenState.NameAndEmailCollection(error)
+            USBankAccountFormScreenState.NameAndEmailCollection(
+                error = error,
+                primaryButtonText = application.getString(
+                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                ),
+                primaryButtonOnClick = { }
+            )
         }
     }
 
     fun onDestroy() {
         paymentLauncher = null
         collectBankAccountLauncher = null
+    }
+
+    fun formattedMerchantName(): String {
+        return args.formArgs.merchantName.trimEnd { it == '.' }
+    }
+
+    private fun buildPrimaryButtonText(): String? {
+        return when {
+            args.isPaymentSheet -> {
+                if (args.clientSecret is PaymentIntentClientSecret) {
+                    args.formArgs.amount?.buildPayButtonLabel(application.resources)
+                } else {
+                    application.getString(
+                        R.string.stripe_setup_button_label
+                    )
+                }
+            }
+            else -> application.getString(
+                R.string.us_bank_account_payment_sheet_primary_button_continue
+            )
+        }
+    }
+
+    private fun buildMandateText(): String {
+        return if (saveForFutureUse.value) {
+            application.getString(
+                R.string.us_bank_account_payment_sheet_mandate_save,
+                formattedMerchantName()
+            )
+        } else {
+            application.getString(
+                R.string.us_bank_account_payment_sheet_mandate_continue
+            )
+        }
     }
 
     internal class Factory(
@@ -319,6 +388,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     data class Args(
         val formArgs: FormFragmentArguments,
         val isPaymentSheet: Boolean,
+        val clientSecret: ClientSecret?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 

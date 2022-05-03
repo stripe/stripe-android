@@ -5,23 +5,25 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 
 sealed class USBankAccountFormScreenState {
     class NameAndEmailCollection(
-        @StringRes val error: Int? = null
+        @StringRes val error: Int? = null,
+        val primaryButtonText: String?,
+        val primaryButtonOnClick: () -> Unit,
     ) : USBankAccountFormScreenState()
     data class MandateCollection(
-        val intentId: String,
-        val linkAccountId: String,
         val bankName: String?,
         val displayName: String?,
         val last4: String?,
-        val saveForFutureUse: Boolean
+        val primaryButtonText: String?,
+        val primaryButtonOnClick: () -> Unit,
+        val mandateText: String
     ) : USBankAccountFormScreenState()
     data class VerifyWithMicrodeposits(
-        val intentId: String,
-        val linkAccountId: String,
         val bankName: String?,
         val displayName: String?,
         val last4: String?,
-        val saveForFutureUse: Boolean
+        val primaryButtonText: String?,
+        val primaryButtonOnClick: () -> Unit,
+        val mandateText: String
     ) : USBankAccountFormScreenState()
     data class ConfirmIntent(
         val confirmIntentParams: ConfirmStripeIntentParams

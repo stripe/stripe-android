@@ -132,7 +132,13 @@ internal class USBankAccountFormFragment : Fragment() {
     private val viewModel by viewModels<USBankAccountFormViewModel> {
         USBankAccountFormViewModel.Factory(
             { requireActivity().application },
-            { USBankAccountFormViewModel.Args(formArgs, sheetViewModel is PaymentSheetViewModel) },
+            {
+                USBankAccountFormViewModel.Args(
+                    formArgs,
+                    sheetViewModel is PaymentSheetViewModel,
+                    clientSecret
+                )
+            },
             this
         )
     }
@@ -169,7 +175,7 @@ internal class USBankAccountFormFragment : Fragment() {
                         if (saved) {
                             getString(
                                 R.string.us_bank_account_payment_sheet_mandate_save,
-                                formattedMerchantName()
+                                viewModel.formattedMerchantName()
                             )
                         } else {
                             getString(R.string.us_bank_account_payment_sheet_mandate_continue)
@@ -251,14 +257,8 @@ internal class USBankAccountFormFragment : Fragment() {
             }
         }
         updatePrimaryButton(
-            text = getString(
-                R.string.us_bank_account_payment_sheet_primary_button_continue
-            ),
-            onClick = {
-                clientSecret?.let {
-                    viewModel.collectBankAccount(it)
-                }
-            },
+            text = screenState.primaryButtonText,
+            onClick = screenState.primaryButtonOnClick,
             enabled = viewModel.requiredFields.stateIn(coroutineScope).value,
         )
         updateMandateText(null)
@@ -277,38 +277,12 @@ internal class USBankAccountFormFragment : Fragment() {
             }
         }
         updatePrimaryButton(
-            text = if (isPaymentSheet) {
-                sheetViewModel
-                    ?.amount
-                    ?.value
-                    ?.buildPayButtonLabel(context.resources)
-            } else {
-                getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
-                )
-            },
-            onClick = {
-                clientSecret?.let {
-                    viewModel.attach(
-                        clientSecret = it,
-                        intentId = screenState.intentId,
-                        linkAccountId = screenState.linkAccountId
-                    )
-                }
-            },
+            text = screenState.primaryButtonText,
+            onClick = screenState.primaryButtonOnClick,
             shouldProcess = isPaymentSheet
         )
         updateMandateText(
-            if (screenState.saveForFutureUse) {
-                getString(
-                    R.string.us_bank_account_payment_sheet_mandate_save,
-                    formattedMerchantName()
-                )
-            } else {
-                getString(
-                    R.string.us_bank_account_payment_sheet_mandate_continue
-                )
-            }
+            screenState.mandateText
         )
     }
 
@@ -325,38 +299,12 @@ internal class USBankAccountFormFragment : Fragment() {
             }
         }
         updatePrimaryButton(
-            text = if (isPaymentSheet) {
-                sheetViewModel
-                    ?.amount
-                    ?.value
-                    ?.buildPayButtonLabel(context.resources)
-            } else {
-                getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
-                )
-            },
-            onClick = {
-                clientSecret?.let {
-                    viewModel.attach(
-                        clientSecret = it,
-                        intentId = screenState.intentId,
-                        linkAccountId = screenState.linkAccountId
-                    )
-                }
-            },
+            text = screenState.primaryButtonText,
+            onClick = screenState.primaryButtonOnClick,
             shouldProcess = isPaymentSheet
         )
         updateMandateText(
-            if (screenState.saveForFutureUse) {
-                getString(
-                    R.string.us_bank_account_payment_sheet_mandate_save,
-                    formattedMerchantName()
-                )
-            } else {
-                getString(
-                    R.string.us_bank_account_payment_sheet_mandate_continue
-                )
-            }
+            screenState.mandateText
         )
     }
 
@@ -529,27 +477,21 @@ internal class USBankAccountFormFragment : Fragment() {
         visible: Boolean = true
     ) {
         sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
-        text?.let {
-            sheetViewModel?.updatePrimaryButtonUIState(
-                PrimaryButton.UIState(
-                    label = text,
-                    onClick = {
-                        if (shouldProcess) {
-                            sheetViewModel?.updatePrimaryButtonState(
-                                PrimaryButton.State.StartProcessing
-                            )
-                        }
-                        onClick()
-                    },
-                    enabled = enabled,
-                    visible = visible
-                )
+        sheetViewModel?.updatePrimaryButtonUIState(
+            PrimaryButton.UIState(
+                label = text,
+                onClick = {
+                    if (shouldProcess) {
+                        sheetViewModel?.updatePrimaryButtonState(
+                            PrimaryButton.State.StartProcessing
+                        )
+                    }
+                    onClick()
+                },
+                enabled = enabled,
+                visible = visible
             )
-        }
-    }
-
-    private fun formattedMerchantName(): String {
-        return formArgs.merchantName.trimEnd { it == '.' }
+        )
     }
 
     private fun updateMandateText(mandateText: String?) {
@@ -559,7 +501,7 @@ internal class USBankAccountFormFragment : Fragment() {
             ) {
                 getString(
                     R.string.us_bank_account_payment_sheet_mandate_verify_with_microdeposit,
-                    formattedMerchantName()
+                    viewModel.formattedMerchantName()
                 )
             } else ""
         val updatedText = mandateText?.let {

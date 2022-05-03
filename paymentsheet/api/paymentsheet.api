@@ -755,129 +755,139 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USB
 	public final fun copy (Lcom/stripe/android/model/ConfirmStripeIntentParams;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ConfirmIntent;
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ConfirmIntent;Lcom/stripe/android/model/ConfirmStripeIntentParams;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$ConfirmIntent;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getIntent ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
+	public final fun getConfirmIntentParams ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished : com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBankName ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
+	public final fun getLinkAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection : com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;
+	public final fun component5 ()Lkotlin/jvm/functions/Function0;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$MandateCollection;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBankName ()Ljava/lang/String;
 	public final fun getDisplayName ()Ljava/lang/String;
-	public final fun getIntentId ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
-	public final fun getLinkedAccountId ()Ljava/lang/String;
-	public final fun getSaveForFutureUse ()Z
+	public final fun getMandateText ()Ljava/lang/String;
+	public final fun getPrimaryButtonOnClick ()Lkotlin/jvm/functions/Function0;
+	public final fun getPrimaryButtonText ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$NameAndEmailCollection : com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState {
 	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/Integer;)V
-	public synthetic fun <init> (Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getError ()Ljava/lang/Integer;
+	public final fun getPrimaryButtonOnClick ()Lkotlin/jvm/functions/Function0;
+	public final fun getPrimaryButtonText ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits : com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;
+	public final fun component5 ()Lkotlin/jvm/functions/Function0;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$VerifyWithMicrodeposits;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBankName ()Ljava/lang/String;
 	public final fun getDisplayName ()Ljava/lang/String;
-	public final fun getIntentId ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
-	public final fun getLinkedAccountId ()Ljava/lang/String;
-	public final fun getSaveForFutureUse ()Z
+	public final fun getMandateText ()Ljava/lang/String;
+	public final fun getPrimaryButtonOnClick ()Lkotlin/jvm/functions/Function0;
+	public final fun getPrimaryButtonText ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Args;Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Args;Landroid/app/Application;Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory_MembersInjector : dagger/MembersInjector {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
+	public fun injectMembers (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;)V
+	public synthetic fun injectMembers (Ljava/lang/Object;)V
+	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;Ljavax/inject/Provider;)V
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/DaggerUSBankAccountFormComponent : com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormComponent$Builder;
-	public fun getViewModel ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
 	public fun inject (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;)V
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidePaymentConfigurationFactory;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePaymentConfigurationFactory;
 	public fun get ()Lcom/stripe/android/PaymentConfiguration;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentConfiguration (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
+	public static fun providePaymentConfiguration (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidePublishableKeyFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidePublishableKeyFactory;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePublishableKeyFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePublishableKeyFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun providePublishableKey (Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+	public static fun providePublishableKey (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidesAppContextFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidesAppContextFactory;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesAppContextFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesAppContextFactory;
 	public fun get ()Landroid/content/Context;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesAppContext (Landroid/app/Application;)Landroid/content/Context;
+	public static fun providesAppContext (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;Landroid/app/Application;)Landroid/content/Context;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidesEnableLoggingFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidesEnableLoggingFactory;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesEnableLoggingFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)V
+	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesEnableLoggingFactory;
 	public fun get ()Ljava/lang/Boolean;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesEnableLogging ()Z
+	public static fun providesEnableLogging (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Z
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidesProductUsageFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormModule_ProvidesProductUsageFactory;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesProductUsageFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)V
+	public static fun create (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidesProductUsageFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/util/Set;
-	public static fun providesProductUsage ()Ljava/util/Set;
+	public static fun providesProductUsage (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule;)Ljava/util/Set;
 }
 
 public final class com/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory : dagger/internal/Factory {
