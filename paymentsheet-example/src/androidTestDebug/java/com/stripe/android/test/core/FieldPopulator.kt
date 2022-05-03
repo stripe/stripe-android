@@ -235,10 +235,10 @@ class FieldPopulator(
         return (!saveCheckboxValue
             && saveForFutureUseSpec?.identifierRequiredForFutureUse
             ?.map { saveForFutureUseHidesIdentifier ->
-                saveForFutureUseHidesIdentifier.identifier.value
+                saveForFutureUseHidesIdentifier.api_path.v1
             }
             ?.firstOrNull { saveForFutureUseHidesIdentifier ->
-                saveForFutureUseHidesIdentifier == section.identifier.value
+                saveForFutureUseHidesIdentifier == section.api_path.v1
             } != null)
 
     }

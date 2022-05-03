@@ -1375,6 +1375,6 @@ public class StripeTest {
     }
 
     private void idle() {
-        shadowOf(getMainLooper()).idle();
+        idleLooper();
     }
 }
