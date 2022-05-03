@@ -1,5 +1,6 @@
 package com.stripe.android.test.core
 
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
 /**
@@ -20,7 +21,8 @@ data class TestParameters(
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
     val takeScreenshotOnLpmLoad: Boolean = false,
-    val forceDarkMode: Boolean? = null
+    val forceDarkMode: Boolean? = null,
+    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
 )
 
 /**

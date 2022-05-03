@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -371,6 +370,10 @@ class PlaygroundTestDriver(
         intent.putExtra(
             PaymentSheetPlaygroundActivity.FORCE_DARK_MODE_EXTRA,
             testParameters.forceDarkMode
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
+            testParameters.appearance
         )
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
