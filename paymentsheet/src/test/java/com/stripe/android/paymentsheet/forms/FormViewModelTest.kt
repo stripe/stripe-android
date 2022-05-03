@@ -231,7 +231,7 @@ internal class FormViewModelTest {
         )
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
             null
         )
     }
@@ -260,8 +260,8 @@ internal class FormViewModelTest {
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
-            nameSection.fields.first().identifier.value
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
+            nameSection.fields.first().identifier.v1
         )
     }
 
@@ -301,7 +301,7 @@ internal class FormViewModelTest {
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.identifier
+            emailSection.api_path
         )
     }
 
@@ -342,7 +342,7 @@ internal class FormViewModelTest {
             completeFormFieldValues
         ).isNotNull()
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.identifier
+            emailSection.api_path
         )
         assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
             PaymentSelection.CustomerRequestedSave.RequestNoReuse

@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * specs that need to be found when pre-populating fields, or when extracting data.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class IdentifierSpec(val value: String) : Parcelable {
+sealed class IdentifierSpec(val v1: String) : Parcelable {
     @Parcelize
     data class Generic(private val _value: String) : IdentifierSpec(_value)
 
@@ -57,18 +57,18 @@ sealed class IdentifierSpec(val value: String) : Parcelable {
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
-            CardBrand.value -> CardBrand
-            CardNumber.value -> CardNumber
-            City.value -> City
-            Country.value -> Country
-            Email.value -> Email
-            Line1.value -> Line1
-            Line2.value -> Line2
-            Name.value -> Name
-            Phone.value -> Phone
-            PostalCode.value -> PostalCode
-            SaveForFutureUse.value -> SaveForFutureUse
-            State.value -> State
+            CardBrand.v1 -> CardBrand
+            CardNumber.v1 -> CardNumber
+            City.v1 -> City
+            Country.v1 -> Country
+            Email.v1 -> Email
+            Line1.v1 -> Line1
+            Line2.v1 -> Line2
+            Name.v1 -> Name
+            Phone.v1 -> Phone
+            PostalCode.v1 -> PostalCode
+            SaveForFutureUse.v1 -> SaveForFutureUse
+            State.v1 -> State
             else -> {
                 Generic(value)
             }

@@ -35,6 +35,12 @@ jobs:
           name: instrumentation-test-report
           path: example/build/reports/androidTests/connected/index.html
 
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
+
+
   # This should be updated to use the browserstack github actions when supported
   browserstack-instrumentation-tests:
     name: Browserstack Instrumentation tests
@@ -67,3 +73,8 @@ jobs:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         run: python scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
