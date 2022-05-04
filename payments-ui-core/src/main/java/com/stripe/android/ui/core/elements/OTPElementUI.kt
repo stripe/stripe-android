@@ -32,17 +32,7 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-@Preview
-@Composable
-private fun OTPElementPreview() {
-    OTPElementUI(
-        enabled = true,
-        element = OTPSpec.transform()
-    )
-}
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
