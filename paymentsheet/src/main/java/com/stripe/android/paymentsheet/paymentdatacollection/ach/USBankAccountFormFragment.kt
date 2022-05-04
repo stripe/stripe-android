@@ -204,12 +204,10 @@ internal class USBankAccountFormFragment : Fragment() {
                         is USBankAccountFormScreenState.Finished -> {
                             sheetViewModel?.updateSelection(
                                 PaymentSelection.New.GenericPaymentMethod(
-                                    label = getString(
+                                    labelResource = getString(
                                         R.string.paymentsheet_payment_method_item_card_number,
                                         screenState.last4
                                     ),
-                                    labelResource =
-                                    R.string.stripe_paymentsheet_payment_method_us_bank_account,
                                     iconResource = TransformToBankIcon(
                                         screenState.bankName
                                     ),

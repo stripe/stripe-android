@@ -125,7 +125,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             Amount(50, "USD"),
             "testInjectorKey",
             PaymentSelection.New.GenericPaymentMethod(
-                R.string.stripe_paymentsheet_payment_method_bancontact,
+                context.getString(R.string.stripe_paymentsheet_payment_method_bancontact),
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 paymentMethodCreateParams,
                 PaymentSelection.CustomerRequestedSave.NoRequest

@@ -46,7 +46,7 @@ internal class PaymentOptionFactory(
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
-                    label = selection.label ?: resources.getString(selection.labelResource)
+                    label = selection.labelResource
                 )
             }
         }

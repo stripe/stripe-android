@@ -116,7 +116,7 @@ class USBankAccountFormViewModelTest {
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.ConfirmIntent::class.java)
-    }
+        }
 
     @Test
     fun `when payment sheet, verified bank account, then confirm intent callable`() =

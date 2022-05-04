@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -66,11 +65,10 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class GenericPaymentMethod(
-            @StringRes val labelResource: Int,
+            val labelResource: String,
             @DrawableRes val iconResource: Int,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
-            val label: String? = null,
         ) : New()
     }
 }
