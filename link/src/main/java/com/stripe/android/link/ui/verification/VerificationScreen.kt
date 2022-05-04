@@ -10,22 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,8 +28,9 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkTextFieldColors
-import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.elements.OTPElement
+import com.stripe.android.ui.core.elements.OTPElementUI
+import com.stripe.android.ui.core.elements.OTPSpec
 
 @Preview
 @Composable
@@ -50,7 +43,7 @@ private fun VerificationBodyPreview() {
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = "+1********23",
                 email = "test@stripe.com",
-                onCodeEntered = { },
+                otpElement = OTPSpec.transform(),
                 onBack = { },
                 onChangeEmailClick = { },
                 onResendCodeClick = { }
@@ -99,7 +92,7 @@ internal fun VerificationBody(
         showChangeEmailMessage = showChangeEmailMessage,
         redactedPhoneNumber = viewModel.linkAccount.redactedPhoneNumber,
         email = viewModel.linkAccount.email,
-        onCodeEntered = viewModel::onVerificationCodeEntered,
+        otpElement = viewModel.otpElement,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
         onResendCodeClick = viewModel::startVerification
@@ -113,7 +106,7 @@ internal fun VerificationBody(
     showChangeEmailMessage: Boolean,
     redactedPhoneNumber: String,
     email: String,
-    onCodeEntered: (String) -> Unit,
+    otpElement: OTPElement,
     onBack: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit
@@ -137,12 +130,15 @@ internal fun VerificationBody(
             text = stringResource(messageStringResId, redactedPhoneNumber),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 30.dp),
+                .padding(top = 4.dp, bottom = 8.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        VerificationCodeInput(onCodeEntered)
+        OTPElementUI(
+            element = otpElement,
+            modifier = Modifier.padding(vertical = 22.dp)
+        )
         if (showChangeEmailMessage) {
             Row(
                 modifier = Modifier
@@ -180,45 +176,6 @@ internal fun VerificationBody(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.button,
                 color = MaterialTheme.colors.onPrimary
-            )
-        }
-    }
-}
-
-@Composable
-private fun VerificationCodeInput(
-    onCodeEntered: (String) -> Unit
-) {
-    // TODO(brnunes-stripe): Migrate to OTP collection element
-    var code by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SectionCard {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = code,
-                onValueChange = {
-                    code = it
-                    if (code.length == 6) {
-                        onCodeEntered(code)
-                    }
-                },
-                label = {
-                    Text(text = "<Code>")
-                },
-                shape = MaterialTheme.shapes.medium,
-                colors = linkTextFieldColors(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Go
-                ),
-                singleLine = true
             )
         }
     }

@@ -32,6 +32,7 @@ internal class SignUpScreenTest {
                 LinkActivityContract.EXTRA_ARGS,
                 LinkActivityContract.Args(
                     StripeIntentFixtures.PI_SUCCEEDED,
+                    true,
                     "Merchant, Inc"
                 )
             )

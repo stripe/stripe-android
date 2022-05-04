@@ -46,13 +46,10 @@ internal class VerificationViewModel @Inject constructor(
 
     val otpElement = OTPSpec.transform()
 
-    private val otpCode: StateFlow<String?> = otpElement.getFormFieldValueFlow()
-        .map {
-            it.map { field -> field.second }
-                .takeIf { entries -> entries.all { entry -> entry.isComplete } }
-                ?.map { entry -> entry.value }
-                ?.joinToString("")
-        }.stateIn(viewModelScope, SharingStarted.Lazily, "")
+    private val otpCode: StateFlow<String?> =
+        otpElement.getFormFieldValueFlow().map { formFieldsList ->
+            formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
+        }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     init {
         viewModelScope.launch {
