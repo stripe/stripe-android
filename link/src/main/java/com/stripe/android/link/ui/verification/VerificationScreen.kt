@@ -166,7 +166,10 @@ internal fun VerificationBody(
                     text = stringResource(id = R.string.verification_change_email),
                     modifier = Modifier
                         .padding(start = 4.dp)
-                        .clickable(onClick = onChangeEmailClick),
+                        .clickable(
+                            enabled = !isProcessing,
+                            onClick = onChangeEmailClick
+                        ),
                     style = MaterialTheme.typography.body2
                         .merge(TextStyle(textDecoration = TextDecoration.Underline)),
                     color = MaterialTheme.colors.onSecondary

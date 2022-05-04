@@ -19,6 +19,14 @@ class OTPController(val otpLength: Int = 6) : Controller {
         it.joinToString("")
     }.distinctUntilChanged()
 
+    /**
+     * Filter invalid values and set the value of the fields to the entered text, one character per
+     * field starting from [index].
+     * If the length of the filtered input is the same as the OTP we're collecting, set the full
+     * input value regardless of the starting index passed as parameter.
+     *
+     * @return the number of fields that had their values set
+     */
     fun onValueChanged(index: Int, text: String): Int {
         if (text == fieldValues[index].value) {
             return 0

@@ -30,6 +30,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -91,6 +93,9 @@ fun OTPElementUI(
                             return@onPreviewKeyEvent true
                         }
                         false
+                    }
+                    .semantics {
+                        testTag = "OTP-$index"
                     }
 
                 if (index == 0) {

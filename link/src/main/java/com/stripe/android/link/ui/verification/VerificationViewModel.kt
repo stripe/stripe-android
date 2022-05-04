@@ -54,6 +54,8 @@ internal class VerificationViewModel @Inject constructor(
 
     private val otpCode: StateFlow<String?> =
         otpElement.getFormFieldValueFlow().map { formFieldsList ->
+            // formFieldsList contains only one element, for the OTP. Take the second value of
+            // the pair, which is the FormFieldEntry containing the value entered by the user.
             formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
         }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
