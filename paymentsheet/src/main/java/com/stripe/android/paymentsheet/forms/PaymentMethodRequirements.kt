@@ -269,3 +269,12 @@ internal val AuBecsDebitRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = null
 )
+
+/**
+ * This defines the requirements for usage as a Payment Method.
+ */
+internal val USBankAccountRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = setOf(Delayed),
+    confirmPMFromCustomer = true
+)

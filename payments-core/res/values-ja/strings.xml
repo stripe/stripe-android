@@ -157,6 +157,4 @@
   <string name="title_payment_method">お支払い方法</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">配送方法を選択してください</string>
-  <!-- Error description for incomplete account number -->
-  <string name="us_bank_account_widget_account_number_incomplete">入力した口座番号に不備があります。</string>
 </resources>

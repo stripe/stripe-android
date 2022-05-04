@@ -230,7 +230,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentMethods = initData.paymentMethods,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
-                newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
+                newLpm = viewModel.paymentSelection as? PaymentSelection.New,
                 statusBarColor = statusBarColor(),
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,

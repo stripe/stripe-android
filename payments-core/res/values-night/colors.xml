@@ -9,6 +9,8 @@
 
     <color name="stripe_text_color_secondary">@android:color/secondary_text_dark</color>
 
+    <color name="clear_icon_tint">#F7FAFC</color>
+
     <!-- PaymentSheet -->
     <color name="stripe_paymentsheet_background">#2e2e2e</color>
     <color name="stripe_paymentsheet_form_border">#3Dffffff</color>

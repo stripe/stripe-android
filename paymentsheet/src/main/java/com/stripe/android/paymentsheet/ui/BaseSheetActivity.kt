@@ -24,17 +24,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
@@ -52,12 +56,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
+    abstract val linkAuthView: ComposeView
     abstract val scrollView: ScrollView
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
     abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
     abstract val testModeIndicator: TextView
+    abstract val notesView: ComposeView
+    abstract val primaryButton: PrimaryButton
+    abstract val bottomSpacer: View
 
     abstract fun setActivityResult(result: ResultType)
 
@@ -119,6 +127,27 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
         setupHeader()
+        setupPrimaryButton()
+        setupNotes()
+
+        viewModel.showLinkVerificationDialog.observe(this) { show ->
+            if (show) {
+                linkAuthView.setContent {
+                    LinkVerificationDialog(
+                        linkLauncher = viewModel.linkLauncher,
+                        onDialogDismissed = viewModel::onLinkVerificationDismissed,
+                        onVerificationCompleted = {
+                            viewModel.launchLink()
+                            viewModel.onLinkVerificationDismissed()
+                        }
+                    )
+                }
+            }
+        }
+
+        viewModel.contentVisible.observe(this) {
+            scrollView.isVisible = it
+        }
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
@@ -203,6 +232,42 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                     )
                 }
             }
+        }
+    }
+
+    private fun setupPrimaryButton() {
+        viewModel.primaryButtonUIState.observe(this) { state ->
+            state?.let {
+                primaryButton.setOnClickListener {
+                    state.onClick()
+                }
+                primaryButton.setLabel(state.label)
+                primaryButton.isVisible = state.visible
+                bottomSpacer.isVisible = state.visible
+            }
+        }
+        viewModel.primaryButtonState.observe(this) { state ->
+            primaryButton.updateState(state)
+        }
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            primaryButton.isEnabled = isEnabled
+        }
+    }
+
+    private fun setupNotes() {
+        viewModel.notesText.observe(this) { text ->
+            val showNotes = text != null
+            text?.let {
+                notesView.setContent {
+                    Html(
+                        html = text,
+                        imageGetter = mapOf(),
+                        color = PaymentsTheme.colors.subtitle,
+                        style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
+                    )
+                }
+            }
+            notesView.isVisible = showNotes
         }
     }
 

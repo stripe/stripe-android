@@ -1,19 +1,19 @@
 package com.stripe.android.financialconnections
 
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkedAccountFixtures
-import com.stripe.android.financialconnections.model.LinkedAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.Token
 import java.util.Date
 
-val linkAccountSessionWithNoMoreAccounts = LinkAccountSession(
+val financialConnectionsSessionWithNoMoreAccounts = FinancialConnectionsSession(
     id = "las_no_more",
-    clientSecret = ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
-    linkedAccounts = LinkedAccountList(
+    clientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+    accountsNew = FinancialConnectionsAccountList(
         listOf(
-            LinkedAccountFixtures.CREDIT_CARD,
-            LinkedAccountFixtures.CHECKING_ACCOUNT
+            FinancialConnectionsAccountFixtures.CREDIT_CARD,
+            FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
         ),
         false,
         "url",
@@ -22,13 +22,13 @@ val linkAccountSessionWithNoMoreAccounts = LinkAccountSession(
     livemode = true
 )
 
-val linkAccountSessionWithMoreAccounts = LinkAccountSession(
+val financialConnectionsSessionWithMoreAccounts = FinancialConnectionsSession(
     id = "las_has_more",
-    clientSecret = ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
-    linkedAccounts = LinkedAccountList(
-        linkedAccounts = listOf(
-            LinkedAccountFixtures.CREDIT_CARD,
-            LinkedAccountFixtures.CHECKING_ACCOUNT
+    clientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+    accountsNew = FinancialConnectionsAccountList(
+        data = listOf(
+            FinancialConnectionsAccountFixtures.CREDIT_CARD,
+            FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
         ),
         hasMore = true,
         url = "url",
@@ -38,8 +38,8 @@ val linkAccountSessionWithMoreAccounts = LinkAccountSession(
     livemode = true
 )
 
-val moreLinkedAccountList = LinkedAccountList(
-    linkedAccounts = listOf(LinkedAccountFixtures.SAVINGS_ACCOUNT),
+val moreFinancialConnectionsAccountList = FinancialConnectionsAccountList(
+    data = listOf(FinancialConnectionsAccountFixtures.SAVINGS_ACCOUNT),
     hasMore = false,
     url = "url",
     count = 1,

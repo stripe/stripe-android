@@ -14,12 +14,13 @@ import kotlinx.coroutines.flow.map
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardBillingAddressElement(
     identifier: IdentifierSpec,
+    rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     addressFieldRepository: AddressFieldElementRepository,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes)
+        CountryConfig(countryCodes),
+        rawValuesMap[IdentifierSpec.Country]
     ),
-    rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
 ) : AddressElement(
     identifier,
     addressFieldRepository,

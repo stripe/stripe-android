@@ -71,7 +71,7 @@ class DefaultFinancialConnectionsSheetLauncher(
                 is FinancialConnectionsSheetContract.Result.Canceled -> Canceled
                 is FinancialConnectionsSheetContract.Result.Failed -> Failed(error)
                 is FinancialConnectionsSheetContract.Result.Completed -> Completed(
-                    linkAccountSession = linkAccountSession,
+                    financialConnectionsSession = financialConnectionsSession,
                 )
             }
         }

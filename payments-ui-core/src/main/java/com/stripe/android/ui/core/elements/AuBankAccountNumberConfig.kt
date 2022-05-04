@@ -45,7 +45,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
 
         if (input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.us_bank_account_widget_account_number_invalid
+                R.string.becs_widget_account_number_invalid
             )
         }
 

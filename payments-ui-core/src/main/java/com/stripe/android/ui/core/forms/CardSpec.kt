@@ -8,25 +8,10 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.billingParams
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
-internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
-    "number" to null,
-    "exp_month" to null,
-    "exp_year" to null,
-    "cvc" to null,
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val CardParamKey: MutableMap<String, Any?> = mutableMapOf(
-    "type" to "card",
-    "billing_details" to billingParams,
-    "card" to cardParams
-)
-
-internal val creditBillingSection = SectionSpec(
-    IdentifierSpec.Generic("credit_billing_section"),
+internal val cardBillingSection = SectionSpec(
+    IdentifierSpec.Generic("card_billing_section"),
     CardBillingSpec(
         countryCodes = supportedBillingCountries
     ),
@@ -35,7 +20,13 @@ internal val creditBillingSection = SectionSpec(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val CardForm = LayoutSpec.create(
-    CardDetailsSectionSpec(IdentifierSpec.Generic("credit_details_section")),
-    creditBillingSection,
+    CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
+    cardBillingSection,
     SaveForFutureUseSpec(emptyList())
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LinkCardForm = LayoutSpec.create(
+    CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
+    cardBillingSection
 )

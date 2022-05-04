@@ -39,12 +39,18 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
+    val testMode = EspressoIdButton(R.id.testmode)
+    val continueButton = EspressoIdButton(R.id.continue_button)
+    val complete = EspressoLabelIdButton(R.string.checkout_complete)
+    val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
+    val multiStepSelect = EspressoIdButton(R.id.payment_method)
     val saveForFutureCheckbox = composeTestRule
         .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
 
     val customer = when (testParameters.customer) {
         Customer.Guest -> EspressoLabelIdButton(R.string.customer_guest)
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
+        Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
     }
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
@@ -91,6 +97,8 @@ class Selectors(
         testParameters.intentType.name
 
     val buyButton = BuyButton(device)
+
+    val editButton = EditButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 

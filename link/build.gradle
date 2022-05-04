@@ -48,6 +48,7 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
 
     testImplementation project(':payments-core')
+    testImplementation project(':payments-ui-core')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
@@ -103,7 +104,8 @@ android {
     kotlinOptions {
         freeCompilerArgs = [
                 "-Xjvm-default=enable",
-                "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi"
+                "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi",
+                "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
         ]
         jvmTarget = "1.8"
     }

@@ -1,14 +1,14 @@
 package com.stripe.android.financialconnections
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 /**
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
     val activityRecreated: Boolean = false,
-    val manifest: LinkAccountSessionManifest? = null,
+    val manifest: FinancialConnectionsSessionManifest? = null,
     val authFlowActive: Boolean = false
 ) {
 

@@ -19,7 +19,8 @@ data class TestParameters(
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
-    val takeScreenshotOnLpmLoad: Boolean = false
+    val takeScreenshotOnLpmLoad: Boolean = false,
+    val forceDarkMode: Boolean? = null
 )
 
 /**
@@ -108,5 +109,6 @@ enum class GooglePayState {
  */
 enum class Customer {
     Guest,
-    New
+    New,
+    Returning,
 }

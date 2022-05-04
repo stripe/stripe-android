@@ -25,21 +25,21 @@ class FinancialConnectionsExampleViewModel : ViewModel() {
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsExampleViewEffect>()
     val viewEffect: SharedFlow<FinancialConnectionsExampleViewEffect> = _viewEffect
 
-    fun startLinkAccountSession() {
+    fun startFinancialConnectionsSession() {
         viewModelScope.launch {
             setState {
                 copy(
                     loading = true,
-                    status = "Fetching link account session from example backend!"
+                    status = "Fetching financial connections session from example backend!"
                 )
             }
             kotlin.runCatching { repository.createLinkAccountSession() }
-                // Success creating session: open ConnectionsSheet with received secret
+                // Success creating session: open FinancialConnectionsSheet with received secret
                 .onSuccess {
                     setState {
                         copy(
                             loading = false,
-                            status = "Session created, opening ConnectionsSheet."
+                            status = "Session created, opening FinancialConnectionsSheet."
                         )
                     }
                     _viewEffect.emit(
@@ -56,7 +56,7 @@ class FinancialConnectionsExampleViewModel : ViewModel() {
                     setState {
                         copy(
                             loading = false,
-                            status = "Error starting linked account session: $it"
+                            status = "Error retrieving financial connections session: $it"
                         )
                     }
                 }
@@ -66,8 +66,8 @@ class FinancialConnectionsExampleViewModel : ViewModel() {
     fun onFinancialConnectionsSheetResult(result: FinancialConnectionsSheetResult) {
         val statusText = when (result) {
             is Completed -> {
-                val linkedAccountList = result.linkAccountSession.linkedAccounts
-                linkedAccountList.linkedAccounts.joinToString("\n") {
+                val accountList = result.financialConnectionsSession.accounts
+                accountList.data.joinToString("\n") {
                     "${it.institutionName} - ${it.displayName} - ${it.last4} - ${it.category}/${it.subcategory}"
                 }
             }

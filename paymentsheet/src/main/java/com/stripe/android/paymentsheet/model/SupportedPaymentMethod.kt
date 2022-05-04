@@ -16,8 +16,6 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
-import com.stripe.android.ui.core.forms.CardForm
-import com.stripe.android.ui.core.forms.CardParamKey
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
@@ -31,32 +29,23 @@ import com.stripe.android.paymentsheet.forms.SIRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
+import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.AffirmForm
-import com.stripe.android.ui.core.forms.AffirmParamKey
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
-import com.stripe.android.ui.core.forms.AfterpayClearpayParamKey
-import com.stripe.android.ui.core.forms.BancontactForm
-import com.stripe.android.ui.core.forms.BancontactParamKey
-import com.stripe.android.ui.core.forms.EpsForm
-import com.stripe.android.ui.core.forms.EpsParamKey
-import com.stripe.android.ui.core.forms.GiropayForm
-import com.stripe.android.ui.core.forms.GiropayParamKey
-import com.stripe.android.ui.core.forms.IdealForm
-import com.stripe.android.ui.core.forms.IdealParamKey
-import com.stripe.android.ui.core.forms.KlarnaForm
-import com.stripe.android.ui.core.forms.KlarnaParamKey
-import com.stripe.android.ui.core.forms.P24Form
-import com.stripe.android.ui.core.forms.P24ParamKey
-import com.stripe.android.ui.core.forms.PaypalForm
-import com.stripe.android.ui.core.forms.PaypalParamKey
-import com.stripe.android.ui.core.forms.SepaDebitForm
-import com.stripe.android.ui.core.forms.SepaDebitParamKey
-import com.stripe.android.ui.core.forms.SofortForm
-import com.stripe.android.ui.core.forms.SofortParamKey
 import com.stripe.android.ui.core.forms.AuBecsDebitForm
-import com.stripe.android.ui.core.forms.AuBecsDebitParamKey
+import com.stripe.android.ui.core.forms.BancontactForm
+import com.stripe.android.ui.core.forms.CardForm
+import com.stripe.android.ui.core.forms.EpsForm
+import com.stripe.android.ui.core.forms.GiropayForm
+import com.stripe.android.ui.core.forms.IdealForm
+import com.stripe.android.ui.core.forms.KlarnaForm
+import com.stripe.android.ui.core.forms.P24Form
+import com.stripe.android.ui.core.forms.PaypalForm
+import com.stripe.android.ui.core.forms.SepaDebitForm
+import com.stripe.android.ui.core.forms.SofortForm
+import com.stripe.android.ui.core.forms.USBankAccountForm
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -88,11 +77,6 @@ sealed class SupportedPaymentMethod(
     private val requirement: PaymentMethodRequirements,
 
     /**
-     * This is a map of the fields in payment_method_options.  See [this](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_options) for details.
-     */
-    val paramKey: MutableMap<String, Any?>,
-
-    /**
      * This describes how the UI should look.
      */
     val formSpec: LayoutSpec,
@@ -104,7 +88,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
         CardRequirement,
-        CardParamKey,
         CardForm
     )
 
@@ -115,7 +98,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_bancontact,
         R.drawable.stripe_ic_paymentsheet_pm_bancontact,
         BancontactRequirement,
-        BancontactParamKey,
         BancontactForm
     )
 
@@ -126,7 +108,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_sofort,
         R.drawable.stripe_ic_paymentsheet_pm_klarna,
         SofortRequirement,
-        SofortParamKey,
         SofortForm
     )
 
@@ -137,7 +118,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_ideal,
         R.drawable.stripe_ic_paymentsheet_pm_ideal,
         IdealRequirement,
-        IdealParamKey,
         IdealForm
     )
 
@@ -148,7 +128,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_sepa_debit,
         R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
         SepaDebitRequirement,
-        SepaDebitParamKey,
         SepaDebitForm
     )
 
@@ -159,7 +138,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_eps,
         R.drawable.stripe_ic_paymentsheet_pm_eps,
         EpsRequirement,
-        EpsParamKey,
         EpsForm
     )
 
@@ -170,7 +148,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_p24,
         R.drawable.stripe_ic_paymentsheet_pm_p24,
         P24Requirement,
-        P24ParamKey,
         P24Form
     )
 
@@ -181,7 +158,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
         GiropayRequirement,
-        GiropayParamKey,
         GiropayForm
     )
 
@@ -192,7 +168,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
         R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
         AfterpayClearpayRequirement,
-        AfterpayClearpayParamKey,
         AfterpayClearpayForm
     )
 
@@ -203,7 +178,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_klarna,
         R.drawable.stripe_ic_paymentsheet_pm_klarna,
         KlarnaRequirement,
-        KlarnaParamKey,
         KlarnaForm
     )
 
@@ -214,7 +188,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_paypal,
         R.drawable.stripe_ic_paymentsheet_pm_paypal,
         PaypalRequirement,
-        PaypalParamKey,
         PaypalForm
     )
 
@@ -225,7 +198,6 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_affirm,
         R.drawable.stripe_ic_paymentsheet_pm_affirm,
         AffirmRequirement,
-        AffirmParamKey,
         AffirmForm
     )
 
@@ -236,8 +208,17 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_au_becs_debit,
         R.drawable.stripe_ic_paymentsheet_pm_bank,
         AuBecsDebitRequirement,
-        AuBecsDebitParamKey,
         AuBecsDebitForm
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @Parcelize
+    object USBankAccount : SupportedPaymentMethod(
+        PaymentMethod.Type.USBankAccount,
+        R.string.stripe_paymentsheet_payment_method_us_bank_account,
+        R.drawable.stripe_ic_paymentsheet_pm_bank,
+        USBankAccountRequirement,
+        USBankAccountForm
     )
 
     /**
@@ -272,7 +253,7 @@ sealed class SupportedPaymentMethod(
         val userSelectableSave = LayoutFormDescriptor(
             formSpec,
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            showCheckboxControlledFields = false
         )
 
         if (!stripeIntent.paymentMethodTypes.contains(type.code)) {
@@ -427,6 +408,7 @@ sealed class SupportedPaymentMethod(
                 AfterpayClearpay,
                 // Affirm // TODO: uncomment once we are ready to go live
                 // AuBecsDebit // TODO: uncomment once we are ready to go live
+                // USBankAccount // TODO: uncomment once we are ready to go live
             )
         }
 
@@ -437,7 +419,8 @@ sealed class SupportedPaymentMethod(
         internal fun SupportedPaymentMethod.shouldTintOnSelection(): Boolean {
             return setOf(
                 Card,
-                AuBecsDebit
+                AuBecsDebit,
+                USBankAccount
             ).contains(this)
         }
 

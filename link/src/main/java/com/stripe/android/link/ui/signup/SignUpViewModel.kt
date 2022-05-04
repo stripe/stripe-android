@@ -13,7 +13,9 @@ import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,14 +34,17 @@ import javax.inject.Provider
  */
 internal class SignUpViewModel @Inject constructor(
     args: LinkActivityContract.Args,
-    @Named(PREFILLED_EMAIL) private val prefilledEmail: String?,
+    @Named(PREFILLED_EMAIL) private val customerEmail: String?,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
-    val merchantName: String = args.merchantName
+    private val prefilledEmail =
+        if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(prefilledEmail)
+    val merchantName: String = args.merchantName
+    val emailElement: SectionFieldElement =
+        EmailSpec.transform(mapOf(IdentifierSpec.Email to prefilledEmail))
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -54,40 +59,21 @@ internal class SignUpViewModel @Inject constructor(
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
-    /**
-     * Holds a Job that looks up the email after a delay, so that we can cancel it if the user
-     * continues typing.
-     */
-    private var lookupJob: Job? = null
+    private val debouncer = Debouncer(prefilledEmail)
 
     init {
-        viewModelScope.launch {
-            consumerEmail.collect { email ->
-                // The first emitted value is the one provided in the constructor arguments, and
-                // shouldn't trigger a lookup.
-                if (email == prefilledEmail && lookupJob == null) {
-                    // If it's a valid email, collect phone number
-                    if (email != null) {
-                        _signUpStatus.value = SignUpState.InputtingPhone
-                    }
-                    return@collect
-                }
-
-                lookupJob?.cancel()
-
-                if (email != null) {
-                    lookupJob = launch {
-                        delay(LOOKUP_DEBOUNCE_MS)
-                        if (isActive) {
-                            _signUpStatus.value = SignUpState.VerifyingEmail
-                            lookupConsumerEmail(email)
-                        }
-                    }
-                } else {
-                    _signUpStatus.value = SignUpState.InputtingEmail
+        debouncer.startWatching(
+            coroutineScope = viewModelScope,
+            emailFlow = consumerEmail,
+            onStateChanged = {
+                _signUpStatus.value = it
+            },
+            onValidEmailEntered = {
+                viewModelScope.launch {
+                    lookupConsumerEmail(it)
                 }
             }
-        }
+        )
     }
 
     fun onSignUpClick(phone: String) {
@@ -131,6 +117,51 @@ internal class SignUpViewModel @Inject constructor(
     private fun onError(error: Throwable) {
         logger.error(error.localizedMessage ?: "Internal error.")
         // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+    }
+
+    internal class Debouncer(
+        private val initialEmail: String?
+    ) {
+        /**
+         * Holds a Job that looks up the email after a delay, so that we can cancel it if the user
+         * continues typing.
+         */
+        private var lookupJob: Job? = null
+
+        fun startWatching(
+            coroutineScope: CoroutineScope,
+            emailFlow: StateFlow<String?>,
+            onStateChanged: (SignUpState) -> Unit,
+            onValidEmailEntered: (String) -> Unit
+        ) {
+            coroutineScope.launch {
+                emailFlow.collect { email ->
+                    // The first emitted value is the one provided in the constructor arguments, and
+                    // shouldn't trigger a lookup.
+                    if (email == initialEmail && lookupJob == null) {
+                        // If it's a valid email, collect phone number
+                        if (email != null) {
+                            onStateChanged(SignUpState.InputtingPhone)
+                        }
+                        return@collect
+                    }
+
+                    lookupJob?.cancel()
+
+                    if (email != null) {
+                        lookupJob = launch {
+                            delay(LOOKUP_DEBOUNCE_MS)
+                            if (isActive) {
+                                onStateChanged(SignUpState.VerifyingEmail)
+                                onValidEmailEntered(email)
+                            }
+                        }
+                    } else {
+                        onStateChanged(SignUpState.InputtingEmail)
+                    }
+                }
+            }
+        }
     }
 
     internal class Factory(

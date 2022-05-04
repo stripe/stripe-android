@@ -39,7 +39,10 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
 
-    private val context = ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripeDefaultTheme
+    )
 
     private val nameSection = SectionSpec(
         IdentifierSpec.Generic("name_section"),
@@ -68,7 +71,6 @@ internal class TransformSpecToElementTest {
                 ),
                 initialValues = mapOf(),
                 amount = null,
-                country = "DE",
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 context
@@ -96,49 +98,51 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a country section sets up the section and country elements correctly`() = runBlocking {
-        val countrySection = SectionSpec(
-            IdentifierSpec.Generic("country_section"),
-            CountrySpec(onlyShowCountryCodes = setOf("AT"))
-        )
-        val formElement = transformSpecToElements.transform(
-            listOf(countrySection)
-        )
+    fun `Adding a country section sets up the section and country elements correctly`() =
+        runBlocking {
+            val countrySection = SectionSpec(
+                IdentifierSpec.Generic("country_section"),
+                CountrySpec(onlyShowCountryCodes = setOf("AT"))
+            )
+            val formElement = transformSpecToElements.transform(
+                listOf(countrySection)
+            )
 
-        val countrySectionElement = formElement.first() as SectionElement
-        val countryElement = countrySectionElement.fields[0] as CountryElement
+            val countrySectionElement = formElement.first() as SectionElement
+            val countryElement = countrySectionElement.fields[0] as CountryElement
 
-        assertThat(countryElement.controller.displayItems).hasSize(1)
-        assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
+            assertThat(countryElement.controller.displayItems).hasSize(1)
+            assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
 
-        // Verify the correct config is setup for the controller
-        assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
+            // Verify the correct config is setup for the controller
+            assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
 
-        assertThat(countrySectionElement.identifier.value).isEqualTo("country_section")
+            assertThat(countrySectionElement.identifier.v1).isEqualTo("country_section")
 
-        assertThat(countryElement.identifier.value).isEqualTo("country")
-    }
+            assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
+        }
 
     @Test
-    fun `Adding a ideal bank section sets up the section and country elements correctly`() = runBlocking {
-        val idealSection = SectionSpec(
-            IdentifierSpec.Generic("ideal_section"),
-            IDEAL_BANK_CONFIG
-        )
-        val formElement = transformSpecToElements.transform(
-            listOf(idealSection)
-        )
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() =
+        runBlocking {
+            val idealSection = SectionSpec(
+                IdentifierSpec.Generic("ideal_section"),
+                IDEAL_BANK_CONFIG
+            )
+            val formElement = transformSpecToElements.transform(
+                listOf(idealSection)
+            )
 
-        val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.fields[0] as SimpleDropdownElement
+            val idealSectionElement = formElement.first() as SectionElement
+            val idealElement = idealSectionElement.fields[0] as SimpleDropdownElement
 
-        // Verify the correct config is setup for the controller
-        assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
+            // Verify the correct config is setup for the controller
+            assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
 
-        assertThat(idealSectionElement.identifier.value).isEqualTo("ideal_section")
+            assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal_section")
 
-        assertThat(idealElement.identifier.value).isEqualTo("bank")
-    }
+            assertThat(idealElement.identifier.v1).isEqualTo("ideal[bank]")
+        }
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() = runBlocking {
@@ -151,7 +155,7 @@ internal class TransformSpecToElementTest {
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
-        assertThat(nameElement.identifier.value).isEqualTo("name")
+        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
         assertThat(nameElement.controller.capitalization).isEqualTo(KeyboardCapitalization.Words)
         assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
@@ -179,7 +183,7 @@ internal class TransformSpecToElementTest {
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
-        assertThat(nameElement.identifier.value).isEqualTo("simple")
+        assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
 
@@ -194,7 +198,7 @@ internal class TransformSpecToElementTest {
 
         // Verify the correct config is setup for the controller
         assertThat(emailElement.controller.label.first()).isEqualTo(EmailConfig().label)
-        assertThat(emailElement.identifier.value).isEqualTo("email")
+        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
     }
 
     @Test
@@ -211,40 +215,41 @@ internal class TransformSpecToElementTest {
 
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
-        assertThat(staticTextElement.identifier).isEqualTo(staticText.identifier)
+        assertThat(staticTextElement.identifier).isEqualTo(staticText.api_path)
     }
 
     @Test
-    fun `Add a save for future use section spec sets the mandate element correctly`() = runBlocking {
-        val mandate = StaticTextSpec(
-            IdentifierSpec.Generic("mandate"),
-            R.string.sepa_mandate,
-        )
-        val hiddenIdentifiers = listOf(nameSection, mandate)
-        val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
-        val formElement = transformSpecToElements.transform(
-            listOf(saveForFutureUseSpec)
-        )
-
-        val saveForFutureUseElement =
-            formElement.first() as SaveForFutureUseElement
-        val saveForFutureUseController = saveForFutureUseElement.controller
-
-        assertThat(saveForFutureUseElement.identifier)
-            .isEqualTo(saveForFutureUseSpec.identifier)
-
-        assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
-
-        saveForFutureUseController.onValueChange(false)
-        assertThat(saveForFutureUseController.hiddenIdentifiers.first())
-            .isEqualTo(
-                hiddenIdentifiers.map { it.identifier }
+    fun `Add a save for future use section spec sets the mandate element correctly`() =
+        runBlocking {
+            val mandate = StaticTextSpec(
+                IdentifierSpec.Generic("mandate"),
+                R.string.sepa_mandate,
             )
-    }
+            val hiddenIdentifiers = listOf(nameSection, mandate)
+            val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
+            val formElement = transformSpecToElements.transform(
+                listOf(saveForFutureUseSpec)
+            )
+
+            val saveForFutureUseElement =
+                formElement.first() as SaveForFutureUseElement
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            assertThat(saveForFutureUseElement.identifier)
+                .isEqualTo(saveForFutureUseSpec.api_path)
+
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
+
+            saveForFutureUseController.onValueChange(false)
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
+                .isEqualTo(
+                    hiddenIdentifiers.map { it.api_path }
+                )
+        }
 
     companion object {
         val IDEAL_BANK_CONFIG = BankDropdownSpec(
-            IdentifierSpec.Generic("bank"),
+            IdentifierSpec.Generic("ideal[bank]"),
             R.string.ideal_bank,
             SupportedBankType.Ideal
         )

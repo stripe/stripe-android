@@ -9,48 +9,69 @@ import kotlinx.parcelize.Parcelize
  * specs that need to be found when pre-populating fields, or when extracting data.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class IdentifierSpec(val value: String) : Parcelable {
+sealed class IdentifierSpec(val v1: String) : Parcelable {
     @Parcelize
     data class Generic(private val _value: String) : IdentifierSpec(_value)
 
     // Needed to pre-populate forms
     @Parcelize
-    object Name : IdentifierSpec("name")
+    object Name : IdentifierSpec("billing_details[name]")
 
     @Parcelize
-    object CardBrand : IdentifierSpec("card_brand_code")
+    object CardBrand : IdentifierSpec("card[brand]")
 
     @Parcelize
-    object CardNumber : IdentifierSpec("number")
+    object CardNumber : IdentifierSpec("card[number]")
 
     @Parcelize
-    object Email : IdentifierSpec("email")
+    object CardCvc : IdentifierSpec("card[cvc]")
 
     @Parcelize
-    object Phone : IdentifierSpec("phone")
+    object Email : IdentifierSpec("billing_details[email]")
 
     @Parcelize
-    object Line1 : IdentifierSpec("line1")
+    object Phone : IdentifierSpec("billing_details[phone]")
 
     @Parcelize
-    object Line2 : IdentifierSpec("line2")
+    object Line1 : IdentifierSpec("billing_details[address][line1]")
 
     @Parcelize
-    object City : IdentifierSpec("city")
+    object Line2 : IdentifierSpec("billing_details[address][line2]")
 
     @Parcelize
-    object PostalCode : IdentifierSpec("postal_code")
+    object City : IdentifierSpec("billing_details[address][city]")
 
     @Parcelize
-    object State : IdentifierSpec("state")
+    object PostalCode : IdentifierSpec("billing_details[address][postal_code]")
 
     @Parcelize
-    object Country : IdentifierSpec("country")
+    object State : IdentifierSpec("billing_details[address][state]")
+
+    @Parcelize
+    object Country : IdentifierSpec("billing_details[address][country]")
 
     // Unique extracting functionality
     @Parcelize
     object SaveForFutureUse : IdentifierSpec("save_for_future_use")
 
-    @Parcelize
-    object PreFilledParameterMap : IdentifierSpec("save_for_future_use")
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        fun get(value: String) = when (value) {
+            CardBrand.v1 -> CardBrand
+            CardNumber.v1 -> CardNumber
+            City.v1 -> City
+            Country.v1 -> Country
+            Email.v1 -> Email
+            Line1.v1 -> Line1
+            Line2.v1 -> Line2
+            Name.v1 -> Name
+            Phone.v1 -> Phone
+            PostalCode.v1 -> PostalCode
+            SaveForFutureUse.v1 -> SaveForFutureUse
+            State.v1 -> State
+            else -> {
+                Generic(value)
+            }
+        }
+    }
 }

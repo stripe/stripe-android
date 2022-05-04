@@ -3,11 +3,13 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
@@ -23,12 +25,14 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.getBackgroundColor
 
 /**
  * An `Activity` for selecting a payment option.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
@@ -57,12 +61,16 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val notesView: ComposeView by lazy { viewBinding.notes }
+    override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
+    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,9 +90,17 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        setupContinueButton(viewBinding.continueButton)
+        viewModel.error.observe(this) {
+            updateErrorMessage(
+                messageView,
+                BaseSheetViewModel.UserErrorMessage(it)
+            )
+        }
+
+        setupContinueButton()
 
         viewModel.transition.observe(this) { event ->
+            clearErrorMessages()
             event?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(
                     transitionTarget,
@@ -114,18 +130,24 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
+        viewModel.selection.observe(this) {
+            clearErrorMessages()
+            setupContinueButton()
+        }
+
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
                     viewBinding.continueButton.isVisible =
-                        fragment is PaymentOptionsAddPaymentMethodFragment
+                        fragment is PaymentOptionsAddPaymentMethodFragment ||
+                        viewModel.primaryButtonUIState.value?.visible == true
                 }
             },
             false
         )
     }
 
-    private fun setupContinueButton(addButton: PrimaryButton) {
+    private fun setupContinueButton() {
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
@@ -139,13 +161,16 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        addButton.setOnClickListener {
+        viewBinding.continueButton.setLabel(
+            getString(R.string.stripe_continue_button_label)
+        )
+
+        viewBinding.continueButton.setOnClickListener {
+            clearErrorMessages()
             viewModel.onUserSelection()
         }
 
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            addButton.isEnabled = isEnabled
-        }
+        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun onTransitionTarget(

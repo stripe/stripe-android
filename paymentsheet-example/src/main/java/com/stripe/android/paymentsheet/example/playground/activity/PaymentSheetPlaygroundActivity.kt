@@ -5,6 +5,7 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
@@ -89,12 +90,17 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var flowController: PaymentSheet.FlowController
 
     @Nullable
-    private var multiStepUIIdlingResource: CountingIdlingResource? = null
+    private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     @Nullable
-    private var singleStepUIIdlingResource: CountingIdlingResource? = null
+    private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
+        if (shouldUseDarkMode != null) {
+            val mode = if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            AppCompatDelegate.setDefaultNightMode(mode)
+        }
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
@@ -158,11 +164,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
             if (it) {
-                singleStepUIIdlingResource?.increment()
-                multiStepUIIdlingResource?.increment()
+                singleStepUIReadyIdlingResource?.increment()
+                multiStepUIReadyIdlingResource?.increment()
             } else {
-                singleStepUIIdlingResource?.decrement()
-                multiStepUIIdlingResource?.decrement()
+                singleStepUIReadyIdlingResource?.decrement()
             }
         }
 
@@ -176,22 +181,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         disableViews()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val (customer, link, googlePay, currency, mode, setShippingAddress, setDefaultBillingAddress, setAutomaticPaymentMethods, setDelayedPaymentMethods) = viewModel.getSavedToggleState()
-        setToggles(
-            customer,
-            link,
-            googlePay,
-            currency,
-            mode,
-            setShippingAddress,
-            setDefaultBillingAddress,
-            setAutomaticPaymentMethods,
-            setDelayedPaymentMethods
-        )
     }
 
     override fun onPause() {
@@ -337,6 +326,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (success) {
             viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
+            multiStepUIReadyIdlingResource?.decrement()
         } else {
             viewModel.status.value =
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"
@@ -369,28 +359,31 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     /**
-     * Only called from test, creates and returns a new [SimpleIdlingResource].
+     * Only called from test, creates and returns a [IdlingResource].
      */
-
     @VisibleForTesting
     @NonNull
-    fun getMultiStepIdlingResource(): IdlingResource? {
-        if (multiStepUIIdlingResource == null) {
-            multiStepUIIdlingResource = CountingIdlingResource("multiStepUIIdlingResource")
+    fun getMultiStepReadyIdlingResource(): IdlingResource? {
+        if (multiStepUIReadyIdlingResource == null) {
+            multiStepUIReadyIdlingResource =
+                CountingIdlingResource("multiStepUIReadyIdlingResource")
         }
-        return multiStepUIIdlingResource
+        return multiStepUIReadyIdlingResource
     }
 
     @VisibleForTesting
     @NonNull
-    fun getSingleStepIdlingResource(): IdlingResource? {
-        if (singleStepUIIdlingResource == null) {
-            singleStepUIIdlingResource = CountingIdlingResource("singleStepUIIdlingResource")
+    fun getSingleStepReadyIdlingResource(): IdlingResource? {
+        if (singleStepUIReadyIdlingResource == null) {
+            singleStepUIReadyIdlingResource =
+                CountingIdlingResource("singleStepUIReadyIdlingResource")
         }
-        return singleStepUIIdlingResource
+        return singleStepUIReadyIdlingResource
     }
+
 
     companion object {
+        const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
     }

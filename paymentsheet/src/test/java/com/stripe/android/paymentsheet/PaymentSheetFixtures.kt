@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
@@ -22,6 +24,18 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME
+    )
+
+    internal val CONFIG_WITH_EVERYTHING = PaymentSheet.Configuration(
+        merchantDisplayName = MERCHANT_DISPLAY_NAME,
+        customer = PaymentSheet.CustomerConfiguration(
+            "customer_id",
+            "ephemeral_key"
+        ),
+        googlePay = ConfigFixtures.GOOGLE_PAY,
+        primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
+        defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
+        allowsDelayedPaymentMethods = true
     )
 
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
@@ -48,7 +62,7 @@ internal object PaymentSheetFixtures {
         paymentMethods = emptyList(),
         config = CONFIG_GOOGLEPAY,
         isGooglePayReady = false,
-        newCard = null,
+        newLpm = null,
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,

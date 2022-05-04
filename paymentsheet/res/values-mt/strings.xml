@@ -28,8 +28,6 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Lura</string>
   <string name="stripe_paymentsheet_close">Agħlaq</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Kompli</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Jew ħallas bil-</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

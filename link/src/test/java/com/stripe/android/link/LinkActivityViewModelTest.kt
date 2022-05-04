@@ -8,11 +8,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.NonFallbackInjector
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
@@ -22,7 +20,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
@@ -37,6 +34,7 @@ import kotlin.test.assertNotNull
 class LinkActivityViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
         StripeIntentFixtures.PI_SUCCEEDED,
+        true,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(
@@ -50,59 +48,10 @@ class LinkActivityViewModelTest {
 
     private val linkAccountManager = mock<LinkAccountManager>()
     private val confirmationManager = mock<ConfirmationManager>()
-    private val cookieStore = mock<CookieStore>()
     private val navigator = mock<Navigator>()
 
     init {
         FakeAndroidKeyStore.setup()
-    }
-
-    @Test
-    fun `When consumer is logged out then start destination is SignUp screen`() = runTest {
-        whenever(cookieStore.isEmailLoggedOut(CUSTOMER_EMAIL)).thenReturn(true)
-
-        val viewModel = createViewModel()
-
-        assertThat(viewModel.startDestination).isEqualTo(LinkScreen.SignUp.route)
-    }
-
-    @Test
-    fun `When consumer is verified then it navigates to Wallet screen`() = runTest {
-        val account = mock<LinkAccount>()
-        whenever(account.isVerified).thenReturn(true)
-        whenever(linkAccountManager.lookupConsumer(any()))
-            .thenReturn(Result.success(account))
-
-        createViewModel()
-
-        verify(navigator).navigateTo(LinkScreen.Wallet, true)
-    }
-
-    @Test
-    fun `When consumer is not verified then it navigates to Verification screen`() = runTest {
-        val account = mock<LinkAccount>()
-        whenever(account.isVerified).thenReturn(false)
-        whenever(linkAccountManager.lookupConsumer(any()))
-            .thenReturn(Result.success(account))
-
-        createViewModel()
-
-        verify(navigator).navigateTo(LinkScreen.Verification, true)
-    }
-
-    @Test
-    fun `When consumer does not exist then it navigates to SignUp screen`() = runTest {
-        whenever(linkAccountManager.lookupConsumer(any()))
-            .thenReturn(Result.success(null))
-
-        createViewModel()
-
-        verify(navigator).navigateTo(
-            argWhere {
-                it.route == LinkScreen.SignUp(CUSTOMER_EMAIL).route
-            },
-            eq(true)
-        )
     }
 
     @Test
@@ -145,7 +94,7 @@ class LinkActivityViewModelTest {
         WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
 
         val factory = LinkActivityViewModel.Factory(
-            ApplicationProvider.getApplicationContext(),
+            { ApplicationProvider.getApplicationContext() },
             { defaultArgs }
         )
         val factorySpy = spy(factory)
@@ -168,7 +117,7 @@ class LinkActivityViewModelTest {
 
         val context = ApplicationProvider.getApplicationContext<Application>()
         val factory = LinkActivityViewModel.Factory(
-            ApplicationProvider.getApplicationContext(),
+            { ApplicationProvider.getApplicationContext() },
             { defaultArgs }
         )
         val factorySpy = spy(factory)
@@ -185,7 +134,6 @@ class LinkActivityViewModelTest {
         LinkActivityViewModel(
             args,
             linkAccountManager,
-            cookieStore,
             navigator,
             confirmationManager
         )

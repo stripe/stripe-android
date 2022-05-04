@@ -10,12 +10,17 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
+import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.ui.inline.InlineSignupViewModel
+import com.stripe.android.link.ui.paymentmethod.FormViewModel
+import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -34,13 +39,24 @@ import kotlin.coroutines.CoroutineContext
     ]
 )
 internal abstract class LinkPaymentLauncherComponent {
+    abstract val linkAccountManager: LinkAccountManager
+
     abstract fun inject(factory: LinkActivityViewModel.Factory)
     abstract fun inject(factory: SignUpViewModel.Factory)
     abstract fun inject(factory: VerificationViewModel.Factory)
     abstract fun inject(factory: WalletViewModel.Factory)
+    abstract fun inject(factory: InlineSignupViewModel.Factory)
+    abstract fun inject(factory: PaymentMethodViewModel.Factory)
+    abstract fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {
+        @BindsInstance
+        fun merchantName(@Named(MERCHANT_NAME) merchantName: String): Builder
+
+        @BindsInstance
+        fun customerEmail(@Named(CUSTOMER_EMAIL) customerEmail: String?): Builder
+
         @BindsInstance
         fun context(context: Context): Builder
 
@@ -58,6 +74,9 @@ internal abstract class LinkPaymentLauncherComponent {
 
         @BindsInstance
         fun stripeRepository(stripeRepository: StripeRepository): Builder
+
+        @BindsInstance
+        fun resourceRepository(resourceRepository: ResourceRepository): Builder
 
         @BindsInstance
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
