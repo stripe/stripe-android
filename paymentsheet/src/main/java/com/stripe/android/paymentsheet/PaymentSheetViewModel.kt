@@ -123,10 +123,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
 
-    @VisibleForTesting
-    internal val _contentVisible = MutableLiveData(true)
-    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
-
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
     internal fun getButtonStateObservable(
         checkoutIdentifier: CheckoutIdentifier
@@ -244,9 +240,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntentValidator.requireValid(stripeIntent)
         }.fold(
             onSuccess = {
-                savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
+                savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
                 updatePaymentMethods(stripeIntent)
-                setupLink(stripeIntent)
+                setupLink(stripeIntent, true)
                 resetViewState()
             },
             onFailure = ::onFatal
@@ -303,7 +299,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun resetViewState(userErrorMessage: String? = null) {
         _viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        savedStateHandle.set(SAVE_PROCESSING, false)
+        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
@@ -313,7 +309,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         this.checkoutIdentifier = checkoutIdentifier
-        savedStateHandle.set(SAVE_PROCESSING, true)
+        savedStateHandle[SAVE_PROCESSING] = true
         _viewState.value = PaymentSheetViewState.StartProcessing
     }
 
@@ -390,10 +386,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentLauncher = null
     }
 
-    fun setContentVisible(visible: Boolean) {
-        _contentVisible.value = visible
-    }
-
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -408,14 +400,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun launchLink() {
-    }
-
     override fun onLinkLaunched() {
+        super.onLinkLaunched()
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
 
     override fun onLinkPaymentResult(result: LinkActivityResult) {
+        super.onLinkPaymentResult(result)
         onPaymentResult(result.convertToPaymentResult())
     }
 
@@ -426,8 +417,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }
 
-    @VisibleForTesting
-    fun onPaymentResult(paymentResult: PaymentResult) {
+    override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
@@ -442,7 +432,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
-            PaymentResult.Completed -> {
+            is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
                 // SavedSelection needs to happen after new cards have been saved.
@@ -509,6 +499,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onUserCancel() {
         _paymentSheetResult.value = PaymentSheetResult.Canceled
+    }
+
+    override fun onFinish() {
+        _paymentSheetResult.value = PaymentSheetResult.Completed
+    }
+
+    override fun onError(@IntegerRes error: Int?) {
+        resetViewState(error)
     }
 
     internal sealed class TransitionTarget {

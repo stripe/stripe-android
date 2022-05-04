@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.getBackgroundColor
 
@@ -60,6 +61,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
@@ -88,9 +90,17 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
+        viewModel.error.observe(this) {
+            updateErrorMessage(
+                messageView,
+                BaseSheetViewModel.UserErrorMessage(it)
+            )
+        }
+
         setupContinueButton()
 
         viewModel.transition.observe(this) { event ->
+            clearErrorMessages()
             event?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(
                     transitionTarget,
@@ -121,6 +131,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewModel.selection.observe(this) {
+            clearErrorMessages()
             setupContinueButton()
         }
 
@@ -151,12 +162,15 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewBinding.continueButton.setLabel(
-            getString(R.string.stripe_paymentsheet_continue_button_label)
+            getString(R.string.stripe_continue_button_label)
         )
 
         viewBinding.continueButton.setOnClickListener {
+            clearErrorMessages()
             viewModel.onUserSelection()
         }
+
+        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun onTransitionTarget(

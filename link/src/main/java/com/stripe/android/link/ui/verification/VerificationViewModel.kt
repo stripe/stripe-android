@@ -9,6 +9,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import kotlinx.coroutines.launch
@@ -24,19 +25,32 @@ internal class VerificationViewModel @Inject constructor(
     private val logger: Logger,
     val linkAccount: LinkAccount
 ) : ViewModel() {
+    /**
+     * Callback when user has successfully verified their account. If not overridden, defaults to
+     * navigating to the Wallet screen using [Navigator].
+     */
+    var onVerificationCompleted: () -> Unit = {
+        navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
+    }
+
+    init {
+        if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
+            startVerification()
+        }
+    }
 
     fun onVerificationCodeEntered(code: String) {
         viewModelScope.launch {
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
-                    navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
+                    onVerificationCompleted()
                 },
                 onFailure = ::onError
             )
         }
     }
 
-    fun onResendCodeClicked() {
+    fun startVerification() {
         viewModelScope.launch {
             linkAccountManager.startVerification().fold(
                 onSuccess = {

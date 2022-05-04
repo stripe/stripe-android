@@ -45,6 +45,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -1159,7 +1160,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      * Retrieves the ConsumerSession if the given email is associated with a Link account.
      */
     override suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
@@ -1167,15 +1168,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 consumerSessionLookupUrl,
                 requestOptions,
-                mapOf("email_address" to email.lowercase())
-                    .plus(
-                        authSessionCookie?.let {
-                            mapOf(
-                                "cookies" to
-                                    mapOf("verification_session_client_secrets" to listOf(it))
-                            )
-                        } ?: emptyMap()
-                    )
+                (
+                    email?.let {
+                        mapOf(
+                            "email_address" to it.lowercase()
+                        )
+                    } ?: emptyMap()
+                    ).plus(
+                    authSessionCookie?.let {
+                        mapOf(
+                            "cookies" to
+                                mapOf("verification_session_client_secrets" to listOf(it))
+                        )
+                    } ?: emptyMap()
+                )
             ),
             ConsumerSessionLookupJsonParser()
         ) {
@@ -1311,6 +1317,30 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerPaymentDetailsUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "active" to false
+                ).plus(
+                    paymentDetailsCreateParams.toParamMap()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser()
         ) {
             // no-op
         }

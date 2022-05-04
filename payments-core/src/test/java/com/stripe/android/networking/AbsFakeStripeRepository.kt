@@ -11,6 +11,7 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -282,7 +283,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     ) = RadarSession("rse_abc123")
 
     override suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
@@ -322,6 +323,14 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
         return null
     }
 

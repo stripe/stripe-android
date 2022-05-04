@@ -70,8 +70,12 @@
   <string name="p24_bank">Przelewy24 銀行</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">保存以用於未來的%s付款</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">掃描卡</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) %s 與我們的支付服務商 Stripe 向您的銀行發送對您的帳戶進行借記的指令以及 (B) 您的銀行按照這些指令對您的帳戶進行借記。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內提出，從您的帳戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續借記的通知。</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">繼續</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">支付 %s</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

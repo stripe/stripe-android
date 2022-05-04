@@ -12,14 +12,14 @@ import kotlinx.parcelize.Parcelize
 data class SaveForFutureUseSpec(
     val identifierRequiredForFutureUse: List<RequiredItemSpec>
 ) : FormItemSpec(), RequiredItemSpec {
-    override val identifier = IdentifierSpec.SaveForFutureUse
+    override val api_path = IdentifierSpec.SaveForFutureUse
 
     fun transform(initialValue: Boolean, merchantName: String): FormElement =
         SaveForFutureUseElement(
-            this.identifier,
+            this.api_path,
             SaveForFutureUseController(
                 this.identifierRequiredForFutureUse.map { requiredItemSpec ->
-                    requiredItemSpec.identifier
+                    requiredItemSpec.api_path
                 },
                 initialValue
             ),

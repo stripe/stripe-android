@@ -14,6 +14,7 @@ dependencies {
     implementation project(':payments-core')
     implementation project(':paymentsheet')
     implementation project(':stripecardscan')
+    implementation project(':financial-connections')
 
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"

@@ -231,6 +231,36 @@ class PaymentMethodCreateParamsTest {
         )
     }
 
+    @Test
+    fun `createLink correctly set parameters`() {
+        val paymentDetailsId = "payment_details_123"
+        val consumerSessionClientSecret = "client_secret_123"
+        val extraParams = mapOf(
+            "card" to mapOf(
+                "cvc" to "123"
+            )
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.createLink(
+                paymentDetailsId, consumerSessionClientSecret, extraParams
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "type" to "link",
+                "link" to mapOf(
+                    "payment_details_id" to paymentDetailsId,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "card" to mapOf(
+                        "cvc" to "123"
+                    )
+                )
+            )
+        )
+    }
+
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Fpx(bank = "hsbc"),

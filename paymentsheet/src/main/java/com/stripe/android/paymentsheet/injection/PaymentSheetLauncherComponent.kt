@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -20,7 +21,8 @@ import javax.inject.Singleton
         PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class
+        LoggingModule::class,
+        ResourceRepositoryModule::class
     ]
 )
 internal interface PaymentSheetLauncherComponent {

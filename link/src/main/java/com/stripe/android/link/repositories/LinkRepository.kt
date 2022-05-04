@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 
@@ -13,7 +14,7 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
         authSessionCookie: String?
     ): Result<ConsumerSessionLookup>
 
@@ -56,6 +57,14 @@ internal interface LinkRepository {
      * Fetch all saved payment methods for the consumer.
      */
     suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Create a new payment method in the consumer account.
+     */
+    suspend fun createPaymentDetails(
+        paymentDetails: ConsumerPaymentDetailsCreateParams,
         consumerSessionClientSecret: String
     ): Result<ConsumerPaymentDetails>
 }

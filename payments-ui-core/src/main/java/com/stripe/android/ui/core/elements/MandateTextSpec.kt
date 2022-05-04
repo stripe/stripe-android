@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class MandateTextSpec(
-    override val identifier: IdentifierSpec,
+    override val api_path: IdentifierSpec,
     @StringRes
     val stringResId: Int,
 ) : FormItemSpec(), RequiredItemSpec {
@@ -18,7 +18,7 @@ internal data class MandateTextSpec(
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         MandateTextElement(
-            this.identifier,
+            this.api_path,
             this.stringResId,
             merchantName
         )

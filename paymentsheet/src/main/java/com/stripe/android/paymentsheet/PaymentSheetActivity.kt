@@ -67,6 +67,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
@@ -141,6 +142,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         linkButton.apply {
             onClick = viewModel::launchLink
+            linkPaymentLauncher = viewModel.linkLauncher
         }
 
         viewModel.transition.observe(this) { transitionEvent ->
@@ -187,10 +189,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
-        }
-
-        viewModel.contentVisible.observe(this) {
-            viewBinding.scrollView.isVisible = it
         }
 
         viewModel.buttonsEnabled.observe(this) { enabled ->
@@ -260,6 +258,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
+        viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
+
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
                 viewBinding.buyButton.setLabel(

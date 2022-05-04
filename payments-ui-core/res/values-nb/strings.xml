@@ -70,8 +70,12 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Lagre til fremtidige betalinger til %s</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Skann kort</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Ved å oppgi betalingsinformasjonen din og bekrefte denne betalingen gir du tillatelse til at (A) %s og Stripe, vår leverandør for betalingstjenesten, sende anmodning til banken din om å belaste kontoen din og (B) banken din belaster kontoen din i samsvar med anmodningen. Som del av dine rettigheter kan du kreve å få beløpet tilbakeført i henhold til avtalen du har med banken. Tilbakeføringskrav må fremsettes innen 8 uker etter at kontoen ble belastet. Rettighetene dine blir forklart i en erklæring som du kan få fra banken. Du godtar å motta varsler om fremtidige belastninger opptil to dager før de skjer.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Fortsett</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Betal %s</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
