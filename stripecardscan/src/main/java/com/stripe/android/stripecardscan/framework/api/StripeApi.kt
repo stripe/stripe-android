@@ -204,11 +204,9 @@ internal suspend fun uploadSavedFrames(
         path = "card_image_verifications/$civId/verify_frames",
         data = VerifyFramesRequest(
             clientSecret = civSecret,
-            verificationFramesData = b64Encode(
-                encodeToJson(
-                    ListSerializer(VerificationFrameData.serializer()),
-                    verificationFramesData,
-                ),
+            verificationFramesData = encodeToJson(
+                ListSerializer(VerificationFrameData.serializer()),
+                verificationFramesData,
             ),
         ),
         requestSerializer = VerifyFramesRequest.serializer(),
