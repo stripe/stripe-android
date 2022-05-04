@@ -276,7 +276,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
             }
-            if (args.isPaymentSheet) {
+            if (args.completePayment) {
                 confirm(clientSecret)
             } else {
                 last4?.let { last4 ->
@@ -322,7 +322,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private fun buildPrimaryButtonText(): String? {
         return when {
-            args.isPaymentSheet -> {
+            args.completePayment -> {
                 if (args.clientSecret is PaymentIntentClientSecret) {
                     args.formArgs.amount?.buildPayButtonLabel(application.resources)
                 } else {
@@ -390,9 +390,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
+    /**
+     * Arguments for launching [USBankAccountFormFragment]
+     *
+     * @param formArgs The form arguments supplied by the payment sheet
+     * @param completePayment Whether the payment should be completed, or the selected payment
+     *                          method should be returned as a result
+     * @param clientSecret The client secret for the Stripe Intent being processed
+     */
     data class Args(
         val formArgs: FormFragmentArguments,
-        val isPaymentSheet: Boolean,
+        val completePayment: Boolean,
         val clientSecret: ClientSecret?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )

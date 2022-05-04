@@ -48,7 +48,7 @@ class USBankAccountFormViewModelTest {
             amount = Amount(5099, "usd"),
             injectorKey = INJECTOR_KEY
         ),
-        isPaymentSheet = true,
+        completePayment = true,
         clientSecret = PaymentIntentClientSecret("pi_12345")
     )
 
@@ -141,7 +141,7 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `when payment options, unverified bank account, then finished`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(isPaymentSheet = false))
+            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
 
             viewModel.handleCollectBankAccountResult(
                 mockUnverifiedBankAccount()
@@ -161,7 +161,7 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `when payment options, verified bank account, then finished`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(isPaymentSheet = false))
+            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
 
             viewModel.handleCollectBankAccountResult(
                 mockVerifiedBankAccount()

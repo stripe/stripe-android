@@ -75,7 +75,7 @@ internal class USBankAccountFormFragment : Fragment() {
         )
     }
 
-    private val paymentSheetViewModelFactory: ViewModelProvider.Factory =
+    private val paymentSheetViewModelFactory: ViewModelProvider.Factory by lazy {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
             {
@@ -86,8 +86,9 @@ internal class USBankAccountFormFragment : Fragment() {
             (activity as? AppCompatActivity) ?: this,
             (activity as? AppCompatActivity)?.intent?.extras
         )
+    }
 
-    private val paymentOptionsViewModelFactory: ViewModelProvider.Factory =
+    private val paymentOptionsViewModelFactory: ViewModelProvider.Factory by lazy {
         PaymentOptionsViewModel.Factory(
             { requireActivity().application },
             {
@@ -98,6 +99,7 @@ internal class USBankAccountFormFragment : Fragment() {
             (activity as? AppCompatActivity) ?: this,
             (activity as? AppCompatActivity)?.intent?.extras
         )
+    }
 
     private val sheetViewModel: BaseSheetViewModel<*>? by lazy {
         when (requireActivity()) {
