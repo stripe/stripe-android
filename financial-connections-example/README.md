@@ -1,4 +1,4 @@
-<img src="src/res/mipmap-xxxhdpi/ic_launcher.png" width="40" /> eaStripe Financial Connections Android SDK (Beta)
+<img src="./src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="40" /> Stripe Financial Connections Android SDK (Beta)
 ======
 
 Stripe Financial Connections Android SDK lets your users securely share their financial data by linking their external financial accounts to your business in your Android app.
