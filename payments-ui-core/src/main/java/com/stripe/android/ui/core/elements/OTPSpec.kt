@@ -6,11 +6,11 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 object OTPSpec : FormItemSpec(), RequiredItemSpec {
-    override val identifier: IdentifierSpec
+    override val api_path: IdentifierSpec
         get() = IdentifierSpec.Generic("otp")
     fun transform(): OTPElement {
         return OTPElement(
-            identifier = identifier,
+            identifier = api_path,
             controller = OTPController()
         )
     }

@@ -23,6 +23,8 @@ import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
+import com.stripe.android.ui.core.elements.OTPElement
+import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionElement
@@ -71,6 +73,7 @@ fun FormUI(
                             enabled, element.controller, hiddenIdentifiers
                         )
                         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
+                        is OTPElement -> OTPElementUI(element)
                         is EmptyFormElement -> {}
                     }
                 }

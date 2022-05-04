@@ -3,84 +3,139 @@ package com.stripe.android.ui.core.elements
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
+@Preview
+@Composable
+private fun OTPElementPreview() {
+    OTPElementUI(element = OTPSpec.transform())
+}
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
     element: OTPElement,
-    colors: TextFieldColors? = null
+    modifier: Modifier = Modifier,
+    colors: TextFieldColors = TextFieldColors()
 ) {
-    val width = LocalConfiguration.current.screenWidthDp.dp / (element.controller.otpLength + 2)
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
+        var focusedElementIndex by remember { mutableStateOf(-1) }
+
         (0 until element.controller.otpLength).map { index ->
-            OTPCell(
+            SectionCard(
                 modifier = Modifier
-                    .width(width)
-                    .onKeyEvent { event ->
-                        if (event.type == KeyEventType.KeyUp) {
-                            if (event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL) {
-                                element.controller.onDelete(index)
-                                focusManager.moveFocus(FocusDirection.Previous)
-                            } else {
-                                focusManager.moveFocus(FocusDirection.Next)
-                            }
+                    .weight(1f)
+                    .padding(horizontal = 2.dp)
+            ) {
+                val value by element.controller.fieldValues[index].collectAsState("")
+
+                var textFieldModifier = Modifier
+                    .padding(0.dp)
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
+                            focusedElementIndex = index
+                        } else if (!focusState.isFocused && focusedElementIndex == index) {
+                            focusedElementIndex = -1
+                        }
+                    }
+                    .onPreviewKeyEvent { event ->
+                        if (index != 0 &&
+                            event.type == KeyEventType.KeyDown &&
+                            event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
+                            value.isEmpty()
+                        ) {
+                            // If the current field is empty, move to the previous one and delete
+                            focusManager.moveFocus(FocusDirection.Previous)
+                            element.controller.onValueChanged(index - 1, "")
+                            return@onPreviewKeyEvent true
                         }
                         false
-                    },
-                colors = colors,
-                textFieldController = element.controller.textFieldControllers[index],
-            )
-        }
-    }
-}
+                    }
 
-@Composable
-private fun OTPCell(
-    modifier: Modifier,
-    colors: TextFieldColors?,
-    textFieldController: TextFieldController,
-) {
-    val placeholder = remember { mutableStateOf("●") }
-    SectionCard {
-        TextField(
-            textFieldController = textFieldController,
-            modifier = modifier.onFocusChanged {
-                placeholder.value = if (!it.hasFocus) "●" else ""
-            },
-            placeholder = {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = placeholder.value,
-                    textAlign = TextAlign.Center
+                if (index == 0) {
+                    textFieldModifier = textFieldModifier.focusRequester(focusRequester)
+                }
+
+                androidx.compose.material.TextField(
+                    value = TextFieldValue(
+                        text = value,
+                        selection = if (focusedElementIndex == index) {
+                            TextRange(value.length)
+                        } else {
+                            TextRange.Zero
+                        }
+                    ),
+                    onValueChange = {
+                        val inputLength = element.controller.onValueChanged(index, it.text)
+                        (0 until inputLength).forEach { _ ->
+                            focusManager.moveFocus(FocusDirection.Next)
+                        }
+                    },
+                    modifier = textFieldModifier,
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = element.controller.keyboardType
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Next)
+                        },
+                        onDone = {
+                            focusManager.clearFocus(true)
+                        }
+                    ),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = if (focusedElementIndex != index) "●" else "",
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    colors = colors
                 )
-            },
-            colors = colors,
-            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-            enabled = true
-        )
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
     }
 }

@@ -11,7 +11,7 @@ data class OTPElement(
     override val controller: OTPController,
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return controller.rawFieldValue.map {
+        return controller.fieldValue.map {
             listOf(identifier to FormFieldEntry(it, it.length == controller.otpLength))
         }
     }
