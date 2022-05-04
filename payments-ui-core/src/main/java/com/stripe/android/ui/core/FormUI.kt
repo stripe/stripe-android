@@ -73,7 +73,7 @@ fun FormUI(
                             enabled, element.controller, hiddenIdentifiers
                         )
                         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
-                        is OTPElement -> OTPElementUI(element)
+                        is OTPElement -> OTPElementUI(enabled, element)
                         is EmptyFormElement -> {}
                     }
                 }

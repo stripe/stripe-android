@@ -13,6 +13,8 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.OTPSpec
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -30,6 +32,10 @@ internal class VerificationViewModel @Inject constructor(
     private val logger: Logger,
     val linkAccount: LinkAccount
 ) : ViewModel() {
+
+    private val _isProcessing = MutableStateFlow(false)
+    val isProcessing: Flow<Boolean> = _isProcessing
+
     /**
      * Callback when user has successfully verified their account. If not overridden, defaults to
      * navigating to the Wallet screen using [Navigator].
@@ -61,8 +67,10 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onVerificationCodeEntered(code: String) {
         viewModelScope.launch {
+            _isProcessing.value = true
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
+                    _isProcessing.value = false
                     onVerificationCompleted()
                 },
                 onFailure = ::onError
@@ -93,6 +101,7 @@ internal class VerificationViewModel @Inject constructor(
 
     private fun onError(error: Throwable) {
         logger.error(error.localizedMessage ?: "Internal error.")
+        _isProcessing.value = false
         // TODO(brnunes-stripe): Add localized error messages, show them in UI.
     }
 

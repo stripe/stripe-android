@@ -39,12 +39,16 @@ import androidx.compose.ui.unit.dp
 @Preview
 @Composable
 private fun OTPElementPreview() {
-    OTPElementUI(element = OTPSpec.transform())
+    OTPElementUI(
+        enabled = true,
+        element = OTPSpec.transform()
+    )
 }
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
+    enabled: Boolean,
     element: OTPElement,
     modifier: Modifier = Modifier,
     colors: TextFieldColors = TextFieldColors()
@@ -109,6 +113,7 @@ fun OTPElementUI(
                         }
                     },
                     modifier = textFieldModifier,
+                    enabled = enabled,
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = element.controller.keyboardType

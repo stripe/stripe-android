@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,6 +49,7 @@ private fun VerificationBodyPreview() {
                 redactedPhoneNumber = "+1********23",
                 email = "test@stripe.com",
                 otpElement = OTPSpec.transform(),
+                isProcessing = false,
                 onBack = { },
                 onChangeEmailClick = { },
                 onResendCodeClick = { }
@@ -82,6 +88,8 @@ internal fun VerificationBody(
         )
     )
 
+    val isProcessing by viewModel.isProcessing.collectAsState(false)
+
     onVerificationCompleted?.let {
         viewModel.onVerificationCompleted = it
     }
@@ -93,6 +101,7 @@ internal fun VerificationBody(
         redactedPhoneNumber = viewModel.linkAccount.redactedPhoneNumber,
         email = viewModel.linkAccount.email,
         otpElement = viewModel.otpElement,
+        isProcessing = isProcessing,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
         onResendCodeClick = viewModel::startVerification
@@ -107,6 +116,7 @@ internal fun VerificationBody(
     redactedPhoneNumber: String,
     email: String,
     otpElement: OTPElement,
+    isProcessing: Boolean,
     onBack: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit
@@ -136,6 +146,7 @@ internal fun VerificationBody(
             color = MaterialTheme.colors.onSecondary
         )
         OTPElementUI(
+            enabled = !isProcessing,
             element = otpElement,
             modifier = Modifier.padding(vertical = 22.dp)
         )
@@ -169,14 +180,23 @@ internal fun VerificationBody(
                     color = MaterialTheme.linkColors.disabledText,
                     shape = MaterialTheme.shapes.small
                 )
-                .clickable(onClick = onResendCodeClick),
+                .clickable(
+                    enabled = !isProcessing,
+                    onClick = onResendCodeClick
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = stringResource(id = R.string.verification_resend),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.button,
-                color = MaterialTheme.colors.onPrimary
-            )
+            CompositionLocalProvider(
+                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.verification_resend),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.button,
+                    color = MaterialTheme.colors.onPrimary
+                        .copy(alpha = LocalContentAlpha.current)
+                )
+            }
         }
     }
 }

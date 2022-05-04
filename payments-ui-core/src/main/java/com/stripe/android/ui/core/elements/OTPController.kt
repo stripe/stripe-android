@@ -2,10 +2,10 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OTPController(val otpLength: Int = 6) : Controller {
@@ -17,7 +17,7 @@ class OTPController(val otpLength: Int = 6) : Controller {
 
     val fieldValue: Flow<String> = combine(fieldValues) {
         it.joinToString("")
-    }
+    }.distinctUntilChanged()
 
     fun onValueChanged(index: Int, text: String): Int {
         if (text == fieldValues[index].value) {
