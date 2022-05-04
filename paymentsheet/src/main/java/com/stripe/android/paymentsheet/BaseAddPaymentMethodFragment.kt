@@ -19,12 +19,14 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
@@ -172,14 +174,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
         when (paymentMethod.type) {
-            // TODO(jameswoo-stripe): add us_bank_account payment method form fragment
-//            PaymentMethod.Type.USBankAccount -> {
-//                if (sheetViewModel is PaymentSheetViewModel) {
-//                    USBankAccountFormForPaymentSheetFragment::class.java
-//                } else {
-//                    USBankAccountFormForPaymentOptionsFragment::class.java
-//                }
-//            }
+            PaymentMethod.Type.USBankAccount -> USBankAccountFormFragment::class.java
             else -> ComposeFormDataCollectionFragment::class.java
         }
 

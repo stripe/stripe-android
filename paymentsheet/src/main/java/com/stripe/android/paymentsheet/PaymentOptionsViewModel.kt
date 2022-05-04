@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
@@ -16,6 +17,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -61,6 +63,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
+    private val _error = MutableLiveData<String>()
+    internal val error: LiveData<String>
+        get() = _error
+
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newLpm = args.newLpm
@@ -89,6 +95,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun onUserCancel() {
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(mostRecentError = _fatal.value)
+    }
+
+    override fun onFinish() {
+        onUserSelection()
+    }
+
+    override fun onError(@StringRes error: Int?) {
+        error?.let {
+            _error.value = getApplication<Application>().getString(error)
+        }
     }
 
     fun onUserSelection() {
@@ -131,6 +147,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 _processing.value = false
             }
         }
+    }
+
+    override fun onPaymentResult(paymentResult: PaymentResult) {
+        _processing.value = false
     }
 
     override fun updateSelection(selection: PaymentSelection?) {
