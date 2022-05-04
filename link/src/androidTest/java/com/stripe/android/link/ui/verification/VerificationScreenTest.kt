@@ -159,6 +159,12 @@ internal class VerificationScreenTest {
         assertThat(otpValue?.value).isEqualTo("")
     }
 
+    @Test
+    fun focus_on_first_otp_field_at_start() {
+        setContent()
+        onOtpField(0).assertIsFocused()
+    }
+
     private fun setContent(
         redactedPhoneNumber: String = "+1********23",
         email: String = "test@stripe.com",
