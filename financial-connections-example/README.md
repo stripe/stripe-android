@@ -28,7 +28,10 @@ Data retrieved through Financial Connections can help you unlock a variety of us
 
 ## Requirements
 
-The Stripe Financial Connections Android SDK is compatible with apps 
+* Android 5.0 (API level 21) and above
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.5.1
+* [Gradle](https://gradle.org/releases/) 5.4.1+
+* [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
 ## Getting started
 
