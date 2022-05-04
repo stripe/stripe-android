@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import android.app.Application
 import android.os.Bundle
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -105,8 +106,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             validName && validEmail
         }
 
-    private var paymentLauncher: PaymentLauncher? = null
-    private var collectBankAccountLauncher: CollectBankAccountLauncher? = null
+    @VisibleForTesting
+    var collectBankAccountLauncher: CollectBankAccountLauncher? = null
 
     private var hasLaunched: Boolean
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
@@ -119,80 +120,107 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         set(value) = savedStateHandle.set(LAST4_KEY, value)
 
     fun registerFragment(fragment: Fragment) {
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(fragment) { result ->
-            when (result) {
-                is CollectBankAccountResult.Completed -> {
-                    when (
-                        val paymentAccount =
-                            result.response.financialConnectionsSession.paymentAccount
-                    ) {
-                        is BankAccount -> {
-                            result.response.intent.id?.let { intentId ->
-                                bankName = paymentAccount.bankName
-                                last4 = paymentAccount.last4
-                                _currentScreenState.update {
-                                    USBankAccountFormScreenState.VerifyWithMicrodeposits(
-                                        bankName = paymentAccount.bankName,
-                                        displayName = paymentAccount.bankName,
-                                        last4 = paymentAccount.last4,
-                                        primaryButtonText = buildPrimaryButtonText(),
-                                        primaryButtonOnClick = {
-                                            args.clientSecret?.let {
-                                                attach(
-                                                    clientSecret = it,
-                                                    intentId = intentId,
-                                                    linkAccountId =
-                                                    result.response.financialConnectionsSession.id
-                                                )
-                                            }
-                                        },
-                                        mandateText = buildMandateText()
-                                    )
-                                }
+        collectBankAccountLauncher = CollectBankAccountLauncher.create(
+            fragment,
+            ::handleCollectBankAccountResult
+        )
+    }
+
+    @VisibleForTesting
+    fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
+        when (result) {
+            is CollectBankAccountResult.Completed -> {
+                when (
+                    val paymentAccount =
+                        result.response.financialConnectionsSession.paymentAccount
+                ) {
+                    is BankAccount -> {
+                        result.response.intent.id?.let { intentId ->
+                            bankName = paymentAccount.bankName
+                            last4 = paymentAccount.last4
+                            _currentScreenState.update {
+                                USBankAccountFormScreenState.VerifyWithMicrodeposits(
+                                    bankName = paymentAccount.bankName,
+                                    displayName = paymentAccount.bankName,
+                                    last4 = paymentAccount.last4,
+                                    primaryButtonText = buildPrimaryButtonText(),
+                                    primaryButtonOnClick = {
+                                        args.clientSecret?.let {
+                                            attach(
+                                                clientSecret = it,
+                                                intentId = intentId,
+                                                linkAccountId =
+                                                result.response.financialConnectionsSession.id
+                                            )
+                                        }
+                                    },
+                                    mandateText = buildMandateText()
+                                )
                             }
-                        }
-                        is FinancialConnectionsAccount -> {
-                            result.response.intent.id?.let { intentId ->
-                                bankName = paymentAccount.institutionName
-                                last4 = paymentAccount.last4
-                                _currentScreenState.update {
-                                    this.args.formArgs.amount
-                                    USBankAccountFormScreenState.MandateCollection(
-                                        bankName = paymentAccount.institutionName,
-                                        displayName = paymentAccount.displayName,
-                                        last4 = paymentAccount.last4,
-                                        primaryButtonText = buildPrimaryButtonText(),
-                                        primaryButtonOnClick = {
-                                            args.clientSecret?.let {
-                                                attach(
-                                                    clientSecret = it,
-                                                    intentId = intentId,
-                                                    linkAccountId =
-                                                    result.response.financialConnectionsSession.id
-                                                )
-                                            }
-                                        },
-                                        mandateText = buildMandateText()
-                                    )
-                                }
-                            }
-                        }
-                        null -> {
-                            reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
                         }
                     }
+                    is FinancialConnectionsAccount -> {
+                        result.response.intent.id?.let { intentId ->
+                            bankName = paymentAccount.institutionName
+                            last4 = paymentAccount.last4
+                            _currentScreenState.update {
+                                this.args.formArgs.amount
+                                USBankAccountFormScreenState.MandateCollection(
+                                    bankName = paymentAccount.institutionName,
+                                    displayName = paymentAccount.displayName,
+                                    last4 = paymentAccount.last4,
+                                    primaryButtonText = buildPrimaryButtonText(),
+                                    primaryButtonOnClick = {
+                                        args.clientSecret?.let {
+                                            attach(
+                                                clientSecret = it,
+                                                intentId = intentId,
+                                                linkAccountId =
+                                                result.response.financialConnectionsSession.id
+                                            )
+                                        }
+                                    },
+                                    mandateText = buildMandateText()
+                                )
+                            }
+                        }
+                    }
+                    null -> {
+                        reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
+                    }
                 }
-                is CollectBankAccountResult.Failed -> {
-                    reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
-                }
-                is CollectBankAccountResult.Cancelled -> {
-                    reset()
-                }
+            }
+            is CollectBankAccountResult.Failed -> {
+                reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
+            }
+            is CollectBankAccountResult.Cancelled -> {
+                reset()
             }
         }
     }
 
-    fun collectBankAccount(clientSecret: ClientSecret) {
+    fun reset(@StringRes error: Int? = null) {
+        hasLaunched = false
+        _currentScreenState.update {
+            USBankAccountFormScreenState.NameAndEmailCollection(
+                error = error,
+                primaryButtonText = application.getString(
+                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                ),
+                primaryButtonOnClick = { }
+            )
+        }
+    }
+
+    fun onDestroy() {
+        collectBankAccountLauncher = null
+    }
+
+    fun formattedMerchantName(): String {
+        return args.formArgs.merchantName.trimEnd { it == '.' }
+    }
+
+    private fun collectBankAccount(clientSecret: ClientSecret) {
         if (hasLaunched) return
         hasLaunched = true
         when (clientSecret) {
@@ -219,7 +247,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun attach(
+    private fun attach(
         clientSecret: ClientSecret,
         intentId: String,
         linkAccountId: String
@@ -263,7 +291,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun confirm(clientSecret: ClientSecret) {
+    private fun confirm(clientSecret: ClientSecret) {
         viewModelScope.launch {
             val intent = when (clientSecret) {
                 is PaymentIntentClientSecret -> {
@@ -291,28 +319,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 USBankAccountFormScreenState.ConfirmIntent(intent)
             }
         }
-    }
-
-    fun reset(@StringRes error: Int? = null) {
-        hasLaunched = false
-        _currentScreenState.update {
-            USBankAccountFormScreenState.NameAndEmailCollection(
-                error = error,
-                primaryButtonText = application.getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
-                ),
-                primaryButtonOnClick = { }
-            )
-        }
-    }
-
-    fun onDestroy() {
-        paymentLauncher = null
-        collectBankAccountLauncher = null
-    }
-
-    fun formattedMerchantName(): String {
-        return args.formArgs.merchantName.trimEnd { it == '.' }
     }
 
     private fun buildPrimaryButtonText(): String? {
