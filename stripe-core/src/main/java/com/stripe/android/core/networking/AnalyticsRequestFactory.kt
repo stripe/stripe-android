@@ -35,24 +35,6 @@ open class AnalyticsRequestFactory(
         )
     }
 
-    /**
-     * Backwards compatible for events not inheriting [AnalyticsEvent].
-     *
-     * @see createRequest
-     */
-    @Deprecated("use {@link #createRequest(AnalyticsEvent, Map<String, Any>)}")
-    fun createRequest(
-        event: String,
-        additionalParams: Map<String, Any>
-    ): AnalyticsRequest {
-        return createRequest(
-            event = object : AnalyticsEvent {
-                override val eventName: String = event
-            },
-            additionalParams = additionalParams
-        )
-    }
-
     private fun createParams(
         event: AnalyticsEvent
     ): Map<String, Any> {
