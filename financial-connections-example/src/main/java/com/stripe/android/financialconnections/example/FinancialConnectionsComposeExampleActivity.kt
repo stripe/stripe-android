@@ -51,12 +51,12 @@ class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
 
         FinancialConnectionsContent(
             state = state,
-            onButtonClick = { viewModel.startLinkAccountSession() }
+            onButtonClick = { viewModel.startFinancialConnectionsSession() }
         )
     }
 
     @Composable
-    fun FinancialConnectionsContent(
+    private fun FinancialConnectionsContent(
         state: FinancialConnectionsExampleState,
         onButtonClick: () -> Unit
     ) {
