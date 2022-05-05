@@ -178,6 +178,20 @@ class USBankAccountFormViewModelTest {
                 .isInstanceOf(USBankAccountFormScreenState.Finished::class.java)
         }
 
+    @Test
+    fun `when reset, primary button launches bank account collection`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+            viewModel.reset()
+
+            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+
+            (currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection).primaryButtonOnClick()
+
+            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
+        }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
