@@ -95,9 +95,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-
         bottomSheetController.setup()
 
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
