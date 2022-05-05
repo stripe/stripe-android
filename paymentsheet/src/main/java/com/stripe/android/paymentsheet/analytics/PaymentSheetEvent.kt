@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any>
@@ -21,13 +22,51 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }
         override val additionalParams: Map<String, Any>
             get() {
+                val primaryButtonConfig = configuration?.appearance?.primaryButton
+                val primaryButtonConfigMap = mapOf(
+                    FIELD_COLORS_LIGHT to (
+                        primaryButtonConfig?.colorsLight
+                            != PaymentSheet.PrimaryButtonColors.defaultLight
+                        ),
+                    FIELD_COLORS_DARK to (
+                        primaryButtonConfig?.colorsDark
+                            != PaymentSheet.PrimaryButtonColors.defaultDark
+                        ),
+                    FIELD_CORNER_RADIUS to (primaryButtonConfig?.shape?.cornerRadiusDp != null),
+                    FIELD_BORDER_WIDTH to (primaryButtonConfig?.shape?.borderStrokeWidthDp != null),
+                    FIELD_FONT to (primaryButtonConfig?.typography?.fontResId != null)
+                )
+                val appearanceConfigMap = mapOf(
+                    FIELD_COLORS_LIGHT to (
+                        configuration?.appearance?.colorsLight
+                            != PaymentSheet.Colors.defaultLight
+                        ),
+                    FIELD_COLORS_DARK to (
+                        configuration?.appearance?.colorsDark
+                            != PaymentSheet.Colors.defaultDark
+                        ),
+                    FIELD_CORNER_RADIUS to (
+                        configuration?.appearance?.shapes?.cornerRadiusDp
+                            != PaymentsThemeDefaults.shapes.cornerRadius
+                        ),
+                    FIELD_BORDER_WIDTH to (
+                        configuration?.appearance?.shapes?.borderStrokeWidthDp
+                            != PaymentsThemeDefaults.shapes.borderStrokeWidth
+                        ),
+                    FIELD_FONT to (configuration?.appearance?.typography?.fontResId != null),
+                    FIELD_SIZE_SCALE_FACTOR to (
+                        configuration?.appearance?.typography?.sizeScaleFactor
+                            != PaymentsThemeDefaults.typography.fontSizeMultiplier
+                        ),
+                    FIELD_PRIMARY_BUTTON to primaryButtonConfigMap
+                )
                 val configurationMap = mapOf(
-                    // todo skyler: add project wardrobe configs here too.
                     FIELD_CUSTOMER to (configuration?.customer != null),
                     FIELD_GOOGLE_PAY to (configuration?.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration?.primaryButtonColor != null),
                     FIELD_BILLING to (configuration?.defaultBillingDetails != null),
                     FIELD_DELAYED_PMS to (configuration?.allowsDelayedPaymentMethods),
+                    FIELD_APPEARANCE to appearanceConfigMap
                 )
                 return mapOf(FIELD_PAYMENT_SHEET_CONFIGURATION to configurationMap)
             }
@@ -100,5 +139,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_BILLING = "default_billing_details"
         const val FIELD_DELAYED_PMS = "allows_delayed_payment_methods"
         const val FIELD_PAYMENT_SHEET_CONFIGURATION = "payment_sheet_configuration"
+        const val FIELD_APPEARANCE = "appearance"
+        const val FIELD_COLORS_LIGHT = "colorsLight"
+        const val FIELD_COLORS_DARK = "colorsDark"
+        const val FIELD_CORNER_RADIUS = "corner_radius"
+        const val FIELD_BORDER_WIDTH = "border_width"
+        const val FIELD_FONT = "font"
+        const val FIELD_SIZE_SCALE_FACTOR = "size_scale_factor"
+        const val FIELD_PRIMARY_BUTTON = "primary_button"
     }
 }
