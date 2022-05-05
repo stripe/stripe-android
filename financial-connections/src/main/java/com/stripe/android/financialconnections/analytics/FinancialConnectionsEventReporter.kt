@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 
 /**
  * Contract for connections related analytic events that will be tracked.
@@ -17,6 +17,6 @@ internal interface FinancialConnectionsEventReporter {
 
     fun onResult(
         configuration: FinancialConnectionsSheet.Configuration,
-        financialConnectionsSheetResult: FinancialConnectionsSheetContract.Result
+        financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     )
 }

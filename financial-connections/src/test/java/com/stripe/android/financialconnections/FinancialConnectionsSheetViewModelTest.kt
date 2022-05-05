@@ -12,6 +12,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -86,7 +88,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(eq(configuration), any<FinancialConnectionsSheetContract.Result.Failed>())
+                .onResult(eq(configuration), any<FinancialConnectionsSheetActivityResult.Failed>())
         }
     }
 
@@ -104,7 +106,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(configuration, FinancialConnectionsSheetContract.Result.Canceled)
+                .onResult(configuration, FinancialConnectionsSheetActivityResult.Canceled)
         }
     }
 
@@ -121,7 +123,7 @@ class FinancialConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(FinishWithResult(FinancialConnectionsSheetContract.Result.Canceled)).isEqualTo(
+                assertThat(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled)).isEqualTo(
                     awaitItem()
                 )
             }
@@ -142,7 +144,7 @@ class FinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 val viewEffect = awaitItem() as FinishWithResult
-                assertThat(viewEffect.result).isInstanceOf(FinancialConnectionsSheetContract.Result.Failed::class.java)
+                assertThat(viewEffect.result).isInstanceOf(FinancialConnectionsSheetActivityResult.Failed::class.java)
             }
         }
 
@@ -165,7 +167,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
                     FinishWithResult(
-                        result = FinancialConnectionsSheetContract.Result.Completed(
+                        result = FinancialConnectionsSheetActivityResult.Completed(
                             expectedSession
                         )
                     )
@@ -189,7 +191,7 @@ class FinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(FinancialConnectionsSheetContract.Result.Failed(apiException))
+                    FinishWithResult(FinancialConnectionsSheetActivityResult.Failed(apiException))
                 )
             }
         }
@@ -209,7 +211,7 @@ class FinancialConnectionsSheetViewModelTest {
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
                 assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(FinancialConnectionsSheetContract.Result.Failed(APIException()))
+                    FinishWithResult(FinancialConnectionsSheetActivityResult.Failed(APIException()))
                 )
             }
         }
@@ -226,7 +228,7 @@ class FinancialConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetContract.Result.Canceled))
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
             }
         }
     }
@@ -245,7 +247,7 @@ class FinancialConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetContract.Result.Canceled))
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
             }
         }
     }
@@ -292,7 +294,7 @@ class FinancialConnectionsSheetViewModelTest {
         configuration: FinancialConnectionsSheet.Configuration,
         savedStateHandle: SavedStateHandle = SavedStateHandle()
     ): FinancialConnectionsSheetViewModel {
-        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
+        val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         return FinancialConnectionsSheetViewModel(
             applicationId = "com.example.app",
             starterArgs = args,

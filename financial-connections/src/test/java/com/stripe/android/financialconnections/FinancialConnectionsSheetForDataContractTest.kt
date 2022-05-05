@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -9,12 +11,12 @@ import java.security.InvalidParameterException
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class FinancialConnectionsSheetContractTest {
+class FinancialConnectionsSheetForDataContractTest {
 
     @Test
     fun `parseResult() with missing data should return failed result`() {
-        assertThat(FinancialConnectionsSheetContract().parseResult(0, Intent()))
-            .isInstanceOf(FinancialConnectionsSheetContract.Result.Failed::class.java)
+        assertThat(FinancialConnectionsSheetForDataContract().parseResult(0, Intent()))
+            .isInstanceOf(FinancialConnectionsSheetResult.Failed::class.java)
     }
 
     @Test
@@ -23,7 +25,7 @@ class FinancialConnectionsSheetContractTest {
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
+        val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         args.validate()
     }
 
@@ -33,7 +35,7 @@ class FinancialConnectionsSheetContractTest {
             " ",
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
+        val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         assertFailsWith<InvalidParameterException>(
             "The financial connections session client secret cannot be an empty string."
         ) {
@@ -47,7 +49,7 @@ class FinancialConnectionsSheetContractTest {
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             " "
         )
-        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
+        val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         assertFailsWith<InvalidParameterException>(
             "The publishable key cannot be an empty string."
         ) {
