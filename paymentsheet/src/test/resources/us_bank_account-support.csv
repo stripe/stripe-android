@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+us_bank_account, true, true, off_session, false, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, true, off_session, false, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, false, off_session, false, card/us_bank_account, false, false, not available, false
+us_bank_account, true, false, off_session, false, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, true, true, on_session, false, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, true, on_session, false, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, false, on_session, false, card/us_bank_account, false, false, not available, false
+us_bank_account, true, false, on_session, false, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, true, true, null, false, card/us_bank_account, true, true, userSelectedSave, true
+us_bank_account, true, true, null, false, card/eps/us_bank_account, true, true, userSelectedSave, true
+us_bank_account, true, false, null, false, card/us_bank_account, false, false, not available, false
+us_bank_account, true, false, null, false, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, false, true, off_session, false, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, true, off_session, false, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, false, off_session, false, card/us_bank_account, false, false, not available, false
+us_bank_account, false, false, off_session, false, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, false, true, on_session, false, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, true, on_session, false, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, false, on_session, false, card/us_bank_account, false, false, not available, false
+us_bank_account, false, false, on_session, false, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, false, true, null, false, card/us_bank_account, true, true, oneTime, true
+us_bank_account, false, true, null, false, card/eps/us_bank_account, true, true, oneTime, true
+us_bank_account, false, false, null, false, card/us_bank_account, false, false, not available, false
+us_bank_account, false, false, null, false, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, true, true, off_session, true, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, true, off_session, true, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, false, off_session, true, card/us_bank_account, false, false, not available, false
+us_bank_account, true, false, off_session, true, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, true, true, on_session, true, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, true, on_session, true, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, true, false, on_session, true, card/us_bank_account, false, false, not available, false
+us_bank_account, true, false, on_session, true, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, true, true, null, true, card/us_bank_account, true, true, userSelectedSave, true
+us_bank_account, true, true, null, true, card/eps/us_bank_account, true, true, userSelectedSave, true
+us_bank_account, true, false, null, true, card/us_bank_account, false, false, not available, false
+us_bank_account, true, false, null, true, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, false, true, off_session, true, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, true, off_session, true, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, false, off_session, true, card/us_bank_account, false, false, not available, false
+us_bank_account, false, false, off_session, true, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, false, true, on_session, true, card/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, true, on_session, true, card/eps/us_bank_account, true, true, merchantRequiredSave, true
+us_bank_account, false, false, on_session, true, card/us_bank_account, false, false, not available, false
+us_bank_account, false, false, on_session, true, card/eps/us_bank_account, false, false, not available, false
+us_bank_account, false, true, null, true, card/us_bank_account, true, true, oneTime, true
+us_bank_account, false, true, null, true, card/eps/us_bank_account, true, true, oneTime, true
+us_bank_account, false, false, null, true, card/us_bank_account, false, false, not available, false
+us_bank_account, false, false, null, true, card/eps/us_bank_account, false, false, not available, false
