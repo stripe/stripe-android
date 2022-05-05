@@ -6,22 +6,6 @@
     <!-- Card details section title for card form entry -->
     <string name="card_information" tools:ignore="ExtraTranslation">Card information</string>
 
-    <!-- Mandate for us_bank_account when using saved payment method -->
-    <string name="us_bank_account_payment_sheet_saved_mandate">By continuing you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/ach-payments/authorization\">these terms&lt;/a>.</string>
-
-    <!-- us_bank_account checkout form -->
-    <string name="us_bank_account_payment_sheet_full_name">Full name</string>
-    <string name="us_bank_account_payment_sheet_email">Email</string>
-    <string name="us_bank_account_payment_sheet_title">Pay with your bank account in just a few steps.</string>
-    <string name="us_bank_account_payment_sheet_primary_button_continue">Continue</string>
-    <string name="us_bank_account_payment_sheet_primary_button_verify_account">Start verification</string>
-    <string name="us_bank_account_payment_sheet_bank_account">Bank account</string>
-    <string name="us_bank_account_payment_sheet_alert_remove">Remove</string>
-    <string name="us_bank_account_payment_sheet_alert_cancel">Cancel</string>
-    <string name="us_bank_account_payment_sheet_alert_title">Remove bank account</string>
-    <string name="us_bank_account_payment_sheet_alert_text">Remove bank account ending in %1s</string>
-    <string name="us_bank_account_payment_sheet_mandate_continue">By continuing, you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/ach-payments/authorization\">these terms&lt;/a>.</string>
-    <string name="us_bank_account_payment_sheet_mandate_save">By saving your account for %1s you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/ach-payments/authorization\">these terms&lt;/a>.</string>
-    <string name="us_bank_account_payment_sheet_mandate_verify_with_microdeposit">Stripe will deposit $0.01 to your account in 1–2 business days. Then you\'ll get an email with instructions to complete payment to %1s.</string>
-    <string name="us_bank_account_payment_sheet_something_went_wrong">Something went wrong when linking your account. Please try again later.</string>
+    <!-- ACHv2 -->
+    <string name="stripe_paymentsheet_ach_something_went_wrong">Something went wrong when linking your account.\nPlease try again later.</string>
 </resources>

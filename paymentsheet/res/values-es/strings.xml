@@ -17,6 +17,10 @@
   <string name="stripe_failure_connection_error">Estamos teniendo problemas de conexión con nuestro proveedor de servicios de pagos. Comprueba tu conexión a Internet y vuelve a intentarlo.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Se ha producido un error interno.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Al continuar, aceptas autorizar pagos de conformidad con <terms>estas condiciones</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Al guardar tu cuenta bancaria para %@, aceptas autorizar pagos con arreglo a <terms> estas condiciones</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Añadir más datos</string>
   <!-- Card details entry form header title -->
@@ -28,6 +32,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Atrás</string>
   <string name="stripe_paymentsheet_close">Cerrar</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe depositará 0,01 $ en tu cuenta dentro de 1 o 2 días hábiles. Luego, recibirás un correo electrónico con instrucciones para completar el pago para %@.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">O paga con</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
