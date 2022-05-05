@@ -69,7 +69,7 @@ ext {
     androidxCoreVersion = '1.7.0'
     androidxFragmentVersion = '1.4.1'
     androidxLifecycleVersion = '2.4.1'
-    androidxNavigationVersion = '2.4.2'
+    androidxNavigationVersion = '2.4.1'
     androidxPreferenceVersion = '1.2.0'
     androidxRecyclerviewVersion = '1.2.1'
     androidxSecurityVersion = '1.1.0-alpha03'
