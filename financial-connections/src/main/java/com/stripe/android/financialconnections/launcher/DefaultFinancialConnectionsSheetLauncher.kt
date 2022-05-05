@@ -64,8 +64,7 @@ class DefaultFinancialConnectionsSheetLauncher(
         )
     }
 
-    companion object {
-        @RestrictTo(LIBRARY_GROUP)
+    @RestrictTo(LIBRARY_GROUP) companion object {
         fun FinancialConnectionsSheetContract.Result.toExposedResult(): FinancialConnectionsSheetResult {
             return when (this) {
                 is FinancialConnectionsSheetContract.Result.Canceled -> Canceled

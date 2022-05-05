@@ -35,17 +35,17 @@ import java.security.InvalidParameterException
         )
     }
 
-    sealed class Args constructor(
+    @RestrictTo(LIBRARY_GROUP) sealed class Args constructor(
         open val configuration: FinancialConnectionsSheet.Configuration,
     ) : Parcelable {
 
         @Parcelize
-        data class Default(
+        @RestrictTo(LIBRARY_GROUP) data class Default(
             override val configuration: FinancialConnectionsSheet.Configuration
         ) : Args(configuration)
 
         @Parcelize
-        data class ForToken(
+        @RestrictTo(LIBRARY_GROUP) data class ForToken(
             override val configuration: FinancialConnectionsSheet.Configuration
         ) : Args(configuration)
 
@@ -62,7 +62,7 @@ import java.security.InvalidParameterException
             }
         }
 
-        companion object {
+        @RestrictTo(LIBRARY_GROUP) companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
@@ -75,7 +75,7 @@ import java.security.InvalidParameterException
          * @param financialConnectionsSession The financial connections session connected
          */
         @Parcelize
-        data class Completed(
+        @RestrictTo(LIBRARY_GROUP) data class Completed(
             val financialConnectionsSession: FinancialConnectionsSession,
             val token: Token? = null
         ) : Result()
@@ -84,14 +84,14 @@ import java.security.InvalidParameterException
          * The customer canceled the connections session attempt.
          */
         @Parcelize
-        object Canceled : Result()
+        @RestrictTo(LIBRARY_GROUP) object Canceled : Result()
 
         /**
          * The connections session attempt failed.
          * @param error The error encountered by the customer.
          */
         @Parcelize
-        data class Failed(
+        @RestrictTo(LIBRARY_GROUP) data class Failed(
             val error: Throwable
         ) : Result()
 
@@ -100,7 +100,7 @@ import java.security.InvalidParameterException
         }
     }
 
-    companion object {
+    private companion object {
         const val EXTRA_ARGS =
             "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_args"
         private const val EXTRA_RESULT =

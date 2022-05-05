@@ -63,8 +63,7 @@ class FinancialConnectionsSheetForTokenLauncher(
         )
     }
 
-    companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) companion object {
         fun Result.toExposedResult(): FinancialConnectionsSheetForTokenResult {
             return when (this) {
                 is Canceled -> FinancialConnectionsSheetForTokenResult.Canceled
