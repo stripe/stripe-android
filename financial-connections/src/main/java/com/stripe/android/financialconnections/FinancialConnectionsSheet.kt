@@ -86,5 +86,22 @@ class FinancialConnectionsSheet internal constructor(
                 FinancialConnectionsSheetForTokenLauncher(activity, callback)
             )
         }
+
+
+        /**
+         * Constructor to be used when launching the payment sheet from a Fragment.
+         *
+         * @param fragment the Fragment that is presenting the payment sheet.
+         * @param callback called with the result of the payment after the payment sheet is dismissed.
+         */
+        @Suppress("UnusedPrivateMember")
+        private fun createForBankAccountToken(
+            fragment: Fragment,
+            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(fragment, callback)
+            )
+        }
     }
 }
