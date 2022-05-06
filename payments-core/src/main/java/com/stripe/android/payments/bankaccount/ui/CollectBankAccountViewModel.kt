@@ -37,14 +37,21 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private val createFinancialConnectionsSession: CreateFinancialConnectionsSession,
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession,
     private val retrieveStripeIntent: RetrieveStripeIntent,
+    private val savedStateHandle: SavedStateHandle,
     private val logger: Logger
 ) : ViewModel() {
+
+    private var hasLaunched: Boolean
+        get() = savedStateHandle.get<Boolean>("has_launched") == true
+        set(value) = savedStateHandle.set("has_launched", value)
 
     val viewEffect: SharedFlow<CollectBankAccountViewEffect> = _viewEffect
 
     init {
-        viewModelScope.launch {
-            createFinancialConnectionsSession()
+        if (hasLaunched.not()) {
+            viewModelScope.launch {
+                createFinancialConnectionsSession()
+            }
         }
     }
 
@@ -67,6 +74,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 .mapCatching { requireNotNull(it.clientSecret) }
                 .onSuccess { linkedAccountSessionSecret: String ->
                     logger.debug("Bank account session created! $linkedAccountSessionSecret.")
+                    hasLaunched = true
                     _viewEffect.emit(
                         OpenConnectionsFlow(
                             linkedAccountSessionClientSecret = linkedAccountSessionSecret,
@@ -79,6 +87,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     fun onConnectionsResult(result: FinancialConnectionsSheetResult) {
+        hasLaunched = false
         viewModelScope.launch {
             when (result) {
                 is FinancialConnectionsSheetResult.Canceled ->
@@ -161,6 +170,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
             savedStateHandle: SavedStateHandle
         ): T {
             return DaggerCollectBankAccountComponent.builder()
+                .savedStateHandle(savedStateHandle)
                 .application(applicationSupplier())
                 .viewEffect(MutableSharedFlow())
                 .configuration(argsSupplier()).build()
