@@ -5,10 +5,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsExampleBinding
-import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenConnectionsSheetExample
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+ import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 
-class FinancialConnectionsExampleActivity : AppCompatActivity() {
+class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<FinancialConnectionsExampleViewModel>()
 
@@ -25,15 +25,16 @@ class FinancialConnectionsExampleActivity : AppCompatActivity() {
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.setupViews() {
+        toolbar.setTitle(R.string.collect_bank_account_for_data_title)
         setSupportActionBar(toolbar)
         financialConnectionsSheet = FinancialConnectionsSheet.create(
-            activity = this@FinancialConnectionsExampleActivity,
+            activity = this@FinancialConnectionsDataExampleActivity,
             callback = viewModel::onFinancialConnectionsSheetResult
         )
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeViews() {
-        launchConnectionsSheet.setOnClickListener { viewModel.startFinancialConnectionsSession() }
+        launchConnectionsSheet.setOnClickListener { viewModel.startFinancialConnectionsSessionForData() }
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeState() {
@@ -45,7 +46,7 @@ class FinancialConnectionsExampleActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
                 when (it) {
-                    is OpenConnectionsSheetExample -> financialConnectionsSheet.present(it.configuration)
+                    is OpenFinancialConnectionsSheetExample -> financialConnectionsSheet.present(it.configuration)
                 }
             }
         }

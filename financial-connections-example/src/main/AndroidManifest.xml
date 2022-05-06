@@ -9,14 +9,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsExampleActivity"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:name=".FinancialConnectionsLauncherActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsDataExampleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsBankAccountTokenExampleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
