@@ -206,7 +206,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 primaryButtonText = application.getString(
                     R.string.us_bank_account_payment_sheet_primary_button_continue
                 ),
-                primaryButtonOnClick = { }
+                primaryButtonOnClick = {
+                    args.clientSecret?.let {
+                        collectBankAccount(it)
+                    }
+                }
             )
         }
     }
