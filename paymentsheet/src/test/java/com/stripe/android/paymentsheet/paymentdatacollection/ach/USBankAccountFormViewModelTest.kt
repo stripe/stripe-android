@@ -81,6 +81,27 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
+    fun `when email and name is invalid then required fields are not filled`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+
+            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to "      "))
+            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+
+            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+
+            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to ""))
+
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+        }
+
+    @Test
     fun `collect bank account is callable with initial screen state`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
