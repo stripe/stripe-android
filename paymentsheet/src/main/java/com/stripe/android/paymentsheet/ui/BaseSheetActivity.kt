@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Insets
