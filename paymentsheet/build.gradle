@@ -29,6 +29,7 @@ dependencies {
     implementation "androidx.browser:browser:$androidxBrowserVersion"
     implementation "androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
     implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
@@ -132,8 +133,6 @@ android {
     }
 
     kotlinOptions {
-        // Needed to support @JvmDefault inheritance in ViewModels
-        freeCompilerArgs = ["-Xjvm-default=enable"]
         jvmTarget = "1.8"
     }
 
