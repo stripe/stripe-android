@@ -96,7 +96,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, args.formArgs.showCheckbox)
 
     val requiredFields = name
-        .map { it.isNotEmpty() }
+        .map { it.isNotBlank() }
         .combine(
             emailElement.getFormFieldValueFlow().map { formFieldsList ->
                 formFieldsList.firstOrNull()?.second?.isComplete ?: false
