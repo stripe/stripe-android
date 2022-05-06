@@ -74,14 +74,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val currentScreenState: StateFlow<USBankAccountFormScreenState>
         get() = _currentScreenState
 
-    val nameElement: SectionFieldElement = SimpleTextSpec.NAME.transform()
+    val nameElement: SectionFieldElement = SimpleTextSpec.NAME.transform(
+        mapOf(
+            IdentifierSpec.Name to args.formArgs.billingDetails?.name
+        )
+    )
     val name: StateFlow<String> = nameElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Lazily, "")
 
     val emailElement: SectionFieldElement = EmailSpec.transform(
         mapOf(
-            IdentifierSpec.Email to null
+            IdentifierSpec.Email to args.formArgs.billingDetails?.email
         )
     )
     val email: StateFlow<String?> = emailElement.getFormFieldValueFlow().map { formFieldsList ->
