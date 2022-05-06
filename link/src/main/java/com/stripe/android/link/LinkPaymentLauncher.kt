@@ -33,8 +33,9 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
@@ -94,7 +95,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     /**
      * Publicly visible account status, used by PaymentSheet to display the correct UI.
      */
-    lateinit var accountStatus: Flow<AccountStatus>
+    lateinit var accountStatus: StateFlow<AccountStatus>
 
     /**
      * Sets up Link to process the given [StripeIntent].
@@ -109,12 +110,13 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      */
     suspend fun setup(
         stripeIntent: StripeIntent,
-        completePayment: Boolean
+        completePayment: Boolean,
+        coroutineScope: CoroutineScope
     ): AccountStatus {
         val component = setupDependencies(stripeIntent, completePayment)
-        accountStatus = component.linkAccountManager.accountStatus
+        accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
-        return accountStatus.first()
+        return accountStatus.value
     }
 
     fun present(

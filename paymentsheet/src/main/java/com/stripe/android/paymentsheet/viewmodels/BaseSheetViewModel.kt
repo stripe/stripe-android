@@ -154,16 +154,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * time the payment selection is changed.
      */
     private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
-    val primaryButtonUIState: LiveData<PrimaryButton.UIState?>
-        get() = _primaryButtonUIState
+    val primaryButtonUIState: LiveData<PrimaryButton.UIState?> = _primaryButtonUIState
 
     private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
-    val primaryButtonState: LiveData<PrimaryButton.State>
-        get() = _primaryButtonState
+    val primaryButtonState: LiveData<PrimaryButton.State> = _primaryButtonState
 
     private val _notesText = MutableLiveData<String?>()
-    internal val notesText: LiveData<String?>
-        get() = _notesText
+    internal val notesText: LiveData<String?> = _notesText
 
     protected var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -198,12 +195,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            _primaryButtonUIState,
+            primaryButtonUIState,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = _primaryButtonUIState.value?.enabled
+                value = primaryButtonUIState.value?.enabled
                     ?: (
                         buttonsEnabled.value == true &&
                             selection.value != null
@@ -308,6 +305,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     requireNotNull(stripeIntent.amount),
                     requireNotNull(stripeIntent.currency)
                 )
+                // Reset the primary button state to display the amount
+                _primaryButtonUIState.value = null
             }.onFailure {
                 onFatal(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
@@ -409,7 +408,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
             viewModelScope.launch {
-                when (linkLauncher.setup(stripeIntent, completePayment)) {
+                when (linkLauncher.setup(stripeIntent, completePayment, this)) {
                     AccountStatus.Verified -> launchLink()
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
@@ -424,6 +423,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun onLinkVerificationDismissed() {
         _showLinkVerificationDialog.value = false
+    }
+
+    fun payWithLink() {
     }
 
     fun launchLink() {

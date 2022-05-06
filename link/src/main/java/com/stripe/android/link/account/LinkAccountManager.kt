@@ -54,10 +54,14 @@ internal class LinkAccountManager @Inject constructor(
     private var userHasLoggedOut = false
 
     /**
-     * Retrieves the Link account associated with the email and starts verification, if needed.
+     * Retrieves the Link account associated with the email and optionally starts verification, if
+     * needed.
      * When the [email] parameter is null, will lookup the account for the currently stored cookie.
      */
-    suspend fun lookupConsumer(email: String?): Result<LinkAccount?> =
+    suspend fun lookupConsumer(
+        email: String?,
+        startVerification: Boolean = true
+    ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
             .map { consumerSessionLookup ->
                 setAndReturnNullable(
@@ -71,10 +75,14 @@ internal class LinkAccountManager @Inject constructor(
                         account
                     } else {
                         setAndReturn(
-                            LinkAccount(
-                                linkRepository.startVerification(account.clientSecret, cookie())
-                                    .getOrThrow()
-                            )
+                            if (startVerification) {
+                                LinkAccount(
+                                    linkRepository.startVerification(account.clientSecret, cookie())
+                                        .getOrThrow()
+                                )
+                            } else {
+                                account
+                            }
                         )
                     }
                 }
