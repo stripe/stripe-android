@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@Suppress("ConstructorParameterNaming")
+@Suppress("ConstructorParameterNaming", "LongParameterList")
 internal class CollectBankAccountViewModel @Inject constructor(
     // bound instances
     private val args: CollectBankAccountContract.Args,
@@ -72,12 +72,12 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 )
             }
                 .mapCatching { requireNotNull(it.clientSecret) }
-                .onSuccess { linkedAccountSessionSecret: String ->
-                    logger.debug("Bank account session created! $linkedAccountSessionSecret.")
+                .onSuccess { financialConnectionsSessionSecret: String ->
+                    logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
                     hasLaunched = true
                     _viewEffect.emit(
                         OpenConnectionsFlow(
-                            linkedAccountSessionClientSecret = linkedAccountSessionSecret,
+                            financialConnectionsSessionSecret = financialConnectionsSessionSecret,
                             publishableKey = args.publishableKey
                         )
                     )
@@ -142,7 +142,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     linkedAccountSessionId = financialConnectionsSession.id
                 )
             }
-                .mapCatching { Completed(CollectBankAccountResponse(it, financialConnectionsSession)) }
+                .mapCatching {
+                    Completed(
+                        CollectBankAccountResponse(
+                            it,
+                            financialConnectionsSession
+                        )
+                    )
+                }
                 .onSuccess { result: Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
