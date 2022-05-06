@@ -18,10 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -159,6 +161,16 @@ internal class USBankAccountFormFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sheetViewModel?.primaryButtonState?.observe(viewLifecycleOwner) { state ->
+                    viewModel.setProcessing(
+                        state is PrimaryButton.State.StartProcessing ||
+                            state is PrimaryButton.State.FinishProcessing
+                    )
+                }
+            }
+        }
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.requiredFields.collect {
@@ -312,9 +324,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private fun NameAndEmailCollectionScreen(@StringRes error: Int? = null) {
         Column(Modifier.fillMaxWidth()) {
             NameAndEmailForm()
-            error?.let {
-                sheetViewModel?.onError(error)
-            }
+            sheetViewModel?.onError(error)
         }
     }
 
@@ -344,6 +354,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     @Composable
     private fun NameAndEmailForm() {
+        val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
             H6Text(
                 text = stringResource(R.string.us_bank_account_payment_sheet_title),
@@ -356,7 +367,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 contentAlignment = Alignment.CenterEnd
             ) {
                 SectionElementUI(
-                    enabled = true,
+                    enabled = !processing.value,
                     element = SectionElement(
                         identifier = IdentifierSpec.Name,
                         fields = listOf(viewModel.nameElement),
@@ -376,7 +387,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 contentAlignment = Alignment.CenterEnd
             ) {
                 SectionElementUI(
-                    enabled = true,
+                    enabled = !processing.value,
                     element = SectionElement(
                         identifier = IdentifierSpec.Email,
                         fields = listOf(viewModel.emailElement),
@@ -400,9 +411,12 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         val openDialog = remember { mutableStateOf(false) }
         val bankIcon = TransformToBankIcon(bankName)
+        val processing = viewModel.processing.collectAsState(false)
 
         Column(
-            Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         ) {
             H6Text(
                 text = stringResource(R.string.us_bank_account_payment_sheet_bank_account),
@@ -424,7 +438,10 @@ internal class USBankAccountFormFragment : Fragment() {
                                 .height(40.dp)
                                 .width(56.dp)
                         )
-                        Text(text = "$displayName ••••$last4")
+                        Text(
+                            text = "$displayName ••••$last4",
+                            modifier = Modifier.alpha(if (processing.value) 0.5f else 1f)
+                        )
                     }
                     Image(
                         painter = painterResource(R.drawable.stripe_ic_clear),
@@ -432,8 +449,11 @@ internal class USBankAccountFormFragment : Fragment() {
                         modifier = Modifier
                             .height(20.dp)
                             .width(20.dp)
+                            .alpha(if (processing.value) 0.5f else 1f)
                             .clickable {
-                                openDialog.value = true
+                                if (!processing.value) {
+                                    openDialog.value = true
+                                }
                             }
                     )
                 }
