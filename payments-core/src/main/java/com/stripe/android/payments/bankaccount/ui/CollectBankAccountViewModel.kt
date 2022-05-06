@@ -42,8 +42,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var hasLaunched: Boolean
-        get() = savedStateHandle.get<Boolean>("has_launched") == true
-        set(value) = savedStateHandle.set("has_launched", value)
+        get() = savedStateHandle.get<Boolean>(KEY_HAS_LAUNCHED) == true
+        set(value) = savedStateHandle.set(KEY_HAS_LAUNCHED, value)
 
     val viewEffect: SharedFlow<CollectBankAccountViewEffect> = _viewEffect
 
@@ -176,5 +176,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 .configuration(argsSupplier()).build()
                 .viewModel as T
         }
+    }
+
+    companion object {
+        private const val KEY_HAS_LAUNCHED = "key_has_launched"
     }
 }
