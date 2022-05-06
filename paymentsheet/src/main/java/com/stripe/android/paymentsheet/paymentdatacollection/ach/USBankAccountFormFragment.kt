@@ -363,10 +363,10 @@ internal class USBankAccountFormFragment : Fragment() {
                         controller = SectionController(
                             null,
                             listOf(viewModel.nameElement.sectionFieldErrorController())
-                        )
+                        ),
                     ),
                     emptyList(),
-                    viewModel.nameElement.identifier
+                    null
                 )
             }
             Box(

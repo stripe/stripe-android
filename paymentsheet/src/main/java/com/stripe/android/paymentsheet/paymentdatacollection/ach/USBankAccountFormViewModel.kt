@@ -163,7 +163,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             bankName = paymentAccount.institutionName
                             last4 = paymentAccount.last4
                             _currentScreenState.update {
-                                this.args.formArgs.amount
                                 USBankAccountFormScreenState.MandateCollection(
                                     bankName = paymentAccount.institutionName,
                                     displayName = paymentAccount.displayName,
