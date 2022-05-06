@@ -24,8 +24,10 @@ internal sealed class SupportedPaymentMethod(
     /**
      * Builds the [ConsumerPaymentDetailsCreateParams] used to create this payment method.
      */
-    abstract fun createParams(paymentMethodCreateParams: PaymentMethodCreateParams):
-        ConsumerPaymentDetailsCreateParams
+    abstract fun createParams(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        email: String
+    ): ConsumerPaymentDetailsCreateParams
 
     /**
      * Creates a map containing additional parameters that must be sent during payment confirmation.
@@ -38,8 +40,13 @@ internal sealed class SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         LinkCardForm
     ) {
-        override fun createParams(paymentMethodCreateParams: PaymentMethodCreateParams) =
-            ConsumerPaymentDetailsCreateParams.Card(paymentMethodCreateParams.toParamMap())
+        override fun createParams(
+            paymentMethodCreateParams: PaymentMethodCreateParams,
+            email: String
+        ) = ConsumerPaymentDetailsCreateParams.Card(
+            paymentMethodCreateParams.toParamMap(),
+            email
+        )
 
         /**
          * CVC is not passed during creation, and must be included when confirming the payment.
