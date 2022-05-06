@@ -5,13 +5,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResultCallback
 import org.jetbrains.annotations.TestOnly
 
-internal class DefaultFinancialConnectionsSheetLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetContract.Args>
+internal class FinancialConnectionsSheetForDataLauncher(
+    private val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetActivityArgs.ForData>
 ) : FinancialConnectionsSheetLauncher {
 
     constructor(
@@ -19,9 +17,9 @@ internal class DefaultFinancialConnectionsSheetLauncher(
         callback: FinancialConnectionsSheetResultCallback
     ) : this(
         activity.registerForActivityResult(
-            FinancialConnectionsSheetContract()
+            FinancialConnectionsSheetForDataContract()
         ) {
-            callback.onFinancialConnectionsSheetResult(it.toExposedResult())
+            callback.onFinancialConnectionsSheetResult(it)
         }
     )
 
@@ -30,9 +28,9 @@ internal class DefaultFinancialConnectionsSheetLauncher(
         callback: FinancialConnectionsSheetResultCallback
     ) : this(
         fragment.registerForActivityResult(
-            FinancialConnectionsSheetContract()
+            FinancialConnectionsSheetForDataContract()
         ) {
-            callback.onFinancialConnectionsSheetResult(it.toExposedResult())
+            callback.onFinancialConnectionsSheetResult(it)
         }
     )
 
@@ -43,27 +41,18 @@ internal class DefaultFinancialConnectionsSheetLauncher(
         callback: FinancialConnectionsSheetResultCallback
     ) : this(
         fragment.registerForActivityResult(
-            FinancialConnectionsSheetContract(),
+            FinancialConnectionsSheetForDataContract(),
             registry
         ) {
-            callback.onFinancialConnectionsSheetResult(it.toExposedResult())
+            callback.onFinancialConnectionsSheetResult(it)
         },
     )
 
     override fun present(configuration: FinancialConnectionsSheet.Configuration) {
         activityResultLauncher.launch(
-            FinancialConnectionsSheetContract.Args.Default(
+            FinancialConnectionsSheetActivityArgs.ForData(
                 configuration,
             )
         )
     }
 }
-
-private fun FinancialConnectionsSheetContract.Result.toExposedResult(): FinancialConnectionsSheetResult =
-    when (this) {
-        is FinancialConnectionsSheetContract.Result.Canceled -> FinancialConnectionsSheetResult.Canceled
-        is FinancialConnectionsSheetContract.Result.Failed -> FinancialConnectionsSheetResult.Failed(error)
-        is FinancialConnectionsSheetContract.Result.Completed -> FinancialConnectionsSheetResult.Completed(
-            financialConnectionsSession = financialConnectionsSession,
-        )
-    }
