@@ -87,7 +87,6 @@ class FinancialConnectionsSheet internal constructor(
             )
         }
 
-
         /**
          * Constructor to be used when launching the payment sheet from a Fragment.
          *
