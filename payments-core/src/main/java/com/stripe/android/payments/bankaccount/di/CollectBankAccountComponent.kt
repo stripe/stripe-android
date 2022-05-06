@@ -36,7 +36,7 @@ internal interface CollectBankAccountComponent {
         fun viewEffect(application: MutableSharedFlow<CollectBankAccountViewEffect>): Builder
 
         @BindsInstance
-        fun savedStateHandle(savedStateHandle:SavedStateHandle): Builder
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
         fun configuration(configuration: CollectBankAccountContract.Args): Builder
