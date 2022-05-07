@@ -218,13 +218,15 @@ internal suspend fun uploadSavedFrames(
 }
 
 internal fun isformatSupport(format: CardImageVerificationDetailsFormat) =
-    (format == CardImageVerificationDetailsFormat.JPEG ||
-        format == CardImageVerificationDetailsFormat.WEBP)
+    format == CardImageVerificationDetailsFormat.JPEG ||
+        format == CardImageVerificationDetailsFormat.WEBP
 
 internal fun imageWithConfig(
     image: Bitmap,
     format: CardImageVerificationDetailsFormat,
-    configs: CardImageVerificationDetailsAcceptedImageConfigs): Pair<ByteArray?, Rect> {
+    configs: CardImageVerificationDetailsAcceptedImageConfigs
+): Pair<ByteArray?, Rect> {
+
     val imageSettings = configs.imageSettings(format)
 
     // Size and crop the image per the settings.
@@ -242,7 +244,7 @@ internal fun imageWithConfig(
     val compressionRatio = imageSettings.compressionRatio!!
 
     // Convert to 0..100
-    val convertedRatio = compressionRatio.times( 100.0).toInt()
+    val convertedRatio = compressionRatio.times(100.0).toInt()
 
     var result: ByteArray? = null
 
@@ -258,7 +260,11 @@ internal fun imageWithConfig(
     return Pair(result, cropRect)
 }
 
-internal fun getImageData(image: Bitmap, configs: CardImageVerificationDetailsAcceptedImageConfigs?): Pair<ByteArray?, Rect> {
+internal fun getImageData(
+    image: Bitmap,
+    configs: CardImageVerificationDetailsAcceptedImageConfigs?
+): Pair<ByteArray?, Rect> {
+
     val imageConfigs = configs ?: CardImageVerificationDetailsAcceptedImageConfigs()
 
     // Attempt to get image data using the configs from the server.

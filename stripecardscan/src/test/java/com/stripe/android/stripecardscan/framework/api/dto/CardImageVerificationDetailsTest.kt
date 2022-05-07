@@ -43,7 +43,7 @@ class CardImageVerificationDetailsTest {
             "    \"last4\": \"9012\",\n" +
             "    \"issuer\": \"Visa\"\n" +
             "  }\n" +
-            "}";
+            "}"
 
         val result = Json.decodeFromString<CardImageVerificationDetailsResult>(json)
         assertNotNull(result.acceptedImageConfigs)
