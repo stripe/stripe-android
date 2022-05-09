@@ -78,7 +78,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param callback  called with the result of the connections session after the connections sheet is dismissed.
          */
         @Suppress("UnusedPrivateMember")
-        fun createForBankAccountToken(
+        private fun createForBankAccountToken(
             activity: ComponentActivity,
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {
