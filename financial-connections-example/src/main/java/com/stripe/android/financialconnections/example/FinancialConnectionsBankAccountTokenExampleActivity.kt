@@ -27,10 +27,11 @@ class FinancialConnectionsBankAccountTokenExampleActivity : AppCompatActivity() 
     private fun ActivityFinancialconnectionsExampleBinding.setupViews() {
         toolbar.setTitle(R.string.collect_bank_account_for_bank_account_token_title)
         setSupportActionBar(toolbar)
-        financialConnectionsSheet = FinancialConnectionsSheet.createForBankAccountToken(
-            activity = this@FinancialConnectionsBankAccountTokenExampleActivity,
-            callback = viewModel::onFinancialConnectionsSheetForBankAccountTokenResult
-        )
+        //TODO@carlosmuvi uncomment for pay-outs.
+//        financialConnectionsSheet = FinancialConnectionsSheet.createForBankAccountToken(
+//            activity = this@FinancialConnectionsBankAccountTokenExampleActivity,
+//            callback = viewModel::onFinancialConnectionsSheetForBankAccountTokenResult
+//        )
     }
 
     private fun ActivityFinancialconnectionsExampleBinding.observeViews() {

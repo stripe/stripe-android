@@ -46,10 +46,11 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.collect_bank_account_for_data),
                 FinancialConnectionsDataExampleActivity::class.java
             ),
-            Item(
-                activity.getString(R.string.collect_bank_account_for_bank_account_token),
-                FinancialConnectionsBankAccountTokenExampleActivity::class.java
-            ),
+            //TODO@carlosmuvi uncomment for pay-outs.
+//            Item(
+//                activity.getString(R.string.collect_bank_account_for_bank_account_token),
+//                FinancialConnectionsBankAccountTokenExampleActivity::class.java
+//            ),
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {
