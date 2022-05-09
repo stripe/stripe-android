@@ -411,7 +411,8 @@ internal class USBankAccountFormFragment : Fragment() {
                         )
                         Text(
                             text = "$displayName ••••$last4",
-                            modifier = Modifier.alpha(if (processing.value) 0.5f else 1f)
+                            modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
+                            color = PaymentsTheme.colors.onComponent
                         )
                     }
                     Image(
