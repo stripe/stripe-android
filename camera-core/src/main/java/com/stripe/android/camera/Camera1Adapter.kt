@@ -88,7 +88,8 @@ class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
-    private var currentCameraId = if (startWithBackCamera) 0 else 1
+    private var currentCameraId =
+        if (startWithBackCamera) Camera.CameraInfo.CAMERA_FACING_BACK else Camera.CameraInfo.CAMERA_FACING_FRONT
 
     private val mainThreadHandler = Handler(activity.mainLooper)
     private var cameraThread: HandlerThread? = null
@@ -149,9 +150,17 @@ class Camera1Adapter(
         // exception was due to the camera already having been closed or from an error with camera
         // hardware.
         val imageWidth =
-            try { camera.parameters.previewSize.width } catch (t: Throwable) { return }
+            try {
+                camera.parameters.previewSize.width
+            } catch (t: Throwable) {
+                return
+            }
         val imageHeight =
-            try { camera.parameters.previewSize.height } catch (t: Throwable) { return }
+            try {
+                camera.parameters.previewSize.height
+            } catch (t: Throwable) {
+                return
+            }
 
         if (bytes != null) {
             try {
