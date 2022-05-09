@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.annotation.StringRes
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.paymentsheet.model.PaymentSelection
 
 sealed class USBankAccountFormScreenState {
     class NameAndEmailCollection(
@@ -33,8 +34,6 @@ sealed class USBankAccountFormScreenState {
     ) : USBankAccountFormScreenState()
 
     data class Finished(
-        val linkAccountId: String,
-        val last4: String,
-        val bankName: String
+        val paymentSelection: PaymentSelection
     ) : USBankAccountFormScreenState()
 }

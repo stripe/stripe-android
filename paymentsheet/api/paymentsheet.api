@@ -731,6 +731,104 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave : java/lang/Enum {
+	public static final field NoRequest Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public static final field RequestNoReuse Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public static final field RequestReuse Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$GooglePay : com/stripe/android/paymentsheet/model/PaymentSelection {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/model/PaymentSelection$GooglePay;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract class com/stripe/android/paymentsheet/model/PaymentSelection$New : com/stripe/android/paymentsheet/model/PaymentSelection {
+	public static final field $stable I
+	public abstract fun getCustomerRequestedSave ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public abstract fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$Card : com/stripe/android/paymentsheet/model/PaymentSelection$New {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;)V
+	public final fun component1 ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun component2 ()Lcom/stripe/android/model/CardBrand;
+	public final fun component3 ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public final fun copy (Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Card;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Card;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Card;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public fun getCustomerRequestedSave ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public final fun getLast4 ()Ljava/lang/String;
+	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$GenericPaymentMethod : com/stripe/android/paymentsheet/model/PaymentSelection$New {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;ILcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun component4 ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public final fun copy (Ljava/lang/String;ILcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$GenericPaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$GenericPaymentMethod;Ljava/lang/String;ILcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$GenericPaymentMethod;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCustomerRequestedSave ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public final fun getIconResource ()I
+	public final fun getLabelResource ()Ljava/lang/String;
+	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$Link : com/stripe/android/paymentsheet/model/PaymentSelection$New {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;Lcom/stripe/android/model/PaymentMethodCreateParams;)V
+	public final fun component1 ()Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;
+	public final fun component2 ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun copy (Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;Lcom/stripe/android/model/PaymentMethodCreateParams;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Link;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Link;Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;Lcom/stripe/android/model/PaymentMethodCreateParams;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$Link;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCustomerRequestedSave ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$CustomerRequestedSave;
+	public final fun getIconResource ()I
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getPaymentDetails ()Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;
+	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$Saved : com/stripe/android/paymentsheet/model/PaymentSelection {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/model/PaymentMethod;)V
+	public final fun component1 ()Lcom/stripe/android/model/PaymentMethod;
+	public final fun copy (Lcom/stripe/android/model/PaymentMethod;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$Saved;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentSelection$Saved;Lcom/stripe/android/model/PaymentMethod;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$Saved;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/paymentsheet/model/StripeIntentValidator_Factory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator_Factory;
@@ -762,16 +860,12 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USB
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished : com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
+	public fun <init> (Lcom/stripe/android/paymentsheet/model/PaymentSelection;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/model/PaymentSelection;
+	public final fun copy (Lcom/stripe/android/paymentsheet/model/PaymentSelection;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;Lcom/stripe/android/paymentsheet/model/PaymentSelection;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$Finished;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBankName ()Ljava/lang/String;
-	public final fun getLast4 ()Ljava/lang/String;
-	public final fun getLinkAccountId ()Ljava/lang/String;
+	public final fun getPaymentSelection ()Lcom/stripe/android/paymentsheet/model/PaymentSelection;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
