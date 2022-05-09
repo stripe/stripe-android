@@ -175,7 +175,7 @@ class PlaygroundTestDriver(
             compareScreenshot(it)
         }
 
-        Espresso.pressBack()
+//        Espresso.pressBack()
 
         teardown()
     }
