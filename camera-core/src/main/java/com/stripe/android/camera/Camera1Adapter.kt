@@ -150,17 +150,9 @@ class Camera1Adapter(
         // exception was due to the camera already having been closed or from an error with camera
         // hardware.
         val imageWidth =
-            try {
-                camera.parameters.previewSize.width
-            } catch (t: Throwable) {
-                return
-            }
+            try { camera.parameters.previewSize.width } catch (t: Throwable) { return }
         val imageHeight =
-            try {
-                camera.parameters.previewSize.height
-            } catch (t: Throwable) {
-                return
-            }
+            try { camera.parameters.previewSize.height } catch (t: Throwable) { return }
 
         if (bytes != null) {
             try {
