@@ -4,7 +4,7 @@ This release contains bug fixes in PaymentSheet.
 
 ### PaymentSheet
 * [FIXED][4966](https://github.com/stripe/stripe-android/pull/4966) Replaced alpha androidx.lifecycle dependencies with stable versions
-* [FIXED][4961](https://github.com/stripe/stripe-android/pull/4961) Fix issue opening the keyboard with small form
+* [FIXED][4961](https://github.com/stripe/stripe-android/pull/4961) Fix issue entering text with small forms.
 
 ## 20.2.1 - 2022-05-03
 This release contains bug fixes in PaymentSheet and Payments.
