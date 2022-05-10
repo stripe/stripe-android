@@ -178,8 +178,6 @@ internal suspend fun uploadSavedFrames(
     savedFrames: Collection<SavedFrame>,
     imageConfigs: CardImageVerificationDetailsAcceptedImageConfigs?,
 ) = withContext(Dispatchers.IO) {
-    val maxImageWidth = 1080
-    val maxImageHeight = 1920
 
     val verificationFramesData = savedFrames.map { savedFrame ->
         val image = savedFrame.frame.cameraPreviewImage.image
@@ -225,7 +223,7 @@ internal fun imageWithConfig(
     image: Bitmap,
     format: CardImageVerificationDetailsFormat,
     configs: CardImageVerificationDetailsAcceptedImageConfigs
-): Pair<ByteArray?, Rect> {
+): Pair<ByteArray, Rect>? {
 
     val imageSettings = configs.imageSettings(format)
 
@@ -246,15 +244,14 @@ internal fun imageWithConfig(
     // Convert to 0..100
     val convertedRatio = compressionRatio.times(100.0).toInt()
 
-    var result: ByteArray? = null
+    var result = when (format) {
+        CardImageVerificationDetailsFormat.WEBP -> image.toWebP(convertedRatio)
+        CardImageVerificationDetailsFormat.HEIC,
+        CardImageVerificationDetailsFormat.JPEG -> image.toJpeg(convertedRatio)
+    }
 
-    when (format) {
-        CardImageVerificationDetailsFormat.WEBP -> {
-            result = image.toWebP(convertedRatio)
-        }
-        CardImageVerificationDetailsFormat.JPEG -> {
-            result = image.toJpeg(convertedRatio)
-        }
+    if (result.size == 0) {
+        return null
     }
 
     return Pair(result, cropRect)
@@ -268,19 +265,17 @@ internal fun getImageData(
     val imageConfigs = configs ?: CardImageVerificationDetailsAcceptedImageConfigs()
 
     // Attempt to get image data using the configs from the server.
-    imageConfigs.preferredFormats?.let { formats ->
-        for (format in imageConfigs.preferredFormats) {
-            if (!isformatSupport(format)) {
-                continue
-            }
+    var result = imageConfigs.preferredFormats?.filter {
+        isformatSupport(it)
+    }?.firstNotNullOfOrNull {
+        imageWithConfig(image, it, imageConfigs)
+    }
 
-            val result = imageWithConfig(image, format, imageConfigs)
-            if (result.first?.size != 0) {
-                return result
-            }
-        }
+    if (result == null) {
+        // Fallback to JPEG format
+        result = imageWithConfig(image, CardImageVerificationDetailsFormat.JPEG, imageConfigs)
     }
 
     // Fallback to JPEG format
-    return imageWithConfig(image, CardImageVerificationDetailsFormat.JPEG, imageConfigs)
+    return result ?: Pair(ByteArray(0), Rect())
 }

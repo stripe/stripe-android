@@ -12,38 +12,38 @@ class CardImageVerificationDetailsTest {
     @Test
     @SmallTest
     fun testImageSettingsMethod() {
-        val json = "{\n" +
-            "  \"accepted_image_configs\": {\n" +
-            "    \"default_settings\": {\n" +
-            "      \"compression_ratio\": 0.8,\n" +
-            "      \"image_size\": [\n" +
-            "        1080,\n" +
-            "        1920\n" +
-            "      ]\n" +
-            "    },\n" +
-            "    \"format_settings\": {\n" +
-            "      \"heic\": {\n" +
-            "        \"compression_ratio\": 0.5\n" +
-            "      },\n" +
-            "      \"webp\": {\n" +
-            "        \"compression_ratio\": 0.7\n" +
-            "        \"image_size\": [\n" +
-            "            2160,\n" +
-            "            1920\n" +
-            "      ]\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"preferred_formats\": [\n" +
-            "      \"heic\",\n" +
-            "      \"webp\",\n" +
-            "      \"jpeg\"\n" +
-            "    ]\n" +
-            "  },\n" +
-            "  \"expected_card\": {\n" +
-            "    \"last4\": \"9012\",\n" +
-            "    \"issuer\": \"Visa\"\n" +
-            "  }\n" +
-            "}"
+        val json = """{
+              "accepted_image_configs": {
+                "default_settings": {
+                  "compression_ratio": 0.8,
+                  "image_size": [
+                    1080,
+                    1920
+                  ]
+                },
+                "format_settings": {
+                  "heic": {
+                    "compression_ratio": 0.5
+                  },
+                  "webp": {
+                    "compression_ratio": 0.7
+                    "image_size": [
+                        2160,
+                        1920
+                  ]
+                  }
+                },
+                "preferred_formats": [
+                  "heic",
+                  "webp",
+                  "jpeg"
+                ]
+              },
+              "expected_card": {
+                "last4": "9012",
+                "issuer": "Visa"
+              }
+            }"""
 
         val result = Json.decodeFromString<CardImageVerificationDetailsResult>(json)
         assertNotNull(result.acceptedImageConfigs)
