@@ -67,6 +67,17 @@ jobs:
           sdcard-path-or-size: 512M
           profile: Nexus 6
           script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots#testPaymentSheetNewCustomer
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: screenshot-test-report
+          path: paymentsheet-example/build/reports/shot/debug/verification/
+
+      - name: get test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-just-html
+          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
 
   check:
     name: Check
