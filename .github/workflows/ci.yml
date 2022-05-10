@@ -71,13 +71,11 @@ jobs:
         if: failure()
         with:
           name: screenshot-test-report
-          path: paymentsheet-example/build/reports/shot/debug/verification/
-
-      - name: get test report
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-report-just-html
           path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
 
   check:
     name: Check
