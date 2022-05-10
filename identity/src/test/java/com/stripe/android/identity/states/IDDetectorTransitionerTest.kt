@@ -18,17 +18,21 @@ internal class IDDetectorTransitionerTest {
     private val mockNeverTimeoutClockMark = mock<ClockMark>().also {
         whenever(it.hasPassed()).thenReturn(false)
     }
+
+    private val mockAlwaysTimeoutClockMark = mock<ClockMark>().also {
+        whenever(it.hasPassed()).thenReturn(true)
+    }
+
     private val mockReachedStateAt = mock<ClockMark>().also {
         whenever(it.elapsedSince()).thenReturn(0.milliseconds)
     }
 
     @Test
-    fun `transitions to Found when iOUCheckPass failed`() {
-        val transitioner = IDDetectorTransitioner()
+    fun `Found transitions to Found when iOUCheckPass failed`() {
+        val transitioner = IDDetectorTransitioner(mockNeverTimeoutClockMark)
 
         val foundState = IdentityScanState.Found(
             ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark,
             transitioner,
             mockReachedStateAt
         )
@@ -48,13 +52,15 @@ internal class IDDetectorTransitionerTest {
     }
 
     @Test
-    fun `transitions to Found when moreResultsRequired and Satisfied when timeRequired is met`() {
+    fun `Found stays in Found when moreResultsRequired and transitions to Satisfied when timeRequired is met`() {
         val timeRequired = 500
-        val transitioner = IDDetectorTransitioner(timeRequired = timeRequired)
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
+            timeRequired = timeRequired
+        )
 
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
-            whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
             whenever(it.transitioner).thenReturn(transitioner)
         }
@@ -84,10 +90,11 @@ internal class IDDetectorTransitionerTest {
     }
 
     @Test
-    fun `transitions to Found when moreResultsRequired and stays in Found when IOU check fails`() {
+    fun `Found stays in Found when moreResultsRequired and stays in Found when IOU check fails`() {
         val timeRequired = 500
         val allowedUnmatchedFrames = 2
         val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
             timeRequired = timeRequired,
             allowedUnmatchedFrames = allowedUnmatchedFrames
         )
@@ -97,7 +104,6 @@ internal class IDDetectorTransitionerTest {
 
         val foundState = IdentityScanState.Found(
             ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark,
             transitioner,
             mockReachedStateAt
         )
@@ -124,10 +130,11 @@ internal class IDDetectorTransitionerTest {
     }
 
     @Test
-    fun `keeps in Found while unmatched frames within allowedUnmatchedFrames and to Unsatisfied when going beyond`() {
+    fun `Found keeps staying in Found while unmatched frames within allowedUnmatchedFrames and to Unsatisfied when going beyond`() {
         val timeRequired = 500
         val allowedUnmatchedFrames = 2
         val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
             timeRequired = timeRequired,
             allowedUnmatchedFrames = allowedUnmatchedFrames
         )
@@ -136,7 +143,6 @@ internal class IDDetectorTransitionerTest {
         whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
-            whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
             whenever(it.transitioner).thenReturn(transitioner)
         }
@@ -175,10 +181,11 @@ internal class IDDetectorTransitionerTest {
     }
 
     @Test
-    fun `keeps in Found while unmatched frames within allowedUnmatchedFrames and to Satisfied when going beyond`() {
+    fun `Found keeps staying in Found while unmatched frames within allowedUnmatchedFrames and to Satisfied when going beyond`() {
         val timeRequired = 500
         val allowedUnmatchedFrames = 2
         val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
             timeRequired = timeRequired,
             allowedUnmatchedFrames = allowedUnmatchedFrames
         )
@@ -187,7 +194,6 @@ internal class IDDetectorTransitionerTest {
         whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
-            whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
             whenever(it.transitioner).thenReturn(transitioner)
         }
@@ -225,12 +231,32 @@ internal class IDDetectorTransitionerTest {
     }
 
     @Test
-    fun `Initial stays in Initial if type doesn't match`() {
-        val transitioner = IDDetectorTransitioner()
+    fun `Initial transitions to Timeout when timeout`() {
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockAlwaysTimeoutClockMark
+        )
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark,
+            transitioner,
+        )
+
+        assertThat(
+            transitioner.transitionFromInitial(
+                initialState,
+                createAnalyzerOutputWithLowIOU(INITIAL_ID_BACK_OUTPUT)
+            )
+        ).isInstanceOf(IdentityScanState.TimeOut::class.java)
+    }
+
+    @Test
+    fun `Initial stays in Initial if type doesn't match`() {
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark
+        )
+
+        val initialState = IdentityScanState.Initial(
+            ScanType.ID_FRONT,
             transitioner,
         )
 
@@ -244,12 +270,13 @@ internal class IDDetectorTransitionerTest {
 
     @Test
     fun `Initial transitions to Found if type does match`() {
-        val transitioner = IDDetectorTransitioner()
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark
+        )
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark,
-            transitioner,
+            transitioner
         )
 
         assertThat(
@@ -258,6 +285,123 @@ internal class IDDetectorTransitionerTest {
                 createAnalyzerOutputWithLowIOU(INITIAL_ID_FRONT_OUTPUT)
             )
         ).isInstanceOf(IdentityScanState.Found::class.java)
+    }
+
+    @Test
+    fun `Satisfied transitions to Finished when displaySatisfiedDuration has passed`() {
+        val mockReachAtClockMark: ClockMark = mock()
+        whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)
+
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
+            displaySatisfiedDuration = DEFAULT_DISPLAY_SATISFIED_DURATION
+        )
+
+        assertThat(
+            transitioner.transitionFromSatisfied(
+                IdentityScanState.Satisfied(
+                    ScanType.ID_FRONT,
+                    transitioner,
+                    reachedStateAt = mockReachAtClockMark
+                ),
+                mock()
+            )
+        ).isInstanceOf(IdentityScanState.Finished::class.java)
+    }
+
+    @Test
+    fun `Satisfied stays in Satisfied when displaySatisfiedDuration has not passed`() {
+        val mockReachAtClockMark: ClockMark = mock()
+        whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)
+
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
+            displaySatisfiedDuration = DEFAULT_DISPLAY_SATISFIED_DURATION
+        )
+
+        val satisfiedState =
+            IdentityScanState.Satisfied(
+                ScanType.ID_FRONT,
+                transitioner,
+                reachedStateAt = mockReachAtClockMark
+            )
+
+        val resultState = transitioner.transitionFromSatisfied(satisfiedState, mock())
+
+        assertThat(resultState).isSameInstanceAs(satisfiedState)
+    }
+
+    @Test
+    fun `Unsatisfied transitions to Timeout when timeout`() {
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockAlwaysTimeoutClockMark,
+            displaySatisfiedDuration = DEFAULT_DISPLAY_SATISFIED_DURATION
+        )
+
+        assertThat(
+            transitioner.transitionFromUnsatisfied(
+                IdentityScanState.Unsatisfied(
+                    "reason",
+                    ScanType.ID_FRONT,
+                    transitioner
+                ),
+                mock()
+            )
+        ).isInstanceOf(IdentityScanState.TimeOut::class.java)
+    }
+
+    @Test
+    fun `Unsatisfied stays in Unsatisfied when displaySatisfiedDuration has not passed`() {
+        val mockReachAtClockMark: ClockMark = mock()
+        whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)
+
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
+            displayUnsatisfiedDuration = DEFAULT_DISPLAY_UNSATISFIED_DURATION
+        )
+
+        val unsatisfiedState =
+            IdentityScanState.Unsatisfied(
+                "reason",
+                ScanType.ID_FRONT,
+                transitioner,
+                reachedStateAt = mockReachAtClockMark
+            )
+
+        val resultState =
+            transitioner.transitionFromUnsatisfied(
+                unsatisfiedState,
+                mock()
+            )
+
+        assertThat(resultState).isSameInstanceAs(unsatisfiedState)
+    }
+
+    @Test
+    fun `Unsatisfied transitions to Initial when displaySatisfiedDuration has passed`() {
+        val mockReachAtClockMark: ClockMark = mock()
+        whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)
+
+        val transitioner = IDDetectorTransitioner(
+            timeoutAt = mockNeverTimeoutClockMark,
+            displayUnsatisfiedDuration = DEFAULT_DISPLAY_UNSATISFIED_DURATION
+        )
+
+        val unsatisfiedState =
+            IdentityScanState.Unsatisfied(
+                "reason",
+                ScanType.ID_FRONT,
+                transitioner,
+                reachedStateAt = mockReachAtClockMark
+            )
+
+        val resultState =
+            transitioner.transitionFromUnsatisfied(
+                unsatisfiedState,
+                mock()
+            )
+
+        assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
     }
 
     private fun createAnalyzerOutputWithHighIOU(
@@ -304,5 +448,8 @@ internal class IDDetectorTransitionerTest {
             0f,
             listOf()
         )
+
+        const val DEFAULT_DISPLAY_SATISFIED_DURATION = 1000
+        const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 1000
     }
 }

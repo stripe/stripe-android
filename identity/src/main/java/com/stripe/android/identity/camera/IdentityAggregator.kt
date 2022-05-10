@@ -24,8 +24,8 @@ internal class IdentityAggregator(
     aggregateResultListener,
     IdentityScanState.Initial(
         type = identityScanType,
-        timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
         transitioner = IDDetectorTransitioner(
+            timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
             iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
             timeRequired = verificationPage.documentCapture.motionBlurMinDuration
         )
