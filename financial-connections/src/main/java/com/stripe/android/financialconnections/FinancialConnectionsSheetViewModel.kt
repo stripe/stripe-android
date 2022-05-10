@@ -30,7 +30,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val eventReporter: FinancialConnectionsEventReporter,
-    private val initialState: FinancialConnectionsSheetState
+    initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
     init {
@@ -68,13 +68,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param manifest the manifest containing the hosted auth flow URL to launch
      *
      */
-    private suspend fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
+    private fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
         // stores manifest in state for future references.
         setState {
             copy(
                 manifest = manifest,
                 authFlowActive = true,
-                sideEffect = Success(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+                viewEffect = Success(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
             )
         }
     }
@@ -111,9 +111,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         setState {
             if (authFlowActive && activityRecreated.not()) {
-                copy(
-                    sideEffect = Success(FinishWithResult(Canceled))
-                )
+                copy(viewEffect = Success(FinishWithResult(Canceled)))
             } else this
         }
     }
@@ -126,9 +124,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onActivityResult() {
         setState {
             if (authFlowActive && activityRecreated) {
-                copy(
-                    sideEffect = Success(FinishWithResult(Canceled))
-                )
+                copy(viewEffect = Success(FinishWithResult(Canceled)))
             } else this
         }
     }
@@ -147,7 +143,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess {
                 val result = FinancialConnectionsSheetActivityResult.Completed(it)
                 eventReporter.onResult(starterArgs.configuration, result)
-                setState { copy(sideEffect = Success(FinishWithResult(result))) }
+                setState { copy(viewEffect = Success(FinishWithResult(result))) }
             }.onFailure {
                 onFatal(it)
             }
@@ -170,7 +166,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess { (las, token) ->
                 val result = FinancialConnectionsSheetActivityResult.Completed(las, token)
                 eventReporter.onResult(starterArgs.configuration, result)
-                setState { copy(sideEffect = Success(FinishWithResult(result))) }
+                setState { copy(viewEffect = Success(FinishWithResult(result))) }
             }.onFailure {
                 onFatal(it)
             }
@@ -186,7 +182,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private suspend fun onFatal(throwable: Throwable) {
         val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
-        setState { copy(sideEffect = Success(FinishWithResult(result))) }
+        setState { copy(viewEffect = Success(FinishWithResult(result))) }
     }
 
     /**
@@ -197,7 +193,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private suspend fun onUserCancel() {
         val result = Canceled
         eventReporter.onResult(starterArgs.configuration, result)
-        setState { copy(sideEffect = Success(FinishWithResult(result))) }
+        setState { copy(viewEffect = Success(FinishWithResult(result))) }
     }
 
     /**

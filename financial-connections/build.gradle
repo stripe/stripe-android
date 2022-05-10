@@ -57,13 +57,6 @@ dependencies {
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
-android {
-    buildFeatures {
-        viewBinding true
-    }
-}
-
-
 ext {
     artifactId = "financial-connections"
     artifactName = "financial-connections"
@@ -71,4 +64,3 @@ ext {
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"
-apply plugin: 'org.jetbrains.kotlin.android'

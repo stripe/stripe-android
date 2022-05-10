@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.launcher
 
 import android.content.Intent
 import android.os.Parcelable
+import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -39,11 +40,8 @@ internal sealed class FinancialConnectionsSheetActivityArgs constructor(
     }
 
     companion object {
-        const val EXTRA_ARGS =
-            "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_args"
-
         internal fun fromIntent(intent: Intent): FinancialConnectionsSheetActivityArgs? {
-            return intent.getParcelableExtra(EXTRA_ARGS)
+            return intent.getParcelableExtra(Mavericks.KEY_ARG)
         }
     }
 }

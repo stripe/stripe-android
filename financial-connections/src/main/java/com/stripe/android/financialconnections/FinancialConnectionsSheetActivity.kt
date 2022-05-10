@@ -2,36 +2,17 @@ package com.stripe.android.financialconnections
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.activity.viewModels
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.airbnb.mvrx.ActivityViewModelContext
-import com.airbnb.mvrx.InternalMavericksApi
-import com.airbnb.mvrx.Mavericks
-import com.airbnb.mvrx.MavericksView
-import com.airbnb.mvrx.MavericksViewModelProvider
 import com.airbnb.mvrx.asMavericksArgs
 import com.airbnb.mvrx.viewModel
-import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
-import com.stripe.android.financialconnections.databinding.ActivityFinancialconnectionsSheetBinding
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
-import java.security.InvalidParameterException
 
-internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
+internal class FinancialConnectionsSheetActivity :
+    AppCompatActivity(R.layout.activity_financialconnections_sheet) {
 
-    @VisibleForTesting
-    internal val viewBinding by lazy {
-        ActivityFinancialconnectionsSheetBinding.inflate(layoutInflater)
-    }
-
-     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
+    val viewModel: FinancialConnectionsSheetViewModel by viewModel()
 
     private val starterArgs: FinancialConnectionsSheetActivityArgs? by lazy {
         FinancialConnectionsSheetActivityArgs.fromIntent(intent)
@@ -39,7 +20,6 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(viewBinding.root)
         if (savedInstanceState == null) addFragment()
     }
 

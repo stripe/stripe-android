@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections
 
-import androidx.lifecycle.SavedStateHandle
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
+import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
@@ -15,42 +15,17 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
-    val manifest: FinancialConnectionsSessionManifest? = null,
-    val authFlowActive: Boolean = false,
-    val sideEffect: Async<FinancialConnectionsSheetViewEffect> = Uninitialized
+    @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
+    @PersistState val authFlowActive: Boolean = false,
+    val viewEffect: Async<FinancialConnectionsSheetViewEffect> = Uninitialized
 ) : MavericksState {
 
+    /**
+     * Constructor used by Mavericks to build the initial state.
+     */
     constructor(args: FinancialConnectionsSheetActivityArgs) : this(
         initialArgs = args
     )
-
-    /**
-     * Restores existing persisted fields into the current [FinancialConnectionsSheetState]
-     */
-    internal fun from(savedStateHandle: SavedStateHandle): FinancialConnectionsSheetState {
-        return copy(
-            manifest = savedStateHandle.get(KEY_MANIFEST) ?: manifest,
-            authFlowActive = savedStateHandle.get(KEY_AUTHFLOW_ACTIVE) ?: authFlowActive,
-        )
-    }
-
-    /**
-     * Saves the persistable fields of this state that changed to the given [SavedStateHandle]
-     */
-    internal fun to(
-        savedStateHandle: SavedStateHandle,
-        previousValue: FinancialConnectionsSheetState
-    ) {
-        if (previousValue.manifest != manifest)
-            savedStateHandle.set(KEY_MANIFEST, manifest)
-        if (previousValue.authFlowActive != authFlowActive)
-            savedStateHandle.set(KEY_AUTHFLOW_ACTIVE, authFlowActive)
-    }
-
-    companion object {
-        private const val KEY_MANIFEST = "key_manifest"
-        private const val KEY_AUTHFLOW_ACTIVE = "key_authflow_active"
-    }
 }
 
 /**

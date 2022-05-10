@@ -6,7 +6,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
 internal class FinancialConnectionsSheetForDataContract :
@@ -17,7 +16,6 @@ internal class FinancialConnectionsSheetForDataContract :
         input: FinancialConnectionsSheetActivityArgs.ForData
     ): Intent {
         return Intent(context, FinancialConnectionsSheetActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
             .putExtra(Mavericks.KEY_ARG, input)
     }
 
