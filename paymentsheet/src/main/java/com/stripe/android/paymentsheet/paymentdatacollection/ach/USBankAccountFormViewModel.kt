@@ -109,6 +109,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             validName && validEmail
         }
 
+    private val _processing = MutableStateFlow(false)
+    val processing: StateFlow<Boolean>
+        get() = _processing
+
     @VisibleForTesting
     var collectBankAccountLauncher: CollectBankAccountLauncher? = null
 
@@ -169,7 +173,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             _currentScreenState.update {
                                 USBankAccountFormScreenState.MandateCollection(
                                     bankName = paymentAccount.institutionName,
-                                    displayName = paymentAccount.displayName,
+                                    displayName = paymentAccount.institutionName,
                                     last4 = paymentAccount.last4,
                                     primaryButtonText = buildPrimaryButtonText(),
                                     primaryButtonOnClick = {
@@ -224,6 +228,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun formattedMerchantName(): String {
         return args.formArgs.merchantName.trimEnd { it == '.' }
+    }
+
+    fun setProcessing(enabled: Boolean) {
+        _processing.update { enabled }
     }
 
     private fun collectBankAccount(clientSecret: ClientSecret) {
