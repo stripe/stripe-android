@@ -25,7 +25,7 @@ class IdentityScanStateTests {
         whenever(it.hasPassed()).thenReturn(true)
     }
 
-    private val mockTransitioner = mock<IdentityFoundStateTransitioner>()
+    private val mockTransitioner = mock<IdentityScanStateTransitioner>()
 
     @Test
     fun `Initial can't transition with unmatched AnalyzerOutput`() {
@@ -54,8 +54,8 @@ class IdentityScanStateTests {
     @Test
     fun `Found transitions to Unsatisfied with bad hit rate`() {
         val mockTargetState = mock<IdentityScanState>()
-        val mockTransitioner = mock<IdentityFoundStateTransitioner>().also {
-            whenever(it.transition(any(), any())).thenReturn(mockTargetState)
+        val mockTransitioner = mock<IdentityScanStateTransitioner>().also {
+            whenever(it.transitionFromFound(any(), any())).thenReturn(mockTargetState)
         }
 
         val initialState =

@@ -1,5 +1,6 @@
 package com.stripe.android.identity.states
 
+import android.util.Log
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerOutput
@@ -7,6 +8,7 @@ import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState.Found
+import com.stripe.android.identity.states.IdentityScanState.Initial
 import com.stripe.android.identity.states.IdentityScanState.Satisfied
 import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
@@ -14,7 +16,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Decide transition based on the Intersection Over Union(IoU) score of bounding boxes.
+ * [IdentityScanStateTransitioner] for IDDetector model, decides transition based on the
+ * Intersection Over Union(IoU) score of bounding boxes.
  *
  * * The transitioner first checks if the ML output [Category] matches desired [ScanType], a mismatch
  * would not necessarily break the check, but will accumulate the [unmatchedFrame] streak,
@@ -24,15 +27,38 @@ import kotlin.math.min
  * * Finally it checks since the time elapsed since [Found] is reached, if it passed
  * [timeRequired], then transitions to [Satisfied], otherwise stays in [Found].
  */
-internal class IOUTransitioner(
+internal class IDDetectorTransitioner(
     private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
     private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
     private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME
-) : IdentityFoundStateTransitioner {
+) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
+    override fun transitionFromInitial(
+        initialState: Initial,
+        analyzerOutput: AnalyzerOutput
+    ): IdentityScanState {
+        require(analyzerOutput is IDDetectorOutput) {
+            "Unexpected output type: $analyzerOutput"
+        }
+        return if (analyzerOutput.category.matchesScanType(initialState.type)) {
+            Log.d(
+                TAG,
+                "Matching model output detected with score ${analyzerOutput.resultScore}, " +
+                    "transition to Found."
+            )
+            Found(initialState.type, initialState.timeoutAt, this)
+        } else {
+            Log.d(
+                TAG,
+                "Model outputs ${analyzerOutput.category}, which doesn't match with " +
+                    "scanType ${initialState.type}, stay in Initial"
+            )
+            initialState
+        }
+    }
 
-    override fun transition(
+    override fun transitionFromFound(
         foundState: Found,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
@@ -141,5 +167,6 @@ internal class IOUTransitioner(
         const val DEFAULT_TIME_REQUIRED = 500
         const val DEFAULT_IOU_THRESHOLD = 0.95f
         const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
+        val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 }

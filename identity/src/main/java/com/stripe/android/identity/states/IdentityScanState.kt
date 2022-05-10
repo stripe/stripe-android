@@ -15,7 +15,7 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 internal sealed class IdentityScanState(
     val type: ScanType,
     val timeoutAt: ClockMark,
-    val transitioner: IdentityFoundStateTransitioner,
+    val transitioner: IdentityScanStateTransitioner,
     isFinal: Boolean
 ) : ScanState(isFinal) {
 
@@ -44,7 +44,7 @@ internal sealed class IdentityScanState(
     internal class Initial(
         type: ScanType,
         timeoutAt: ClockMark,
-        transitioner: IdentityFoundStateTransitioner
+        transitioner: IdentityScanStateTransitioner
     ) : IdentityScanState(type, timeoutAt, transitioner, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
@@ -53,26 +53,10 @@ internal sealed class IdentityScanState(
             require(analyzerOutput is IDDetectorOutput) {
                 "Unexpected output type: $analyzerOutput"
             }
-            return when {
-                timeoutAt.hasPassed() -> {
-                    TimeOut(type, timeoutAt, transitioner)
-                }
-                analyzerOutput.category.matchesScanType(type) -> {
-                    Log.d(
-                        TAG,
-                        "Matching model output detected with score ${analyzerOutput.resultScore}, " +
-                            "transition to Found."
-                    )
-                    Found(type, timeoutAt, transitioner)
-                }
-                else -> {
-                    Log.d(
-                        TAG,
-                        "Model outputs ${analyzerOutput.category}, which doesn't match with " +
-                            "scanType $type, stay in Initial"
-                    )
-                    this
-                }
+            return if (timeoutAt.hasPassed()) {
+                TimeOut(type, timeoutAt, transitioner)
+            } else {
+                transitioner.transitionFromInitial(this, analyzerOutput)
             }
         }
     }
@@ -84,14 +68,14 @@ internal sealed class IdentityScanState(
     internal class Found(
         type: ScanType,
         timeoutAt: ClockMark,
-        transitioner: IdentityFoundStateTransitioner,
+        transitioner: IdentityScanStateTransitioner,
         internal var reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, timeoutAt, transitioner, false) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
             if (timeoutAt.hasPassed()) {
                 TimeOut(type, timeoutAt, transitioner)
             } else {
-                transitioner.transition(this, analyzerOutput)
+                transitioner.transitionFromFound(this, analyzerOutput)
             }
     }
 
@@ -103,7 +87,7 @@ internal sealed class IdentityScanState(
     internal class Satisfied(
         type: ScanType,
         timeoutAt: ClockMark,
-        transitioner: IdentityFoundStateTransitioner,
+        transitioner: IdentityScanStateTransitioner,
         private val reachedStateAt: ClockMark = Clock.markNow(),
         private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION
     ) : IdentityScanState(type, timeoutAt, transitioner, false) {
@@ -128,7 +112,7 @@ internal sealed class IdentityScanState(
         internal val reason: String,
         type: ScanType,
         timeoutAt: ClockMark,
-        transitioner: IdentityFoundStateTransitioner,
+        transitioner: IdentityScanStateTransitioner,
         private val reachedStateAt: ClockMark = Clock.markNow(),
         private val displayUnsatisfiedDuration: Int = DEFAULT_DISPLAY_UNSATISFIED_DURATION
     ) : IdentityScanState(type, timeoutAt, transitioner, false) {
@@ -157,7 +141,7 @@ internal sealed class IdentityScanState(
     internal class Finished(
         type: ScanType,
         timeoutAt: ClockMark,
-        transitioner: IdentityFoundStateTransitioner
+        transitioner: IdentityScanStateTransitioner
     ) : IdentityScanState(type, timeoutAt, transitioner, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
     }
@@ -168,7 +152,7 @@ internal sealed class IdentityScanState(
     internal class TimeOut(
         type: ScanType,
         timeoutAt: ClockMark,
-        transitioner: IdentityFoundStateTransitioner
+        transitioner: IdentityScanStateTransitioner
     ) : IdentityScanState(type, timeoutAt, transitioner, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
     }
