@@ -28,7 +28,7 @@ dependencies {
     // flex ops
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
     // support library to reshape image to the input model shape
-    implementation 'org.tensorflow:tensorflow-lite-support:0.3.1'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.0'
 
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
