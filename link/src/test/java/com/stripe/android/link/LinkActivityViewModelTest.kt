@@ -34,6 +34,7 @@ import kotlin.test.assertNotNull
 class LinkActivityViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
         StripeIntentFixtures.PI_SUCCEEDED,
+        true,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(

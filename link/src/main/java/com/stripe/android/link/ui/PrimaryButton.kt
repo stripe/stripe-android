@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui
 
+import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,14 +21,38 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.ui.core.Amount
 
 internal enum class PrimaryButtonState {
     Enabled,
     Disabled,
     Processing
+}
+
+internal const val progressIndicatorTestTag = "CircularProgressIndicator"
+
+internal fun primaryButtonLabel(
+    args: LinkActivityContract.Args,
+    resources: Resources
+) = if (args.completePayment) {
+    when (args.stripeIntent) {
+        is PaymentIntent -> Amount(
+            requireNotNull(args.stripeIntent.amount),
+            requireNotNull(args.stripeIntent.currency)
+        ).buildPayButtonLabel(resources)
+        is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
+    }
+} else {
+    resources.getString(R.string.stripe_continue_button_label)
 }
 
 @Composable
@@ -62,7 +87,11 @@ internal fun PrimaryButton(
             ) {
                 if (state == PrimaryButtonState.Processing) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .semantics {
+                                testTag = progressIndicatorTestTag
+                            },
                         color = MaterialTheme.linkColors.buttonLabel,
                         strokeWidth = 2.dp
                     )

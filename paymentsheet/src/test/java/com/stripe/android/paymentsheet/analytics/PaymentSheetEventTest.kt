@@ -16,7 +16,7 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            ).toString()
+            ).eventName
         ).isEqualTo(
             "mc_complete_init_customer_googlepay"
         )
@@ -28,7 +28,7 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM
-            ).toString()
+            ).eventName
         ).isEqualTo(
             "mc_complete_init_default"
         )
@@ -41,7 +41,7 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 paymentSelection = PaymentSelection.GooglePay,
                 result = PaymentSheetEvent.Payment.Result.Success
-            ).toString()
+            ).eventName
         ).isEqualTo(
             "mc_complete_payment_googlepay_success"
         )
@@ -53,9 +53,47 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.SelectPaymentOption(
                 mode = EventReporter.Mode.Custom,
                 paymentSelection = PaymentSelection.GooglePay
-            ).toString()
+            ).eventName
         ).isEqualTo(
             "mc_custom_paymentoption_googlepay_select"
+        )
+    }
+
+    @Test
+    fun `Init event should have default params if config is all defaults`() {
+        val expectedConfigMap = mapOf(
+            "customer" to false,
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+        )
+        assertThat(
+            PaymentSheetEvent.Init(
+                mode = EventReporter.Mode.Complete,
+                configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+            ).additionalParams
+        ).isEqualTo(
+            mapOf("payment_sheet_configuration" to expectedConfigMap)
+        )
+    }
+
+    @Test
+    fun `Init event should should mark all optional params present if there are there`() {
+        val expectedConfigMap = mapOf(
+            "customer" to true,
+            "googlepay" to true,
+            "primary_button_color" to true,
+            "default_billing_details" to true,
+            "allows_delayed_payment_methods" to true,
+        )
+        assertThat(
+            PaymentSheetEvent.Init(
+                mode = EventReporter.Mode.Complete,
+                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
+            ).additionalParams
+        ).isEqualTo(
+            mapOf("payment_sheet_configuration" to expectedConfigMap)
         )
     }
 }

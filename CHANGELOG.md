@@ -1,8 +1,15 @@
 # CHANGELOG
-## x.x.x - xxxx-xx-xx
+## 20.2.2 - 2022-05-09
+This release contains bug fixes in PaymentSheet.
+
+### PaymentSheet
+* [FIXED][4966](https://github.com/stripe/stripe-android/pull/4966) Replaced alpha androidx.lifecycle dependencies with stable versions
+* [FIXED][4961](https://github.com/stripe/stripe-android/pull/4961) Fix issue entering text with small forms.
+
+## 20.2.1 - 2022-05-03
+This release contains bug fixes in PaymentSheet and Payments.
 
 ### Payments
-
 * [CHANGED] [4910](https://github.com/stripe/stripe-android/pull/4910) Some changes affecting CollectBankAccountLauncher (ACH)
   * `CollectBankAccountResponse#LinkAccountSession` to `FinancialConnectionsSession`
   * `LinkedAccount` to `FinancialConnectionsAccount`.

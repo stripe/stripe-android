@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -42,17 +43,19 @@ import com.stripe.android.ui.core.elements.SectionCard
 @Composable
 private fun VerificationBodyPreview() {
     DefaultLinkTheme {
-        VerificationBody(
-            headerStringResId = R.string.verification_header,
-            messageStringResId = R.string.verification_message,
-            showChangeEmailMessage = true,
-            redactedPhoneNumber = "+1********23",
-            email = "test@stripe.com",
-            onCodeEntered = { },
-            onBack = { },
-            onChangeEmailClick = { },
-            onResendCodeClick = { }
-        )
+        Surface {
+            VerificationBody(
+                headerStringResId = R.string.verification_header,
+                messageStringResId = R.string.verification_message,
+                showChangeEmailMessage = true,
+                redactedPhoneNumber = "+1********23",
+                email = "test@stripe.com",
+                onCodeEntered = { },
+                onBack = { },
+                onChangeEmailClick = { },
+                onResendCodeClick = { }
+            )
+        }
     }
 }
 

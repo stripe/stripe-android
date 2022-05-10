@@ -15,7 +15,9 @@ class SaveForFutureUseSpec : FormItemSpec(), RequiredItemSpec {
     fun transform(initialValue: Boolean, merchantName: String): FormElement =
         SaveForFutureUseElement(
             this.api_path,
-            SaveForFutureUseController(initialValue),
+            SaveForFutureUseController(
+                initialValue
+            ),
             merchantName
         )
 }

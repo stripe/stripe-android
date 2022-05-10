@@ -938,7 +938,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = 0,
-                labelResource = 0,
+                labelResource = "",
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
             )

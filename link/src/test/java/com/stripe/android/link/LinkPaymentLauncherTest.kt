@@ -33,7 +33,8 @@ class LinkPaymentLauncherTest {
         uiContext = mock(),
         paymentAnalyticsRequestFactory = mock(),
         analyticsRequestExecutor = mock(),
-        stripeRepository = mock()
+        stripeRepository = mock(),
+        resourceRepository = mock()
     )
 
     init {
@@ -43,7 +44,7 @@ class LinkPaymentLauncherTest {
     @Test
     fun `verify present() launches LinkActivity with correct arguments`() = runTest {
         val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-        linkPaymentLauncher.setup(stripeIntent)
+        linkPaymentLauncher.setup(stripeIntent, true)
         linkPaymentLauncher.present(mockHostActivityLauncher)
 
         verify(mockHostActivityLauncher).launch(

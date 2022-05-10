@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -18,9 +19,11 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -153,6 +156,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
     val primaryButtonUIState: LiveData<PrimaryButton.UIState?>
         get() = _primaryButtonUIState
+
+    private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
+    val primaryButtonState: LiveData<PrimaryButton.State>
+        get() = _primaryButtonState
 
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?>
@@ -333,6 +340,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _primaryButtonUIState.value = state
     }
 
+    fun updatePrimaryButtonState(state: PrimaryButton.State) {
+        _primaryButtonState.value = state
+    }
+
     fun updateBelowButtonText(text: String?) {
         _notesText.value = text
     }
@@ -390,21 +401,25 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    protected fun setupLink(unused: StripeIntent) {
-        // TODO(brnunes-stripe): Enable Link
-//        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
-//            viewModelScope.launch {
-//                when (linkLauncher.setup(stripeIntent)) {
-//                    AccountStatus.Verified -> launchLink()
-//                    AccountStatus.VerificationStarted,
-//                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
-//                    AccountStatus.SignedOut -> {}
-//                }
-//                _isLinkEnabled.value = true
-//            }
-//        } else {
+    @Suppress("UNREACHABLE_CODE")
+    protected fun setupLink(stripeIntent: StripeIntent, completePayment: Boolean) {
+        // TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
         _isLinkEnabled.value = false
-//        }
+        return
+
+        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
+            viewModelScope.launch {
+                when (linkLauncher.setup(stripeIntent, completePayment)) {
+                    AccountStatus.Verified -> launchLink()
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
+                    AccountStatus.SignedOut -> {}
+                }
+                _isLinkEnabled.value = true
+            }
+        } else {
+            _isLinkEnabled.value = false
+        }
     }
 
     fun onLinkVerificationDismissed() {
@@ -436,6 +451,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     abstract fun onUserCancel()
+
+    abstract fun onPaymentResult(paymentResult: PaymentResult)
+
+    abstract fun onFinish()
+
+    abstract fun onError(@StringRes error: Int? = null)
 
     /**
      * Used to set up any dependencies that require a reference to the current Activity.

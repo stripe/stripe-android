@@ -5,6 +5,13 @@ public final class com/stripe/android/ui/core/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion {
+	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Type;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+}
+
+public final class com/stripe/android/ui/core/FormUIKt {
+}
+
 public final class com/stripe/android/ui/core/MeasureComposableWidthKt {
 }
 
@@ -111,6 +118,14 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardBrand 
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$CardBrand;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$CardCvc : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$CardCvc;
 	public fun describeContents ()I
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
@@ -264,6 +279,7 @@ public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
 
 public final class com/stripe/android/ui/core/forms/CardSpecKt {
 	public static final fun getCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getLinkCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 }
 
 public final class com/stripe/android/ui/core/forms/EpsSpecKt {
@@ -314,5 +330,24 @@ public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepos
 	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
+}
+
+public abstract class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule$Companion;
+	public fun <init> ()V
+	public abstract fun bindsResourceRepository (Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;)Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule$Companion {
+	public final fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule_Companion_ProvideResourcesFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule_Companion_ProvideResourcesFactory;
+	public fun get ()Landroid/content/res/Resources;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
 }
 

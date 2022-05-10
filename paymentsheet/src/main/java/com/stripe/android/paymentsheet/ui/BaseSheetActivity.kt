@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Insets
@@ -94,9 +93,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 0f
             }
         }
-
-        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.setup()
 
@@ -245,6 +241,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 primaryButton.isVisible = state.visible
                 bottomSpacer.isVisible = state.visible
             }
+        }
+        viewModel.primaryButtonState.observe(this) { state ->
+            primaryButton.updateState(state)
         }
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled

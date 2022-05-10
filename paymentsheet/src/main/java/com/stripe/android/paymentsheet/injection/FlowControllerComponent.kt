@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,8 @@ import javax.inject.Singleton
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class
+        LoggingModule::class,
+        ResourceRepositoryModule::class
     ]
 )
 internal interface FlowControllerComponent {

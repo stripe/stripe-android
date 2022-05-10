@@ -5,9 +5,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjector
@@ -95,7 +93,7 @@ class VerificationViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        WeakMapInjectorRegistry.register(injector, DUMMY_INJECTOR_KEY)
+
         val factory = VerificationViewModel.Factory(
             mock(),
             injector
@@ -103,8 +101,6 @@ class VerificationViewModelTest {
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(VerificationViewModel::class.java)
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
-
-        WeakMapInjectorRegistry.staticCacheMap.clear()
     }
 
     private fun createViewModel() = VerificationViewModel(

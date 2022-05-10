@@ -14,6 +14,9 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.progressIndicatorTestTag
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.EmailElement
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +33,8 @@ internal class SignUpScreenTest {
                 LinkActivityContract.EXTRA_ARGS,
                 LinkActivityContract.Args(
                     StripeIntentFixtures.PI_SUCCEEDED,
-                    "Merchant, Inc"
+                    merchantName = "Merchant, Inc",
+                    completePayment = false
                 )
             )
         }
@@ -91,13 +95,14 @@ internal class SignUpScreenTest {
                 SignUpBody(
                     merchantName = "Example, Inc.",
                     emailElement = EmailElement(initialValue = ""),
-                    signUpState = signUpState
-                ) {}
+                    signUpState = signUpState,
+                    onSignUpClick = {}
+                )
             }
         }
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
-    private fun onProgressIndicator() = composeTestRule.onNodeWithTag("CircularProgressIndicator")
+    private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Mobile Number")
     private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
 }

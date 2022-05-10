@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,8 +38,6 @@ import com.stripe.android.link.ui.signup.PhoneCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.EmailElement
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,15 +45,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Preview
 @Composable
 private fun Preview() {
-    LinkInlineSignup(
-        merchantName = "Example, Inc.",
-        emailElement = EmailElement(initialValue = "email"),
-        signUpState = SignUpState.InputtingEmail,
-        isExpanded = true,
-        toggleExpanded = {},
-        onPhoneInputCompleted = {},
-        onUserInteracted = {}
-    )
+    DefaultLinkTheme {
+        Surface {
+            LinkInlineSignup(
+                merchantName = "Example, Inc.",
+                emailElement = EmailElement(initialValue = "email@me.co"),
+                signUpState = SignUpState.InputtingEmail,
+                isExpanded = true,
+                toggleExpanded = {},
+                onPhoneInputCompleted = {},
+                onUserInteracted = {}
+            )
+        }
+    }
 }
 
 @Composable
@@ -180,6 +183,9 @@ class LinkInlineSignupView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0
 ) : AbstractComposeView(context, attrs, defStyle) {
+
+    override var shouldCreateCompositionOnAttachedToWindow: Boolean = false
+        private set
 
     var linkLauncher: LinkPaymentLauncher? = null
 

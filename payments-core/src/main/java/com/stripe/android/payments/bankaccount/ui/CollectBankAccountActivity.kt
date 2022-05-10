@@ -55,7 +55,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     private fun OpenConnectionsFlow.launch() {
         financialConnectionsPaymentsProxy.present(
-            linkedAccountSessionClientSecret,
+            financialConnectionsSessionSecret,
             publishableKey
         )
     }

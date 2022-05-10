@@ -211,7 +211,7 @@ internal class PrimaryButton @JvmOverloads constructor(
      * Used to override the current UI state of the Primary Button
      */
     internal data class UIState(
-        val label: String,
+        val label: String?,
         val onClick: () -> Unit,
         val enabled: Boolean,
         val visible: Boolean

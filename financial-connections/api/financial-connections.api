@@ -122,7 +122,7 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetContract$Args;Lcom/stripe/android/financialconnections/domain/GenerateFinancialConnectionsSessionManifest;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
+	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs;Lcom/stripe/android/financialconnections/domain/GenerateFinancialConnectionsSessionManifest;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 }
 
 public final class com/stripe/android/financialconnections/analytics/DefaultFinancialConnectionsEventReporter_Factory : dagger/internal/Factory {
@@ -161,7 +161,7 @@ public final class com/stripe/android/financialconnections/di/FinancialConnectio
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesConfigurationFactory;
 	public fun get ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesConfiguration (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetContract$Args;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;
+	public static fun providesConfiguration (Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesEnableLoggingFactory : dagger/internal/Factory {

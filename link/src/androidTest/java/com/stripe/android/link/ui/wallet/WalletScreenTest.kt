@@ -33,13 +33,14 @@ internal class WalletScreenTest {
                 LinkActivityContract.EXTRA_ARGS,
                 LinkActivityContract.Args(
                     StripeIntentFixtures.PI_SUCCEEDED,
+                    true,
                     "Merchant, Inc"
                 )
             )
         }
     }
 
-    private val payButtonLabel = "Pay $10.99"
+    private val primaryButtonLabel = "Pay $10.99"
     private val paymentDetails = listOf(
         ConsumerPaymentDetails.Card(
             "id1",
@@ -68,7 +69,7 @@ internal class WalletScreenTest {
             }
         )
 
-        onPayButton().performClick()
+        onPrimaryButton().performClick()
         assertThat(paymentMethod).isEqualTo(paymentDetails.first())
     }
 
@@ -99,7 +100,7 @@ internal class WalletScreenTest {
 
         toggleListExpanded()
         select(secondPaymentMethod)
-        onPayButton().performClick()
+        onPrimaryButton().performClick()
 
         assertThat(paymentMethod).isEqualTo(secondPaymentMethod)
     }
@@ -143,9 +144,9 @@ internal class WalletScreenTest {
             WalletBody(
                 isProcessing = false,
                 paymentDetails = paymentDetails,
-                payButtonLabel = payButtonLabel,
+                primaryButtonLabel = primaryButtonLabel,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
-                onPayButtonClick = onPayButtonClick,
+                onPrimaryButtonClick = onPayButtonClick,
                 onPayAnotherWayClick = onPayAnotherWayClick
             )
         }
@@ -157,5 +158,5 @@ internal class WalletScreenTest {
     private fun select(paymentDetails: ConsumerPaymentDetails.Card) =
         composeTestRule.onNodeWithText(paymentDetails.last4, substring = true).performClick()
 
-    private fun onPayButton() = composeTestRule.onNodeWithText(payButtonLabel)
+    private fun onPrimaryButton() = composeTestRule.onNodeWithText(primaryButtonLabel)
 }
