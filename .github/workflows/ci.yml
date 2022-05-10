@@ -63,6 +63,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           sdcard-path-or-size: 512M
+          profile: pixel_3a
           script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots#testPaymentSheetNewCustomer
 
   check:
