@@ -809,14 +809,15 @@ internal class PaymentSheetViewModelTest {
             .isTrue()
 
         viewModel.setEditing(true)
-        assertThat(isEnabled)
-            .isFalse()
-
         viewModel.updatePrimaryButtonUIState(
             primaryButtonUIState.copy(
                 enabled = true
             )
         )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
         assertThat(isEnabled)
             .isTrue()
 
