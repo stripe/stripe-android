@@ -228,7 +228,7 @@ internal fun imageWithConfig(
     val cropRect = maxImageSize
         .scaleAndCenterWithin(image.size())
 
-    val image = image
+    val croppedImage = image
         .crop(cropRect)
         .constrainToSize(maxImageSize)
 
@@ -239,9 +239,9 @@ internal fun imageWithConfig(
     val convertedRatio = compressionRatio.times(100.0).toInt()
 
     var result = when (format) {
-        ImageFormat.WEBP -> image.toWebP(convertedRatio)
+        ImageFormat.WEBP -> croppedImage.toWebP(convertedRatio)
         ImageFormat.HEIC,
-        ImageFormat.JPEG -> image.toJpeg(convertedRatio)
+        ImageFormat.JPEG -> croppedImage.toJpeg(convertedRatio)
     }
 
     if (result.size == 0) {
@@ -263,6 +263,6 @@ internal fun getImageData(image: Bitmap, imageConfigs: AcceptedImageConfigs):
         // Fallback to JPEG format
         result = imageWithConfig(image, ImageFormat.JPEG, imageConfigs)
     }
-    
+
     return result ?: Pair(ByteArray(0), Rect())
 }
