@@ -17,7 +17,7 @@ internal data class FinancialConnectionsSheetState(
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
     @PersistState val authFlowActive: Boolean = false,
-    val viewEffect: Async<FinancialConnectionsSheetViewEffect> = Uninitialized
+    val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
     /**

@@ -35,11 +35,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     init {
         eventReporter.onPresented(starterArgs.configuration)
-        withState {
-            // avoid re-fetching manifest if already exists (this will happen on process recreations)
-            if (it.manifest == null) {
-                fetchManifest()
-            }
+        // avoid re-fetching manifest if already exists (this will happen on process recreations)
+        if (initialState.manifest == null) {
+            onActivityRecreated()
+            fetchManifest()
         }
     }
 
@@ -78,7 +77,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             copy(
                 manifest = manifest,
                 authFlowActive = true,
-                viewEffect = Success(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+                viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
             )
         }
     }
@@ -99,7 +98,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @see onResume (we rely on this on regular flows)
      * @see onActivityResult (we rely on this on config changes)
      */
-    internal fun onActivityRecreated() {
+    private fun onActivityRecreated() {
         setState {
             copy(
                 activityRecreated = true
@@ -115,7 +114,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         setState {
             if (authFlowActive && activityRecreated.not()) {
-                copy(viewEffect = Success(FinishWithResult(Canceled)))
+                copy(viewEffect = FinishWithResult(Canceled))
             } else this
         }
     }
@@ -128,7 +127,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onActivityResult() {
         setState {
             if (authFlowActive && activityRecreated) {
-                copy(viewEffect = Success(FinishWithResult(Canceled)))
+                copy(viewEffect = FinishWithResult(Canceled))
             } else this
         }
     }
@@ -147,7 +146,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess {
                 val result = FinancialConnectionsSheetActivityResult.Completed(it)
                 eventReporter.onResult(starterArgs.configuration, result)
-                setState { copy(viewEffect = Success(FinishWithResult(result))) }
+                setState { copy(viewEffect = FinishWithResult(result)) }
             }.onFailure {
                 onFatal(it)
             }
@@ -170,7 +169,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess { (las, token) ->
                 val result = FinancialConnectionsSheetActivityResult.Completed(las, token)
                 eventReporter.onResult(starterArgs.configuration, result)
-                setState { copy(viewEffect = Success(FinishWithResult(result))) }
+                setState { copy(viewEffect = FinishWithResult(result)) }
             }.onFailure {
                 onFatal(it)
             }
@@ -183,10 +182,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
      */
-    private suspend fun onFatal(throwable: Throwable) {
+    private fun onFatal(throwable: Throwable) {
         val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
-        setState { copy(viewEffect = Success(FinishWithResult(result))) }
+        setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
     /**
@@ -194,10 +193,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
      * URL callback, notify the [FinancialConnectionsSheetResultCallback] with [Canceled]
      */
-    private suspend fun onUserCancel() {
+    private fun onUserCancel() {
         val result = Canceled
         eventReporter.onResult(starterArgs.configuration, result)
-        setState { copy(viewEffect = Success(FinishWithResult(result))) }
+        setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
     /**
@@ -216,13 +215,18 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     is FinancialConnectionsSheetActivityArgs.ForData -> fetchFinancialConnectionsSession()
                     is FinancialConnectionsSheetActivityArgs.ForToken -> fetchFinancialConnectionsSessionForToken()
                 }
-                it.manifest?.cancelUrl -> viewModelScope.launch { onUserCancel() }
-                else -> viewModelScope.launch { onFatal(Exception("Error processing FinancialConnectionsSheet intent"))  }
+                it.manifest?.cancelUrl -> onUserCancel()
+                else -> onFatal(Exception("Error processing FinancialConnectionsSheet intent"))
             }
         }
     }
 
-    companion object : MavericksViewModelFactory<FinancialConnectionsSheetViewModel, FinancialConnectionsSheetState> {
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
+    }
+
+    companion object :
+        MavericksViewModelFactory<FinancialConnectionsSheetViewModel, FinancialConnectionsSheetState> {
 
         override fun create(
             viewModelContext: ViewModelContext,
