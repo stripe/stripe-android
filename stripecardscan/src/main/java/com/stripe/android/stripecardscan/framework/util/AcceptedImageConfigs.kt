@@ -48,7 +48,7 @@ internal data class AcceptedImageConfigs(
     private var formatSettings: HashMap<ImageFormat, ImageSettings?>? = null,
     var preferredFormats: Array<ImageFormat>? = Array<ImageFormat>(1) { ImageFormat.JPEG }
 ) {
-    constructor(configs: CardImageVerificationDetailsAcceptedImageConfigs?): this() {
+    constructor(configs: CardImageVerificationDetailsAcceptedImageConfigs?) : this() {
         configs?.let {
             it.formatSettings?.takeIf { it.size > 0 }.also { formatSettings = HashMap() }?.forEach {
                 val value = ImageSettings(it.value)
@@ -56,19 +56,12 @@ internal data class AcceptedImageConfigs(
                 formatSettings?.put(key, value)
             }
 
-            val mappedFormats = it.preferredFormats?.map {
-                f -> ImageFormat.fromValue(f)
-            }?.filter {
-                isformatSupport(it)
-            }?.takeIf {
-                it.count() > 0
-            }?.let {
-                preferredFormats = it.toTypedArray()
-            }
+            val mappedFormats = it.preferredFormats?.map { ImageFormat.fromValue(it) }
+                ?.filter { isformatSupport(it) }
+                ?.takeIf { it.count() > 0 }
+                ?.let { preferredFormats = it.toTypedArray() }
 
-            it.defaultSettings?.let {
-                defaultSettings = ImageSettings(it)
-            }
+            it.defaultSettings?.let { defaultSettings = ImageSettings(it) }
         }
     }
 

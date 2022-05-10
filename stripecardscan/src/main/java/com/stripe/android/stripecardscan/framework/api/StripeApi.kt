@@ -251,7 +251,8 @@ internal fun imageWithConfig(
     return Pair(result, cropRect)
 }
 
-internal fun getImageData(image: Bitmap, imageConfigs: AcceptedImageConfigs): Pair<ByteArray, Rect> {
+internal fun getImageData(image: Bitmap, imageConfigs: AcceptedImageConfigs):
+    Pair<ByteArray, Rect> {
 
     // Attempt to get image data using the configs from the server.
     var result = imageConfigs.preferredFormats?.firstNotNullOfOrNull {
