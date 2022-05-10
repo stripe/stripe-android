@@ -75,7 +75,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             resultScore = 0f
         }
 
-        return AnalyzerOutput(
+        return IDDetectorOutput(
             BoundingBox(
                 left = boundingBoxes[0][0],
                 top = boundingBoxes[0][1],

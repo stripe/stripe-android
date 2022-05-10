@@ -7,6 +7,7 @@ import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.Category
+import com.stripe.android.identity.ml.IDDetectorOutput
 
 /**
  * States during scanning a document.
@@ -48,8 +49,11 @@ internal sealed class IdentityScanState(
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            when {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
+            require(analyzerOutput is IDDetectorOutput) {
+                "Unexpected output type: $analyzerOutput"
+            }
+            return when {
                 timeoutAt.hasPassed() -> {
                     TimeOut(type, timeoutAt, transitioner)
                 }
@@ -70,6 +74,7 @@ internal sealed class IdentityScanState(
                     this
                 }
             }
+        }
     }
 
     /**

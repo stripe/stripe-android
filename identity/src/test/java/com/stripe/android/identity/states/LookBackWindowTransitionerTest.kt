@@ -2,9 +2,9 @@ package com.stripe.android.identity.states
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.framework.time.ClockMark
-import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
+import com.stripe.android.identity.ml.IDDetectorOutput
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -83,7 +83,7 @@ internal class LookBackWindowTransitionerTest {
     }
 
     private companion object {
-        val ID_FRONT_OUTPUT = AnalyzerOutput(
+        val ID_FRONT_OUTPUT = IDDetectorOutput(
             BoundingBox(0f, 0f, 0f, 0f),
             Category.ID_FRONT,
             0f,
