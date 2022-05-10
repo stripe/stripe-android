@@ -14,7 +14,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class IOUTransitionerTest {
+internal class IDDetectorTransitionerTest {
     private val mockNeverTimeoutClockMark = mock<ClockMark>().also {
         whenever(it.hasPassed()).thenReturn(false)
     }
@@ -24,7 +24,7 @@ internal class IOUTransitionerTest {
 
     @Test
     fun `transitions to Found when iOUCheckPass failed`() {
-        val transitioner = IOUTransitioner()
+        val transitioner = IDDetectorTransitioner()
 
         val foundState = IdentityScanState.Found(
             ScanType.ID_FRONT,
@@ -33,11 +33,11 @@ internal class IOUTransitionerTest {
             mockReachedStateAt
         )
         // initialize previousBoundingBox
-        transitioner.transition(foundState, INITIAL_ID_FRONT_OUTPUT)
+        transitioner.transitionFromFound(foundState, INITIAL_ID_FRONT_OUTPUT)
 
         // send a low IOU result
         assertThat(
-            transitioner.transition(
+            transitioner.transitionFromFound(
                 foundState,
                 createAnalyzerOutputWithLowIOU(INITIAL_ID_FRONT_OUTPUT)
             )
@@ -50,7 +50,7 @@ internal class IOUTransitionerTest {
     @Test
     fun `transitions to Found when moreResultsRequired and Satisfied when timeRequired is met`() {
         val timeRequired = 500
-        val transitioner = IOUTransitioner(timeRequired = timeRequired)
+        val transitioner = IDDetectorTransitioner(timeRequired = timeRequired)
 
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
@@ -64,7 +64,7 @@ internal class IOUTransitionerTest {
         // mock time required is not yet met
         whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
         assertThat(
-            transitioner.transition(
+            transitioner.transitionFromFound(
                 mockFoundState,
                 result
             )
@@ -72,7 +72,7 @@ internal class IOUTransitionerTest {
 
         // mock time required is met
         whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired + 10).milliseconds)
-        val resultState = transitioner.transition(
+        val resultState = transitioner.transitionFromFound(
             mockFoundState,
             createAnalyzerOutputWithHighIOU(result)
         )
@@ -87,7 +87,7 @@ internal class IOUTransitionerTest {
     fun `transitions to Found when moreResultsRequired and stays in Found when IOU check fails`() {
         val timeRequired = 500
         val allowedUnmatchedFrames = 2
-        val transitioner = IOUTransitioner(
+        val transitioner = IDDetectorTransitioner(
             timeRequired = timeRequired,
             allowedUnmatchedFrames = allowedUnmatchedFrames
         )
@@ -105,7 +105,7 @@ internal class IOUTransitionerTest {
         // 1st frame - a match, stays in Found
         val result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
         assertThat(
-            transitioner.transition(
+            transitioner.transitionFromFound(
                 foundState,
                 result
             )
@@ -113,7 +113,7 @@ internal class IOUTransitionerTest {
 
         // 2nd frame - a low IOU frame, stays in Found
         assertThat(
-            transitioner.transition(
+            transitioner.transitionFromFound(
                 foundState,
                 createAnalyzerOutputWithLowIOU(result)
             )
@@ -127,7 +127,7 @@ internal class IOUTransitionerTest {
     fun `keeps in Found while unmatched frames within allowedUnmatchedFrames and to Unsatisfied when going beyond`() {
         val timeRequired = 500
         val allowedUnmatchedFrames = 2
-        val transitioner = IOUTransitioner(
+        val transitioner = IDDetectorTransitioner(
             timeRequired = timeRequired,
             allowedUnmatchedFrames = allowedUnmatchedFrames
         )
@@ -144,7 +144,7 @@ internal class IOUTransitionerTest {
         // 1st frame - a match, stays in Found
         var result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
         assertThat(
-            transitioner.transition(
+            transitioner.transitionFromFound(
                 mockFoundState,
                 result
             )
@@ -154,7 +154,7 @@ internal class IOUTransitionerTest {
         for (i in 1..allowedUnmatchedFrames) {
             result = createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
             assertThat(
-                transitioner.transition(
+                transitioner.transitionFromFound(
                     mockFoundState,
                     result
                 )
@@ -162,7 +162,7 @@ internal class IOUTransitionerTest {
         }
 
         // another high iOU frame that breaks the streak
-        val resultState = transitioner.transition(
+        val resultState = transitioner.transitionFromFound(
             mockFoundState,
             createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
         )
@@ -178,7 +178,7 @@ internal class IOUTransitionerTest {
     fun `keeps in Found while unmatched frames within allowedUnmatchedFrames and to Satisfied when going beyond`() {
         val timeRequired = 500
         val allowedUnmatchedFrames = 2
-        val transitioner = IOUTransitioner(
+        val transitioner = IDDetectorTransitioner(
             timeRequired = timeRequired,
             allowedUnmatchedFrames = allowedUnmatchedFrames
         )
@@ -195,7 +195,7 @@ internal class IOUTransitionerTest {
         // 1st frame - a match, stays in Found
         var result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
         assertThat(
-            transitioner.transition(
+            transitioner.transitionFromFound(
                 mockFoundState,
                 result
             )
@@ -205,7 +205,7 @@ internal class IOUTransitionerTest {
         for (i in 1..allowedUnmatchedFrames) {
             result = createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
             assertThat(
-                transitioner.transition(
+                transitioner.transitionFromFound(
                     mockFoundState,
                     result
                 )
@@ -215,13 +215,49 @@ internal class IOUTransitionerTest {
         // mock required time is met
         whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired + 10).milliseconds)
         // another high iOU frame with a match
-        val resultState = transitioner.transition(
+        val resultState = transitioner.transitionFromFound(
             mockFoundState,
             createAnalyzerOutputWithHighIOU(result, Category.ID_FRONT)
         )
 
         assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
         assertThat(resultState.type).isEqualTo(ScanType.ID_FRONT)
+    }
+
+    @Test
+    fun `Initial stays in Initial if type doesn't match`() {
+        val transitioner = IDDetectorTransitioner()
+
+        val initialState = IdentityScanState.Initial(
+            ScanType.ID_FRONT,
+            mockNeverTimeoutClockMark,
+            transitioner,
+        )
+
+        assertThat(
+            transitioner.transitionFromInitial(
+                initialState,
+                createAnalyzerOutputWithLowIOU(INITIAL_ID_BACK_OUTPUT)
+            )
+        ).isSameInstanceAs(initialState)
+    }
+
+    @Test
+    fun `Initial transitions to Found if type does match`() {
+        val transitioner = IDDetectorTransitioner()
+
+        val initialState = IdentityScanState.Initial(
+            ScanType.ID_FRONT,
+            mockNeverTimeoutClockMark,
+            transitioner,
+        )
+
+        assertThat(
+            transitioner.transitionFromInitial(
+                initialState,
+                createAnalyzerOutputWithLowIOU(INITIAL_ID_FRONT_OUTPUT)
+            )
+        ).isInstanceOf(IdentityScanState.Found::class.java)
     }
 
     private fun createAnalyzerOutputWithHighIOU(
@@ -258,6 +294,13 @@ internal class IOUTransitionerTest {
         val INITIAL_ID_FRONT_OUTPUT = IDDetectorOutput(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
+            0f,
+            listOf()
+        )
+
+        val INITIAL_ID_BACK_OUTPUT = IDDetectorOutput(
+            INITIAL_BOUNDING_BOX,
+            Category.ID_BACK,
             0f,
             listOf()
         )
