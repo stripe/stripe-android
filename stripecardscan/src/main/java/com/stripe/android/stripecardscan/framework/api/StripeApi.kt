@@ -263,7 +263,6 @@ internal fun getImageData(image: Bitmap, imageConfigs: AcceptedImageConfigs):
         // Fallback to JPEG format
         result = imageWithConfig(image, ImageFormat.JPEG, imageConfigs)
     }
-
-    // Fallback to JPEG format
+    
     return result ?: Pair(ByteArray(0), Rect())
 }
