@@ -145,7 +145,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                 )
             } else {
                 PaymentSelection.New.GenericPaymentMethod(
-                    selectedPaymentMethodResources.displayNameResource,
+                    getString(selectedPaymentMethodResources.displayNameResource),
                     selectedPaymentMethodResources.iconResource,
                     this,
                     customerRequestedSave = formFieldValues.userRequestedReuse

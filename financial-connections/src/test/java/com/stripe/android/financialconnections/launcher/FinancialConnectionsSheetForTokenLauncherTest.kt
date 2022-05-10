@@ -4,7 +4,6 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.bankAccountToken
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
@@ -22,7 +21,7 @@ class FinancialConnectionsSheetForTokenLauncherTest {
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
-            FinancialConnectionsSheetContract.Result.Completed(
+            FinancialConnectionsSheetForTokenResult.Completed(
                 financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts,
                 token = bankAccountToken
             )
@@ -55,7 +54,7 @@ class FinancialConnectionsSheetForTokenLauncherTest {
 
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Cancelled`() {
-        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetContract.Result.Canceled)
+        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetForTokenResult.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }

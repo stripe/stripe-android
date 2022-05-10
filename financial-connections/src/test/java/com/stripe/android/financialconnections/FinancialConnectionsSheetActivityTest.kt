@@ -8,6 +8,8 @@ import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.utils.InjectableActivityScenario
 import com.stripe.android.financialconnections.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.financialconnections.utils.injectableActivityScenario
@@ -31,12 +33,12 @@ import org.robolectric.Shadows.shadowOf
 class FinancialConnectionsSheetActivityTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val contract = FinancialConnectionsSheetContract()
+    private val contract = FinancialConnectionsSheetForDataContract()
     private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val args = FinancialConnectionsSheetContract.Args.Default(configuration)
+    private val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
     private val intent = contract.createIntent(context, args)
     private val viewModel = createViewModel()
 
@@ -73,7 +75,7 @@ class FinancialConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            FinancialConnectionsSheetContract.Result.Failed::class.java
+            FinancialConnectionsSheetResult.Failed::class.java
         )
     }
 
@@ -81,7 +83,7 @@ class FinancialConnectionsSheetActivityTest {
     fun `onCreate() with invalid args returns Failed result`() {
         val scenario = activityScenario()
         val configuration = FinancialConnectionsSheet.Configuration("", "")
-        val args = FinancialConnectionsSheetContract.Args.Default(configuration)
+        val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         val intent = contract.createIntent(context, args)
         scenario.launch(intent)
         assertThat(
@@ -90,7 +92,7 @@ class FinancialConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            FinancialConnectionsSheetContract.Result.Failed::class.java
+            FinancialConnectionsSheetResult.Failed::class.java
         )
     }
 
@@ -139,7 +141,7 @@ class FinancialConnectionsSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isInstanceOf(
-            FinancialConnectionsSheetContract.Result.Canceled::class.java
+            FinancialConnectionsSheetResult.Canceled::class.java
         )
     }
 

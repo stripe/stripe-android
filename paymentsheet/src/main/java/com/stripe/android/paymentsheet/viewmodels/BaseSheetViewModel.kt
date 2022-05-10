@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -22,6 +23,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -155,6 +157,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val primaryButtonUIState: LiveData<PrimaryButton.UIState?>
         get() = _primaryButtonUIState
 
+    private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
+    val primaryButtonState: LiveData<PrimaryButton.State>
+        get() = _primaryButtonState
+
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?>
         get() = _notesText
@@ -197,11 +203,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = _primaryButtonUIState.value?.enabled
-                    ?: (
-                        buttonsEnabled.value == true &&
-                            selection.value != null
-                        )
+                value = if (_primaryButtonUIState.value != null) {
+                    _primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
+                } else {
+                    buttonsEnabled.value == true && selection.value != null
+                }
             }
         }
     }.distinctUntilChanged()
@@ -334,6 +340,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _primaryButtonUIState.value = state
     }
 
+    fun updatePrimaryButtonState(state: PrimaryButton.State) {
+        _primaryButtonState.value = state
+    }
+
     fun updateBelowButtonText(text: String?) {
         _notesText.value = text
     }
@@ -441,6 +451,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     abstract fun onUserCancel()
+
+    abstract fun onPaymentResult(paymentResult: PaymentResult)
+
+    abstract fun onFinish()
+
+    abstract fun onError(@StringRes error: Int? = null)
 
     /**
      * Used to set up any dependencies that require a reference to the current Activity.

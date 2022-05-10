@@ -112,12 +112,4 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertThat(AnalyticsRequestFactory.ANALYTICS_UA)
             .isEqualTo("analytics.stripe_android-1.0")
     }
-
-    @Test
-    fun `createEvent(String) - event name field matches passed string`() {
-        val event = "my_event_name"
-        val request = factory.createRequest(event, emptyMap())
-
-        assertThat(request.params["event"]).isEqualTo(event)
-    }
 }

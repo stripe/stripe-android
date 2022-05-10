@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -11,7 +11,8 @@ import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
-internal sealed class PaymentSelection : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class PaymentSelection : Parcelable {
     @Parcelize
     object GooglePay : PaymentSelection()
 
@@ -66,10 +67,10 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class GenericPaymentMethod(
-            @StringRes val labelResource: Int,
+            val labelResource: String,
             @DrawableRes val iconResource: Int,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
         ) : New()
     }
 }

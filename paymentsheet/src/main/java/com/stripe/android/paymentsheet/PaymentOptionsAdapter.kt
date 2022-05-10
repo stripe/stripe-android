@@ -71,6 +71,7 @@ internal class PaymentOptionsAdapter(
     internal var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
     private var isEditing = false
+    private var savedSelection: SavedSelection? = null
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
 
@@ -97,6 +98,8 @@ internal class PaymentOptionsAdapter(
         showGooglePay: Boolean,
         paymentSelection: PaymentSelection? = null
     ) {
+        savedSelection = config.savedSelection
+
         val items = listOfNotNull(
             Item.AddCard,
             Item.GooglePay.takeIf { config.isGooglePayReady && showGooglePay }
@@ -129,7 +132,7 @@ internal class PaymentOptionsAdapter(
      * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
-        savedSelection: SavedSelection
+        savedSelection: SavedSelection?
     ): Int {
         return listOfNotNull(
             // saved selection
@@ -145,6 +148,7 @@ internal class PaymentOptionsAdapter(
                         }
                     }
                     SavedSelection.None -> false
+                    else -> false
                 }
                 b
             }.takeIf { it != -1 },
@@ -204,9 +208,10 @@ internal class PaymentOptionsAdapter(
     @VisibleForTesting
     internal fun onItemSelected(
         position: Int,
-        isClick: Boolean
+        isClick: Boolean,
+        force: Boolean = false
     ) {
-        if (position != NO_POSITION &&
+        if (force || position != NO_POSITION &&
             (canClickSelectedItem || position != selectedItemPosition) &&
             !isEditing
         ) {
@@ -247,6 +252,11 @@ internal class PaymentOptionsAdapter(
                 GooglePayViewHolder(parent, width, ::onItemSelected)
             ViewType.SavedPaymentMethod ->
                 SavedPaymentMethodViewHolder(parent, width, ::onItemSelected) { position ->
+                    onItemSelected(
+                        position = findInitialSelectedPosition(savedSelection),
+                        isClick = false,
+                        force = true
+                    )
                     paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
                 }
         }
@@ -370,8 +380,7 @@ internal class PaymentOptionsAdapter(
                     isEditing = false,
                     isSelected = false,
                     isEnabled = isEnabled,
-                    labelText =
-                    itemView.resources.getString(
+                    labelText = itemView.resources.getString(
                         R.string.stripe_paymentsheet_add_payment_method_button_label
                     ),
                     iconRes = iconRes,

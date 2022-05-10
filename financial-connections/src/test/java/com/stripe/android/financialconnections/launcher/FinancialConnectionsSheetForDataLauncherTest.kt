@@ -1,13 +1,11 @@
-package com.stripe.android.connections.launcher
+package com.stripe.android.financialconnections.launcher
 
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
-import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
@@ -15,16 +13,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class DefaultFinancialConnectionsSheetLauncherTest {
+class FinancialConnectionsSheetForDataLauncherTest {
 
     private val configuration = FinancialConnectionsSheet.Configuration("", "")
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
-            FinancialConnectionsSheetContract.Result.Completed(
+            FinancialConnectionsSheetResult.Completed(
                 financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts,
-                token = null
             )
         )
 
@@ -33,7 +30,7 @@ class DefaultFinancialConnectionsSheetLauncherTest {
         ) {
             onFragment { fragment ->
                 val results = mutableListOf<FinancialConnectionsSheetResult>()
-                val launcher = DefaultFinancialConnectionsSheetLauncher(
+                val launcher = FinancialConnectionsSheetForDataLauncher(
                     fragment,
                     testRegistry
                 ) {
@@ -54,14 +51,14 @@ class DefaultFinancialConnectionsSheetLauncherTest {
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Cancelled`() {
-        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetContract.Result.Canceled)
+        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetResult.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
         ) {
             onFragment { fragment ->
                 val results = mutableListOf<FinancialConnectionsSheetResult>()
-                val launcher = DefaultFinancialConnectionsSheetLauncher(
+                val launcher = FinancialConnectionsSheetForDataLauncher(
                     fragment,
                     testRegistry
                 ) {

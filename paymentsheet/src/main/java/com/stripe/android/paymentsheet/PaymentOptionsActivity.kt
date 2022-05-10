@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.getBackgroundColor
 
@@ -89,9 +90,17 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
+        viewModel.error.observe(this) {
+            updateErrorMessage(
+                messageView,
+                BaseSheetViewModel.UserErrorMessage(it)
+            )
+        }
+
         setupContinueButton()
 
         viewModel.transition.observe(this) { event ->
+            clearErrorMessages()
             event?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(
                     transitionTarget,
@@ -122,6 +131,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewModel.selection.observe(this) {
+            clearErrorMessages()
             setupContinueButton()
         }
 
@@ -156,6 +166,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
 
         viewBinding.continueButton.setOnClickListener {
+            clearErrorMessages()
             viewModel.onUserSelection()
         }
 
