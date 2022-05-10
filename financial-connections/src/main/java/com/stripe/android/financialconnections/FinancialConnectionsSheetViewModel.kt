@@ -48,18 +48,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * as well as the success and cancel callback URLs to verify.
      */
     private fun fetchManifest() {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                generateFinancialConnectionsSessionManifest(
-                    clientSecret = starterArgs.configuration.financialConnectionsSessionClientSecret,
-                    applicationId = applicationId
-                )
-            }.onFailure {
-                onFatal(it)
-            }.onSuccess {
-                openAuthFlow(it)
+        withState { state ->
+            viewModelScope.launch {
+                kotlin.runCatching {
+                    state.initialArgs.validate()
+                    generateFinancialConnectionsSessionManifest(
+                        clientSecret = starterArgs.configuration.financialConnectionsSessionClientSecret,
+                        applicationId = applicationId
+                    )
+                }.onFailure {
+                    onFatal(it)
+                }.onSuccess {
+                    openAuthFlow(it)
+                }
             }
         }
+
     }
 
     /**
