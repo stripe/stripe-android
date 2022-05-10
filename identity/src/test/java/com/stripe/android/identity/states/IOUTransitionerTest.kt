@@ -3,9 +3,9 @@ package com.stripe.android.identity.states
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
-import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
+import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState.ScanType
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -225,10 +225,10 @@ internal class IOUTransitionerTest {
     }
 
     private fun createAnalyzerOutputWithHighIOU(
-        previousAnalyzerOutput: AnalyzerOutput,
+        previousAnalyzerOutput: IDDetectorOutput,
         newCategory: Category? = null
     ) =
-        AnalyzerOutput(
+        IDDetectorOutput(
             boundingBox = BoundingBox(
                 previousAnalyzerOutput.boundingBox.left + 1,
                 previousAnalyzerOutput.boundingBox.top + 1,
@@ -240,8 +240,8 @@ internal class IOUTransitionerTest {
             previousAnalyzerOutput.allScores
         )
 
-    private fun createAnalyzerOutputWithLowIOU(previousAnalyzerOutput: AnalyzerOutput) =
-        AnalyzerOutput(
+    private fun createAnalyzerOutputWithLowIOU(previousAnalyzerOutput: IDDetectorOutput) =
+        IDDetectorOutput(
             boundingBox = BoundingBox(
                 previousAnalyzerOutput.boundingBox.left + 500f,
                 previousAnalyzerOutput.boundingBox.top + 500f,
@@ -255,7 +255,7 @@ internal class IOUTransitionerTest {
 
     private companion object {
         val INITIAL_BOUNDING_BOX = BoundingBox(0f, 0f, 500f, 500f)
-        val INITIAL_ID_FRONT_OUTPUT = AnalyzerOutput(
+        val INITIAL_ID_FRONT_OUTPUT = IDDetectorOutput(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
             0f,

@@ -5,6 +5,7 @@ import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
+import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState.Found
 import com.stripe.android.identity.states.IdentityScanState.Satisfied
 import com.stripe.android.identity.states.IdentityScanState.ScanType
@@ -35,6 +36,9 @@ internal class IOUTransitioner(
         foundState: Found,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
+        require(analyzerOutput is IDDetectorOutput) {
+            "Unexpected output type: $analyzerOutput"
+        }
         return when {
             !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
                 "Type ${analyzerOutput.category} doesn't match ${foundState.type}",

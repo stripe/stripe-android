@@ -3,6 +3,7 @@ package com.stripe.android.identity.states
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.identity.ml.AnalyzerOutput
+import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState.Found
 import com.stripe.android.identity.states.IdentityScanState.Satisfied
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
@@ -30,6 +31,9 @@ internal class LookBackWindowTransitioner(
         foundState: Found,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
+        require(analyzerOutput is IDDetectorOutput) {
+            "Unexpected output type: $analyzerOutput"
+        }
         val isHit = analyzerOutput.category.matchesScanType(foundState.type)
         if (isHit) {
             hitsCount++
