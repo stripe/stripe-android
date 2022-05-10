@@ -1,6 +1,9 @@
 package com.stripe.android.stripecardscan.framework.api.dto
 
+import android.util.Size
 import androidx.test.filters.SmallTest
+import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
+import com.stripe.android.stripecardscan.framework.util.ImageFormat
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Test
@@ -49,31 +52,29 @@ class CardImageVerificationDetailsTest {
         assertNotNull(result.acceptedImageConfigs)
 
         result.acceptedImageConfigs?.let {
-            val heicSettings = it.imageSettings(CardImageVerificationDetailsFormat.HEIC)
+            val acceptedImageConfigs = AcceptedImageConfigs(it)
+            val heicSettings = acceptedImageConfigs.imageSettings(ImageFormat.HEIC)
             assertNotNull(heicSettings)
 
             heicSettings?.let {
-                assertEquals(it.compressionRatio, 0.5)
-                assertEquals(it.imageSize?.first(), 1080.0)
-                assertEquals(it.imageSize?.last(), 1920.0)
+                assertEquals(it.first, 0.5)
+                assertEquals(it.second, Size(1080, 1920))
             }
 
-            val jpegSettings = it.imageSettings(CardImageVerificationDetailsFormat.JPEG)
+            val jpegSettings = acceptedImageConfigs.imageSettings(ImageFormat.JPEG)
             assertNotNull(jpegSettings)
 
             jpegSettings?.let {
-                assertEquals(it.compressionRatio, 0.8)
-                assertEquals(it.imageSize?.first(), 1080.0)
-                assertEquals(it.imageSize?.last(), 1920.0)
+                assertEquals(it.first, 0.8)
+                assertEquals(it.second, Size(1080, 1920))
             }
 
-            val webpSettings = it.imageSettings(CardImageVerificationDetailsFormat.WEBP)
+            val webpSettings = acceptedImageConfigs.imageSettings(ImageFormat.WEBP)
             assertNotNull(webpSettings)
 
             webpSettings?.let {
-                assertEquals(it.compressionRatio, 0.7)
-                assertEquals(it.imageSize?.first(), 2160.0)
-                assertEquals(it.imageSize?.last(), 1920.0)
+                assertEquals(it.first, 0.7)
+                assertEquals(it.second, Size(2160, 1920))
             }
         }
     }
