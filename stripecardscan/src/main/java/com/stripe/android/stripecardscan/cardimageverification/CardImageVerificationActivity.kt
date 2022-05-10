@@ -25,11 +25,11 @@ import com.stripe.android.stripecardscan.cardimageverification.exception.Unknown
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
 import com.stripe.android.stripecardscan.framework.api.NetworkResult
-import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsAcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
 import com.stripe.android.stripecardscan.framework.api.uploadSavedFrames
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsCIV
+import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
@@ -142,7 +142,7 @@ internal open class CardImageVerificationActivity :
     /**
      * The image format to send to verify_frames
      */
-    private var imageConfigs: CardImageVerificationDetailsAcceptedImageConfigs? = null
+    private var imageConfigs: AcceptedImageConfigs = AcceptedImageConfigs()
 
     /**
      * The listener which handles results from the scan.
@@ -342,7 +342,7 @@ internal open class CardImageVerificationActivity :
                 if (expectedCard.lastFour.isNullOrEmpty() ||
                     isValidPanLastFour(expectedCard.lastFour)
                 ) {
-                    imageConfigs = result.body.acceptedImageConfigs
+                    imageConfigs = AcceptedImageConfigs(result.body.acceptedImageConfigs)
 
                     CardVerificationFlowParameters(
                         cardIssuer = getIssuerByDisplayName(expectedCard.issuer),

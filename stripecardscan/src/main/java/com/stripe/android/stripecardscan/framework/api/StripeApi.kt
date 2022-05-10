@@ -4,7 +4,6 @@ package com.stripe.android.stripecardscan.framework.api
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
-import android.util.Size
 import androidx.annotation.CheckResult
 import com.stripe.android.camera.framework.image.constrainToSize
 import com.stripe.android.camera.framework.image.crop
@@ -16,8 +15,6 @@ import com.stripe.android.camera.framework.util.move
 import com.stripe.android.camera.framework.util.scaleAndCenterWithin
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
-import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsAcceptedImageConfigs
-import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsFormat
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsResult
 import com.stripe.android.stripecardscan.framework.api.dto.ClientDevice
@@ -32,8 +29,10 @@ import com.stripe.android.stripecardscan.framework.api.dto.VerificationFrameData
 import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesRequest
 import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesResult
 import com.stripe.android.stripecardscan.framework.api.dto.ViewFinderMargins
+import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
+import com.stripe.android.stripecardscan.framework.util.ImageFormat
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import com.stripe.android.stripecardscan.framework.util.b64Encode
 import com.stripe.android.stripecardscan.framework.util.encodeToJson
@@ -176,14 +175,14 @@ internal suspend fun uploadSavedFrames(
     civId: String,
     civSecret: String,
     savedFrames: Collection<SavedFrame>,
-    imageConfigs: CardImageVerificationDetailsAcceptedImageConfigs?,
+    imageConfigs: AcceptedImageConfigs,
 ) = withContext(Dispatchers.IO) {
 
     val verificationFramesData = savedFrames.map { savedFrame ->
         val image = savedFrame.frame.cameraPreviewImage.image
 
         val imageDataAndCropRect = getImageData(image, imageConfigs)
-        val b64ImageData = b64Encode(imageDataAndCropRect.first!!)
+        val b64ImageData = b64Encode(imageDataAndCropRect.first)
         val cropRect = imageDataAndCropRect.second
 
         val viewFinderRect = determineViewFinderCrop(
@@ -215,21 +214,16 @@ internal suspend fun uploadSavedFrames(
     )
 }
 
-internal fun isformatSupport(format: CardImageVerificationDetailsFormat) =
-    format == CardImageVerificationDetailsFormat.JPEG ||
-        format == CardImageVerificationDetailsFormat.WEBP
-
 internal fun imageWithConfig(
     image: Bitmap,
-    format: CardImageVerificationDetailsFormat,
-    configs: CardImageVerificationDetailsAcceptedImageConfigs
+    format: ImageFormat,
+    configs: AcceptedImageConfigs
 ): Pair<ByteArray, Rect>? {
 
     val imageSettings = configs.imageSettings(format)
 
     // Size and crop the image per the settings.
-    val imageSize = imageSettings.imageSize!!
-    val maxImageSize = Size(imageSize.first().toInt(), imageSize.last().toInt())
+    val maxImageSize = imageSettings.second
 
     val cropRect = maxImageSize
         .scaleAndCenterWithin(image.size())
@@ -239,15 +233,15 @@ internal fun imageWithConfig(
         .constrainToSize(maxImageSize)
 
     // Now convert formats with the compression ratio from settings.
-    val compressionRatio = imageSettings.compressionRatio!!
+    val compressionRatio = imageSettings.first
 
     // Convert to 0..100
     val convertedRatio = compressionRatio.times(100.0).toInt()
 
     var result = when (format) {
-        CardImageVerificationDetailsFormat.WEBP -> image.toWebP(convertedRatio)
-        CardImageVerificationDetailsFormat.HEIC,
-        CardImageVerificationDetailsFormat.JPEG -> image.toJpeg(convertedRatio)
+        ImageFormat.WEBP -> image.toWebP(convertedRatio)
+        ImageFormat.HEIC,
+        ImageFormat.JPEG -> image.toJpeg(convertedRatio)
     }
 
     if (result.size == 0) {
@@ -257,23 +251,16 @@ internal fun imageWithConfig(
     return Pair(result, cropRect)
 }
 
-internal fun getImageData(
-    image: Bitmap,
-    configs: CardImageVerificationDetailsAcceptedImageConfigs?
-): Pair<ByteArray?, Rect> {
-
-    val imageConfigs = configs ?: CardImageVerificationDetailsAcceptedImageConfigs()
+internal fun getImageData(image: Bitmap, imageConfigs: AcceptedImageConfigs): Pair<ByteArray, Rect> {
 
     // Attempt to get image data using the configs from the server.
-    var result = imageConfigs.preferredFormats?.filter {
-        isformatSupport(it)
-    }?.firstNotNullOfOrNull {
+    var result = imageConfigs.preferredFormats?.firstNotNullOfOrNull {
         imageWithConfig(image, it, imageConfigs)
     }
 
     if (result == null) {
         // Fallback to JPEG format
-        result = imageWithConfig(image, CardImageVerificationDetailsFormat.JPEG, imageConfigs)
+        result = imageWithConfig(image, ImageFormat.JPEG, imageConfigs)
     }
 
     // Fallback to JPEG format
