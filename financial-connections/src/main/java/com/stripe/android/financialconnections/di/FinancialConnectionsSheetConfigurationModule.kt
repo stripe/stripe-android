@@ -4,7 +4,7 @@ import android.app.Application
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -16,7 +16,7 @@ internal object FinancialConnectionsSheetConfigurationModule {
     @Provides
     @Singleton
     fun providesConfiguration(
-        args: FinancialConnectionsSheetContract.Args
+        args: FinancialConnectionsSheetActivityArgs
     ): FinancialConnectionsSheet.Configuration = args.configuration
 
     @Provides

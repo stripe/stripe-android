@@ -6,7 +6,6 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
@@ -48,6 +47,7 @@ import kotlin.test.BeforeTest
 class SignUpViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
         StripeIntentFixtures.PI_SUCCEEDED,
+        true,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(
@@ -201,7 +201,7 @@ class SignUpViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
+
         val factory = SignUpViewModel.Factory(
             injector,
             null
@@ -209,8 +209,6 @@ class SignUpViewModelTest {
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
-
-        WeakMapInjectorRegistry.staticCacheMap.clear()
     }
 
     private fun createViewModel(
@@ -218,7 +216,7 @@ class SignUpViewModelTest {
         args: LinkActivityContract.Args = defaultArgs
     ) = SignUpViewModel(
         args = args,
-        prefilledEmail = prefilledEmail,
+        customerEmail = prefilledEmail,
         linkAccountManager = linkAccountManager,
         logger = Logger.noop(),
         navigator = navigator

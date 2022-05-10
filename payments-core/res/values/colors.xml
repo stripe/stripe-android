@@ -20,6 +20,8 @@
     <color name="stripe_card_widget_progress_foreground">#ffffffcc</color>
     <color name="stripe_card_widget_progress_background">#4F566B</color>
 
+    <color name="clear_icon_tint">#1C1C1E</color>
+
     <!-- Payment Sheet -->
     <color name="stripe_paymentsheet_background">#ffffff</color>
     <color name="stripe_paymentsheet_form_border">#33787880</color>

@@ -28,8 +28,6 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Vissza</string>
   <string name="stripe_paymentsheet_close">Bezárás</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Folytatás</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Vagy fizetés a következővel:</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

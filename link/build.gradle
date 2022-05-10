@@ -41,13 +41,14 @@ dependencies {
     implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
     // Integration with activities
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation "androidx.navigation:navigation-compose:2.5.0-beta01"
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$flowlayoutVersion"
     implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
 
     testImplementation project(':payments-core')
+    testImplementation project(':payments-ui-core')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
@@ -102,8 +103,8 @@ android {
 
     kotlinOptions {
         freeCompilerArgs = [
-                "-Xjvm-default=enable",
-                "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi"
+                "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi",
+                "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
         ]
         jvmTarget = "1.8"
     }

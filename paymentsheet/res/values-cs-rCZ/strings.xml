@@ -28,8 +28,6 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Zpět</string>
   <string name="stripe_paymentsheet_close">Zavřít</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Pokračovat</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Nebo zaplatit pomocí</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

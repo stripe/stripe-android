@@ -117,9 +117,9 @@ internal class TransformSpecToElementTest {
             // Verify the correct config is setup for the controller
             assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
 
-            assertThat(countrySectionElement.identifier.value).isEqualTo("country_section")
+            assertThat(countrySectionElement.identifier.v1).isEqualTo("country_section")
 
-            assertThat(countryElement.identifier.value).isEqualTo("billing_details[address][country]")
+            assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
         }
 
     @Test
@@ -139,9 +139,9 @@ internal class TransformSpecToElementTest {
             // Verify the correct config is setup for the controller
             assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
 
-            assertThat(idealSectionElement.identifier.value).isEqualTo("ideal_section")
+            assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal_section")
 
-            assertThat(idealElement.identifier.value).isEqualTo("ideal[bank]")
+            assertThat(idealElement.identifier.v1).isEqualTo("ideal[bank]")
         }
 
     @Test
@@ -155,7 +155,7 @@ internal class TransformSpecToElementTest {
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
-        assertThat(nameElement.identifier.value).isEqualTo("billing_details[name]")
+        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
         assertThat(nameElement.controller.capitalization).isEqualTo(KeyboardCapitalization.Words)
         assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
@@ -183,7 +183,7 @@ internal class TransformSpecToElementTest {
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
-        assertThat(nameElement.identifier.value).isEqualTo("simple")
+        assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
 
@@ -198,7 +198,7 @@ internal class TransformSpecToElementTest {
 
         // Verify the correct config is setup for the controller
         assertThat(emailElement.controller.label.first()).isEqualTo(EmailConfig().label)
-        assertThat(emailElement.identifier.value).isEqualTo("billing_details[email]")
+        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
     }
 
     @Test
@@ -215,7 +215,7 @@ internal class TransformSpecToElementTest {
 
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
-        assertThat(staticTextElement.identifier).isEqualTo(staticText.identifier)
+        assertThat(staticTextElement.identifier).isEqualTo(staticText.api_path)
     }
 
     companion object {

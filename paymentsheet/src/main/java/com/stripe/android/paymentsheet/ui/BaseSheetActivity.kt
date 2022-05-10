@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Insets
@@ -11,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowMetrics
-import android.widget.FrameLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
@@ -28,11 +26,10 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -58,6 +55,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
+    abstract val linkAuthView: ComposeView
     abstract val scrollView: ScrollView
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
@@ -66,6 +64,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val testModeIndicator: TextView
     abstract val notesView: ComposeView
     abstract val primaryButton: PrimaryButton
+    abstract val bottomSpacer: View
 
     abstract fun setActivityResult(result: ResultType)
 
@@ -94,9 +93,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 0f
             }
         }
-
-        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.setup()
 
@@ -129,6 +125,25 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         setupHeader()
         setupPrimaryButton()
         setupNotes()
+
+        viewModel.showLinkVerificationDialog.observe(this) { show ->
+            if (show) {
+                linkAuthView.setContent {
+                    LinkVerificationDialog(
+                        linkLauncher = viewModel.linkLauncher,
+                        onDialogDismissed = viewModel::onLinkVerificationDismissed,
+                        onVerificationCompleted = {
+                            viewModel.launchLink()
+                            viewModel.onLinkVerificationDismissed()
+                        }
+                    )
+                }
+            }
+        }
+
+        viewModel.contentVisible.observe(this) {
+            scrollView.isVisible = it
+        }
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
@@ -217,13 +232,18 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     private fun setupPrimaryButton() {
-        viewModel.primaryButtonOnClick.observe(this) { action ->
-            primaryButton.setOnClickListener {
-                action()
+        viewModel.primaryButtonUIState.observe(this) { state ->
+            state?.let {
+                primaryButton.setOnClickListener {
+                    state.onClick()
+                }
+                primaryButton.setLabel(state.label)
+                primaryButton.isVisible = state.visible
+                bottomSpacer.isVisible = state.visible
             }
         }
-        viewModel.primaryButtonText.observe(this) { text ->
-            primaryButton.setLabel(text)
+        viewModel.primaryButtonState.observe(this) { state ->
+            primaryButton.updateState(state)
         }
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
@@ -244,17 +264,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 }
             }
             notesView.isVisible = showNotes
-            primaryButton.updateLayoutParams {
-                (this as? FrameLayout.LayoutParams)?.updateMargins(
-                    bottom = if (showNotes) {
-                        0
-                    } else {
-                        resources.getDimensionPixelSize(
-                            R.dimen.stripe_paymentsheet_button_container_spacing_bottom
-                        )
-                    }
-                )
-            }
         }
     }
 

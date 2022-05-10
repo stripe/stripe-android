@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -66,6 +67,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
@@ -74,6 +76,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
+    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
     private val topContainer by lazy { viewBinding.topContainer }
@@ -138,6 +141,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         linkButton.apply {
             onClick = viewModel::launchLink
+            linkPaymentLauncher = viewModel.linkLauncher
         }
 
         viewModel.transition.observe(this) { transitionEvent ->
@@ -184,10 +188,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
-        }
-
-        viewModel.contentVisible.observe(this) {
-            viewBinding.scrollView.isVisible = it
         }
 
         viewModel.buttonsEnabled.observe(this) { enabled ->
@@ -257,6 +257,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
+        viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
+
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
                 viewBinding.buyButton.setLabel(
@@ -281,6 +283,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
+
+        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun setupTopContainer() {

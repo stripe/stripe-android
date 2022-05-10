@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import android.content.res.Resources
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,21 +8,17 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
-import com.stripe.android.link.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -31,7 +26,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 internal class WalletViewModel @Inject constructor(
-    args: LinkActivityContract.Args,
+    val args: LinkActivityContract.Args,
     val linkAccount: LinkAccount,
     private val linkRepository: LinkRepository,
     private val linkAccountManager: LinkAccountManager,
@@ -61,37 +56,35 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun payButtonLabel(resources: Resources) = when (stripeIntent) {
-        is PaymentIntent -> Amount(
-            requireNotNull(stripeIntent.amount),
-            requireNotNull(stripeIntent.currency)
-        ).buildPayButtonLabel(resources)
-        is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
-    }
-
-    fun completePayment(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+    fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
         isProcessing.value = true
 
-        val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-            .create(linkAccount.clientSecret, selectedPaymentDetails)
-        confirmationManager.confirmStripeIntent(params) { result ->
-            result.fold(
-                onSuccess = { paymentResult ->
-                    when (paymentResult) {
-                        is PaymentResult.Canceled -> {
-                            // no-op, let the user continue their flow
+        if (args.completePayment) {
+            val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                .createConfirmStripeIntentParams(linkAccount.clientSecret, selectedPaymentDetails)
+            confirmationManager.confirmStripeIntent(params) { result ->
+                result.fold(
+                    onSuccess = { paymentResult ->
+                        when (paymentResult) {
+                            is PaymentResult.Canceled -> {
+                                // no-op, let the user continue their flow
+                            }
+                            is PaymentResult.Failed -> {
+                                onError(paymentResult.throwable)
+                            }
+                            is PaymentResult.Completed ->
+                                navigator.dismiss(LinkActivityResult.Success.Completed)
                         }
-                        is PaymentResult.Failed -> {
-                            onError(paymentResult.throwable)
-                        }
-                        is PaymentResult.Completed ->
-                            navigator.dismiss(LinkActivityResult.Success)
-                    }
-                },
-                onFailure = ::onError
-            )
+                    },
+                    onFailure = ::onError
+                )
 
-            isProcessing.value = false
+                isProcessing.value = false
+            }
+        } else {
+            val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                .createPaymentMethodCreateParams(linkAccount.clientSecret, selectedPaymentDetails)
+            navigator.dismiss(LinkActivityResult.Success.Selected(selectedPaymentDetails, params))
         }
     }
 

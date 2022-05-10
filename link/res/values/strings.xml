@@ -4,13 +4,18 @@
 
     <string name="accessibility_close">Close</string>
 
+    <string name="inline_sign_up_header">Save my info for secure 1-click checkout</string>
+
     <string name="sign_up_header">Save your info for secure 1-click checkout</string>
     <string name="sign_up_message">Pay faster at %1$s and thousands of merchants.</string>
-    <string name="sign_up_terms">You agree to Link terms of service and to create a Link with Stripe account.</string>
+    <string name="sign_up_terms">By joining Link, you agree to the Terms and Privacy Policy.</string>
     <string name="sign_up">Join Link</string>
 
     <string name="verification_header">Enter your verification code</string>
     <string name="verification_message">Enter the code sent to %1$s to use Link to pay by default.</string>
+    <string name="verification_header_inline">Sign in to your Link account</string>
+    <string name="verification_message_inline">You’ve already saved your payment info with Link. Enter the code sent to %1$s.</string>
+    <string name="verification_header_prefilled">Use your saved info to check out faster</string>
     <string name="verification_not_email">Not %1$s?</string>
     <string name="verification_change_email">Change email</string>
     <string name="verification_resend">Resend code</string>
@@ -21,4 +26,6 @@
     <string name="wallet_default">Default</string>
     <string name="wallet_add_new_payment_method">Add a new payment method</string>
     <string name="wallet_pay_another_way">Pay another way</string>
+
+    <string name="pm_add_new_card">Add a new card</string>
 </resources>

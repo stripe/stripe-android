@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -18,9 +19,11 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -34,6 +37,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
@@ -141,15 +145,21 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
-    private val _primaryButtonText = MutableLiveData<String>()
-    val primaryButtonText: LiveData<String>
-        get() = _primaryButtonText
+    @VisibleForTesting
+    internal val _contentVisible = MutableLiveData(true)
+    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
 
-    private val primaryButtonEnabled = MutableLiveData<Boolean?>()
+    /**
+     * Use this to override the current UI state of the primary button. The UI state is reset every
+     * time the payment selection is changed.
+     */
+    private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
+    val primaryButtonUIState: LiveData<PrimaryButton.UIState?>
+        get() = _primaryButtonUIState
 
-    private val _primaryButtonOnClick = MutableLiveData<() -> Unit>()
-    val primaryButtonOnClick: LiveData<() -> Unit>
-        get() = _primaryButtonOnClick
+    private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
+    val primaryButtonState: LiveData<PrimaryButton.State>
+        get() = _primaryButtonState
 
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?>
@@ -157,6 +167,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     protected var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
+    val linkLauncher = linkPaymentLauncherFactory.create(merchantName, null)
+
+    private val _showLinkVerificationDialog = MutableLiveData(false)
+    val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
 
     /**
      * This should be initialized from the starter args, and then from that
@@ -184,12 +198,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            primaryButtonEnabled,
+            _primaryButtonUIState,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = primaryButtonEnabled.value
+                value = _primaryButtonUIState.value?.enabled
                     ?: (
                         buttonsEnabled.value == true &&
                             selection.value != null
@@ -322,28 +336,27 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         logger.warning(message)
     }
 
-    fun updatePrimaryButtonText(text: String) {
-        _primaryButtonText.value = text
+    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
+        _primaryButtonUIState.value = state
     }
 
-    fun updatePrimaryButtonEnabled(enabled: Boolean) {
-        primaryButtonEnabled.value = enabled
+    fun updatePrimaryButtonState(state: PrimaryButton.State) {
+        _primaryButtonState.value = state
     }
 
-    fun updatePrimaryButtonOnClick(onPress: () -> Unit) {
-        _primaryButtonOnClick.value = onPress
-    }
-
-    fun updateNotes(text: String?) {
+    fun updateBelowButtonText(text: String?) {
         _notesText.value = text
     }
 
-    fun updateSelection(selection: PaymentSelection?) {
+    open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newLpm = selection
         }
-        primaryButtonEnabled.value = null
+
         savedStateHandle[SAVE_SELECTION] = selection
+
+        updateBelowButtonText(null)
+        updatePrimaryButtonUIState(null)
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
@@ -367,6 +380,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         editing.value = isEditing
     }
 
+    fun setContentVisible(visible: Boolean) {
+        _contentVisible.value = visible
+    }
+
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
@@ -384,23 +401,62 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    protected fun setupLink(unused: StripeIntent) {
-        // TODO(brnunes-stripe): Enable Link
+    @Suppress("UNREACHABLE_CODE")
+    protected fun setupLink(stripeIntent: StripeIntent, completePayment: Boolean) {
+        // TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
         _isLinkEnabled.value = false
+        return
+
+        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
+            viewModelScope.launch {
+                when (linkLauncher.setup(stripeIntent, completePayment)) {
+                    AccountStatus.Verified -> launchLink()
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
+                    AccountStatus.SignedOut -> {}
+                }
+                _isLinkEnabled.value = true
+            }
+        } else {
+            _isLinkEnabled.value = false
+        }
+    }
+
+    fun onLinkVerificationDismissed() {
+        _showLinkVerificationDialog.value = false
+    }
+
+    fun launchLink() {
+        linkActivityResultLauncher?.let { activityResultLauncher ->
+            linkLauncher.present(
+                activityResultLauncher
+            )
+            onLinkLaunched()
+        }
     }
 
     /**
      * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
      * accordingly.
      */
-    abstract fun onLinkLaunched()
+    open fun onLinkLaunched() {
+        setContentVisible(false)
+    }
 
     /**
      * Method called with the result of a Link payment.
      */
-    abstract fun onLinkPaymentResult(result: LinkActivityResult)
+    open fun onLinkPaymentResult(result: LinkActivityResult) {
+        setContentVisible(true)
+    }
 
     abstract fun onUserCancel()
+
+    abstract fun onPaymentResult(paymentResult: PaymentResult)
+
+    abstract fun onFinish()
+
+    abstract fun onError(@StringRes error: Int? = null)
 
     /**
      * Used to set up any dependencies that require a reference to the current Activity.

@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.networking.StripeRepository
@@ -30,7 +31,7 @@ internal class LinkApiRepository @Inject constructor(
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
         authSessionCookie: String?
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
@@ -186,6 +187,32 @@ internal class LinkApiRepository @Inject constructor(
             },
             onFailure = {
                 logger.error("Error fetching consumer payment details", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun createPaymentDetails(
+        paymentDetails: ConsumerPaymentDetailsCreateParams,
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
+        runCatching {
+            stripeRepository.createPaymentDetails(
+                consumerSessionClientSecret,
+                paymentDetails,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error creating consumer payment method"))
+            },
+            onFailure = {
+                logger.error("Error creating consumer payment method", it)
                 Result.failure(it)
             }
         )

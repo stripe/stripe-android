@@ -23,7 +23,9 @@ internal class Navigator @Inject constructor() {
     ) = navigationController?.let { navController ->
         navController.navigate(target.route) {
             if (clearBackStack) {
-                popUpTo(navController.backQueue.first().destination.id)
+                popUpTo(navController.backQueue.first().destination.id) {
+                    inclusive = true
+                }
             }
         }
     }

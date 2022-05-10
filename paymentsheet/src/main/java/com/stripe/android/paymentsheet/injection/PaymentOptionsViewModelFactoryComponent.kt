@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -18,7 +19,8 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         PaymentOptionsViewModelModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class
+        LoggingModule::class,
+        ResourceRepositoryModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

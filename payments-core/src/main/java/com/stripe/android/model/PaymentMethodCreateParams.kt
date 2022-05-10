@@ -429,22 +429,52 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class USBankAccount(
-        internal var accountNumber: String,
-        internal var routingNumber: String,
-        internal var accountType: PaymentMethod.USBankAccount.USBankAccountType,
-        internal var accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType
+    @Suppress("DataClassPrivateConstructor")
+    data class USBankAccount private constructor(
+        internal var linkAccountSessionId: String? = null,
+        internal var accountNumber: String? = null,
+        internal var routingNumber: String? = null,
+        internal var accountType: PaymentMethod.USBankAccount.USBankAccountType? = null,
+        internal var accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType? = null
     ) : StripeParamsModel, Parcelable {
+        constructor(
+            linkAccountSessionId: String
+        ) : this(
+            linkAccountSessionId,
+            null,
+            null,
+            null,
+            null
+        )
+        constructor(
+            accountNumber: String,
+            routingNumber: String,
+            accountType: PaymentMethod.USBankAccount.USBankAccountType,
+            accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType
+        ) : this(
+            linkAccountSessionId = null,
+            accountNumber = accountNumber,
+            routingNumber = routingNumber,
+            accountType = accountType,
+            accountHolderType = accountHolderType
+        )
         override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_ACCOUNT_NUMBER to accountNumber,
-                PARAM_ROUTING_NUMBER to routingNumber,
-                PARAM_ACCOUNT_TYPE to accountType.value,
-                PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType.value
-            )
+            return if (linkAccountSessionId != null) {
+                mapOf(
+                    PARAM_LINKED_ACCOUNT_SESSION_ID to linkAccountSessionId!!
+                )
+            } else {
+                mapOf(
+                    PARAM_ACCOUNT_NUMBER to accountNumber!!,
+                    PARAM_ROUTING_NUMBER to routingNumber!!,
+                    PARAM_ACCOUNT_TYPE to accountType!!.value,
+                    PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType!!.value
+                )
+            }
         }
 
         private companion object {
+            private const val PARAM_LINKED_ACCOUNT_SESSION_ID = "link_account_session"
             private const val PARAM_ACCOUNT_NUMBER = "account_number"
             private const val PARAM_ROUTING_NUMBER = "routing_number"
             private const val PARAM_ACCOUNT_TYPE = "account_type"
@@ -456,7 +486,7 @@ data class PaymentMethodCreateParams internal constructor(
     data class Link(
         internal var paymentDetailsId: String,
         internal var consumerSessionClientSecret: String,
-        internal var paymentMethodOptions: Map<String, Map<String, String>>? = null
+        internal var extraParams: Map<String, @RawValue Any>? = null
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
@@ -465,9 +495,7 @@ data class PaymentMethodCreateParams internal constructor(
                     PARAM_CONSUMER_SESSION_CLIENT_SECRET to consumerSessionClientSecret
                 )
             ).plus(
-                paymentMethodOptions?.let {
-                    mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it)
-                } ?: emptyMap()
+                extraParams ?: emptyMap()
             )
         }
 
@@ -476,7 +504,6 @@ data class PaymentMethodCreateParams internal constructor(
             private const val PARAM_CREDENTIALS = "credentials"
             private const val PARAM_CONSUMER_SESSION_CLIENT_SECRET =
                 "consumer_session_client_secret"
-            private const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         }
     }
 
@@ -854,11 +881,15 @@ data class PaymentMethodCreateParams internal constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
-            paymentMethodOptions: Map<String, Map<String, String>>? = null
+            extraParams: Map<String, @RawValue Any>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
-                link = Link(paymentDetailsId, consumerSessionClientSecret, paymentMethodOptions)
+                link = Link(
+                    paymentDetailsId,
+                    consumerSessionClientSecret,
+                    extraParams
+                )
             )
         }
 

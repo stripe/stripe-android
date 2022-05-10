@@ -419,7 +419,8 @@ sealed class SupportedPaymentMethod(
         internal fun SupportedPaymentMethod.shouldTintOnSelection(): Boolean {
             return setOf(
                 Card,
-                AuBecsDebit
+                AuBecsDebit,
+                USBankAccount
             ).contains(this)
         }
 
