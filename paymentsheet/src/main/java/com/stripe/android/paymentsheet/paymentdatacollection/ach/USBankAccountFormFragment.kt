@@ -36,8 +36,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -45,7 +43,6 @@ import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -219,36 +216,7 @@ internal class USBankAccountFormFragment : Fragment() {
                                 ?.confirmStripeIntent(screenState.confirmIntentParams)
                         }
                         is USBankAccountFormScreenState.Finished -> {
-                            sheetViewModel?.updateSelection(
-                                PaymentSelection.New.GenericPaymentMethod(
-                                    labelResource = getString(
-                                        R.string.paymentsheet_payment_method_item_card_number,
-                                        screenState.last4
-                                    ),
-                                    iconResource = TransformToBankIcon(
-                                        screenState.bankName
-                                    ),
-                                    paymentMethodCreateParams =
-                                    PaymentMethodCreateParams.create(
-                                        usBankAccount = PaymentMethodCreateParams.USBankAccount(
-                                            linkAccountSessionId = screenState.linkAccountId
-                                        ),
-                                        billingDetails = PaymentMethod.BillingDetails(
-                                            name = viewModel.name.value,
-                                            email = viewModel.email.value
-                                        )
-                                    ),
-                                    customerRequestedSave = if (formArgs.showCheckbox) {
-                                        if (viewModel.saveForFutureUse.value) {
-                                            PaymentSelection.CustomerRequestedSave.RequestReuse
-                                        } else {
-                                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                                        }
-                                    } else {
-                                        PaymentSelection.CustomerRequestedSave.NoRequest
-                                    }
-                                )
-                            )
+                            sheetViewModel?.updateSelection(screenState.paymentSelection)
                             sheetViewModel?.onFinish()
                         }
                     }
