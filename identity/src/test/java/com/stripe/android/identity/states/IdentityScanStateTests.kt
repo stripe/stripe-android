@@ -8,11 +8,11 @@ import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.ml.IDDetectorOutput
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertSame
 
 @RunWith(RobolectricTestRunner::class)
 class IdentityScanStateTests {
@@ -28,43 +28,54 @@ class IdentityScanStateTests {
     private val mockTransitioner = mock<IdentityScanStateTransitioner>()
 
     @Test
-    fun `Initial can't transition with unmatched AnalyzerOutput`() {
+    fun `Initial transitions to Timeout if timeOut passed`() {
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark,
+            mockAlwaysTimeoutClockMark,
             mockTransitioner
         )
         val resultState = initialState.consumeTransition(ID_BACK_OUTPUT)
 
-        assertThat(resultState).isSameInstanceAs(initialState)
+        assertThat(resultState).isInstanceOf(IdentityScanState.TimeOut::class.java)
     }
 
     @Test
-    fun `Initial transitions to Found with matched AnalyzerOutput`() {
+    fun `Initial calls transitionFromInitial if not timeout`() {
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.ID_FRONT,
             mockNeverTimeoutClockMark,
             mockTransitioner
         )
-        val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
+        initialState.consumeTransition(ID_FRONT_OUTPUT)
 
-        assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
+        verify(mockTransitioner).transitionFromInitial(same(initialState), same(ID_FRONT_OUTPUT))
     }
 
     @Test
-    fun `Found transitions to Unsatisfied with bad hit rate`() {
+    fun `Found transitions to Timeout if timeOut passed`() {
         val mockTargetState = mock<IdentityScanState>()
-        val mockTransitioner = mock<IdentityScanStateTransitioner>().also {
-            whenever(it.transitionFromFound(any(), any())).thenReturn(mockTargetState)
-        }
 
         val initialState =
             IdentityScanState.Found(
                 IdentityScanState.ScanType.ID_FRONT,
-                mockNeverTimeoutClockMark,
+                mockAlwaysTimeoutClockMark,
                 mockTransitioner
             )
-        assertSame(initialState.consumeTransition(ID_FRONT_OUTPUT), mockTargetState)
+        val resultState = initialState.consumeTransition(ID_BACK_OUTPUT)
+
+        assertThat(resultState).isInstanceOf(IdentityScanState.TimeOut::class.java)
+    }
+
+    @Test
+    fun `Found calls transitionFromFound if not timeout`() {
+        val initialState = IdentityScanState.Found(
+            IdentityScanState.ScanType.ID_FRONT,
+            mockNeverTimeoutClockMark,
+            mockTransitioner
+        )
+        initialState.consumeTransition(ID_FRONT_OUTPUT)
+
+        verify(mockTransitioner).transitionFromFound(same(initialState), same(ID_FRONT_OUTPUT))
     }
 
     @Test
