@@ -10,7 +10,6 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,14 +53,6 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    private val sectionToFieldIdentifierMap = formSpec.items
-        .filterIsInstance<SectionSpec>()
-        .associate { sectionSpec ->
-            sectionSpec.api_path to sectionSpec.fields.map {
-                it.identifier
-            }
-        }
-
     private val cardBillingElement = elements.map { elementsList ->
         elementsList
             ?.filterIsInstance<SectionElement>()
@@ -73,20 +64,10 @@ internal class FormViewModel @Inject internal constructor(
     /**
      * List of field identifiers which should not be visible.
      */
-    val hiddenIdentifiers = cardBillingElement.map {
-        it?.hiddenIdentifiers ?: flowOf(emptyList())
-    }.flattenConcat().map {
-        // For hidden *section* identifiers, list of identifiers of elements in the section
-        val identifiers = sectionToFieldIdentifierMap
-            .filter { idControllerPair ->
-                it.contains(idControllerPair.key)
-            }
-            .flatMap { sectionToSectionFieldEntry ->
-                sectionToSectionFieldEntry.value
-            }
-
-        it.plus(identifiers)
-    }
+    internal val hiddenIdentifiers =
+        cardBillingElement.map {
+            it?.hiddenIdentifiers ?: flowOf(emptyList())
+        }.flattenConcat()
 
     /**
      * Emits a map of the form values when the form content is valid, null otherwise.

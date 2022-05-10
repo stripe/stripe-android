@@ -357,14 +357,7 @@ internal class USBankAccountFormFragment : Fragment() {
             ) {
                 SectionElementUI(
                     enabled = true,
-                    element = SectionElement(
-                        identifier = IdentifierSpec.Name,
-                        fields = listOf(viewModel.nameElement),
-                        controller = SectionController(
-                            null,
-                            listOf(viewModel.nameElement.sectionFieldErrorController())
-                        ),
-                    ),
+                    element = viewModel.nameElement,
                     emptyList(),
                     null
                 )
@@ -377,14 +370,7 @@ internal class USBankAccountFormFragment : Fragment() {
             ) {
                 SectionElementUI(
                     enabled = true,
-                    element = SectionElement(
-                        identifier = IdentifierSpec.Email,
-                        fields = listOf(viewModel.emailElement),
-                        controller = SectionController(
-                            null,
-                            listOf(viewModel.emailElement.sectionFieldErrorController())
-                        )
-                    ),
+                    element = viewModel.emailElement,
                     emptyList(),
                     viewModel.emailElement.identifier
                 )

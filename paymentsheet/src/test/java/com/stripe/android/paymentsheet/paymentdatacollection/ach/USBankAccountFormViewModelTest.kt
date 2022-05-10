@@ -71,8 +71,8 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameElement.fields.first().setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.fields.first().setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
 
             assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isNotEmpty()
             assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isNotEmpty()
@@ -85,18 +85,18 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to "      "))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameElement.fields.first().setRawValue(mapOf(IdentifierSpec.Name to "      "))
+            viewModel.emailElement.fields.first().setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameElement.fields.first().setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.fields.first().setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to ""))
+            viewModel.nameElement.fields.first().setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.fields.first().setRawValue(mapOf(IdentifierSpec.Email to ""))
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
         }

@@ -132,8 +132,8 @@ internal class FormViewModel @Inject internal constructor(
             it?.hiddenIdentifiers ?: flowOf(emptyList())
         }.flattenConcat(),
         externalHiddenIdentifiers
-    ) { cardBillingIdentifiers, saveFutureUseIdentifiers ->
-        saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
+    ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
+        externalHiddenIdentifiers.plus(cardBillingIdentifiers)
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden

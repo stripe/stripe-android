@@ -50,7 +50,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowLooper
 import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
@@ -152,36 +151,6 @@ internal class FormViewModelTest {
         assertThat(values[1]).isFalse()
     }
 
-    @Test
-    fun `Verify setting section as hidden sets sub-fields as hidden as well`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            LayoutSpec.create(
-                emailSection,
-                countrySection,
-                SaveForFutureUseSpec()
-            ),
-            args,
-            resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
-
-        val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                values.add(it)
-            }
-        assertThat(values[0]).isEmpty()
-
-        formViewModel.setSaveForFutureUse(false)
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Generic("email_section")))
-
-        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec.Generic("email_section"))
-        assertThat(values[1][1]).isEqualTo(IdentifierSpec.Email)
-    }
-
     @ExperimentalCoroutinesApi
     @Test
     fun `Verify if there are no text fields nothing is hidden`() = runTest {
@@ -241,16 +210,13 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             LayoutSpec.create(
                 emailSection,
-                countrySection,
-                SaveForFutureUseSpec()
+                countrySection
             ),
             args,
             resourceRepository = resourceRepository,
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
-        val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
-            .filterIsInstance(SaveForFutureUseController::class.java).first()
         val emailController =
             getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
@@ -264,7 +230,7 @@ internal class FormViewModelTest {
             emailSection.api_path
         )
 
-        saveForFutureUseController.onValueChange(false)
+        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(

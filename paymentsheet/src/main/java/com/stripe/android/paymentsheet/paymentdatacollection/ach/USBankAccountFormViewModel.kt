@@ -15,9 +15,9 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -35,10 +35,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBank
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
-import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.ui.core.elements.SectionElement
 import dagger.Lazy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -74,12 +74,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val currentScreenState: StateFlow<USBankAccountFormScreenState>
         get() = _currentScreenState
 
-    val nameElement: SectionFieldElement = SimpleTextSpec.NAME.transform()
+    val nameElement: SectionElement = NameSpec().transform(emptyMap())
     val name: StateFlow<String> = nameElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Lazily, "")
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(
+    val emailElement: SectionElement = EmailSpec().transform(
         mapOf(
             IdentifierSpec.Email to null
         )
