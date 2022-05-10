@@ -103,9 +103,6 @@ internal class FormViewModel @Inject internal constructor(
         this.enabled.value = enabled
     }
 
-    @VisibleForTesting
-    internal val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
-
     private val saveForFutureUseElement = elements
         .map { elementsList ->
             elementsList?.find { element ->
@@ -117,14 +114,6 @@ internal class FormViewModel @Inject internal constructor(
         it?.controller?.saveForFutureUse ?: flowOf(false)
     }.flattenConcat()
 
-    private val sectionToFieldIdentifierMap = layout.items
-        .filterIsInstance<SectionSpec>()
-        .associate { sectionSpec ->
-            sectionSpec.api_path to sectionSpec.fields.map {
-                it.identifier
-            }
-        }
-
     private val cardBillingElement = elements
         .map { elementsList ->
             elementsList
@@ -133,37 +122,39 @@ internal class FormViewModel @Inject internal constructor(
                 ?.filterIsInstance<CardBillingAddressElement>()
                 ?.firstOrNull()
         }
+    private var externalHiddenIdentifiers = MutableStateFlow(emptyList<IdentifierSpec>())
 
-    internal val hiddenIdentifiers =
-        combine(
-            saveForFutureUseVisible,
-            saveForFutureUseElement.map {
-                it?.controller?.hiddenIdentifiers ?: flowOf(emptyList())
-            }.flattenConcat(),
-            cardBillingElement.map {
-                it?.hiddenIdentifiers ?: flowOf(emptyList())
-            }.flattenConcat()
-        ) { showFutureUse, saveFutureUseIdentifiers, cardBillingIdentifiers ->
-            val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
-            // For hidden *section* identifiers, list of identifiers of elements in the section
-            val identifiers = sectionToFieldIdentifierMap
-                .filter { idControllerPair ->
-                    hiddenIdentifiers.contains(idControllerPair.key)
-                }
-                .flatMap { sectionToSectionFieldEntry ->
-                    sectionToSectionFieldEntry.value
-                }
+    @VisibleForTesting
+    internal fun addHiddenIdentifiers(identifierSpecs: List<IdentifierSpec>) {
+        externalHiddenIdentifiers.value = identifierSpecs
+    }
 
-            val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
-            if (!showFutureUse && saveForFutureUseElement != null) {
-                hiddenIdentifiers
-                    .plus(identifiers)
-                    .plus(saveForFutureUseElement.identifier)
-            } else {
-                hiddenIdentifiers
-                    .plus(identifiers)
+    private val sectionToFieldIdentifierMap = layout.items
+        .filterIsInstance<SectionSpec>()
+        .associate { sectionSpec ->
+            sectionSpec.api_path to sectionSpec.fields.map {
+                it.identifier
             }
         }
+
+    internal val hiddenIdentifiers = combine(
+        cardBillingElement.map {
+            it?.hiddenIdentifiers ?: flowOf(emptyList())
+        }.flattenConcat(),
+        externalHiddenIdentifiers
+    ) { cardBillingIdentifiers, saveFutureUseIdentifiers ->
+        val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
+        // For hidden *section* identifiers, list of identifiers of elements in the section
+        val identifiers = sectionToFieldIdentifierMap
+            .filter { idControllerPair ->
+                hiddenIdentifiers.contains(idControllerPair.key)
+            }
+            .flatMap { sectionToSectionFieldEntry ->
+                sectionToSectionFieldEntry.value
+            }
+
+        hiddenIdentifiers.plus(identifiers)
+    }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
     private val showingMandate =

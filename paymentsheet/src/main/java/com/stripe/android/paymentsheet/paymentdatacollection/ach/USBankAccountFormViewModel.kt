@@ -88,7 +88,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec(listOf()).transform(
+    val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec().transform(
         initialValue = args.formArgs.showCheckbox,
         merchantName = args.formArgs.merchantName
     ) as SaveForFutureUseElement
