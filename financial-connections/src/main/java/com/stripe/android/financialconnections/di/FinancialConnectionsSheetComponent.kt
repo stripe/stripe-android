@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import dagger.BindsInstance
@@ -21,7 +23,7 @@ import javax.inject.Singleton
 internal interface FinancialConnectionsSheetComponent {
     val viewModel: FinancialConnectionsSheetViewModel
 
-    fun inject(factory: FinancialConnectionsSheetViewModel.Factory)
+    fun inject(factory: FinancialConnectionsSheetViewModel.Companion)
 
     @Component.Builder
     interface Builder {
@@ -29,7 +31,7 @@ internal interface FinancialConnectionsSheetComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
+        fun initialState(initialState: FinancialConnectionsSheetState): Builder
 
         @BindsInstance
         fun internalArgs(financialConnectionsSheetActivityArgs: FinancialConnectionsSheetActivityArgs): Builder

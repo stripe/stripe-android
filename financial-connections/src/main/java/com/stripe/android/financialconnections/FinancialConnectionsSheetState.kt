@@ -1,6 +1,10 @@
 package com.stripe.android.financialconnections
 
 import androidx.lifecycle.SavedStateHandle
+import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.MavericksState
+import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -9,10 +13,16 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
+    val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
     val manifest: FinancialConnectionsSessionManifest? = null,
-    val authFlowActive: Boolean = false
-) {
+    val authFlowActive: Boolean = false,
+    val sideEffect: Async<FinancialConnectionsSheetViewEffect> = Uninitialized
+) : MavericksState {
+
+    constructor(args: FinancialConnectionsSheetActivityArgs) : this(
+        initialArgs = args
+    )
 
     /**
      * Restores existing persisted fields into the current [FinancialConnectionsSheetState]

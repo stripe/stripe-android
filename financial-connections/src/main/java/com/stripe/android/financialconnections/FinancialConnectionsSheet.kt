@@ -1,8 +1,10 @@
 package com.stripe.android.financialconnections
 
+import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
+import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
@@ -15,8 +17,14 @@ import kotlinx.parcelize.Parcelize
  * typically as a field initializer of an Activity or Fragment.
  */
 class FinancialConnectionsSheet internal constructor(
+    app: Application,
     private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher
 ) {
+
+    init {
+        Mavericks.initialize(app)
+    }
+
     /**
      * Configuration for a [FinancialConnectionsSheet]
      *
@@ -52,6 +60,7 @@ class FinancialConnectionsSheet internal constructor(
             callback: FinancialConnectionsSheetResultCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
+                activity.application,
                 FinancialConnectionsSheetForDataLauncher(activity, callback)
             )
         }
@@ -67,6 +76,7 @@ class FinancialConnectionsSheet internal constructor(
             callback: FinancialConnectionsSheetResultCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
+                fragment.requireActivity().application,
                 FinancialConnectionsSheetForDataLauncher(fragment, callback)
             )
         }
@@ -83,6 +93,7 @@ class FinancialConnectionsSheet internal constructor(
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
+                activity.application,
                 FinancialConnectionsSheetForTokenLauncher(activity, callback)
             )
         }
@@ -99,6 +110,7 @@ class FinancialConnectionsSheet internal constructor(
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
+                fragment.requireActivity().application,
                 FinancialConnectionsSheetForTokenLauncher(fragment, callback)
             )
         }

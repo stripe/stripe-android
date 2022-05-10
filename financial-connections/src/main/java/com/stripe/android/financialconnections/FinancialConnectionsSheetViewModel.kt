@@ -1,13 +1,10 @@
 package com.stripe.android.financialconnections
 
-import android.app.Application
 import android.content.Intent
-import android.os.Bundle
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import com.airbnb.mvrx.MavericksViewModel
+import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
@@ -18,13 +15,9 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -36,22 +29,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val generateFinancialConnectionsSessionManifest: GenerateFinancialConnectionsSessionManifest,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
-    private val savedStateHandle: SavedStateHandle,
-    private val eventReporter: FinancialConnectionsEventReporter
-) : ViewModel() {
-
-    // on process recreation - restore saved fields from [SavedStateHandle].
-    private val _state = MutableStateFlow(FinancialConnectionsSheetState().from(savedStateHandle))
-    internal val state: StateFlow<FinancialConnectionsSheetState> = _state
-
-    private val _viewEffect = MutableSharedFlow<FinancialConnectionsSheetViewEffect>()
-    internal val viewEffect: SharedFlow<FinancialConnectionsSheetViewEffect> = _viewEffect
+    private val eventReporter: FinancialConnectionsEventReporter,
+    private val initialState: FinancialConnectionsSheetState
+) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
     init {
         eventReporter.onPresented(starterArgs.configuration)
-        // avoid re-fetching manifest if already exists (this will happen on process recreations)
-        if (state.value.manifest == null) {
-            fetchManifest()
+        withState {
+            // avoid re-fetching manifest if already exists (this will happen on process recreations)
+            if (it.manifest == null) {
+                fetchManifest()
+            }
         }
     }
 
@@ -82,13 +70,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      */
     private suspend fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
         // stores manifest in state for future references.
-        _state.updateAndPersist {
-            it.copy(
+        setState {
+            copy(
                 manifest = manifest,
-                authFlowActive = true
+                authFlowActive = true,
+                sideEffect = Success(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
             )
         }
-        _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
     }
 
     /**
@@ -108,7 +96,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @see onActivityResult (we rely on this on config changes)
      */
     internal fun onActivityRecreated() {
-        _state.updateAndPersist { it.copy(activityRecreated = true) }
+        setState {
+            copy(
+                activityRecreated = true
+            )
+        }
     }
 
     /**
@@ -117,10 +109,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *  canceled.
      */
     internal fun onResume() {
-        if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
-            viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
-            }
+        setState {
+            if (authFlowActive && activityRecreated.not()) {
+                copy(
+                    sideEffect = Success(FinishWithResult(Canceled))
+                )
+            } else this
         }
     }
 
@@ -130,10 +124,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * the back button or closed the custom tabs UI, so return result as canceled.
      */
     internal fun onActivityResult() {
-        if (_state.value.authFlowActive && _state.value.activityRecreated) {
-            viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
-            }
+        setState {
+            if (authFlowActive && activityRecreated) {
+                copy(
+                    sideEffect = Success(FinishWithResult(Canceled))
+                )
+            } else this
         }
     }
 
@@ -151,7 +147,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess {
                 val result = FinancialConnectionsSheetActivityResult.Completed(it)
                 eventReporter.onResult(starterArgs.configuration, result)
-                _viewEffect.emit(FinishWithResult(result))
+                setState { copy(sideEffect = Success(FinishWithResult(result))) }
             }.onFailure {
                 onFatal(it)
             }
@@ -174,7 +170,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess { (las, token) ->
                 val result = FinancialConnectionsSheetActivityResult.Completed(las, token)
                 eventReporter.onResult(starterArgs.configuration, result)
-                _viewEffect.emit(FinishWithResult(result))
+                setState { copy(sideEffect = Success(FinishWithResult(result))) }
             }.onFailure {
                 onFatal(it)
             }
@@ -190,7 +186,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private suspend fun onFatal(throwable: Throwable) {
         val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
-        _viewEffect.emit(FinishWithResult(result))
+        setState { copy(sideEffect = Success(FinishWithResult(result))) }
     }
 
     /**
@@ -199,9 +195,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * URL callback, notify the [FinancialConnectionsSheetResultCallback] with [Canceled]
      */
     private suspend fun onUserCancel() {
-        val result = FinancialConnectionsSheetActivityResult.Canceled
+        val result = Canceled
         eventReporter.onResult(starterArgs.configuration, result)
-        _viewEffect.emit(FinishWithResult(result))
+        setState { copy(sideEffect = Success(FinishWithResult(result))) }
     }
 
     /**
@@ -213,54 +209,33 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        _state.updateAndPersist { it.copy(authFlowActive = false) }
-        viewModelScope.launch {
-            val manifest = _state.value.manifest
+        setState { copy(authFlowActive = false) }
+        withState {
             when (intent?.data.toString()) {
-                manifest?.successUrl -> when (starterArgs) {
+                it.manifest?.successUrl -> when (starterArgs) {
                     is FinancialConnectionsSheetActivityArgs.ForData -> fetchFinancialConnectionsSession()
                     is FinancialConnectionsSheetActivityArgs.ForToken -> fetchFinancialConnectionsSessionForToken()
                 }
-                manifest?.cancelUrl -> onUserCancel()
-                else -> onFatal(Exception("Error processing FinancialConnectionsSheet intent"))
+                it.manifest?.cancelUrl -> viewModelScope.launch { onUserCancel() }
+                else -> viewModelScope.launch { onFatal(Exception("Error processing FinancialConnectionsSheet intent"))  }
             }
         }
     }
 
-    /**
-     * Updates state AND saves persistable fields into [SavedStateHandle]
-     */
-    private inline fun MutableStateFlow<FinancialConnectionsSheetState>.updateAndPersist(
-        function: (FinancialConnectionsSheetState) -> FinancialConnectionsSheetState
-    ) {
-        val previousValue = value
-        update(function)
-        value.to(savedStateHandle, previousValue)
-    }
+    companion object : MavericksViewModelFactory<FinancialConnectionsSheetViewModel, FinancialConnectionsSheetState> {
 
-    class Factory(
-        private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> FinancialConnectionsSheetActivityArgs,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
+        override fun create(
+            viewModelContext: ViewModelContext,
+            state: FinancialConnectionsSheetState
+        ): FinancialConnectionsSheetViewModel {
             return DaggerFinancialConnectionsSheetComponent
                 .builder()
-                .application(applicationSupplier())
-                .savedStateHandle(savedStateHandle)
-                .internalArgs(starterArgsSupplier())
-                .build().viewModel as T
+                .application(viewModelContext.app())
+                .initialState(state)
+                .internalArgs(state.initialArgs)
+                .build().viewModel
         }
-    }
 
-    internal companion object {
         internal const val MAX_ACCOUNTS = 100
     }
 }
