@@ -13,6 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.databinding.ActivityFinancialconnectionsSheetBinding
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import java.security.InvalidParameterException
 
@@ -38,8 +40,8 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     private val viewModel: FinancialConnectionsSheetViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs: FinancialConnectionsSheetContract.Args? by lazy {
-        FinancialConnectionsSheetContract.Args.fromIntent(intent)
+    private val starterArgs: FinancialConnectionsSheetActivityArgs? by lazy {
+        FinancialConnectionsSheetActivityArgs.fromIntent(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +51,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             finishWithResult(
-                FinancialConnectionsSheetContract.Result.Failed(
+                FinancialConnectionsSheetActivityResult.Failed(
                     IllegalArgumentException("ConnectionsSheet started without arguments.")
                 )
             )
@@ -58,7 +60,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
             try {
                 starterArgs.validate()
             } catch (e: InvalidParameterException) {
-                finishWithResult(FinancialConnectionsSheetContract.Result.Failed(e))
+                finishWithResult(FinancialConnectionsSheetActivityResult.Failed(e))
                 return
             }
         }
@@ -111,10 +113,10 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
      * return canceled result
      */
     override fun onBackPressed() {
-        finishWithResult(FinancialConnectionsSheetContract.Result.Canceled)
+        finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
     }
 
-    private fun finishWithResult(result: FinancialConnectionsSheetContract.Result) {
+    private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())

@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -32,7 +32,7 @@ internal interface FinancialConnectionsSheetComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun configuration(configuration: FinancialConnectionsSheetContract.Args): Builder
+        fun internalArgs(financialConnectionsSheetActivityArgs: FinancialConnectionsSheetActivityArgs): Builder
 
         fun build(): FinancialConnectionsSheetComponent
     }

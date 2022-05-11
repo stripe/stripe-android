@@ -6,7 +6,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,7 +70,7 @@ class DefaultConnectionsEventReportTest {
     fun `onResult() should fire analytics request with expected event value for success`() {
         eventReporter.onResult(
             configuration,
-            FinancialConnectionsSheetContract.Result.Completed(financialConnectionsSession)
+            FinancialConnectionsSheetActivityResult.Completed(financialConnectionsSession)
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -83,7 +83,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for cancelled`() {
-        eventReporter.onResult(configuration, FinancialConnectionsSheetContract.Result.Canceled)
+        eventReporter.onResult(configuration, FinancialConnectionsSheetActivityResult.Canceled)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
@@ -95,7 +95,7 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onResult() should fire analytics request with expected event value for failure`() {
-        eventReporter.onResult(configuration, FinancialConnectionsSheetContract.Result.Failed(Exception()))
+        eventReporter.onResult(configuration, FinancialConnectionsSheetActivityResult.Failed(Exception()))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.failed" &&

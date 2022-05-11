@@ -6,14 +6,15 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class SimpleTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val label: Int,
-    val capitalization: KeyboardCapitalization,
-    val keyboardType: KeyboardType,
+    val capitalization: @RawValue KeyboardCapitalization,
+    val keyboardType: @RawValue KeyboardType,
     val showOptionalLabel: Boolean = false
 ) : SectionFieldSpec(identifier) {
 

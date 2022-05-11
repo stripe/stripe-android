@@ -18,10 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,8 +36,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -161,6 +160,19 @@ internal class USBankAccountFormFragment : Fragment() {
         )
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sheetViewModel?.primaryButtonState?.observe(viewLifecycleOwner) { state ->
+                    // When the primary button state is StartProcessing or FinishProcessing
+                    // we should disable the inputs of this form. StartProcessing shows the loading
+                    // spinner, FinishProcessing shows the checkmark animation
+                    viewModel.setProcessing(
+                        state is PrimaryButton.State.StartProcessing ||
+                            state is PrimaryButton.State.FinishProcessing
+                    )
+                }
+            }
+        }
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.requiredFields.collect {
                     sheetViewModel?.updatePrimaryButtonUIState(
                         sheetViewModel?.primaryButtonUIState?.value?.copy(
@@ -204,36 +216,7 @@ internal class USBankAccountFormFragment : Fragment() {
                                 ?.confirmStripeIntent(screenState.confirmIntentParams)
                         }
                         is USBankAccountFormScreenState.Finished -> {
-                            sheetViewModel?.updateSelection(
-                                PaymentSelection.New.GenericPaymentMethod(
-                                    labelResource = getString(
-                                        R.string.paymentsheet_payment_method_item_card_number,
-                                        screenState.last4
-                                    ),
-                                    iconResource = TransformToBankIcon(
-                                        screenState.bankName
-                                    ),
-                                    paymentMethodCreateParams =
-                                    PaymentMethodCreateParams.create(
-                                        usBankAccount = PaymentMethodCreateParams.USBankAccount(
-                                            linkAccountSessionId = screenState.linkAccountId
-                                        ),
-                                        billingDetails = PaymentMethod.BillingDetails(
-                                            name = viewModel.name.value,
-                                            email = viewModel.email.value
-                                        )
-                                    ),
-                                    customerRequestedSave = if (formArgs.showCheckbox) {
-                                        if (viewModel.saveForFutureUse.value) {
-                                            PaymentSelection.CustomerRequestedSave.RequestReuse
-                                        } else {
-                                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                                        }
-                                    } else {
-                                        PaymentSelection.CustomerRequestedSave.NoRequest
-                                    }
-                                )
-                            )
+                            sheetViewModel?.updateSelection(screenState.paymentSelection)
                             sheetViewModel?.onFinish()
                         }
                     }
@@ -312,9 +295,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private fun NameAndEmailCollectionScreen(@StringRes error: Int? = null) {
         Column(Modifier.fillMaxWidth()) {
             NameAndEmailForm()
-            error?.let {
-                sheetViewModel?.onError(error)
-            }
+            sheetViewModel?.onError(error)
         }
     }
 
@@ -344,6 +325,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     @Composable
     private fun NameAndEmailForm() {
+        val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
             H6Text(
                 text = stringResource(R.string.us_bank_account_payment_sheet_title),
@@ -356,17 +338,17 @@ internal class USBankAccountFormFragment : Fragment() {
                 contentAlignment = Alignment.CenterEnd
             ) {
                 SectionElementUI(
-                    enabled = true,
+                    enabled = !processing.value,
                     element = SectionElement(
                         identifier = IdentifierSpec.Name,
                         fields = listOf(viewModel.nameElement),
                         controller = SectionController(
                             null,
                             listOf(viewModel.nameElement.sectionFieldErrorController())
-                        )
+                        ),
                     ),
                     emptyList(),
-                    viewModel.nameElement.identifier
+                    null
                 )
             }
             Box(
@@ -376,7 +358,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 contentAlignment = Alignment.CenterEnd
             ) {
                 SectionElementUI(
-                    enabled = true,
+                    enabled = !processing.value,
                     element = SectionElement(
                         identifier = IdentifierSpec.Email,
                         fields = listOf(viewModel.emailElement),
@@ -400,9 +382,12 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         val openDialog = remember { mutableStateOf(false) }
         val bankIcon = TransformToBankIcon(bankName)
+        val processing = viewModel.processing.collectAsState(false)
 
         Column(
-            Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         ) {
             H6Text(
                 text = stringResource(R.string.us_bank_account_payment_sheet_bank_account),
@@ -424,7 +409,11 @@ internal class USBankAccountFormFragment : Fragment() {
                                 .height(40.dp)
                                 .width(56.dp)
                         )
-                        Text(text = "$displayName ••••$last4")
+                        Text(
+                            text = "$displayName ••••$last4",
+                            modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
+                            color = PaymentsTheme.colors.onComponent
+                        )
                     }
                     Image(
                         painter = painterResource(R.drawable.stripe_ic_clear),
@@ -432,8 +421,11 @@ internal class USBankAccountFormFragment : Fragment() {
                         modifier = Modifier
                             .height(20.dp)
                             .width(20.dp)
+                            .alpha(if (processing.value) 0.5f else 1f)
                             .clickable {
-                                openDialog.value = true
+                                if (!processing.value) {
+                                    openDialog.value = true
+                                }
                             }
                     )
                 }

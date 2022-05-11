@@ -54,21 +54,7 @@ internal fun TextField(
     val contentDescription by textFieldController.contentDescription.collectAsState("")
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val colors = TextFieldDefaults.textFieldColors(
-        textColor = if (shouldShowError) {
-            PaymentsTheme.colors.material.error
-        } else {
-            PaymentsTheme.colors.onComponent
-        },
-        unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
-        focusedLabelColor = PaymentsTheme.colors.placeholderText,
-        placeholderColor = PaymentsTheme.colors.placeholderText,
-        backgroundColor = PaymentsTheme.colors.component,
-        focusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        cursorColor = PaymentsTheme.colors.colorTextCursor
-    )
+    val colors = TextFieldColors(shouldShowError)
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
@@ -94,19 +80,6 @@ internal fun TextField(
     TextField(
         value = value,
         onValueChange = { textFieldController.onValueChange(it) },
-        isError = shouldShowError,
-        label = {
-            FormLabel(
-                text = if (textFieldController.showOptionalLabel) {
-                    stringResource(
-                        R.string.form_label_optional,
-                        label?.let { stringResource(it) } ?: ""
-                    )
-                } else {
-                    label?.let { stringResource(it) } ?: ""
-                }
-            )
-        },
         modifier = modifier
             .fillMaxWidth()
             .onPreviewKeyEvent { event ->
@@ -130,6 +103,29 @@ internal fun TextField(
                 this.contentDescription = contentDescription
                 this.editableText = AnnotatedString("")
             },
+        enabled = enabled,
+        label = {
+            FormLabel(
+                text = if (textFieldController.showOptionalLabel) {
+                    stringResource(
+                        R.string.form_label_optional,
+                        label?.let { stringResource(it) } ?: ""
+                    )
+                } else {
+                    label?.let { stringResource(it) } ?: ""
+                }
+            )
+        },
+        trailingIcon = trailingIcon?.let {
+            { TrailingIcon(it, colors, loading) }
+        },
+        isError = shouldShowError,
+        visualTransformation = textFieldController.visualTransformation,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = textFieldController.keyboardType,
+            capitalization = textFieldController.capitalization,
+            imeAction = imeAction
+        ),
         keyboardActions = KeyboardActions(
             onNext = {
                 focusManager.moveFocus(FocusDirection.Next)
@@ -138,21 +134,29 @@ internal fun TextField(
                 focusManager.clearFocus(true)
             }
         ),
-        visualTransformation = textFieldController.visualTransformation,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = textFieldController.keyboardType,
-            capitalization = textFieldController.capitalization,
-            imeAction = imeAction
-        ),
-        colors = colors,
-        maxLines = 1,
         singleLine = true,
-        enabled = enabled,
-        trailingIcon = trailingIcon?.let {
-            { TrailingIcon(it, colors, loading) }
-        }
+        colors = colors,
     )
 }
+
+@Composable
+internal fun TextFieldColors(
+    shouldShowError: Boolean = false
+) = TextFieldDefaults.textFieldColors(
+    textColor = if (shouldShowError) {
+        PaymentsTheme.colors.material.error
+    } else {
+        PaymentsTheme.colors.onComponent
+    },
+    unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
+    focusedLabelColor = PaymentsTheme.colors.placeholderText,
+    placeholderColor = PaymentsTheme.colors.placeholderText,
+    backgroundColor = PaymentsTheme.colors.component,
+    focusedIndicatorColor = Color.Transparent,
+    disabledIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+    cursorColor = PaymentsTheme.colors.colorTextCursor
+)
 
 @Composable
 internal fun TrailingIcon(

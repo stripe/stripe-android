@@ -70,9 +70,7 @@ fun SectionCard(
         shape = PaymentsTheme.shapes.material.medium,
         modifier = modifier
     ) {
-        Column {
-            content()
-        }
+        content()
     }
 }
 

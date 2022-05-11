@@ -202,6 +202,8 @@ class PlaygroundTestDriver(
         while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     /**
@@ -211,6 +213,8 @@ class PlaygroundTestDriver(
         while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     private fun verifyDeviceSupportsTestAuthorization(
