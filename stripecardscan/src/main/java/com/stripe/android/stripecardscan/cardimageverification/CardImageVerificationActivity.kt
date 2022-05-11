@@ -33,6 +33,7 @@ import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
+import com.stripe.android.stripecardscan.framework.util.toVerificationFrameData
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.payment.card.getCardIssuer
@@ -166,15 +167,22 @@ internal open class CardImageVerificationActivity :
 
             override fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>) {
                 launch {
-                    when (
-                        val result = uploadSavedFrames(
-                            stripePublishableKey = params.stripePublishableKey,
-                            civId = params.cardImageVerificationIntentId,
-                            civSecret = params.cardImageVerificationIntentSecret,
-                            savedFrames = frames,
-                            imageConfigs = imageConfigs,
-                        )
-                    ) {
+                    val imageCompressionStat = Stats.trackTask("image_compression_duration")
+                    val verificationFramesData = frames.toVerificationFrameData(imageConfigs)
+                    imageCompressionStat.trackResult("complete")
+
+                    val completionLoopStat = Stats.trackTask("completion_loop_duration")
+
+                    val result = uploadSavedFrames(
+                        stripePublishableKey = params.stripePublishableKey,
+                        civId = params.cardImageVerificationIntentId,
+                        civSecret = params.cardImageVerificationIntentSecret,
+                        savedFrames = frames,
+                        verificationFramesData = verificationFramesData,
+                    )
+
+
+                    when (result) {
                         is NetworkResult.Success ->
                             cardImageVerificationComplete(pan)
                         is NetworkResult.Error ->

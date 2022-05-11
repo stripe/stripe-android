@@ -1,18 +1,8 @@
 @file:JvmName("StripeApi")
 package com.stripe.android.stripecardscan.framework.api
 
-import android.graphics.Bitmap
-import android.graphics.Rect
 import android.util.Log
 import androidx.annotation.CheckResult
-import com.stripe.android.camera.framework.image.constrainToSize
-import com.stripe.android.camera.framework.image.crop
-import com.stripe.android.camera.framework.image.determineViewFinderCrop
-import com.stripe.android.camera.framework.image.size
-import com.stripe.android.camera.framework.image.toJpeg
-import com.stripe.android.camera.framework.image.toWebP
-import com.stripe.android.camera.framework.util.move
-import com.stripe.android.camera.framework.util.scaleAndCenterWithin
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
@@ -28,13 +18,9 @@ import com.stripe.android.stripecardscan.framework.api.dto.StripeServerErrorResp
 import com.stripe.android.stripecardscan.framework.api.dto.VerificationFrameData
 import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesRequest
 import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesResult
-import com.stripe.android.stripecardscan.framework.api.dto.ViewFinderMargins
-import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
-import com.stripe.android.stripecardscan.framework.util.ImageFormat
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
-import com.stripe.android.stripecardscan.framework.util.b64Encode
 import com.stripe.android.stripecardscan.framework.util.encodeToJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -175,29 +161,8 @@ internal suspend fun uploadSavedFrames(
     civId: String,
     civSecret: String,
     savedFrames: Collection<SavedFrame>,
-    imageConfigs: AcceptedImageConfigs,
+    verificationFramesData: List<VerificationFrameData>,
 ) = withContext(Dispatchers.IO) {
-
-    val verificationFramesData = savedFrames.map { savedFrame ->
-        val image = savedFrame.frame.cameraPreviewImage.image
-
-        val imageDataAndCropRect = getImageData(image, imageConfigs)
-        val b64ImageData = b64Encode(imageDataAndCropRect.first)
-        val cropRect = imageDataAndCropRect.second
-
-        val viewFinderRect = determineViewFinderCrop(
-            cameraPreviewImageSize = image.size(),
-            previewBounds = savedFrame.frame.cameraPreviewImage.viewBounds,
-            viewFinder = savedFrame.frame.cardFinder,
-        )
-            .move(-cropRect.left, -cropRect.top)
-
-        VerificationFrameData(
-            imageData = b64ImageData,
-            viewFinderMargins = ViewFinderMargins.fromRect(viewFinderRect)
-        )
-    }
-
     network.postForResult(
         stripePublishableKey = stripePublishableKey,
         path = "card_image_verifications/$civId/verify_frames",
@@ -212,57 +177,4 @@ internal suspend fun uploadSavedFrames(
         responseSerializer = VerifyFramesResult.serializer(),
         errorSerializer = StripeServerErrorResponse.serializer(),
     )
-}
-
-internal fun imageWithConfig(
-    image: Bitmap,
-    format: ImageFormat,
-    configs: AcceptedImageConfigs
-): Pair<ByteArray, Rect>? {
-
-    val imageSettings = configs.imageSettings(format)
-
-    // Size and crop the image per the settings.
-    val maxImageSize = imageSettings.second
-
-    val cropRect = maxImageSize
-        .scaleAndCenterWithin(image.size())
-
-    val croppedImage = image
-        .crop(cropRect)
-        .constrainToSize(maxImageSize)
-
-    // Now convert formats with the compression ratio from settings.
-    val compressionRatio = imageSettings.first
-
-    // Convert to 0..100
-    val convertedRatio = compressionRatio.times(100.0).toInt()
-
-    var result = when (format) {
-        ImageFormat.WEBP -> croppedImage.toWebP(convertedRatio)
-        ImageFormat.HEIC,
-        ImageFormat.JPEG -> croppedImage.toJpeg(convertedRatio)
-    }
-
-    if (result.size == 0) {
-        return null
-    }
-
-    return Pair(result, cropRect)
-}
-
-internal fun getImageData(image: Bitmap, imageConfigs: AcceptedImageConfigs):
-    Pair<ByteArray, Rect> {
-
-    // Attempt to get image data using the configs from the server.
-    var result = imageConfigs.preferredFormats?.firstNotNullOfOrNull {
-        imageWithConfig(image, it, imageConfigs)
-    }
-
-    if (result == null) {
-        // Fallback to JPEG format
-        result = imageWithConfig(image, ImageFormat.JPEG, imageConfigs)
-    }
-
-    return result ?: Pair(ByteArray(0), Rect())
 }
