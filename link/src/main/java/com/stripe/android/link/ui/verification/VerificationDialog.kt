@@ -8,8 +8,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -25,15 +27,16 @@ fun LinkVerificationDialog(
     onDialogDismissed: () -> Unit,
     onVerificationCompleted: () -> Unit
 ) {
+    var openDialog by remember { mutableStateOf(true) }
+
     val injector = requireNotNull(linkLauncher.injector)
-    val openDialog = remember { mutableStateOf(true) }
     val linkAccount = linkLauncher.linkAccountManager.linkAccount.collectAsState()
 
     linkAccount.value?.let { account ->
-        if (openDialog.value) {
+        if (openDialog) {
             Dialog(
                 onDismissRequest = {
-                    openDialog.value = false
+                    openDialog = false
                     onDialogDismissed()
                 }
             ) {
@@ -52,7 +55,7 @@ fun LinkVerificationDialog(
                             LinkAppBar(
                                 email = account.email,
                                 onCloseButtonClick = {
-                                    openDialog.value = false
+                                    openDialog = false
                                     onDialogDismissed()
                                 }
                             )
@@ -62,7 +65,10 @@ fun LinkVerificationDialog(
                                 showChangeEmailMessage = false,
                                 linkAccount = account,
                                 injector = injector,
-                                onVerificationCompleted = onVerificationCompleted
+                                onVerificationCompleted = {
+                                    openDialog = false
+                                    onVerificationCompleted()
+                                }
                             )
                         }
                     }
