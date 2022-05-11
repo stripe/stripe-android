@@ -245,7 +245,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             newLpm.paymentMethodCreateParams
                         is PaymentSelection.New.Card ->
                             newLpm.paymentMethodCreateParams
-                        }
                         else -> null
                     }
                 }
