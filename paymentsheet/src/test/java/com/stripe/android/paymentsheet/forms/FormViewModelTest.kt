@@ -161,6 +161,34 @@ internal class FormViewModelTest {
     }
 
     @Test
+    fun `Verify setting save for future use visibility`() {
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec()
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+        )
+
+        val values = mutableListOf<List<IdentifierSpec>>()
+        formViewModel.hiddenIdentifiers.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isEmpty()
+
+        formViewModel.saveForFutureUseVisible.value = false
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec.SaveForFutureUse)
+    }
+
+    @Test
     fun `Verify setting section as hidden sets sub-fields as hidden as well`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
