@@ -21,13 +21,13 @@ import kotlin.math.min
 
 @CheckResult
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun Bitmap.toWebP(): ByteArray =
+fun Bitmap.toWebP(quality: Int = 92): ByteArray =
     ByteArrayOutputStream().use {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            this.compress(Bitmap.CompressFormat.WEBP_LOSSY, 92, it)
+            this.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, it)
         } else {
             @Suppress("deprecation")
-            this.compress(Bitmap.CompressFormat.WEBP, 92, it)
+            this.compress(Bitmap.CompressFormat.WEBP, quality, it)
         }
         it.flush()
         it.toByteArray()

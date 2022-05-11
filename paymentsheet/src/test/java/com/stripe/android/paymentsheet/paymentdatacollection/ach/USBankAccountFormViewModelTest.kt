@@ -16,6 +16,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResp
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.Amount
@@ -54,7 +55,9 @@ class USBankAccountFormViewModelTest {
             )
         ),
         completePayment = true,
-        clientSecret = PaymentIntentClientSecret("pi_12345")
+        clientSecret = PaymentIntentClientSecret("pi_12345"),
+        savedScreenState = null,
+        savedPaymentMethod = null
     )
 
     private val stripeRepository = mock<StripeRepository>()
@@ -116,7 +119,7 @@ class USBankAccountFormViewModelTest {
                 USBankAccountFormScreenState.NameAndEmailCollection::class.java
             )
 
-            (currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection).primaryButtonOnClick()
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
 
             verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
         }
@@ -134,7 +137,7 @@ class USBankAccountFormViewModelTest {
             assertThat(currentScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
 
-            (currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits).primaryButtonOnClick()
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
@@ -154,7 +157,7 @@ class USBankAccountFormViewModelTest {
             assertThat(currentScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
 
-            (currentScreenState as USBankAccountFormScreenState.MandateCollection).primaryButtonOnClick()
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
@@ -174,7 +177,7 @@ class USBankAccountFormViewModelTest {
             assertThat(currentScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
 
-            (currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits).primaryButtonOnClick()
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
@@ -194,7 +197,7 @@ class USBankAccountFormViewModelTest {
             assertThat(currentScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
 
-            (currentScreenState as USBankAccountFormScreenState.MandateCollection).primaryButtonOnClick()
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
@@ -210,9 +213,63 @@ class USBankAccountFormViewModelTest {
 
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
 
-            (currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection).primaryButtonOnClick()
+            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
 
             verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `when saved payment method is USBankAccount SavedAccount is emitted`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    savedPaymentMethod = PaymentSelection.New.USBankAccount(
+                        labelResource = "Test",
+                        iconResource = 0,
+                        bankName = "Test",
+                        last4 = "Test",
+                        financialConnectionsSessionId = "1234",
+                        intentId = "1234",
+                        paymentMethodCreateParams = mock(),
+                        customerRequestedSave = mock()
+                    )
+                )
+            )
+
+            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+
+            assertThat(
+                currentScreenState
+            ).isInstanceOf(
+                USBankAccountFormScreenState.SavedAccount::class.java
+            )
+        }
+
+    @Test
+    fun `when saved screen state, saved screen state is emitted`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    savedScreenState = USBankAccountFormScreenState.SavedAccount(
+                        name = "Test",
+                        email = "test@email.com",
+                        bankName = "Test",
+                        last4 = "Test",
+                        financialConnectionsSessionId = "1234",
+                        intentId = "1234",
+                        primaryButtonText = "Test",
+                        mandateText = "Test"
+                    )
+                )
+            )
+
+            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+
+            assertThat(
+                currentScreenState
+            ).isInstanceOf(
+                USBankAccountFormScreenState.SavedAccount::class.java
+            )
         }
 
     private fun createViewModel(

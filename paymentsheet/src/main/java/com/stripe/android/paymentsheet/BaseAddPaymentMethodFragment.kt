@@ -143,7 +143,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = !processing,
                     paymentMethods = paymentMethods,
                     onItemSelectedListener = { selectedLpm ->
-                        onPaymentMethodSelected(selectedLpm)
+                        if (sheetViewModel.getAddFragmentSelectedLpmValue() != selectedLpm) {
+                            onPaymentMethodSelected(selectedLpm)
+                        }
                     }
                 )
             }
@@ -243,6 +245,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             newLpm.paymentMethodCreateParams
                         is PaymentSelection.New.Card ->
                             newLpm.paymentMethodCreateParams
+                        }
                         else -> null
                     }
                 }

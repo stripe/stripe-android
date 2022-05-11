@@ -29,6 +29,7 @@ import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
 import com.stripe.android.stripecardscan.framework.api.uploadSavedFrames
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsCIV
+import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
@@ -139,6 +140,11 @@ internal open class CardImageVerificationActivity :
     private var requiredCardLastFour: String? = null
 
     /**
+     * The image format to send to verify_frames
+     */
+    private var imageConfigs: AcceptedImageConfigs = AcceptedImageConfigs()
+
+    /**
      * The listener which handles results from the scan.
      */
     override val resultListener: CardImageVerificationResultListener =
@@ -166,6 +172,7 @@ internal open class CardImageVerificationActivity :
                             civId = params.cardImageVerificationIntentId,
                             civSecret = params.cardImageVerificationIntentSecret,
                             savedFrames = frames,
+                            imageConfigs = imageConfigs,
                         )
                     ) {
                         is NetworkResult.Success ->
@@ -335,6 +342,8 @@ internal open class CardImageVerificationActivity :
                 if (expectedCard.lastFour.isNullOrEmpty() ||
                     isValidPanLastFour(expectedCard.lastFour)
                 ) {
+                    imageConfigs = AcceptedImageConfigs(result.body.acceptedImageConfigs)
+
                     CardVerificationFlowParameters(
                         cardIssuer = getIssuerByDisplayName(expectedCard.issuer),
                         lastFour = expectedCard.lastFour,
