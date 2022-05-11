@@ -180,8 +180,8 @@ internal open class CardImageVerificationActivity :
 
                     val imageCompressionStat = Stats.trackTask("image_compression_duration")
 
-                    val verificationFramesDataAndPayload = frames.toVerificationFrameData(imageConfigs)
-                    currentScanPayloadInfo = verificationFramesDataAndPayload.second
+                    val verificationFramesAndPayload = frames.toVerificationFrameData(imageConfigs)
+                    currentScanPayloadInfo = verificationFramesAndPayload.second
 
                     imageCompressionStat.trackResult("complete")
 
@@ -192,7 +192,7 @@ internal open class CardImageVerificationActivity :
                         civId = params.cardImageVerificationIntentId,
                         civSecret = params.cardImageVerificationIntentSecret,
                         savedFrames = frames,
-                        verificationFramesData = verificationFramesDataAndPayload.first,
+                        verificationFramesData = verificationFramesAndPayload.first,
                     )
 
                     completionLoopStat.trackResult("complete")

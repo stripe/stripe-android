@@ -13,8 +13,7 @@ import com.stripe.android.stripecardscan.framework.image.toImageFormat
 @CheckResult
 internal suspend fun Collection<SavedFrame>.toVerificationFrameData(
     imageConfigs: AcceptedImageConfigs
-): Pair<List<VerificationFrameData>, PayloadInfo>
-{
+): Pair<List<VerificationFrameData>, PayloadInfo> {
     // Attempt to get image data using the configs from the server.
     val format = imageConfigs.preferredFormats?.first() ?: ImageFormat.JPEG
     var imageSettings = imageConfigs.imageSettings(format)
