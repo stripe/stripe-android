@@ -253,7 +253,8 @@ class LinkApiRepositoryTest {
     @Test
     fun `createPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
-        val consumerPaymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(emptyMap())
+        val consumerPaymentDetailsCreateParams =
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com")
 
         linkRepository.createPaymentDetails(
             consumerPaymentDetailsCreateParams,
@@ -274,7 +275,7 @@ class LinkApiRepositoryTest {
             .thenReturn(paymentDetails)
 
         val result = linkRepository.createPaymentDetails(
-            ConsumerPaymentDetailsCreateParams.Card(emptyMap()),
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
             "secret"
         )
 
@@ -288,7 +289,7 @@ class LinkApiRepositoryTest {
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.createPaymentDetails(
-            ConsumerPaymentDetailsCreateParams.Card(emptyMap()),
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
             "secret"
         )
 
