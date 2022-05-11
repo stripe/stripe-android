@@ -103,6 +103,9 @@ internal class FormViewModel @Inject internal constructor(
         this.enabled.value = enabled
     }
 
+    @VisibleForTesting
+    internal val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
+
     private val saveForFutureUseElement = elements
         .map { elementsList ->
             elementsList?.find { element ->
@@ -138,11 +141,12 @@ internal class FormViewModel @Inject internal constructor(
         }
 
     internal val hiddenIdentifiers = combine(
+        saveForFutureUseVisible,
         cardBillingElement.map {
             it?.hiddenIdentifiers ?: flowOf(emptyList())
         }.flattenConcat(),
         externalHiddenIdentifiers
-    ) { cardBillingIdentifiers, saveFutureUseIdentifiers ->
+    ) { showFutureUse, cardBillingIdentifiers, saveFutureUseIdentifiers ->
         val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
         // For hidden *section* identifiers, list of identifiers of elements in the section
         val identifiers = sectionToFieldIdentifierMap
@@ -153,7 +157,15 @@ internal class FormViewModel @Inject internal constructor(
                 sectionToSectionFieldEntry.value
             }
 
-        hiddenIdentifiers.plus(identifiers)
+        val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
+        if (!showFutureUse && saveForFutureUseElement != null) {
+            hiddenIdentifiers
+                .plus(identifiers)
+                .plus(saveForFutureUseElement.identifier)
+        } else {
+            hiddenIdentifiers
+                .plus(identifiers)
+        }
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
