@@ -66,7 +66,7 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots#testPaymentSheetNewCustomer
+          script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots
       - uses: actions/upload-artifact@v2
         if: failure()
         with:

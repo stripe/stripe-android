@@ -111,7 +111,7 @@ object PaymentsThemeDefaults {
     }
 
     val colorsLight = PaymentsColors(
-        primary = Color.Red,
+        primary = Color(0xFF007AFF),
         surface = Color.White,
         component = Color.White,
         componentBorder = Color(0x33787880),
