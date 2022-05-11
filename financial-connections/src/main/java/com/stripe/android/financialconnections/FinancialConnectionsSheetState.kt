@@ -20,6 +20,9 @@ internal data class FinancialConnectionsSheetState(
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
+    val sessionSecret: String
+        get() = initialArgs.configuration.financialConnectionsSessionClientSecret
+
     /**
      * Constructor used by Mavericks to build the initial state.
      */

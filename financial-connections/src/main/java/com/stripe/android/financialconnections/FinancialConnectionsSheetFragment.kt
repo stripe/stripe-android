@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 
-class FinancialConnectionsSheetFragment :
+internal class FinancialConnectionsSheetFragment :
     Fragment(R.layout.fragment_financial_connections_sheet), MavericksView {
 
     private val startForResult = registerForActivityResult(StartActivityForResult()) {

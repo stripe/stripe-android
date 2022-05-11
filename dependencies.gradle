@@ -1,5 +1,6 @@
 ext.versions = [
         detekt: "1.19.0",
+        mavericks: "2.6.1"
 ]
 
 ext.buildLibs = [
@@ -10,6 +11,11 @@ ext.configs = [
         androidLibrary: "${project.rootDir}/build-configuration/android-library.gradle",
 ]
 
+ext.libs = [
+        mavericks: "com.airbnb.android:mavericks:$versions.mavericks"
+]
+
 ext.testLibs = [
-        turbine: "app.cash.turbine:turbine:0.7.0"
+        turbine: "app.cash.turbine:turbine:0.7.0",
+        mavericks: "com.airbnb.android:mavericks-testing:$versions.mavericks"
 ]

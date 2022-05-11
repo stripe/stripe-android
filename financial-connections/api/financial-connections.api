@@ -118,11 +118,11 @@ public abstract interface class com/stripe/android/financialconnections/Financia
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheetViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs;Lcom/stripe/android/financialconnections/domain/GenerateFinancialConnectionsSessionManifest;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
+	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/financialconnections/domain/GenerateFinancialConnectionsSessionManifest;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetState;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 }
 
 public final class com/stripe/android/financialconnections/analytics/DefaultFinancialConnectionsEventReporter_Factory : dagger/internal/Factory {
@@ -133,19 +133,10 @@ public final class com/stripe/android/financialconnections/analytics/DefaultFina
 	public static fun newInstance (Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/core/networking/AnalyticsRequestFactory;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/financialconnections/analytics/DefaultFinancialConnectionsEventReporter;
 }
 
-public final class com/stripe/android/financialconnections/databinding/ActivityFinancialconnectionsSheetBinding : androidx/viewbinding/ViewBinding {
-	public final field spinner Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/financialconnections/databinding/ActivityFinancialconnectionsSheetBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/financialconnections/databinding/ActivityFinancialconnectionsSheetBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/financialconnections/databinding/ActivityFinancialconnectionsSheetBinding;
-}
-
 public final class com/stripe/android/financialconnections/di/DaggerFinancialConnectionsSheetComponent : com/stripe/android/financialconnections/di/FinancialConnectionsSheetComponent {
 	public static fun builder ()Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetComponent$Builder;
 	public fun getViewModel ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
-	public fun inject (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel$Factory;)V
+	public fun inject (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel$Companion;)V
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesApplicationIdFactory : dagger/internal/Factory {

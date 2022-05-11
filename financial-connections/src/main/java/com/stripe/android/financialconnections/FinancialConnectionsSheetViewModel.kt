@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
@@ -25,7 +24,6 @@ import javax.inject.Named
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val starterArgs: FinancialConnectionsSheetActivityArgs,
     private val generateFinancialConnectionsSessionManifest: GenerateFinancialConnectionsSessionManifest,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
@@ -34,11 +32,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
     init {
-        eventReporter.onPresented(starterArgs.configuration)
+        eventReporter.onPresented(initialState.initialArgs.configuration)
         // avoid re-fetching manifest if already exists (this will happen on process recreations)
         if (initialState.manifest == null) {
-            onActivityRecreated()
             fetchManifest()
+        } else {
+            onActivityRecreated()
         }
     }
 
@@ -52,11 +51,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 kotlin.runCatching {
                     state.initialArgs.validate()
                     generateFinancialConnectionsSessionManifest(
-                        clientSecret = starterArgs.configuration.financialConnectionsSessionClientSecret,
+                        clientSecret = state.sessionSecret,
                         applicationId = applicationId
                     )
                 }.onFailure {
-                    onFatal(it)
+                    onFatal(state, it)
                 }.onSuccess {
                     openAuthFlow(it)
                 }
@@ -139,16 +138,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * fetch the updated [FinancialConnectionsSession] model from the API
      * and return it back as a [Completed] result.
      */
-    private fun fetchFinancialConnectionsSession() {
+    private fun fetchFinancialConnectionsSession(state: FinancialConnectionsSheetState) {
         viewModelScope.launch {
             kotlin.runCatching {
-                fetchFinancialConnectionsSession(starterArgs.configuration.financialConnectionsSessionClientSecret)
+                fetchFinancialConnectionsSession(state.sessionSecret)
             }.onSuccess {
                 val result = FinancialConnectionsSheetActivityResult.Completed(it)
-                eventReporter.onResult(starterArgs.configuration, result)
+                eventReporter.onResult(state.initialArgs.configuration, result)
                 setState { copy(viewEffect = FinishWithResult(result)) }
             }.onFailure {
-                onFatal(it)
+                onFatal(state, it)
             }
         }
     }
@@ -160,18 +159,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * fetch the updated [FinancialConnectionsSession] and the generated [com.stripe.android.model.Token]
      * and return it back as a [Completed] result.
      */
-    private fun fetchFinancialConnectionsSessionForToken() {
+    private fun fetchFinancialConnectionsSessionForToken(state: FinancialConnectionsSheetState) {
         viewModelScope.launch {
             kotlin.runCatching {
-                fetchFinancialConnectionsSessionForToken(
-                    clientSecret = starterArgs.configuration.financialConnectionsSessionClientSecret
-                )
+                fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
                 val result = FinancialConnectionsSheetActivityResult.Completed(las, token)
-                eventReporter.onResult(starterArgs.configuration, result)
+                eventReporter.onResult(state.initialArgs.configuration, result)
                 setState { copy(viewEffect = FinishWithResult(result)) }
             }.onFailure {
-                onFatal(it)
+                onFatal(state, it)
             }
         }
     }
@@ -182,9 +179,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
      */
-    private fun onFatal(throwable: Throwable) {
+    private fun onFatal(state: FinancialConnectionsSheetState, throwable: Throwable) {
         val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
-        eventReporter.onResult(starterArgs.configuration, result)
+        eventReporter.onResult(state.initialArgs.configuration, result)
         setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
@@ -193,9 +190,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
      * URL callback, notify the [FinancialConnectionsSheetResultCallback] with [Canceled]
      */
-    private fun onUserCancel() {
+    private fun onUserCancel(state: FinancialConnectionsSheetState) {
         val result = Canceled
-        eventReporter.onResult(starterArgs.configuration, result)
+        eventReporter.onResult(state.initialArgs.configuration, result)
         setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
@@ -209,14 +206,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      */
     internal fun handleOnNewIntent(intent: Intent?) {
         setState { copy(authFlowActive = false) }
-        withState {
+        withState { state ->
             when (intent?.data.toString()) {
-                it.manifest?.successUrl -> when (starterArgs) {
-                    is FinancialConnectionsSheetActivityArgs.ForData -> fetchFinancialConnectionsSession()
-                    is FinancialConnectionsSheetActivityArgs.ForToken -> fetchFinancialConnectionsSessionForToken()
+                state.manifest?.successUrl -> when (state.initialArgs) {
+                    is FinancialConnectionsSheetActivityArgs.ForData ->
+                        fetchFinancialConnectionsSession(state)
+                    is FinancialConnectionsSheetActivityArgs.ForToken ->
+                        fetchFinancialConnectionsSessionForToken(state)
                 }
-                it.manifest?.cancelUrl -> onUserCancel()
-                else -> onFatal(Exception("Error processing FinancialConnectionsSheet intent"))
+                state.manifest?.cancelUrl -> onUserCancel(state)
+                else ->
+                    onFatal(state, Exception("Error processing FinancialConnectionsSheet intent"))
             }
         }
     }

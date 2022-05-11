@@ -2,9 +2,9 @@ package com.stripe.android.financialconnections
 
 import android.content.Intent
 import android.net.Uri
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.cash.turbine.test
+import com.airbnb.mvrx.test.MvRxTestRule
+import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
@@ -13,13 +13,17 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -33,6 +37,9 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class FinancialConnectionsSheetViewModelTest {
 
+    @get:Rule
+    val mvrxRule = MvRxTestRule(testDispatcher = UnconfinedTestDispatcher())
+
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
@@ -44,23 +51,24 @@ class FinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.CANCEL_URL
     )
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
-    private val fetchFinancialConnectionsSessionForToken = mock<FetchFinancialConnectionsSessionForToken>()
-    private val generateFinancialConnectionsSessionManifest = mock<GenerateFinancialConnectionsSessionManifest>()
+    private val fetchFinancialConnectionsSessionForToken =
+        mock<FetchFinancialConnectionsSessionForToken>()
+    private val generateFinancialConnectionsSessionManifest =
+        mock<GenerateFinancialConnectionsSessionManifest>()
+    private val defaultInitialState = FinancialConnectionsSheetState(
+        FinancialConnectionsSheetActivityArgs.ForData(configuration)
+    )
 
     @Test
     fun `init - eventReporter fires onPresented`() {
-        createViewModel(configuration)
-        verify(eventReporter)
-            .onPresented(configuration)
+        createViewModel(defaultInitialState)
+        verify(eventReporter).onPresented(configuration)
     }
 
     @Test
-    fun `init - if manifest not restored from SavedStateHandle, fetchManifest triggered`() =
+    fun `init - if manifest not present in initial state, fetchManifest triggered`() =
         runTest {
-            createViewModel(
-                configuration = configuration,
-                savedStateHandle = SavedStateHandle()
-            )
+            createViewModel(defaultInitialState)
 
             verify(generateFinancialConnectionsSessionManifest).invoke(any(), any())
         }
@@ -68,10 +76,7 @@ class FinancialConnectionsSheetViewModelTest {
     @Test
     fun `init - if manifest restored from SavedStateHandle, fetchManifest not triggered`() {
         runTest {
-            createViewModel(
-                configuration = configuration,
-                savedStateHandle = SavedStateHandle().also { it.set("key_manifest", manifest) }
-            )
+            createViewModel(defaultInitialState.copy(manifest = manifest))
 
             verifyNoInteractions(generateFinancialConnectionsSessionManifest)
         }
@@ -81,14 +86,14 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - wrong intent should fire analytics event and set fail result`() {
         runTest {
             // Given
-            val viewModel = createViewModel(configuration)
+            val viewModel = createViewModel(defaultInitialState)
 
             // When
             viewModel.handleOnNewIntent(Intent("error_url"))
 
             // Then
             verify(eventReporter)
-                .onResult(eq(configuration), any<FinancialConnectionsSheetActivityResult.Failed>())
+                .onResult(eq(configuration), any<Failed>())
         }
     }
 
@@ -97,7 +102,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
-            val viewModel = createViewModel(configuration)
+            val viewModel = createViewModel(defaultInitialState)
             val cancelIntent = cancelIntent()
 
             // When
@@ -106,7 +111,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(configuration, FinancialConnectionsSheetActivityResult.Canceled)
+                .onResult(configuration, Canceled)
         }
     }
 
@@ -115,38 +120,38 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
-                // When
-                // end auth flow
-                viewModel.handleOnNewIntent(cancelIntent())
+            val viewModel = createViewModel(defaultInitialState)
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled)).isEqualTo(
-                    awaitItem()
-                )
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(cancelIntent())
+
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
             }
         }
 
     @Test
     fun `handleOnNewIntent - when intent with unknown received, then finish with Result#Failed`() =
         runTest {
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
-                // Given
-                val errorIntent = Intent()
+            // Given
+            val viewModel = createViewModel(defaultInitialState)
+            val errorIntent = Intent()
 
-                // When
-                // end auth flow
-                viewModel.handleOnNewIntent(errorIntent)
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(errorIntent)
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isFalse()
-                val viewEffect = awaitItem() as FinishWithResult
-                assertThat(viewEffect.result).isInstanceOf(FinancialConnectionsSheetActivityResult.Failed::class.java)
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isFalse()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
         }
+
 
     @Test
     fun `handleOnNewIntent - when intent with success, then finish with Result#Success`() =
@@ -156,22 +161,17 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
             whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
 
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            val viewModel = createViewModel(defaultInitialState)
 
-                // When
-                // end auth flow
-                viewModel.handleOnNewIntent(successIntent())
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(successIntent())
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(
-                        result = FinancialConnectionsSheetActivityResult.Completed(
-                            expectedSession
-                        )
-                    )
-                )
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isFalse()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isEqualTo(Completed(expectedSession))
             }
         }
 
@@ -182,17 +182,17 @@ class FinancialConnectionsSheetViewModelTest {
             val apiException = APIException()
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
             whenever(fetchFinancialConnectionsSession.invoke(any())).thenAnswer { throw apiException }
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
-                // When
-                // end auth flow
-                viewModel.handleOnNewIntent(successIntent())
+            val viewModel = createViewModel(defaultInitialState)
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(FinancialConnectionsSheetActivityResult.Failed(apiException))
-                )
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(successIntent())
+
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isFalse()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isEqualTo(Failed(apiException))
             }
         }
 
@@ -202,17 +202,17 @@ class FinancialConnectionsSheetViewModelTest {
             // Given
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
             whenever(fetchFinancialConnectionsSession(any())).thenAnswer { throw APIException() }
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
-                // When
-                // end auth flow
-                viewModel.handleOnNewIntent(successIntent())
+            val viewModel = createViewModel(defaultInitialState)
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(successIntent())
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(awaitItem()).isEqualTo(
-                    FinishWithResult(FinancialConnectionsSheetActivityResult.Failed(APIException()))
-                )
+            // Then
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isFalse()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isEqualTo(Failed(APIException()))
             }
         }
 
@@ -220,15 +220,18 @@ class FinancialConnectionsSheetViewModelTest {
     fun `onResume - when flow is still active and no config changes, finish with Result#Cancelled`() {
         runTest {
             // Given
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
-                // When
-                // end auth flow (activity resumed without new intent received)
-                viewModel.onResume()
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            val viewModel = createViewModel(defaultInitialState)
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
+            // When
+            // end auth flow (activity resumed without new intent received)
+            viewModel.onResume()
+
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isTrue()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isEqualTo(Canceled)
             }
         }
     }
@@ -237,17 +240,23 @@ class FinancialConnectionsSheetViewModelTest {
     fun `onActivityResult - when flow is still active and config changed, finish with Result#Cancelled`() {
         runTest {
             // Given
-            val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
-                // When
-                // configuration changes, changing lifecycle flow.
-                viewModel.onActivityRecreated()
-                // auth flow ends (activity received result without new intent received)
-                viewModel.onActivityResult()
+            // simulate a config change (initial state has a persisted manifest and ongoing authFlow)
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    manifest = manifest,
+                    authFlowActive = true
+                )
+            )
 
-                // Then
-                assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
+            // When
+            // auth flow ends (activity received result without new intent received)
+            viewModel.onActivityResult()
+
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isTrue()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isEqualTo(Canceled)
             }
         }
     }
@@ -259,10 +268,10 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
 
             // When
-            val viewModel = createViewModel(configuration)
+            val viewModel = createViewModel(defaultInitialState)
 
             // Then
-            assertThat(viewModel.state.value.manifest).isEqualTo(manifest)
+            withState(viewModel) { assertThat(it.manifest).isEqualTo(manifest) }
         }
     }
 
@@ -291,14 +300,11 @@ class FinancialConnectionsSheetViewModelTest {
     )
 
     private fun createViewModel(
-        configuration: FinancialConnectionsSheet.Configuration,
-        savedStateHandle: SavedStateHandle = SavedStateHandle()
+        initialState: FinancialConnectionsSheetState,
     ): FinancialConnectionsSheetViewModel {
-        val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         return FinancialConnectionsSheetViewModel(
             applicationId = "com.example.app",
-            starterArgs = args,
-            savedStateHandle = savedStateHandle,
+            initialState = initialState,
             generateFinancialConnectionsSessionManifest = generateFinancialConnectionsSessionManifest,
             fetchFinancialConnectionsSession = fetchFinancialConnectionsSession,
             fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,

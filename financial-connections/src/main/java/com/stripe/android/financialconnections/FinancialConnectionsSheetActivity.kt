@@ -20,16 +20,15 @@ internal class FinancialConnectionsSheetActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) addFragment()
-    }
-
-    private fun addFragment() {
-        val fragment = FinancialConnectionsSheetFragment()
-        fragment.arguments = requireNotNull(starterArgs).asMavericksArgs()
-        supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-            .add(R.id.nav_host_fragment, fragment, null)
-            .commit()
+        if (savedInstanceState == null) {
+            val fragment = FinancialConnectionsSheetFragment().apply {
+                arguments = requireNotNull(starterArgs).asMavericksArgs()
+            }
+            supportFragmentManager.beginTransaction()
+                .setReorderingAllowed(true)
+                .add(R.id.nav_host_fragment, fragment, null)
+                .commit()
+        }
     }
 
     /**

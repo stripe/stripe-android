@@ -12,7 +12,7 @@ class FinancialConnectionsSheetTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
     private val financialConnectionsSheet =
-        FinancialConnectionsSheet(activity.application, financialConnectionsSheetLauncher)
+        FinancialConnectionsSheet(financialConnectionsSheetLauncher)
 
     @Test
     fun `present() should launch the connection sheet with the given configuration`() {
