@@ -9,6 +9,7 @@ import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerification
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsResult
 import com.stripe.android.stripecardscan.framework.api.dto.ClientDevice
 import com.stripe.android.stripecardscan.framework.api.dto.ConfigurationStats
+import com.stripe.android.stripecardscan.framework.api.dto.PayloadInfo
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsCIVRequest
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsOCRRequest
@@ -52,6 +53,7 @@ internal fun uploadScanStatsCIV(
     appDetails: AppDetails,
     scanStatistics: ScanStatistics,
     scanConfig: ScanConfig,
+    payloadInfo: PayloadInfo?,
 ) = GlobalScope.launch(Dispatchers.IO) {
     val statsPayload = StatsPayload(
         instanceId = instanceId,
@@ -59,7 +61,8 @@ internal fun uploadScanStatsCIV(
         device = ClientDevice.fromDevice(device),
         app = AppInfo.fromAppDetails(appDetails),
         scanStats = scanStatistics,
-        configuration = ConfigurationStats.fromScanConfig(scanConfig)
+        configuration = ConfigurationStats.fromScanConfig(scanConfig),
+        payloadInfo = payloadInfo
 // TODO: this should probably be reported as part of scanstats, but is not yet supported
 //        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
     )

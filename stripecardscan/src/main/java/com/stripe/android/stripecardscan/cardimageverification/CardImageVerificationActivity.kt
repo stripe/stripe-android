@@ -25,6 +25,7 @@ import com.stripe.android.stripecardscan.cardimageverification.exception.Unknown
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
 import com.stripe.android.stripecardscan.framework.api.NetworkResult
+import com.stripe.android.stripecardscan.framework.api.dto.PayloadInfo
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
 import com.stripe.android.stripecardscan.framework.api.uploadSavedFrames
@@ -146,6 +147,11 @@ internal open class CardImageVerificationActivity :
     private var imageConfigs: AcceptedImageConfigs = AcceptedImageConfigs()
 
     /**
+     * The scan stats tracker for main loop duration
+     */
+    private var currentScanPayloadInfo: PayloadInfo? = null
+
+    /**
      * The listener which handles results from the scan.
      */
     override val resultListener: CardImageVerificationResultListener =
@@ -168,7 +174,10 @@ internal open class CardImageVerificationActivity :
             override fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>) {
                 launch {
                     val imageCompressionStat = Stats.trackTask("image_compression_duration")
-                    val verificationFramesData = frames.toVerificationFrameData(imageConfigs)
+
+                    val verificationFramesDataAndPayload = frames.toVerificationFrameData(imageConfigs)
+                    currentScanPayloadInfo = verificationFramesDataAndPayload.second
+
                     imageCompressionStat.trackResult("complete")
 
                     val completionLoopStat = Stats.trackTask("completion_loop_duration")
@@ -178,7 +187,7 @@ internal open class CardImageVerificationActivity :
                         civId = params.cardImageVerificationIntentId,
                         civSecret = params.cardImageVerificationIntentSecret,
                         savedFrames = frames,
-                        verificationFramesData = verificationFramesData,
+                        verificationFramesData = verificationFramesDataAndPayload.first,
                     )
 
 
@@ -623,7 +632,9 @@ internal open class CardImageVerificationActivity :
             scanConfig = ScanConfig(
                 strictModeFrameCount = params.configuration.strictModeFrames.count,
             ),
+            payloadInfo = currentScanPayloadInfo
         )
+        currentScanPayloadInfo = null
         super.closeScanner()
     }
 }
