@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -43,6 +42,7 @@ import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -134,7 +134,9 @@ internal class USBankAccountFormFragment : Fragment() {
                 USBankAccountFormViewModel.Args(
                     formArgs,
                     sheetViewModel is PaymentSheetViewModel,
-                    clientSecret
+                    clientSecret,
+                    sheetViewModel?.usBankAccountSavedScreenState,
+                    (sheetViewModel?.newLpm as? PaymentSelection.New.USBankAccount)
                 )
             },
             this
@@ -208,12 +210,17 @@ internal class USBankAccountFormFragment : Fragment() {
                         is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                             renderVerifyWithMicrodepositsScreen(screenState)
                         }
+                        is USBankAccountFormScreenState.SavedAccount -> {
+                            renderSavedAccountScreen(screenState)
+                        }
                         is USBankAccountFormScreenState.ConfirmIntent -> {
                             (sheetViewModel as? PaymentSheetViewModel)
                                 ?.confirmStripeIntent(screenState.confirmIntentParams)
                         }
                         is USBankAccountFormScreenState.Finished -> {
                             sheetViewModel?.updateSelection(screenState.paymentSelection)
+                            sheetViewModel?.usBankAccountSavedScreenState =
+                                viewModel.generateSavedState(screenState)
                             sheetViewModel?.onFinish()
                         }
                     }
@@ -223,6 +230,11 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     override fun onDetach() {
+        sheetViewModel?.usBankAccountSavedScreenState =
+            viewModel.currentScreenState.value.updateInputs(
+                viewModel.name.value,
+                viewModel.email.value
+            )
         viewModel.onDestroy()
         super.onDetach()
     }
@@ -233,12 +245,14 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         setContent {
             PaymentsTheme {
-                NameAndEmailCollectionScreen(screenState.error)
+                NameAndEmailCollectionScreen(screenState)
             }
         }
         updatePrimaryButton(
             text = screenState.primaryButtonText,
-            onClick = screenState.primaryButtonOnClick,
+            onClick = {
+                viewModel.handlePrimaryButtonClick(screenState)
+            },
             enabled = viewModel.requiredFields.stateIn(coroutineScope).value,
         )
         updateMandateText(null)
@@ -249,16 +263,14 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         setContent {
             PaymentsTheme {
-                MandateCollectionScreen(
-                    screenState.bankName,
-                    screenState.displayName,
-                    screenState.last4
-                )
+                MandateCollectionScreen(screenState)
             }
         }
         updatePrimaryButton(
             text = screenState.primaryButtonText,
-            onClick = screenState.primaryButtonOnClick,
+            onClick = {
+                viewModel.handlePrimaryButtonClick(screenState)
+            },
             shouldProcess = isPaymentSheet
         )
         updateMandateText(
@@ -271,16 +283,34 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         setContent {
             PaymentsTheme {
-                VerifyWithMicrodepositsScreen(
-                    screenState.bankName,
-                    screenState.displayName,
-                    screenState.last4
-                )
+                VerifyWithMicrodepositsScreen(screenState)
             }
         }
         updatePrimaryButton(
             text = screenState.primaryButtonText,
-            onClick = screenState.primaryButtonOnClick,
+            onClick = {
+                viewModel.handlePrimaryButtonClick(screenState)
+            },
+            shouldProcess = isPaymentSheet
+        )
+        updateMandateText(
+            screenState.mandateText
+        )
+    }
+
+    private fun ComposeView.renderSavedAccountScreen(
+        screenState: USBankAccountFormScreenState.SavedAccount
+    ) {
+        setContent {
+            PaymentsTheme {
+                SavedAccountScreen(screenState)
+            }
+        }
+        updatePrimaryButton(
+            text = screenState.primaryButtonText,
+            onClick = {
+                viewModel.handlePrimaryButtonClick(screenState)
+            },
             shouldProcess = isPaymentSheet
         )
         updateMandateText(
@@ -289,39 +319,59 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     @Composable
-    private fun NameAndEmailCollectionScreen(@StringRes error: Int? = null) {
+    private fun NameAndEmailCollectionScreen(
+        screenState: USBankAccountFormScreenState.NameAndEmailCollection
+    ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm()
-            sheetViewModel?.onError(error)
+            NameAndEmailForm(screenState.name, screenState.email)
+            sheetViewModel?.onError(screenState.error)
         }
     }
 
     @Composable
     private fun MandateCollectionScreen(
-        bankName: String?,
-        displayName: String?,
-        last4: String?
+        screenState: USBankAccountFormScreenState.MandateCollection
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm()
-            AccountDetailsForm(bankName, displayName, last4)
+            NameAndEmailForm(screenState.name, screenState.email)
+            AccountDetailsForm(
+                screenState.paymentAccount.institutionName,
+                screenState.paymentAccount.last4
+            )
         }
     }
 
     @Composable
     private fun VerifyWithMicrodepositsScreen(
-        bankName: String?,
-        displayName: String?,
-        last4: String?
+        screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm()
-            AccountDetailsForm(bankName, displayName, last4)
+            NameAndEmailForm(screenState.name, screenState.email)
+            AccountDetailsForm(
+                screenState.paymentAccount.bankName,
+                screenState.paymentAccount.last4
+            )
         }
     }
 
     @Composable
-    private fun NameAndEmailForm() {
+    private fun SavedAccountScreen(
+        screenState: USBankAccountFormScreenState.SavedAccount
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            NameAndEmailForm(screenState.name, screenState.email)
+            AccountDetailsForm(
+                screenState.bankName,
+                screenState.last4
+            )
+        }
+    }
+
+    @Composable
+    private fun NameAndEmailForm(
+        name: String,
+        email: String?
+    ) {
         val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
             H6Text(
@@ -360,7 +410,6 @@ internal class USBankAccountFormFragment : Fragment() {
     @Composable
     private fun AccountDetailsForm(
         bankName: String?,
-        displayName: String?,
         last4: String?
     ) {
         val openDialog = remember { mutableStateOf(false) }
@@ -393,7 +442,7 @@ internal class USBankAccountFormFragment : Fragment() {
                                 .width(56.dp)
                         )
                         Text(
-                            text = "$displayName ••••$last4",
+                            text = "$bankName ••••$last4",
                             modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
                             color = PaymentsTheme.colors.onComponent
                         )
