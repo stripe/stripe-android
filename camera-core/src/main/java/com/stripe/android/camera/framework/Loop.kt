@@ -58,7 +58,7 @@ interface AnalyzerLoopErrorListener {
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class AnalyzerLoop<DataFrame, State, Output>(
-    private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
+    private val analyzerPool: AnalyzerPool<DataFrame, in State, out Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
@@ -112,7 +112,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
      */
     private suspend fun startWorker(
         flow: Flow<DataFrame>,
-        analyzer: Analyzer<DataFrame, in State, Output>,
+        analyzer: Analyzer<DataFrame, in State, out Output>,
     ) {
         flow.collect { frame ->
             val stat = analyzer.statsName?.let { Stats.trackRepeatingTask(it) }
@@ -171,7 +171,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
-    private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
+    private val analyzerPool: AnalyzerPool<DataFrame, in State, out Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener
 ) : AnalyzerLoop<DataFrame, State, Output>(
