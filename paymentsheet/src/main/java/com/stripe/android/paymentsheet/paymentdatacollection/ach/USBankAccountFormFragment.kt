@@ -189,8 +189,8 @@ internal class USBankAccountFormFragment : Fragment() {
                 viewModel.saveForFutureUse.collect { saved ->
                     updateMandateText(
                         if (saved) {
-                            ACHText.getSaveMandateText(
-                                requireContext(),
+                            getString(
+                                R.string.stripe_paymentsheet_ach_save_mandate,
                                 viewModel.formattedMerchantName()
                             )
                         } else {
@@ -552,8 +552,8 @@ internal class USBankAccountFormFragment : Fragment() {
             if (viewModel.currentScreenState.value
                 is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
-                ACHText.getMicrodepositText(
-                    requireContext(),
+                getString(
+                    R.string.stripe_paymentsheet_microdeposit,
                     viewModel.formattedMerchantName()
                 )
             } else ""

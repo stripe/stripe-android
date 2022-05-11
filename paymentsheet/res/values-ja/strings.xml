@@ -20,7 +20,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[続行すると、<terms>これらの規約</terms>に従って支払いをオーソリすることに同意したものとみなされます。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[%@ の銀行口座を保存すると、<terms>これらの規約</terms>に従って支払いをオーソリすることに同意したものと見なされます。]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[%s の銀行口座を保存すると、<terms>これらの規約</terms>に従って支払いをオーソリすることに同意したものと見なされます。]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 追加</string>
   <!-- Card details entry form header title -->
@@ -33,7 +33,7 @@
   <string name="stripe_paymentsheet_back">戻る</string>
   <string name="stripe_paymentsheet_close">閉じる</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">1 ～ 2 営業日以内に Stripe は口座に $0.01 を入金します。その後、%@ への支払いを完了するための手順が記載されたメールが送信されます。</string>
+  <string name="stripe_paymentsheet_microdeposit">1 ～ 2 営業日以内に Stripe は口座に $0.01 を入金します。その後、%s への支払いを完了するための手順が記載されたメールが送信されます。</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

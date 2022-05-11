@@ -20,7 +20,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[การบันทึกบัญชีธนาคารของ %@ หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[การบันทึกบัญชีธนาคารของ %s หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ เพิ่ม</string>
   <!-- Card details entry form header title -->
@@ -33,7 +33,7 @@
   <string name="stripe_paymentsheet_back">ย้อนกลับ</string>
   <string name="stripe_paymentsheet_close">ปิด</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ %@ ให้เสร็จสิ้น</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ %s ให้เสร็จสิ้น</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">หรือชำระเงินด้วย</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

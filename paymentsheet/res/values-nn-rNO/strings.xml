@@ -20,7 +20,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ved å halde fram godtek du å autorisere betalingar i samsvar med desse <terms>vilkåra</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Ved å lagre bankkontoen din for %@ godtek du å autorisere betalingar i samsvar med desse <terms>vilkåra</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Ved å lagre bankkontoen din for %s godtek du å autorisere betalingar i samsvar med desse <terms>vilkåra</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Legg til</string>
   <!-- Card details entry form header title -->
@@ -33,7 +33,7 @@
   <string name="stripe_paymentsheet_back">Tilbake</string>
   <string name="stripe_paymentsheet_close">Lukk</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe sett inn 0,01 USD på kontoen din om 1–2 verkedagar. Så får du ei e-postmelding med instruksjonar om å fullføre betaling til %@.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe sett inn 0,01 USD på kontoen din om 1–2 verkedagar. Så får du ei e-postmelding med instruksjonar om å fullføre betaling til %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Eller betal ved å bruke</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

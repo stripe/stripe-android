@@ -435,7 +435,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private fun buildMandateText(): String {
         return if (saveForFutureUse.value) {
-            ACHText.getSaveMandateText(application, formattedMerchantName())
+            application.getString(
+                R.string.stripe_paymentsheet_ach_save_mandate,
+                formattedMerchantName()
+            )
         } else {
             ACHText.getContinueMandateText(application)
         }

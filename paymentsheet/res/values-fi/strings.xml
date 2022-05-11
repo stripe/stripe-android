@@ -20,7 +20,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Jatkamalla hyväksyt maksujen valtuutuksen <terms>näiden ehtojen mukaisesti</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Tallentamalla pankkitilisi yritykselle %@, hyväksyt maksujen valtuutuksen <terms>näiden ehtojen mukaisesti</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Tallentamalla pankkitilisi yritykselle %s, hyväksyt maksujen valtuutuksen <terms>näiden ehtojen mukaisesti</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Lisää</string>
   <!-- Card details entry form header title -->
@@ -33,7 +33,7 @@
   <string name="stripe_paymentsheet_back">Takaisin</string>
   <string name="stripe_paymentsheet_close">Sulje</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe tallettaa 0,01 dollaria tilillesi 1–2 arkipäivän kuluessa. Saat myös sähköpostiisi ohjeet maksun suorittamiseksi loppuun yritykselle %@.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe tallettaa 0,01 dollaria tilillesi 1–2 arkipäivän kuluessa. Saat myös sähköpostiisi ohjeet maksun suorittamiseksi loppuun yritykselle %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Tai käytä maksutapaa</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

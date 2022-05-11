@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.R
 /**
  * Temporary hack to get mandate text to display properly until translations are fixed
  */
-object ACHText {
+internal object ACHText {
     fun getContinueMandateText(context: Context): String {
         return context.getString(
             R.string.stripe_paymentsheet_ach_continue_mandate
@@ -14,17 +14,5 @@ object ACHText {
             "<terms>",
             "<a href=\"https://stripe.com/ach-payments/authorization\">"
         ).replace("</terms>", "</a>")
-    }
-
-    fun getSaveMandateText(context: Context, merchantName: String): String {
-        return context.getString(
-            R.string.stripe_paymentsheet_ach_save_mandate
-        ).replace("%@", merchantName)
-    }
-
-    fun getMicrodepositText(context: Context, merchantName: String): String {
-        return context.getString(
-            R.string.stripe_paymentsheet_microdeposit
-        ).replace("%@", merchantName)
     }
 }

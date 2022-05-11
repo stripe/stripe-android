@@ -20,7 +20,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Kontynuując, wyrażasz zgodę na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Zapisując swoje konto bankowe dla %@, zgadzasz się na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Zapisując swoje konto bankowe dla %s, zgadzasz się na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
   <!-- Card details entry form header title -->
@@ -33,7 +33,7 @@
   <string name="stripe_paymentsheet_back">Wstecz</string>
   <string name="stripe_paymentsheet_close">Zamknij</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe wpłaci 0,01 USD na Twoje konto w ciągu 1-2 dni roboczych. Następnie otrzymasz wiadomość e-mail z instrukcjami dotyczącymi zakończenia płatności na rzecz %@.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe wpłaci 0,01 USD na Twoje konto w ciągu 1-2 dni roboczych. Następnie otrzymasz wiadomość e-mail z instrukcjami dotyczącymi zakończenia płatności na rzecz %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Lub zapłać, korzystając z</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

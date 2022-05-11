@@ -20,7 +20,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[繼續操作即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[保存您的 %@ 銀行帳戶即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[保存您的 %s 銀行帳戶即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
   <!-- Card details entry form header title -->
@@ -33,7 +33,7 @@
   <string name="stripe_paymentsheet_back">上一步</string>
   <string name="stripe_paymentsheet_close">關閉</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe 會在 1-2 個工作日向您的帳戶存入 0.01 美元。然後您會收到一封郵件，指導您完成向 %@ 的付款。</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe 會在 1-2 個工作日向您的帳戶存入 0.01 美元。然後您會收到一封郵件，指導您完成向 %s 的付款。</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
