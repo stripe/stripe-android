@@ -25,10 +25,12 @@ class SupportedPaymentMethodTest {
         )
 
         assertThat(
-            ConsumerPaymentDetailsCreateParams.Card(paymentMethodCreateParams).toParamMap()
+            ConsumerPaymentDetailsCreateParams.Card(paymentMethodCreateParams, "email@test.com")
+                .toParamMap()
         ).isEqualTo(
             mapOf(
                 "type" to "card",
+                "billing_email_address" to "email@test.com",
                 "card" to mapOf(
                     "number" to "5555555555554444",
                     "exp_month" to "12",

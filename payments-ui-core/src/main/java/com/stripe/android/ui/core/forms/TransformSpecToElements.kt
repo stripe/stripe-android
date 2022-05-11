@@ -23,6 +23,7 @@ import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
@@ -60,6 +61,7 @@ class TransformSpecToElements(
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(context, initialValues)
                 is BsbSpec -> it.transform(initialValues)
+                is OTPSpec -> it.transform()
                 is EmailSpec -> it.transform(initialValues)
                 is NameSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)

@@ -155,7 +155,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
-
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
@@ -176,10 +175,33 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             }
                         )
                     )
+                } else {
+                    updatePrimaryButtonUIState(
+                        PrimaryButton.UIState(
+                            label = null,
+                            visible = false,
+                            enabled = false,
+                            onClick = { }
+                        )
+                    )
                 }
             }
+            is PaymentSelection.New -> {
+                updatePrimaryButtonUIState(
+                    PrimaryButton.UIState(
+                        label = getApplication<Application>().getString(
+                            R.string.stripe_continue_button_label
+                        ),
+                        visible = true,
+                        enabled = true,
+                        onClick = {
+                            processNewPaymentMethod(selection)
+                        }
+                    )
+                )
+            }
             else -> {
-                // no-op
+                // no op
             }
         }
     }

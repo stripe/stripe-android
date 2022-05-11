@@ -18,17 +18,17 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
@@ -74,14 +74,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val currentScreenState: StateFlow<USBankAccountFormScreenState>
         get() = _currentScreenState
 
-    val nameElement: SectionElement = NameSpec().transform(emptyMap())
+    val nameElement: SectionElement = NameSpec().transform(
+        mapOf(
+            IdentifierSpec.Name to args.formArgs.billingDetails?.name
+        )
+    )
     val name: StateFlow<String> = nameElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Lazily, "")
 
     val emailElement: SectionElement = EmailSpec().transform(
         mapOf(
-            IdentifierSpec.Email to null
+            IdentifierSpec.Email to args.formArgs.billingDetails?.email
         )
     )
     val email: StateFlow<String?> = emailElement.getFormFieldValueFlow().map { formFieldsList ->
@@ -104,6 +108,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         ) { validName, validEmail ->
             validName && validEmail
         }
+
+    private val _processing = MutableStateFlow(false)
+    val processing: StateFlow<Boolean>
+        get() = _processing
 
     @VisibleForTesting
     var collectBankAccountLauncher: CollectBankAccountLauncher? = null
@@ -165,7 +173,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             _currentScreenState.update {
                                 USBankAccountFormScreenState.MandateCollection(
                                     bankName = paymentAccount.institutionName,
-                                    displayName = paymentAccount.displayName,
+                                    displayName = paymentAccount.institutionName,
                                     last4 = paymentAccount.last4,
                                     primaryButtonText = buildPrimaryButtonText(),
                                     primaryButtonOnClick = {
@@ -220,6 +228,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun formattedMerchantName(): String {
         return args.formArgs.merchantName.trimEnd { it == '.' }
+    }
+
+    fun setProcessing(enabled: Boolean) {
+        _processing.update { enabled }
     }
 
     private fun collectBankAccount(clientSecret: ClientSecret) {
@@ -279,46 +291,54 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
             }
-            if (args.completePayment) {
-                confirm(clientSecret)
-            } else {
-                last4?.let { last4 ->
-                    bankName?.let { bankName ->
-                        _currentScreenState.update {
-                            USBankAccountFormScreenState.Finished(linkAccountId, last4, bankName)
-                        }
+
+            val paymentSelection = PaymentSelection.New.GenericPaymentMethod(
+                labelResource = application.getString(
+                    R.string.paymentsheet_payment_method_item_card_number,
+                    last4
+                ),
+                iconResource = TransformToBankIcon(
+                    bankName
+                ),
+                paymentMethodCreateParams =
+                PaymentMethodCreateParams.create(
+                    usBankAccount = PaymentMethodCreateParams.USBankAccount(
+                        linkAccountSessionId = linkAccountId
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = name.value,
+                        email = email.value
+                    )
+                ),
+                customerRequestedSave = if (args.formArgs.showCheckbox) {
+                    if (saveForFutureUse.value) {
+                        PaymentSelection.CustomerRequestedSave.RequestReuse
+                    } else {
+                        PaymentSelection.CustomerRequestedSave.RequestNoReuse
                     }
+                } else {
+                    PaymentSelection.CustomerRequestedSave.NoRequest
+                }
+            )
+
+            if (args.completePayment) {
+                confirm(clientSecret, paymentSelection)
+            } else {
+                _currentScreenState.update {
+                    USBankAccountFormScreenState.Finished(paymentSelection)
                 }
             }
         }
     }
 
-    private fun confirm(clientSecret: ClientSecret) {
+    private fun confirm(clientSecret: ClientSecret, paymentSelection: PaymentSelection.New) {
         viewModelScope.launch {
-            val intent = when (clientSecret) {
-                is PaymentIntentClientSecret -> {
-                    ConfirmPaymentIntentParams.create(
-                        clientSecret = clientSecret.value,
-                        paymentMethodType = PaymentMethod.Type.USBankAccount
-                    ).apply {
-                        paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
-                            setupFutureUsage = if (saveForFutureUse.value) {
-                                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                            } else {
-                                null
-                            }
-                        )
-                    }
-                }
-                is SetupIntentClientSecret -> {
-                    ConfirmSetupIntentParams.create(
-                        clientSecret = clientSecret.value,
-                        paymentMethodType = PaymentMethod.Type.USBankAccount
-                    )
-                }
-            }
+            val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+                clientSecret
+            )
+            val confirmIntent = confirmParamsFactory.create(paymentSelection)
             _currentScreenState.update {
-                USBankAccountFormScreenState.ConfirmIntent(intent)
+                USBankAccountFormScreenState.ConfirmIntent(confirmIntent)
             }
         }
     }

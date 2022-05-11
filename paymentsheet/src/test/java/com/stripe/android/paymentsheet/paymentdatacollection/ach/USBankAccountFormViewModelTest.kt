@@ -14,6 +14,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -46,7 +47,11 @@ class USBankAccountFormViewModelTest {
             showCheckboxControlledFields = false,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
-            injectorKey = INJECTOR_KEY
+            injectorKey = INJECTOR_KEY,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = CUSTOMER_NAME,
+                email = CUSTOMER_EMAIL
+            )
         ),
         completePayment = true,
         clientSecret = PaymentIntentClientSecret("pi_12345")
@@ -71,11 +76,8 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            viewModel.nameElement.fields.first().setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailElement.fields.first().setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
-
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isNotEmpty()
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isNotEmpty()
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isEqualTo(CUSTOMER_EMAIL)
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
         }
@@ -281,7 +283,7 @@ class USBankAccountFormViewModelTest {
     private companion object {
         const val INJECTOR_KEY = "injectorKey"
         const val MERCHANT_NAME = "merchantName"
-        const val CUSTOMER_NAME = "customer name"
-        const val CUSTOMER_EMAIL = "customer@email.com"
+        const val CUSTOMER_NAME = "Jenny Rose"
+        const val CUSTOMER_EMAIL = "email@email.com"
     }
 }
