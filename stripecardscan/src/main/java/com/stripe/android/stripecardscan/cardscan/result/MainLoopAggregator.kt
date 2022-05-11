@@ -2,6 +2,8 @@ package com.stripe.android.stripecardscan.cardscan.result
 
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
+import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.FinalResult
+import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.InterimResult
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 
 /**

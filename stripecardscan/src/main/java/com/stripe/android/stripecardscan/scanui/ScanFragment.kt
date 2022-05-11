@@ -14,13 +14,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.stripecardscan.R
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
-import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
+import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
