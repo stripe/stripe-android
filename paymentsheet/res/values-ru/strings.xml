@@ -42,6 +42,8 @@
   <string name="stripe_paymentsheet_pay_button_label">Оплатить</string>
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">Австралийская система прямого списания средств BECS</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Карта</string>
   <!-- Payment method brand name -->

@@ -42,6 +42,8 @@
   <string name="stripe_paymentsheet_pay_button_label">Zahlen</string>
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS-Lastschriftverfahren</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Karte</string>
   <!-- Payment method brand name -->
