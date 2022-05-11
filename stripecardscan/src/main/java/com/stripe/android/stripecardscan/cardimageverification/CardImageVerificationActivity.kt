@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
@@ -149,6 +150,7 @@ internal open class CardImageVerificationActivity :
     /**
      * The scan stats tracker for main loop duration
      */
+    private var mainLoopStatsTracker: StatTracker? = null
     private var currentScanPayloadInfo: PayloadInfo? = null
 
     /**
@@ -173,6 +175,9 @@ internal open class CardImageVerificationActivity :
 
             override fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>) {
                 launch {
+                    mainLoopStatsTracker?.trackResult("complete")
+                    mainLoopStatsTracker = null
+
                     val imageCompressionStat = Stats.trackTask("image_compression_duration")
 
                     val verificationFramesDataAndPayload = frames.toVerificationFrameData(imageConfigs)
@@ -190,6 +195,7 @@ internal open class CardImageVerificationActivity :
                         verificationFramesData = verificationFramesDataAndPayload.first,
                     )
 
+                    completionLoopStat.trackResult("complete")
 
                     when (result) {
                         is NetworkResult.Success ->
@@ -329,6 +335,13 @@ internal open class CardImageVerificationActivity :
     override fun onResume() {
         super.onResume()
         scanState = CardVerificationScanState.NotFound
+        mainLoopStatsTracker = Stats.trackTask("main_loop_duration")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        launch { mainLoopStatsTracker?.trackResult("paused") }
+        mainLoopStatsTracker = null
     }
 
     private fun ensureValidParams() = when {
