@@ -14,7 +14,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [28]
+        api-level: [29]
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -45,28 +45,17 @@ jobs:
             ~/.android/adb*
           key: avd-${{ matrix.api-level }}
 
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          disable-animations: true
-          sdcard-path-or-size: 512M
-          profile: Nexus 6
-          script: echo "Generated AVD snapshot for caching."
-
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
+          arch: x86
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots
+          script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots#testPaymentSheetNewCustomer
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
