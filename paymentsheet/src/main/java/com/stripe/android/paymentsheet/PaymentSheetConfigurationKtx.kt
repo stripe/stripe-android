@@ -68,9 +68,6 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
 
     PaymentsTheme.typographyMutable = PaymentsThemeDefaults.typography.copy(
         fontFamily = typography.fontResId,
-        fontWeightNormal = typography.normalWeight,
-        fontWeightMedium = typography.mediumWeight,
-        fontWeightBold = typography.boldWeight,
         fontSizeMultiplier = typography.sizeScaleFactor
     )
 

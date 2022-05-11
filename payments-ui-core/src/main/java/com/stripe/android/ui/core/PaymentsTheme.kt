@@ -479,3 +479,8 @@ fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
         baseStyle
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Context.getRawValueFromDimenResource(resource: Int): Float {
+    return resources.getDimension(resource) / resources.displayMetrics.density
+}
