@@ -157,7 +157,6 @@ internal class FormViewModel @Inject internal constructor(
                 sectionToSectionFieldEntry.value
             }
 
-
         val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
         if (!showFutureUse && saveForFutureUseElement != null) {
             hiddenIdentifiers
