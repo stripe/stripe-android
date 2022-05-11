@@ -91,7 +91,7 @@ class PaymentSheetEventTest {
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM
             ).additionalParams
         ).isEqualTo(
-            mapOf("payment_sheet_configuration" to expectedConfigMap)
+            mapOf("mpe_config" to expectedConfigMap)
         )
     }
 
@@ -127,7 +127,7 @@ class PaymentSheetEventTest {
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
             ).additionalParams
         ).isEqualTo(
-            mapOf("payment_sheet_configuration" to expectedConfigMap)
+            mapOf("mpe_config" to expectedConfigMap)
         )
     }
 }

@@ -68,7 +68,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_DELAYED_PMS to (configuration?.allowsDelayedPaymentMethods),
                     FIELD_APPEARANCE to appearanceConfigMap
                 )
-                return mapOf(FIELD_PAYMENT_SHEET_CONFIGURATION to configurationMap)
+                return mapOf(FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap)
             }
     }
 
@@ -138,7 +138,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_PRIMARY_BUTTON_COLOR = "primary_button_color"
         const val FIELD_BILLING = "default_billing_details"
         const val FIELD_DELAYED_PMS = "allows_delayed_payment_methods"
-        const val FIELD_PAYMENT_SHEET_CONFIGURATION = "payment_sheet_configuration"
+        const val FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION = "mpe_config"
         const val FIELD_APPEARANCE = "appearance"
         const val FIELD_COLORS_LIGHT = "colorsLight"
         const val FIELD_COLORS_DARK = "colorsDark"
