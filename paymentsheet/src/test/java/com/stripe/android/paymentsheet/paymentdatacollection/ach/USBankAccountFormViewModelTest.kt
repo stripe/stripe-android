@@ -219,6 +219,22 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
+    fun `when reset, save for future usage should be true`() {
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+
+            assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isFalse()
+
+            viewModel.reset()
+
+            assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isTrue()
+        }
+    }
+
+    @Test
     fun `when saved payment method is USBankAccount SavedAccount is emitted`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(
@@ -258,7 +274,8 @@ class USBankAccountFormViewModelTest {
                         financialConnectionsSessionId = "1234",
                         intentId = "1234",
                         primaryButtonText = "Test",
-                        mandateText = "Test"
+                        mandateText = "Test",
+                        saveForFutureUsage = true
                     )
                 )
             )
