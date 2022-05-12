@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.screens.BankPickerViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -24,6 +25,7 @@ internal interface FinancialConnectionsSheetComponent {
     val viewModel: FinancialConnectionsSheetViewModel
 
     fun inject(factory: FinancialConnectionsSheetViewModel.Companion)
+    fun inject(factory: BankPickerViewModel.Companion)
 
     @Component.Builder
     interface Builder {

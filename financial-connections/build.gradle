@@ -30,13 +30,22 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
     implementation libs.mavericks
+    implementation libs.mavericksCompose
 
-    debugImplementation "androidx.fragment:fragment-testing:1.4.1"
+    // Compose
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
+    implementation "androidx.activity:activity-compose:androidxActivityVersion"
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
+    implementation 'androidx.compose.material:material:1.1.1'
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
@@ -58,6 +67,17 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
+
+android {
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+    }
+}
+
 
 ext {
     artifactId = "financial-connections"

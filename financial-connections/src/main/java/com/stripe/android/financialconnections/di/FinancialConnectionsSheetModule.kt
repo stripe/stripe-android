@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.analytics.DefaultFinancialConnect
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.screens.BankPickerSubcomponent
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
@@ -22,6 +23,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module(
+    subcomponents = [BankPickerSubcomponent::class],
     includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
 internal object FinancialConnectionsSheetModule {
