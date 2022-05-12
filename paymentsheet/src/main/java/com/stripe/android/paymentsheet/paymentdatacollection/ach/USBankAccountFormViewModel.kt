@@ -126,7 +126,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     args.savedPaymentMethod.bankName,
                     args.savedPaymentMethod.last4,
                     buildPrimaryButtonText(),
-                    buildMandateText()
+                    buildMandateText(),
+                    args.formArgs.showCheckbox
                 )
             }
         }
@@ -164,6 +165,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                     intentId = intentId,
                                     primaryButtonText = buildPrimaryButtonText(),
                                     mandateText = buildMandateText(),
+                                    saveForFutureUsage = saveForFutureUse.value
                                 )
                             }
                         }
@@ -180,6 +182,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                     intentId = intentId,
                                     primaryButtonText = buildPrimaryButtonText(),
                                     mandateText = buildMandateText(),
+                                    saveForFutureUsage = saveForFutureUse.value
                                 )
                             }
                         }
@@ -200,7 +203,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         _currentScreenState.value = _currentScreenState.value.updateInputs(
-            name.value, email.value
+            name.value, email.value, saveForFutureUse.value
         )
         when (screenState) {
             is USBankAccountFormScreenState.NameAndEmailCollection -> {
@@ -259,6 +262,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     intentId = screenState.intentId,
                     primaryButtonText = buildPrimaryButtonText(),
                     mandateText = buildMandateText(),
+                    saveForFutureUsage = saveForFutureUse.value
                 )
             }
             else -> null
@@ -267,6 +271,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
+        saveForFutureUseElement.controller.onValueChange(true)
         _currentScreenState.update {
             USBankAccountFormScreenState.NameAndEmailCollection(
                 name = name.value,

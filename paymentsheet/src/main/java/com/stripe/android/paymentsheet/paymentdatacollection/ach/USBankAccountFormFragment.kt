@@ -236,7 +236,8 @@ internal class USBankAccountFormFragment : Fragment() {
         sheetViewModel?.usBankAccountSavedScreenState =
             viewModel.currentScreenState.value.updateInputs(
                 viewModel.name.value,
-                viewModel.email.value
+                viewModel.email.value,
+                viewModel.saveForFutureUse.value
             )
         viewModel.onDestroy()
         super.onDetach()
@@ -339,7 +340,8 @@ internal class USBankAccountFormFragment : Fragment() {
             NameAndEmailForm(screenState.name, screenState.email)
             AccountDetailsForm(
                 screenState.paymentAccount.institutionName,
-                screenState.paymentAccount.last4
+                screenState.paymentAccount.last4,
+                screenState.saveForFutureUsage
             )
         }
     }
@@ -352,7 +354,8 @@ internal class USBankAccountFormFragment : Fragment() {
             NameAndEmailForm(screenState.name, screenState.email)
             AccountDetailsForm(
                 screenState.paymentAccount.bankName,
-                screenState.paymentAccount.last4
+                screenState.paymentAccount.last4,
+                screenState.saveForFutureUsage
             )
         }
     }
@@ -365,7 +368,8 @@ internal class USBankAccountFormFragment : Fragment() {
             NameAndEmailForm(screenState.name, screenState.email)
             AccountDetailsForm(
                 screenState.bankName,
-                screenState.last4
+                screenState.last4,
+                screenState.saveForFutureUsage
             )
         }
     }
@@ -439,7 +443,8 @@ internal class USBankAccountFormFragment : Fragment() {
     @Composable
     private fun AccountDetailsForm(
         bankName: String?,
-        last4: String?
+        last4: String?,
+        saveForFutureUsage: Boolean
     ) {
         val openDialog = remember { mutableStateOf(false) }
         val bankIcon = TransformToBankIcon(bankName)
@@ -492,7 +497,12 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
             if (formArgs.showCheckbox) {
-                SaveForFutureUseElementUI(true, viewModel.saveForFutureUseElement)
+                SaveForFutureUseElementUI(
+                    true,
+                    viewModel.saveForFutureUseElement.apply {
+                        this.controller.onValueChange(saveForFutureUsage)
+                    }
+                )
             }
         }
         last4?.let {
