@@ -164,13 +164,14 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun createPaymentDetails(
         paymentMethod: SupportedPaymentMethod,
-        cardPaymentMethodCreateParams: PaymentMethodCreateParams
+        paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> =
         linkAccount.value?.let { account ->
             linkRepository.createPaymentDetails(
-                paymentMethod.createParams(cardPaymentMethodCreateParams, account.email),
+                paymentMethod.createParams(paymentMethodCreateParams, account.email),
                 account.clientSecret,
-                args.stripeIntent
+                args.stripeIntent,
+                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
             )
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")

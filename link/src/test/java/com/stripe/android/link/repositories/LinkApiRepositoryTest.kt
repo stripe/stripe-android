@@ -3,11 +3,13 @@ package com.stripe.android.link.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.confirmation.ConfirmPaymentIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,6 +27,10 @@ import java.util.Locale
 @ExperimentalCoroutinesApi
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
+
+    private val paymentIntent = mock<PaymentIntent>().apply {
+        whenever(clientSecret).thenReturn("secret")
+    }
 
     private val linkRepository = LinkApiRepository(
         publishableKeyProvider = { PUBLISHABLE_KEY },
@@ -260,7 +266,7 @@ class LinkApiRepositoryTest {
         linkRepository.createPaymentDetails(
             consumerPaymentDetailsCreateParams,
             secret,
-            StripeIntentFixtures.PI_SUCCEEDED
+            paymentIntent,
         )
 
         verify(stripeRepository).createPaymentDetails(
@@ -272,18 +278,32 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `createPaymentDetails returns successful result`() = runTest {
-        val paymentDetails = mock<ConsumerPaymentDetails>()
+        val paymentDetails = mock<ConsumerPaymentDetails.PaymentDetails>().apply {
+            whenever(id).thenReturn("id")
+        }
+        val consumerPaymentDetails = mock<ConsumerPaymentDetails>().apply {
+            whenever(this.paymentDetails).thenReturn(listOf(paymentDetails))
+        }
         whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
-            .thenReturn(paymentDetails)
+            .thenReturn(consumerPaymentDetails)
 
         val result = linkRepository.createPaymentDetails(
             ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
             "secret",
-            StripeIntentFixtures.PI_SUCCEEDED
+            paymentIntent
         )
 
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(paymentDetails)
+        assertThat(result.getOrNull()).isEqualTo(
+            LinkPaymentDetails(
+                paymentDetails,
+                ConfirmPaymentIntentParamsFactory(paymentIntent)
+                    .createPaymentMethodCreateParams(
+                        "secret",
+                        paymentDetails
+                    )
+            )
+        )
     }
 
     @Test
@@ -294,7 +314,7 @@ class LinkApiRepositoryTest {
         val result = linkRepository.createPaymentDetails(
             ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
             "secret",
-            StripeIntentFixtures.PI_SUCCEEDED
+            paymentIntent
         )
 
         assertThat(result.isFailure).isTrue()

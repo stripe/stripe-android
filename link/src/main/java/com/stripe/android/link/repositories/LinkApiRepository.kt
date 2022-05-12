@@ -198,7 +198,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun createPaymentDetails(
         paymentDetails: ConsumerPaymentDetailsCreateParams,
         consumerSessionClientSecret: String,
-        stripeIntent: StripeIntent
+        stripeIntent: StripeIntent,
+        extraConfirmationParams: Map<String, Any>?
     ): Result<LinkPaymentDetails> = withContext(workContext) {
         runCatching {
             stripeRepository.createPaymentDetails(
@@ -214,7 +215,8 @@ internal class LinkApiRepository @Inject constructor(
                     ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
                         .createPaymentMethodCreateParams(
                             consumerSessionClientSecret,
-                            it
+                            it,
+                            extraConfirmationParams
                         )
                 )
             }

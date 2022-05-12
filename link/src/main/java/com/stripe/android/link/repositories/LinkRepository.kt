@@ -68,6 +68,7 @@ internal interface LinkRepository {
     suspend fun createPaymentDetails(
         paymentDetails: ConsumerPaymentDetailsCreateParams,
         consumerSessionClientSecret: String,
-        stripeIntent: StripeIntent
+        stripeIntent: StripeIntent,
+        extraConfirmationParams: Map<String, Any>? = null
     ): Result<LinkPaymentDetails>
 }

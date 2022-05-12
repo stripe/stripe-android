@@ -59,16 +59,14 @@ internal class PaymentMethodViewModel @Inject constructor(
             _isProcessing.emit(true)
 
             linkRepository.createPaymentDetails(
-                paymentMethod.createParams(
-                    paymentMethodCreateParams,
-                    linkAccount.email
-                ),
+                paymentMethod.createParams(paymentMethodCreateParams, linkAccount.email),
                 linkAccount.clientSecret,
-                args.stripeIntent
+                args.stripeIntent,
+                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
             ).fold(
                 onSuccess = { paymentDetails ->
                     if (args.completePayment) {
-                        completePayment(paymentDetails, paymentMethod)
+                        completePayment(paymentDetails)
                     } else {
                         navigator.dismiss(LinkActivityResult.Success.Selected(paymentDetails))
                     }
@@ -83,16 +81,9 @@ internal class PaymentMethodViewModel @Inject constructor(
         linkAccountManager.logout()
     }
 
-    private fun completePayment(
-        linkPaymentDetails: LinkPaymentDetails,
-        paymentMethod: SupportedPaymentMethod
-    ) {
+    private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
         val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-            .createConfirmStripeIntentParams(
-                linkAccount.clientSecret,
-                linkPaymentDetails.paymentDetails,
-                paymentMethod.extraConfirmationParams(linkPaymentDetails.paymentMethodCreateParams)
-            )
+            .createConfirmStripeIntentParams(linkPaymentDetails.paymentMethodCreateParams)
 
         confirmationManager.confirmStripeIntent(params) { result ->
             result.fold(

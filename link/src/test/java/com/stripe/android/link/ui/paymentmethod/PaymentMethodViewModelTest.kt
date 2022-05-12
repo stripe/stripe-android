@@ -76,13 +76,19 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment creates PaymentDetails`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(createLinkPaymentDetails()))
+        whenever(
+            linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         createViewModel().startPayment(cardFormFieldValues)
 
         val paramsCaptor = argumentCaptor<ConsumerPaymentDetailsCreateParams>()
-        verify(linkRepository).createPaymentDetails(paramsCaptor.capture(), any(), any())
+        verify(linkRepository).createPaymentDetails(
+            paramsCaptor.capture(),
+            any(),
+            any(),
+            anyOrNull()
+        )
 
         assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
             mapOf(
@@ -104,8 +110,16 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment completes payment when PaymentDetails creation succeeds and completePayment is true`() =
         runTest {
-            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-                .thenReturn(Result.success(createLinkPaymentDetails()))
+            val value = createLinkPaymentDetails()
+            whenever(
+                linkRepository.createPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
+                .thenReturn(Result.success(value))
 
             createViewModel().startPayment(cardFormFieldValues)
 
@@ -146,7 +160,14 @@ class PaymentMethodViewModelTest {
             whenever(args.completePayment).thenReturn(false)
 
             val linkPaymentDetails = createLinkPaymentDetails()
-            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+            whenever(
+                linkRepository.createPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
                 .thenReturn(Result.success(linkPaymentDetails))
 
             createViewModel().startPayment(cardFormFieldValues)
@@ -161,7 +182,14 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment dismisses Link on success`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(
+            linkRepository.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
             .thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
@@ -184,7 +212,14 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment starts processing`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(
+            linkRepository.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
             .thenReturn(Result.success(createLinkPaymentDetails()))
 
         val viewModel = createViewModel()
@@ -201,7 +236,14 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment stops processing on error`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(
+            linkRepository.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
             .thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
@@ -286,7 +328,11 @@ class PaymentMethodViewModelTest {
         PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first().let {
             LinkPaymentDetails(
                 it,
-                PaymentMethodCreateParams.createLink(it.id, clientSecret)
+                PaymentMethodCreateParams.createLink(
+                    it.id,
+                    clientSecret,
+                    mapOf("card" to mapOf("cvc" to "123"))
+                )
             )
         }
 

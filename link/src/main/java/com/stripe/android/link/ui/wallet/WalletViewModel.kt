@@ -61,9 +61,14 @@ internal class WalletViewModel @Inject constructor(
         isProcessing.value = true
 
         if (args.completePayment) {
-            val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-                .createConfirmStripeIntentParams(linkAccount.clientSecret, selectedPaymentDetails)
-            confirmationManager.confirmStripeIntent(params) { result ->
+            val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+            val params = paramsFactory.createPaymentMethodCreateParams(
+                linkAccount.clientSecret,
+                selectedPaymentDetails
+            )
+            confirmationManager.confirmStripeIntent(
+                paramsFactory.createConfirmStripeIntentParams(params)
+            ) { result ->
                 result.fold(
                     onSuccess = { paymentResult ->
                         when (paymentResult) {

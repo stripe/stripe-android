@@ -7,6 +7,9 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,23 +45,29 @@ class LinkPaymentLauncherTest {
     }
 
     @Test
-    fun `verify present() launches LinkActivity with correct arguments`() = runTest {
-        val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-        linkPaymentLauncher.setup(stripeIntent, true, this)
-        linkPaymentLauncher.present(mockHostActivityLauncher)
+    fun `verify present() launches LinkActivity with correct arguments`() =
+        runTest(UnconfinedTestDispatcher()) {
+            launch {
+                val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
+                linkPaymentLauncher.setup(stripeIntent, true, this)
+                linkPaymentLauncher.present(mockHostActivityLauncher)
 
-        verify(mockHostActivityLauncher).launch(
-            argWhere { arg ->
-                arg.stripeIntent == stripeIntent &&
-                    arg.injectionParams != null &&
-                    arg.injectionParams.productUsage == setOf(PRODUCT_USAGE) &&
-                    arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
-                    arg.injectionParams.enableLogging &&
-                    arg.injectionParams.publishableKey == PUBLISHABLE_KEY &&
-                    arg.injectionParams.stripeAccountId.equals(STRIPE_ACCOUNT_ID)
+                verify(mockHostActivityLauncher).launch(
+                    argWhere { arg ->
+                        arg.stripeIntent == stripeIntent &&
+                            arg.injectionParams != null &&
+                            arg.injectionParams.productUsage == setOf(PRODUCT_USAGE) &&
+                            arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                            arg.injectionParams.enableLogging &&
+                            arg.injectionParams.publishableKey == PUBLISHABLE_KEY &&
+                            arg.injectionParams.stripeAccountId.equals(STRIPE_ACCOUNT_ID)
+                    }
+                )
+
+                // Need to cancel because the coroutine scope is still collecting the account status
+                this.coroutineContext.job.cancel()
             }
-        )
-    }
+        }
 
     companion object {
         const val PRODUCT_USAGE = "productUsage"
