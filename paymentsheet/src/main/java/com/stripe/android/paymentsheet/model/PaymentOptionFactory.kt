@@ -49,6 +49,12 @@ internal class PaymentOptionFactory(
                     label = selection.labelResource
                 )
             }
+            is PaymentSelection.New.USBankAccount -> {
+                PaymentOption(
+                    drawableResourceId = selection.iconResource,
+                    label = selection.labelResource
+                )
+            }
         }
     }
 }

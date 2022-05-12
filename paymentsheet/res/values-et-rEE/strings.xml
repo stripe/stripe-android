@@ -17,6 +17,10 @@
   <string name="stripe_failure_connection_error">Makseteenuse pakkujaga ei saa ühendust luua. Kontrollige Interneti-ühendust ja proovige uuesti.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Ilmnes sisemine tõrge.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Jätkates nõustute maksete autoriseerimisega vastavalt nendele <terms>tingimustele</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Salvestades oma pangakonto %s, nõustute maksete autoriseerimisega vastavalt nendele <terms>tingimustele</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ lisa</string>
   <!-- Card details entry form header title -->
@@ -28,6 +32,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Tagasi</string>
   <string name="stripe_paymentsheet_close">Sule</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe deponeerib teie pangakontole 0,01 dollarit 1–2 tööpäeva jooksul. Seejärel saate meili juhistega makse sooritamiseks ettevõttele %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Või kasuta makseviisi</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

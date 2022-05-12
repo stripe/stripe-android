@@ -31,8 +31,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
     implementation libs.mavericks
 
-    debugImplementation "androidx.fragment:fragment-testing:1.4.1"
-
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"

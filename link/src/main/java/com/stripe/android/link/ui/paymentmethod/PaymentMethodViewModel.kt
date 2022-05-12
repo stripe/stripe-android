@@ -53,7 +53,8 @@ internal class PaymentMethodViewModel @Inject constructor(
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
                 paymentMethod.type
-            )
+            ),
+            linkAccount.email
         )
 
         viewModelScope.launch {

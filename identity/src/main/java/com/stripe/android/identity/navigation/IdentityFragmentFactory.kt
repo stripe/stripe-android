@@ -38,6 +38,10 @@ internal class IdentityFragmentFactory @Inject constructor(
                 identityScanViewModelFactory,
                 identityViewModelFactory
             )
+            SelfieFragment::class.java.name -> SelfieFragment(
+                identityScanViewModelFactory,
+                identityViewModelFactory
+            )
             CameraPermissionDeniedFragment::class.java.name -> CameraPermissionDeniedFragment(
                 appSettingsOpenable
             )
