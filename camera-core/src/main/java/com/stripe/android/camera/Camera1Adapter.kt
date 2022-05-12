@@ -44,7 +44,6 @@ import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
 import com.stripe.android.camera.framework.util.retrySync
 import java.lang.ref.WeakReference
-import java.util.ArrayList
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -81,6 +80,7 @@ class Camera1Adapter(
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
     private val cameraErrorListener: CameraErrorListener,
+    startWithBackCamera: Boolean = true
 ) : CameraAdapter<CameraPreviewImage<Bitmap>>(), PreviewCallback {
     override val implementationName: String = "Camera1"
 
@@ -88,7 +88,8 @@ class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
-    private var currentCameraId = 0
+    private var currentCameraId =
+        if (startWithBackCamera) Camera.CameraInfo.CAMERA_FACING_BACK else Camera.CameraInfo.CAMERA_FACING_FRONT
 
     private val mainThreadHandler = Handler(activity.mainLooper)
     private var cameraThread: HandlerThread? = null

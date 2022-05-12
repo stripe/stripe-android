@@ -8,4 +8,7 @@
     <color name="plus_icon_tint">#1C1C1E</color>
     <color name="privacy_policy_icon_tint">#1C1C1E</color>
     <color name="time_estimate_icon_tint">#1C1C1E</color>
+
+    <color name="flash_mask_color">#FFFFFF</color>
+
 </resources>

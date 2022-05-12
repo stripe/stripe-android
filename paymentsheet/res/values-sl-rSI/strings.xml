@@ -17,6 +17,10 @@
   <string name="stripe_failure_connection_error">Pri vzpostavljanju povezave z našim ponudnikom plačil prihaja do težav. Preverite povezavo z internetom in poskusite znova.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Prišlo je do notranje napake.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s <terms>temi pogoji</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Če shranite bančni račun za %s, se strinjate z odobritvijo plačil v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
   <!-- Card details entry form header title -->
@@ -28,6 +32,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Nazaj</string>
   <string name="stripe_paymentsheet_close">Zapri</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe bo v 1–2 delovnih dneh na vaš račun nakazal znesek v višini 0,01 USD. Nato boste prejeli e-poštno sporočilo z navodili za dokončanje plačila podjetju %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ali pa za plačilo uporabite</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

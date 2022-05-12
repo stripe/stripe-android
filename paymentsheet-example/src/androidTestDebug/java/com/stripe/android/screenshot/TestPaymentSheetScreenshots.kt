@@ -20,12 +20,14 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@Ignore
 class TestPaymentSheetScreenshots {
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)

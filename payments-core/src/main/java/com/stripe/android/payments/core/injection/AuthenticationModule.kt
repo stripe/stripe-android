@@ -22,30 +22,39 @@ import javax.inject.Singleton
  * Provides mappings between [NextActionData] and [PaymentAuthenticator] provided by payment SDK.
  */
 @Module
+@SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class AuthenticationModule {
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS1::class)
-    abstract fun binds3DS1Authenticator(webIntentAuthenticator: WebIntentAuthenticator): PaymentAuthenticator<StripeIntent>
+    abstract fun binds3DS1Authenticator(
+        webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
 
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.RedirectToUrl::class)
-    abstract fun bindsRedirectAuthenticator(webIntentAuthenticator: WebIntentAuthenticator): PaymentAuthenticator<StripeIntent>
+    abstract fun bindsRedirectAuthenticator(
+        webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
 
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.AlipayRedirect::class)
-    abstract fun bindsAlipayRedirectAuthenticator(webIntentAuthenticator: WebIntentAuthenticator): PaymentAuthenticator<StripeIntent>
+    abstract fun bindsAlipayRedirectAuthenticator(
+        webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
 
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.DisplayOxxoDetails::class)
-    abstract fun bindsOxxoAuthenticator(oxxoAuthenticator: OxxoAuthenticator): PaymentAuthenticator<StripeIntent>
+    abstract fun bindsOxxoAuthenticator(
+        oxxoAuthenticator: OxxoAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
 
     companion object {
         @Provides

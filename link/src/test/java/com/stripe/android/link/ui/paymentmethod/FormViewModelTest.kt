@@ -11,12 +11,16 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
+import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,7 +66,18 @@ class FormViewModelTest {
     fun `Verify params are set when element flows are complete`() = runTest {
         // Using Sofort as a complex enough example to test the form view model class.
         val formViewModel = FormViewModel(
-            SofortForm,
+            LayoutSpec.create(
+                SectionSpec(
+                    IdentifierSpec.Generic("name_section"),
+                    NAME
+                ),
+                SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec),
+                SectionSpec(
+                    IdentifierSpec.Generic("country_section"),
+                    CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
+                ),
+                SaveForFutureUseSpec()
+            ),
             resourceRepository = resourceRepository,
             transformSpecToElement = transformSpecToElements
         )

@@ -63,6 +63,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
     // Test rules and transitive dependencies:
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
+    androidTestImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
 
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
