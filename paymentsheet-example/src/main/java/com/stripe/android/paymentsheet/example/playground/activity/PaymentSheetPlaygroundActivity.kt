@@ -43,8 +43,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 } ?: CheckoutCustomer.New
             }
             else -> {
-                val useSnapshotCustomer = intent.extras?.get(USE_SNAPSHOT_RETURNING_CUSTOMER) as Boolean?
-                if (useSnapshotCustomer != null) {
+                val useSnapshotCustomer = intent.extras?.get(
+                    USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA
+                ) as Boolean?
+                if (useSnapshotCustomer != null && useSnapshotCustomer) {
                     CheckoutCustomer.Snapshot
                 } else {
                     CheckoutCustomer.Returning
@@ -391,7 +393,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
-        const val USE_SNAPSHOT_RETURNING_CUSTOMER = "UseSnapshotReturningCustomer"
+        const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
     }

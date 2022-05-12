@@ -17,10 +17,4 @@ echo "Creating emulator with architecture: $ARCHITECTURE"
 
 "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" "--verbose" "create" "avd" "--force" "--name" "test" "--device" "Nexus 6" "--package" "system-images;android-28;google_apis;$ARCHITECTURE" "--tag" "google_apis" "--abi" "$ARCHITECTURE" "--sdcard" "512M"
 
-
-if [ ! -d "$ANDROID_HOME" ] ; then
-  echo "Cannot find \$ANDROID_HOME."
-  exit
-fi
-
 "$ANDROID_HOME/emulator/emulator" "@test" "-verbose" "-netdelay" "none" "-gpu" "swiftshader_indirect"
