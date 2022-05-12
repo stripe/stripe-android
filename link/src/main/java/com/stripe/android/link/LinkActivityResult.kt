@@ -2,8 +2,6 @@ package com.stripe.android.link
 
 import android.app.Activity
 import android.os.Parcelable
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.parcelize.Parcelize
 
 sealed class LinkActivityResult(
@@ -20,15 +18,10 @@ sealed class LinkActivityResult(
          * this class indicates that the flow was completed successfully and the user has selected
          * a payment method.
          *
-         * @param paymentDetails The [ConsumerPaymentDetails.PaymentDetails] selected by the user
-         * @param paymentMethodCreateParams The [PaymentMethodCreateParams] to be used to confirm
-         *                                  the Stripe Intent.
+         * @param paymentDetails The payment method selected by the user.
          */
         @Parcelize
-        data class Selected(
-            val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-            val paymentMethodCreateParams: PaymentMethodCreateParams
-        ) : Success()
+        data class Selected(val paymentDetails: LinkPaymentDetails) : Success()
 
         /**
          * When Link was launched with [LinkActivityContract.Args.completePayment] set to true, this

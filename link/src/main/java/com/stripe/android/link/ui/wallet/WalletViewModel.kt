@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
@@ -84,7 +85,11 @@ internal class WalletViewModel @Inject constructor(
         } else {
             val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
                 .createPaymentMethodCreateParams(linkAccount.clientSecret, selectedPaymentDetails)
-            navigator.dismiss(LinkActivityResult.Success.Selected(selectedPaymentDetails, params))
+            navigator.dismiss(
+                LinkActivityResult.Success.Selected(
+                    LinkPaymentDetails(selectedPaymentDetails, params)
+                )
+            )
         }
     }
 

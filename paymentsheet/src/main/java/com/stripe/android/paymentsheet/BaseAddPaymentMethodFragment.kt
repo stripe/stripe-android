@@ -99,7 +99,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         PrimaryButton.UIState(
                             label = null,
                             onClick = sheetViewModel::payWithLink,
-                            // TODO: When ready should still consider whether ctaEnabled is true
                             enabled = isReady,
                             visible = true
                         )

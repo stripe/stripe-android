@@ -84,7 +84,17 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     fun onPhoneInputCompleted(phoneNumber: String?) {
-        isReady.value = phoneNumber != null
+        // Email must be valid otherwise phone number collection UI would not be visible
+        val email = requireNotNull(consumerEmail.value)
+        if (phoneNumber != null) {
+            // TODO(brnunes-stripe): Use actual formatted value from phone number collection UI.
+            linkAccountManager.userSignUpInput =
+                LinkAccountManager.UserSignUpInput(email, "+1$phoneNumber", "US")
+            isReady.value = true
+        } else {
+            linkAccountManager.userSignUpInput = null
+            isReady.value = false
+        }
     }
 
     private suspend fun lookupConsumerEmail(email: String) {

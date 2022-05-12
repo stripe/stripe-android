@@ -44,7 +44,7 @@ class LinkPaymentLauncherTest {
     @Test
     fun `verify present() launches LinkActivity with correct arguments`() = runTest {
         val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-        linkPaymentLauncher.setup(stripeIntent, true)
+        linkPaymentLauncher.setup(stripeIntent, true, this)
         linkPaymentLauncher.present(mockHostActivityLauncher)
 
         verify(mockHostActivityLauncher).launch(

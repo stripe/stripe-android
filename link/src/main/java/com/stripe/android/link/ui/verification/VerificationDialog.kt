@@ -15,61 +15,78 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.LinkAppBar
 
+/**
+ * Function called when the Link verification dialog has been dismissed. The boolean returned
+ * indicates whether the verification succeeded.
+ * When called, [LinkPaymentLauncher.accountStatus] will contain the up to date account status.
+ */
+typealias LinkVerificationCallback = (success: Boolean) -> Unit
+
 @Composable
 fun LinkVerificationDialog(
     linkLauncher: LinkPaymentLauncher,
-    onDialogDismissed: () -> Unit,
-    onVerificationCompleted: () -> Unit
+    verificationCallback: LinkVerificationCallback
 ) {
-    var openDialog by remember { mutableStateOf(true) }
+    // Must be inside a NavController so that the VerificationViewModel scope is destroyed when the
+    // dialog is dismissed, and when called again a new scope is created.
+    val navController = rememberNavController()
 
-    val injector = requireNotNull(linkLauncher.injector)
-    val linkAccount = linkLauncher.linkAccountManager.linkAccount.collectAsState()
+    NavHost(navController = navController, startDestination = "dialog") {
+        composable("dialog") {
+            var openDialog by remember { mutableStateOf(true) }
 
-    linkAccount.value?.let { account ->
-        if (openDialog) {
-            Dialog(
-                onDismissRequest = {
-                    openDialog = false
-                    onDialogDismissed()
-                }
-            ) {
-                DefaultLinkTheme {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.linkColors.disabledText,
-                                shape = MaterialTheme.shapes.medium
-                            ),
-                        shape = MaterialTheme.shapes.medium
+            val injector = requireNotNull(linkLauncher.injector)
+            val linkAccount = linkLauncher.linkAccountManager.linkAccount.collectAsState()
+
+            linkAccount.value?.let { account ->
+                if (openDialog) {
+                    Dialog(
+                        onDismissRequest = {
+                            openDialog = false
+                            verificationCallback(false)
+                        }
                     ) {
-                        Column(Modifier.padding(horizontal = 20.dp)) {
-                            LinkAppBar(
-                                email = account.email,
-                                onCloseButtonClick = {
-                                    openDialog = false
-                                    onDialogDismissed()
+                        DefaultLinkTheme {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.linkColors.disabledText,
+                                        shape = MaterialTheme.shapes.medium
+                                    ),
+                                shape = MaterialTheme.shapes.medium
+                            ) {
+                                Column(Modifier.padding(horizontal = 20.dp)) {
+                                    LinkAppBar(
+                                        email = account.email,
+                                        onCloseButtonClick = {
+                                            openDialog = false
+                                            verificationCallback(false)
+                                        }
+                                    )
+                                    VerificationBody(
+                                        headerStringResId = R.string.verification_header_prefilled,
+                                        messageStringResId = R.string.verification_message,
+                                        showChangeEmailMessage = false,
+                                        linkAccount = account,
+                                        injector = injector,
+                                        onVerificationCompleted = {
+                                            openDialog = false
+                                            verificationCallback(true)
+                                        }
+                                    )
                                 }
-                            )
-                            VerificationBody(
-                                headerStringResId = R.string.verification_header_prefilled,
-                                messageStringResId = R.string.verification_message,
-                                showChangeEmailMessage = false,
-                                linkAccount = account,
-                                injector = injector,
-                                onVerificationCompleted = {
-                                    openDialog = false
-                                    onVerificationCompleted()
-                                }
-                            )
+                            }
                         }
                     }
                 }

@@ -18,10 +18,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
@@ -165,12 +168,18 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
 
-    protected var linkActivityResultLauncher:
+    private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
-    val linkLauncher = linkPaymentLauncherFactory.create(merchantName, null)
+    val linkLauncher =
+        linkPaymentLauncherFactory.create(merchantName, config?.defaultBillingDetails?.email)
 
     private val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
+
+    /**
+     * Function called when the Link verification dialog is dismissed.
+     */
+    var linkVerificationCallback: LinkVerificationCallback? = null
 
     /**
      * This should be initialized from the starter args, and then from that
@@ -414,7 +423,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 when (linkLauncher.setup(stripeIntent, completePayment, this)) {
                     AccountStatus.Verified -> launchLink()
                     AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> _showLinkVerificationDialog.value = true
+                    AccountStatus.NeedsVerification -> {
+                        linkVerificationCallback = { success ->
+                            linkVerificationCallback = null
+                            _showLinkVerificationDialog.value = false
+
+                            if (success) {
+                                launchLink()
+                            }
+                        }
+                        _showLinkVerificationDialog.value = true
+                    }
                     AccountStatus.SignedOut -> {}
                 }
                 _isLinkEnabled.value = true
@@ -424,11 +443,51 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    fun onLinkVerificationDismissed() {
-        _showLinkVerificationDialog.value = false
+    fun payWithLink() {
+        (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
+            savedStateHandle[SAVE_PROCESSING] = true
+            updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+
+            when (linkLauncher.accountStatus.value) {
+                AccountStatus.Verified -> createLinkPaymentDetails(params)
+                AccountStatus.VerificationStarted,
+                AccountStatus.NeedsVerification -> {
+                    linkVerificationCallback = { success ->
+                        linkVerificationCallback = null
+                        _showLinkVerificationDialog.value = false
+
+                        if (success) {
+                            createLinkPaymentDetails(params)
+                        } else {
+                            savedStateHandle[SAVE_PROCESSING] = false
+                            updatePrimaryButtonState(PrimaryButton.State.Ready)
+                        }
+                    }
+                    _showLinkVerificationDialog.value = true
+                }
+                AccountStatus.SignedOut -> {
+                    viewModelScope.launch {
+                        linkLauncher.signUpWithUserInput().fold(
+                            onSuccess = {
+                                createLinkPaymentDetails(params)
+                            },
+                            onFailure = {
+                                savedStateHandle[SAVE_PROCESSING] = false
+                                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    fun payWithLink() {
+    private fun createLinkPaymentDetails(paymentMethodCreateParams: PaymentMethodCreateParams) {
+        viewModelScope.launch {
+            onLinkPaymentDetailsCollected(
+                linkLauncher.attachNewCardToAccount(paymentMethodCreateParams).getOrNull()
+            )
+        }
     }
 
     fun launchLink() {
@@ -449,11 +508,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     /**
-     * Method called with the result of a Link payment.
+     * Method called with the result of launching the Link UI to collect a payment.
      */
-    open fun onLinkPaymentResult(result: LinkActivityResult) {
+    open fun onLinkActivityResult(result: LinkActivityResult) {
         setContentVisible(true)
     }
+
+    /**
+     * Method called after completing collection of payment data for a payment with Link.
+     */
+    abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?)
 
     abstract fun onUserCancel()
 
@@ -470,7 +534,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     open fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             LinkActivityContract(),
-            ::onLinkPaymentResult
+            ::onLinkActivityResult
         )
     }
 
@@ -481,6 +545,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     open fun unregisterFromActivity() {
         linkActivityResultLauncher = null
     }
+
+    protected fun LinkPaymentDetails.convertToPaymentSelection() =
+        PaymentSelection.New.Link(paymentDetails, paymentMethodCreateParams)
 
     data class UserErrorMessage(val message: String)
 

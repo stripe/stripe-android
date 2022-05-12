@@ -1,9 +1,11 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.StripeIntent
 
 /**
  * Interface for a repository that interacts with Link services.
@@ -65,6 +67,7 @@ internal interface LinkRepository {
      */
     suspend fun createPaymentDetails(
         paymentDetails: ConsumerPaymentDetailsCreateParams,
-        consumerSessionClientSecret: String
-    ): Result<ConsumerPaymentDetails>
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent
+    ): Result<LinkPaymentDetails>
 }

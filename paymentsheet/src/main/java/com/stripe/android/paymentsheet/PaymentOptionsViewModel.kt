@@ -16,9 +16,10 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -133,19 +134,31 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _processing.value = true
     }
 
-    override fun onLinkPaymentResult(result: LinkActivityResult) {
+    override fun onLinkActivityResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Success.Selected -> {
-                val linkSelection = PaymentSelection.New.Link(
-                    result.paymentDetails, result.paymentMethodCreateParams
-                )
-                updateSelection(linkSelection)
-                onUserSelection()
+                onLinkPaymentDetailsCollected(result.paymentDetails)
             }
             else -> {
-                super.onLinkPaymentResult(result)
+                if (result is LinkActivityResult.Failed) {
+                    _error.value = result.error.localizedMessage
+                }
+
+                super.onLinkActivityResult(result)
                 _processing.value = false
             }
+        }
+    }
+
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+        linkPaymentDetails?.let {
+            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+            updateSelection(it.convertToPaymentSelection())
+            onUserSelection()
+        } ?: run {
+            // Creating Link PaymentDetails failed, fallback to regular checkout.
+            // paymentSelection is already set to the card parameters from the form.
+            onUserSelection()
         }
     }
 

@@ -1,9 +1,12 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,12 +20,14 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
-    args: LinkActivityContract.Args,
+    private val args: LinkActivityContract.Args,
     private val linkRepository: LinkRepository,
     private val cookieStore: CookieStore
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
+
+    var userSignUpInput: UserSignUpInput? = null
 
     val accountStatus =
         linkAccount.transform { value ->
@@ -89,6 +94,19 @@ internal class LinkAccountManager @Inject constructor(
             }
 
     /**
+     * Use the locally stored user input to sign up for a new Link account, starting verification
+     * if needed.
+     */
+    suspend fun signUpWithUserInput(): Result<LinkAccount> =
+        userSignUpInput?.let {
+            signUp(it.email, it.phone, it.country)
+        } ?: run {
+            Result.failure(
+                IllegalStateException("Must collect consumer info before trying to sign up")
+            )
+        }
+
+    /**
      * Registers the user for a new Link account and starts verification if needed.
      */
     suspend fun signUp(
@@ -139,6 +157,26 @@ internal class LinkAccountManager @Inject constructor(
         )
 
     /**
+     * Creates a new PaymentDetails attached to the current account.
+     *
+     * @return The parameters needed to confirm the current Stripe Intent using the newly created
+     *          Payment Details.
+     */
+    suspend fun createPaymentDetails(
+        paymentMethod: SupportedPaymentMethod,
+        cardPaymentMethodCreateParams: PaymentMethodCreateParams
+    ): Result<LinkPaymentDetails> =
+        linkAccount.value?.let { account ->
+            linkRepository.createPaymentDetails(
+                paymentMethod.createParams(cardPaymentMethodCreateParams, account.email),
+                account.clientSecret,
+                args.stripeIntent
+            )
+        } ?: Result.failure(
+            IllegalStateException("A non-null Link account is needed to create payment details")
+        )
+
+    /**
      * Logs the current consumer out.
      *
      * Regardless of the result of the API call, the local cookie is deleted and the current account
@@ -182,4 +220,10 @@ internal class LinkAccountManager @Inject constructor(
         }
 
     private fun cookie() = cookieStore.getAuthSessionCookie()
+
+    data class UserSignUpInput(
+        val email: String,
+        val phone: String,
+        val country: String
+    )
 }

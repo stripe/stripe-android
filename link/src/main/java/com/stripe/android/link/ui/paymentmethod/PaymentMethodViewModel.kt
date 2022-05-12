@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -15,7 +16,6 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -49,28 +49,28 @@ internal class PaymentMethodViewModel @Inject constructor(
     val paymentMethod = SupportedPaymentMethod.Card()
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
-        val createParams = paymentMethod.createParams(
+        val paymentMethodCreateParams =
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
                 paymentMethod.type
-            ),
-            linkAccount.email
-        )
+            )
 
         viewModelScope.launch {
             _isProcessing.emit(true)
+
             linkRepository.createPaymentDetails(
-                createParams,
-                linkAccount.clientSecret
+                paymentMethod.createParams(
+                    paymentMethodCreateParams,
+                    linkAccount.email
+                ),
+                linkAccount.clientSecret,
+                args.stripeIntent
             ).fold(
-                onSuccess = {
-                    val paymentDetails = it.paymentDetails.first()
+                onSuccess = { paymentDetails ->
                     if (args.completePayment) {
-                        completePayment(paymentDetails, paymentMethod, formValues)
+                        completePayment(paymentDetails, paymentMethod)
                     } else {
-                        val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-                            .createPaymentMethodCreateParams(linkAccount.clientSecret, paymentDetails)
-                        navigator.dismiss(LinkActivityResult.Success.Selected(paymentDetails, params))
+                        navigator.dismiss(LinkActivityResult.Success.Selected(paymentDetails))
                     }
                 },
                 onFailure = ::onError
@@ -84,15 +84,14 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private fun completePayment(
-        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        paymentMethod: SupportedPaymentMethod,
-        formValues: Map<IdentifierSpec, FormFieldEntry>
+        linkPaymentDetails: LinkPaymentDetails,
+        paymentMethod: SupportedPaymentMethod
     ) {
         val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
             .createConfirmStripeIntentParams(
                 linkAccount.clientSecret,
-                paymentDetails,
-                paymentMethod.extraConfirmationParams(formValues)
+                linkPaymentDetails.paymentDetails,
+                paymentMethod.extraConfirmationParams(linkPaymentDetails.paymentMethodCreateParams)
             )
 
         confirmationManager.confirmStripeIntent(params) { result ->

@@ -3,6 +3,7 @@ package com.stripe.android.link.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
@@ -258,7 +259,8 @@ class LinkApiRepositoryTest {
 
         linkRepository.createPaymentDetails(
             consumerPaymentDetailsCreateParams,
-            secret
+            secret,
+            StripeIntentFixtures.PI_SUCCEEDED
         )
 
         verify(stripeRepository).createPaymentDetails(
@@ -276,7 +278,8 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.createPaymentDetails(
             ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
-            "secret"
+            "secret",
+            StripeIntentFixtures.PI_SUCCEEDED
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -290,7 +293,8 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.createPaymentDetails(
             ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
-            "secret"
+            "secret",
+            StripeIntentFixtures.PI_SUCCEEDED
         )
 
         assertThat(result.isFailure).isTrue()

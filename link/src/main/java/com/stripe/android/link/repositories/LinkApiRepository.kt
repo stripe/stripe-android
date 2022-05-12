@@ -5,10 +5,13 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -194,8 +197,9 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun createPaymentDetails(
         paymentDetails: ConsumerPaymentDetailsCreateParams,
-        consumerSessionClientSecret: String
-    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent
+    ): Result<LinkPaymentDetails> = withContext(workContext) {
         runCatching {
             stripeRepository.createPaymentDetails(
                 consumerSessionClientSecret,
@@ -204,7 +208,16 @@ internal class LinkApiRepository @Inject constructor(
                     publishableKeyProvider(),
                     stripeAccountIdProvider()
                 )
-            )
+            )?.paymentDetails?.first()?.let {
+                LinkPaymentDetails(
+                    it,
+                    ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                        .createPaymentMethodCreateParams(
+                            consumerSessionClientSecret,
+                            it
+                        )
+                )
+            }
         }.fold(
             onSuccess = {
                 it?.let {
