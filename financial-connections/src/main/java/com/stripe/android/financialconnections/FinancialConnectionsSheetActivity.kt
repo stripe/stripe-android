@@ -38,13 +38,4 @@ internal class FinancialConnectionsSheetActivity :
         super.onNewIntent(intent)
         viewModel.handleOnNewIntent(intent)
     }
-
-    /**
-     * If the back button is pressed during the manifest fetch or session fetch
-     * return canceled result
-     */
-    override fun onBackPressed() {
-        setResult(Activity.RESULT_OK, Intent().putExtras(Canceled.toBundle()))
-        finish()
-    }
 }

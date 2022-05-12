@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.fragment.app.Fragment
 import com.airbnb.mvrx.MavericksView
@@ -21,6 +23,13 @@ internal class FinancialConnectionsSheetFragment :
     }
 
     private val viewModel: FinancialConnectionsSheetViewModel by activityViewModel()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
+        }
+    }
 
     /**
      * handle state changes here.
