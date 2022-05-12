@@ -98,7 +98,7 @@ dependencies {
 }
 
 shot {
-    tolerance = 2 // 2% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 emulators
+    tolerance = 1 // 1% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 vs m1 emulators
 }
 
 android {
