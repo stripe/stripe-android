@@ -200,6 +200,32 @@ public final class com/stripe/android/identity/databinding/LoadingButtonBinding 
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/identity/databinding/LoadingButtonBinding;
 }
 
+public final class com/stripe/android/identity/databinding/SelfieItemBinding : androidx/viewbinding/ViewBinding {
+	public final field scanningView Lcom/google/android/material/card/MaterialCardView;
+	public final field selfieItem Landroid/widget/ImageView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/SelfieItemBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/SelfieItemBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/SelfieItemBinding;
+}
+
+public final class com/stripe/android/identity/databinding/SelfieScanFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
+	public final field capturedImages Landroidx/recyclerview/widget/RecyclerView;
+	public final field flashMask Landroid/view/View;
+	public final field headerTitle Landroid/widget/TextView;
+	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
+	public final field message Landroid/widget/TextView;
+	public final field resultView Landroid/widget/LinearLayout;
+	public final field scanningView Lcom/google/android/material/card/MaterialCardView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/SelfieScanFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/LinearLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/SelfieScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/SelfieScanFragmentBinding;
+}
+
 public final class com/stripe/android/identity/injection/DaggerIdentityVerificationSheetComponent : com/stripe/android/identity/injection/IdentityVerificationSheetComponent {
 	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityVerificationSheetComponent$Builder;
 	public fun inject (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
