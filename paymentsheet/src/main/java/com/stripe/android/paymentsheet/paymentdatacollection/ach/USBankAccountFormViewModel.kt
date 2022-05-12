@@ -83,7 +83,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 name = name.value,
                 email = email.value,
                 primaryButtonText = application.getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                    R.string.stripe_continue_button_label
                 )
             )
         )
@@ -185,12 +185,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         }
                     }
                     null -> {
-                        reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
+                        reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
                     }
                 }
             }
             is CollectBankAccountResult.Failed -> {
-                reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
             }
             is CollectBankAccountResult.Cancelled -> {
                 reset()
@@ -273,7 +273,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 email = email.value,
                 error = error,
                 primaryButtonText = application.getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                    R.string.stripe_continue_button_label
                 )
             )
         }
@@ -428,7 +428,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 }
             }
             else -> application.getString(
-                R.string.us_bank_account_payment_sheet_primary_button_continue
+                R.string.stripe_continue_button_label
             )
         }
     }
@@ -436,13 +436,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun buildMandateText(): String {
         return if (saveForFutureUse.value) {
             application.getString(
-                R.string.us_bank_account_payment_sheet_mandate_save,
+                R.string.stripe_paymentsheet_ach_save_mandate,
                 formattedMerchantName()
             )
         } else {
-            application.getString(
-                R.string.us_bank_account_payment_sheet_mandate_continue
-            )
+            ACHText.getContinueMandateText(application)
         }
     }
 

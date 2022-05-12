@@ -190,11 +190,11 @@ internal class USBankAccountFormFragment : Fragment() {
                     updateMandateText(
                         if (saved) {
                             getString(
-                                R.string.us_bank_account_payment_sheet_mandate_save,
+                                R.string.stripe_paymentsheet_ach_save_mandate,
                                 viewModel.formattedMerchantName()
                             )
                         } else {
-                            getString(R.string.us_bank_account_payment_sheet_mandate_continue)
+                            ACHText.getContinueMandateText(requireContext())
                         }
                     )
                 }
@@ -378,7 +378,7 @@ internal class USBankAccountFormFragment : Fragment() {
         val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
             H6Text(
-                text = stringResource(R.string.us_bank_account_payment_sheet_title),
+                text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
             Box(
@@ -451,7 +451,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 .padding(bottom = 8.dp)
         ) {
             H6Text(
-                text = stringResource(R.string.us_bank_account_payment_sheet_bank_account),
+                text = stringResource(R.string.title_bank_account),
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             SectionCard(modifier = Modifier.fillMaxWidth()) {
@@ -499,17 +499,17 @@ internal class USBankAccountFormFragment : Fragment() {
             SimpleDialogElementUI(
                 openDialog = openDialog,
                 titleText = stringResource(
-                    id = R.string.us_bank_account_payment_sheet_alert_title
+                    id = R.string.stripe_paymentsheet_remove_bank_account_title
                 ),
                 messageText = stringResource(
-                    id = R.string.us_bank_account_payment_sheet_alert_text,
+                    id = R.string.bank_account_ending_in,
                     last4
                 ),
                 confirmText = stringResource(
-                    id = R.string.us_bank_account_payment_sheet_alert_remove
+                    id = R.string.remove
                 ),
                 dismissText = stringResource(
-                    id = R.string.us_bank_account_payment_sheet_alert_cancel
+                    id = R.string.cancel
                 ),
                 onConfirmListener = {
                     openDialog.value = false
@@ -553,7 +553,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
                 getString(
-                    R.string.us_bank_account_payment_sheet_mandate_verify_with_microdeposit,
+                    R.string.stripe_paymentsheet_microdeposit,
                     viewModel.formattedMerchantName()
                 )
             } else ""
