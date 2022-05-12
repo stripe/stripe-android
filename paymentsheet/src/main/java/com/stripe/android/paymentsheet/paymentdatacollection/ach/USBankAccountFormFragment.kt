@@ -203,6 +203,7 @@ internal class USBankAccountFormFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.currentScreenState.collect { screenState ->
+                    sheetViewModel?.onError(screenState.error)
                     when (screenState) {
                         is USBankAccountFormScreenState.NameAndEmailCollection -> {
                             renderNameAndEmailCollectionScreen(screenState, this)
@@ -328,7 +329,6 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         Column(Modifier.fillMaxWidth()) {
             NameAndEmailForm(screenState.name, screenState.email)
-            sheetViewModel?.onError(screenState.error)
         }
     }
 
@@ -550,6 +550,11 @@ internal class USBankAccountFormFragment : Fragment() {
                         )
                     }
                     onClick()
+                    sheetViewModel?.updatePrimaryButtonUIState(
+                        sheetViewModel?.primaryButtonUIState?.value?.copy(
+                            onClick = null
+                        )
+                    )
                 },
                 enabled = enabled,
                 visible = visible

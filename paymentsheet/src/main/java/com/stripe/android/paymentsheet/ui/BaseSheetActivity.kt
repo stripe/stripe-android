@@ -235,7 +235,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         viewModel.primaryButtonUIState.observe(this) { state ->
             state?.let {
                 primaryButton.setOnClickListener {
-                    state.onClick()
+                    state.onClick?.invoke()
                 }
                 primaryButton.setLabel(state.label)
                 primaryButton.isVisible = state.visible
