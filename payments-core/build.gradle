@@ -51,7 +51,6 @@ dependencies {
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation testLibs.turbine
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"

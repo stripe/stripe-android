@@ -152,7 +152,6 @@ class FinancialConnectionsSheetViewModelTest {
             }
         }
 
-
     @Test
     fun `handleOnNewIntent - when intent with success, then finish with Result#Success`() =
         runTest {

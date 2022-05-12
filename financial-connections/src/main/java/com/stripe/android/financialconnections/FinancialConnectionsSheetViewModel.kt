@@ -61,7 +61,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
-
     }
 
     /**

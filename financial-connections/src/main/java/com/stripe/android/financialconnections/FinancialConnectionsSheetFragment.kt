@@ -60,4 +60,3 @@ internal class FinancialConnectionsSheetFragment :
         requireActivity().finish()
     }
 }
-
