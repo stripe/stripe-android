@@ -87,8 +87,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             linkLauncher = sheetViewModel.linkLauncher
         }
 
-        updateLinkInlineSignupVisibility(paymentMethods[selectedPaymentMethodIndex])
-
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
@@ -117,6 +115,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             if (savedInstanceState == null) {
                 replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
             }
+            updateLinkInlineSignupVisibility(paymentMethods[selectedPaymentMethodIndex])
         }
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()

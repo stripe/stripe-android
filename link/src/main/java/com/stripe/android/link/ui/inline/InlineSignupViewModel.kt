@@ -83,7 +83,7 @@ internal class InlineSignupViewModel @Inject constructor(
         }
     }
 
-    fun onPhoneInputCompleted(phoneNumber: String?) {
+    fun onPhoneInput(phoneNumber: String?) {
         // Email must be valid otherwise phone number collection UI would not be visible
         val email = requireNotNull(consumerEmail.value)
         if (phoneNumber != null) {

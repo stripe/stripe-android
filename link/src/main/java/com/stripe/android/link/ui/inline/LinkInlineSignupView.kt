@@ -102,7 +102,7 @@ private fun LinkInlineSignup(
         enabled = enabled,
         expanded = isExpanded,
         toggleExpanded = viewModel::toggleExpanded,
-        onPhoneInput = viewModel::onPhoneInputCompleted,
+        onPhoneInput = viewModel::onPhoneInput,
         onUserInteracted = onUserInteracted
     )
 }

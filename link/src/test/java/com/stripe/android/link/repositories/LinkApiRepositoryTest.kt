@@ -278,6 +278,7 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `createPaymentDetails returns successful result`() = runTest {
+        val secret = "secret"
         val paymentDetails = mock<ConsumerPaymentDetails.PaymentDetails>().apply {
             whenever(id).thenReturn("id")
         }
@@ -289,7 +290,7 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.createPaymentDetails(
             ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
-            "secret",
+            secret,
             paymentIntent
         )
 
@@ -299,7 +300,7 @@ class LinkApiRepositoryTest {
                 paymentDetails,
                 ConfirmPaymentIntentParamsFactory(paymentIntent)
                     .createPaymentMethodCreateParams(
-                        "secret",
+                        secret,
                         paymentDetails
                     )
             )
