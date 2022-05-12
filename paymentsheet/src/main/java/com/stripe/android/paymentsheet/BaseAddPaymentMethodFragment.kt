@@ -219,7 +219,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             amount: Amount? = null,
             @InjectorKey injectorKey: String,
             newLpm: PaymentSelection.New?,
-            isShowingLinkInlineSignup: Boolean
+            isShowingLinkInlineSignup: Boolean = false
         ): FormFragmentArguments {
 
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
