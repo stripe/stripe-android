@@ -90,7 +90,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onFatal(throwable: Throwable) {
         _fatal.value = throwable
-        _paymentOptionResult.value = PaymentOptionResult.Failed(throwable)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Failed(
+                error = throwable,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     override fun onUserCancel() {
@@ -204,12 +208,20 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Succeeded(
+                paymentSelection = paymentSelection,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Succeeded(
+                paymentSelection = paymentSelection,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {
