@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -37,6 +36,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -959,9 +959,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.notesText.value)
             .isEqualTo(
-                ApplicationProvider.getApplicationContext<Context?>().getString(
-                    R.string.us_bank_account_payment_sheet_saved_mandate
-                )
+                ACHText.getContinueMandateText(ApplicationProvider.getApplicationContext())
             )
 
         viewModel.updateSelection(
