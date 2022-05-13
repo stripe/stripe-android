@@ -128,9 +128,8 @@ internal abstract class BasePaymentMethodsListFragment(
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,
-            addCardClickListener = {
-                transitionToAddPaymentMethod()
-            }
+            addCardClickListener = ::transitionToAddPaymentMethod,
+            linkClickListener = sheetViewModel::launchLink
         ).also {
             viewBinding.recycler.adapter = it
         }
@@ -139,6 +138,7 @@ internal abstract class BasePaymentMethodsListFragment(
             config,
             sheetViewModel.paymentMethods.value.orEmpty(),
             sheetViewModel is PaymentOptionsViewModel,
+            sheetViewModel is PaymentOptionsViewModel && sheetViewModel.isLinkEnabled.value == true,
             sheetViewModel.selection.value
         )
 
