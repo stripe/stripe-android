@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.PaymentIntent
@@ -12,6 +14,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -182,17 +185,17 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class Appearance(
         /**
-         * Describes the colors used while the system is in light mode
+         * Describes the colors used while the system is in light mode.
          */
         val colorsLight: Colors = Colors.defaultLight,
 
         /**
-         * Describes the colors used while the system is in dark mode
+         * Describes the colors used while the system is in dark mode.
          */
         val colorsDark: Colors = Colors.defaultDark,
 
         /**
-         * Describes the appearance of shapes
+         * Describes the appearance of shapes.
          */
         val shapes: Shapes = Shapes.default,
 
@@ -202,7 +205,7 @@ class PaymentSheet internal constructor(
         val typography: Typography = Typography.default,
 
         /**
-         * Describes the appearance of the primary button (e.g., the "Pay" button)
+         * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
         val primaryButton: PrimaryButton = PrimaryButton()
     ) : Parcelable {
@@ -229,99 +232,125 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class Colors(
         /**
-         * A primary color used throughout PaymentSheet
+         * A primary color used throughout PaymentSheet.
          */
         @ColorInt
         val primary: Int,
 
         /**
-         * The color used for the surfaces (backgrounds) of PaymentSheet
+         * The color used for the surfaces (backgrounds) of PaymentSheet.
          */
         @ColorInt
         val surface: Int,
 
         /**
-         * The color used for the background of inputs, tabs, and other components
+         * The color used for the background of inputs, tabs, and other components.
          */
         @ColorInt
         val component: Int,
 
         /**
-         * The color used for borders of inputs, tabs, and other components
+         * The color used for borders of inputs, tabs, and other components.
          */
         @ColorInt
         val componentBorder: Int,
 
         /**
-         * The color of the divider lines used inside inputs, tabs, and other components
+         * The color of the divider lines used inside inputs, tabs, and other components.
          */
         @ColorInt
         val componentDivider: Int,
 
         /**
-         * The default color used for text and on other elements that live on components
+         * The default color used for text and on other elements that live on components.
          */
         @ColorInt
         val onComponent: Int,
 
         /**
-         * The color used for items appearing over the background in Payment Sheet
+         * The color used for items appearing over the background in Payment Sheet.
          */
         @ColorInt
         val onSurface: Int,
 
         /**
          * The color used for text of secondary importance.
-         * For example, this color is used for the label above input fields
+         * For example, this color is used for the label above input fields.
          */
         @ColorInt
         val subtitle: Int,
 
         /**
-         * The color used for input placeholder text
+         * The color used for input placeholder text.
          */
         @ColorInt
         val placeholderText: Int,
 
         /**
-         * The color used for icons in PaymentSheet, such as the close or back icons
+         * The color used for icons in PaymentSheet, such as the close or back icons.
          */
         @ColorInt
         val appBarIcon: Int,
 
         /**
-         * A color used to indicate errors or destructive actions in PaymentSheet
+         * A color used to indicate errors or destructive actions in PaymentSheet.
          */
         @ColorInt
         val error: Int,
     ) : Parcelable {
+        constructor(
+            primary: Color,
+            surface: Color,
+            component: Color,
+            componentBorder: Color,
+            componentDivider: Color,
+            onComponent: Color,
+            subtitle: Color,
+            placeholderText: Color,
+            onSurface: Color,
+            appBarIcon: Color,
+            error: Color,
+        ) : this(
+            primary = primary.toArgb(),
+            surface = surface.toArgb(),
+            component = component.toArgb(),
+            componentBorder = componentBorder.toArgb(),
+            componentDivider = componentDivider.toArgb(),
+            onComponent = onComponent.toArgb(),
+            subtitle = subtitle.toArgb(),
+            placeholderText = placeholderText.toArgb(),
+            onSurface = onSurface.toArgb(),
+            appBarIcon = appBarIcon.toArgb(),
+            error = error.toArgb()
+        )
+
         companion object {
             val defaultLight = Colors(
-                primary = PaymentsThemeDefaults.colorsLight.primary.toArgb(),
-                surface = PaymentsThemeDefaults.colorsLight.surface.toArgb(),
-                component = PaymentsThemeDefaults.colorsLight.component.toArgb(),
-                componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder.toArgb(),
-                componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider.toArgb(),
-                onComponent = PaymentsThemeDefaults.colorsLight.onComponent.toArgb(),
-                subtitle = PaymentsThemeDefaults.colorsLight.subtitle.toArgb(),
-                placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText.toArgb(),
-                onSurface = PaymentsThemeDefaults.colorsLight.onSurface.toArgb(),
-                appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon.toArgb(),
-                error = PaymentsThemeDefaults.colorsLight.error.toArgb(),
+                primary = PaymentsThemeDefaults.colorsLight.primary,
+                surface = PaymentsThemeDefaults.colorsLight.surface,
+                component = PaymentsThemeDefaults.colorsLight.component,
+                componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder,
+                componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider,
+                onComponent = PaymentsThemeDefaults.colorsLight.onComponent,
+                subtitle = PaymentsThemeDefaults.colorsLight.subtitle,
+                placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText,
+                onSurface = PaymentsThemeDefaults.colorsLight.onSurface,
+                appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon,
+                error = PaymentsThemeDefaults.colorsLight.error,
             )
 
             val defaultDark = Colors(
-                primary = PaymentsThemeDefaults.colorsDark.primary.toArgb(),
-                surface = PaymentsThemeDefaults.colorsDark.surface.toArgb(),
-                component = PaymentsThemeDefaults.colorsDark.component.toArgb(),
-                componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder.toArgb(),
-                componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider.toArgb(),
-                onComponent = PaymentsThemeDefaults.colorsDark.onComponent.toArgb(),
-                subtitle = PaymentsThemeDefaults.colorsDark.subtitle.toArgb(),
-                placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText.toArgb(),
-                onSurface = PaymentsThemeDefaults.colorsDark.onSurface.toArgb(),
-                appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon.toArgb(),
-                error = PaymentsThemeDefaults.colorsDark.error.toArgb(),
+                primary = PaymentsThemeDefaults.colorsDark.primary,
+                surface = PaymentsThemeDefaults.colorsDark.surface,
+                component = PaymentsThemeDefaults.colorsDark.component,
+                componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder,
+                componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider,
+                onComponent = PaymentsThemeDefaults.colorsDark.onComponent,
+                subtitle = PaymentsThemeDefaults.colorsDark.subtitle,
+                placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText,
+                onSurface = PaymentsThemeDefaults.colorsDark.onSurface,
+                appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon,
+                error = PaymentsThemeDefaults.colorsDark.error,
             )
         }
     }
@@ -329,15 +358,20 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class Shapes(
         /**
-         * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet
+         * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
         val cornerRadiusDp: Float,
 
         /**
-         * The border used for inputs, tabs, and other components in PaymentSheet
+         * The border used for inputs, tabs, and other components in PaymentSheet.
          */
         val borderStrokeWidthDp: Float,
     ) : Parcelable {
+        constructor(context: Context, cornerRadiusDp: Int, borderStrokeWidthDp: Int) : this(
+            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
+            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp)
+        )
+
         companion object {
             val default = Shapes(
                 cornerRadiusDp = PaymentsThemeDefaults.shapes.cornerRadius,
@@ -350,24 +384,9 @@ class PaymentSheet internal constructor(
     data class Typography(
         /**
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
-         * When this value increases fonts will increase in size and decrease when this value is lowered
+         * When this value increases fonts will increase in size and decrease when this value is lowered.
          */
         val sizeScaleFactor: Float,
-
-        /**
-         * Base weight for text
-         */
-        val normalWeight: Int,
-
-        /**
-         * Medium weight for text
-         */
-        val mediumWeight: Int,
-
-        /**
-         * Bold weight for text
-         */
-        val boldWeight: Int,
 
         /**
          * The font used in text. This should be a resource ID value.
@@ -378,9 +397,6 @@ class PaymentSheet internal constructor(
         companion object {
             val default = Typography(
                 sizeScaleFactor = PaymentsThemeDefaults.typography.fontSizeMultiplier,
-                normalWeight = PaymentsThemeDefaults.typography.fontWeightNormal,
-                mediumWeight = PaymentsThemeDefaults.typography.fontWeightMedium,
-                boldWeight = PaymentsThemeDefaults.typography.fontWeightBold,
                 fontResId = PaymentsThemeDefaults.typography.fontFamily
             )
         }
@@ -389,11 +405,11 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class PrimaryButton(
         /**
-         * Describes the colors used while the system is in light mode
+         * Describes the colors used while the system is in light mode.
          */
         val colorsLight: PrimaryButtonColors = PrimaryButtonColors.defaultLight,
         /**
-         * Describes the colors used while the system is in dark mode
+         * Describes the colors used while the system is in dark mode.
          */
         val colorsDark: PrimaryButtonColors = PrimaryButtonColors.defaultDark,
         /**
@@ -409,22 +425,32 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class PrimaryButtonColors(
         /**
-         * The background color of the primary button
+         * The background color of the primary button.
          * Note: If 'null', Appearance.Colors.primary is used.
          */
         @ColorInt
         val background: Int?,
         /**
-         * The color of the text and icon in the primary button
+         * The color of the text and icon in the primary button.
          */
         @ColorInt
         val onBackground: Int,
         /**
-         * The border color of the primary button
+         * The border color of the primary button.
          */
         @ColorInt
         val border: Int,
     ) : Parcelable {
+        constructor(
+            background: Color?,
+            onBackground: Color,
+            border: Color
+        ) : this(
+            background = background?.toArgb(),
+            onBackground = onBackground.toArgb(),
+            border = border.toArgb()
+        )
+
         companion object {
             val defaultLight = PrimaryButtonColors(
                 background = null,
@@ -444,16 +470,29 @@ class PaymentSheet internal constructor(
     @Parcelize
     data class PrimaryButtonShape(
         /**
-         * The corner radius of the primary button
+         * The corner radius of the primary button.
          * Note: If 'null', Appearance.Shapes.cornerRadiusDp is used.
          */
         val cornerRadiusDp: Float? = null,
         /**
-         * The border width of the primary button
+         * The border width of the primary button.
          * Note: If 'null', Appearance.Shapes.borderStrokeWidthDp is used.
          */
         val borderStrokeWidthDp: Float? = null
-    ) : Parcelable
+    ) : Parcelable {
+        constructor(
+            context: Context,
+            cornerRadiusDp: Int? = null,
+            borderStrokeWidthDp: Int? = null
+        ) : this(
+            cornerRadiusDp = cornerRadiusDp?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            borderStrokeWidthDp = borderStrokeWidthDp?.let {
+                context.getRawValueFromDimenResource(it)
+            }
+        )
+    }
 
     @Parcelize
     data class PrimaryButtonTypography(
