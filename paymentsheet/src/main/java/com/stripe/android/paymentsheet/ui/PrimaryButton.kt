@@ -131,6 +131,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
+        isClickable = true
         originalLabel?.let {
             setLabel(it)
         }
@@ -144,13 +145,14 @@ internal class PrimaryButton @JvmOverloads constructor(
     private fun onStartProcessing() {
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
-
+        isClickable = false
         setLabel(
             resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
         )
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+        isClickable = false
         backgroundTintList = ColorStateList.valueOf(
             resources.getColor(R.color.stripe_paymentsheet_primary_button_success_background)
         )
@@ -212,7 +214,7 @@ internal class PrimaryButton @JvmOverloads constructor(
      */
     internal data class UIState(
         val label: String?,
-        val onClick: () -> Unit,
+        val onClick: (() -> Unit)?,
         val enabled: Boolean,
         val visible: Boolean
     )

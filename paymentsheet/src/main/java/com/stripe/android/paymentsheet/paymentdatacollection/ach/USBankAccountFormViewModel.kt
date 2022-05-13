@@ -274,9 +274,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         saveForFutureUseElement.controller.onValueChange(true)
         _currentScreenState.update {
             USBankAccountFormScreenState.NameAndEmailCollection(
+                error = error,
                 name = name.value,
                 email = email.value,
-                error = error,
                 primaryButtonText = application.getString(
                     R.string.stripe_continue_button_label
                 )
