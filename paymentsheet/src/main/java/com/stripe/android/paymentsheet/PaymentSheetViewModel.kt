@@ -354,6 +354,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
 
+        updatePrimaryButtonUIState(null)
+
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {

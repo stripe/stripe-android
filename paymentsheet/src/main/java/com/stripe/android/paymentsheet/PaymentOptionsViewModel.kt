@@ -95,7 +95,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onUserCancel() {
         _paymentOptionResult.value =
-            PaymentOptionResult.Canceled(mostRecentError = _fatal.value)
+            PaymentOptionResult.Canceled(
+                mostRecentError = _fatal.value,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     override fun onFinish() {
@@ -156,36 +159,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
-        when (selection) {
-            is PaymentSelection.Saved -> {
-                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateBelowButtonText(
-                        ACHText.getContinueMandateText(getApplication())
-                    )
-                    updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = getApplication<Application>().getString(
-                                R.string.stripe_continue_button_label
-                            ),
-                            visible = true,
-                            enabled = true,
-                            onClick = {
-                                processExistingPaymentMethod(selection)
-                            }
-                        )
-                    )
-                } else {
-                    updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = null,
-                            visible = false,
-                            enabled = false,
-                            onClick = { }
-                        )
-                    )
-                }
-            }
-            is PaymentSelection.New -> {
+        when {
+            selection is PaymentSelection.Saved &&
+                selection.paymentMethod.type == PaymentMethod.Type.USBankAccount -> {
+                updateBelowButtonText(
+                    ACHText.getContinueMandateText(getApplication())
+                )
                 updatePrimaryButtonUIState(
                     PrimaryButton.UIState(
                         label = getApplication<Application>().getString(
@@ -194,13 +173,31 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         visible = true,
                         enabled = true,
                         onClick = {
-                            processNewPaymentMethod(selection)
+                            processExistingPaymentMethod(selection)
                         }
                     )
                 )
             }
+            selection is PaymentSelection.Saved -> {
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        visible = false
+                    )
+                )
+            }
             else -> {
-                // no op
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        label = getApplication<Application>().getString(
+                            R.string.stripe_continue_button_label
+                        ),
+                        visible = true,
+                        enabled = true,
+                        onClick = {
+                            onUserSelection()
+                        }
+                    )
+                )
             }
         }
     }

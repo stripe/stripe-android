@@ -5,12 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentOptionResult(
-    val resultCode: Int
+    val resultCode: Int,
+    open val paymentMethods: List<PaymentMethod>? = null
 ) : Parcelable {
     fun toBundle(): Bundle {
         return bundleOf(EXTRA_RESULT to this)
@@ -27,8 +29,11 @@ internal sealed class PaymentOptionResult(
 
     @Parcelize
     data class Canceled(
-        val mostRecentError: Throwable?
-    ) : PaymentOptionResult(Activity.RESULT_CANCELED)
+        val mostRecentError: Throwable?,
+        // The user could have removed a payment method and canceled the flow. We should update
+        // the list of paymentMethods
+        override val paymentMethods: List<PaymentMethod>? = null
+    ) : PaymentOptionResult(Activity.RESULT_CANCELED, paymentMethods)
 
     internal companion object {
         private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
