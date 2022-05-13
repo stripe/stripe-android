@@ -202,9 +202,6 @@ data class FinancialConnectionsAccount(
         @SerialName("balances")
         BALANCES("balances"),
 
-        @SerialName("identity")
-        IDENTITY("identity"),
-
         @SerialName("ownership")
         OWNERSHIP("ownership"),
 
