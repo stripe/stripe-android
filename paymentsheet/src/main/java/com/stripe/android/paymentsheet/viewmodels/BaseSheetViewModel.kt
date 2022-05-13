@@ -212,8 +212,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = if (_primaryButtonUIState.value != null) {
-                    _primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
+                value = if (primaryButtonUIState.value != null) {
+                    primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
                 } else {
                     buttonsEnabled.value == true && selection.value != null
                 }

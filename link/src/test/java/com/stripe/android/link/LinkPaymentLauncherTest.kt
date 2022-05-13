@@ -9,7 +9,6 @@ import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +45,7 @@ class LinkPaymentLauncherTest {
 
     @Test
     fun `verify present() launches LinkActivity with correct arguments`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             launch {
                 val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
                 linkPaymentLauncher.setup(stripeIntent, true, this)

@@ -108,7 +108,7 @@ private fun LinkInlineSignup(
 }
 
 @Composable
-private fun LinkInlineSignup(
+internal fun LinkInlineSignup(
     merchantName: String,
     emailElement: SectionFieldElement,
     signUpState: SignUpState,
