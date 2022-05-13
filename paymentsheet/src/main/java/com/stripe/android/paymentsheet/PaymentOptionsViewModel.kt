@@ -16,9 +16,10 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -90,12 +91,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onFatal(throwable: Throwable) {
         _fatal.value = throwable
-        _paymentOptionResult.value = PaymentOptionResult.Failed(throwable)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Failed(
+                error = throwable,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     override fun onUserCancel() {
         _paymentOptionResult.value =
-            PaymentOptionResult.Canceled(mostRecentError = _fatal.value)
+            PaymentOptionResult.Canceled(
+                mostRecentError = _fatal.value,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     override fun onFinish() {
@@ -134,19 +142,31 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _processing.value = true
     }
 
-    override fun onLinkPaymentResult(result: LinkActivityResult) {
+    override fun onLinkActivityResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Success.Selected -> {
-                val linkSelection = PaymentSelection.New.Link(
-                    result.paymentDetails, result.paymentMethodCreateParams
-                )
-                updateSelection(linkSelection)
-                onUserSelection()
+                onLinkPaymentDetailsCollected(result.paymentDetails)
             }
             else -> {
-                super.onLinkPaymentResult(result)
+                if (result is LinkActivityResult.Failed) {
+                    _error.value = result.error.localizedMessage
+                }
+
+                super.onLinkActivityResult(result)
                 _processing.value = false
             }
+        }
+    }
+
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+        linkPaymentDetails?.let {
+            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+            updateSelection(it.convertToPaymentSelection())
+            onUserSelection()
+        } ?: run {
+            // Creating Link PaymentDetails failed, fallback to regular checkout.
+            // paymentSelection is already set to the card parameters from the form.
+            onUserSelection()
         }
     }
 
@@ -156,36 +176,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
-        when (selection) {
-            is PaymentSelection.Saved -> {
-                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateBelowButtonText(
-                        ACHText.getContinueMandateText(getApplication())
-                    )
-                    updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = getApplication<Application>().getString(
-                                R.string.stripe_continue_button_label
-                            ),
-                            visible = true,
-                            enabled = true,
-                            onClick = {
-                                processExistingPaymentMethod(selection)
-                            }
-                        )
-                    )
-                } else {
-                    updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = null,
-                            visible = false,
-                            enabled = false,
-                            onClick = { }
-                        )
-                    )
-                }
-            }
-            is PaymentSelection.New -> {
+        when {
+            selection is PaymentSelection.Saved &&
+                selection.paymentMethod.type == PaymentMethod.Type.USBankAccount -> {
+                updateBelowButtonText(
+                    ACHText.getContinueMandateText(getApplication())
+                )
                 updatePrimaryButtonUIState(
                     PrimaryButton.UIState(
                         label = getApplication<Application>().getString(
@@ -194,25 +190,52 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         visible = true,
                         enabled = true,
                         onClick = {
-                            processNewPaymentMethod(selection)
+                            processExistingPaymentMethod(selection)
                         }
                     )
                 )
             }
+            selection is PaymentSelection.Saved ||
+                selection is PaymentSelection.GooglePay -> {
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        visible = false
+                    )
+                )
+            }
             else -> {
-                // no op
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        label = getApplication<Application>().getString(
+                            R.string.stripe_continue_button_label
+                        ),
+                        visible = true,
+                        enabled = true,
+                        onClick = {
+                            onUserSelection()
+                        }
+                    )
+                )
             }
         }
     }
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Succeeded(
+                paymentSelection = paymentSelection,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Succeeded(
+                paymentSelection = paymentSelection,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {

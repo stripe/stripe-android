@@ -27,6 +27,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -354,6 +355,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
 
+        updatePrimaryButtonUIState(null)
+
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
@@ -404,17 +407,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
 
-    override fun onLinkPaymentResult(result: LinkActivityResult) {
-        super.onLinkPaymentResult(result)
+    override fun onLinkActivityResult(result: LinkActivityResult) {
+        super.onLinkActivityResult(result)
         onPaymentResult(result.convertToPaymentResult())
     }
 
-    private fun LinkActivityResult.convertToPaymentResult() =
-        when (this) {
-            is LinkActivityResult.Success -> PaymentResult.Completed
-            is LinkActivityResult.Canceled -> PaymentResult.Canceled
-            is LinkActivityResult.Failed -> PaymentResult.Failed(error)
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+        linkPaymentDetails?.let {
+            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+            updateSelection(it.convertToPaymentSelection())
+            checkout(CheckoutIdentifier.SheetBottomBuy)
+        } ?: run {
+            // Link PaymentDetails creationg failed, fallback to regular checkout.
+            // paymentSelection is already set to the card parameters from the form.
+            checkout(CheckoutIdentifier.SheetBottomBuy)
         }
+    }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
@@ -507,6 +515,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onError(@IntegerRes error: Int?) {
         resetViewState(error)
     }
+
+    private fun LinkActivityResult.convertToPaymentResult() =
+        when (this) {
+            is LinkActivityResult.Success -> PaymentResult.Completed
+            is LinkActivityResult.Canceled -> PaymentResult.Canceled
+            is LinkActivityResult.Failed -> PaymentResult.Failed(error)
+        }
 
     internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig
