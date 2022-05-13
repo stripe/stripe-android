@@ -182,7 +182,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     )
                 )
             }
-            selection is PaymentSelection.Saved -> {
+            selection is PaymentSelection.Saved ||
+                selection is PaymentSelection.GooglePay -> {
                 updatePrimaryButtonUIState(
                     primaryButtonUIState.value?.copy(
                         visible = false
