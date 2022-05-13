@@ -7,7 +7,7 @@ import com.stripe.android.stripecardscan.cardimageverification.SavedFrameType
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator.FinalResult
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator.InterimResult
-import com.stripe.android.stripecardscan.framework.util.FrameSaver
+import com.stripe.android.camera.framework.util.FrameSaver
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.CardMatchResult
 import com.stripe.android.stripecardscan.payment.card.RequiresMatchingCard
@@ -33,8 +33,8 @@ internal class MainLoopAggregator(
         MainLoopAnalyzer.Input,
         MainLoopState,
         MainLoopAnalyzer.Prediction,
-        MainLoopAggregator.InterimResult,
-        MainLoopAggregator.FinalResult
+        InterimResult,
+        FinalResult
         >(
         listener = listener,
         initialState = MainLoopState.Initial(
