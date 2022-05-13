@@ -120,10 +120,10 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     fun setLabel(text: String?) {
         externalLabel = text
-        if (state !is State.StartProcessing) {
-            originalLabel = text
-        }
         text?.let {
+            if (state !is State.StartProcessing) {
+                originalLabel = text
+            }
             viewBinding.label.setContent {
                 LabelUI(label = text)
             }

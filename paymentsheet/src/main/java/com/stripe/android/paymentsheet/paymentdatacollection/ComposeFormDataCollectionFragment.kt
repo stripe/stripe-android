@@ -30,6 +30,7 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
@@ -99,6 +100,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             // It automatically restarts the block when the lifecycle is STARTED again.
             formViewModel.completeFormValues
                 .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .distinctUntilChanged()
                 .collect { formFieldValues ->
                     // if the formFieldValues is a change either null or new values for the
                     // newLpm then we should clear it out --- but what happens if we cancel -- selection should

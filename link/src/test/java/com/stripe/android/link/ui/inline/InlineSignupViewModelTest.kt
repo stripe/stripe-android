@@ -48,7 +48,7 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             Truth.assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
 
-            verify(linkAccountManager, times(0)).lookupConsumer(any())
+            verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }
 
     @Test
@@ -64,7 +64,7 @@ class InlineSignupViewModelTest {
                     ConsumerSession.VerificationSession.SessionState.Started
                 )
             )
-            whenever(linkAccountManager.lookupConsumer(any()))
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             // Advance past lookup debounce delay
@@ -80,7 +80,7 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
 
-            whenever(linkAccountManager.lookupConsumer(any()))
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
