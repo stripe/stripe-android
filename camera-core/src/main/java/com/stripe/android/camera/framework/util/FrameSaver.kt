@@ -1,6 +1,7 @@
-package com.stripe.android.stripecardscan.framework.util
+package com.stripe.android.camera.framework.util
 
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.LinkedList
@@ -8,7 +9,8 @@ import java.util.LinkedList
 /**
  * Save data frames for later retrieval.
  */
-internal abstract class FrameSaver<Identifier, Frame, MetaData> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class FrameSaver<Identifier, Frame, MetaData> {
 
     private val saveFrameMutex = Mutex()
     private val savedFrames = mutableMapOf<Identifier, LinkedList<Frame>>()

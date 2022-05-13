@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.framework.util
+package com.stripe.android.camera.framework.util
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
