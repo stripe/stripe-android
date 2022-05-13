@@ -118,7 +118,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
-    private val isPaymentSheet by lazy {
+    private val completePayment by lazy {
         sheetViewModel is PaymentSheetViewModel
     }
 
@@ -240,6 +240,8 @@ internal class USBankAccountFormFragment : Fragment() {
                 viewModel.email.value,
                 viewModel.saveForFutureUse.value
             )
+        sheetViewModel?.updateBelowButtonText(null)
+        sheetViewModel?.updatePrimaryButtonUIState(null)
         viewModel.onDestroy()
         super.onDetach()
     }
@@ -276,7 +278,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            shouldProcess = isPaymentSheet
+            shouldProcess = completePayment
         )
         updateMandateText(
             screenState.mandateText
@@ -296,7 +298,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            shouldProcess = isPaymentSheet
+            shouldProcess = completePayment
         )
         updateMandateText(
             screenState.mandateText
@@ -316,7 +318,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            shouldProcess = isPaymentSheet
+            shouldProcess = completePayment
         )
         updateMandateText(
             screenState.mandateText

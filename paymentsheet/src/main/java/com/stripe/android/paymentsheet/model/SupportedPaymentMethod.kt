@@ -408,7 +408,7 @@ sealed class SupportedPaymentMethod(
                 AfterpayClearpay,
                 // Affirm // TODO: uncomment once we are ready to go live
                 // AuBecsDebit // TODO: uncomment once we are ready to go live
-                 USBankAccount // TODO: uncomment once we are ready to go live
+                // USBankAccount // TODO: uncomment once we are ready to go live
             )
         }
 
