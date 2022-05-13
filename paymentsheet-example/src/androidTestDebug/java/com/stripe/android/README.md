@@ -5,7 +5,7 @@ To Run Screenshot tests, takes 30 seconds a test and is long running:
 ./gradlew executeScreenshotTests
 
 To Run Screenshot tests for a specific file (and test method):
-./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.screenshot.TestPaymentSheetScreenshots#testPaymentSheetReturningCustomerLight
+./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.TestPaymentSheetScreenshots#testPaymentSheetReturningCustomerLight
 
 After running you can check the report here: ./stripe-android/paymentsheet-example/build/reports/shot/debug/verification/index.html
 
