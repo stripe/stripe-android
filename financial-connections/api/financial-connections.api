@@ -13,6 +13,8 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Companion {
 	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration : android/os/Parcelable {
