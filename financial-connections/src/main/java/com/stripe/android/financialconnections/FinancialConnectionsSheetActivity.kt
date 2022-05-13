@@ -12,15 +12,13 @@ internal class FinancialConnectionsSheetActivity :
 
     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
 
-    private val starterArgs: FinancialConnectionsSheetActivityArgs? by lazy {
-        FinancialConnectionsSheetActivityArgs.fromIntent(intent)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             val fragment = FinancialConnectionsSheetFragment().apply {
-                arguments = requireNotNull(starterArgs).asMavericksArgs()
+                arguments = requireNotNull(
+                    FinancialConnectionsSheetActivityArgs.fromIntent(intent)
+                ).asMavericksArgs()
             }
             supportFragmentManager.beginTransaction()
                 .setReorderingAllowed(true)
