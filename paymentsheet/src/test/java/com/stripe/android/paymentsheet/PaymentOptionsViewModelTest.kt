@@ -80,7 +80,8 @@ internal class PaymentOptionsViewModelTest {
 
         assertThat(paymentOptionResult).isEqualTo(
             PaymentOptionResult.Succeeded(
-                SELECTION_SAVED_PAYMENT_METHOD
+                SELECTION_SAVED_PAYMENT_METHOD,
+                listOf()
             )
         )
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
@@ -100,7 +101,8 @@ internal class PaymentOptionsViewModelTest {
             assertThat(paymentOptionResult)
                 .isEqualTo(
                     PaymentOptionResult.Succeeded(
-                        NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION
+                        NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                        listOf()
                     )
                 )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
