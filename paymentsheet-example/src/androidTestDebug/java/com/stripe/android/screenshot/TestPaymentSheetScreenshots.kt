@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.screenshot
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.espresso.IdlingPolicies
@@ -27,7 +27,6 @@ import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@Ignore
 class TestPaymentSheetScreenshots {
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
@@ -62,7 +61,8 @@ class TestPaymentSheetScreenshots {
         saveForFutureUseCheckboxVisible = true,
         useBrowser = null,
         authorizationAction = null,
-        takeScreenshotOnLpmLoad = true
+        takeScreenshotOnLpmLoad = true,
+        snapshotReturningCustomer = true
     )
 
     @Test
@@ -81,7 +81,6 @@ class TestPaymentSheetScreenshots {
 
     @Test
     fun testPaymentSheetReturningCustomerLight() {
-        // todo skyler: build a returning customer that always has the same PMs saved.
         testDriver.screenshotRegression(
             testParams.copy(forceDarkMode = false, customer = Customer.Returning)
         )
