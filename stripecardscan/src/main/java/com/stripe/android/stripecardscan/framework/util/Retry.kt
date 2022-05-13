@@ -1,7 +1,7 @@
 package com.stripe.android.stripecardscan.framework.util
 
-import com.stripe.android.camera.framework.util.UnexpectedRetryException
 import com.stripe.android.camera.framework.time.Duration
+import com.stripe.android.camera.framework.util.UnexpectedRetryException
 import kotlinx.coroutines.delay
 
 private const val DEFAULT_RETRIES = 3

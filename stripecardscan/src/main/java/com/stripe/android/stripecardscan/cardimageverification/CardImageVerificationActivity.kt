@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
@@ -25,6 +26,7 @@ import com.stripe.android.stripecardscan.cardimageverification.exception.Unknown
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
 import com.stripe.android.stripecardscan.framework.api.NetworkResult
+import com.stripe.android.stripecardscan.framework.api.dto.PayloadInfo
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
 import com.stripe.android.stripecardscan.framework.api.uploadSavedFrames
@@ -33,6 +35,7 @@ import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
+import com.stripe.android.stripecardscan.framework.util.toVerificationFrameData
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.payment.card.getCardIssuer
@@ -145,6 +148,12 @@ internal open class CardImageVerificationActivity :
     private var imageConfigs: AcceptedImageConfigs = AcceptedImageConfigs()
 
     /**
+     * The scan stats tracker for main loop duration
+     */
+    private var mainLoopStatsTracker: StatTracker? = null
+    private var currentScanPayloadInfo: PayloadInfo? = null
+
+    /**
      * The listener which handles results from the scan.
      */
     override val resultListener: CardImageVerificationResultListener =
@@ -166,15 +175,29 @@ internal open class CardImageVerificationActivity :
 
             override fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>) {
                 launch {
-                    when (
-                        val result = uploadSavedFrames(
-                            stripePublishableKey = params.stripePublishableKey,
-                            civId = params.cardImageVerificationIntentId,
-                            civSecret = params.cardImageVerificationIntentSecret,
-                            savedFrames = frames,
-                            imageConfigs = imageConfigs,
-                        )
-                    ) {
+                    mainLoopStatsTracker?.trackResult("complete")
+                    mainLoopStatsTracker = null
+
+                    val imageCompressionStat = Stats.trackTask("image_compression_duration")
+
+                    val verificationFramesAndPayload = frames.toVerificationFrameData(imageConfigs)
+                    currentScanPayloadInfo = verificationFramesAndPayload.second
+
+                    imageCompressionStat.trackResult("complete")
+
+                    val completionLoopStat = Stats.trackTask("completion_loop_duration")
+
+                    val result = uploadSavedFrames(
+                        stripePublishableKey = params.stripePublishableKey,
+                        civId = params.cardImageVerificationIntentId,
+                        civSecret = params.cardImageVerificationIntentSecret,
+                        savedFrames = frames,
+                        verificationFramesData = verificationFramesAndPayload.first,
+                    )
+
+                    completionLoopStat.trackResult("complete")
+
+                    when (result) {
                         is NetworkResult.Success ->
                             cardImageVerificationComplete(pan)
                         is NetworkResult.Error ->
@@ -312,6 +335,13 @@ internal open class CardImageVerificationActivity :
     override fun onResume() {
         super.onResume()
         scanState = CardVerificationScanState.NotFound
+        mainLoopStatsTracker = Stats.trackTask("main_loop_duration")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        launch { mainLoopStatsTracker?.trackResult("paused") }
+        mainLoopStatsTracker = null
     }
 
     private fun ensureValidParams() = when {
@@ -615,7 +645,9 @@ internal open class CardImageVerificationActivity :
             scanConfig = ScanConfig(
                 strictModeFrameCount = params.configuration.strictModeFrames.count,
             ),
+            payloadInfo = currentScanPayloadInfo
         )
+        currentScanPayloadInfo = null
         super.closeScanner()
     }
 }

@@ -5,10 +5,10 @@ import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerification
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsFormat
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsImageSettings
 
-internal enum class ImageFormat {
-    HEIC,
-    JPEG,
-    WEBP;
+internal enum class ImageFormat(val string: String) {
+    HEIC("heic"),
+    JPEG("jpeg"),
+    WEBP("webp");
 
     companion object {
         fun fromValue(value: CardImageVerificationDetailsFormat): ImageFormat =
