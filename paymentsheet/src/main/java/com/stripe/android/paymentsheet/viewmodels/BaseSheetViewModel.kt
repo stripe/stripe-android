@@ -367,7 +367,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         savedStateHandle[SAVE_SELECTION] = selection
 
         updateBelowButtonText(null)
-        updatePrimaryButtonUIState(null)
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
@@ -407,6 +406,18 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         it,
                         paymentMethodId
                     )
+                }
+
+                if (_paymentMethods.value?.all {
+                    it.type != PaymentMethod.Type.USBankAccount
+                } == true
+                ) {
+                    updatePrimaryButtonUIState(
+                        primaryButtonUIState.value?.copy(
+                            visible = false
+                        )
+                    )
+                    updateBelowButtonText(null)
                 }
             }
         }
