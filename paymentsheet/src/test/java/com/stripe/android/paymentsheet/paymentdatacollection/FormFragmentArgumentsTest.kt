@@ -81,7 +81,7 @@ class FormFragmentArgumentsTest {
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.Generic("card[exp_month]") to "1",
                 IdentifierSpec.Generic("card[exp_year]") to "2024",
-                IdentifierSpec.Generic("card[cvc]") to "111"
+                IdentifierSpec.CardCvc to "111"
             )
         )
     }

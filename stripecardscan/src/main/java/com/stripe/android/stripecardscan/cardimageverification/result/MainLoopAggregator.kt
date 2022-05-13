@@ -1,10 +1,12 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
+import com.stripe.android.camera.framework.AggregateResultListener
+import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrameType
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
-import com.stripe.android.camera.framework.AggregateResultListener
-import com.stripe.android.camera.framework.ResultAggregator
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator.FinalResult
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator.InterimResult
 import com.stripe.android.stripecardscan.framework.util.FrameSaver
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.CardMatchResult

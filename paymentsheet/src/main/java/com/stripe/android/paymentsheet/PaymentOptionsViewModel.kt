@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFa
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -155,14 +156,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
-
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
                     updateBelowButtonText(
-                        getApplication<Application>().getString(
-                            R.string.us_bank_account_payment_sheet_saved_mandate
-                        )
+                        ACHText.getContinueMandateText(getApplication())
                     )
                     updatePrimaryButtonUIState(
                         PrimaryButton.UIState(
@@ -176,10 +174,33 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             }
                         )
                     )
+                } else {
+                    updatePrimaryButtonUIState(
+                        PrimaryButton.UIState(
+                            label = null,
+                            visible = false,
+                            enabled = false,
+                            onClick = { }
+                        )
+                    )
                 }
             }
+            is PaymentSelection.New -> {
+                updatePrimaryButtonUIState(
+                    PrimaryButton.UIState(
+                        label = getApplication<Application>().getString(
+                            R.string.stripe_continue_button_label
+                        ),
+                        visible = true,
+                        enabled = true,
+                        onClick = {
+                            processNewPaymentMethod(selection)
+                        }
+                    )
+                )
+            }
             else -> {
-                // no-op
+                // no op
             }
         }
     }

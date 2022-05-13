@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -18,6 +17,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -251,7 +252,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm saved payment methods`() = runTest {
+    fun `checkout() should confirm saved card payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -269,6 +270,33 @@ internal class PaymentSheetViewModelTest {
                     CLIENT_SECRET,
                     paymentMethodOptions = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `checkout() should confirm saved us_bank_account payment methods`() = runTest {
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
+        viewModel.startConfirm.observeForever {
+            confirmParams.add(it)
+        }
+
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout(CheckoutIdentifier.None)
+
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    mandateData = MandateDataParams(
+                        type = MandateDataParams.Type.Online.DEFAULT
                     )
                 )
             )
@@ -809,14 +837,15 @@ internal class PaymentSheetViewModelTest {
             .isTrue()
 
         viewModel.setEditing(true)
-        assertThat(isEnabled)
-            .isFalse()
-
         viewModel.updatePrimaryButtonUIState(
             primaryButtonUIState.copy(
                 enabled = true
             )
         )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
         assertThat(isEnabled)
             .isTrue()
 
@@ -930,9 +959,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.notesText.value)
             .isEqualTo(
-                ApplicationProvider.getApplicationContext<Context?>().getString(
-                    R.string.us_bank_account_payment_sheet_saved_mandate
-                )
+                ACHText.getContinueMandateText(ApplicationProvider.getApplicationContext())
             )
 
         viewModel.updateSelection(

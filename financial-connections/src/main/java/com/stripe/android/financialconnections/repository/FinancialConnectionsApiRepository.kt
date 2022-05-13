@@ -75,6 +75,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             url = generateHostedUrl,
             options = options,
             params = mapOf(
+                PARAMS_FULLSCREEN to true,
+                PARAMS_HIDE_CLOSE_BUTTON to true,
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_APPLICATION_ID to applicationId
             ),
@@ -139,6 +141,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
         internal const val PARAMS_APPLICATION_ID = "application_id"
+        internal const val PARAMS_FULLSCREEN = "fullscreen"
+        internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
 
         internal const val listAccountsUrl: String =
             "$API_HOST/v1/link_account_sessions/list_accounts"

@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -357,9 +358,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
                     updateBelowButtonText(
-                        getApplication<Application>().getString(
-                            R.string.us_bank_account_payment_sheet_saved_mandate
-                        )
+                        ACHText.getContinueMandateText(getApplication())
                     )
                 }
             }

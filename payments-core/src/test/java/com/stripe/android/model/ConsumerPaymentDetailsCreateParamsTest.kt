@@ -25,11 +25,13 @@ class ConsumerPaymentDetailsCreateParamsTest {
                             "extra" to "1"
                         )
                     )
-                )
+                ),
+                "email@stripe.com"
             ).toParamMap()
         ).isEqualTo(
             mapOf(
                 "type" to "card",
+                "billing_email_address" to "email@stripe.com",
                 "card" to mapOf(
                     "number" to "123",
                     "exp_month" to "12",

@@ -24,7 +24,7 @@ jobs:
           script: |
             adb logcat -c
             adb logcat &
-            ./gradlew connectedAndroidTest
+            ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
         env:
           STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
           STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
@@ -33,7 +33,7 @@ jobs:
         if: failure()
         with:
           name: instrumentation-test-report
-          path: example/build/reports/androidTests/connected/index.html
+          path: example/build/reports/androidTests/connected/index.html | paymentsheet-example/build/reports/androidTests/connected/index.html
 
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
@@ -41,11 +41,12 @@ jobs:
         run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
 
 
+
   # This should be updated to use the browserstack github actions when supported
   browserstack-instrumentation-tests:
     name: Browserstack Instrumentation tests
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1

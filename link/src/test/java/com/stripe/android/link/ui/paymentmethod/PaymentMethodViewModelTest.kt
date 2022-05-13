@@ -47,7 +47,9 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
     private val clientSecret = "client_secret"
-    private val linkAccount = mock<LinkAccount>()
+    private val linkAccount = mock<LinkAccount>().also {
+        whenever(it.email).thenReturn("email@stripe.com")
+    }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
     private val linkAccountManager = mock<LinkAccountManager>()
@@ -84,6 +86,7 @@ class PaymentMethodViewModelTest {
         assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
             mapOf(
                 "type" to "card",
+                "billing_email_address" to "email@stripe.com",
                 "card" to mapOf(
                     "number" to "5555555555554444",
                     "exp_month" to "12",
