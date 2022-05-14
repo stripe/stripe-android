@@ -159,6 +159,9 @@ internal class PaymentOptionsAdapter(
             // Google Pay
             items.indexOfFirst { it is Item.GooglePay }.takeIf { it != -1 },
 
+            // Link
+            items.indexOfFirst { it is Item.Link }.takeIf { it != -1 },
+
             // the first payment method
             items.indexOfFirst { it is Item.SavedPaymentMethod }.takeIf { it != -1 }
         ).firstOrNull() ?: NO_POSITION
@@ -465,7 +468,6 @@ internal class PaymentOptionsAdapter(
                     isSelected = isSelected,
                     isEnabled = isEnabled,
                     iconRes = R.drawable.stripe_link_mark,
-                    iconModifier = Modifier.height(18.dp).width(38.dp),
                     labelText = itemView.resources.getString(R.string.link),
                     description = itemView.resources.getString(R.string.link),
                     onItemSelectedListener = onItemSelectedListener,
@@ -576,7 +578,6 @@ internal fun PaymentOptionUi(
     isEditing: Boolean,
     isEnabled: Boolean,
     iconRes: Int,
-    iconModifier: Modifier? = null,
     @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
     removePmDialogTitle: String = "",
@@ -617,7 +618,7 @@ internal fun PaymentOptionUi(
                 Image(
                     painter = painterResource(iconRes),
                     contentDescription = null,
-                    modifier = iconModifier ?: Modifier
+                    modifier = Modifier
                         .height(40.dp)
                         .width(56.dp)
                 )
