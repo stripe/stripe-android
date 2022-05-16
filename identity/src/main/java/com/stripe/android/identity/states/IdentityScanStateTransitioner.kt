@@ -1,5 +1,6 @@
 package com.stripe.android.identity.states
 
+import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.states.IdentityScanState.Found
 import com.stripe.android.identity.states.IdentityScanState.Initial
@@ -10,23 +11,27 @@ import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
  * Interface to determine how to transition between [IdentityScanState]s.
  */
 internal interface IdentityScanStateTransitioner {
-    fun transitionFromInitial(
+    suspend fun transitionFromInitial(
         initialState: Initial,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState
 
-    fun transitionFromFound(
+    suspend fun transitionFromFound(
         foundState: Found,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState
 
-    fun transitionFromSatisfied(
+    suspend fun transitionFromSatisfied(
         satisfiedState: Satisfied,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState
 
-    fun transitionFromUnsatisfied(
+    suspend fun transitionFromUnsatisfied(
         unsatisfiedState: Unsatisfied,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState
 }
