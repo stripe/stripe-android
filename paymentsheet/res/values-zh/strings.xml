@@ -23,8 +23,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[保存您的 %s 银行账户即表示您同意按照<terms>这些条款</terms>授权付款。]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">国家或地区</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
