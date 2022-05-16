@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.BankRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
@@ -25,17 +24,11 @@ class AsyncResourceRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : ResourceRepository {
-    private lateinit var bankRepository: BankRepository
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
-        loadingJobs.add(
-            CoroutineScope(workContext).launch {
-                bankRepository = BankRepository(resources)
-            }
-        )
         loadingJobs.add(
             CoroutineScope(workContext).launch {
                 addressRepository = AddressFieldElementRepository(resources)
@@ -57,6 +50,5 @@ class AsyncResourceRepository @Inject constructor(
 
     override fun isLoaded() = loadingJobs.isEmpty()
 
-    override fun getBankRepository() = bankRepository
     override fun getAddressRepository() = addressRepository
 }

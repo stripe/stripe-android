@@ -6,18 +6,18 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-data class BankDropdownSpec(
+data class DropdownSpec(
     override val identifier: IdentifierSpec,
     @StringRes val label: Int,
-    val bankType: SupportedBankType
+    val items: List<DropdownItemSpec>
 ) : SectionFieldSpec(identifier) {
-    fun transform(bankRepository: BankRepository, initialValue: String?): SectionFieldElement =
+    fun transform(initialValue: String?): SectionFieldElement =
         SimpleDropdownElement(
             this.identifier,
             DropdownFieldController(
                 SimpleDropdownConfig(
                     label,
-                    bankRepository.get(this.bankType)
+                    items
                 ),
                 initialValue = initialValue
             )
