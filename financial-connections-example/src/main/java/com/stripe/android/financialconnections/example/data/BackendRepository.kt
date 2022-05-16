@@ -6,5 +6,10 @@ class BackendRepository(
     private val backendService: BackendApiService = BackendApiFactory(BASE_URL).create()
 ) {
 
-    suspend fun createLinkAccountSession() = backendService.createLinkAccountSession()
+    suspend fun createLinkAccountSession() =
+        backendService.createLinkAccountSession()
+
+    suspend fun createLinkAccountSessionForToken() =
+        backendService.createLinkAccountSessionForToken()
+
 }
