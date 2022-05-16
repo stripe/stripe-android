@@ -118,7 +118,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
-    private val isPaymentSheet by lazy {
+    private val completePayment by lazy {
         sheetViewModel is PaymentSheetViewModel
     }
 
@@ -203,6 +203,7 @@ internal class USBankAccountFormFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.currentScreenState.collect { screenState ->
+                    sheetViewModel?.onError(screenState.error)
                     when (screenState) {
                         is USBankAccountFormScreenState.NameAndEmailCollection -> {
                             renderNameAndEmailCollectionScreen(screenState, this)
@@ -239,6 +240,8 @@ internal class USBankAccountFormFragment : Fragment() {
                 viewModel.email.value,
                 viewModel.saveForFutureUse.value
             )
+        sheetViewModel?.updateBelowButtonText(null)
+        sheetViewModel?.updatePrimaryButtonUIState(null)
         viewModel.onDestroy()
         super.onDetach()
     }
@@ -275,7 +278,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            shouldProcess = isPaymentSheet
+            shouldProcess = completePayment
         )
         updateMandateText(
             screenState.mandateText
@@ -295,7 +298,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            shouldProcess = isPaymentSheet
+            shouldProcess = completePayment
         )
         updateMandateText(
             screenState.mandateText
@@ -315,7 +318,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            shouldProcess = isPaymentSheet
+            shouldProcess = completePayment
         )
         updateMandateText(
             screenState.mandateText
@@ -328,7 +331,6 @@ internal class USBankAccountFormFragment : Fragment() {
     ) {
         Column(Modifier.fillMaxWidth()) {
             NameAndEmailForm(screenState.name, screenState.email)
-            sheetViewModel?.onError(screenState.error)
         }
     }
 
@@ -550,6 +552,11 @@ internal class USBankAccountFormFragment : Fragment() {
                         )
                     }
                     onClick()
+                    sheetViewModel?.updatePrimaryButtonUIState(
+                        sheetViewModel?.primaryButtonUIState?.value?.copy(
+                            onClick = null
+                        )
+                    )
                 },
                 enabled = enabled,
                 visible = visible

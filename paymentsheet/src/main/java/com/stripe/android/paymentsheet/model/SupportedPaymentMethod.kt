@@ -406,9 +406,9 @@ sealed class SupportedPaymentMethod(
                 Klarna,
                 PayPal,
                 AfterpayClearpay,
+                USBankAccount,
                 // Affirm // TODO: uncomment once we are ready to go live
                 // AuBecsDebit // TODO: uncomment once we are ready to go live
-                // USBankAccount // TODO: uncomment once we are ready to go live
             )
         }
 

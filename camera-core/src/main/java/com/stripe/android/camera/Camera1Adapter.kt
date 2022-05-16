@@ -160,7 +160,13 @@ class Camera1Adapter(
                     CameraPreviewImage(
                         image = NV21Image(imageWidth, imageHeight, bytes)
                             .toBitmap(getRenderScript(activity))
-                            .rotate(mRotation.toFloat()),
+                            .rotate(
+                                if (currentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                                    mRotation.toFloat()
+                                } else {
+                                    -mRotation.toFloat()
+                                }
+                            ),
                         viewBounds = Rect(
                             previewView.left,
                             previewView.top,
@@ -405,7 +411,7 @@ class Camera1Adapter(
     private fun setCameraDisplayOrientation(activity: Activity) {
         val camera = mCamera ?: return
         val info = Camera.CameraInfo()
-        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info)
+        Camera.getCameraInfo(currentCameraId, info)
 
         val rotation = activity.windowManager.defaultDisplay.rotation
         val degrees = rotation.rotationToDegrees()

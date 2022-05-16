@@ -6,15 +6,22 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal sealed class USBankAccountFormScreenState {
-    data class NameAndEmailCollection(
-        @StringRes val error: Int? = null,
+internal sealed class USBankAccountFormScreenState(
+    @StringRes open val error: Int? = null
+) {
+    class NameAndEmailCollection(
+        @StringRes override val error: Int? = null,
         val name: String,
         val email: String?,
         val primaryButtonText: String?
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
-            this.copy(name = name, email = email)
+            NameAndEmailCollection(
+                error = error,
+                name = name,
+                email = email,
+                primaryButtonText = primaryButtonText
+            )
     }
 
     data class MandateCollection(
