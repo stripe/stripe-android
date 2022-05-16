@@ -23,8 +23,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Αποθηκεύοντας τον τραπεζικό λογαριασμό σας για την %s, συμφωνείτε να εξουσιοδοτείτε πληρωμές σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Προσθήκη</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Στοιχεία κάρτας</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Χώρα ή περιοχή</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->

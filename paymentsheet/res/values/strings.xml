@@ -23,8 +23,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[By saving your bank account for %s you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->

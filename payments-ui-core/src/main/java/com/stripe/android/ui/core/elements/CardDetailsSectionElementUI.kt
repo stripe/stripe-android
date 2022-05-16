@@ -30,7 +30,7 @@ fun CardDetailsSectionElementUI(
             .fillMaxWidth()
     ) {
         H6Text(
-            text = stringResource(R.string.card_information),
+            text = stringResource(R.string.stripe_paymentsheet_add_payment_method_card_information),
             modifier = Modifier
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
