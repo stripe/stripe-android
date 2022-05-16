@@ -50,8 +50,11 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.H6Text
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.elements.SectionController
+import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import kotlinx.coroutines.CoroutineScope
@@ -392,7 +395,20 @@ internal class USBankAccountFormFragment : Fragment() {
             ) {
                 SectionElementUI(
                     enabled = !processing.value,
-                    element = viewModel.nameElement,
+                    element = SectionElement(
+                        identifier = IdentifierSpec.Name,
+                        fields = listOf(
+                            viewModel.nameElement.apply {
+                                setRawValue(
+                                    mapOf(IdentifierSpec.Name to name)
+                                )
+                            }
+                        ),
+                        controller = SectionController(
+                            null,
+                            listOf(viewModel.nameElement.sectionFieldErrorController())
+                        ),
+                    ),
                     emptyList(),
                     null
                 )
@@ -405,7 +421,20 @@ internal class USBankAccountFormFragment : Fragment() {
             ) {
                 SectionElementUI(
                     enabled = !processing.value,
-                    element = viewModel.emailElement,
+                    element = SectionElement(
+                        identifier = IdentifierSpec.Email,
+                        fields = listOf(
+                            viewModel.emailElement.apply {
+                                setRawValue(
+                                    mapOf(IdentifierSpec.Email to email)
+                                )
+                            }
+                        ),
+                        controller = SectionController(
+                            null,
+                            listOf(viewModel.emailElement.sectionFieldErrorController())
+                        )
+                    ),
                     emptyList(),
                     viewModel.emailElement.identifier
                 )

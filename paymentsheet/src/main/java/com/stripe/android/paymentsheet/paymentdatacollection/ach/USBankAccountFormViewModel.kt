@@ -4,6 +4,8 @@ import android.app.Application
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -33,12 +35,13 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SimpleTextElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import dagger.Lazy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,19 +62,25 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val nameElement: SectionElement = NameSpec().transform(
-        mapOf(
-            IdentifierSpec.Name to args.formArgs.billingDetails?.name
-        )
+    internal val nameElement = SimpleTextElement(
+        IdentifierSpec.Name,
+        SimpleTextFieldController(
+            SimpleTextFieldConfig(
+                label = com.stripe.android.ui.core.R.string.address_label_name,
+                capitalization = KeyboardCapitalization.Words,
+                keyboard = KeyboardType.Text
+            ),
+            initialValue = args.formArgs.billingDetails?.name
+        ),
     )
+
     val name: StateFlow<String> = nameElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val emailElement: SectionElement = EmailSpec().transform(
-        mapOf(
-            IdentifierSpec.Email to args.formArgs.billingDetails?.email
-        )
+    val emailElement = EmailElement(
+        IdentifierSpec.Email,
+        initialValue = args.formArgs.billingDetails?.email
     )
     val email: StateFlow<String?> = emailElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
