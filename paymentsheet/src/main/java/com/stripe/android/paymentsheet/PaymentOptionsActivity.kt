@@ -133,9 +133,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
-                    viewBinding.continueButton.isVisible =
+                    val visible =
                         fragment is PaymentOptionsAddPaymentMethodFragment ||
-                        viewModel.primaryButtonUIState.value?.visible == true
+                            viewModel.primaryButtonUIState.value?.visible == true
+                    viewBinding.continueButton.isVisible = visible
+                    viewBinding.bottomSpacer.isVisible = visible
                 }
             },
             false
