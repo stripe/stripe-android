@@ -33,6 +33,106 @@ import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
+@Composable
+fun NameFieldSection(
+    value: String,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction,
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit,
+    onValidValue: (String?) -> Unit
+) {
+    TextField(
+        value = value,
+        config = SimpleTextFieldConfig.NAME,
+        modifier = modifier,
+        imeAction = imeAction,
+        enabled = enabled,
+        onValueChanged = onValueChanged,
+        onValidValue = onValidValue
+    )
+}
+
+@Composable
+fun NameFieldSection(
+    textFieldController: TextFieldController,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction,
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit = {},
+    onValidValue: (String?) -> Unit = {}
+) {
+    TextField(
+        textFieldController = textFieldController,
+        modifier = modifier,
+        imeAction = imeAction,
+        enabled = enabled,
+        onValueChanged = onValueChanged,
+        onValidValue = onValidValue
+    )
+}
+
+@Composable
+fun EmailFieldSection(
+    textFieldController: TextFieldController,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction,
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit = {},
+    onValidValue: (String?) -> Unit = {}
+) {
+    TextField(
+        textFieldController = textFieldController,
+        modifier = modifier,
+        imeAction = imeAction,
+        enabled = enabled,
+        onValueChanged = onValueChanged,
+        onValidValue = onValidValue
+    )
+}
+
+//@Composable
+//fun TextField(
+//    initialValue: String,
+//    config: TextFieldConfig,
+//    modifier: Modifier = Modifier,
+//    imeAction: ImeAction,
+//    enabled: Boolean,
+//    onValueChanged: (String) -> Unit,
+//    onValidValue: (String?) -> Unit
+//) {
+//    val controller = remember {
+//        SimpleTextFieldController(
+//            config,
+//            initialValue = initialValue,
+//            showOptionalLabel = false
+//        )
+//    }
+//
+//    val label by controller.label.collectAsState(null)
+//    val error by controller.error.collectAsState(null)
+//
+//    val sectionErrorString = error?.let {
+//        it.formatArgs?.let { args ->
+//            stringResource(
+//                it.errorMessage,
+//                *args
+//            )
+//        } ?: stringResource(it.errorMessage)
+//    }
+//
+//    Section(label, sectionErrorString) {
+//        TextField(
+//            textFieldController = controller,
+//            enabled = enabled,
+//            imeAction = imeAction,
+//            modifier = modifier,
+//            onValueChanged = onValueChanged,
+//            onValidValue = onValidValue
+//        )
+//    }
+//}
+
 /**
  * This is focused on converting an `Element` into what is displayed in a textField.
  * - some focus logic
@@ -40,11 +140,13 @@ import com.stripe.android.ui.core.R
  * - calls through to the Elements worker functions for focus change and value change events
  */
 @Composable
-internal fun TextField(
+fun TextField(
     textFieldController: TextFieldController,
     modifier: Modifier = Modifier,
     imeAction: ImeAction,
-    enabled: Boolean
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit = {},
+    onValidValue: (String?) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
@@ -79,7 +181,11 @@ internal fun TextField(
 
     TextField(
         value = value,
-        onValueChange = { textFieldController.onValueChange(it) },
+        onValueChange = {
+            val validValue = textFieldController.onValueChange(it)
+            onValueChanged(it)
+            onValidValue(validValue)
+        },
         modifier = modifier
             .fillMaxWidth()
             .onPreviewKeyEvent { event ->

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface TextFieldController : InputController {
-    fun onValueChange(displayFormatted: String)
+    fun onValueChange(displayFormatted: String) : String?
     fun onFocusChange(newHasFocus: Boolean)
 
     val debugLabel: String
@@ -108,11 +108,17 @@ class SimpleTextFieldController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String) : String? {
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
+
+        return if(_fieldState.value .isValid()){
+            _fieldValue.value
+        }else {
+            null
+        }
     }
 
     /**

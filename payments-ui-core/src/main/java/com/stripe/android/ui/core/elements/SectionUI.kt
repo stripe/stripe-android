@@ -19,7 +19,7 @@ import com.stripe.android.ui.core.PaymentsTheme
  * by the caller, and an error string.
  */
 @Composable
-internal fun Section(
+fun Section(
     @StringRes title: Int?,
     error: String?,
     contentOutsideCard: @Composable () -> Unit = {},

@@ -102,7 +102,7 @@ internal class StripeCollectBankAccountLauncher constructor(
 sealed class CollectBankAccountConfiguration : Parcelable {
     @Parcelize
     data class USBankAccount(
-        val name: String,
+        val name: String?,
         val email: String?
     ) : Parcelable, CollectBankAccountConfiguration()
 }

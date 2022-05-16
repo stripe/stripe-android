@@ -11,11 +11,11 @@ internal sealed class USBankAccountFormScreenState(
 ) {
     class NameAndEmailCollection(
         @StringRes override val error: Int? = null,
-        val name: String,
+        val name: String?,
         val email: String?,
         val primaryButtonText: String?
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
+        override fun updateInputs(name: String?, email: String?, saveForFutureUsage: Boolean) =
             NameAndEmailCollection(
                 error = error,
                 name = name,
@@ -25,7 +25,7 @@ internal sealed class USBankAccountFormScreenState(
     }
 
     data class MandateCollection(
-        val name: String,
+        val name: String?,
         val email: String?,
         val paymentAccount: FinancialConnectionsAccount,
         val financialConnectionsSessionId: String,
@@ -34,12 +34,12 @@ internal sealed class USBankAccountFormScreenState(
         val mandateText: String,
         val saveForFutureUsage: Boolean,
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
+        override fun updateInputs(name: String?, email: String?, saveForFutureUsage: Boolean) =
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
     }
 
     data class VerifyWithMicrodeposits(
-        val name: String,
+        val name: String?,
         val email: String?,
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
@@ -48,12 +48,12 @@ internal sealed class USBankAccountFormScreenState(
         val mandateText: String,
         val saveForFutureUsage: Boolean,
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
+        override fun updateInputs(name: String?, email: String?, saveForFutureUsage: Boolean) =
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
     }
 
     data class SavedAccount(
-        val name: String,
+        val name: String?,
         val email: String?,
         val financialConnectionsSessionId: String?,
         val intentId: String,
@@ -63,14 +63,14 @@ internal sealed class USBankAccountFormScreenState(
         val mandateText: String,
         val saveForFutureUsage: Boolean,
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
+        override fun updateInputs(name: String?, email: String?, saveForFutureUsage: Boolean) =
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
     }
 
     data class ConfirmIntent(
         val confirmIntentParams: ConfirmStripeIntentParams
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) = this
+        override fun updateInputs(name: String?, email: String?, saveForFutureUsage: Boolean) = this
     }
 
     data class Finished(
@@ -80,11 +80,11 @@ internal sealed class USBankAccountFormScreenState(
         val last4: String,
         val bankName: String
     ) : USBankAccountFormScreenState() {
-        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) = this
+        override fun updateInputs(name: String?, email: String?, saveForFutureUsage: Boolean) = this
     }
 
     abstract fun updateInputs(
-        name: String,
+        name: String?,
         email: String?,
         saveForFutureUsage: Boolean
     ): USBankAccountFormScreenState
