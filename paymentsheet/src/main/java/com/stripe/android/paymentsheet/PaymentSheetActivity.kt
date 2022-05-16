@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -32,8 +31,6 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -91,7 +88,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setActivityResult(
@@ -112,6 +108,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 return
             }
         }
+        super.onCreate(savedInstanceState)
 
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -137,7 +134,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             bottomSheetController.expand()
         }
 
-        setupBuyButton()
         setupTopContainer()
 
         linkButton.apply {
@@ -198,7 +194,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.selection.observe(this) {
             clearErrorMessages()
-            setupBuyButton()
+            resetPrimaryButtonState()
         }
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
@@ -257,35 +253,23 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         buttonContainer.isVisible = true
     }
 
-    private fun setupBuyButton() {
+    override fun resetPrimaryButtonState() {
         viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
 
         if (viewModel.isProcessingPaymentIntent) {
-            viewModel.amount.observe(this) {
-                viewBinding.buyButton.setLabel(
-                    requireNotNull(it).buildPayButtonLabel(resources)
-                )
-            }
+            viewBinding.buyButton.setLabel(
+                viewModel.amount.value?.buildPayButtonLabel(resources)
+            )
         } else {
             viewBinding.buyButton.setLabel(
                 resources.getString(R.string.stripe_setup_button_label)
             )
         }
 
-        val buttonColor = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-            PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
-        )
-        viewBinding.buyButton.setAppearanceConfiguration(
-            PaymentsTheme.primaryButtonStyle,
-            buttonColor
-        )
-
         viewBinding.buyButton.setOnClickListener {
             clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
-
-        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun setupTopContainer() {

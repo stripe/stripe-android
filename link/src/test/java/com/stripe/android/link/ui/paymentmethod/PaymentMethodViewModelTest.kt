@@ -11,6 +11,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.confirmation.PaymentConfirmationCallback
@@ -47,7 +48,9 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
     private val clientSecret = "client_secret"
-    private val linkAccount = mock<LinkAccount>()
+    private val linkAccount = mock<LinkAccount>().also {
+        whenever(it.email).thenReturn("email@stripe.com")
+    }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
     private val linkAccountManager = mock<LinkAccountManager>()
@@ -73,17 +76,24 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment creates PaymentDetails`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+        whenever(
+            linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         createViewModel().startPayment(cardFormFieldValues)
 
         val paramsCaptor = argumentCaptor<ConsumerPaymentDetailsCreateParams>()
-        verify(linkRepository).createPaymentDetails(paramsCaptor.capture(), any())
+        verify(linkRepository).createPaymentDetails(
+            paramsCaptor.capture(),
+            any(),
+            any(),
+            anyOrNull()
+        )
 
         assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
             mapOf(
                 "type" to "card",
+                "billing_email_address" to "email@stripe.com",
                 "card" to mapOf(
                     "number" to "5555555555554444",
                     "exp_month" to "12",
@@ -100,8 +110,16 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment completes payment when PaymentDetails creation succeeds and completePayment is true`() =
         runTest {
-            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-                .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+            val value = createLinkPaymentDetails()
+            whenever(
+                linkRepository.createPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
+                .thenReturn(Result.success(value))
 
             createViewModel().startPayment(cardFormFieldValues)
 
@@ -140,31 +158,39 @@ class PaymentMethodViewModelTest {
     fun `startPayment returns PaymentMethodCreateParams when PaymentDetails creation succeeds and completePayment is false`() =
         runTest {
             whenever(args.completePayment).thenReturn(false)
-            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-                .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+
+            val linkPaymentDetails = createLinkPaymentDetails()
+            whenever(
+                linkRepository.createPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
+                .thenReturn(Result.success(linkPaymentDetails))
 
             createViewModel().startPayment(cardFormFieldValues)
 
             val paramsCaptor = argumentCaptor<LinkActivityResult>()
             verify(navigator).dismiss(paramsCaptor.capture())
 
-            val paymentDetails =
-                PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first()
             assertThat(paramsCaptor.firstValue).isEqualTo(
-                LinkActivityResult.Success.Selected(
-                    paymentDetails,
-                    PaymentMethodCreateParams.createLink(
-                        paymentDetails.id,
-                        clientSecret
-                    )
-                )
+                LinkActivityResult.Success.Selected(linkPaymentDetails)
             )
         }
 
     @Test
     fun `startPayment dismisses Link on success`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+        whenever(
+            linkRepository.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
+            .thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
         whenever(
@@ -186,8 +212,15 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment starts processing`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+        whenever(
+            linkRepository.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
+            .thenReturn(Result.success(createLinkPaymentDetails()))
 
         val viewModel = createViewModel()
 
@@ -203,8 +236,15 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment stops processing on error`() = runTest {
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS))
+        whenever(
+            linkRepository.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
+            .thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
         whenever(
@@ -283,6 +323,18 @@ class PaymentMethodViewModelTest {
             confirmationManager,
             logger
         )
+
+    private fun createLinkPaymentDetails() =
+        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first().let {
+            LinkPaymentDetails(
+                it,
+                PaymentMethodCreateParams.createLink(
+                    it.id,
+                    clientSecret,
+                    mapOf("card" to mapOf("cvc" to "123"))
+                )
+            )
+        }
 
     private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
 }

@@ -50,6 +50,30 @@ class PrimaryButtonTest {
     }
 
     @Test
+    fun `onStartProcessing() and onFinishingState() should make button not clickable`() {
+        primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.updateState(
+            PrimaryButton.State.StartProcessing
+        )
+        assertThat(primaryButton.isClickable).isFalse()
+
+        primaryButton.updateState(
+            PrimaryButton.State.Ready
+        )
+        assertThat(primaryButton.isClickable).isTrue()
+
+        primaryButton.updateState(
+            PrimaryButton.State.FinishProcessing({})
+        )
+        assertThat(primaryButton.isClickable).isFalse()
+
+        primaryButton.updateState(
+            PrimaryButton.State.Ready
+        )
+        assertThat(primaryButton.isClickable).isTrue()
+    }
+
+    @Test
     fun `onReadyState() should update label`() {
         primaryButton.setLabel("Pay $10.99")
         primaryButton.backgroundTintList = ColorStateList.valueOf(Color.BLACK)

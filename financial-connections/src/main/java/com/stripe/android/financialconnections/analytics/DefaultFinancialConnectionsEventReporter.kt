@@ -4,7 +4,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,10 +27,10 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
 
     override fun onResult(
         configuration: FinancialConnectionsSheet.Configuration,
-        financialConnectionsSheetResult: FinancialConnectionsSheetContract.Result
+        financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     ) {
         val event = when (financialConnectionsSheetResult) {
-            is FinancialConnectionsSheetContract.Result.Completed ->
+            is FinancialConnectionsSheetActivityResult.Completed ->
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
@@ -38,7 +38,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
-            is FinancialConnectionsSheetContract.Result.Canceled ->
+            is FinancialConnectionsSheetActivityResult.Canceled ->
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
                     mapOf(
@@ -46,7 +46,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
-            is FinancialConnectionsSheetContract.Result.Failed ->
+            is FinancialConnectionsSheetActivityResult.Failed ->
                 FinancialConnectionsAnalyticsEvent(
                     FinancialConnectionsAnalyticsEvent.Code.SheetFailed,
                     mapOf(

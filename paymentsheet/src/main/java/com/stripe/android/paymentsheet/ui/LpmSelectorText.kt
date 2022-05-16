@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +31,7 @@ internal fun LpmSelectorText(
                 modifier = Modifier.padding(horizontal = 4.dp),
                 painter = painterResource(it),
                 contentDescription = null,
-                tint = MaterialTheme.colors.onSurface
+                tint = PaymentsTheme.colors.material.onSurface
             )
         }
         Text(

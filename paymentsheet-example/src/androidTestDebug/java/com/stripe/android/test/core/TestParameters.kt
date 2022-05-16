@@ -22,7 +22,8 @@ data class TestParameters(
     val authorizationAction: AuthorizeAction? = null,
     val takeScreenshotOnLpmLoad: Boolean = false,
     val forceDarkMode: Boolean? = null,
-    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+    val snapshotReturningCustomer: Boolean = false
 )
 
 /**

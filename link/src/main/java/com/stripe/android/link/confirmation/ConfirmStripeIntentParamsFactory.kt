@@ -17,9 +17,7 @@ import kotlinx.parcelize.RawValue
 internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams> {
 
     abstract fun createConfirmStripeIntentParams(
-        consumerSessionClientSecret: String,
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        extraParams: Map<String, @RawValue Any>? = null
+        paymentMethodCreateParams: PaymentMethodCreateParams
     ): T
 
     abstract fun createPaymentMethodCreateParams(
@@ -41,15 +39,9 @@ internal class ConfirmPaymentIntentParamsFactory(
     private val paymentIntent: PaymentIntent
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
     override fun createConfirmStripeIntentParams(
-        consumerSessionClientSecret: String,
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        extraParams: Map<String, @RawValue Any>?
+        paymentMethodCreateParams: PaymentMethodCreateParams
     ) = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-        createPaymentMethodCreateParams(
-            consumerSessionClientSecret,
-            selectedPaymentDetails,
-            extraParams
-        ),
+        paymentMethodCreateParams,
         paymentIntent.clientSecret!!
     )
 
@@ -68,15 +60,9 @@ internal class ConfirmSetupIntentParamsFactory(
     private val setupIntent: SetupIntent
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
     override fun createConfirmStripeIntentParams(
-        consumerSessionClientSecret: String,
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        extraParams: Map<String, @RawValue Any>?
+        paymentMethodCreateParams: PaymentMethodCreateParams
     ) = ConfirmSetupIntentParams.Companion.create(
-        createPaymentMethodCreateParams(
-            consumerSessionClientSecret,
-            selectedPaymentDetails,
-            extraParams
-        ),
+        paymentMethodCreateParams,
         setupIntent.clientSecret!!
     )
 

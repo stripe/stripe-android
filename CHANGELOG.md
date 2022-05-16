@@ -1,4 +1,18 @@
 # CHANGELOG
+## XX.X.X - 2022-05.XX
+This release adds `us_bank_account` PaymentMethod to PaymentSheet.
+
+### PaymentSheet
+* [FIXED][5011](https://github.com/stripe/stripe-android/pull/5011) fix flying payment sheet by downgrading material from 1.6 to 1.5
+* [ADDED][4964](https://github.com/stripe/stripe-android/pull/4964) `us_bank_account` PaymentMethod is now available in PaymentSheet
+
+## 20.2.2 - 2022-05-09
+This release contains bug fixes in PaymentSheet.
+
+### PaymentSheet
+* [FIXED][4966](https://github.com/stripe/stripe-android/pull/4966) Replaced alpha androidx.lifecycle dependencies with stable versions
+* [FIXED][4961](https://github.com/stripe/stripe-android/pull/4961) Fix issue entering text with small forms.
+
 ## 20.2.1 - 2022-05-03
 This release contains bug fixes in PaymentSheet and Payments.
 

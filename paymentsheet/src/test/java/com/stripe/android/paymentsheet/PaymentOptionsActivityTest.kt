@@ -79,7 +79,7 @@ class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null)
+                PaymentOptionResult.Canceled(null, listOf())
             )
         }
     }
@@ -100,7 +100,7 @@ class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null)
+                PaymentOptionResult.Canceled(null, listOf())
             )
         }
     }

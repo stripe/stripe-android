@@ -132,7 +132,7 @@ class PaymentSheet internal constructor(
         val allowsDelayedPaymentMethods: Boolean = false,
 
         /**
-         * Describes the appearance of Payment Sheet
+         * Describes the appearance of Payment Sheet.
          */
         val appearance: Appearance = Appearance()
     ) : Parcelable {

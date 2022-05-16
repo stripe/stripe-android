@@ -42,7 +42,16 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     CheckoutCustomer.WithId(it)
                 } ?: CheckoutCustomer.New
             }
-            else -> CheckoutCustomer.Returning
+            else -> {
+                val useSnapshotCustomer = intent.extras?.get(
+                    USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA
+                ) as Boolean?
+                if (useSnapshotCustomer != null && useSnapshotCustomer) {
+                    CheckoutCustomer.Snapshot
+                } else {
+                    CheckoutCustomer.Returning
+                }
+            }
         }
 
     private val googlePayConfig: PaymentSheet.GooglePayConfiguration?
@@ -392,6 +401,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         const val APPEARANCE_EXTRA = "Appearance"
+        const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
     }

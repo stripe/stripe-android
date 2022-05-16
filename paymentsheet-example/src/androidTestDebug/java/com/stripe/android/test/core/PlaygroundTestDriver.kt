@@ -174,8 +174,6 @@ class PlaygroundTestDriver(
             compareScreenshot(it)
         }
 
-        Espresso.pressBack()
-
         teardown()
     }
 
@@ -201,6 +199,8 @@ class PlaygroundTestDriver(
         while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     /**
@@ -210,6 +210,8 @@ class PlaygroundTestDriver(
         while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     private fun verifyDeviceSupportsTestAuthorization(
@@ -374,6 +376,10 @@ class PlaygroundTestDriver(
         intent.putExtra(
             PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
             testParameters.appearance
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
+            testParameters.snapshotReturningCustomer
         )
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->

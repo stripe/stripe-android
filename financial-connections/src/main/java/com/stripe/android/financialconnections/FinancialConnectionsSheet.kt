@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
-import com.stripe.android.financialconnections.launcher.DefaultFinancialConnectionsSheetLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import kotlinx.parcelize.Parcelize
@@ -52,7 +52,7 @@ class FinancialConnectionsSheet internal constructor(
             callback: FinancialConnectionsSheetResultCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
-                DefaultFinancialConnectionsSheetLauncher(activity, callback)
+                FinancialConnectionsSheetForDataLauncher(activity, callback)
             )
         }
 
@@ -67,7 +67,7 @@ class FinancialConnectionsSheet internal constructor(
             callback: FinancialConnectionsSheetResultCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
-                DefaultFinancialConnectionsSheetLauncher(fragment, callback)
+                FinancialConnectionsSheetForDataLauncher(fragment, callback)
             )
         }
 
@@ -77,8 +77,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param activity  the Activity that is presenting the connections sheet.
          * @param callback  called with the result of the connections session after the connections sheet is dismissed.
          */
-        @Suppress("UnusedPrivateMember")
-        private fun createForBankAccountToken(
+        fun createForBankAccountToken(
             activity: ComponentActivity,
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {
@@ -93,8 +92,7 @@ class FinancialConnectionsSheet internal constructor(
          * @param fragment the Fragment that is presenting the payment sheet.
          * @param callback called with the result of the payment after the payment sheet is dismissed.
          */
-        @Suppress("UnusedPrivateMember")
-        private fun createForBankAccountToken(
+        fun createForBankAccountToken(
             fragment: Fragment,
             callback: (FinancialConnectionsSheetForTokenResult) -> Unit
         ): FinancialConnectionsSheet {

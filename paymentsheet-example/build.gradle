@@ -98,6 +98,10 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
 }
 
+shot {
+    tolerance = 1 // 1% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 vs m1 emulators
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion

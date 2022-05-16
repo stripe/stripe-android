@@ -59,6 +59,7 @@ sealed class IdentifierSpec(val v1: String) : Parcelable {
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand
             CardNumber.v1 -> CardNumber
+            CardCvc.v1 -> CardCvc
             City.v1 -> City
             Country.v1 -> Country
             Email.v1 -> Email

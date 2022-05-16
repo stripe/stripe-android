@@ -67,7 +67,7 @@
 
         <Button
             android:id="@+id/appearance_button"
-            android:text="Appearance Customization"
+            android:text="@string/appearance_playground"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginEnd="16dp"

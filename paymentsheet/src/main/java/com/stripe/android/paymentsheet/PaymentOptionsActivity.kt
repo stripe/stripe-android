@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -26,8 +25,6 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getBackgroundColor
 
 /**
  * An `Activity` for selecting a payment option.
@@ -97,8 +94,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        setupContinueButton()
-
         viewModel.transition.observe(this) { event ->
             clearErrorMessages()
             event?.getContentIfNotHandled()?.let { transitionTarget ->
@@ -132,34 +127,26 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.selection.observe(this) {
             clearErrorMessages()
-            setupContinueButton()
+            resetPrimaryButtonState()
         }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
-                    viewBinding.continueButton.isVisible =
+                    val visible =
                         fragment is PaymentOptionsAddPaymentMethodFragment ||
-                        viewModel.primaryButtonUIState.value?.visible == true
+                            viewModel.primaryButtonUIState.value?.visible == true
+                    viewBinding.continueButton.isVisible = visible
+                    viewBinding.bottomSpacer.isVisible = visible
                 }
             },
             false
         )
     }
 
-    private fun setupContinueButton() {
+    override fun resetPrimaryButtonState() {
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
-
-        viewModel.config?.let {
-            val buttonColor = it.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
-            )
-            viewBinding.continueButton.setAppearanceConfiguration(
-                PaymentsTheme.primaryButtonStyle,
-                buttonColor
-            )
-        }
 
         viewBinding.continueButton.setLabel(
             getString(R.string.stripe_continue_button_label)
@@ -169,8 +156,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             clearErrorMessages()
             viewModel.onUserSelection()
         }
-
-        viewBinding.bottomSpacer.isVisible = true
     }
 
     private fun onTransitionTarget(

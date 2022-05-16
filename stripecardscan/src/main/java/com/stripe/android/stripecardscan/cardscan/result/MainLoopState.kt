@@ -1,8 +1,8 @@
 package com.stripe.android.stripecardscan.cardscan.result
 
-import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.seconds
+import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 

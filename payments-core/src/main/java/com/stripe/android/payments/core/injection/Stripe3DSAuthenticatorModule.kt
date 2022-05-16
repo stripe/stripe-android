@@ -20,6 +20,7 @@ import javax.inject.Singleton
         Stripe3ds2TransactionModule::class
     ]
 )
+@SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class Stripe3DSAuthenticatorModule {
     @IntentAuthenticatorMap
     @Binds

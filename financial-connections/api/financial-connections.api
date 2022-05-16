@@ -13,6 +13,8 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Companion {
 	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration : android/os/Parcelable {
@@ -122,7 +124,7 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetContract$Args;Lcom/stripe/android/financialconnections/domain/GenerateFinancialConnectionsSessionManifest;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
+	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs;Lcom/stripe/android/financialconnections/domain/GenerateFinancialConnectionsSessionManifest;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken;Landroidx/lifecycle/SavedStateHandle;Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 }
 
 public final class com/stripe/android/financialconnections/analytics/DefaultFinancialConnectionsEventReporter_Factory : dagger/internal/Factory {
@@ -161,7 +163,7 @@ public final class com/stripe/android/financialconnections/di/FinancialConnectio
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesConfigurationFactory;
 	public fun get ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesConfiguration (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetContract$Args;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;
+	public static fun providesConfiguration (Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesEnableLoggingFactory : dagger/internal/Factory {
@@ -634,7 +636,6 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions : java/lang/Enum {
 	public static final field BALANCES Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field Companion Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions$Companion;
-	public static final field IDENTITY Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field OWNERSHIP Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field PAYMENT_METHOD Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field TRANSACTIONS Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;

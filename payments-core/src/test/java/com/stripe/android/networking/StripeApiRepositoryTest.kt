@@ -1806,8 +1806,10 @@ internal class StripeApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val clientSecret = "secret"
+            val email = "email@stripe.com"
             val paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
+                email
             )
             create().createPaymentDetails(
                 clientSecret,
@@ -1824,6 +1826,7 @@ internal class StripeApiRepositoryTest {
                 }
                 assertEquals(this["active"], false)
                 assertEquals(this["type"], "card")
+                assertEquals(this["billing_email_address"], email)
                 withNestedParams("billing_address") {
                     assertEquals(this["country_code"], "US")
                     assertEquals(this["postal_code"], "94111")

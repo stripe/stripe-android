@@ -22,7 +22,7 @@ internal val cardBillingSection = SectionSpec(
 val CardForm = LayoutSpec.create(
     CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
     cardBillingSection,
-    SaveForFutureUseSpec(emptyList())
+    SaveForFutureUseSpec()
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.framework.ml
 import com.stripe.android.stripecardscan.framework.ml.ssd.RectForm
 import com.stripe.android.stripecardscan.framework.ml.ssd.areaClamped
 import com.stripe.android.stripecardscan.framework.ml.ssd.overlapWith
-import java.util.ArrayList
 
 /**
  * In this project we implement HARD NMS and NOT Soft NMS. I highly recommend checkout SOFT NMS

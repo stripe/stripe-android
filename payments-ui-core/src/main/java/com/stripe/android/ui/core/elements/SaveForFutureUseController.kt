@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SaveForFutureUseController(
-    identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList(),
     saveForFutureUseInitialValue: Boolean
 ) : InputController {
     override val label: Flow<Int> = MutableStateFlow(
@@ -27,11 +26,6 @@ class SaveForFutureUseController(
     override val formFieldValue: Flow<FormFieldEntry> =
         combine(isComplete, rawFieldValue) { complete, value ->
             FormFieldEntry(value, complete)
-        }
-
-    val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
-        saveForFutureUse.map { saveFutureUseInstance ->
-            identifiersRequiredForFutureUse.takeUnless { saveFutureUseInstance } ?: emptyList()
         }
 
     fun onValueChange(saveForFutureUse: Boolean) {

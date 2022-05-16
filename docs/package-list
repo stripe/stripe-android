@@ -55,9 +55,11 @@ com.stripe.android.ui.core.elements
 com.stripe.android.ui.core.elements.menu
 com.stripe.android.ui.core.forms
 com.stripe.android.ui.core.forms.resources
+com.stripe.android.ui.core.forms.resources.injection
 module:paymentsheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.paymentdatacollection.ach
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
