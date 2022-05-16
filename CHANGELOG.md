@@ -1,5 +1,5 @@
 # CHANGELOG
-## XX.X.X - 2022-05.XX
+## 20.3.0 - 2022-05.16
 This release adds `us_bank_account` PaymentMethod to PaymentSheet.
 
 ### PaymentSheet
