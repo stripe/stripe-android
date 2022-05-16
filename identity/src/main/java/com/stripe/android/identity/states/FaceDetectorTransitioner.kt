@@ -76,10 +76,8 @@ internal class FaceDetectorTransitioner(
             metaData: AnalyzerOutput
         ) = SELFIES
 
-
         fun selfieCollected(): Int = getSavedFrames()[SELFIES]?.size ?: 0
     }
-
 
     override suspend fun transitionFromInitial(
         initialState: Initial,
@@ -138,7 +136,8 @@ internal class FaceDetectorTransitioner(
                 )
                 if (selfieFrameSaver.selfieCollected() >= selfieCapturePage.numSamples) {
                     Log.d(
-                        TAG, "A valid selfie captured, enough selfie " +
+                        TAG,
+                        "A valid selfie captured, enough selfie " +
                             "collected(${selfieCapturePage.numSamples}), transitions to Satisfied"
                     )
                     Satisfied(foundState.type, this)
@@ -179,11 +178,11 @@ internal class FaceDetectorTransitioner(
     }
 
     private fun isFaceValid(analyzerOutput: FaceDetectorOutput) =
-        isFaceCentered(analyzerOutput.boundingBox)
-            && isFaceFocused()
-            && isFaceAwayFromEdges(analyzerOutput.boundingBox)
-            && isFaceCoverageOK(analyzerOutput.boundingBox)
-            && isFaceScoreOverThreshold(analyzerOutput.resultScore)
+        isFaceCentered(analyzerOutput.boundingBox) &&
+            isFaceFocused() &&
+            isFaceAwayFromEdges(analyzerOutput.boundingBox) &&
+            isFaceCoverageOK(analyzerOutput.boundingBox) &&
+            isFaceScoreOverThreshold(analyzerOutput.resultScore)
 
     /**
      * Check face is centered by making sure center of face is
@@ -203,9 +202,9 @@ internal class FaceDetectorTransitioner(
 
     private fun isFaceAwayFromEdges(boundingBox: BoundingBox): Boolean {
         selfieCapturePage.minEdgeThreshold.let { edgeThreshold ->
-            return boundingBox.top > edgeThreshold && boundingBox.left > edgeThreshold
-                && (boundingBox.top + boundingBox.height) < (1 - edgeThreshold)
-                && (boundingBox.left + boundingBox.width) < (1 - edgeThreshold)
+            return boundingBox.top > edgeThreshold && boundingBox.left > edgeThreshold &&
+                (boundingBox.top + boundingBox.height) < (1 - edgeThreshold) &&
+                (boundingBox.left + boundingBox.width) < (1 - edgeThreshold)
         }
     }
 

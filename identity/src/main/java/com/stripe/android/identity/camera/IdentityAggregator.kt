@@ -86,9 +86,9 @@ internal class IdentityAggregator(
             val previousState = state
             state = previousState.consumeTransition(frame, result)
             val interimResult = InterimResult(state)
-            return when (state) {
+            return interimResult to when (state) {
                 is IdentityScanState.Finished -> {
-                    interimResult to FinalResult(
+                    FinalResult(
                         frame,
                         result,
                         state,
@@ -96,7 +96,7 @@ internal class IdentityAggregator(
                     )
                 }
                 is IdentityScanState.TimeOut -> {
-                    interimResult to FinalResult(
+                    FinalResult(
                         frame,
                         result,
                         state,
@@ -104,7 +104,7 @@ internal class IdentityAggregator(
                     )
                 }
                 else -> {
-                    interimResult to null
+                    null
                 }
             }
         } else {

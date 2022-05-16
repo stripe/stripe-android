@@ -31,7 +31,6 @@ internal class FaceDetectorTransitionerTest {
 
     private val mockSelfieFrameSaver = mock<FaceDetectorTransitioner.SelfieFrameSaver>()
 
-
     @Test
     fun `Initial transitions to TimeOut when timeout`() = runBlocking {
         val transitioner =

@@ -45,7 +45,7 @@ internal sealed class IdentityScanState(
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
-        override suspend  fun consumeTransition(
+        override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
             analyzerOutput: AnalyzerOutput
         ) =
@@ -61,7 +61,7 @@ internal sealed class IdentityScanState(
         transitioner: IdentityScanStateTransitioner,
         internal var reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
-        override suspend  fun consumeTransition(
+        override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
             analyzerOutput: AnalyzerOutput
         ) =
@@ -78,7 +78,7 @@ internal sealed class IdentityScanState(
         transitioner: IdentityScanStateTransitioner,
         val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
-        override suspend  fun consumeTransition(
+        override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
             analyzerOutput: AnalyzerOutput
         ) =
