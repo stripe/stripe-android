@@ -35,6 +35,7 @@
     <item name="stripeExpiryStrokeSize" format="float" type="dimen" description="The size of the outline of the expiry text displayed in the middle of the view finder window">2.5</item>
 
     <dimen name="stripeInstructionsTextSize" description="The size of the instructions text above the view finder window">22sp</dimen>
+    <dimen name="stripePrivacyLinkTextSize" description="The size of the privacy link text below the view finder window">14sp</dimen>
     <dimen name="stripeSecurityTextSize" description="The size of the security text below the view finder window">14sp</dimen>
 
     <dimen name="stripeLogoMargin" description="The minimum amount of space surrounding the logo">16dp</dimen>

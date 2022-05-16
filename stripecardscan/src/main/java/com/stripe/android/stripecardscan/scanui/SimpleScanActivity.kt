@@ -20,6 +20,7 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.setDrawable
+import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
@@ -82,6 +83,11 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
      * The text view used to inform the user that the scanned card is secure.
      */
     protected open val securityTextView: TextView by lazy { TextView(this) }
+
+    /**
+     * The text view used to inform user that Stripe is used to verify card data.
+     */
+    protected open val privacyLinkTextView: TextView by lazy { TextView(this) }
 
     /**
      * The background that draws the user focus to the view finder.
@@ -181,6 +187,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             swapCameraButtonView,
             cardNameTextView,
             cardNumberTextView,
+            privacyLinkTextView,
         )
     }
 
@@ -202,6 +209,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         setupInstructionsViewUi()
         setupSecurityNoticeUi()
         setupCardDetailsUi()
+        setupPrivacyLinkTextUi()
     }
 
     protected open fun setupCloseButtonViewUi() {
@@ -331,6 +339,20 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         )
     }
 
+    protected open fun setupPrivacyLinkTextUi() {
+        privacyLinkTextView.setHtmlString(getString(R.string.stripe_card_scan_privacy_link_text))
+        privacyLinkTextView.setTextSizeByRes(R.dimen.stripePrivacyLinkTextSize)
+        privacyLinkTextView.gravity = Gravity.CENTER
+
+        var textColor = getColorByRes(R.color.stripePrivacyLinkColorLight)
+        if (isBackgroundDark()) {
+            textColor = getColorByRes(R.color.stripePrivacyLinkColorDark)
+        }
+
+        privacyLinkTextView.setTextColor(textColor)
+        privacyLinkTextView.setLinkTextColor(textColor)
+    }
+
     protected open fun setupUiConstraints() {
         setupPreviewFrameConstraints()
         setupCloseButtonViewConstraints()
@@ -340,6 +362,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         setupInstructionsViewConstraints()
         setupSecurityNoticeConstraints()
         setupCardDetailsConstraints()
+        setupPrivacyLinkViewConstraints()
     }
 
     protected open fun setupPreviewFrameConstraints() {
@@ -442,6 +465,24 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
 
         instructionsTextView.addConstraints {
             connect(it.id, ConstraintSet.BOTTOM, viewFinderWindowView.id, ConstraintSet.TOP)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
+    }
+
+    protected open fun setupPrivacyLinkViewConstraints() {
+        privacyLinkTextView.layoutParams = ConstraintLayout.LayoutParams(
+            0, // width
+            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+        ).apply {
+            topMargin = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
+            bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
+            marginStart = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
+            marginEnd = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
+        }
+
+        privacyLinkTextView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, securityTextView.id, ConstraintSet.BOTTOM)
             connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
             connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
