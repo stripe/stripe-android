@@ -38,6 +38,7 @@ import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Html
+import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
@@ -127,16 +128,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         setupNotes()
 
         viewModel.showLinkVerificationDialog.observe(this) { show ->
-            if (show) {
-                linkAuthView.setContent {
-                    LinkVerificationDialog(
-                        linkLauncher = viewModel.linkLauncher,
-                        onDialogDismissed = viewModel::onLinkVerificationDismissed,
-                        onVerificationCompleted = {
-                            viewModel.launchLink()
-                            viewModel.onLinkVerificationDismissed()
-                        }
-                    )
+            linkAuthView.setContent {
+                if (show) {
+                    viewModel.linkVerificationCallback?.let { callback ->
+                        LinkVerificationDialog(
+                            linkLauncher = viewModel.linkLauncher,
+                            verificationCallback = callback
+                        )
+                    }
                 }
             }
         }
@@ -231,15 +230,20 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
     }
 
+    /**
+     * Perform the initial setup for the primary button.
+     */
     private fun setupPrimaryButton() {
         viewModel.primaryButtonUIState.observe(this) { state ->
             state?.let {
                 primaryButton.setOnClickListener {
-                    state.onClick()
+                    state.onClick?.invoke()
                 }
                 primaryButton.setLabel(state.label)
                 primaryButton.isVisible = state.visible
                 bottomSpacer.isVisible = state.visible
+            } ?: run {
+                resetPrimaryButtonState()
             }
         }
         viewModel.primaryButtonState.observe(this) { state ->
@@ -248,7 +252,20 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }
+
+        primaryButton.setAppearanceConfiguration(
+            PaymentsTheme.primaryButtonStyle,
+            tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
+            )
+        )
+        bottomSpacer.isVisible = true
     }
+
+    /**
+     * Reset the primary button to its default state.
+     */
+    abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
         viewModel.notesText.observe(this) { text ->

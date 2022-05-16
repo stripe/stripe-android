@@ -53,7 +53,7 @@ internal class InlineSignupViewModel @Inject constructor(
      * This will be true when the user has entered an email that already has a link account and just
      * needs verification, or when they entered a new email and phone number.
      */
-    val isReady = MutableStateFlow(true)
+    val isReady = MutableStateFlow(false)
     private var hasExpanded = false
 
     private var debouncer = SignUpViewModel.Debouncer(prefilledEmail)
@@ -81,17 +81,28 @@ internal class InlineSignupViewModel @Inject constructor(
         }
     }
 
-    fun onPhoneInputCompleted(phoneNumber: String) {
-        isReady.value = true
+    fun onPhoneInput(phoneNumber: String?) {
+        // Email must be valid otherwise phone number collection UI would not be visible
+        val email = requireNotNull(consumerEmail.value)
+        if (phoneNumber != null) {
+            // TODO(brnunes-stripe): Use actual formatted value from phone number collection UI.
+            linkAccountManager.userSignUpInput =
+                LinkAccountManager.UserSignUpInput(email, "+1$phoneNumber", "US")
+            isReady.value = true
+        } else {
+            linkAccountManager.userSignUpInput = null
+            isReady.value = false
+        }
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
-        linkAccountManager.lookupConsumer(email).fold(
+        linkAccountManager.lookupConsumer(email, startVerification = false).fold(
             onSuccess = {
                 if (it != null) {
                     isReady.value = true
                     _signUpStatus.value = SignUpState.InputtingEmail
                 } else {
+                    isReady.value = false
                     _signUpStatus.value = SignUpState.InputtingPhone
                 }
             },

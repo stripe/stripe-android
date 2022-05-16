@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,9 +56,10 @@ private fun Preview() {
                 merchantName = "Example, Inc.",
                 emailElement = EmailElement(initialValue = "email@me.co"),
                 signUpState = SignUpState.InputtingEmail,
-                isExpanded = true,
+                enabled = true,
+                expanded = true,
                 toggleExpanded = {},
-                onPhoneInputCompleted = {},
+                onPhoneInput = {},
                 onUserInteracted = {}
             )
         }
@@ -63,7 +69,9 @@ private fun Preview() {
 @Composable
 private fun LinkInlineSignup(
     injector: NonFallbackInjector,
+    enabled: Boolean,
     onUserInteracted: () -> Unit,
+    onSelected: (Boolean) -> Unit,
     onReady: (Boolean) -> Unit
 ) {
     val viewModel: InlineSignupViewModel = viewModel(
@@ -72,103 +80,134 @@ private fun LinkInlineSignup(
 
     val signUpState by viewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
     val isExpanded by viewModel.isExpanded.collectAsState(false)
+    val isReady by viewModel.isReady.collectAsState()
+
+    onSelected(isExpanded)
+    onReady(isReady)
+
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(isReady) {
+        if (isReady) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+    }
 
     LinkInlineSignup(
         merchantName = viewModel.merchantName,
         emailElement = viewModel.emailElement,
         signUpState = signUpState,
-        isExpanded = isExpanded,
+        enabled = enabled,
+        expanded = isExpanded,
         toggleExpanded = viewModel::toggleExpanded,
-        onPhoneInputCompleted = viewModel::onPhoneInputCompleted,
+        onPhoneInput = viewModel::onPhoneInput,
         onUserInteracted = onUserInteracted
     )
 }
 
 @Composable
-private fun LinkInlineSignup(
+internal fun LinkInlineSignup(
     merchantName: String,
     emailElement: SectionFieldElement,
     signUpState: SignUpState,
-    isExpanded: Boolean,
+    enabled: Boolean,
+    expanded: Boolean,
     toggleExpanded: () -> Unit,
-    onPhoneInputCompleted: (String) -> Unit,
+    onPhoneInput: (String?) -> Unit,
     onUserInteracted: () -> Unit
 ) {
     var phoneNumber by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    DefaultLinkTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = PaymentsTheme.colors.colorComponentBorder,
-                    shape = PaymentsTheme.shapes.material.medium
-                )
-                .background(
-                    color = PaymentsTheme.colors.component,
-                    shape = PaymentsTheme.shapes.material.medium
-                )
-        ) {
-            Row(
+    CompositionLocalProvider(
+        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+    ) {
+        DefaultLinkTheme {
+            Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .clickable {
-                        toggleExpanded()
-                        onUserInteracted()
-                    }
-            ) {
-                Checkbox(
-                    checked = isExpanded,
-                    onCheckedChange = null, // needs to be null for accessibility on row click to work
-                    modifier = Modifier.padding(end = 8.dp),
-                    enabled = true
-                )
-                Column {
-                    Text(
-                        text = stringResource(id = R.string.inline_sign_up_header),
-                        style = PaymentsTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                        color = PaymentsTheme.colors.material.onSurface
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = PaymentsTheme.colors.colorComponentBorder,
+                        shape = PaymentsTheme.shapes.material.medium
                     )
-                    Text(
-                        text = stringResource(R.string.sign_up_message, merchantName),
+                    .background(
+                        color = PaymentsTheme.colors.component,
+                        shape = PaymentsTheme.shapes.material.medium
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .clickable {
+                            toggleExpanded()
+                            onUserInteracted()
+                        }
+                ) {
+                    Checkbox(
+                        checked = expanded,
+                        onCheckedChange = null, // needs to be null for accessibility on row click to work
+                        modifier = Modifier.padding(end = 8.dp),
+                        enabled = enabled
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(id = R.string.inline_sign_up_header),
+                            style = PaymentsTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                            color = PaymentsTheme.colors.material.onSurface
+                                .copy(alpha = LocalContentAlpha.current)
+                        )
+                        Text(
+                            text = stringResource(R.string.sign_up_message, merchantName),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            style = PaymentsTheme.typography.body1,
+                            color = PaymentsTheme.colors.material.onSurface
+                                .copy(alpha = LocalContentAlpha.current)
+                        )
+                    }
+                }
+                AnimatedVisibility(
+                    visible = expanded,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        style = PaymentsTheme.typography.body1,
-                        color = PaymentsTheme.colors.material.onSurface
-                    )
-                }
-            }
-            AnimatedVisibility(
-                visible = isExpanded,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    EmailCollectionSection(emailElement = emailElement, signUpState = signUpState)
-
-                    AnimatedVisibility(
-                        visible = signUpState == SignUpState.InputtingPhone
+                            .padding(bottom = 16.dp)
                     ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            // TODO(brnunes-stripe): Migrate to phone number collection element
-                            PhoneCollectionSection(
-                                phoneNumber = phoneNumber,
-                                onPhoneNumberChanged = {
-                                    phoneNumber = it
-                                    if (phoneNumber.length == 10) {
-                                        onPhoneInputCompleted(phoneNumber)
-                                        keyboardController?.hide()
+                        EmailCollectionSection(
+                            enabled = enabled,
+                            emailElement = emailElement,
+                            signUpState = signUpState
+                        )
+
+                        AnimatedVisibility(
+                            visible = signUpState == SignUpState.InputtingPhone
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                // TODO(brnunes-stripe): Migrate to phone number collection element
+                                PhoneCollectionSection(
+                                    phoneNumber = phoneNumber,
+                                    onPhoneNumberChanged = {
+                                        phoneNumber = it
+                                        if (phoneNumber.length == 10) {
+                                            onPhoneInput(phoneNumber)
+                                            keyboardController?.hide()
+                                        } else {
+                                            onPhoneInput(null)
+                                        }
                                     }
-                                }
-                            )
-                            LinkTerms(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp, bottom = 24.dp),
-                                textAlign = TextAlign.Left
-                            )
+                                )
+                                LinkTerms(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 16.dp),
+                                    textAlign = TextAlign.Left
+                                )
+                            }
                         }
                     }
                 }
@@ -202,13 +241,24 @@ class LinkInlineSignupView @JvmOverloads constructor(
      */
     val isReady = MutableStateFlow(true)
 
+    val isSelected = MutableStateFlow(false)
+
+    private var enabledState by mutableStateOf(isEnabled)
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        enabledState = enabled
+    }
+
     @Composable
     override fun Content() {
         linkLauncher?.injector?.let {
             PaymentsTheme {
                 LinkInlineSignup(
                     injector = it,
+                    enabled = enabledState,
                     onUserInteracted = { hasUserInteracted = true },
+                    onSelected = { isSelected.value = it },
                     onReady = { isReady.value = it }
                 )
             }

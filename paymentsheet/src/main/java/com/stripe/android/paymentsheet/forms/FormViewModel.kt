@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -101,6 +102,9 @@ internal class FormViewModel @Inject internal constructor(
         this.enabled.value = enabled
     }
 
+    @VisibleForTesting
+    internal val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
+
     private val saveForFutureUseElement = elements
         .map { elementsList ->
             elementsList?.find { element ->
@@ -128,12 +132,21 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     internal val hiddenIdentifiers = combine(
+        saveForFutureUseVisible,
         cardBillingElement.map {
             it?.hiddenIdentifiers ?: flowOf(emptyList())
         }.flattenConcat(),
         externalHiddenIdentifiers
-    ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
-        externalHiddenIdentifiers.plus(cardBillingIdentifiers)
+    ) { showFutureUse, cardBillingIdentifiers, saveFutureUseIdentifiers ->
+        val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
+
+        val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
+        if (!showFutureUse && saveForFutureUseElement != null) {
+            hiddenIdentifiers
+                .plus(saveForFutureUseElement.identifier)
+        } else {
+            hiddenIdentifiers
+        }
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden

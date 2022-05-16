@@ -1,5 +1,5 @@
 ext.versions = [
-        detekt: "1.19.0",
+        detekt: "1.20.0",
 ]
 
 ext.buildLibs = [
@@ -11,5 +11,5 @@ ext.configs = [
 ]
 
 ext.testLibs = [
-        turbine: "app.cash.turbine:turbine:0.7.0"
+        turbine: "app.cash.turbine:turbine:0.8.0"
 ]

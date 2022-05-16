@@ -21,6 +21,7 @@ import kotlin.coroutines.CoroutineContext
 @Module(
     subcomponents = [Stripe3ds2TransactionViewModelSubcomponent::class]
 )
+@SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class Stripe3ds2TransactionModule {
     @Binds
     abstract fun bindsStripe3ds2ChallengeResultProcessor(

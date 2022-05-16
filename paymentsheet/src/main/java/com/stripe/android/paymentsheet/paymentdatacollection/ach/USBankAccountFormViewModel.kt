@@ -83,7 +83,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 name = name.value,
                 email = email.value,
                 primaryButtonText = application.getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                    R.string.stripe_continue_button_label
                 )
             )
         )
@@ -126,7 +126,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     args.savedPaymentMethod.bankName,
                     args.savedPaymentMethod.last4,
                     buildPrimaryButtonText(),
-                    buildMandateText()
+                    buildMandateText(),
+                    args.formArgs.showCheckbox
                 )
             }
         }
@@ -164,6 +165,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                     intentId = intentId,
                                     primaryButtonText = buildPrimaryButtonText(),
                                     mandateText = buildMandateText(),
+                                    saveForFutureUsage = saveForFutureUse.value
                                 )
                             }
                         }
@@ -180,17 +182,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                     intentId = intentId,
                                     primaryButtonText = buildPrimaryButtonText(),
                                     mandateText = buildMandateText(),
+                                    saveForFutureUsage = saveForFutureUse.value
                                 )
                             }
                         }
                     }
                     null -> {
-                        reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
+                        reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
                     }
                 }
             }
             is CollectBankAccountResult.Failed -> {
-                reset(R.string.us_bank_account_payment_sheet_something_went_wrong)
+                reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
             }
             is CollectBankAccountResult.Cancelled -> {
                 reset()
@@ -200,7 +203,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         _currentScreenState.value = _currentScreenState.value.updateInputs(
-            name.value, email.value
+            name.value, email.value, saveForFutureUse.value
         )
         when (screenState) {
             is USBankAccountFormScreenState.NameAndEmailCollection -> {
@@ -259,6 +262,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     intentId = screenState.intentId,
                     primaryButtonText = buildPrimaryButtonText(),
                     mandateText = buildMandateText(),
+                    saveForFutureUsage = saveForFutureUse.value
                 )
             }
             else -> null
@@ -267,13 +271,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
+        saveForFutureUseElement.controller.onValueChange(true)
         _currentScreenState.update {
             USBankAccountFormScreenState.NameAndEmailCollection(
+                error = error,
                 name = name.value,
                 email = email.value,
-                error = error,
                 primaryButtonText = application.getString(
-                    R.string.us_bank_account_payment_sheet_primary_button_continue
+                    R.string.stripe_continue_button_label
                 )
             )
         }
@@ -428,7 +433,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 }
             }
             else -> application.getString(
-                R.string.us_bank_account_payment_sheet_primary_button_continue
+                R.string.stripe_continue_button_label
             )
         }
     }
@@ -436,13 +441,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun buildMandateText(): String {
         return if (saveForFutureUse.value) {
             application.getString(
-                R.string.us_bank_account_payment_sheet_mandate_save,
+                R.string.stripe_paymentsheet_ach_save_mandate,
                 formattedMerchantName()
             )
         } else {
-            application.getString(
-                R.string.us_bank_account_payment_sheet_mandate_continue
-            )
+            ACHText.getContinueMandateText(application)
         }
     }
 

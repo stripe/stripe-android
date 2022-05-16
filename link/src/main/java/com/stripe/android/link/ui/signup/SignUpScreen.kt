@@ -125,6 +125,7 @@ internal fun SignUpBody(
             color = MaterialTheme.colors.onSecondary
         )
         EmailCollectionSection(
+            enabled = true,
             emailElement = emailElement,
             signUpState = signUpState
         )
@@ -163,6 +164,7 @@ internal fun SignUpBody(
 
 @Composable
 internal fun EmailCollectionSection(
+    enabled: Boolean,
     emailElement: SectionFieldElement,
     signUpState: SignUpState
 ) {
@@ -173,7 +175,7 @@ internal fun EmailCollectionSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         SectionElementUI(
-            enabled = signUpState != SignUpState.VerifyingEmail,
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
             element = SectionElement(
                 identifier = IdentifierSpec.Email,
                 fields = listOf(emailElement),

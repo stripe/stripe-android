@@ -2,9 +2,9 @@ package com.stripe.android.identity.injection
 
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.identity.networking.DefaultIDDetectorFetcher
+import com.stripe.android.identity.networking.DefaultIdentityModelFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
-import com.stripe.android.identity.networking.IDDetectorFetcher
+import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
@@ -27,7 +27,7 @@ internal abstract class IdentityCommonModule {
 
     @Binds
     @Singleton
-    abstract fun bindIDDetectorFetcher(defaultIDDetectorFetcher: DefaultIDDetectorFetcher): IDDetectorFetcher
+    abstract fun bindIDDetectorFetcher(defaultIDDetectorFetcher: DefaultIdentityModelFetcher): IdentityModelFetcher
 
     companion object {
         @Provides

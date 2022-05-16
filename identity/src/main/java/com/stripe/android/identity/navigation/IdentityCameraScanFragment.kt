@@ -91,14 +91,7 @@ internal abstract class IdentityCameraScanFragment(
             )
             stopScanning()
         }
-        cameraAdapter = Camera1Adapter(
-            requireNotNull(activity),
-            cameraView.previewFrame,
-            MINIMUM_RESOLUTION,
-            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-                Log.e(TAG, "scan fails with exception: $cause")
-            }
-        )
+        cameraAdapter = createCameraAdapter()
 
         identityViewModel.pageAndModel.observe(viewLifecycleOwner) {
             when (it.status) {
@@ -123,6 +116,16 @@ internal abstract class IdentityCameraScanFragment(
             }
         }
     }
+
+    protected open fun createCameraAdapter() =
+        Camera1Adapter(
+            requireNotNull(activity),
+            cameraView.previewFrame,
+            MINIMUM_RESOLUTION,
+            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
+                Log.e(TAG, "scan fails with exception: $cause")
+            }
+        )
 
     /**
      * Called back each time when [CameraViewModel.displayStateChanged] is changed.
@@ -153,7 +156,7 @@ internal abstract class IdentityCameraScanFragment(
     /**
      * Stop scanning, may start again later.
      */
-    private fun stopScanning() {
+    protected fun stopScanning() {
         identityScanViewModel.identityScanFlow.resetFlow()
         cameraAdapter.unbindFromLifecycle(this)
     }
@@ -166,6 +169,6 @@ internal abstract class IdentityCameraScanFragment(
 
     internal companion object {
         private val TAG: String = IdentityCameraScanFragment::class.java.simpleName
-        private val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
+        val MINIMUM_RESOLUTION = Size(1067, 600)
     }
 }

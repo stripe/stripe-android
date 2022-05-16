@@ -23,9 +23,11 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.paymentmethod.FormViewModel
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -33,8 +35,9 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
@@ -94,7 +97,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     /**
      * Publicly visible account status, used by PaymentSheet to display the correct UI.
      */
-    lateinit var accountStatus: Flow<AccountStatus>
+    lateinit var accountStatus: StateFlow<AccountStatus>
 
     /**
      * Sets up Link to process the given [StripeIntent].
@@ -102,27 +105,50 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      * This will fetch the user's account if they're already logged in, or lookup the email passed
      * in during instantiation.
      *
-     * @param stripeIntent the PaymentIntent or SetupIntent
+     * @param stripeIntent the PaymentIntent or SetupIntent.
      * @param completePayment whether the payment should be completed, or the selected payment
      *  method should be returned as a result.
-     *
+     * @param coroutineScope the coroutine scope used to collect the account status flow.
      */
     suspend fun setup(
         stripeIntent: StripeIntent,
-        completePayment: Boolean
+        completePayment: Boolean,
+        coroutineScope: CoroutineScope
     ): AccountStatus {
         val component = setupDependencies(stripeIntent, completePayment)
-        accountStatus = component.linkAccountManager.accountStatus
+        accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
-        return accountStatus.first()
+        return accountStatus.value
     }
 
+    /**
+     * Launch the Link UI to process the Stripe Intent sent in [setup].
+     */
     fun present(
         activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
     ) {
         requireNotNull(args) { "Must call setup before presenting" }
         activityResultLauncher.launch(args)
     }
+
+    /**
+     * Trigger Link sign up with the input collected from the user.
+     */
+    suspend fun signUpWithUserInput() = linkAccountManager.signUpWithUserInput().map { true }
+
+    /**
+     * Attach a new Card to the currently signed in Link account.
+     *
+     * @return The parameters needed to confirm the current Stripe Intent using the newly created
+     *          PaymentDetails.
+     */
+    suspend fun attachNewCardToAccount(
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ): Result<LinkPaymentDetails> =
+        linkAccountManager.createPaymentDetails(
+            SupportedPaymentMethod.Card(),
+            paymentMethodCreateParams
+        )
 
     private fun setupDependencies(
         stripeIntent: StripeIntent,

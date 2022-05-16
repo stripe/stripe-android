@@ -22,12 +22,13 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
-import com.stripe.android.identity.camera.IDDetectorAggregator
+import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
 import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
 import com.stripe.android.identity.ml.BoundingBox
+import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
-import com.stripe.android.identity.networking.IDDetectorFetcher
+import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
@@ -54,7 +55,7 @@ import javax.inject.Provider
 internal class IdentityViewModel @Inject constructor(
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityRepository: IdentityRepository,
-    private val idDetectorFetcher: IDDetectorFetcher,
+    private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
     val identityFragmentFactory: IdentityFragmentFactory
 ) : ViewModel() {
@@ -284,13 +285,16 @@ internal class IdentityViewModel @Inject constructor(
     }
 
     /**
-     * Upload high_res and low_res of the [IDDetectorAggregator.FinalResult] from scan.
+     * Upload high_res and low_res of the [IdentityAggregator.FinalResult] from scan.
      */
     internal fun uploadScanResult(
-        result: IDDetectorAggregator.FinalResult,
+        result: IdentityAggregator.FinalResult,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         targetScanType: IdentityScanState.ScanType?
     ) {
+        require(result.result is IDDetectorOutput) {
+            "Unexpected output type: ${result.result}"
+        }
         val originalBitmap = result.frame.cameraPreviewImage.image
         val boundingBox = result.result.boundingBox
         val scores = result.result.allScores
@@ -483,7 +487,7 @@ internal class IdentityViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 _idDetectorModelFile.postValue(Resource.loading())
-                idDetectorFetcher.fetchIDDetector(modelUrl)
+                identityModelFetcher.fetchIdentityModel(modelUrl)
             }.fold(
                 onSuccess = {
                     _idDetectorModelFile.postValue(Resource.success(it))

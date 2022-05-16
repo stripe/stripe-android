@@ -27,6 +27,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -49,6 +50,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -353,13 +355,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
 
+        updatePrimaryButtonUIState(null)
+
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
                     updateBelowButtonText(
-                        getApplication<Application>().getString(
-                            R.string.us_bank_account_payment_sheet_saved_mandate
-                        )
+                        ACHText.getContinueMandateText(getApplication())
                     )
                 }
             }
@@ -405,17 +407,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
 
-    override fun onLinkPaymentResult(result: LinkActivityResult) {
-        super.onLinkPaymentResult(result)
+    override fun onLinkActivityResult(result: LinkActivityResult) {
+        super.onLinkActivityResult(result)
         onPaymentResult(result.convertToPaymentResult())
     }
 
-    private fun LinkActivityResult.convertToPaymentResult() =
-        when (this) {
-            is LinkActivityResult.Success -> PaymentResult.Completed
-            is LinkActivityResult.Canceled -> PaymentResult.Canceled
-            is LinkActivityResult.Failed -> PaymentResult.Failed(error)
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+        linkPaymentDetails?.let {
+            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+            updateSelection(it.convertToPaymentSelection())
+            checkout(CheckoutIdentifier.SheetBottomBuy)
+        } ?: run {
+            // Link PaymentDetails creationg failed, fallback to regular checkout.
+            // paymentSelection is already set to the card parameters from the form.
+            checkout(CheckoutIdentifier.SheetBottomBuy)
         }
+    }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
@@ -508,6 +515,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onError(@IntegerRes error: Int?) {
         resetViewState(error)
     }
+
+    private fun LinkActivityResult.convertToPaymentResult() =
+        when (this) {
+            is LinkActivityResult.Success -> PaymentResult.Completed
+            is LinkActivityResult.Canceled -> PaymentResult.Canceled
+            is LinkActivityResult.Failed -> PaymentResult.Failed(error)
+        }
 
     internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig

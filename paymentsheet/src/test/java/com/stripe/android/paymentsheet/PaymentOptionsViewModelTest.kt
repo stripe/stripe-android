@@ -80,7 +80,8 @@ internal class PaymentOptionsViewModelTest {
 
         assertThat(paymentOptionResult).isEqualTo(
             PaymentOptionResult.Succeeded(
-                SELECTION_SAVED_PAYMENT_METHOD
+                SELECTION_SAVED_PAYMENT_METHOD,
+                listOf()
             )
         )
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
@@ -100,7 +101,8 @@ internal class PaymentOptionsViewModelTest {
             assertThat(paymentOptionResult)
                 .isEqualTo(
                     PaymentOptionResult.Succeeded(
-                        NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION
+                        NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                        listOf()
                     )
                 )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
@@ -248,6 +250,34 @@ internal class PaymentOptionsViewModelTest {
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
+    }
+
+    @Test
+    fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
+        val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
+        val viewModel = PaymentOptionsViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+                paymentMethods = listOf(paymentMethod)
+            ),
+            prefsRepositoryFactory = { FakePrefsRepository() },
+            eventReporter = eventReporter,
+            customerRepository = customerRepository,
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY,
+            resourceRepository = resourceRepository,
+            savedStateHandle = SavedStateHandle(),
+            linkPaymentLauncherFactory = mock()
+        )
+
+        viewModel.removePaymentMethod(paymentMethod)
+        idleLooper()
+
+        assertThat(viewModel.paymentMethods.value)
+            .isEmpty()
+        assertThat(viewModel.primaryButtonUIState.value).isNull()
+        assertThat(viewModel.notesText.value).isNull()
     }
 
     private companion object {

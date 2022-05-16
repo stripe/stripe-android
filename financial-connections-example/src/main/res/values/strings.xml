@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Financial Connections Example</string>
     <string name="launch_connections_sheet">Connect an Account</string>
+    <string name="collect_bank_account_for_data">Collect account for data</string>
+    <string name="collect_bank_account_for_bank_account_token">Collect bank account for Connect payouts</string>
+    <string name="collect_bank_account_for_data_title">Collect Accounts</string>
+    <string name="collect_bank_account_for_bank_account_token_title">Collect Bank Account Token</string>
 </resources>
