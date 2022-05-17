@@ -8,6 +8,7 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
@@ -42,7 +43,11 @@ internal class IdentityAggregator(
                     filePurpose = "selfie",
                     numSamples = 8,
                     sampleInterval = 200,
-                    faceDetectorThreshold = 0.8f,
+                    models = VerificationPageStaticContentSelfieModels(
+                        faceDetectorUrl = "",
+                        faceDetectorMinScore = 0.8f,
+                        faceDetectorIou = 0.5f
+                    ),
                     maxCenteredThresholdX = 0.2f,
                     maxCenteredThresholdY = 0.2f,
                     minEdgeThreshold = 0.05f,
