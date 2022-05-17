@@ -39,4 +39,6 @@
     <string name="confirm">confirm</string>
     <string name="currency_usd">USD</string>
     <string name="currency_eur">EUR</string>
+    <string name="show_sheet">Show Sheet</string>
+    <string name="appearance_playground">"Appearance Customization"</string>
 </resources>
