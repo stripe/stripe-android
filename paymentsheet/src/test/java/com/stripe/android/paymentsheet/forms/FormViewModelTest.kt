@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressElement
+import com.stripe.android.ui.core.elements.LpmFormRepository
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -73,6 +74,9 @@ internal class FormViewModelTest {
 
     private val resourceRepository =
         StaticResourceRepository(
+            LpmFormRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            ),
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             )

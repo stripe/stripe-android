@@ -395,20 +395,20 @@ sealed class SupportedPaymentMethod(
         @VisibleForTesting
         internal val exposedPaymentMethods by lazy {
             listOf(
-                Card,
-                Bancontact,
-                Sofort,
-                Ideal,
-                SepaDebit,
-                Eps,
-                Giropay,
-                P24,
-                Klarna,
-                PayPal,
-                AfterpayClearpay,
-                USBankAccount,
-                // Affirm // TODO: uncomment once we are ready to go live
-                // AuBecsDebit // TODO: uncomment once we are ready to go live
+                Card.type.code,
+                Bancontact.type.code,
+                Sofort.type.code,
+                Ideal.type.code,
+                SepaDebit.type.code,
+                Eps.type.code,
+                Giropay.type.code,
+                P24.type.code,
+                Klarna.type.code,
+                PayPal.type.code,
+                AfterpayClearpay.type.code,
+                USBankAccount.type.code,
+                // Affirm.type.code // TODO: uncomment once we are ready to go live
+                // AuBecsDebit.type.code // TODO: uncomment once we are ready to go live
             )
         }
 
