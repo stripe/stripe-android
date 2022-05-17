@@ -16,7 +16,12 @@ internal data class CollectedDataParam(
     @SerialName("id_document_front")
     val idDocumentFront: DocumentUploadParam? = null,
     @SerialName("id_document_back")
-    val idDocumentBack: DocumentUploadParam? = null
+    val idDocumentBack: DocumentUploadParam? = null,
+    // TODO(IDPROD-3944) - verify with server change
+    @SerialName("training_consent")
+    val trainingConsent: Boolean? = null,
+    @SerialName("face")
+    val face: FaceUploadParam? = null
 ) {
     @Serializable
     internal enum class Type {
@@ -108,5 +113,9 @@ internal data class CollectedDataParam(
                     ),
                     idDocumentType = type
                 )
+
+        fun createForSelfie(): CollectedDataParam {
+            return CollectedDataParam(true)
+        }
     }
 }

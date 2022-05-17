@@ -221,7 +221,7 @@ internal class FaceDetectorTransitioner(
     }
 
     private fun isFaceScoreOverThreshold(actualScore: Float) =
-        actualScore > selfieCapturePage.faceDetectorThreshold
+        actualScore > selfieCapturePage.models.faceDetectorMinScore
 
     internal companion object {
         val TAG: String = FaceDetectorTransitioner::class.java.simpleName

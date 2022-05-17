@@ -7,6 +7,7 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -235,7 +236,11 @@ internal class FaceDetectorTransitionerTest {
             filePurpose = "selfie",
             numSamples = NUM_SAMPLES,
             sampleInterval = SAMPLE_INTERVAL,
-            faceDetectorThreshold = SCORE_THRESHOLD,
+            models = VerificationPageStaticContentSelfieModels(
+                faceDetectorUrl = "",
+                faceDetectorMinScore = SCORE_THRESHOLD,
+                faceDetectorIou = 0.5f
+            ),
             maxCenteredThresholdX = 0.2f,
             maxCenteredThresholdY = 0.2f,
             minEdgeThreshold = 0.05f,
