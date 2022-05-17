@@ -10,7 +10,7 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
-import com.stripe.android.ui.core.elements.BankDropdownSpec
+import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -136,7 +136,7 @@ class FieldPopulator(
                             is CountrySpec -> {}
                             is SimpleTextSpec -> {}
                             AuBankAccountNumberSpec -> {}
-                            is BankDropdownSpec -> {}
+                            is DropdownSpec -> {}
                             IbanSpec -> {}
                             is KlarnaCountrySpec -> {}
                             is CardBillingSpec -> {
@@ -205,7 +205,7 @@ class FieldPopulator(
                             is CountrySpec -> {}
                             is SimpleTextSpec -> {}
                             AuBankAccountNumberSpec -> {}
-                            is BankDropdownSpec -> {}
+                            is DropdownSpec -> {}
                             IbanSpec -> {}
                             is KlarnaCountrySpec -> {}
                             is CardBillingSpec -> {

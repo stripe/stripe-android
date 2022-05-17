@@ -50,14 +50,6 @@ public final class com/stripe/android/ui/core/elements/AfterpayClearpayHeaderEle
 public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateElementUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/BankRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/elements/BankRepository_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/elements/BankRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
-}
-
 public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
 }
 
@@ -82,23 +74,6 @@ public final class com/stripe/android/ui/core/elements/ComposableSingletons$Sect
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/ui/core/elements/DropdownItemSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/DropdownItemSpec$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/DropdownItemSpec;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/DropdownItemSpec;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/DropdownItemSpec$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/ui/core/elements/EmailConfig$Companion {
