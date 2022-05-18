@@ -10,10 +10,10 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
-import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
@@ -117,17 +117,6 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.name)
                     }
                 }
-                is AuBankAccountNumberSpec -> {}
-                is IbanSpec -> {}
-                is KlarnaCountrySpec -> {}
-                is CountrySpec -> {}
-                is CardBillingSpec -> {
-                    if (testParameters.billing == Billing.Off) {
-                        // TODO: This will not work when other countries are selected or defaulted
-                        selectors.getZip()
-                            .assertContentDescriptionEquals(values.zip)
-                    }
-                }
                 is AddressSpec -> {
                     if (testParameters.billing == Billing.Off) {
                         // TODO: This will not work when other countries are selected or defaulted
@@ -141,8 +130,19 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.state)
                     }
                 }
-                is BankDropdownSpec -> {}
+                is CountrySpec -> {}
                 is SimpleTextSpec -> {}
+                is AuBankAccountNumberSpec -> {}
+                is DropdownSpec -> {}
+                is IbanSpec -> {}
+                is KlarnaCountrySpec -> {}
+                is CardBillingSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getZip()
+                            .assertContentDescriptionEquals(values.zip)
+                    }
+                }
             }
         }
     }
@@ -205,10 +205,19 @@ class FieldPopulator(
                         }
                     }
                 }
-                is BankDropdownSpec -> {}
-                is SimpleTextSpec -> {
-                    // TODO: For AU Becs which uses this we won't know how to select the item
-                    // consider using the label to find the element.
+                is CountrySpec -> {}
+                is SimpleTextSpec -> {}
+                is AuBankAccountNumberSpec -> {}
+                is DropdownSpec -> {}
+                is IbanSpec -> {}
+                is KlarnaCountrySpec -> {}
+                is CardBillingSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getZip().apply {
+                            performTextInput(values.zip)
+                        }
+                    }
                 }
             }
         }

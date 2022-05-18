@@ -7,11 +7,11 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
-import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -70,6 +70,12 @@ class TransformSpecToElements(
                     amount?.currencyCode,
                     initialValues
                 )
+                is DropdownSpec -> it.transform(initialValues)
+                is SimpleTextSpec -> it.transform(initialValues)
+                is AddressSpec -> it.transform(
+                    initialValues,
+                    resourceRepository.getAddressRepository()
+                )
                 is CountrySpec -> it.transform(
                     initialValues
                 )
@@ -80,10 +86,6 @@ class TransformSpecToElements(
                 is AddressSpec -> it.transform(
                     initialValues,
                     resourceRepository.getAddressRepository()
-                )
-                is BankDropdownSpec -> it.transform(
-                    resourceRepository.getBankRepository(),
-                    initialValues[it.api_path]
                 )
                 is SimpleTextSpec -> it.transform(initialValues)
             }

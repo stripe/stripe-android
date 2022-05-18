@@ -4,6 +4,7 @@ import android.util.Log
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
@@ -38,8 +39,9 @@ internal class IDDetectorTransitioner(
 ) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
-    override fun transitionFromInitial(
+    override suspend fun transitionFromInitial(
         initialState: Initial,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         require(analyzerOutput is IDDetectorOutput) {
@@ -68,8 +70,9 @@ internal class IDDetectorTransitioner(
         }
     }
 
-    override fun transitionFromFound(
+    override suspend fun transitionFromFound(
         foundState: Found,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         require(analyzerOutput is IDDetectorOutput) {
@@ -96,8 +99,9 @@ internal class IDDetectorTransitioner(
         }
     }
 
-    override fun transitionFromSatisfied(
+    override suspend fun transitionFromSatisfied(
         satisfiedState: Satisfied,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         return if (satisfiedState.reachedStateAt.elapsedSince() > displaySatisfiedDuration.milliseconds) {
@@ -108,8 +112,9 @@ internal class IDDetectorTransitioner(
         }
     }
 
-    override fun transitionFromUnsatisfied(
+    override suspend fun transitionFromUnsatisfied(
         unsatisfiedState: Unsatisfied,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         return when {

@@ -23,8 +23,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Spremanjem bankovnog računa za %s pristajete na autorizaciju plaćanja u skladu s <terms>ovim uvjetima</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Informacije o kartici</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Zemlja ili regija</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->

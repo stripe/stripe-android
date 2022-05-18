@@ -6,11 +6,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.BankDropdownSpec
-import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.CountryConfig
 import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.DropdownItemSpec
+import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -23,7 +23,6 @@ import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
-import com.stripe.android.ui.core.elements.SupportedBankType
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -50,15 +49,9 @@ internal class TransformSpecToElementTest {
 
     @Before
     fun beforeTest() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.initialize(
-            mapOf(SupportedBankType.Ideal to IDEAL_BANKS_JSON.byteInputStream())
-        )
-
         transformSpecToElements =
             TransformSpecToElements(
                 resourceRepository = StaticResourceRepository(
-                    bankRepository,
                     mock()
                 ),
                 initialValues = mapOf(),
@@ -182,10 +175,63 @@ internal class TransformSpecToElementTest {
     }
 
     companion object {
-        val IDEAL_BANK_CONFIG = BankDropdownSpec(
+        val IDEAL_BANK_CONFIG = DropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
             R.string.ideal_bank,
-            SupportedBankType.Ideal
+            listOf(
+                DropdownItemSpec(
+                    api_value = "abn_amro",
+                    display_text = "ABN Amro"
+                ),
+                DropdownItemSpec(
+                    api_value = "asn_bank",
+                    display_text = "ASN Bank"
+                ),
+                DropdownItemSpec(
+                    api_value = "bunq",
+                    display_text = "bunq B.V.‎"
+                ),
+                DropdownItemSpec(
+                    api_value = "handelsbanken",
+                    display_text = "Handelsbanken"
+                ),
+                DropdownItemSpec(
+                    api_value = "ing",
+                    display_text = "ING Bank"
+                ),
+                DropdownItemSpec(
+                    api_value = "knab",
+                    display_text = "Knab"
+                ),
+                DropdownItemSpec(
+                    api_value = "rabobank",
+                    display_text = "Rabobank"
+                ),
+                DropdownItemSpec(
+                    api_value = "regiobank",
+                    display_text = "RegioBank"
+                ),
+                DropdownItemSpec(
+                    api_value = "revolut",
+                    display_text = "Revolut"
+                ),
+                DropdownItemSpec(
+                    api_value = "sns_bank",
+                    display_text = "SNS Bank"
+                ),
+                DropdownItemSpec(
+                    api_value = "triodos_bank",
+                    display_text = "Triodos Bank"
+                ),
+                DropdownItemSpec(
+                    api_value = "van_lanschot",
+                    display_text = "Van Lanschot"
+                ),
+                DropdownItemSpec(
+                    api_value = null, // HIGHLIGHT
+                    display_text = "Other"
+                )
+            )
         )
 
         val IDEAL_BANKS_JSON =

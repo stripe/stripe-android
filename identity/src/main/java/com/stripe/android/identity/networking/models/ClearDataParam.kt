@@ -14,7 +14,12 @@ internal data class ClearDataParam(
     @SerialName("id_document_front")
     val idDocumentFront: Boolean = false,
     @SerialName("id_document_back")
-    val idDocumentBack: Boolean = false
+    val idDocumentBack: Boolean = false,
+    // TODO(IDPROD-3944) - verify with server change
+    @SerialName("face")
+    val face: Boolean? = null,
+    @SerialName("training_consent")
+    val trainingConsent: Boolean? = null,
 ) {
     internal companion object {
         private const val CLEAR_DATA_PARAM = "clear_data"

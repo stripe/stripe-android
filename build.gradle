@@ -19,7 +19,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.9.0"
-        classpath 'com.karumi:shot:5.14.0'
+        classpath 'com.karumi:shot:5.14.1'
         classpath buildLibs.detektGradlePlugin
     }
 }
