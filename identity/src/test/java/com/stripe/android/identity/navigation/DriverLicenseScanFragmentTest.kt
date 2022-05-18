@@ -22,17 +22,17 @@ import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -391,8 +391,8 @@ internal class DriverLicenseScanFragmentTest {
         )
 
         val mockDocumentCapture = mock<VerificationPageStaticContentDocumentCapturePage>()
-        val mockVerificationPage = mock<VerificationPage>{
-            on {documentCapture} doReturn mockDocumentCapture
+        val mockVerificationPage = mock<VerificationPage> {
+            on { documentCapture } doReturn mockDocumentCapture
         }
         successCaptor.lastValue.invoke(mockVerificationPage)
         verify(mockIdentityViewModel).uploadScanResult(

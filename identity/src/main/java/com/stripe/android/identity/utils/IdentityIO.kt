@@ -3,7 +3,6 @@ package com.stripe.android.identity.utils
 import android.graphics.Bitmap
 import android.net.Uri
 import com.stripe.android.identity.ml.BoundingBox
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import java.io.File
 import java.io.IOException
 

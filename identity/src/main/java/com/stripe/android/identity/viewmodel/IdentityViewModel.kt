@@ -68,7 +68,6 @@ internal class IdentityViewModel @Inject constructor(
     private val _documentUploadedState = MutableStateFlow(DocumentUploadState())
     val documentUploadState: StateFlow<DocumentUploadState> = _documentUploadedState
 
-
     /**
      * Response for initial VerificationPage, used for building UI.
      */

@@ -26,6 +26,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
@@ -38,7 +39,6 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.networking.UploadedResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking

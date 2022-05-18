@@ -82,7 +82,6 @@ internal class IdentityViewModelTest {
         mock()
     )
 
-
     private fun mockUploadSuccess() = runBlocking {
         whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any())).thenReturn(
             UPLOADED_STRIPE_FILE
@@ -217,9 +216,9 @@ internal class IdentityViewModelTest {
             eq(VERIFICATION_SESSION_ID),
             eq(
                 if (isFront)
-                    "${VERIFICATION_SESSION_ID}_${FRONT}.jpeg"
+                    "${VERIFICATION_SESSION_ID}_$FRONT.jpeg"
                 else
-                    "${VERIFICATION_SESSION_ID}_${BACK}.jpeg"
+                    "${VERIFICATION_SESSION_ID}_$BACK.jpeg"
             ),
             eq(HIGH_RES_IMAGE_MAX_DIMENSION),
             eq(HIGH_RES_COMPRESSION_QUALITY)
