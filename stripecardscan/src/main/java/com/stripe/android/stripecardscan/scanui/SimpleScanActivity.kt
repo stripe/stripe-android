@@ -339,7 +339,13 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         )
     }
 
-    protected open fun setupPrivacyLinkTextUi() {
+    /**
+     * Configures the privacy link blurb that allows the user to view
+     * the Stripe privacy policy on the web.
+     * <p>
+     * NOTE: THIS STRING SHOULD NOT BE MODIFIED
+     */
+    protected fun setupPrivacyLinkTextUi() {
         privacyLinkTextView.setHtmlString(getString(R.string.stripe_card_scan_privacy_link_text))
         privacyLinkTextView.setTextSizeByRes(R.dimen.stripePrivacyLinkTextSize)
         privacyLinkTextView.gravity = Gravity.CENTER

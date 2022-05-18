@@ -9,7 +9,7 @@
     <string name="stripe_card_scan_title" description="Text displayed above the scan window for paymentsheet, instructing the user how to scan card">Position your card in the rectangle to scan</string>
     <string name="stripe_card_scan_instructions" description="Text displayed above the scan window, instructing the user how to scan card">Scan Your Card</string>
     <string name="stripe_card_scan_security" description="Security notification displayed below the scan window">Your card info is secure</string>
-    <string name="stripe_card_scan_privacy_link_text" description="Privacy link text in scan window"><![CDATA[We use Stripe to verify your card details. Stripe may use and store your data according its privacy policy. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Learn more</u></a>]]></string>
+    <string name="stripe_card_scan_privacy_link_text" description="Privacy link text in scan window. THIS STRING SHOULD NOT BE MODIFIED"><![CDATA[We use Stripe to verify your card details. Stripe may use and store your data according its privacy policy. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Learn more</u></a>]]></string>
     <string name="stripe_scanned_wrong_card" description="Text displayed above the scan window when the wrong card is scanned">Card doesn\'t match</string>
 
     <string name="stripe_camera_permission_denied_message" description="Message shown to the user when camera permission is denied">Please allow camera access to scan your card</string>
