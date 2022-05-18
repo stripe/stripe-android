@@ -5,6 +5,7 @@ This release adds [appearance customization APIs](https://github.com/stripe/stri
 
 ### Payments
 * [CHANGED][5038](https://github.com/stripe/stripe-android/pull/5038) Remove force portrait mode in Google Pay.
+* [ADDED][5011](https://github.com/stripe/stripe-android/pull/5011) Add `allowCreditCards` to `GooglePayLauncher`
 
 ### PaymentSheet
 * [FIXED][5039](https://github.com/stripe/stripe-android/pull/5039) Fixed the format of the country dropdown in PaymentSheet for all languages.
