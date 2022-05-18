@@ -107,7 +107,7 @@ internal class AppearancePlaygroundActivity : BasePaymentSheetActivity() {
                                         customer = customerConfig,
                                         googlePay = googlePayConfig,
                                         allowsDelayedPaymentMethods = true,
-                                        appearance = appearance
+//                                        appearance = appearance
                                     )
                                 )
                             }

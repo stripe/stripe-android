@@ -334,7 +334,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
-            appearance = appearance
+//            appearance = appearance
         )
     }
 

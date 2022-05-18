@@ -131,11 +131,13 @@ class PaymentSheet internal constructor(
          */
         val allowsDelayedPaymentMethods: Boolean = false,
 
-        /**
-         * Describes the appearance of Payment Sheet.
-         */
-        val appearance: Appearance = Appearance()
+//        /**
+//         * Describes the appearance of Payment Sheet.
+//         */
+//        val appearance: Appearance = Appearance()
     ) : Parcelable {
+
+        val appearance: Appearance = Appearance()
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
@@ -177,7 +179,7 @@ class PaymentSheet internal constructor(
                 primaryButtonColor,
                 defaultBillingDetails,
                 allowsDelayedPaymentMethods,
-                appearance
+//                appearance
             )
         }
     }
