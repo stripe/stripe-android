@@ -1,11 +1,14 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.material.Colors
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val LinkGreen = Color(0xFF33DDB3)
+private val LinkGreen = Color(0xFF33DDB3)
 private val ButtonLabel = Color(0xFF1D3944)
 
 private val LightComponentBackground = Color.White
@@ -34,6 +37,17 @@ internal data class LinkColors(
     val disabledText: Color,
     val materialColors: Colors
 )
+
+@Composable
+internal fun linkTextFieldColors() =
+    TextFieldDefaults.textFieldColors(
+        backgroundColor = MaterialTheme.colors.background,
+        cursorColor = LinkGreen,
+        focusedLabelColor = LinkGreen,
+        focusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+    )
 
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
