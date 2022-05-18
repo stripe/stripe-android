@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.view.KeyEvent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
@@ -42,13 +43,13 @@ import com.stripe.android.ui.core.R
 @Composable
 fun TextFieldSection(
     textFieldController: TextFieldController,
+    @StringRes sectionTitle: Int? = null,
     modifier: Modifier = Modifier,
     imeAction: ImeAction,
     enabled: Boolean,
     onValueChanged: (String) -> Unit = {},
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
-    val label by textFieldController.label.collectAsState(null)
     val error by textFieldController.error.collectAsState(null)
 
     val sectionErrorString = error?.let {
@@ -60,7 +61,7 @@ fun TextFieldSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(label, sectionErrorString) {
+    Section(sectionTitle, sectionErrorString) {
         TextField(
             textFieldController = textFieldController,
             enabled = enabled,

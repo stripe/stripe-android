@@ -45,6 +45,8 @@ import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -55,7 +57,7 @@ private fun Preview() {
         Surface {
             LinkInlineSignup(
                 merchantName = "Example, Inc.",
-                emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email@me.co")),
+                emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
@@ -97,7 +99,7 @@ private fun LinkInlineSignup(
 
     LinkInlineSignup(
         merchantName = viewModel.merchantName,
-        emailElement = viewModel.emailElement,
+        emailController = viewModel.emailController,
         signUpState = signUpState,
         enabled = enabled,
         expanded = isExpanded,
@@ -110,7 +112,7 @@ private fun LinkInlineSignup(
 @Composable
 internal fun LinkInlineSignup(
     merchantName: String,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
     signUpState: SignUpState,
     enabled: Boolean,
     expanded: Boolean,
@@ -181,7 +183,7 @@ internal fun LinkInlineSignup(
                     ) {
                         EmailCollectionSection(
                             enabled = enabled,
-                            emailElement = emailElement,
+                            emailController = emailController,
                             signUpState = signUpState
                         )
 

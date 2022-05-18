@@ -56,7 +56,7 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
+            viewModel.emailController.onRawValueChange("valid@email.com")
 
             val linkAccount = LinkAccount(
                 mockConsumerSessionWithVerificationSession(
@@ -78,7 +78,7 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
+            viewModel.emailController.onRawValueChange("valid@email.com")
 
             whenever(linkAccountManager.lookupConsumer(any(), any()))
                 .thenReturn(Result.success(null))
