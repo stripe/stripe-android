@@ -31,7 +31,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-    implementation 'androidx.test:core-ktx:1.4.0'
 
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "androidx.test:runner:$androidTestVersion"
@@ -47,6 +46,7 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    androidTestImplementation "androidx.test:core-ktx:1.4.0"
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
