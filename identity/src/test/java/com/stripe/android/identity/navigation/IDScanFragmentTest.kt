@@ -16,7 +16,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
-import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
@@ -96,7 +96,7 @@ internal class IDScanFragmentTest {
 
     @Before
     fun simulateModelDownloaded() {
-        mockPageAndModel.postValue(Resource.success(Pair(SUCCESS_VERIFICATION_PAGE, mock())))
+        mockPageAndModel.postValue(Resource.success(Pair(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE, mock())))
     }
 
     @Test

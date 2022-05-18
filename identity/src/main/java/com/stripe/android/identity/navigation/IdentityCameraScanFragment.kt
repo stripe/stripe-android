@@ -81,7 +81,10 @@ internal abstract class IdentityCameraScanFragment(
                                 ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
                             ).also {
                                 if (identityScanViewModel.targetScanType != IdentityScanState.ScanType.SELFIE) {
-                                    ARG_REQUIRE_LIVE_CAPTURE to verificationPage.documentCapture.requireLiveCapture
+                                    it.putBoolean(
+                                        ARG_REQUIRE_LIVE_CAPTURE,
+                                        verificationPage.documentCapture.requireLiveCapture
+                                    )
                                 }
                             }
                         )

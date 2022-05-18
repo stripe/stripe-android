@@ -18,7 +18,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
-import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.networking.Resource
@@ -117,7 +118,14 @@ class IdentityDocumentScanFragmentTest {
     @Test
     fun `when page and model are ready onCameraReady is called`() {
         launchTestFragment().onFragment {
-            mockPageAndModel.postValue(Resource.success(Pair(SUCCESS_VERIFICATION_PAGE, mock())))
+            mockPageAndModel.postValue(
+                Resource.success(
+                    Pair(
+                        SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE,
+                        mock()
+                    )
+                )
+            )
 
             idleMainLooper()
 
@@ -157,7 +165,7 @@ class IdentityDocumentScanFragmentTest {
     }
 
     @Test
-    fun `when finalResult is posted with Timeout navigates to couldNotCaptureFragment`() {
+    fun `when not require live capture finalResult is posted with Timeout navigates to couldNotCaptureFragment`() {
         launchTestFragment().onFragment { testFragment ->
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
@@ -185,7 +193,7 @@ class IdentityDocumentScanFragmentTest {
                 successCaptor.capture(),
                 any()
             )
-            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE)
+            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE)
 
             verify(mockScanFlow).resetFlow()
             assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
@@ -193,8 +201,58 @@ class IdentityDocumentScanFragmentTest {
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
+                    [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
+            assertThat(
+                requireNotNull(navController.backStack.last().arguments)
+                    [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
+            ).isEqualTo(false)
+        }
+    }
+
+    @Test
+    fun `when require live capture finalResult is posted with Timeout navigates to couldNotCaptureFragment`() {
+        launchTestFragment().onFragment { testFragment ->
+            val navController = TestNavHostController(
+                ApplicationProvider.getApplicationContext()
+            )
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(R.id.IDScanFragment)
+            Navigation.setViewNavController(
+                testFragment.requireView(),
+                navController
+            )
+
+            whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+
+            finalResultLiveData.postValue(
+                mock<IdentityAggregator.FinalResult>().also {
+                    whenever(it.identityState).thenReturn(mock<IdentityScanState.TimeOut>())
+                }
+            )
+
+            val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE)
+
+            verify(mockScanFlow).resetFlow()
+            assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.couldNotCaptureFragment)
+            assertThat(
+                requireNotNull(navController.backStack.last().arguments)
+                    [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
+            ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
+            assertThat(
+                requireNotNull(navController.backStack.last().arguments)
+                    [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
+            ).isEqualTo(true)
         }
     }
 
