@@ -30,7 +30,7 @@ internal data class AnalyzerInput(
 /**
  * Output interface of ML models
  */
-internal interface AnalyzerOutput
+internal sealed interface AnalyzerOutput
 
 /**
  * Output of IDDetector
@@ -40,4 +40,12 @@ internal data class IDDetectorOutput(
     val category: Category,
     val resultScore: Float,
     val allScores: List<Float>
+) : AnalyzerOutput
+
+/**
+ * Output of FaceDetector
+ */
+internal data class FaceDetectorOutput(
+    val boundingBox: BoundingBox,
+    val resultScore: Float
 ) : AnalyzerOutput

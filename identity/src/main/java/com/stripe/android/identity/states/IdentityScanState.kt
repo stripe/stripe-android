@@ -3,6 +3,7 @@ package com.stripe.android.identity.states
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.scanui.ScanState
+import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 
 /**
@@ -29,7 +30,8 @@ internal sealed class IdentityScanState(
     /**
      * Transitions to the next state based on model output.
      */
-    internal abstract fun consumeTransition(
+    internal abstract suspend fun consumeTransition(
+        analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState
 
@@ -43,8 +45,11 @@ internal sealed class IdentityScanState(
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            transitioner.transitionFromInitial(this, analyzerOutput)
+        override suspend fun consumeTransition(
+            analyzerInput: AnalyzerInput,
+            analyzerOutput: AnalyzerOutput
+        ) =
+            transitioner.transitionFromInitial(this, analyzerInput, analyzerOutput)
     }
 
     /**
@@ -56,8 +61,11 @@ internal sealed class IdentityScanState(
         transitioner: IdentityScanStateTransitioner,
         internal var reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            transitioner.transitionFromFound(this, analyzerOutput)
+        override suspend fun consumeTransition(
+            analyzerInput: AnalyzerInput,
+            analyzerOutput: AnalyzerOutput
+        ) =
+            transitioner.transitionFromFound(this, analyzerInput, analyzerOutput)
     }
 
     /**
@@ -70,8 +78,11 @@ internal sealed class IdentityScanState(
         transitioner: IdentityScanStateTransitioner,
         val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            transitioner.transitionFromSatisfied(this, analyzerOutput)
+        override suspend fun consumeTransition(
+            analyzerInput: AnalyzerInput,
+            analyzerOutput: AnalyzerOutput
+        ) =
+            transitioner.transitionFromSatisfied(this, analyzerInput, analyzerOutput)
     }
 
     /**
@@ -83,9 +94,10 @@ internal sealed class IdentityScanState(
         transitioner: IdentityScanStateTransitioner,
         val reachedStateAt: ClockMark = Clock.markNow(),
     ) : IdentityScanState(type, transitioner, false) {
-
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            transitioner.transitionFromUnsatisfied(this, analyzerOutput)
+        override suspend fun consumeTransition(
+            analyzerInput: AnalyzerInput,
+            analyzerOutput: AnalyzerOutput
+        ) = transitioner.transitionFromUnsatisfied(this, analyzerInput, analyzerOutput)
     }
 
     /**
@@ -95,7 +107,10 @@ internal sealed class IdentityScanState(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner
     ) : IdentityScanState(type, transitioner, true) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
+        override suspend fun consumeTransition(
+            analyzerInput: AnalyzerInput,
+            analyzerOutput: AnalyzerOutput
+        ) = this
     }
 
     /**
@@ -105,6 +120,9 @@ internal sealed class IdentityScanState(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner
     ) : IdentityScanState(type, transitioner, true) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
+        override suspend fun consumeTransition(
+            analyzerInput: AnalyzerInput,
+            analyzerOutput: AnalyzerOutput
+        ) = this
     }
 }

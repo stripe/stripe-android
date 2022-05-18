@@ -1,11 +1,12 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import kotlinx.serialization.Serializable
+import kotlinx.parcelize.Parcelize
 
-@Serializable
+@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class DropdownItemSpec(
-    val value: String?,
-    val text: String
-)
+    val api_value: String?,
+    val display_text: String
+) : Parcelable

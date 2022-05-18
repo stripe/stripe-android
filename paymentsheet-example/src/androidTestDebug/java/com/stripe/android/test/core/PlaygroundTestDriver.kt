@@ -374,6 +374,10 @@ class PlaygroundTestDriver(
             testParameters.forceDarkMode
         )
         intent.putExtra(
+            PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
+            testParameters.appearance
+        )
+        intent.putExtra(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
             testParameters.snapshotReturningCustomer
         )
