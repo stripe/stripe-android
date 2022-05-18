@@ -8,7 +8,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.link.R
-import com.stripe.android.ui.core.PaymentsTheme
 
 @Preview
 @Composable
@@ -19,7 +18,7 @@ fun LinkTerms(
     Text(
         text = stringResource(R.string.sign_up_terms),
         modifier = modifier,
-        color = PaymentsTheme.colors.material.onSurface,
+        color = MaterialTheme.colors.onSurface,
         textAlign = textAlign,
         style = MaterialTheme.typography.caption
     )

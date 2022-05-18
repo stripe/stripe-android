@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.paymentsColors
 
 private const val LINK_TAG = "URL"
 
@@ -208,8 +208,8 @@ private fun ClickableText(
     text: AnnotatedString,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    color: Color = PaymentsTheme.colors.subtitle,
-    style: TextStyle = PaymentsTheme.typography.body2,
+    color: Color = MaterialTheme.paymentsColors.subtitle,
+    style: TextStyle = MaterialTheme.typography.body2,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,

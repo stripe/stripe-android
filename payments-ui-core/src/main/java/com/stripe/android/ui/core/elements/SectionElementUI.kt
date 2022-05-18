@@ -3,12 +3,15 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.stripe.android.ui.core.PaymentsTheme
+import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.ui.core.paymentsShapes
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,10 +44,10 @@ fun SectionElementUI(
                 )
                 if (index != element.fields.lastIndex) {
                     Divider(
-                        color = PaymentsTheme.colors.colorComponentDivider,
-                        thickness = PaymentsTheme.shapes.borderStrokeWidth,
+                        color = MaterialTheme.paymentsColors.componentDivider,
+                        thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,
                         modifier = Modifier.padding(
-                            horizontal = PaymentsTheme.shapes.borderStrokeWidth
+                            horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
                         )
                     )
                 }

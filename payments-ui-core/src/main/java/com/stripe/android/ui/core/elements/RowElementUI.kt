@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.ui.core.paymentsShapes
 
 @Composable
 internal fun RowElementUI(
@@ -64,10 +67,10 @@ internal fun RowElementUI(
                                 height = (Dimension.fillToConstraints)
                             }
                             .padding(
-                                horizontal = PaymentsTheme.shapes.borderStrokeWidth
+                                horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
                             )
-                            .width(PaymentsTheme.shapes.borderStrokeWidth),
-                        color = PaymentsTheme.colors.colorComponentDivider
+                            .width(MaterialTheme.paymentsShapes.borderStrokeWidth.dp),
+                        color = MaterialTheme.paymentsColors.componentDivider
                     )
                 }
             }
