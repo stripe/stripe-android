@@ -33,111 +33,49 @@ import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
-@Composable
-fun NameFieldSection(
-    value: String,
-    modifier: Modifier = Modifier,
-    imeAction: ImeAction,
-    enabled: Boolean,
-    onValueChanged: (String) -> Unit,
-    onValidValue: (String?) -> Unit
-) {
-    TextField(
-        value = value,
-        config = SimpleTextFieldConfig.NAME,
-        modifier = modifier,
-        imeAction = imeAction,
-        enabled = enabled,
-        onValueChanged = onValueChanged,
-        onValidValue = onValidValue
-    )
-}
-
-@Composable
-fun NameFieldSection(
-    textFieldController: TextFieldController,
-    modifier: Modifier = Modifier,
-    imeAction: ImeAction,
-    enabled: Boolean,
-    onValueChanged: (String) -> Unit = {},
-    onValidValue: (String?) -> Unit = {}
-) {
-    TextField(
-        textFieldController = textFieldController,
-        modifier = modifier,
-        imeAction = imeAction,
-        enabled = enabled,
-        onValueChanged = onValueChanged,
-        onValidValue = onValidValue
-    )
-}
-
-@Composable
-fun EmailFieldSection(
-    textFieldController: TextFieldController,
-    modifier: Modifier = Modifier,
-    imeAction: ImeAction,
-    enabled: Boolean,
-    onValueChanged: (String) -> Unit = {},
-    onValidValue: (String?) -> Unit = {}
-) {
-    TextField(
-        textFieldController = textFieldController,
-        modifier = modifier,
-        imeAction = imeAction,
-        enabled = enabled,
-        onValueChanged = onValueChanged,
-        onValidValue = onValidValue
-    )
-}
-
-//@Composable
-//fun TextField(
-//    initialValue: String,
-//    config: TextFieldConfig,
-//    modifier: Modifier = Modifier,
-//    imeAction: ImeAction,
-//    enabled: Boolean,
-//    onValueChanged: (String) -> Unit,
-//    onValidValue: (String?) -> Unit
-//) {
-//    val controller = remember {
-//        SimpleTextFieldController(
-//            config,
-//            initialValue = initialValue,
-//            showOptionalLabel = false
-//        )
-//    }
-//
-//    val label by controller.label.collectAsState(null)
-//    val error by controller.error.collectAsState(null)
-//
-//    val sectionErrorString = error?.let {
-//        it.formatArgs?.let { args ->
-//            stringResource(
-//                it.errorMessage,
-//                *args
-//            )
-//        } ?: stringResource(it.errorMessage)
-//    }
-//
-//    Section(label, sectionErrorString) {
-//        TextField(
-//            textFieldController = controller,
-//            enabled = enabled,
-//            imeAction = imeAction,
-//            modifier = modifier,
-//            onValueChanged = onValueChanged,
-//            onValidValue = onValidValue
-//        )
-//    }
-//}
-
 /**
- * This is focused on converting an `Element` into what is displayed in a textField.
+ * This is focused on converting an [TextFieldController] into what is displayed in a section
+ * with a single textField.
  * - some focus logic
  * - observes values that impact how things show on the screen
- * - calls through to the Elements worker functions for focus change and value change events
+ */
+@Composable
+fun TextFieldSection(
+    textFieldController: TextFieldController,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction,
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit = {},
+    onTextStateChanged: (TextFieldState?) -> Unit = {}
+) {
+    val label by textFieldController.label.collectAsState(null)
+    val error by textFieldController.error.collectAsState(null)
+
+    val sectionErrorString = error?.let {
+        it.formatArgs?.let { args ->
+            stringResource(
+                it.errorMessage,
+                *args
+            )
+        } ?: stringResource(it.errorMessage)
+    }
+
+    Section(label, sectionErrorString) {
+        TextField(
+            textFieldController = textFieldController,
+            enabled = enabled,
+            imeAction = imeAction,
+            modifier = modifier,
+            onValueChanged = onValueChanged,
+            onTextStateChanged = onTextStateChanged
+        )
+    }
+}
+
+/**
+ * This is focused on converting an [TextFieldController] into what is displayed in a textField.
+ * - some focus logic
+ * - observes values that impact how things show on the screen
  */
 @Composable
 fun TextField(
@@ -146,7 +84,7 @@ fun TextField(
     imeAction: ImeAction,
     enabled: Boolean,
     onValueChanged: (String) -> Unit = {},
-    onValidValue: (String?) -> Unit = {}
+    onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
@@ -182,9 +120,11 @@ fun TextField(
     TextField(
         value = value,
         onValueChange = {
-            val validValue = textFieldController.onValueChange(it)
-            onValueChanged(it)
-            onValidValue(validValue)
+            val newTextState = textFieldController.onValueChange(it)
+
+            if (newTextState != null) {
+                onTextStateChanged(newTextState)
+            }
         },
         modifier = modifier
             .fillMaxWidth()
