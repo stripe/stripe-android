@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.stateIn
@@ -90,18 +89,18 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to "      "))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameController.onRawValueChange("      ")
+            viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameController.onRawValueChange(CUSTOMER_NAME)
+            viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
 
-            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to ""))
+            viewModel.nameController.onRawValueChange(CUSTOMER_NAME)
+            viewModel.emailController.onRawValueChange("")
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
         }
