@@ -90,18 +90,18 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            viewModel.nameController.setRawValue(mapOf(IdentifierSpec.Name to "      "))
-            viewModel.emailController.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to "      "))
+            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
 
-            viewModel.nameController.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailController.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
+            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to CUSTOMER_EMAIL))
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
 
-            viewModel.nameController.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
-            viewModel.emailController.setRawValue(mapOf(IdentifierSpec.Email to ""))
+            viewModel.nameElement.setRawValue(mapOf(IdentifierSpec.Name to CUSTOMER_NAME))
+            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to ""))
 
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
         }

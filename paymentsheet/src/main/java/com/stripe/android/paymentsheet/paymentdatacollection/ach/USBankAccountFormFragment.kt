@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -50,11 +49,13 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.EmailFieldSection
 import com.stripe.android.ui.core.elements.H6Text
-import com.stripe.android.ui.core.elements.NameFieldSection
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.elements.SectionController
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.stateIn
@@ -161,32 +162,6 @@ internal class USBankAccountFormFragment : Fragment() {
         )
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.currentScreenState.collect { state ->
-                    when (state) {
-                        is USBankAccountFormScreenState.MandateCollection -> {
-                            viewModel.nameController.onRawValueChange(state.name ?: "")
-                            viewModel.emailController.onRawValueChange(state.email ?: "")
-                        }
-                        is USBankAccountFormScreenState.NameAndEmailCollection -> {
-                            viewModel.nameController.onRawValueChange(state.name ?: "")
-                            viewModel.emailController.onRawValueChange(state.email ?: "")
-                        }
-                        is USBankAccountFormScreenState.SavedAccount -> {
-                            viewModel.nameController.onRawValueChange(state.name ?: "")
-                            viewModel.emailController.onRawValueChange(state.email ?: "")
-                        }
-                        is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                            viewModel.nameController.onRawValueChange(state.name ?: "")
-                            viewModel.emailController.onRawValueChange(state.email ?: "")
-                        }
-                        else -> {}
-                    }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sheetViewModel?.primaryButtonState?.observe(viewLifecycleOwner) { state ->
                     // When the primary button state is StartProcessing or FinishProcessing
                     // we should disable the inputs of this form. StartProcessing shows the loading
@@ -261,9 +236,8 @@ internal class USBankAccountFormFragment : Fragment() {
     override fun onDetach() {
         sheetViewModel?.usBankAccountSavedScreenState =
             viewModel.currentScreenState.value.updateInputs(
-                viewModel.name.value?.value,
-                viewModel.email.value?.value,
-                //?
+                viewModel.name.value,
+                viewModel.email.value,
                 viewModel.saveForFutureUse.value
             )
         sheetViewModel?.updateBelowButtonText(null)
@@ -404,12 +378,10 @@ internal class USBankAccountFormFragment : Fragment() {
 
     @Composable
     private fun NameAndEmailForm(
-        name: String?,
+        name: String,
         email: String?
     ) {
         val processing = viewModel.processing.collectAsState(false)
-
-
         Column(Modifier.fillMaxWidth()) {
             H6Text(
                 text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
@@ -421,28 +393,52 @@ internal class USBankAccountFormFragment : Fragment() {
                     .padding(0.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                NameFieldSection(
-                    textFieldController = viewModel.nameController,
+                SectionElementUI(
                     enabled = !processing.value,
-                    imeAction = ImeAction.Next,
-//                    onValueChanged = viewModel.onNameChanged,
-//                    onValidValue = viewModel.onNameValidChange
+                    element = SectionElement(
+                        identifier = IdentifierSpec.Name,
+                        fields = listOf(
+                            viewModel.nameElement.apply {
+                                setRawValue(
+                                    mapOf(IdentifierSpec.Name to name)
+                                )
+                            }
+                        ),
+                        controller = SectionController(
+                            null,
+                            listOf(viewModel.nameElement.sectionFieldErrorController())
+                        ),
+                    ),
+                    emptyList(),
+                    null
                 )
             }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            EmailFieldSection(
-                textFieldController = viewModel.emailController,
-                enabled = !processing.value,
-                imeAction = ImeAction.Done,
-//                onValueChanged = viewModel.onEmailChanged,
-//                onValidValue = viewModel.onEmailValidChange
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                SectionElementUI(
+                    enabled = !processing.value,
+                    element = SectionElement(
+                        identifier = IdentifierSpec.Email,
+                        fields = listOf(
+                            viewModel.emailElement.apply {
+                                setRawValue(
+                                    mapOf(IdentifierSpec.Email to email)
+                                )
+                            }
+                        ),
+                        controller = SectionController(
+                            null,
+                            listOf(viewModel.emailElement.sectionFieldErrorController())
+                        )
+                    ),
+                    emptyList(),
+                    viewModel.emailElement.identifier
+                )
+            }
         }
     }
 
@@ -571,7 +567,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private fun updateMandateText(mandateText: String?) {
         val microdepositsText =
             if (viewModel.currentScreenState.value
-                    is USBankAccountFormScreenState.VerifyWithMicrodeposits
+                is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
                 getString(
                     R.string.stripe_paymentsheet_microdeposit,
