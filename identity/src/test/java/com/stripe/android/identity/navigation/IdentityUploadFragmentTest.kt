@@ -24,6 +24,7 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_P
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -37,7 +38,7 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
+import com.stripe.android.identity.networking.UploadedResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -68,10 +69,10 @@ class IdentityUploadFragmentTest {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
     }
 
-    private val uploadState =
-        MutableStateFlow(IdentityViewModel.UploadState())
+    private val documentUploadState =
+        MutableStateFlow(DocumentUploadState())
 
-    private val errorUploadState = mock<IdentityViewModel.UploadState> {
+    private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
     }
 
@@ -80,7 +81,7 @@ class IdentityUploadFragmentTest {
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
-        whenever(it.uploadState).thenReturn(uploadState)
+        whenever(it.documentUploadState).thenReturn(documentUploadState)
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
@@ -211,8 +212,8 @@ class IdentityUploadFragmentTest {
     @Test
     fun `verify front upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            uploadState.update {
-                errorUploadState
+            documentUploadState.update {
+                errorDocumentUploadState
             }
 
             assertThat(navController.currentDestination?.id)
@@ -223,8 +224,8 @@ class IdentityUploadFragmentTest {
     @Test
     fun `verify back upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            uploadState.update {
-                errorUploadState
+            documentUploadState.update {
+                errorDocumentUploadState
             }
 
             assertThat(navController.currentDestination?.id)
@@ -235,8 +236,8 @@ class IdentityUploadFragmentTest {
     @Test
     fun `verify uploadFinished updates UI`() {
         launchFragment { binding, _, _ ->
-            uploadState.update {
-                IdentityViewModel.UploadState(
+            documentUploadState.update {
+                DocumentUploadState(
                     frontHighResResult = Resource.success(
                         FRONT_HIGH_RES_RESULT_FILEUPLOAD
                     ),
@@ -261,8 +262,8 @@ class IdentityUploadFragmentTest {
     fun `verify when kontinue is clicked and post succeeds navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
-                uploadState.update {
-                    IdentityViewModel.UploadState(
+                documentUploadState.update {
+                    DocumentUploadState(
                         frontHighResResult = Resource.success(
                             FRONT_HIGH_RES_RESULT_FILEUPLOAD
                         ),
@@ -316,7 +317,7 @@ class IdentityUploadFragmentTest {
         navController.setCurrentDestination(R.id.couldNotCaptureFragment)
         navController.navigate(R.id.IDUploadFragment)
         launchFragment { _, _, _ ->
-            verify(mockIdentityViewModel, times(0)).resetUploadedState()
+            verify(mockIdentityViewModel, times(0)).resetDocumentUploadedState()
         }
     }
 
@@ -336,7 +337,7 @@ class IdentityUploadFragmentTest {
 
         navController.navigateUp()
         launchFragment { _, _, _ ->
-            verify(mockIdentityViewModel).resetUploadedState()
+            verify(mockIdentityViewModel).resetDocumentUploadedState()
         }
     }
 
@@ -346,7 +347,7 @@ class IdentityUploadFragmentTest {
         navController.navigate(R.id.IDUploadFragment)
 
         launchFragment { _, _, _ ->
-            verify(mockIdentityViewModel).resetUploadedState()
+            verify(mockIdentityViewModel).resetDocumentUploadedState()
         }
     }
 
@@ -472,8 +473,8 @@ class IdentityUploadFragmentTest {
 
             // mock file uploaded
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
-                uploadState.update {
-                    IdentityViewModel.UploadState(
+                documentUploadState.update {
+                    DocumentUploadState(
                         frontHighResResult =
                         Resource.success(
                             if (isTakePhoto) FRONT_HIGH_RES_RESULT_MANUALCAPTURE else FRONT_HIGH_RES_RESULT_FILEUPLOAD
@@ -485,8 +486,8 @@ class IdentityUploadFragmentTest {
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.VISIBLE)
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
-                uploadState.update {
-                    IdentityViewModel.UploadState(
+                documentUploadState.update {
+                    DocumentUploadState(
                         backHighResResult =
                         Resource.success(
                             if (isTakePhoto) BACK_HIGH_RES_RESULT_MANUALCAPTURE else BACK_HIGH_RES_RESULT_FILEUPLOAD

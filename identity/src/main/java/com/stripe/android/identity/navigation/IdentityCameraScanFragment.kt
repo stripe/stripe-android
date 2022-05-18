@@ -78,9 +78,12 @@ internal abstract class IdentityCameraScanFragment(
                         findNavController().navigate(
                             R.id.action_global_couldNotCaptureFragment,
                             bundleOf(
-                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType,
-                                ARG_REQUIRE_LIVE_CAPTURE to verificationPage.documentCapture.requireLiveCapture
-                            )
+                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
+                            ).also {
+                                if (identityScanViewModel.targetScanType != IdentityScanState.ScanType.SELFIE) {
+                                    ARG_REQUIRE_LIVE_CAPTURE to verificationPage.documentCapture.requireLiveCapture
+                                }
+                            }
                         )
                     }
                 },

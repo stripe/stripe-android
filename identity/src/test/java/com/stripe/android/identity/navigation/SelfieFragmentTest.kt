@@ -12,6 +12,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
@@ -45,12 +46,12 @@ internal class SelfieFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
-    private val uploadState =
-        MutableStateFlow(IdentityViewModel.UploadState())
+    private val documentUploadState =
+        MutableStateFlow(DocumentUploadState())
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModel } doReturn mockPageAndModel
-        on { uploadState } doReturn uploadState
+        on { documentUploadState } doReturn documentUploadState
     }
 
     @Test

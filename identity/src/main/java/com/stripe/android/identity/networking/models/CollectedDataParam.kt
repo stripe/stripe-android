@@ -2,7 +2,7 @@ package com.stripe.android.identity.networking.models
 
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.networking.UploadedResult
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -49,10 +49,10 @@ internal data class CollectedDataParam(
 
         fun createFromUploadedResultsForAutoCapture(
             type: Type,
-            frontHighResResult: IdentityViewModel.UploadedResult,
-            frontLowResResult: IdentityViewModel.UploadedResult,
-            backHighResResult: IdentityViewModel.UploadedResult? = null,
-            backLowResResult: IdentityViewModel.UploadedResult? = null
+            frontHighResResult: UploadedResult,
+            frontLowResResult: UploadedResult,
+            backHighResResult: UploadedResult? = null,
+            backLowResResult: UploadedResult? = null
         ): CollectedDataParam =
             if (backHighResResult != null && backLowResResult != null) {
                 CollectedDataParam(

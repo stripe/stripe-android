@@ -48,8 +48,7 @@ internal interface IdentityIO {
     fun resizeBitmapAndCreateFileToUpload(
         bitmap: Bitmap,
         verificationId: String,
-        isFullFrame: Boolean,
-        side: String? = null,
+        fileName: String,
         maxDimension: Int,
         compressionQuality: Float,
     ): File
@@ -64,7 +63,7 @@ internal interface IdentityIO {
     fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
-        docCapturePage: VerificationPageStaticContentDocumentCapturePage
+        paddingSize: Float
     ): Bitmap
 
     /**

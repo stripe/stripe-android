@@ -101,7 +101,7 @@ class IdentityDocumentScanFragmentTest {
     @Test
     fun `when viewCreated uploadedState is reset`() {
         launchTestFragment().onFragment {
-            verify(mockIdentityViewModel).resetUploadedState()
+            verify(mockIdentityViewModel).resetDocumentUploadedState()
         }
     }
 
@@ -207,13 +207,13 @@ class IdentityDocumentScanFragmentTest {
     @Test
     fun `when shouldStartFromBack don't reset upload state`() {
         launchTestFragment(shouldStartFromBack = true)
-        verify(mockIdentityViewModel, times(0)).resetUploadedState()
+        verify(mockIdentityViewModel, times(0)).resetDocumentUploadedState()
     }
 
     @Test
     fun `when not shouldStartFromBack reset upload state`() {
         launchTestFragment(shouldStartFromBack = false)
-        verify(mockIdentityViewModel).resetUploadedState()
+        verify(mockIdentityViewModel).resetDocumentUploadedState()
     }
 
     private fun launchTestFragment(shouldStartFromBack: Boolean = false) =
