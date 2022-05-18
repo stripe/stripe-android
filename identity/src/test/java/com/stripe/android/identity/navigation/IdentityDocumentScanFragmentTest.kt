@@ -201,11 +201,11 @@ class IdentityDocumentScanFragmentTest {
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                    [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
+                [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                    [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
+                [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
             ).isEqualTo(false)
         }
     }
@@ -247,11 +247,11 @@ class IdentityDocumentScanFragmentTest {
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                    [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
+                [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                    [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
+                [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
             ).isEqualTo(true)
         }
     }
