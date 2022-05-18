@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldColors
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,6 +24,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -33,106 +35,113 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsThemeStatic
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
     enabled: Boolean,
     element: OTPElement,
-    modifier: Modifier = Modifier,
-    colors: TextFieldColors = TextFieldColors()
+    modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
+    PaymentsThemeStatic {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            var focusedElementIndex by remember { mutableStateOf(-1) }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        var focusedElementIndex by remember { mutableStateOf(-1) }
+            (0 until element.controller.otpLength).map { index ->
+                SectionCard(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp)
+                ) {
+                    val value by element.controller.fieldValues[index].collectAsState("")
 
-        (0 until element.controller.otpLength).map { index ->
-            SectionCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 2.dp)
-            ) {
-                val value by element.controller.fieldValues[index].collectAsState("")
-
-                var textFieldModifier = Modifier
-                    .padding(0.dp)
-                    .onFocusChanged { focusState ->
-                        if (focusState.isFocused) {
-                            focusedElementIndex = index
-                        } else if (!focusState.isFocused && focusedElementIndex == index) {
-                            focusedElementIndex = -1
+                    var textFieldModifier = Modifier
+                        .padding(0.dp)
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                focusedElementIndex = index
+                            } else if (!focusState.isFocused && focusedElementIndex == index) {
+                                focusedElementIndex = -1
+                            }
                         }
+                        .onPreviewKeyEvent { event ->
+                            if (index != 0 &&
+                                event.type == KeyEventType.KeyDown &&
+                                event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
+                                value.isEmpty()
+                            ) {
+                                // If the current field is empty, move to the previous one and delete
+                                focusManager.moveFocus(FocusDirection.Previous)
+                                element.controller.onValueChanged(index - 1, "")
+                                return@onPreviewKeyEvent true
+                            }
+                            false
+                        }
+                        .semantics {
+                            testTag = "OTP-$index"
+                        }
+
+                    if (index == 0) {
+                        textFieldModifier = textFieldModifier.focusRequester(focusRequester)
                     }
-                    .onPreviewKeyEvent { event ->
-                        if (index != 0 &&
-                            event.type == KeyEventType.KeyDown &&
-                            event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
-                            value.isEmpty()
-                        ) {
-                            // If the current field is empty, move to the previous one and delete
-                            focusManager.moveFocus(FocusDirection.Previous)
-                            element.controller.onValueChanged(index - 1, "")
-                            return@onPreviewKeyEvent true
-                        }
-                        false
-                    }
-                    .semantics {
-                        testTag = "OTP-$index"
-                    }
 
-                if (index == 0) {
-                    textFieldModifier = textFieldModifier.focusRequester(focusRequester)
-                }
-
-                androidx.compose.material.TextField(
-                    value = TextFieldValue(
-                        text = value,
-                        selection = if (focusedElementIndex == index) {
-                            TextRange(value.length)
-                        } else {
-                            TextRange.Zero
-                        }
-                    ),
-                    onValueChange = {
-                        val inputLength = element.controller.onValueChanged(index, it.text)
-                        (0 until inputLength).forEach { _ ->
-                            focusManager.moveFocus(FocusDirection.Next)
-                        }
-                    },
-                    modifier = textFieldModifier,
-                    enabled = enabled,
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = element.controller.keyboardType
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Next)
+                    androidx.compose.material.TextField(
+                        value = TextFieldValue(
+                            text = value,
+                            selection = if (focusedElementIndex == index) {
+                                TextRange(value.length)
+                            } else {
+                                TextRange.Zero
+                            }
+                        ),
+                        onValueChange = {
+                            val inputLength = element.controller.onValueChanged(index, it.text)
+                            (0 until inputLength).forEach { _ ->
+                                focusManager.moveFocus(FocusDirection.Next)
+                            }
                         },
-                        onDone = {
-                            focusManager.clearFocus(true)
-                        }
-                    ),
-                    singleLine = true,
-                    placeholder = {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = if (focusedElementIndex != index) "●" else "",
-                            textAlign = TextAlign.Center
+                        modifier = textFieldModifier,
+                        enabled = enabled,
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = element.controller.keyboardType
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                focusManager.moveFocus(FocusDirection.Next)
+                            },
+                            onDone = {
+                                focusManager.clearFocus(true)
+                            }
+                        ),
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = if (focusedElementIndex != index) "●" else "",
+                                textAlign = TextAlign.Center
+                            )
+                        },
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = Color.Transparent,
+                            cursorColor = LocalContentColor.current,
+                            focusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                         )
-                    },
-                    colors = colors
-                )
+                    )
+                }
             }
-        }
 
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
         }
     }
 }

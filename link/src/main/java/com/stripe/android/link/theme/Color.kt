@@ -5,7 +5,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 
-private val LinkGreen = Color(0xFF33DDB3)
+val LinkGreen = Color(0xFF33DDB3)
 private val ButtonLabel = Color(0xFF1D3944)
 
 private val LightComponentBackground = Color.White

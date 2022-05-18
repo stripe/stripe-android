@@ -18,6 +18,8 @@ internal val HorizontalPadding = 20.dp
 internal fun linkTextFieldColors() =
     TextFieldDefaults.textFieldColors(
         backgroundColor = MaterialTheme.colors.background,
+        cursorColor = LinkGreen,
+        focusedLabelColor = LinkGreen,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,

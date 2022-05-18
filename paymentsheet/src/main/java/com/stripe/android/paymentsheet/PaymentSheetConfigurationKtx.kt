@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -34,31 +36,35 @@ internal fun PaymentSheet.Configuration.validate() {
 
 internal fun PaymentSheet.Appearance.parseAppearance() {
     PaymentsTheme.colorsLightMutable = PaymentsThemeDefaults.colorsLight.copy(
-        primary = Color(colorsLight.primary),
-        surface = Color(colorsLight.surface),
         component = Color(colorsLight.component),
         componentBorder = Color(colorsLight.componentBorder),
         componentDivider = Color(colorsLight.componentDivider),
         onComponent = Color(colorsLight.onComponent),
         subtitle = Color(colorsLight.subtitle),
         placeholderText = Color(colorsLight.placeholderText),
-        onSurface = Color(colorsLight.onSurface),
         appBarIcon = Color(colorsLight.appBarIcon),
-        error = Color(colorsLight.error)
+        materialColors = lightColors(
+            primary = Color(colorsLight.primary),
+            surface = Color(colorsLight.surface),
+            onSurface = Color(colorsLight.onSurface),
+            error = Color(colorsLight.error)
+        )
     )
 
     PaymentsTheme.colorsDarkMutable = PaymentsThemeDefaults.colorsDark.copy(
-        primary = Color(colorsDark.primary),
-        surface = Color(colorsDark.surface),
         component = Color(colorsDark.component),
         componentBorder = Color(colorsDark.componentBorder),
         componentDivider = Color(colorsDark.componentDivider),
         onComponent = Color(colorsDark.onComponent),
         subtitle = Color(colorsDark.subtitle),
         placeholderText = Color(colorsDark.placeholderText),
-        onSurface = Color(colorsDark.onSurface),
         appBarIcon = Color(colorsDark.appBarIcon),
-        error = Color(colorsDark.error)
+        materialColors = darkColors(
+            primary = Color(colorsDark.primary),
+            surface = Color(colorsDark.surface),
+            onSurface = Color(colorsDark.onSurface),
+            error = Color(colorsDark.error)
+        )
     )
 
     PaymentsTheme.shapesMutable = PaymentsThemeDefaults.shapes.copy(

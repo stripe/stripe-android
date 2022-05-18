@@ -18,6 +18,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +42,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
@@ -280,8 +282,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                     Html(
                         html = text,
                         imageGetter = mapOf(),
-                        color = PaymentsTheme.colors.subtitle,
-                        style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
+                        color = MaterialTheme.paymentsColors.subtitle,
+                        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center)
                     )
                 }
             }

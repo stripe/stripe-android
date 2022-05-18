@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -21,8 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 
 @Composable
@@ -41,14 +42,14 @@ fun AfterpayClearpayElementUI(
             element.getLabel(context.resources),
             Modifier
                 .padding(end = 4.dp),
-            color = PaymentsTheme.colors.subtitle
+            color = MaterialTheme.paymentsColors.subtitle
         )
         Image(
             painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
             contentDescription = stringResource(
                 R.string.afterpay_clearpay_message
             ),
-            colorFilter = if (PaymentsTheme.colors.material.surface.shouldUseDarkDynamicColor()) {
+            colorFilter = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
                 null
             } else {
                 ColorFilter.tint(Color.White)
@@ -68,7 +69,7 @@ fun AfterpayClearpayElementUI(
                 text = "ⓘ",
                 modifier = Modifier.padding(0.dp),
                 style = TextStyle(fontWeight = FontWeight.Bold),
-                color = PaymentsTheme.colors.subtitle
+                color = MaterialTheme.paymentsColors.subtitle
             )
         }
     }
