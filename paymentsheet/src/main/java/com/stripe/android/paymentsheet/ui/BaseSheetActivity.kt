@@ -228,10 +228,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 val text = viewModel.headerText.observeAsState()
 
                 text.value?.let {
-                    H4Text(
-                        text = it,
-                        modifier = Modifier.padding(bottom = 2.dp)
-                    )
+                    PaymentsTheme {
+                        H4Text(
+                            text = it,
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                    }
                 }
             }
         }

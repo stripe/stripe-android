@@ -5,7 +5,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -13,12 +12,10 @@ fun H4Text(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    PaymentsTheme {
-        Text(
-            text = text,
-            color = MaterialTheme.colors.onSurface,
-            style = MaterialTheme.typography.h4,
-            modifier = modifier
-        )
-    }
+    Text(
+        text = text,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.h4,
+        modifier = modifier
+    )
 }
