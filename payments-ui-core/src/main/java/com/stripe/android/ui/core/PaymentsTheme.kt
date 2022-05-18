@@ -285,7 +285,10 @@ val LocalColors = staticCompositionLocalOf { PaymentsTheme.getColors(false) }
 val LocalShapes = staticCompositionLocalOf { PaymentsTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { PaymentsTheme.typographyMutable }
 
-// CAUTION: This theme is mutable by merchant configurations.
+/**
+ * Base Theme for Payments Composables.
+ * CAUTION: This theme is mutable by merchant configurations.
+ */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
@@ -309,10 +312,13 @@ fun PaymentsTheme(
     }
 }
 
-// Use this theme if you do not want merchant configurations to change your UI
+/**
+ * Base Theme for Payments Composables that are not merchant configurable.
+ * Use this theme if you do not want merchant configurations to change your UI
+ */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentsThemeStatic(
+fun DefaultPaymentsTheme(
     content: @Composable () -> Unit
 ) {
     val colors = PaymentsThemeDefaults.colors(isSystemInDarkTheme())
@@ -350,9 +356,7 @@ fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke {
     val color = if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
     return BorderStroke(width.dp, color)
 }
-// This object lets you access colors in composables via
-// StripeTheme.colors.primary etc
-// This mirrors an object that lives inside of MaterialTheme.
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
     const val minContrastForWhite = 2.2

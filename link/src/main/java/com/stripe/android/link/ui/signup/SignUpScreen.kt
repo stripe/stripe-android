@@ -41,7 +41,7 @@ import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.PaymentsThemeStatic
+import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionCard
@@ -128,7 +128,7 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        PaymentsThemeStatic {
+        DefaultPaymentsTheme {
             EmailCollectionSection(
                 enabled = true,
                 emailElement = emailElement,
@@ -140,7 +140,7 @@ internal fun SignUpBody(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // TODO(brnunes-stripe): Migrate to phone number collection element
-                PaymentsThemeStatic {
+                DefaultPaymentsTheme {
                     PhoneCollectionSection(
                         phoneNumber = phoneNumber,
                         onPhoneNumberChanged = {

@@ -188,29 +188,27 @@ internal fun LinkInlineSignup(
                         AnimatedVisibility(
                             visible = signUpState == SignUpState.InputtingPhone
                         ) {
-                            PaymentsTheme {
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    // TODO(brnunes-stripe): Migrate to phone number collection element
-                                    PhoneCollectionSection(
-                                        phoneNumber = phoneNumber,
-                                        textFieldColors = TextFieldColors(),
-                                        onPhoneNumberChanged = {
-                                            phoneNumber = it
-                                            if (phoneNumber.length == 10) {
-                                                onPhoneInput(phoneNumber)
-                                                keyboardController?.hide()
-                                            } else {
-                                                onPhoneInput(null)
-                                            }
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                // TODO(brnunes-stripe): Migrate to phone number collection element
+                                PhoneCollectionSection(
+                                    phoneNumber = phoneNumber,
+                                    textFieldColors = TextFieldColors(),
+                                    onPhoneNumberChanged = {
+                                        phoneNumber = it
+                                        if (phoneNumber.length == 10) {
+                                            onPhoneInput(phoneNumber)
+                                            keyboardController?.hide()
+                                        } else {
+                                            onPhoneInput(null)
                                         }
-                                    )
-                                    LinkTerms(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 16.dp),
-                                        textAlign = TextAlign.Left
-                                    )
-                                }
+                                    }
+                                )
+                                LinkTerms(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 16.dp),
+                                    textAlign = TextAlign.Left
+                                )
                             }
                         }
                     }
