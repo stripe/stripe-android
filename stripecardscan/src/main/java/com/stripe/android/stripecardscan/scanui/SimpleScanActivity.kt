@@ -340,6 +340,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     }
 
     protected open fun setupPrivacyLinkTextUi() {
+        // THIS STRING SHOULD NOT BE MODIFIED
         privacyLinkTextView.setHtmlString(getString(R.string.stripe_card_scan_privacy_link_text))
         privacyLinkTextView.setTextSizeByRes(R.dimen.stripePrivacyLinkTextSize)
         privacyLinkTextView.gravity = Gravity.CENTER
