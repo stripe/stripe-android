@@ -77,7 +77,7 @@ class SignUpViewModelTest {
             val viewModel = createViewModel(prefilledEmail = null)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
+            viewModel.emailController.onRawValueChange("valid@email.com")
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
             // Mock a delayed response so we stay in the loading state
@@ -98,13 +98,13 @@ class SignUpViewModelTest {
     fun `When multiple valid emails entered quickly then lookup is triggered only for last one`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(prefilledEmail = null)
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "first@email.com"))
+            viewModel.emailController.onRawValueChange("first@email.com")
             advanceTimeBy(LOOKUP_DEBOUNCE_MS / 2)
 
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "second@email.com"))
+            viewModel.emailController.onRawValueChange("second@email.com")
             advanceTimeBy(LOOKUP_DEBOUNCE_MS / 2)
 
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "third@email.com"))
+            viewModel.emailController.onRawValueChange("third@email.com")
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
             // Mock a delayed response so we stay in the loading state

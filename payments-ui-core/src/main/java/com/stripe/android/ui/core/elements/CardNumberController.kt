@@ -59,7 +59,7 @@ internal class CardNumberController constructor(
 
     internal val cardBrandFlow = _fieldValue.map {
         accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
-            ?: CardBrand.Unknown
+        ?: CardBrand.Unknown
     }
 
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
@@ -130,10 +130,12 @@ internal class CardNumberController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String): TextFieldState? {
         _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
         accountRangeService.onCardNumberChanged(cardNumber)
+
+        return null
     }
 
     /**
