@@ -99,7 +99,8 @@ data class PrimaryButtonShape(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonTypography(
     @FontRes
-    val fontFamily: Int?
+    val fontFamily: Int?,
+    val fontSize: TextUnit
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -179,6 +180,7 @@ object PaymentsThemeDefaults {
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
+            fontSize = typography.largeFontSize
         )
     )
 }
@@ -472,6 +474,7 @@ fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
 fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
     val baseStyle = MaterialTheme.typography.h5.copy(
         color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
+        fontSize = typography.fontSize
     )
     return if (typography.fontFamily != null) {
         baseStyle.copy(fontFamily = FontFamily(Font(typography.fontFamily)))

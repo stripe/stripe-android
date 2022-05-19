@@ -107,7 +107,8 @@ class TestPaymentSheetScreenshots {
             borderStrokeWidthDp = 3.0f
         ),
         typography = PaymentSheet.PrimaryButtonTypography(
-            fontResId = R.font.cursive
+            fontResId = R.font.cursive,
+            fontSizeSp = 12.0f
         )
     )
 
