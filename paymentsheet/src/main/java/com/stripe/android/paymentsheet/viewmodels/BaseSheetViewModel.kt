@@ -409,8 +409,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(
@@ -425,9 +425,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     @Suppress("UNREACHABLE_CODE")
     protected fun setupLink(stripeIntent: StripeIntent, completePayment: Boolean) {
-//         TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
-//        _isLinkEnabled.value = false
-//        return
+        //TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
+        _isLinkEnabled.value = false
+        return
 
         if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
             viewModelScope.launch {
