@@ -43,7 +43,7 @@ class TransformSpecToElements(
     private val context: Context
 ) {
     fun transform(
-        list: List<FormItemSpec>,
+        list: List<FormItemSpec>
     ): List<FormElement> =
         list.map {
             when (it) {
