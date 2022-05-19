@@ -16,6 +16,7 @@ internal data class StatsPayload(
     @SerialName("app") val app: AppInfo,
     @SerialName("scan_stats") val scanStats: ScanStatistics,
     @SerialName("configuration") val configuration: ConfigurationStats,
+    @SerialName("payload_info") val payloadInfo: PayloadInfo? = null,
 // TODO: these should probably be reported as part of scanstats
 //    @SerialName("model_versions") val modelVersions: List<ModelVersion>,
 )
@@ -90,3 +91,10 @@ internal data class ConfigurationStats(
         )
     }
 }
+
+@Serializable
+internal data class PayloadInfo(
+    @SerialName("image_compression_type") val imageCompressionType: String,
+    @SerialName("image_compression_quality") val imageCompressionQuality: Float,
+    @SerialName("image_payload_size") val imagePayloadSizeInBytes: Int,
+)

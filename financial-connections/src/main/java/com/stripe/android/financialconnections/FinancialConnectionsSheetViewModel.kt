@@ -65,7 +65,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
-
     }
 
     /**
@@ -88,8 +87,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * Activity recreation changes the lifecycle order:
      *
-     * - If config change happens while in web flow: onResume -> onNewIntent -> activityResult
-     * - If no config change happens: onActivityResult -> onNewIntent -> onResume
+     * If config change happens while in web flow:
+     * - onResume -> onNewIntent -> activityResult -> onResume(again)
+     * If no config change happens:
+     * - onActivityResult -> onNewIntent -> onResume
      *
      * (note [handleOnNewIntent] will just get called if user completed the web flow and clicked
      * the deeplink that redirects back to the app)

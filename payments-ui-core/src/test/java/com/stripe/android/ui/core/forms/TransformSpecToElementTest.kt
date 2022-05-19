@@ -16,8 +16,6 @@ import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameConfig
-import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
@@ -217,35 +215,6 @@ internal class TransformSpecToElementTest {
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.api_path)
     }
-
-    @Test
-    fun `Add a save for future use section spec sets the mandate element correctly`() =
-        runBlocking {
-            val mandate = StaticTextSpec(
-                IdentifierSpec.Generic("mandate"),
-                R.string.sepa_mandate,
-            )
-            val hiddenIdentifiers = listOf(nameSection, mandate)
-            val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
-            val formElement = transformSpecToElements.transform(
-                listOf(saveForFutureUseSpec)
-            )
-
-            val saveForFutureUseElement =
-                formElement.first() as SaveForFutureUseElement
-            val saveForFutureUseController = saveForFutureUseElement.controller
-
-            assertThat(saveForFutureUseElement.identifier)
-                .isEqualTo(saveForFutureUseSpec.api_path)
-
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
-
-            saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
-                .isEqualTo(
-                    hiddenIdentifiers.map { it.api_path }
-                )
-        }
 
     companion object {
         val IDEAL_BANK_CONFIG = BankDropdownSpec(

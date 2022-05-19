@@ -7,7 +7,7 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
-import com.stripe.android.identity.camera.IDDetectorAggregator
+import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
@@ -22,10 +22,10 @@ import java.io.File
 internal open class CameraViewModel :
     ViewModel(),
     AnalyzerLoopErrorListener,
-    AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
+    AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     SimpleScanStateful<IdentityScanState> {
-    private val interimResults = MutableLiveData<IDDetectorAggregator.InterimResult>()
-    internal val finalResult = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val interimResults = MutableLiveData<IdentityAggregator.InterimResult>()
+    internal val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
     internal val displayStateChanged =
         SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
@@ -46,12 +46,12 @@ internal open class CameraViewModel :
         displayStateChanged.postValue(newState to previousState)
     }
 
-    override suspend fun onResult(result: IDDetectorAggregator.FinalResult) {
+    override suspend fun onResult(result: IdentityAggregator.FinalResult) {
         Log.d(TAG, "Final result received: $result")
         finalResult.postValue(result)
     }
 
-    override suspend fun onInterimResult(result: IDDetectorAggregator.InterimResult) {
+    override suspend fun onInterimResult(result: IdentityAggregator.InterimResult) {
         Log.d(TAG, "Interim result received: $result")
         interimResults.postValue(result)
 

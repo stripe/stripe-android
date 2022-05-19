@@ -20,7 +20,8 @@ data class TestParameters(
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
     val takeScreenshotOnLpmLoad: Boolean = false,
-    val forceDarkMode: Boolean? = null
+    val forceDarkMode: Boolean? = null,
+    val snapshotReturningCustomer: Boolean = false
 )
 
 /**

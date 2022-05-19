@@ -25,13 +25,16 @@ sealed class ConsumerPaymentDetailsCreateParams(
      */
     @Parcelize
     class Card(
-        private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>
+        private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>,
+        private val email: String
     ) : ConsumerPaymentDetailsCreateParams(PaymentMethod.Type.Card) {
         override fun toParamMap() = super.toParamMap()
             .plus(convertParamsMap())
 
         private fun convertParamsMap(): Map<String, Any> {
             val params: MutableMap<String, Any> = mutableMapOf()
+            params[PARAM_BILLING_EMAIL_ADDRESS] = email
+
             // card["billing_details"]["address"] becomes card["billing_address"]
             (
                 (cardPaymentMethodCreateParamsMap[PARAM_BILLING_DETAILS] as? Map<*, *>)
@@ -44,6 +47,7 @@ sealed class ConsumerPaymentDetailsCreateParams(
                     PARAM_POSTAL_CODE to it[PARAM_POSTAL_CODE]
                 )
             }
+
             // only card number, exp_month and exp_year are included
             (cardPaymentMethodCreateParamsMap[PARAM_CARD] as? Map<*, *>)?.let {
                 params[PARAM_CARD] = it.toMutableMap().filterKeys { key ->
@@ -58,6 +62,7 @@ sealed class ConsumerPaymentDetailsCreateParams(
             private const val PARAM_CARD_NUMBER = "number"
             private const val PARAM_CARD_EXP_MONTH = "exp_month"
             private const val PARAM_CARD_EXP_YEAR = "exp_year"
+            private const val PARAM_BILLING_EMAIL_ADDRESS = "billing_email_address"
             private const val PARAM_BILLING_ADDRESS = "billing_address"
             private const val PARAM_COUNTRY_CODE = "country_code"
             private const val PARAM_POSTAL_CODE = "postal_code"

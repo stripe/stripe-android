@@ -555,6 +555,33 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @Test
+    fun `confirmPaymentSelection() with us_bank_account payment method should start paymentLauncher`() {
+        val paymentSelection = GENERIC_PAYMENT_SELECTION.copy(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT
+        )
+
+        flowController.confirmPaymentSelection(
+            paymentSelection,
+            InitData(
+                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                PAYMENT_METHODS,
+                SavedSelection.PaymentMethod(
+                    id = "pm_123456789"
+                ),
+                isGooglePayReady = false
+            )
+        )
+
+        verifyPaymentSelection(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            paymentSelection.paymentMethodCreateParams,
+            PaymentMethodOptionsParams.USBankAccount()
+        )
+    }
+
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams,
