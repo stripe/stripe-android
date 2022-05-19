@@ -4,8 +4,6 @@ import android.app.Application
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -17,9 +15,9 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -35,13 +33,12 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SimpleTextElement
-import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SimpleTextSpec
 import dagger.Lazy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -62,25 +59,19 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    internal val nameElement = SimpleTextElement(
-        IdentifierSpec.Name,
-        SimpleTextFieldController(
-            SimpleTextFieldConfig(
-                label = com.stripe.android.ui.core.R.string.address_label_name,
-                capitalization = KeyboardCapitalization.Words,
-                keyboard = KeyboardType.Text
-            ),
-            initialValue = args.formArgs.billingDetails?.name
-        ),
+    val nameElement: SectionFieldElement = SimpleTextSpec.NAME.transform(
+        mapOf(
+            IdentifierSpec.Name to args.formArgs.billingDetails?.name
+        )
     )
-
     val name: StateFlow<String> = nameElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val emailElement = EmailElement(
-        IdentifierSpec.Email,
-        initialValue = args.formArgs.billingDetails?.email
+    val emailElement: SectionFieldElement = EmailSpec.transform(
+        mapOf(
+            IdentifierSpec.Email to args.formArgs.billingDetails?.email
+        )
     )
     val email: StateFlow<String?> = emailElement.getFormFieldValueFlow().map { formFieldsList ->
         formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value

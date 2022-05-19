@@ -36,7 +36,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_BORDER_WIDTH to (primaryButtonConfig?.shape?.borderStrokeWidthDp != null),
                     FIELD_FONT to (primaryButtonConfig?.typography?.fontResId != null)
                 )
-                val appearanceConfigMap = mapOf(
+                val appearanceConfigMap = mutableMapOf(
                     FIELD_COLORS_LIGHT to (
                         configuration?.appearance?.colorsLight
                             != PaymentSheet.Colors.defaultLight
@@ -60,6 +60,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_PRIMARY_BUTTON to primaryButtonConfigMap
                 )
+                // We add a usage field to make queries easier.
+                val usedPrimaryButtonApi = primaryButtonConfigMap.values.contains(true)
+                val usedAppearanceApi = appearanceConfigMap
+                    .values.filterIsInstance<Boolean>().contains(true)
+
+                appearanceConfigMap[FIELD_APPEARANCE_USAGE] =
+                    usedAppearanceApi || usedPrimaryButtonApi
+
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration?.customer != null),
                     FIELD_GOOGLE_PAY to (configuration?.googlePay != null),
@@ -140,6 +148,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_DELAYED_PMS = "allows_delayed_payment_methods"
         const val FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION = "mpe_config"
         const val FIELD_APPEARANCE = "appearance"
+        const val FIELD_APPEARANCE_USAGE = "usage"
         const val FIELD_COLORS_LIGHT = "colorsLight"
         const val FIELD_COLORS_DARK = "colorsDark"
         const val FIELD_CORNER_RADIUS = "corner_radius"

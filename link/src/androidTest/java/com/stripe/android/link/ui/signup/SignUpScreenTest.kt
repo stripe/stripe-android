@@ -15,7 +15,8 @@ import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -92,7 +93,7 @@ internal class SignUpScreenTest {
             DefaultLinkTheme {
                 SignUpBody(
                     merchantName = "Example, Inc.",
-                    emailElement = EmailElement(initialValue = ""),
+                    emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "")),
                     signUpState = signUpState,
                     onSignUpClick = {}
                 )

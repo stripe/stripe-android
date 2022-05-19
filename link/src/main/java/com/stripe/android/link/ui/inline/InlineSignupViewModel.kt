@@ -11,7 +11,8 @@ import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
-import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,7 +32,8 @@ internal class InlineSignupViewModel @Inject constructor(
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
 
-    val emailElement: SectionFieldElement = EmailElement(initialValue = prefilledEmail)
+    val emailElement: SectionFieldElement =
+        EmailSpec.transform(mapOf(IdentifierSpec.Email to prefilledEmail))
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

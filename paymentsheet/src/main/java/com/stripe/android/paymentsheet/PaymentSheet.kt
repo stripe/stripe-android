@@ -326,31 +326,31 @@ class PaymentSheet internal constructor(
 
         companion object {
             val defaultLight = Colors(
-                primary = PaymentsThemeDefaults.colorsLight.primary,
-                surface = PaymentsThemeDefaults.colorsLight.surface,
+                primary = PaymentsThemeDefaults.colorsLight.materialColors.primary,
+                surface = PaymentsThemeDefaults.colorsLight.materialColors.surface,
                 component = PaymentsThemeDefaults.colorsLight.component,
                 componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder,
                 componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider,
                 onComponent = PaymentsThemeDefaults.colorsLight.onComponent,
                 subtitle = PaymentsThemeDefaults.colorsLight.subtitle,
                 placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsLight.onSurface,
+                onSurface = PaymentsThemeDefaults.colorsLight.materialColors.onSurface,
                 appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon,
-                error = PaymentsThemeDefaults.colorsLight.error,
+                error = PaymentsThemeDefaults.colorsLight.materialColors.error,
             )
 
             val defaultDark = Colors(
-                primary = PaymentsThemeDefaults.colorsDark.primary,
-                surface = PaymentsThemeDefaults.colorsDark.surface,
+                primary = PaymentsThemeDefaults.colorsDark.materialColors.primary,
+                surface = PaymentsThemeDefaults.colorsDark.materialColors.surface,
                 component = PaymentsThemeDefaults.colorsDark.component,
                 componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder,
                 componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider,
                 onComponent = PaymentsThemeDefaults.colorsDark.onComponent,
                 subtitle = PaymentsThemeDefaults.colorsDark.subtitle,
                 placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsDark.onSurface,
+                onSurface = PaymentsThemeDefaults.colorsDark.materialColors.onSurface,
                 appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon,
-                error = PaymentsThemeDefaults.colorsDark.error,
+                error = PaymentsThemeDefaults.colorsDark.materialColors.error,
             )
         }
     }

@@ -1,10 +1,11 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.paymentsColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -14,8 +15,8 @@ fun H6Text(
 ) {
     Text(
         text = text,
-        color = PaymentsTheme.colors.subtitle,
-        style = PaymentsTheme.typography.h6,
+        color = MaterialTheme.paymentsColors.subtitle,
+        style = MaterialTheme.typography.h6,
         modifier = modifier
     )
 }

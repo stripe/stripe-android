@@ -75,7 +75,8 @@ class PaymentSheetEventTest {
             "border_width" to false,
             "size_scale_factor" to false,
             "font" to false,
-            "primary_button" to expectedPrimaryButton
+            "primary_button" to expectedPrimaryButton,
+            "usage" to false
         )
         val expectedConfigMap = mapOf(
             "customer" to false,
@@ -111,7 +112,8 @@ class PaymentSheetEventTest {
             "border_width" to true,
             "size_scale_factor" to true,
             "font" to true,
-            "primary_button" to expectedPrimaryButton
+            "primary_button" to expectedPrimaryButton,
+            "usage" to true
         )
         val expectedConfigMap = mapOf(
             "customer" to true,
