@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,6 +58,7 @@ import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -480,7 +482,7 @@ internal class USBankAccountFormFragment : Fragment() {
                         Text(
                             text = "$bankName ••••$last4",
                             modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
-                            color = PaymentsTheme.colors.onComponent
+                            color = MaterialTheme.paymentsColors.onComponent
                         )
                     }
                     Image(
