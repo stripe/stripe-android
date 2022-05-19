@@ -3,7 +3,8 @@
 ## x.x.x - xxxx-xx-xx
 
 ### PaymentSheet
-- [FIXED] the format of the country dropdown in PaymentSheet for all languages.
+- [FIXED] Fixed the format of the country dropdown in PaymentSheet for all languages.
+- [ADDED] Added Affirm and AU BECS Direct Debit.
 
 
 ## 20.3.0 - 2022-05-16
