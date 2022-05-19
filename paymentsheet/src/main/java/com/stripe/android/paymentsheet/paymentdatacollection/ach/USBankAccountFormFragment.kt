@@ -395,7 +395,7 @@ internal class USBankAccountFormFragment : Fragment() {
             ) {
                 TextFieldSection(
                     textFieldController = viewModel.nameController.apply {
-                         onRawValueChange(name)
+                        onRawValueChange(name)
                     },
                     imeAction = ImeAction.Next,
                     enabled = !processing.value

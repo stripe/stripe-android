@@ -7,7 +7,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

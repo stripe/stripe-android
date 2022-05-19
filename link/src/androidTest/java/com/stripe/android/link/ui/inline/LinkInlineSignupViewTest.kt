@@ -15,7 +15,6 @@ import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.ui.core.elements.SectionFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test

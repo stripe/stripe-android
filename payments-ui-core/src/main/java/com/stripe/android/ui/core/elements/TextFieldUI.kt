@@ -1,8 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import android.view.KeyEvent
-import androidx.annotation.StringRes
 import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions

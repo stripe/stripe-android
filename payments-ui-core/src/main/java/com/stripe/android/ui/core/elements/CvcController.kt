@@ -80,7 +80,7 @@ internal class CvcController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) : TextFieldState? {
+    override fun onValueChange(displayFormatted: String): TextFieldState? {
         _fieldValue.value = cvcTextFieldConfig.filter(displayFormatted)
 
         return null

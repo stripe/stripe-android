@@ -108,14 +108,14 @@ class SimpleTextFieldController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) : TextFieldState? {
+    override fun onValueChange(displayFormatted: String): TextFieldState? {
         val originalTextStateValue = _fieldState.value
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
 
-        return if(_fieldState.value  != originalTextStateValue){
+        return if (_fieldState.value != originalTextStateValue) {
             _fieldState.value
         } else {
             null
@@ -133,7 +133,7 @@ class SimpleTextFieldController constructor(
         _hasFocus.value = newHasFocus
     }
 
-    companion object{
+    companion object {
         fun createEmailSectionController(initialValue: String?) = SimpleTextFieldController(
             EmailConfig(),
             initialValue = initialValue

@@ -16,7 +16,6 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
