@@ -171,7 +171,6 @@ internal fun DropdownMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .requiredSizeIn(
-//                minWidth = DropdownMenuItemDefaultMinWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
             )
             .clickable {

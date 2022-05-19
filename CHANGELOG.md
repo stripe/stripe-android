@@ -1,5 +1,12 @@
 # CHANGELOG
-## 20.3.0 - 2022-05.16
+
+## x.x.x - xxxx-xx-xx
+
+### PaymentSheet
+- [FIXED] the format of the country dropdown in PaymentSheet for all languages.
+
+
+## 20.3.0 - 2022-05-16
 This release adds `us_bank_account` PaymentMethod to PaymentSheet.
 
 ### PaymentSheet
