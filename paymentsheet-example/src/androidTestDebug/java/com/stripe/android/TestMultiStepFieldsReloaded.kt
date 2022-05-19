@@ -159,8 +159,7 @@ class TestMultiStepFieldsReloaded {
         )
     }
 
-    @Ignore("Ignored until ready to release")
-//    @Test
+    @Test
     fun testAffirm() {
         testDriver.confirmCustom(
             newUser.copy(
@@ -170,7 +169,7 @@ class TestMultiStepFieldsReloaded {
         )
     }
 
-    @Ignore("Cannot be tested requires AU-based merchant")
+    @Test
     fun testAuBecsDD() {
         testDriver.confirmCustom(
             newUser.copy(
@@ -190,7 +189,7 @@ class TestMultiStepFieldsReloaded {
         )
     }
 
-    @Ignore("Cannot be tested requires EU-based merchant")
+    @Test
     fun testPayPal() {
         testDriver.confirmCustom(
             newUser.copy(
