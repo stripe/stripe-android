@@ -93,7 +93,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val requiredFields = combine(
         nameController.formFieldValue.map { formFieldEntry ->
-            !formFieldEntry.value.isNullOrBlank()
+            formFieldEntry.isComplete
         },
         emailController.formFieldValue.map { formFieldEntry ->
             formFieldEntry.isComplete
