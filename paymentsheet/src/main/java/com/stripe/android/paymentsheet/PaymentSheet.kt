@@ -426,7 +426,7 @@ class PaymentSheet internal constructor(
     data class PrimaryButtonColors(
         /**
          * The background color of the primary button.
-         * Note: If 'null', Appearance.Colors.primary is used.
+         * Note: If 'null', {@link Colors#primary} is used.
          */
         @ColorInt
         val background: Int?,
@@ -471,12 +471,12 @@ class PaymentSheet internal constructor(
     data class PrimaryButtonShape(
         /**
          * The corner radius of the primary button.
-         * Note: If 'null', Appearance.Shapes.cornerRadiusDp is used.
+         * Note: If 'null', {@link Shapes#cornerRadiusDp} is used.
          */
         val cornerRadiusDp: Float? = null,
         /**
          * The border width of the primary button.
-         * Note: If 'null', Appearance.Shapes.borderStrokeWidthDp is used.
+         * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
          */
         val borderStrokeWidthDp: Float? = null
     ) : Parcelable {
