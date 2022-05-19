@@ -22,6 +22,4 @@ internal data class FaceUploadParam(
     val faceScoreVariance: Float? = null,
     @SerialName("num_frames")
     val numFrames: Int? = null,
-    @SerialName("focal_length")
-    val focalLength: Float? = null,
 )

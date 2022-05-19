@@ -211,6 +211,7 @@ public final class com/stripe/android/identity/databinding/SelfieItemBinding : a
 }
 
 public final class com/stripe/android/identity/databinding/SelfieScanFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field allowImageCollection Landroid/widget/CheckBox;
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field capturedImages Landroidx/recyclerview/widget/RecyclerView;
 	public final field flashMask Landroid/view/View;

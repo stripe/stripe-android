@@ -3,6 +3,7 @@ package com.stripe.android.identity.states
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
@@ -71,7 +72,7 @@ internal class FaceDetectorTransitionerTest {
         )
 
         verify(mockSelfieFrameSaver).saveFrame(
-            eq((mockInput to VALID_SCORE)),
+            eq((mockInput to VALID_OUTPUT)),
             same(VALID_OUTPUT)
         )
         assertThat(
@@ -233,7 +234,7 @@ internal class FaceDetectorTransitionerTest {
         const val NUM_SAMPLES = 8
         val SELFIE_CAPTURE_PAGE = VerificationPageStaticContentSelfieCapturePage(
             autoCaptureTimeout = 15000,
-            filePurpose = "selfie",
+            filePurpose = StripeFilePurpose.IdentityPrivate.code,
             numSamples = NUM_SAMPLES,
             sampleInterval = SAMPLE_INTERVAL,
             models = VerificationPageStaticContentSelfieModels(

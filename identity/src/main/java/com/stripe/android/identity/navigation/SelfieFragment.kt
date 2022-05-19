@@ -8,18 +8,32 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.camera.DefaultCameraErrorListener
+import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.ui.SelfieResultAdapter
+import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
+import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * Fragment to capture selfie.
@@ -38,8 +52,12 @@ internal class SelfieFragment(
     private lateinit var scanningView: CardView
     private lateinit var resultView: LinearLayout
     private lateinit var capturedImages: RecyclerView
+    private lateinit var allowImageCollection: CheckBox
 
-    private val selfieResultAdapter = SelfieResultAdapter()
+    internal var flashed = false
+
+    @VisibleForTesting
+    internal val selfieResultAdapter: SelfieResultAdapter = SelfieResultAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,6 +72,7 @@ internal class SelfieFragment(
         scanningView = binding.scanningView
         resultView = binding.resultView
         capturedImages = binding.capturedImages
+        allowImageCollection = binding.allowImageCollection
         capturedImages.adapter = selfieResultAdapter
 
         flashAnimatorSet = AnimatorSet().apply {
@@ -72,23 +91,15 @@ internal class SelfieFragment(
         continueButton.isEnabled = false
 
         continueButton.setOnClickListener {
-            // TODO(ccen) collect 3 images from ML pipe line and upload them
+            continueButton.toggleToLoading()
+            collectUploadedStateAndUploadForCollectedSelfies()
         }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // TODO(ccen) track identityScanViewModel.finalResult and upload processed images
-    }
-
-    /**
-     * Collect the 3 results from ML pipe line.
-     *
-     * TODO(ccen): replace the place holder with bitmap from ML pipe line.
-     */
-    private fun getResults(): List<Bitmap> {
-        return listOf()
+        identityViewModel.resetSelfieUploadedState()
     }
 
     override fun createCameraAdapter(): Camera1Adapter {
@@ -110,9 +121,10 @@ internal class SelfieFragment(
     override fun updateUI(identityScanState: IdentityScanState) {
         when (identityScanState) {
             is IdentityScanState.Initial -> {
-                resetUI()
+                // no-op
             }
             is IdentityScanState.Found -> {
+                maybeFlash()
                 binding.message.text = requireContext().getText(R.string.capturing)
             }
             is IdentityScanState.Unsatisfied -> {} // no-op
@@ -120,9 +132,10 @@ internal class SelfieFragment(
                 binding.message.text = requireContext().getText(R.string.selfie_capture_complete)
             }
             is IdentityScanState.Finished -> {
-                flash()
-                // TODO(ccen) - get result from identityScanState
-                toggleResultViewWithResult(getResults())
+                toggleResultViewWithResult(
+                    (identityScanState.transitioner as FaceDetectorTransitioner)
+                        .filteredFrames.map { it.first.cameraPreviewImage.image.mirrorHorizontally() }
+                )
             }
             is IdentityScanState.TimeOut -> {
                 // no-op, transitions to CouldNotCaptureFragment
@@ -138,10 +151,78 @@ internal class SelfieFragment(
     }
 
     /**
+     * Collect the [IdentityViewModel.selfieUploadState] and update UI accordingly.
+     *
+     * Try to [postVerificationPageDataAndMaybeSubmit] when all images are uploaded and navigates
+     * to error when error occurs.
+     */
+    private fun collectUploadedStateAndUploadForCollectedSelfies() =
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                identityViewModel.selfieUploadState.collectLatest {
+                    when {
+                        it.hasError() -> {
+                            Log.e(TAG, "Fail to upload files: ${it.getError()}")
+                            navigateToDefaultErrorFragment()
+                        }
+                        it.isAnyLoading() -> {
+                            continueButton.toggleToLoading()
+                        }
+                        it.isAllUploaded() -> {
+                            lifecycleScope.launch {
+                                runCatching {
+                                    val faceDetectorTransitioner =
+                                        requireNotNull(
+                                            identityScanViewModel.finalResult.value?.identityState?.transitioner as? FaceDetectorTransitioner
+                                        ) {
+                                            "Failed to retrieve final result for Selfie"
+                                        }
+                                    postVerificationPageDataAndMaybeSubmit(
+                                        identityViewModel = identityViewModel,
+                                        collectedDataParam = CollectedDataParam.createForSelfie(
+                                            firstHighResResult = requireNotNull(it.firstHighResResult.data),
+                                            firstLowResResult = requireNotNull(it.firstLowResResult.data),
+                                            lastHighResResult = requireNotNull(it.lastHighResResult.data),
+                                            lastLowResResult = requireNotNull(it.lastLowResResult.data),
+                                            bestHighResResult = requireNotNull(it.bestHighResResult.data),
+                                            bestLowResResult = requireNotNull(it.bestLowResResult.data),
+                                            trainingConsent = allowImageCollection.isChecked,
+                                            faceScoreVariance = faceDetectorTransitioner.scoreVariance,
+                                            numFrames = faceDetectorTransitioner.numFrames
+                                        ),
+                                        fromFragment = fragmentId,
+                                        clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM,
+                                        shouldNotSubmit = { false }
+                                    )
+                                }.onFailure { throwable ->
+                                    Log.e(
+                                        TAG,
+                                        "fail to submit uploaded files: $throwable"
+                                    )
+                                    navigateToDefaultErrorFragment()
+                                }
+                            }
+                        }
+                        else -> {
+                            Log.e(
+                                TAG,
+                                "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it"
+                            )
+                            navigateToDefaultErrorFragment()
+                        }
+                    }
+                }
+            }
+        }
+
+    /**
      * Animate the selfie view with a flash.
      */
-    private fun flash() {
-        flashAnimatorSet.start()
+    private fun maybeFlash() {
+        if (!flashed) {
+            flashAnimatorSet.start()
+            flashed = true
+        }
     }
 
     private fun toggleResultViewWithResult(resultList: List<Bitmap>) {

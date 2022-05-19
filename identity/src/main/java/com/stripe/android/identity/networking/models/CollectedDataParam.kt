@@ -114,8 +114,28 @@ internal data class CollectedDataParam(
                     idDocumentType = type
                 )
 
-        fun createForSelfie(): CollectedDataParam {
-            return CollectedDataParam(true)
-        }
+        fun createForSelfie(
+            firstHighResResult: UploadedResult,
+            firstLowResResult: UploadedResult,
+            lastHighResResult: UploadedResult,
+            lastLowResResult: UploadedResult,
+            bestHighResResult: UploadedResult,
+            bestLowResResult: UploadedResult,
+            trainingConsent: Boolean,
+            faceScoreVariance: Float,
+            numFrames: Int
+        ) = CollectedDataParam(
+            trainingConsent = trainingConsent,
+            face = FaceUploadParam(
+                bestHighResImage = bestHighResResult.uploadedStripeFile.id,
+                bestLowResImage = bestLowResResult.uploadedStripeFile.id,
+                firstHighResImage = firstHighResResult.uploadedStripeFile.id,
+                firstLowResImage = firstLowResResult.uploadedStripeFile.id,
+                lastHighResImage = lastHighResResult.uploadedStripeFile.id,
+                lastLowResImage = lastLowResResult.uploadedStripeFile.id,
+                faceScoreVariance = faceScoreVariance,
+                numFrames = numFrames
+            )
+        )
     }
 }

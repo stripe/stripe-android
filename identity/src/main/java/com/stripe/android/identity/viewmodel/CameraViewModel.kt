@@ -32,8 +32,18 @@ internal open class CameraViewModel :
 
     internal lateinit var identityScanFlow: IdentityScanFlow
 
-    internal fun initializeScanFlow(verificationPage: VerificationPage, identityModelFile: File) {
-        identityScanFlow = IdentityScanFlow(this, this, identityModelFile, verificationPage)
+    internal fun initializeScanFlow(
+        verificationPage: VerificationPage,
+        idDetectorModelFile: File,
+        faceDetectorModelFile: File
+    ) {
+        identityScanFlow = IdentityScanFlow(
+            this,
+            this,
+            idDetectorModelFile,
+            faceDetectorModelFile,
+            verificationPage
+        )
     }
 
     override var scanState: IdentityScanState? = null

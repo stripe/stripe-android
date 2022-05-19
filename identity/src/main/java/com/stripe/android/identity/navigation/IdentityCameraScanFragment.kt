@@ -29,6 +29,7 @@ import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * An abstract [Fragment] class to access camera scanning for Identity.
@@ -71,7 +72,7 @@ internal abstract class IdentityCameraScanFragment(
                     if (finalResult.identityState is IdentityScanState.Finished) {
                         identityViewModel.uploadScanResult(
                             finalResult,
-                            verificationPage.documentCapture,
+                            verificationPage,
                             identityScanViewModel.targetScanType
                         )
                     } else if (finalResult.identityState is IdentityScanState.TimeOut) {
@@ -103,9 +104,12 @@ internal abstract class IdentityCameraScanFragment(
             when (it.status) {
                 Status.SUCCESS -> {
                     requireNotNull(it.data).let { pageFilePair ->
+                        // TODO(IDPROD-3944) - download faceDetector model file
+                        val faceDetectorModelFile = File("path/to/faceDetector")
                         identityScanViewModel.initializeScanFlow(
                             pageFilePair.first,
-                            pageFilePair.second
+                            idDetectorModelFile = pageFilePair.second,
+                            faceDetectorModelFile = faceDetectorModelFile
                         )
                         lifecycleScope.launch(Dispatchers.Main) {
                             onCameraReady()

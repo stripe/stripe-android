@@ -28,7 +28,6 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
@@ -96,7 +95,14 @@ internal class IDScanFragmentTest {
 
     @Before
     fun simulateModelDownloaded() {
-        mockPageAndModel.postValue(Resource.success(Pair(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE, mock())))
+        mockPageAndModel.postValue(
+            Resource.success(
+                Pair(
+                    SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE,
+                    mock()
+                )
+            )
+        )
     }
 
     @Test
@@ -369,14 +375,11 @@ internal class IDScanFragmentTest {
             any()
         )
 
-        val mockDocumentCapture = mock<VerificationPageStaticContentDocumentCapturePage>()
-        val mockVerificationPage = mock<VerificationPage> {
-            on { documentCapture } doReturn mockDocumentCapture
-        }
+        val mockVerificationPage = mock<VerificationPage>()
         successCaptor.lastValue.invoke(mockVerificationPage)
         verify(mockIdentityViewModel).uploadScanResult(
             same(finalResult),
-            same(mockDocumentCapture),
+            same(mockVerificationPage),
             eq(targetType)
         )
     }
