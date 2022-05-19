@@ -17,10 +17,12 @@
   <string name="stripe_failure_connection_error">Det har oppstått et problem under tilkoblingen til betalingstjenesten. Kontroller Internett-forbindelsen og prøv igjen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Det oppstod en intern feil.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ved å fortsette godtar du å autorisere betalinger i samsvar med <terms>disse vilkårene</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Ved å lagre bankkontoen for %s godtar du å autorisere betalinger i samsvar med <terms>disse vilkårene</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Legg til</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformasjon</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -28,8 +30,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Tilbake</string>
   <string name="stripe_paymentsheet_close">Lukk</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Fortsett</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe vil sette inn et innskudd på USD 0,01 på kontoen din innen 1–2 virkedager. Deretter vil du få en e-post med instruksjoner for å fullføre betalingen til %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Eller betal med</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

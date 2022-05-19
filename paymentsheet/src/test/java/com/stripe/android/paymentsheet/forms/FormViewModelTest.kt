@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressElement
-import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -74,9 +73,6 @@ internal class FormViewModelTest {
 
     private val resourceRepository =
         StaticResourceRepository(
-            BankRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             )
@@ -140,7 +136,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -155,6 +151,7 @@ internal class FormViewModelTest {
         assertThat(values[0]).isTrue()
 
         formViewModel.setSaveForFutureUse(false)
+        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
 
         assertThat(values[1]).isFalse()
     }
@@ -166,7 +163,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -194,7 +191,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -209,6 +206,7 @@ internal class FormViewModelTest {
         assertThat(values[0]).isEmpty()
 
         formViewModel.setSaveForFutureUse(false)
+        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Generic("email_section")))
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -231,7 +229,7 @@ internal class FormViewModelTest {
         )
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
             null
         )
     }
@@ -247,7 +245,7 @@ internal class FormViewModelTest {
                 nameSection,
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -257,11 +255,12 @@ internal class FormViewModelTest {
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
             .filterIsInstance(SaveForFutureUseController::class.java).first()
 
+        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
-            nameSection.fields.first().identifier.value
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
+            nameSection.fields.first().identifier.v1
         )
     }
 
@@ -275,7 +274,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -301,7 +300,7 @@ internal class FormViewModelTest {
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.identifier
+            emailSection.api_path
         )
     }
 
@@ -315,7 +314,7 @@ internal class FormViewModelTest {
             LayoutSpec.create(
                 emailSection,
                 countrySection,
-                SaveForFutureUseSpec(listOf(emailSection))
+                SaveForFutureUseSpec()
             ),
             args,
             resourceRepository = resourceRepository,
@@ -333,6 +332,7 @@ internal class FormViewModelTest {
         // Verify formFieldValues is null because the email is required and invalid
         assertThat(formViewModel.completeFormValues.first()).isNull()
 
+        formViewModel.addHiddenIdentifiers(listOf(EmailSpec.identifier))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues is not null even though the email is invalid
@@ -342,7 +342,7 @@ internal class FormViewModelTest {
             completeFormFieldValues
         ).isNotNull()
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.identifier
+            emailSection.api_path
         )
         assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
             PaymentSelection.CustomerRequestedSave.RequestNoReuse
@@ -365,7 +365,18 @@ internal class FormViewModelTest {
             showCheckboxControlledFields = true
         )
         val formViewModel = FormViewModel(
-            SofortForm,
+            LayoutSpec.create(
+                SectionSpec(
+                    IdentifierSpec.Generic("name_section"),
+                    NAME
+                ),
+                SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec),
+                SectionSpec(
+                    IdentifierSpec.Generic("country_section"),
+                    CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
+                ),
+                SaveForFutureUseSpec()
+            ),
             args,
             resourceRepository = resourceRepository,
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)

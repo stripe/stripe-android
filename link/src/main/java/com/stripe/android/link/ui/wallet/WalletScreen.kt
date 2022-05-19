@@ -53,6 +53,7 @@ import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 
@@ -81,8 +82,8 @@ private fun WalletBodyPreview() {
                         "4444"
                     )
                 ),
-                payButtonLabel = "Pay $10.99",
-                onPayButtonClick = {},
+                primaryButtonLabel = "Pay $10.99",
+                onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
                 onAddNewPaymentMethodClick = {}
             )
@@ -108,8 +109,8 @@ internal fun WalletBody(
     WalletBody(
         isProcessing = isProcessing,
         paymentDetails = paymentDetails,
-        payButtonLabel = viewModel.payButtonLabel(LocalContext.current.resources),
-        onPayButtonClick = viewModel::completePayment,
+        primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+        onPrimaryButtonClick = viewModel::onSelectedPaymentDetails,
         onPayAnotherWayClick = viewModel::payAnotherWay,
         onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod
     )
@@ -119,9 +120,9 @@ internal fun WalletBody(
 internal fun WalletBody(
     isProcessing: Boolean,
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
-    payButtonLabel: String,
+    primaryButtonLabel: String,
     onAddNewPaymentMethodClick: () -> Unit,
-    onPayButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onPrimaryButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPayAnotherWayClick: () -> Unit
 ) {
     var isWalletExpanded by rememberSaveable { mutableStateOf(false) }
@@ -171,7 +172,7 @@ internal fun WalletBody(
             }
             Spacer(modifier = Modifier.height(20.dp))
             PrimaryButton(
-                label = payButtonLabel,
+                label = primaryButtonLabel,
                 state = if (isProcessing) {
                     PrimaryButtonState.Processing
                 } else {
@@ -179,7 +180,7 @@ internal fun WalletBody(
                 },
                 icon = R.drawable.stripe_ic_lock
             ) {
-                onPayButtonClick(paymentDetails[selectedIndex])
+                onPrimaryButtonClick(paymentDetails[selectedIndex])
             }
             TextButton(
                 onClick = onPayAnotherWayClick,

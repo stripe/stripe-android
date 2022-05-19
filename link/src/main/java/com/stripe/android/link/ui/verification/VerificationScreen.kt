@@ -1,30 +1,28 @@
 package com.stripe.android.link.ui.verification
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,28 +33,54 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkTextFieldColors
-import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.DefaultPaymentsTheme
+import com.stripe.android.ui.core.elements.OTPElement
+import com.stripe.android.ui.core.elements.OTPElementUI
+import com.stripe.android.ui.core.elements.OTPSpec
 
 @Preview
 @Composable
 private fun VerificationBodyPreview() {
     DefaultLinkTheme {
-        VerificationBody(
-            redactedPhoneNumber = "+1********23",
-            email = "test@stripe.com",
-            onCodeEntered = { },
-            onBack = { },
-            onChangeEmailClick = { },
-            onResendCodeClick = { }
-        )
+        Surface {
+            VerificationBody(
+                headerStringResId = R.string.verification_header,
+                messageStringResId = R.string.verification_message,
+                showChangeEmailMessage = true,
+                redactedPhoneNumber = "+1********23",
+                email = "test@stripe.com",
+                otpElement = OTPSpec.transform(),
+                isProcessing = false,
+                onBack = { },
+                onChangeEmailClick = { },
+                onResendCodeClick = { }
+            )
+        }
     }
 }
 
 @Composable
-internal fun VerificationBody(
+internal fun VerificationBodyFullFlow(
     linkAccount: LinkAccount,
     injector: NonFallbackInjector
+) {
+    VerificationBody(
+        headerStringResId = R.string.verification_header,
+        messageStringResId = R.string.verification_message,
+        showChangeEmailMessage = true,
+        linkAccount = linkAccount,
+        injector = injector
+    )
+}
+
+@Composable
+internal fun VerificationBody(
+    @StringRes headerStringResId: Int,
+    @StringRes messageStringResId: Int,
+    showChangeEmailMessage: Boolean,
+    linkAccount: LinkAccount,
+    injector: NonFallbackInjector,
+    onVerificationCompleted: (() -> Unit)? = null
 ) {
     val viewModel: VerificationViewModel = viewModel(
         factory = VerificationViewModel.Factory(
@@ -65,21 +89,35 @@ internal fun VerificationBody(
         )
     )
 
+    val isProcessing by viewModel.isProcessing.collectAsState(false)
+
+    onVerificationCompleted?.let {
+        viewModel.onVerificationCompleted = it
+    }
+
     VerificationBody(
+        headerStringResId = headerStringResId,
+        messageStringResId = messageStringResId,
+        showChangeEmailMessage = showChangeEmailMessage,
         redactedPhoneNumber = viewModel.linkAccount.redactedPhoneNumber,
         email = viewModel.linkAccount.email,
-        onCodeEntered = viewModel::onVerificationCodeEntered,
+        otpElement = viewModel.otpElement,
+        isProcessing = isProcessing,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
-        onResendCodeClick = viewModel::onResendCodeClicked
+        onResendCodeClick = viewModel::startVerification
     )
 }
 
 @Composable
 internal fun VerificationBody(
+    @StringRes headerStringResId: Int,
+    @StringRes messageStringResId: Int,
+    showChangeEmailMessage: Boolean,
     redactedPhoneNumber: String,
     email: String,
-    onCodeEntered: (String) -> Unit,
+    otpElement: OTPElement,
+    isProcessing: Boolean,
     onBack: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit
@@ -92,7 +130,7 @@ internal fun VerificationBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.verification_header),
+            text = stringResource(headerStringResId),
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
@@ -100,90 +138,71 @@ internal fun VerificationBody(
             color = MaterialTheme.colors.onPrimary
         )
         Text(
-            text = stringResource(R.string.verification_message, redactedPhoneNumber),
+            text = stringResource(messageStringResId, redactedPhoneNumber),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 30.dp),
+                .padding(top = 4.dp, bottom = 8.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        VerificationCodeInput(onCodeEntered)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 22.dp, bottom = 30.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(id = R.string.verification_not_email, email),
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onSecondary
-            )
-            Text(
-                text = stringResource(id = R.string.verification_change_email),
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .clickable(onClick = onChangeEmailClick),
-                style = MaterialTheme.typography.body2
-                    .merge(TextStyle(textDecoration = TextDecoration.Underline)),
-                color = MaterialTheme.colors.onSecondary
+        DefaultPaymentsTheme {
+            OTPElementUI(
+                enabled = !isProcessing,
+                element = otpElement,
+                modifier = Modifier.padding(vertical = 22.dp)
             )
         }
-        TextButton(
-            onClick = onResendCodeClick,
+        if (showChangeEmailMessage) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp, bottom = 30.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.verification_not_email, email),
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSecondary
+                )
+                Text(
+                    text = stringResource(id = R.string.verification_change_email),
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .clickable(
+                            enabled = !isProcessing,
+                            onClick = onChangeEmailClick
+                        ),
+                    style = MaterialTheme.typography.body2
+                        .merge(TextStyle(textDecoration = TextDecoration.Underline)),
+                    color = MaterialTheme.colors.onSecondary
+                )
+            }
+        }
+        Box(
             modifier = Modifier
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.linkColors.disabledText,
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.small
+                )
+                .clickable(
+                    enabled = !isProcessing,
+                    onClick = onResendCodeClick
                 ),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.background
-            )
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = stringResource(id = R.string.verification_resend),
-                style = MaterialTheme.typography.button,
-                color = MaterialTheme.colors.onPrimary
-            )
-        }
-    }
-}
-
-@Composable
-private fun VerificationCodeInput(
-    onCodeEntered: (String) -> Unit
-) {
-    // TODO(brnunes-stripe): Migrate to OTP collection element
-    var code by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SectionCard {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = code,
-                onValueChange = {
-                    code = it
-                    if (code.length == 6) {
-                        onCodeEntered(code)
-                    }
-                },
-                label = {
-                    Text(text = "<Code>")
-                },
-                shape = MaterialTheme.shapes.medium,
-                colors = linkTextFieldColors(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Go
-                ),
-                singleLine = true
-            )
+            CompositionLocalProvider(
+                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.verification_resend),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.button,
+                    color = MaterialTheme.colors.onPrimary
+                        .copy(alpha = LocalContentAlpha.current)
+                )
+            }
         }
     }
 }

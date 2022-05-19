@@ -18,12 +18,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
+@Ignore
 internal class PaymentMethodsUITest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -62,6 +64,31 @@ internal class PaymentMethodsUITest {
         //     paymentMethods.size
         // ) - (CARD_HORIZONTAL_PADDING.dp * 2)
         bancontact.assertWidthIsEqualTo(107.27273.dp)
+    }
+
+    @Test
+    fun testUSBankAccount() {
+        composeTestRule.setContent {
+            PaymentMethodsUI(
+                paymentMethods = listOf(
+                    SupportedPaymentMethod.Bancontact,
+                    SupportedPaymentMethod.Sofort,
+                    SupportedPaymentMethod.AfterpayClearpay,
+                    SupportedPaymentMethod.USBankAccount
+                ),
+                selectedIndex = 4,
+                isEnabled = true,
+                onItemSelectedListener = {}
+            )
+        }
+
+        // Expect the value to be equal to the width of the screen
+        // minus the left and right padding for each card
+        // calculateViewWidth(
+        //     composeTestRule.activity.resources.displayMetrics,
+        //     paymentMethods.size
+        // ) - (CARD_HORIZONTAL_PADDING.dp * 2)
+        usBankAccount.assertWidthIsEqualTo(116.0.dp)
     }
 
     @Test
@@ -158,6 +185,13 @@ internal class PaymentMethodsUITest {
         get() = composeTestRule.onNodeWithTag(
             TEST_TAG_LIST + composeTestRule.activity.resources.getString(
                 SupportedPaymentMethod.Eps.displayNameResource
+            )
+        )
+
+    private val usBankAccount
+        get() = composeTestRule.onNodeWithTag(
+            TEST_TAG_LIST + composeTestRule.activity.resources.getString(
+                SupportedPaymentMethod.USBankAccount.displayNameResource
             )
         )
 

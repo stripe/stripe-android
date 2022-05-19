@@ -20,11 +20,11 @@ internal class CardDetailsController constructor(
     )
 
     val cvcElement = CvcElement(
-        IdentifierSpec.Generic("card[cvc]"),
+        IdentifierSpec.CardCvc,
         CvcController(
             CvcConfig(),
             numberElement.controller.cardBrandFlow,
-            initialValue = initialValues[IdentifierSpec.Generic("card[cvc]")]
+            initialValue = initialValues[IdentifierSpec.CardCvc]
         )
     )
 

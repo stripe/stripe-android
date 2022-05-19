@@ -10,6 +10,7 @@ import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -43,11 +44,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.paymentsColors
 
 private const val LINK_TAG = "URL"
 
-internal data class EmbeddableImage(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddableImage(
     @DrawableRes val id: Int,
     @StringRes val contentDescription: Int
 )
@@ -58,7 +60,8 @@ internal data class EmbeddableImage(
  * The source value in the img tab, must map to something in the imageGetter.
  */
 @Composable
-internal fun Html(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Html(
     html: String,
     imageGetter: Map<String, EmbeddableImage>,
     modifier: Modifier = Modifier,
@@ -205,8 +208,8 @@ private fun ClickableText(
     text: AnnotatedString,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    color: Color = PaymentsTheme.colors.subtitle,
-    style: TextStyle = PaymentsTheme.typography.body2,
+    color: Color = MaterialTheme.paymentsColors.subtitle,
+    style: TextStyle = MaterialTheme.typography.body2,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,

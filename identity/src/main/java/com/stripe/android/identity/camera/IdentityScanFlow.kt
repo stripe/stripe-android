@@ -25,17 +25,17 @@ import java.io.File
 /**
  * Identity's [ScanFlow] implementation, uses a pool of [IDDetectorAnalyzer] to within a
  * [ProcessBoundAnalyzerLoop] to analyze a [Flow] of [CameraPreviewImage]s.
- * The results are handled in [IDDetectorAggregator].
+ * The results are handled in [IdentityAggregator].
  *
  * TODO(ccen): merge with [CardScanFlow].
  */
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
+    private val aggregateResultListener: AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
     private val verificationPage: VerificationPage
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
-    private var aggregator: IDDetectorAggregator? = null
+    private var aggregator: IdentityAggregator? = null
 
     /**
      * If this is true, do not start the flow.
@@ -79,7 +79,7 @@ internal class IdentityScanFlow(
             if (canceled) {
                 return@launch
             }
-            aggregator = IDDetectorAggregator(
+            aggregator = IdentityAggregator(
                 parameters,
                 aggregateResultListener,
                 verificationPage

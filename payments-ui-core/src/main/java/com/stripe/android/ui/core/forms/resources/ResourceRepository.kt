@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.forms.resources
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.BankRepository
 
 /**
  * Interface that provides all resources needed by the forms.
@@ -17,6 +16,5 @@ interface ResourceRepository {
 
     fun isLoaded(): Boolean
 
-    fun getBankRepository(): BankRepository
     fun getAddressRepository(): AddressFieldElementRepository
 }

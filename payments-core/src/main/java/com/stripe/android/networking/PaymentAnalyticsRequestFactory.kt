@@ -179,17 +179,6 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     }
 
     @JvmSynthetic
-    fun createRequest(
-        event: String,
-        deviceId: String
-    ): AnalyticsRequest {
-        return createRequest(
-            event,
-            mapOf(FIELD_DEVICE_ID to deviceId)
-        )
-    }
-
-    @JvmSynthetic
     internal fun createRequest(
         event: PaymentAnalyticsEvent,
         productUsageTokens: Set<String> = emptySet(),
@@ -262,7 +251,6 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     internal companion object {
         internal const val FIELD_TOKEN_TYPE = "token_type"
-        internal const val FIELD_DEVICE_ID = "device_id"
         internal const val FIELD_PRODUCT_USAGE = "product_usage"
         internal const val FIELD_SOURCE_TYPE = "source_type"
         internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"

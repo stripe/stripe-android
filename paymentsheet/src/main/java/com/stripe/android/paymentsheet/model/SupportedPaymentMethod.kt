@@ -253,7 +253,7 @@ sealed class SupportedPaymentMethod(
         val userSelectableSave = LayoutFormDescriptor(
             formSpec,
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            showCheckboxControlledFields = false
         )
 
         if (!stripeIntent.paymentMethodTypes.contains(type.code)) {
@@ -406,9 +406,9 @@ sealed class SupportedPaymentMethod(
                 Klarna,
                 PayPal,
                 AfterpayClearpay,
+                USBankAccount,
                 // Affirm // TODO: uncomment once we are ready to go live
                 // AuBecsDebit // TODO: uncomment once we are ready to go live
-                // USBankAccount // TODO: uncomment once we are ready to go live
             )
         }
 
@@ -419,7 +419,8 @@ sealed class SupportedPaymentMethod(
         internal fun SupportedPaymentMethod.shouldTintOnSelection(): Boolean {
             return setOf(
                 Card,
-                AuBecsDebit
+                AuBecsDebit,
+                USBankAccount
             ).contains(this)
         }
 

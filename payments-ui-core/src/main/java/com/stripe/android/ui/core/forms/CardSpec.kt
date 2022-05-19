@@ -10,8 +10,8 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
-internal val creditBillingSection = SectionSpec(
-    IdentifierSpec.Generic("credit_billing_section"),
+internal val cardBillingSection = SectionSpec(
+    IdentifierSpec.Generic("card_billing_section"),
     CardBillingSpec(
         countryCodes = supportedBillingCountries
     ),
@@ -20,7 +20,13 @@ internal val creditBillingSection = SectionSpec(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val CardForm = LayoutSpec.create(
-    CardDetailsSectionSpec(IdentifierSpec.Generic("credit_details_section")),
-    creditBillingSection,
-    SaveForFutureUseSpec(emptyList())
+    CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
+    cardBillingSection,
+    SaveForFutureUseSpec()
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LinkCardForm = LayoutSpec.create(
+    CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
+    cardBillingSection
 )

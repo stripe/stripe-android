@@ -17,10 +17,12 @@
   <string name="stripe_failure_connection_error">Estamos passando por problemas de conexão com nosso provedor de pagamentos. Verifique sua conexão com a Internet e tente novamente.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Ocorreu um erro interno.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ao continuar, você aceita autorizar pagamentos de acordo com <terms>estes termos</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Ao salvar sua conta bancária para %s, você autoriza pagamentos de acordo com <terms>estes termos</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adicionar</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Dados do cartão</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">País ou região</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -28,8 +30,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Voltar</string>
   <string name="stripe_paymentsheet_close">Fechar</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Continuar</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">A Stripe depositará $ 0,01 na sua conta em 1 a 2 dias úteis. Depois disso, você receberá um e-mail com instruções de como concluir o pagamento para %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ou pague com</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

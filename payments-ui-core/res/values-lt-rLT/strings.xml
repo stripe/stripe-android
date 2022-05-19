@@ -70,10 +70,16 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Išsaugoti vėlesniems %s mokėjimams</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Nuskaityti kortelę</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Pateikdami mokėjimo duomenis ir patvirtindami šį mokėjimą, leidžiate (A) „%s“ ir „Stripe“ (mūsų mokėjimo paslaugų teikėjui) jūsų bankui siųsti nurodymus nurašyti pinigus iš jūsų sąskaitos ir (B) leidžiate savo bankui, gavus tokius nurodymus, nurašyti pinigus iš jūsų sąskaitos. Pagal jūsų su banku sudarytos sutarties sąlygas turite teisę iš banko reikalauti pinigų grąžinimo. Prašymą grąžinti pinigus turite pateikti per 8 savaites nuo pinigų iš jūsų sąskaitos nurašymo dienos. Jūsų teisės paaiškintos pareiškime, kurį galite gauti iš savo banko. Sutinkate gauti pranešimus apie būsimus nurašymus likus iki 2 dienų iki jų įvykdymo momento.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Tęsti</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Mokėti %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortelės duomenys</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nustatyti</string>
 </resources>

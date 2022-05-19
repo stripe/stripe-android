@@ -10,12 +10,14 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
     override fun parse(json: JSONObject): ConsumerPaymentDetails {
-        val paymentDetails = json.optJSONArray(FIELD_PAYMENT_DETAILS)
-            ?.let { paymentDetailsArray ->
-                (0 until paymentDetailsArray.length())
-                    .map { index -> paymentDetailsArray.getJSONObject(index) }
-                    .mapNotNull { parsePaymentDetails(it) }
-            } ?: emptyList()
+        val paymentDetails = json.optJSONArray(FIELD_PAYMENT_DETAILS)?.let { paymentDetailsArray ->
+            (0 until paymentDetailsArray.length())
+                .map { index -> paymentDetailsArray.getJSONObject(index) }
+                .mapNotNull { parsePaymentDetails(it) }
+        } // Response with a single object might have it not in a list
+            ?: json.optJSONObject(FIELD_PAYMENT_DETAILS)?.let {
+                parsePaymentDetails(it)
+            }?.let { listOf(it) } ?: emptyList()
         return ConsumerPaymentDetails(paymentDetails)
     }
 

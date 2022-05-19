@@ -8,18 +8,18 @@ class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         R.string.ideal_bank,
         listOf(
-            DropdownItemSpec(text = "ABN AMRO", value = "abn_amro"),
-            DropdownItemSpec(text = "ASN Bank", value = "asn_bank"),
-            DropdownItemSpec(text = "Bunq", value = "bunq"),
-            DropdownItemSpec(text = "Handelsbanken", value = "handelsbanken"),
-            DropdownItemSpec(text = "ING", value = "ing"),
-            DropdownItemSpec(text = "Knab", value = "knab"),
-            DropdownItemSpec(text = "Rabobank", value = "rabobank"),
-            DropdownItemSpec(text = "Revolut", value = "revolut"),
-            DropdownItemSpec(text = "RegioBank", value = "regiobank"),
-            DropdownItemSpec(text = "SNS Bank (De Volksbank)", value = "sns_bank"),
-            DropdownItemSpec(text = "Triodos Bank", value = "triodos_bank"),
-            DropdownItemSpec(text = "Van Lanschot", value = "van_lanschot"),
+            DropdownItemSpec(display_text = "ABN AMRO", api_value = "abn_amro"),
+            DropdownItemSpec(display_text = "ASN Bank", api_value = "asn_bank"),
+            DropdownItemSpec(display_text = "Bunq", api_value = "bunq"),
+            DropdownItemSpec(display_text = "Handelsbanken", api_value = "handelsbanken"),
+            DropdownItemSpec(display_text = "ING", api_value = "ing"),
+            DropdownItemSpec(display_text = "Knab", api_value = "knab"),
+            DropdownItemSpec(display_text = "Rabobank", api_value = "rabobank"),
+            DropdownItemSpec(display_text = "Revolut", api_value = "revolut"),
+            DropdownItemSpec(display_text = "RegioBank", api_value = "regiobank"),
+            DropdownItemSpec(display_text = "SNS Bank (De Volksbank)", api_value = "sns_bank"),
+            DropdownItemSpec(display_text = "Triodos Bank", api_value = "triodos_bank"),
+            DropdownItemSpec(display_text = "Van Lanschot", api_value = "van_lanschot"),
         )
     )
 

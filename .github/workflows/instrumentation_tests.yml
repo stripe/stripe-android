@@ -24,7 +24,7 @@ jobs:
           script: |
             adb logcat -c
             adb logcat &
-            ./gradlew connectedAndroidTest
+            ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
         env:
           STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
           STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
@@ -33,13 +33,18 @@ jobs:
         if: failure()
         with:
           name: instrumentation-test-report
-          path: example/build/reports/androidTests/connected/index.html
+          path: example/build/reports/androidTests/connected/index.html | paymentsheet-example/build/reports/androidTests/connected/index.html
+
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
 
   # This should be updated to use the browserstack github actions when supported
   browserstack-instrumentation-tests:
     name: Browserstack Instrumentation tests
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -67,3 +72,51 @@ jobs:
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         run: python scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
+
+  screenshot-regression-tests:
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 28
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          sdcard-path-or-size: 512M
+          profile: Nexus 6
+          script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
+      - uses: actions/upload-artifact@v2
+        with:
+          name: screenshot-test-report
+          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}

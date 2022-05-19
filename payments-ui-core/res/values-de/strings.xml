@@ -70,10 +70,16 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Für zukünftige %s-Zahlungen speichern</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Karte scannen</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Durch Angabe der Zahlungsinformationen und Bestätigung der Zahlung ermächtigen Sie (A) %s und Stripe, unseren Zahlungsdienstleister, Zahlungen von Ihrem Konto mittels Lastschrift einzuziehen. Zugleich (B) weisen Sie Ihr Kreditinstitut gemäß diesen Anweisungen an, Ihr Konto entsprechend zu belasten. Sie haben im Rahmen Ihrer Rechte Anspruch auf Erstattung von Ihrem Kreditinstitut gemäß den vereinbarten Bedingungen mit Ihrem Kreditinstitut. Sie können innerhalb von 8 Wochen, beginnend mit dem Belastungsdatum, die Erstattung des belasteten Betrages verlangen. Es gelten dabei die mit Ihrem Kreditinstitut vereinbarten Bedingungen. Weiterhin erklären Sie sich damit einverstanden, die Vorabankündigung bis spätestens 2 Tage vor Zahlungseinzug zu erhalten.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Weiter</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s zahlen</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kartendaten</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Einrichten</string>
 </resources>

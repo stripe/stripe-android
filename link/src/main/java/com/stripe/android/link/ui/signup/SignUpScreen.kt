@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,9 +35,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkTextFieldColors
+import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.progressIndicatorTestTag
+import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionCard
@@ -48,16 +54,18 @@ import com.stripe.android.ui.core.elements.SectionFieldElement
 @Composable
 private fun SignUpBodyPreview() {
     DefaultLinkTheme {
-        SignUpBody(
-            merchantName = "Example, Inc.",
-            emailElement = EmailSpec.transform(
-                mapOf(
-                    IdentifierSpec.Email to "email"
-                )
-            ),
-            signUpState = SignUpState.InputtingPhone,
-            onSignUpClick = {}
-        )
+        Surface {
+            SignUpBody(
+                merchantName = "Example, Inc.",
+                emailElement = EmailSpec.transform(
+                    mapOf(
+                        IdentifierSpec.Email to "email"
+                    )
+                ),
+                signUpState = SignUpState.InputtingPhone,
+                onSignUpClick = {}
+            )
+        }
     }
 }
 
@@ -94,6 +102,9 @@ internal fun SignUpBody(
         LocalFocusManager.current.clearFocus()
     }
 
+    var phoneNumber by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -117,20 +128,52 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        EmailCollectionSection(
-            emailElement = emailElement,
-            signUpState = signUpState
-        )
+        DefaultPaymentsTheme {
+            EmailCollectionSection(
+                enabled = true,
+                emailElement = emailElement,
+                signUpState = signUpState
+            )
+        }
         AnimatedVisibility(
             visible = signUpState == SignUpState.InputtingPhone
         ) {
-            PhoneCollectionSection(onSignUpClick)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // TODO(brnunes-stripe): Migrate to phone number collection element
+                DefaultPaymentsTheme {
+                    PhoneCollectionSection(
+                        phoneNumber = phoneNumber,
+                        onPhoneNumberChanged = {
+                            phoneNumber = it
+                        },
+                        textFieldColors = linkTextFieldColors()
+                    )
+                }
+                LinkTerms(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
+                    textAlign = TextAlign.Center
+                )
+                PrimaryButton(
+                    label = stringResource(R.string.sign_up),
+                    state = if (phoneNumber.length == 10) {
+                        PrimaryButtonState.Enabled
+                    } else {
+                        PrimaryButtonState.Disabled
+                    }
+                ) {
+                    onSignUpClick(phoneNumber)
+                    keyboardController?.hide()
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun EmailCollectionSection(
+internal fun EmailCollectionSection(
+    enabled: Boolean,
     emailElement: SectionFieldElement,
     signUpState: SignUpState
 ) {
@@ -141,7 +184,7 @@ private fun EmailCollectionSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         SectionElementUI(
-            enabled = signUpState != SignUpState.VerifyingEmail,
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
             element = SectionElement(
                 identifier = IdentifierSpec.Email,
                 fields = listOf(emailElement),
@@ -164,8 +207,9 @@ private fun EmailCollectionSection(
                         bottom = 8.dp
                     )
                     .semantics {
-                        testTag = "CircularProgressIndicator"
+                        testTag = progressIndicatorTestTag
                     },
+                color = MaterialTheme.linkColors.buttonLabel,
                 strokeWidth = 2.dp
             )
         }
@@ -173,13 +217,11 @@ private fun EmailCollectionSection(
 }
 
 @Composable
-private fun PhoneCollectionSection(
-    onSignUpClick: (String) -> Unit
+internal fun PhoneCollectionSection(
+    phoneNumber: String,
+    textFieldColors: TextFieldColors = linkTextFieldColors(),
+    onPhoneNumberChanged: (String) -> Unit
 ) {
-    // TODO(brnunes-stripe): Migrate to phone number collection element
-    var phone by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -188,40 +230,19 @@ private fun PhoneCollectionSection(
             TextField(
                 modifier = Modifier
                     .fillMaxWidth(),
-                value = phone,
-                onValueChange = {
-                    phone = it
-                },
+                value = phoneNumber,
+                onValueChange = onPhoneNumberChanged,
                 label = {
                     Text(text = "Mobile Number")
                 },
                 shape = MaterialTheme.shapes.medium,
-                colors = linkTextFieldColors(),
+                colors = textFieldColors,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Go
                 ),
                 singleLine = true
             )
-        }
-        Text(
-            text = stringResource(R.string.sign_up_terms),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.caption
-        )
-        PrimaryButton(
-            label = stringResource(R.string.sign_up),
-            state = if (phone.length == 10) {
-                PrimaryButtonState.Enabled
-            } else {
-                PrimaryButtonState.Disabled
-            }
-        ) {
-            onSignUpClick(phone)
-            keyboardController?.hide()
         }
     }
 }

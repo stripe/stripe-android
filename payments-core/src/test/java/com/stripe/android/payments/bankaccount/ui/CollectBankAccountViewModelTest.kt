@@ -1,17 +1,17 @@
 package com.stripe.android.payments.bankaccount.ui
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
-import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
-import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
+import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
+import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
@@ -33,13 +33,14 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession as PaymentsFinancialConnectionsSession
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class CollectBankAccountViewModelTest {
 
-    private val createLinkAccountSession: CreateLinkAccountSession = mock()
-    private val attachLinkAccountSession: AttachLinkAccountSession = mock()
+    private val createFinancialConnectionsSession: CreateFinancialConnectionsSession = mock()
+    private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession = mock()
     private val retrieveStripeIntent: RetrieveStripeIntent = mock()
 
     private val publishableKey = "publishable_key"
@@ -48,22 +49,22 @@ class CollectBankAccountViewModelTest {
     private val email = "email"
     private val linkedAccountSessionId = "las_id"
     private val linkedAccountSessionClientSecret = "las_client_secret"
-    private val linkedAccountSession = BankConnectionsLinkedAccountSession(
+    private val financialConnectionsSession = FinancialConnectionsSession(
         clientSecret = linkedAccountSessionClientSecret,
         id = linkedAccountSessionId
     )
 
-    private val linkAccountSession = mock<LinkAccountSession> {
+    private val paymentsFinancialConnectionsSession = mock<PaymentsFinancialConnectionsSession> {
         on { this.clientSecret } doReturn "client_secret"
         on { this.id } doReturn linkedAccountSessionId
     }
 
     @Test
-    fun `init - when createLinkAccountSession succeeds for PI, opens connection flow`() = runTest {
+    fun `init - when createFinancialConnectionsSession succeeds for PI, opens connection flow`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
-            givenCreateAccountSessionForPaymentIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
 
             // When
             buildViewModel(viewEffect, paymentIntentConfiguration())
@@ -72,18 +73,18 @@ class CollectBankAccountViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
                     publishableKey,
-                    linkedAccountSession.clientSecret!!
+                    financialConnectionsSession.clientSecret!!
                 )
             )
         }
     }
 
     @Test
-    fun `init - when createLinkAccountSession succeeds for SI, opens connection flow`() = runTest {
+    fun `init - when createFinancialConnectionsSession succeeds for SI, opens connection flow`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
-            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(financialConnectionsSession))
 
             // When
             buildViewModel(viewEffect, setupIntentConfiguration())
@@ -92,7 +93,7 @@ class CollectBankAccountViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
                     publishableKey,
-                    linkedAccountSession.clientSecret!!
+                    financialConnectionsSession.clientSecret!!
                 )
             )
         }
@@ -103,18 +104,18 @@ class CollectBankAccountViewModelTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
-            givenCreateAccountSessionForPaymentIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
             givenRetrieveStripeIntentReturns(Result.success(mock()))
 
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
             // Then
             cancelAndConsumeRemainingEvents()
-            verify(attachLinkAccountSession, never()).forPaymentIntent(any(), any(), any())
+            verify(attachFinancialConnectionsSession, never()).forPaymentIntent(any(), any(), any())
         }
     }
 
@@ -123,23 +124,23 @@ class CollectBankAccountViewModelTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
-            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(financialConnectionsSession))
             givenRetrieveStripeIntentReturns(Result.success(mock()))
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
             // Then
             cancelAndConsumeRemainingEvents()
-            verify(attachLinkAccountSession, never()).forSetupIntent(any(), any(), any())
+            verify(attachFinancialConnectionsSession, never()).forSetupIntent(any(), any(), any())
         }
     }
 
     @Test
-    fun `init - when createLinkAccountSession fails, finish with error`() = runTest {
+    fun `init - when createFinancialConnectionsSession fails, finish with error`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
@@ -164,20 +165,20 @@ class CollectBankAccountViewModelTest {
         viewEffect.test {
             // Given
             val paymentIntent = mock<PaymentIntent>()
-            givenCreateAccountSessionForPaymentIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
             givenAttachAccountSessionForPaymentIntentReturns(Result.success(paymentIntent))
 
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(paymentIntent, linkAccountSession))
+                    Completed(CollectBankAccountResponse(paymentIntent, paymentsFinancialConnectionsSession))
                 )
             )
         }
@@ -189,19 +190,19 @@ class CollectBankAccountViewModelTest {
         viewEffect.test {
             // Given
             val setupIntent = mock<SetupIntent>()
-            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(financialConnectionsSession))
             givenAttachAccountSessionForSetupIntentReturns(Result.success(setupIntent))
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(setupIntent, linkAccountSession))
+                    Completed(CollectBankAccountResponse(setupIntent, paymentsFinancialConnectionsSession))
                 )
             )
         }
@@ -213,13 +214,13 @@ class CollectBankAccountViewModelTest {
         viewEffect.test {
             // Given
             val expectedException = Exception("Random error")
-            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(financialConnectionsSession))
             givenAttachAccountSessionForSetupIntentReturns(Result.failure(expectedException))
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsResult(
-                FinancialConnectionsSheetResult.Completed(linkAccountSession)
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
             // Then
@@ -232,9 +233,9 @@ class CollectBankAccountViewModelTest {
     }
 
     private fun givenCreateAccountSessionForPaymentIntentReturns(
-        result: Result<BankConnectionsLinkedAccountSession>
+        result: Result<FinancialConnectionsSession>
     ) {
-        createLinkAccountSession.stub {
+        createFinancialConnectionsSession.stub {
             onBlocking {
                 forPaymentIntent(
                     publishableKey = publishableKey,
@@ -249,7 +250,7 @@ class CollectBankAccountViewModelTest {
     private fun givenAttachAccountSessionForPaymentIntentReturns(
         result: Result<PaymentIntent>
     ) {
-        attachLinkAccountSession.stub {
+        attachFinancialConnectionsSession.stub {
             onBlocking {
                 forPaymentIntent(
                     publishableKey = publishableKey,
@@ -263,7 +264,7 @@ class CollectBankAccountViewModelTest {
     private fun givenAttachAccountSessionForSetupIntentReturns(
         result: Result<SetupIntent>
     ) {
-        attachLinkAccountSession.stub {
+        attachFinancialConnectionsSession.stub {
             onBlocking {
                 forSetupIntent(
                     publishableKey = publishableKey,
@@ -275,9 +276,9 @@ class CollectBankAccountViewModelTest {
     }
 
     private fun givenCreateAccountSessionForSetupIntentReturns(
-        result: Result<BankConnectionsLinkedAccountSession>
+        result: Result<FinancialConnectionsSession>
     ) {
-        createLinkAccountSession.stub {
+        createFinancialConnectionsSession.stub {
             onBlocking {
                 forSetupIntent(
                     publishableKey = publishableKey,
@@ -307,10 +308,11 @@ class CollectBankAccountViewModelTest {
         configuration: CollectBankAccountContract.Args
     ) = CollectBankAccountViewModel(
         args = configuration,
-        createLinkAccountSession = createLinkAccountSession,
-        attachLinkAccountSession = attachLinkAccountSession,
+        createFinancialConnectionsSession = createFinancialConnectionsSession,
+        attachFinancialConnectionsSession = attachFinancialConnectionsSession,
         retrieveStripeIntent = retrieveStripeIntent,
         logger = Logger.noop(),
+        savedStateHandle = SavedStateHandle(),
         _viewEffect = viewEffect
     )
 

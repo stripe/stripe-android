@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class SectionSpec(
-    override val identifier: IdentifierSpec,
+    override val api_path: IdentifierSpec,
     val fields: List<SectionFieldSpec>,
     @StringRes val title: Int? = null,
 ) : FormItemSpec(), RequiredItemSpec, Parcelable {

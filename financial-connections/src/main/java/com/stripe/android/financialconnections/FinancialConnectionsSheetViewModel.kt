@@ -8,19 +8,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.connections.domain.FetchLinkAccountSessionForToken
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Canceled
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Completed
-import com.stripe.android.financialconnections.FinancialConnectionsSheetContract.Result.Failed
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
-import com.stripe.android.financialconnections.domain.FetchLinkAccountSession
-import com.stripe.android.financialconnections.domain.GenerateLinkAccountSessionManifest
-import com.stripe.android.financialconnections.model.LinkAccountSession
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -33,10 +32,10 @@ import javax.inject.Named
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val starterArgs: FinancialConnectionsSheetContract.Args,
-    private val generateLinkAccountSessionManifest: GenerateLinkAccountSessionManifest,
-    private val fetchLinkAccountSession: FetchLinkAccountSession,
-    private val fetchLinkAccountSessionForToken: FetchLinkAccountSessionForToken,
+    private val starterArgs: FinancialConnectionsSheetActivityArgs,
+    private val generateFinancialConnectionsSessionManifest: GenerateFinancialConnectionsSessionManifest,
+    private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
+    private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: FinancialConnectionsEventReporter
 ) : ViewModel() {
@@ -57,14 +56,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     /**
-     * Fetches the [LinkAccountSessionManifest] from the Stripe API to get the hosted auth flow URL
+     * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
      * as well as the success and cancel callback URLs to verify.
      */
     private fun fetchManifest() {
         viewModelScope.launch {
             kotlin.runCatching {
-                generateLinkAccountSessionManifest(
-                    clientSecret = starterArgs.configuration.linkAccountSessionClientSecret,
+                generateFinancialConnectionsSessionManifest(
+                    clientSecret = starterArgs.configuration.financialConnectionsSessionClientSecret,
                     applicationId = applicationId
                 )
             }.onFailure {
@@ -81,7 +80,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param manifest the manifest containing the hosted auth flow URL to launch
      *
      */
-    private suspend fun openAuthFlow(manifest: LinkAccountSessionManifest) {
+    private suspend fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
         // stores manifest in state for future references.
         _state.updateAndPersist {
             it.copy(
@@ -120,7 +119,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
             viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(Canceled))
+                _viewEffect.emit(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
             }
         }
     }
@@ -133,24 +132,24 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onActivityResult() {
         if (_state.value.authFlowActive && _state.value.activityRecreated) {
             viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(Canceled))
+                _viewEffect.emit(FinishWithResult(FinancialConnectionsSheetActivityResult.Canceled))
             }
         }
     }
 
     /**
-     * For regular connections flows requesting a link account session:
+     * For regular connections flows requesting a session:
      *
      * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [LinkAccountSession] model from the API
+     * fetch the updated [FinancialConnectionsSession] model from the API
      * and return it back as a [Completed] result.
      */
-    private fun fetchLinkAccountSession() {
+    private fun fetchFinancialConnectionsSession() {
         viewModelScope.launch {
             kotlin.runCatching {
-                fetchLinkAccountSession(starterArgs.configuration.linkAccountSessionClientSecret)
+                fetchFinancialConnectionsSession(starterArgs.configuration.financialConnectionsSessionClientSecret)
             }.onSuccess {
-                val result = Completed(it)
+                val result = FinancialConnectionsSheetActivityResult.Completed(it)
                 eventReporter.onResult(starterArgs.configuration, result)
                 _viewEffect.emit(FinishWithResult(result))
             }.onFailure {
@@ -163,15 +162,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * For connections flows requesting an account [com.stripe.android.model.Token]:
      *
      * On successfully completing the hosted auth flow and receiving the success callback intent,
-     * fetch the updated [LinkAccountSession] and the generated [com.stripe.android.model.Token]
+     * fetch the updated [FinancialConnectionsSession] and the generated [com.stripe.android.model.Token]
      * and return it back as a [Completed] result.
      */
-    private fun fetchLinkAccountSessionForToken() {
+    private fun fetchFinancialConnectionsSessionForToken() {
         viewModelScope.launch {
             kotlin.runCatching {
-                fetchLinkAccountSessionForToken(starterArgs.configuration.linkAccountSessionClientSecret)
+                fetchFinancialConnectionsSessionForToken(
+                    clientSecret = starterArgs.configuration.financialConnectionsSessionClientSecret
+                )
             }.onSuccess { (las, token) ->
-                val result = Completed(las, token)
+                val result = FinancialConnectionsSheetActivityResult.Completed(las, token)
                 eventReporter.onResult(starterArgs.configuration, result)
                 _viewEffect.emit(FinishWithResult(result))
             }.onFailure {
@@ -187,7 +188,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
      */
     private suspend fun onFatal(throwable: Throwable) {
-        val result = Failed(throwable)
+        val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
         _viewEffect.emit(FinishWithResult(result))
     }
@@ -198,7 +199,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * URL callback, notify the [FinancialConnectionsSheetResultCallback] with [Canceled]
      */
     private suspend fun onUserCancel() {
-        val result = Canceled
+        val result = FinancialConnectionsSheetActivityResult.Canceled
         eventReporter.onResult(starterArgs.configuration, result)
         _viewEffect.emit(FinishWithResult(result))
     }
@@ -217,8 +218,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             val manifest = _state.value.manifest
             when (intent?.data.toString()) {
                 manifest?.successUrl -> when (starterArgs) {
-                    is FinancialConnectionsSheetContract.Args.Default -> fetchLinkAccountSession()
-                    is FinancialConnectionsSheetContract.Args.ForToken -> fetchLinkAccountSessionForToken()
+                    is FinancialConnectionsSheetActivityArgs.ForData -> fetchFinancialConnectionsSession()
+                    is FinancialConnectionsSheetActivityArgs.ForToken -> fetchFinancialConnectionsSessionForToken()
                 }
                 manifest?.cancelUrl -> onUserCancel()
                 else -> onFatal(Exception("Error processing FinancialConnectionsSheet intent"))
@@ -239,7 +240,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> FinancialConnectionsSheetContract.Args,
+        private val starterArgsSupplier: () -> FinancialConnectionsSheetActivityArgs,
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
@@ -254,7 +255,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 .builder()
                 .application(applicationSupplier())
                 .savedStateHandle(savedStateHandle)
-                .configuration(starterArgsSupplier())
+                .internalArgs(starterArgsSupplier())
                 .build().viewModel as T
         }
     }

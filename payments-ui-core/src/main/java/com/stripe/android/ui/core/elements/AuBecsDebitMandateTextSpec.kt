@@ -4,11 +4,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class AuBecsDebitMandateTextSpec(
-    override val identifier: IdentifierSpec
+    override val api_path: IdentifierSpec
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(merchantName: String): FormElement =
         AuBecsDebitMandateTextElement(
-            this.identifier,
+            this.api_path,
             merchantName,
         )
 }

@@ -17,6 +17,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -35,9 +36,11 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -80,6 +83,13 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
+    )
 
     @Captor
     private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
@@ -242,7 +252,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm saved payment methods`() = runTest {
+    fun `checkout() should confirm saved card payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -260,6 +270,33 @@ internal class PaymentSheetViewModelTest {
                     CLIENT_SECRET,
                     paymentMethodOptions = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `checkout() should confirm saved us_bank_account payment methods`() = runTest {
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
+        viewModel.startConfirm.observeForever {
+            confirmParams.add(it)
+        }
+
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout(CheckoutIdentifier.None)
+
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    mandateData = MandateDataParams(
+                        type = MandateDataParams.Type.Online.DEFAULT
                     )
                 )
             )
@@ -780,7 +817,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
+    fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() {
         var isEnabled = false
         viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
         viewModel.ctaEnabled.observeForever {
@@ -800,8 +837,33 @@ internal class PaymentSheetViewModelTest {
             .isTrue()
 
         viewModel.setEditing(true)
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = true
+            )
+        )
         assertThat(isEnabled)
             .isFalse()
+
+        viewModel.setEditing(false)
+        assertThat(isEnabled)
+            .isTrue()
+
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = false
+            )
+        )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.updateSelection(mock())
+        assertThat(isEnabled)
+            .isTrue()
     }
 
     @Test
@@ -884,6 +946,42 @@ internal class PaymentSheetViewModelTest {
             SupportedPaymentMethod.SepaDebit,
             SupportedPaymentMethod.Sofort
         )
+    }
+
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
+        val viewModel = createViewModel()
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.US_BANK_ACCOUNT
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(
+                ACHText.getContinueMandateText(ApplicationProvider.getApplicationContext())
+            )
+
+        viewModel.updateSelection(
+            PaymentSelection.New.GenericPaymentMethod(
+                iconResource = 0,
+                labelResource = "",
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(null)
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(null)
     }
 
     private fun createViewModel(

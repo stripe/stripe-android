@@ -17,10 +17,12 @@
   <string name="stripe_failure_connection_error">Qed nesperjenzaw problemi fil-konnessjoni mal-fornitur tal-pagamenti tagħna. Jekk jogħġbok iċċekkja l-konnessjoni tal-internet tiegħek u erġa\' pprova.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Seħħ żball intern.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Meta tissejvja l-kont tal-bank tiegħek għal %s tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Żid</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">L-informazzjoni tal-kard</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Pajjiż jew reġjun</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -28,8 +30,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Lura</string>
   <string name="stripe_paymentsheet_close">Agħlaq</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Kompli</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe se tiddepożita $0.01 fil-kont tiegħek fi żmien jum/jumejn tax-xogħol. Imbagħad se tirċievi email bl-istruzzjonijiet biex tagħmel il-pagament lil %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Jew ħallas bil-</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

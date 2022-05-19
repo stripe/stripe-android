@@ -8,7 +8,7 @@ import org.mockito.kotlin.verify
 class FinancialConnectionsSheetTest {
     private val financialConnectionsSheetLauncher = mock<FinancialConnectionsSheetLauncher>()
     private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_LINK_ACCOUNT_SESSION_SECRET,
+        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
     private val financialConnectionsSheet =

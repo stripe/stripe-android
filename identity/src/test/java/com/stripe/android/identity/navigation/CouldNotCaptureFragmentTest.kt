@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.view.View
 import android.widget.Button
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
@@ -95,6 +96,11 @@ internal class CouldNotCaptureFragmentTest {
         testClickingRetry(ScanType.PASSPORT, R.id.passportScanFragment, false)
     }
 
+    @Test
+    fun `SELFIE navigates to SelfieFragment`() {
+        testClickingRetry(ScanType.SELFIE, R.id.selfieFragment, false)
+    }
+
     private fun testClickingFileUpload(
         scanType: ScanType,
         requireLiveCapture: Boolean,
@@ -127,7 +133,7 @@ internal class CouldNotCaptureFragmentTest {
 
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK]
+                [IdentityDocumentScanFragment.ARG_SHOULD_START_FROM_BACK]
             ).isEqualTo(shouldStartFromBack)
         }
     }
@@ -157,6 +163,21 @@ internal class CouldNotCaptureFragmentTest {
             it.requireView(),
             navController
         )
+
+        assertThat(binding.titleText.text).isEqualTo(it.getString(R.string.could_not_capture_title))
+        assertThat(binding.message1.text).isEqualTo(it.getString(R.string.could_not_capture_body1))
+        assertThat(binding.bottomButton.text).isEqualTo(it.getString(R.string.try_again))
+
+        if (type == ScanType.SELFIE) {
+            assertThat(binding.topButton.visibility).isEqualTo(View.GONE)
+            assertThat(binding.message2.visibility).isEqualTo(View.GONE)
+        } else {
+            assertThat(binding.topButton.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.message2.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.topButton.text).isEqualTo(it.getString(R.string.file_upload))
+            assertThat(binding.message2.text).isEqualTo(it.getString(R.string.could_not_capture_body2))
+        }
+
         testBlock(binding.topButton, binding.bottomButton, navController)
     }
 }

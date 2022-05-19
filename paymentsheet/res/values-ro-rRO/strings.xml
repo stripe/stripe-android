@@ -17,10 +17,12 @@
   <string name="stripe_failure_connection_error">Întâmpinăm probleme de conectare cu furnizorul nostru de plăți. Verificați conexiunea la internet și încercați din nou.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">A apărut o eroare internă.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Continuând, sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Prin salvarea contului dvs. bancar pentru %s sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adăugare</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Informații privind cardul</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">Țară sau regiune</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -28,8 +30,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Înapoi</string>
   <string name="stripe_paymentsheet_close">Închidere</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">Continuare</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe va depune 0,01 USD în contul dvs. în decurs de 1-2 zile lucrătoare. Apoi veți primi un e-mail cu instrucțiuni pentru a finaliza plata către %s.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Sau folosiți ca metodă de plată</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

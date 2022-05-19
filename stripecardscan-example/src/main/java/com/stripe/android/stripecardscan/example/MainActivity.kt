@@ -1,8 +1,8 @@
 package com.stripe.android.stripecardscan.example
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.stripecardscan.example.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

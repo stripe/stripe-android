@@ -15,9 +15,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
-import com.stripe.android.identity.camera.IDDetectorAggregator
+import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
-import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
+import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -54,7 +54,7 @@ class PassportScanFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
@@ -152,7 +152,7 @@ class PassportScanFragmentTest {
             assertThat(passportScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
 
             finalResultLiveData.postValue(
-                mock<IDDetectorAggregator.FinalResult>().also {
+                mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
             )
@@ -235,7 +235,7 @@ class PassportScanFragmentTest {
         }
     }
 
-    private fun simulateFrontScanned(afterScannedBlock: (TestNavHostController, IdentityCameraScanFragmentBinding) -> Unit) {
+    private fun simulateFrontScanned(afterScannedBlock: (TestNavHostController, IdentityDocumentScanFragmentBinding) -> Unit) {
         launchPassportScanFragment().onFragment { passportScanFragment ->
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
@@ -250,7 +250,7 @@ class PassportScanFragmentTest {
             )
             // start scan
             // mock success of scan
-            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
+            val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                 whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
             }
             finalResultLiveData.postValue(mockFrontFinalResult)
@@ -275,7 +275,7 @@ class PassportScanFragmentTest {
             )
 
             // click continue, trigger navigation
-            val binding = IdentityCameraScanFragmentBinding.bind(passportScanFragment.requireView())
+            val binding = IdentityDocumentScanFragmentBinding.bind(passportScanFragment.requireView())
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
             afterScannedBlock(navController, binding)
@@ -293,11 +293,11 @@ class PassportScanFragmentTest {
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
-        check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
+        check: (binding: IdentityDocumentScanFragmentBinding, context: Context) -> Unit
     ) {
         launchPassportScanFragment().onFragment {
             displayStateChanged.postValue((newScanState to mock()))
-            check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
+            check(IdentityDocumentScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }
     }
 

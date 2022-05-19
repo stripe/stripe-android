@@ -14,30 +14,34 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.model.CardBrand
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
 import com.stripe.android.paymentsheet.ui.AnimationConstants
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
+
+    private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
+    private var showLinkInlineSignup = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,8 +60,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
+        viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
 
         val paymentMethods = sheetViewModel.supportedPaymentMethods
 
@@ -76,7 +79,38 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
         }
 
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            viewBinding.linkInlineSignup.isEnabled = !isProcessing
+        }
+
+        viewBinding.linkInlineSignup.apply {
+            linkLauncher = sheetViewModel.linkLauncher
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                combine(
+                    viewBinding.linkInlineSignup.isSelected,
+                    viewBinding.linkInlineSignup.isReady
+                ) { isSelected, isReady ->
+                    if (isSelected) {
+                        PrimaryButton.UIState(
+                            label = null,
+                            onClick = sheetViewModel::payWithLink,
+                            enabled = isReady,
+                            visible = true
+                        )
+                    } else {
+                        null
+                    }
+                }.collect {
+                    sheetViewModel.updatePrimaryButtonUIState(it)
+                }
+            }
+        }
+
         if (paymentMethods.isNotEmpty()) {
+            updateLinkInlineSignupVisibility(paymentMethods[selectedPaymentMethodIndex])
             // If the activity is destroyed and recreated, then the fragment is already present
             // and doesn't need to be replaced, only the selected payment method needs to be set
             if (savedInstanceState == null) {
@@ -84,41 +118,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
-        }
-
-        // If the activity was destroyed and recreated then we need to re-attach the fragment,
-        // as attach will not be called again.
-        childFragmentManager.fragments.forEach { fragment ->
-            attachComposeFragmentViewModel(fragment)
-        }
-
-        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            attachComposeFragmentViewModel(fragment)
-        }
-
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
-    }
-
-    private fun attachComposeFragmentViewModel(fragment: Fragment) {
-        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-            // Need to access the formViewModel so it is constructed.
-            val formViewModel = formFragment.formViewModel
-            viewLifecycleOwner.lifecycleScope.launch {
-                formViewModel.completeFormValues.collect { formFieldValues ->
-                    // if the formFieldValues is a change either null or new values for the
-                    // newLpm then we should clear it out --- but what happens if we cancel -- selection should
-                    // have the correct value
-                    sheetViewModel.updateSelection(
-                        transformToPaymentSelection(
-                            formFieldValues,
-                            sheetViewModel.getAddFragmentSelectedLpmValue()
-                        )
-                    )
-                }
-            }
-        }
     }
 
     private fun setupRecyclerView(
@@ -141,7 +141,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = !processing,
                     paymentMethods = paymentMethods,
                     onItemSelectedListener = { selectedLpm ->
-                        onPaymentMethodSelected(selectedLpm)
+                        if (sheetViewModel.getAddFragmentSelectedLpmValue() != selectedLpm) {
+                            onPaymentMethodSelected(selectedLpm)
+                        }
                     }
                 )
             }
@@ -154,6 +156,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         ViewCompat.getWindowInsetsController(requireView())
             ?.hide(WindowInsetsCompat.Type.ime())
 
+        updateLinkInlineSignupVisibility(paymentMethod)
         replacePaymentMethodFragment(paymentMethod)
     }
 
@@ -170,10 +173,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
-                initialPaymentMethodCreateParams =
-                sheetViewModel.newLpm?.paymentMethodCreateParams.takeIf {
-                    sheetViewModel.selection.value == null
-                }
+                newLpm = sheetViewModel.newLpm,
+                isShowingLinkInlineSignup = showLinkInlineSignup
             )
         )
 
@@ -192,82 +193,59 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
     }
 
+    private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
+        showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
+            selectedPaymentMethod.type == PaymentMethod.Type.Card &&
+            sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
+
+        viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup
+    }
+
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
         when (paymentMethod.type) {
-            // TODO(jameswoo-stripe): add us_bank_account payment method form fragment
-//            PaymentMethod.Type.USBankAccount -> {
-//                if (sheetViewModel is PaymentSheetViewModel) {
-//                    USBankAccountFormForPaymentSheetFragment::class.java
-//                } else {
-//                    USBankAccountFormForPaymentOptionsFragment::class.java
-//                }
-//            }
+            PaymentMethod.Type.USBankAccount -> USBankAccountFormFragment::class.java
             else -> ComposeFormDataCollectionFragment::class.java
         }
 
-    private fun getFragment() =
-        childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
-
     companion object {
-        private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
 
         @VisibleForTesting
-        internal fun transformToPaymentSelection(
-            formFieldValues: FormFieldValues?,
-            selectedPaymentMethodResources: SupportedPaymentMethod,
-        ) = formFieldValues?.let {
-            transformToPaymentMethodCreateParams.transform(
-                formFieldValues.copy(
-                    fieldValuePairs = it.fieldValuePairs
-                        .filterNot { entry ->
-                            entry.key == IdentifierSpec.SaveForFutureUse ||
-                                entry.key == IdentifierSpec.CardBrand
-                        }
-                ),
-                selectedPaymentMethodResources.type
-            ).run {
-                if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
-                    PaymentSelection.New.Card(
-                        paymentMethodCreateParams = this,
-                        brand = CardBrand.fromCode(
-                            formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
-                        ),
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-
-                    )
-                } else {
-                    PaymentSelection.New.GenericPaymentMethod(
-                        selectedPaymentMethodResources.displayNameResource,
-                        selectedPaymentMethodResources.iconResource,
-                        this,
-                        customerRequestedSave = formFieldValues.userRequestedReuse
-                    )
-                }
-            }
-        }
-
-        @VisibleForTesting
-        internal fun getFormArguments(
+        fun getFormArguments(
             showPaymentMethod: SupportedPaymentMethod,
             stripeIntent: StripeIntent,
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
             @InjectorKey injectorKey: String,
-            initialPaymentMethodCreateParams: PaymentMethodCreateParams?
+            newLpm: PaymentSelection.New?,
+            isShowingLinkInlineSignup: Boolean = false
         ): FormFragmentArguments {
 
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
                 paymentMethod = showPaymentMethod,
-                showCheckbox = layoutFormDescriptor.showCheckbox,
-                showCheckboxControlledFields = layoutFormDescriptor.showCheckboxControlledFields,
+                showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
+                showCheckboxControlledFields = newLpm?.let {
+                    newLpm.customerRequestedSave ==
+                        PaymentSelection.CustomerRequestedSave.RequestReuse
+                } ?: layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
                 injectorKey = injectorKey,
-                initialPaymentMethodCreateParams = initialPaymentMethodCreateParams
+                initialPaymentMethodCreateParams =
+                newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
+                    it == showPaymentMethod.type.code
+                }?.let {
+                    when (newLpm) {
+                        is PaymentSelection.New.GenericPaymentMethod ->
+                            newLpm.paymentMethodCreateParams
+                        is PaymentSelection.New.Card ->
+                            newLpm.paymentMethodCreateParams
+                        else -> null
+                    }
+                }
             )
         }
     }

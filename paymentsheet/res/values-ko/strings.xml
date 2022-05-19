@@ -17,10 +17,12 @@
   <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">내부 오류가 발생했습니다.</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[계속하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[%s에 대해 귀하의 은행 계좌를 저장하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">국가 또는 지역</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -28,8 +30,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">뒤로</string>
   <string name="stripe_paymentsheet_close">닫기</string>
-  <!-- Text for continue button -->
-  <string name="stripe_paymentsheet_continue_button_label">계속</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe에서 영업일 기준 1~2일 후에 계좌로 0.01$를 입금할 예정입니다. 그런 다음 %s에 대한 결제를 완료하기 위한 지침이 포함된 이메일을 전송할 것입니다.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">또는 다음 결제 방식 사용</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

@@ -23,6 +23,7 @@ class LinkActivityContractTest {
 
         val args = LinkActivityContract.Args(
             StripeIntentFixtures.PI_SUCCEEDED,
+            true,
             "Merchant, Inc",
             "customer@email.com",
             injectionParams

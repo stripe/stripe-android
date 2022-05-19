@@ -16,6 +16,10 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
+    /**
+     * To create a baseline for a payment method, create a new file <payment_method>-support.csv,
+     * comment out the assert in this test, and copy the output into the new csv file
+     */
     @Test
     fun `Test supported payment method baseline`() {
         SupportedPaymentMethod.values()
@@ -234,7 +238,7 @@ class SupportedPaymentMethodTest {
                 formType = when {
                     formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "oneTime"
                     formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == true -> "merchantRequiredSave"
-                    formShowsSaveCheckbox == true && formShowsCheckboxControlledFields == true -> "userSelectedSave"
+                    formShowsSaveCheckbox == true -> "userSelectedSave"
                     else -> "not available"
                 }
             )

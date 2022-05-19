@@ -100,6 +100,67 @@ class ErrorFragmentTest {
         }
     }
 
+    @Test
+    fun `when destination is present in backstack, clicking back keep popping until destination is reached`() {
+        val navigationDestination = R.id.consentFragment
+
+        launchErrorFragment(navigationDestination).onFragment {
+            val navController = TestNavHostController(
+                ApplicationProvider.getApplicationContext()
+            )
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(R.id.consentFragment)
+            navController.navigate(R.id.action_consentFragment_to_docSelectionFragment)
+            navController.navigate(R.id.action_global_errorFragment)
+
+            Navigation.setViewNavController(
+                it.requireView(),
+                navController
+            )
+
+            // back stack: [consentFragment, docSelectionFragment, errorFragment]
+            assertThat(navController.currentDestination?.id).isEqualTo(R.id.errorFragment)
+
+            // keep popping until navigationDestination(consentFragment) is reached
+            BaseErrorFragmentBinding.bind(it.requireView()).bottomButton.callOnClick()
+
+            assertThat(navController.currentDestination?.id).isEqualTo(navigationDestination)
+        }
+    }
+
+    @Test
+    fun `when destination is not present in backstack, clicking back reaches the first entry`() {
+        val navigationDestination = R.id.confirmationFragment
+        val firstEntry = R.id.consentFragment
+        launchErrorFragment(navigationDestination).onFragment {
+            val navController = TestNavHostController(
+                ApplicationProvider.getApplicationContext()
+            )
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(firstEntry)
+            navController.navigate(R.id.action_consentFragment_to_docSelectionFragment)
+            navController.navigate(R.id.action_global_errorFragment)
+
+            Navigation.setViewNavController(
+                it.requireView(),
+                navController
+            )
+
+            // back stack: [consentFragment, docSelectionFragment, errorFragment]
+            assertThat(navController.currentDestination?.id).isEqualTo(R.id.errorFragment)
+
+            // navigationDestination(confirmationFragment) is not in backstack,
+            // keep popping until firstEntry(consentFragment) is reached
+            BaseErrorFragmentBinding.bind(it.requireView()).bottomButton.callOnClick()
+
+            assertThat(navController.currentDestination?.id).isEqualTo(firstEntry)
+        }
+    }
+
     private fun launchErrorFragment(
         navigationDestination: Int? = null
     ) = launchFragmentInContainer(

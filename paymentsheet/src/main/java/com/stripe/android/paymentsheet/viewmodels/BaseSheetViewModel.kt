@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -17,10 +18,15 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -33,7 +39,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
@@ -141,8 +149,37 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
-    protected var linkActivityResultLauncher:
+    @VisibleForTesting
+    internal val _contentVisible = MutableLiveData(true)
+    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
+
+    /**
+     * Use this to override the current UI state of the primary button. The UI state is reset every
+     * time the payment selection is changed.
+     */
+    private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
+    val primaryButtonUIState: LiveData<PrimaryButton.UIState?> = _primaryButtonUIState
+
+    private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
+    val primaryButtonState: LiveData<PrimaryButton.State> = _primaryButtonState
+
+    private val _notesText = MutableLiveData<String?>()
+    internal val notesText: LiveData<String?> = _notesText
+
+    var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
+
+    private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
+    val linkLauncher =
+        linkPaymentLauncherFactory.create(merchantName, config?.defaultBillingDetails?.email)
+
+    private val _showLinkVerificationDialog = MutableLiveData(false)
+    val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
+
+    /**
+     * Function called when the Link verification dialog is dismissed.
+     */
+    var linkVerificationCallback: LinkVerificationCallback? = null
 
     /**
      * This should be initialized from the starter args, and then from that
@@ -170,12 +207,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
+            primaryButtonUIState,
             buttonsEnabled,
             selection,
         ).forEach { source ->
             addSource(source) {
-                value = buttonsEnabled.value == true &&
-                    selection.value != null
+                value = if (primaryButtonUIState.value != null) {
+                    primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
+                } else {
+                    buttonsEnabled.value == true && selection.value != null
+                }
             }
         }
     }.distinctUntilChanged()
@@ -276,6 +317,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     requireNotNull(stripeIntent.amount),
                     requireNotNull(stripeIntent.currency)
                 )
+                // Reset the primary button state to display the amount
+                _primaryButtonUIState.value = null
             }.onFailure {
                 onFatal(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
@@ -304,11 +347,26 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         logger.warning(message)
     }
 
-    fun updateSelection(selection: PaymentSelection?) {
+    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
+        _primaryButtonUIState.value = state
+    }
+
+    fun updatePrimaryButtonState(state: PrimaryButton.State) {
+        _primaryButtonState.value = state
+    }
+
+    fun updateBelowButtonText(text: String?) {
+        _notesText.value = text
+    }
+
+    open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newLpm = selection
         }
+
         savedStateHandle[SAVE_SELECTION] = selection
+
+        updateBelowButtonText(null)
     }
 
     fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
@@ -332,6 +390,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         editing.value = isEditing
     }
 
+    fun setContentVisible(visible: Boolean) {
+        _contentVisible.value = visible
+    }
+
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
@@ -345,27 +407,136 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         paymentMethodId
                     )
                 }
+
+                if (_paymentMethods.value?.all {
+                    it.type != PaymentMethod.Type.USBankAccount
+                } == true
+                ) {
+                    updatePrimaryButtonUIState(
+                        primaryButtonUIState.value?.copy(
+                            visible = false
+                        )
+                    )
+                    updateBelowButtonText(null)
+                }
             }
         }
     }
 
-    protected fun setupLink(unused: StripeIntent) {
-        // TODO(brnunes-stripe): Enable Link
+    @Suppress("UNREACHABLE_CODE")
+    protected fun setupLink(stripeIntent: StripeIntent, completePayment: Boolean) {
+        // TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
         _isLinkEnabled.value = false
+        return
+
+        if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
+            viewModelScope.launch {
+                when (linkLauncher.setup(stripeIntent, completePayment, this)) {
+                    AccountStatus.Verified -> launchLink()
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> {
+                        linkVerificationCallback = { success ->
+                            linkVerificationCallback = null
+                            _showLinkVerificationDialog.value = false
+
+                            if (success) {
+                                launchLink()
+                            }
+                        }
+                        _showLinkVerificationDialog.value = true
+                    }
+                    AccountStatus.SignedOut -> {}
+                }
+                _isLinkEnabled.value = true
+            }
+        } else {
+            _isLinkEnabled.value = false
+        }
+    }
+
+    fun payWithLink() {
+        (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
+            savedStateHandle[SAVE_PROCESSING] = true
+            updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+
+            when (linkLauncher.accountStatus.value) {
+                AccountStatus.Verified -> createLinkPaymentDetails(params)
+                AccountStatus.VerificationStarted,
+                AccountStatus.NeedsVerification -> {
+                    linkVerificationCallback = { success ->
+                        linkVerificationCallback = null
+                        _showLinkVerificationDialog.value = false
+
+                        if (success) {
+                            createLinkPaymentDetails(params)
+                        } else {
+                            savedStateHandle[SAVE_PROCESSING] = false
+                            updatePrimaryButtonState(PrimaryButton.State.Ready)
+                        }
+                    }
+                    _showLinkVerificationDialog.value = true
+                }
+                AccountStatus.SignedOut -> {
+                    viewModelScope.launch {
+                        linkLauncher.signUpWithUserInput().fold(
+                            onSuccess = {
+                                createLinkPaymentDetails(params)
+                            },
+                            onFailure = {
+                                savedStateHandle[SAVE_PROCESSING] = false
+                                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createLinkPaymentDetails(paymentMethodCreateParams: PaymentMethodCreateParams) {
+        viewModelScope.launch {
+            onLinkPaymentDetailsCollected(
+                linkLauncher.attachNewCardToAccount(paymentMethodCreateParams).getOrNull()
+            )
+        }
+    }
+
+    fun launchLink() {
+        linkActivityResultLauncher?.let { activityResultLauncher ->
+            linkLauncher.present(
+                activityResultLauncher
+            )
+            onLinkLaunched()
+        }
     }
 
     /**
      * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
      * accordingly.
      */
-    abstract fun onLinkLaunched()
+    open fun onLinkLaunched() {
+        setContentVisible(false)
+    }
 
     /**
-     * Method called with the result of a Link payment.
+     * Method called with the result of launching the Link UI to collect a payment.
      */
-    abstract fun onLinkPaymentResult(result: LinkActivityResult)
+    open fun onLinkActivityResult(result: LinkActivityResult) {
+        setContentVisible(true)
+    }
+
+    /**
+     * Method called after completing collection of payment data for a payment with Link.
+     */
+    abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?)
 
     abstract fun onUserCancel()
+
+    abstract fun onPaymentResult(paymentResult: PaymentResult)
+
+    abstract fun onFinish()
+
+    abstract fun onError(@StringRes error: Int? = null)
 
     /**
      * Used to set up any dependencies that require a reference to the current Activity.
@@ -374,7 +545,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     open fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             LinkActivityContract(),
-            ::onLinkPaymentResult
+            ::onLinkActivityResult
         )
     }
 
@@ -385,6 +556,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     open fun unregisterFromActivity() {
         linkActivityResultLauncher = null
     }
+
+    protected fun LinkPaymentDetails.convertToPaymentSelection() =
+        PaymentSelection.New.Link(paymentDetails, paymentMethodCreateParams)
 
     data class UserErrorMessage(val message: String)
 

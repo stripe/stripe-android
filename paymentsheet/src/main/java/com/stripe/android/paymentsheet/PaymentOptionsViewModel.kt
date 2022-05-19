@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
@@ -15,13 +16,18 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import javax.inject.Inject
@@ -59,6 +65,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
+    private val _error = MutableLiveData<String>()
+    internal val error: LiveData<String>
+        get() = _error
+
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newLpm = args.newLpm
@@ -73,7 +83,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
-        setupLink(args.stripeIntent)
+        setupLink(args.stripeIntent, false)
         setStripeIntent(args.stripeIntent)
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
@@ -81,12 +91,29 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onFatal(throwable: Throwable) {
         _fatal.value = throwable
-        _paymentOptionResult.value = PaymentOptionResult.Failed(throwable)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Failed(
+                error = throwable,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     override fun onUserCancel() {
         _paymentOptionResult.value =
-            PaymentOptionResult.Canceled(mostRecentError = _fatal.value)
+            PaymentOptionResult.Canceled(
+                mostRecentError = _fatal.value,
+                paymentMethods = _paymentMethods.value
+            )
+    }
+
+    override fun onFinish() {
+        onUserSelection()
+    }
+
+    override fun onError(@StringRes error: Int?) {
+        error?.let {
+            _error.value = getApplication<Application>().getString(error)
+        }
     }
 
     fun onUserSelection() {
@@ -95,30 +122,120 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved, PaymentSelection.GooglePay -> processExistingCard(
-                    paymentSelection
-                )
-                is PaymentSelection.New -> processNewCard(paymentSelection)
+                is PaymentSelection.Saved -> {
+                    // We don't want the USBankAccount selection to close the payment sheet right
+                    // away, the user needs to accept a mandate
+                    if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
+                        processExistingPaymentMethod(
+                            paymentSelection
+                        )
+                    }
+                }
+                is PaymentSelection.GooglePay -> processExistingPaymentMethod(paymentSelection)
+                is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
         }
     }
 
     override fun onLinkLaunched() {
+        super.onLinkLaunched()
         _processing.value = true
     }
 
-    override fun onLinkPaymentResult(result: LinkActivityResult) {
+    override fun onLinkActivityResult(result: LinkActivityResult) {
+        when (result) {
+            is LinkActivityResult.Success.Selected -> {
+                onLinkPaymentDetailsCollected(result.paymentDetails)
+            }
+            else -> {
+                if (result is LinkActivityResult.Failed) {
+                    _error.value = result.error.localizedMessage
+                }
+
+                super.onLinkActivityResult(result)
+                _processing.value = false
+            }
+        }
+    }
+
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+        linkPaymentDetails?.let {
+            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+            updateSelection(it.convertToPaymentSelection())
+            onUserSelection()
+        } ?: run {
+            // Creating Link PaymentDetails failed, fallback to regular checkout.
+            // paymentSelection is already set to the card parameters from the form.
+            onUserSelection()
+        }
+    }
+
+    override fun onPaymentResult(paymentResult: PaymentResult) {
         _processing.value = false
     }
 
-    private fun processExistingCard(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+    override fun updateSelection(selection: PaymentSelection?) {
+        super.updateSelection(selection)
+        when {
+            selection is PaymentSelection.Saved &&
+                selection.paymentMethod.type == PaymentMethod.Type.USBankAccount -> {
+                updateBelowButtonText(
+                    ACHText.getContinueMandateText(getApplication())
+                )
+                updatePrimaryButtonUIState(
+                    PrimaryButton.UIState(
+                        label = getApplication<Application>().getString(
+                            R.string.stripe_continue_button_label
+                        ),
+                        visible = true,
+                        enabled = true,
+                        onClick = {
+                            processExistingPaymentMethod(selection)
+                        }
+                    )
+                )
+            }
+            selection is PaymentSelection.Saved ||
+                selection is PaymentSelection.GooglePay -> {
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        visible = false
+                    )
+                )
+            }
+            else -> {
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        label = getApplication<Application>().getString(
+                            R.string.stripe_continue_button_label
+                        ),
+                        visible = true,
+                        enabled = true,
+                        onClick = {
+                            onUserSelection()
+                        }
+                    )
+                )
+            }
+        }
     }
 
-    private fun processNewCard(paymentSelection: PaymentSelection) {
+    private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Succeeded(
+                paymentSelection = paymentSelection,
+                paymentMethods = _paymentMethods.value
+            )
+    }
+
+    private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
+        prefsRepository.savePaymentSelection(paymentSelection)
+        _paymentOptionResult.value =
+            PaymentOptionResult.Succeeded(
+                paymentSelection = paymentSelection,
+                paymentMethods = _paymentMethods.value
+            )
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {

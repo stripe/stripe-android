@@ -1,13 +1,14 @@
 package com.stripe.android.ui.core.elements
 
-import android.util.Log
 import android.view.KeyEvent
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -31,8 +32,8 @@ import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.paymentsColors
 
 /**
  * This is focused on converting an `Element` into what is displayed in a textField.
@@ -47,8 +48,6 @@ internal fun TextField(
     imeAction: ImeAction,
     enabled: Boolean
 ) {
-    Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
-
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
     val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
@@ -57,21 +56,7 @@ internal fun TextField(
     val contentDescription by textFieldController.contentDescription.collectAsState("")
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val colors = TextFieldDefaults.textFieldColors(
-        textColor = if (shouldShowError) {
-            PaymentsTheme.colors.material.error
-        } else {
-            PaymentsTheme.colors.onComponent
-        },
-        unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
-        focusedLabelColor = PaymentsTheme.colors.placeholderText,
-        placeholderColor = PaymentsTheme.colors.placeholderText,
-        backgroundColor = PaymentsTheme.colors.component,
-        focusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        cursorColor = PaymentsTheme.colors.colorTextCursor
-    )
+    val colors = TextFieldColors(shouldShowError)
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
@@ -97,19 +82,6 @@ internal fun TextField(
     TextField(
         value = value,
         onValueChange = { textFieldController.onValueChange(it) },
-        isError = shouldShowError,
-        label = {
-            FormLabel(
-                text = if (textFieldController.showOptionalLabel) {
-                    stringResource(
-                        R.string.form_label_optional,
-                        label?.let { stringResource(it) } ?: ""
-                    )
-                } else {
-                    label?.let { stringResource(it) } ?: ""
-                }
-            )
-        },
         modifier = modifier
             .fillMaxWidth()
             .onPreviewKeyEvent { event ->
@@ -133,6 +105,29 @@ internal fun TextField(
                 this.contentDescription = contentDescription
                 this.editableText = AnnotatedString("")
             },
+        enabled = enabled,
+        label = {
+            FormLabel(
+                text = if (textFieldController.showOptionalLabel) {
+                    stringResource(
+                        R.string.form_label_optional,
+                        label?.let { stringResource(it) } ?: ""
+                    )
+                } else {
+                    label?.let { stringResource(it) } ?: ""
+                }
+            )
+        },
+        trailingIcon = trailingIcon?.let {
+            { TrailingIcon(it, colors, loading) }
+        },
+        isError = shouldShowError,
+        visualTransformation = textFieldController.visualTransformation,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = textFieldController.keyboardType,
+            capitalization = textFieldController.capitalization,
+            imeAction = imeAction
+        ),
         keyboardActions = KeyboardActions(
             onNext = {
                 focusManager.moveFocus(FocusDirection.Next)
@@ -141,21 +136,30 @@ internal fun TextField(
                 focusManager.clearFocus(true)
             }
         ),
-        visualTransformation = textFieldController.visualTransformation,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = textFieldController.keyboardType,
-            capitalization = textFieldController.capitalization,
-            imeAction = imeAction
-        ),
-        colors = colors,
-        maxLines = 1,
         singleLine = true,
-        enabled = enabled,
-        trailingIcon = trailingIcon?.let {
-            { TrailingIcon(it, colors, loading) }
-        }
+        colors = colors,
     )
 }
+
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun TextFieldColors(
+    shouldShowError: Boolean = false
+) = TextFieldDefaults.textFieldColors(
+    textColor = if (shouldShowError) {
+        MaterialTheme.colors.error
+    } else {
+        MaterialTheme.paymentsColors.onComponent
+    },
+    unfocusedLabelColor = MaterialTheme.paymentsColors.placeholderText,
+    focusedLabelColor = MaterialTheme.paymentsColors.placeholderText,
+    placeholderColor = MaterialTheme.paymentsColors.placeholderText,
+    backgroundColor = MaterialTheme.paymentsColors.component,
+    focusedIndicatorColor = Color.Transparent,
+    disabledIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+    cursorColor = MaterialTheme.paymentsColors.textCursor
+)
 
 @Composable
 internal fun TrailingIcon(

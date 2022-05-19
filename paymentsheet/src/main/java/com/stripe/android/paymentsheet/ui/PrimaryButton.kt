@@ -120,10 +120,10 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     fun setLabel(text: String?) {
         externalLabel = text
-        if (state !is State.StartProcessing) {
-            originalLabel = text
-        }
         text?.let {
+            if (state !is State.StartProcessing) {
+                originalLabel = text
+            }
             viewBinding.label.setContent {
                 LabelUI(label = text)
             }
@@ -131,6 +131,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
+        isClickable = true
         originalLabel?.let {
             setLabel(it)
         }
@@ -144,13 +145,14 @@ internal class PrimaryButton @JvmOverloads constructor(
     private fun onStartProcessing() {
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
-
+        isClickable = false
         setLabel(
             resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
         )
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+        isClickable = false
         backgroundTintList = ColorStateList.valueOf(
             resources.getColor(R.color.stripe_paymentsheet_primary_button_success_background)
         )
@@ -206,15 +208,27 @@ internal class PrimaryButton @JvmOverloads constructor(
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
+
+    /**
+     * Used to override the current UI state of the Primary Button
+     */
+    internal data class UIState(
+        val label: String?,
+        val onClick: (() -> Unit)?,
+        val enabled: Boolean,
+        val visible: Boolean
+    )
 }
 
 @Composable
 private fun LabelUI(label: String) {
-    Text(
-        text = label,
-        textAlign = TextAlign.Center,
-        style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
-        modifier = Modifier
-            .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
-    )
+    PaymentsTheme {
+        Text(
+            text = label,
+            textAlign = TextAlign.Center,
+            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
+            modifier = Modifier
+                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+        )
+    }
 }

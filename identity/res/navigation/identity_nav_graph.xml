@@ -152,5 +152,12 @@
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_driverLicenseScanFragment"
             app:destination="@id/driverLicenseScanFragment" />
+        <action
+            android:id="@+id/action_couldNotCaptureFragment_to_selfieFragment"
+            app:destination="@id/selfieFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/selfieFragment"
+        android:name="com.stripe.android.identity.navigation.SelfieFragment"
+        android:label="SelfieFragment" /><action android:id="@+id/action_global_selfieFragment" app:destination="@id/selfieFragment"/>
 </navigation>

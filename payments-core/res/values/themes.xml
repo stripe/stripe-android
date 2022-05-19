@@ -13,7 +13,7 @@
     <style name="StripeDefaultTheme" parent="StripeBaseTheme" />
 
     <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
-    <style name="StripeTransparentTheme" parent="Theme.AppCompat">
+    <style name="StripeTransparentTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>

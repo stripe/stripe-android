@@ -31,6 +31,7 @@ sealed class CheckoutCustomer(val value: String) {
     object Guest : CheckoutCustomer("guest")
     object New : CheckoutCustomer("new")
     object Returning : CheckoutCustomer("returning")
+    object Snapshot : CheckoutCustomer("snapshot")
     data class WithId(val customerId: String) : CheckoutCustomer(customerId)
 }
 

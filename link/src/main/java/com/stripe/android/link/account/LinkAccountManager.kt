@@ -1,10 +1,16 @@
 package com.stripe.android.link.account
 
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,17 +20,53 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
+    private val args: LinkActivityContract.Args,
     private val linkRepository: LinkRepository,
     private val cookieStore: CookieStore
 ) {
-    private val _linkAccount =
-        MutableStateFlow<LinkAccount?>(null)
+    private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
+    var userSignUpInput: UserSignUpInput? = null
+
+    val accountStatus =
+        linkAccount.transform { value ->
+            emit(
+                // If we already fetched an account, return its status
+                value?.accountStatus
+                    ?: (
+                        // If consumer has previously logged in, fetch their account
+                        cookieStore.getAuthSessionCookie()?.let {
+                            lookupConsumer(null).getOrNull()?.accountStatus
+                        }
+                            // If a customer email was passed in, lookup the account,
+                            // unless the user has logged out of this account
+                            ?: args.customerEmail?.let {
+                                if (hasUserLoggedOut(it)) {
+                                    AccountStatus.SignedOut
+                                } else {
+                                    lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+                                }
+                            } ?: AccountStatus.SignedOut
+                        )
+            )
+        }
+
     /**
-     * Retrieves the Link account associated with the email and starts verification, if needed.
+     * Keeps track of whether the user has logged out during this session. If that's the case, we
+     * want to ignore the email passed in by the merchant to avoid confusion.
      */
-    suspend fun lookupConsumer(email: String): Result<LinkAccount?> =
+    private var userHasLoggedOut = false
+
+    /**
+     * Retrieves the Link account associated with the email and optionally starts verification, if
+     * needed.
+     * When the [email] parameter is null, will lookup the account for the currently stored cookie.
+     */
+    suspend fun lookupConsumer(
+        email: String?,
+        startVerification: Boolean = true
+    ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
             .map { consumerSessionLookup ->
                 setAndReturnNullable(
@@ -38,14 +80,31 @@ internal class LinkAccountManager @Inject constructor(
                         account
                     } else {
                         setAndReturn(
-                            LinkAccount(
-                                linkRepository.startVerification(account.clientSecret, cookie())
-                                    .getOrThrow()
-                            )
+                            if (startVerification) {
+                                LinkAccount(
+                                    linkRepository.startVerification(account.clientSecret, cookie())
+                                        .getOrThrow()
+                                )
+                            } else {
+                                account
+                            }
                         )
                     }
                 }
             }
+
+    /**
+     * Use the locally stored user input to sign up for a new Link account, starting verification
+     * if needed.
+     */
+    suspend fun signUpWithUserInput(): Result<LinkAccount> =
+        userSignUpInput?.let {
+            signUp(it.email, it.phone, it.country)
+        } ?: run {
+            Result.failure(
+                IllegalStateException("Must collect consumer info before trying to sign up")
+            )
+        }
 
     /**
      * Registers the user for a new Link account and starts verification if needed.
@@ -98,6 +157,27 @@ internal class LinkAccountManager @Inject constructor(
         )
 
     /**
+     * Creates a new PaymentDetails attached to the current account.
+     *
+     * @return The parameters needed to confirm the current Stripe Intent using the newly created
+     *          Payment Details.
+     */
+    suspend fun createPaymentDetails(
+        paymentMethod: SupportedPaymentMethod,
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ): Result<LinkPaymentDetails> =
+        linkAccount.value?.let { account ->
+            linkRepository.createPaymentDetails(
+                paymentMethod.createParams(paymentMethodCreateParams, account.email),
+                account.clientSecret,
+                args.stripeIntent,
+                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+            )
+        } ?: Result.failure(
+            IllegalStateException("A non-null Link account is needed to create payment details")
+        )
+
+    /**
      * Logs the current consumer out.
      *
      * Regardless of the result of the API call, the local cookie is deleted and the current account
@@ -109,22 +189,42 @@ internal class LinkAccountManager @Inject constructor(
             val cookie = cookie()
             cookieStore.logout(account.email)
             _linkAccount.value = null
+            userHasLoggedOut = true
             GlobalScope.launch {
                 linkRepository.logout(account.clientSecret, cookie)
             }
         }
 
+    /**
+     * Whether the user has logged out from any account during this session, or the last logout was
+     * from the [email] passed as parameter, even if in a previous session.
+     */
+    fun hasUserLoggedOut(email: String?) = userHasLoggedOut || email?.let {
+        cookieStore.isEmailLoggedOut(it)
+    } ?: false
+
     private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {
         _linkAccount.value = linkAccount
         cookieStore.updateAuthSessionCookie(linkAccount.getAuthSessionCookie())
+        if (cookieStore.isEmailLoggedOut(linkAccount.email)) {
+            cookieStore.storeLoggedOutEmail("")
+        }
         return linkAccount
     }
 
-    private fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? {
-        _linkAccount.value = linkAccount
-        cookieStore.updateAuthSessionCookie(linkAccount?.getAuthSessionCookie())
-        return linkAccount
-    }
+    private fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? =
+        linkAccount?.let {
+            setAndReturn(it)
+        } ?: run {
+            _linkAccount.value = null
+            null
+        }
 
     private fun cookie() = cookieStore.getAuthSessionCookie()
+
+    data class UserSignUpInput(
+        val email: String,
+        val phone: String,
+        val country: String
+    )
 }

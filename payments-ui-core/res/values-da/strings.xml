@@ -70,10 +70,16 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Gem til fremtidige %s-betalinger</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Scan kort</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Ved at give dine betalingsoplysninger og bekræfte denne betaling giver du (A) %s og Stripe, vores betalingstjenesteudbyder, tilladelse til at sende instruktioner til din bank om at debitere din konto og (B) din bank til at debitere din konto i overensstemmelse med disse instruktioner. Som en del af dine rettigheder har du ret til en refusion fra din bank under vilkårene og betingelserne i din aftale med din bank. Der skal kræves refusion inden for 8 uger fra den dato, hvor din konto blev debiteret. Dine rettigheder forklares i en erklæring, som du kan få fra din bank. Du accepterer at modtage underretninger om fremtidig debitering op til to dage før de opstår.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Fortsæt</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Betal %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortoplysninger</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Opsætning</string>
 </resources>

@@ -8,12 +8,11 @@ import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
-import com.stripe.android.ui.core.elements.BankDropdownSpec
-import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -24,6 +23,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
@@ -58,7 +58,6 @@ class TransformSpecToElements(
                 is SectionSpec -> it.transform(
                     initialValues,
                     amount?.currencyCode,
-                    resourceRepository.getBankRepository(),
                     resourceRepository.getAddressRepository()
                 )
                 is StaticTextSpec -> it.transform()
@@ -71,26 +70,25 @@ class TransformSpecToElements(
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(context, initialValues)
                 is BsbSpec -> it.transform(initialValues)
+                is OTPSpec -> it.transform()
             }
         }
 
     private fun SectionSpec.transform(
         initialValues: Map<IdentifierSpec, String?>,
         currencyCode: String?,
-        bankRepository: BankRepository,
         addressRepository: AddressFieldElementRepository
     ): SectionElement {
         val fieldElements = this.fields.transform(
             initialValues,
             currencyCode,
-            bankRepository,
             addressRepository
         )
 
         // The controller of the section element will be the same as the field element
         // as there is only a single field in a section
         return SectionElement(
-            this.identifier,
+            this.api_path,
             fieldElements,
             SectionController(
                 this.title,
@@ -105,14 +103,13 @@ class TransformSpecToElements(
     private fun List<SectionFieldSpec>.transform(
         initialValues: Map<IdentifierSpec, String?>,
         currencyCode: String?,
-        bankRepository: BankRepository,
         addressRepository: AddressFieldElementRepository
     ) =
         this.map {
             when (it) {
                 is EmailSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
-                is BankDropdownSpec -> it.transform(bankRepository, initialValues[it.identifier])
+                is DropdownSpec -> it.transform(initialValues[it.identifier])
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,

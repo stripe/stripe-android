@@ -1,14 +1,16 @@
 package com.stripe.android.financialconnections
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.model.LinkAccountSessionManifest
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 /**
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
     val activityRecreated: Boolean = false,
-    val manifest: LinkAccountSessionManifest? = null,
+    val manifest: FinancialConnectionsSessionManifest? = null,
     val authFlowActive: Boolean = false
 ) {
 
@@ -56,9 +58,9 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
-     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetContract.Result]
+     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetForDataContract.Result]
      */
     data class FinishWithResult(
-        val result: FinancialConnectionsSheetContract.Result
+        val result: FinancialConnectionsSheetActivityResult
     ) : FinancialConnectionsSheetViewEffect()
 }

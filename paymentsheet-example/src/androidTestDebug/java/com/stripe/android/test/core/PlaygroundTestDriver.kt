@@ -2,16 +2,19 @@ package com.stripe.android.test.core
 
 import android.app.Activity
 import android.app.Application
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
+import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.test.core.ui.BrowserUI
@@ -35,7 +38,7 @@ class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
-) {
+) : ScreenshotTest {
     private var resultValue: String? = null
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
@@ -151,9 +154,38 @@ class PlaygroundTestDriver(
         teardown()
     }
 
+    /**
+     * This test will open the payment sheet complete flow and take a picture when it has finished
+     * opening. The sheet is then closed. We will use the screenshot to compare o a golden value
+     * in our repository.
+     *
+     * A test calling this takes about 20 seconds
+     */
+    fun screenshotRegression(
+        testParameters: TestParameters,
+        customOperations: () -> Unit = {}
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        customOperations()
+
+        currentActivity[0]?.let {
+            compareScreenshot(it)
+        }
+
+        teardown()
+    }
+
     private fun pressBuy() {
         selectors.buyButton.apply {
             scrollTo()
+            click()
+        }
+    }
+
+    internal fun pressEdit() {
+        selectors.editButton.apply {
             click()
         }
     }
@@ -167,6 +199,8 @@ class PlaygroundTestDriver(
         while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     /**
@@ -176,6 +210,8 @@ class PlaygroundTestDriver(
         while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     private fun verifyDeviceSupportsTestAuthorization(
@@ -329,7 +365,23 @@ class PlaygroundTestDriver(
         // Setup the playground for scenario, and launch it.  We use the playground
         // so we don't have to implement another route to create a payment intent,
         // the challenge is that we don't have access to the activity or it's viewmodels
-        val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
+        val intent = Intent(
+            ApplicationProvider.getApplicationContext(),
+            PaymentSheetPlaygroundActivity::class.java
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.FORCE_DARK_MODE_EXTRA,
+            testParameters.forceDarkMode
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
+            testParameters.appearance
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
+            testParameters.snapshotReturningCustomer
+        )
+        val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
 
             monitorCurrentActivity(activity.application)
