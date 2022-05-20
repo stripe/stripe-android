@@ -74,7 +74,7 @@ class CountryConfig(
     }
 
     private fun getCountryName(displayName: String) = if (flagMode) {
-        // In flag mode, remove the flag which is located beforet the first space
+        // In flag mode, remove the flag which is located before the first space
         displayName.substring(displayName.indexOf(" ") + 1)
     } else {
         displayName
