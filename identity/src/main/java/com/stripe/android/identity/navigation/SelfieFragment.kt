@@ -169,38 +169,36 @@ internal class SelfieFragment(
                             continueButton.toggleToLoading()
                         }
                         it.isAllUploaded() -> {
-                            lifecycleScope.launch {
-                                runCatching {
-                                    val faceDetectorTransitioner =
-                                        requireNotNull(
-                                            identityScanViewModel.finalResult.value?.identityState?.transitioner as? FaceDetectorTransitioner
-                                        ) {
-                                            "Failed to retrieve final result for Selfie"
-                                        }
-                                    postVerificationPageDataAndMaybeSubmit(
-                                        identityViewModel = identityViewModel,
-                                        collectedDataParam = CollectedDataParam.createForSelfie(
-                                            firstHighResResult = requireNotNull(it.firstHighResResult.data),
-                                            firstLowResResult = requireNotNull(it.firstLowResResult.data),
-                                            lastHighResResult = requireNotNull(it.lastHighResResult.data),
-                                            lastLowResResult = requireNotNull(it.lastLowResResult.data),
-                                            bestHighResResult = requireNotNull(it.bestHighResResult.data),
-                                            bestLowResResult = requireNotNull(it.bestLowResResult.data),
-                                            trainingConsent = allowImageCollection.isChecked,
-                                            faceScoreVariance = faceDetectorTransitioner.scoreVariance,
-                                            numFrames = faceDetectorTransitioner.numFrames
-                                        ),
-                                        fromFragment = fragmentId,
-                                        clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM,
-                                        shouldNotSubmit = { false }
-                                    )
-                                }.onFailure { throwable ->
-                                    Log.e(
-                                        TAG,
-                                        "fail to submit uploaded files: $throwable"
-                                    )
-                                    navigateToDefaultErrorFragment()
-                                }
+                            runCatching {
+                                val faceDetectorTransitioner =
+                                    requireNotNull(
+                                        identityScanViewModel.finalResult.value?.identityState?.transitioner as? FaceDetectorTransitioner
+                                    ) {
+                                        "Failed to retrieve final result for Selfie"
+                                    }
+                                postVerificationPageDataAndMaybeSubmit(
+                                    identityViewModel = identityViewModel,
+                                    collectedDataParam = CollectedDataParam.createForSelfie(
+                                        firstHighResResult = requireNotNull(it.firstHighResResult.data),
+                                        firstLowResResult = requireNotNull(it.firstLowResResult.data),
+                                        lastHighResResult = requireNotNull(it.lastHighResResult.data),
+                                        lastLowResResult = requireNotNull(it.lastLowResResult.data),
+                                        bestHighResResult = requireNotNull(it.bestHighResResult.data),
+                                        bestLowResResult = requireNotNull(it.bestLowResResult.data),
+                                        trainingConsent = allowImageCollection.isChecked,
+                                        faceScoreVariance = faceDetectorTransitioner.scoreVariance,
+                                        numFrames = faceDetectorTransitioner.numFrames
+                                    ),
+                                    fromFragment = fragmentId,
+                                    clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM,
+                                    shouldNotSubmit = { false }
+                                )
+                            }.onFailure { throwable ->
+                                Log.e(
+                                    TAG,
+                                    "fail to submit uploaded files: $throwable"
+                                )
+                                navigateToDefaultErrorFragment()
                             }
                         }
                         else -> {
