@@ -36,24 +36,19 @@ internal class FinancialConnectionsSheetFragment :
      */
     override fun invalidate() {
         withState(viewModel) { state ->
-            if (state.viewEffect != null) {
-                when (state.viewEffect) {
-                    is OpenAuthFlowWithUrl -> state.viewEffect.launch()
-                    is FinishWithResult -> finishWithResult(state.viewEffect.result)
+            state.viewEffect?.let {
+                when (it) {
+                    is OpenAuthFlowWithUrl -> startForResult.launch(
+                        CreateBrowserIntentForUrl(
+                            context = requireContext(),
+                            uri = Uri.parse(it.url),
+                        )
+                    )
+                    is FinishWithResult -> finishWithResult(it.result)
                 }
                 viewModel.onViewEffectLaunched()
             }
         }
-    }
-
-    private fun OpenAuthFlowWithUrl.launch() {
-        val uri = Uri.parse(this.url)
-        startForResult.launch(
-            CreateBrowserIntentForUrl(
-                context = requireContext(),
-                uri = uri,
-            )
-        )
     }
 
     override fun onResume() {
@@ -62,10 +57,9 @@ internal class FinancialConnectionsSheetFragment :
     }
 
     private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
-        requireActivity().setResult(
-            Activity.RESULT_OK,
-            Intent().putExtras(result.toBundle())
-        )
-        requireActivity().finish()
+        with(requireActivity()) {
+            setResult(Activity.RESULT_OK, Intent().putExtras(result.toBundle()))
+            finish()
+        }
     }
 }
