@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
-import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinWidth
 import com.stripe.android.ui.core.paymentsColors
 import kotlin.math.max
 import kotlin.math.min
@@ -172,7 +171,6 @@ internal fun DropdownMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .requiredSizeIn(
-                minWidth = DropdownMenuItemDefaultMinWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
             )
             .clickable {
@@ -184,11 +182,7 @@ internal fun DropdownMenuItem(
             modifier = Modifier
                 // This padding makes up for the checkmark at the end.
                 .padding(
-                    horizontal = if (isSelected) {
-                        13.dp
-                    } else {
-                        0.dp
-                    }
+                    start = 13.dp
                 )
                 .fillMaxWidth(.8f),
             color = if (isSelected) {

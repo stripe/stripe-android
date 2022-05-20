@@ -7,6 +7,7 @@ on:
       - 'payments-model/**'
       - 'stripe-core/**'
       - 'payments-model/**'
+      - 'payments-ui-core/**'
       - 'link/**'
       - 'dependencies.gradle'
 jobs:

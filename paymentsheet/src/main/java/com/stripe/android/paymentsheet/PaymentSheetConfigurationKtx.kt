@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.PrimaryButtonColors
@@ -94,7 +95,9 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
             primaryButton.shape.borderStrokeWidthDp ?: shapes.borderStrokeWidthDp,
         ),
         typography = PrimaryButtonTypography(
-            fontFamily = primaryButton.typography.fontResId ?: typography.fontResId
+            fontFamily = primaryButton.typography.fontResId ?: typography.fontResId,
+            fontSize = primaryButton.typography.fontSizeSp?.sp
+                ?: (PaymentsThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
         )
     )
 }

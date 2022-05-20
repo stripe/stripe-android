@@ -61,7 +61,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         .createNameSectionController(args.formArgs.billingDetails?.name)
 
     val name: StateFlow<String> = nameController.formFieldValue.map { formFieldEntry ->
-        formFieldEntry.value ?: ""
+        formFieldEntry.takeIf { it.isComplete }?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     val emailController: TextFieldController = SimpleTextFieldController
@@ -93,7 +93,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val requiredFields = combine(
         nameController.formFieldValue.map { formFieldEntry ->
-            !formFieldEntry.value.isNullOrBlank()
+            formFieldEntry.isComplete
         },
         emailController.formFieldValue.map { formFieldEntry ->
             formFieldEntry.isComplete

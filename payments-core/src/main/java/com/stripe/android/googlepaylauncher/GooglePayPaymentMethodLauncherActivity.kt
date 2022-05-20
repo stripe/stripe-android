@@ -1,8 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -46,12 +44,6 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         val statusColor = intent.getIntExtra(GooglePayPaymentMethodLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
         if (statusColor != -1) {
             window.statusBarColor = statusColor
-        }
-
-        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
-            // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
-            // orientation. See https://stackoverflow.com/a/50832408/11103900
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
         disableAnimations()

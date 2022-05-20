@@ -501,8 +501,23 @@ class PaymentSheet internal constructor(
          * Note: If 'null', Appearance.Typography.fontResId is used.
          */
         @FontRes
-        val fontResId: Int? = null
-    ) : Parcelable
+        val fontResId: Int? = null,
+
+        /**
+         * The font size in the primary button.
+         * Note: If 'null', {@link Typography#sizeScaleFactor} is used.
+         */
+        val fontSizeSp: Float? = null
+    ) : Parcelable {
+        constructor(
+            context: Context,
+            fontResId: Int? = null,
+            fontSizeSp: Int
+        ) : this(
+            fontResId = fontResId,
+            fontSizeSp = context.getRawValueFromDimenResource(fontSizeSp)
+        )
+    }
 
     @Parcelize
     data class Address(
