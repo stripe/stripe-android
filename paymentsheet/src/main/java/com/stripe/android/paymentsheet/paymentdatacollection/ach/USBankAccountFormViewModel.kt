@@ -15,9 +15,9 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -37,7 +37,6 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
-import dagger.Lazy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -53,7 +52,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -238,7 +237,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     }
                 }
             }
-            else -> { /* no op */ }
+            else -> { /* no op */
+            }
         }
     }
 

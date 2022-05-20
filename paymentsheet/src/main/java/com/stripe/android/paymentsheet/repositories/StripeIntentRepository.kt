@@ -1,17 +1,17 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import dagger.Lazy
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal sealed class StripeIntentRepository {
@@ -33,16 +33,17 @@ internal sealed class StripeIntentRepository {
      */
     class Api @Inject constructor(
         private val stripeRepository: StripeRepository,
-        private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
+        private val lazyPaymentConfig: Provider<PaymentConfiguration>,
         @IOContext private val workContext: CoroutineContext,
         private val locale: Locale?
     ) : StripeIntentRepository() {
-        private val requestOptions by lazy {
-            ApiRequest.Options(
+        // The PaymentConfiguration can change after initialization, so this needs to get a new
+        // request options each time requested.
+        private val requestOptions
+            get() = ApiRequest.Options(
                 lazyPaymentConfig.get().publishableKey,
                 lazyPaymentConfig.get().stripeAccountId
             )
-        }
 
         /**
          * Tries to retrieve the StripeIntent with ordered Payment Methods, falling back to
