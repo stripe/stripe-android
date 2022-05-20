@@ -23,8 +23,6 @@ internal class FinancialConnectionsSubcomponentBuilderProvider @Inject construct
 /**
  * helper to retrieve [FinancialConnectionsSubcomponentBuilderProvider] when building
  * a [com.airbnb.mvrx.MavericksViewModelFactory].
- *
- *
  */
 internal val ViewModelContext.subComponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider
     get() = this

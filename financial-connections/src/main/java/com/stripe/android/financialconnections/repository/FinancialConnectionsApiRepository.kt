@@ -14,11 +14,13 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.InstitutionResponse
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
@@ -28,6 +30,7 @@ import javax.inject.Named
 internal class FinancialConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
+    private val configuration: FinancialConnectionsSheet.Configuration,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsRepository {
 
@@ -51,7 +54,10 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             options = options,
             params = getFinancialConnectionsAcccountsParams.toParamMap()
         )
-        return executeRequest(financialConnectionsRequest, FinancialConnectionsAccountList.serializer())
+        return executeRequest(
+            financialConnectionsRequest,
+            FinancialConnectionsAccountList.serializer()
+        )
     }
 
     override suspend fun getFinancialConnectionsSession(
@@ -84,6 +90,38 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         return executeRequest(
             financialConnectionsRequest,
             FinancialConnectionsSessionManifest.serializer()
+        )
+    }
+
+    override suspend fun featuredInstitutions(): InstitutionResponse {
+        val request = apiRequestFactory.createGet(
+            url = featuredInstitutionsUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+            ),
+        )
+        return executeRequest(
+            request,
+            InstitutionResponse.serializer()
+        )
+    }
+
+    override suspend fun searchInstitutions(
+        query: String,
+    ): InstitutionResponse {
+        val request = apiRequestFactory.createGet(
+            url = institutionsUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+                "query" to query,
+                "limit" to 8
+            ),
+        )
+        return executeRequest(
+            request,
+            InstitutionResponse.serializer()
         )
     }
 
@@ -152,5 +190,12 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
         internal const val generateHostedUrl: String =
             "$API_HOST/v1/link_account_sessions/generate_hosted_url"
+
+        internal const val institutionsUrl: String =
+            "$API_HOST/v1/connections/institutions"
+
+        internal const val featuredInstitutionsUrl: String =
+            "$API_HOST/v1/connections/featured_institutions"
+
     }
 }

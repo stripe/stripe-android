@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.InstitutionResponse
 
 internal interface FinancialConnectionsRepository {
     @Throws(
@@ -40,4 +41,22 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String,
         applicationId: String
     ): FinancialConnectionsSessionManifest
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun searchInstitutions(
+        query: String,
+    ): InstitutionResponse
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun featuredInstitutions(): InstitutionResponse
 }

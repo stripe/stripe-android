@@ -50,7 +50,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     @Composable
     fun NavHost() {
         val navController = rememberNavController()
-        NavHost(navController, startDestination = "bank-confirmationi") {
+        NavHost(navController, startDestination = "bank-picker") {
             composable("bank-picker") {
                 val viewModel: BankPickerViewModel = mavericksViewModel()
                 BankPickerScreen(viewModel, navController)

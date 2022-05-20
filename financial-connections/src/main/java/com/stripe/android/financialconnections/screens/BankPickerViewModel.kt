@@ -1,27 +1,42 @@
 package com.stripe.android.financialconnections.screens
 
-import android.util.Log
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.subComponentBuilderProvider
-import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.model.InstitutionResponse
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 internal class BankPickerViewModel @Inject constructor(
-    internal val testClass: TestClass,
-    internal val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
+    val configuration: FinancialConnectionsSheet.Configuration,
+    val searchInstitutions: SearchInstitutions,
     initialState: BankPickerState
 ) : MavericksViewModel<BankPickerState>(initialState) {
 
-    override fun onCleared() {
-        super.onCleared()
-        Log.e("CARLOS", "CLEARED!")
+    private var searchJob: Job? = null
+
+    init {
+        suspend { searchInstitutions() }
+            .execute(retainValue = BankPickerState::institutions) { copy(institutions = it) }
     }
 
-    companion object :
-        MavericksViewModelFactory<BankPickerViewModel, BankPickerState> {
+    fun onQueryChanged(query: String) {
+        setState { copy(query = query) }
+        searchJob?.cancel()
+        searchJob = suspend {
+            delay(300)
+            searchInstitutions(query)
+        }.execute(retainValue = BankPickerState::institutions) { copy(institutions = it) }
+    }
+
+    companion object : MavericksViewModelFactory<BankPickerViewModel, BankPickerState> {
 
         override fun create(
             viewModelContext: ViewModelContext,
@@ -37,5 +52,6 @@ internal class BankPickerViewModel @Inject constructor(
 }
 
 data class BankPickerState(
-    val test: String = "test"
+    val query: String = "",
+    val institutions: Async<InstitutionResponse> = Uninitialized
 ) : MavericksState
