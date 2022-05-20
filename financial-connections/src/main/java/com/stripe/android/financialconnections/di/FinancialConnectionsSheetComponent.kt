@@ -21,8 +21,6 @@ import javax.inject.Singleton
 internal interface FinancialConnectionsSheetComponent {
     val viewModel: FinancialConnectionsSheetViewModel
 
-    fun inject(factory: FinancialConnectionsSheetViewModel.Companion)
-
     @Component.Builder
     interface Builder {
         @BindsInstance
