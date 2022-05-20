@@ -14,7 +14,7 @@ data class SharedDataSpec(
     val fields: List<FormItemSpec>
 )
 
-class Serializer{
+class Serializer {
     private val format = Json {
         ignoreUnknownKeys = true
         serializersModule = module
@@ -44,6 +44,9 @@ class Serializer{
                 subclass(StaticTextSpec::class)
                 subclass(NameSpec::class)
                 subclass(MandateTextSpec::class)
+                subclass(SimpleTextSpec::class)
+                subclass(CardDetailsSectionSpec::class)
+                subclass(CardBillingSpec::class)
                 //                    subclass(SofortAddressField::class)
             }
         }

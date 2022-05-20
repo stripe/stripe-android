@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import kotlinx.parcelize.Parcelize
+import com.stripe.android.ui.core.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,12 +10,12 @@ import kotlinx.serialization.Serializable
  * Mandate text element spec.
  */
 @Serializable
-@SerialName("mandate")
+@SerialName("sepa_mandate")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class MandateTextSpec(
     override val api_path: IdentifierSpec,
     @StringRes
-    val stringResId: Int,
+    val stringResId: Int = R.string.sepa_mandate,
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(merchantName: String): FormElement =
         // It could be argued that the static text should have a controller, but
