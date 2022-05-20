@@ -189,7 +189,7 @@ class TestMultiStepFieldsReloaded {
         )
     }
 
-    @Test
+    @Ignore("Need to add GBP currency to playground")
     fun testPayPal() {
         testDriver.confirmCustom(
             newUser.copy(

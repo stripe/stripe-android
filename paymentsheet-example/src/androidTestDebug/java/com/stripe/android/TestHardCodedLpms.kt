@@ -202,7 +202,7 @@ class TestHardCodedLpms {
         )
     }
 
-    @Test
+    @Ignore("Need to add GBP currency to playground")
     fun testPayPal() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
