@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

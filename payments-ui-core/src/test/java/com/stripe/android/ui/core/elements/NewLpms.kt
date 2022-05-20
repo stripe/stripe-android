@@ -16,7 +16,7 @@ import com.stripe.android.ui.core.forms.SofortForm
 
 class NewLpms {
     companion object {
-        fun values() = listOf(//12
+        fun values() = listOf( // 12
             AfterpayClearpayJson,
             AffirmJson,
             KlarnaJson,

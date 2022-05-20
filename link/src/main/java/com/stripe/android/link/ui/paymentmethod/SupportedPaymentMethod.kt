@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.forms.LinkCardForm
 import kotlinx.parcelize.Parcelize
 
@@ -16,7 +16,7 @@ import kotlinx.parcelize.Parcelize
  */
 internal sealed class SupportedPaymentMethod(
     val type: PaymentMethod.Type,
-    val formSpec: LayoutSpec,
+    val formSpec: List<FormItemSpec>,
 ) : Parcelable {
 
     /**

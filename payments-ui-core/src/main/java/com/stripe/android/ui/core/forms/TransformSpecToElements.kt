@@ -20,6 +20,7 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
+import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
@@ -84,6 +85,7 @@ class TransformSpecToElements(
                     initialValues
                 )
                 is SimpleTextSpec -> it.transform(initialValues)
+                is KlarnaHeaderStaticTextSpec -> it.transform()
             }
         }
 }

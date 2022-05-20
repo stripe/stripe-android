@@ -79,9 +79,11 @@ class SerializeJson {
             "{\"display_text\":\"$2\", \"api_value\":\"$1\"}"
         )
 
-        json = ("\"api_path\": \\{" +
-            "\\s*\"v1\": \"([^\"]*)\"\\s*" +
-            "\\s*\\}").toRegex().replace(
+        json = (
+            "\"api_path\": \\{" +
+                "\\s*\"v1\": \"([^\"]*)\"\\s*" +
+                "\\s*\\}"
+            ).toRegex().replace(
             json,
             "\"api_path\": { \"v1\": \"\$1\"}"
         )

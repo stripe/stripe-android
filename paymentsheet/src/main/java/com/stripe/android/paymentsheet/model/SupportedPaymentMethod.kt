@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.AffirmForm
@@ -79,8 +80,10 @@ sealed class SupportedPaymentMethod(
     /**
      * This describes how the UI should look.
      */
-    val formSpec: LayoutSpec,
+    formFields: List<FormItemSpec>
 ) : Parcelable {
+    val formSpec = LayoutSpec(formFields)
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Card : SupportedPaymentMethod(

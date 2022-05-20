@@ -29,6 +29,7 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.ui.core.DefaultPaymentsTheme
+import com.stripe.android.ui.core.elements.LayoutSpec
 
 @Preview
 @Composable
@@ -56,7 +57,10 @@ internal fun PaymentMethodBody(
     )
 
     val formViewModel: FormViewModel = viewModel(
-        factory = FormViewModel.Factory(viewModel.paymentMethod.formSpec, injector)
+        factory = FormViewModel.Factory(
+            LayoutSpec(viewModel.paymentMethod.formSpec),
+            injector
+        )
     )
 
     val formValues by formViewModel.completeFormValues.collectAsState(null)

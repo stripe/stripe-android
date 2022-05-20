@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
