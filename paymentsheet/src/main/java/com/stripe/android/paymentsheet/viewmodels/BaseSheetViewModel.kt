@@ -425,7 +425,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     @Suppress("UNREACHABLE_CODE")
     protected fun setupLink(stripeIntent: StripeIntent, completePayment: Boolean) {
-        // TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
+//         TODO(brnunes-stripe): Enable Link by deleting the 2 lines below
         _isLinkEnabled.value = false
         return
 

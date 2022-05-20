@@ -25,6 +25,8 @@
     <color name="stripeCardExpiryOutlineColor" description="The outline color of the card expiry displayed over the scan window">@android:color/black</color>
 
     <color name="stripeInstructionsColorDark" description="The color of the instructions text above the scan window when the background is a dark color">@android:color/white</color>
+    <color name="stripePrivacyLinkColorLight" description="The color of the privacy text below the scan window when the background is a light color">@android:color/darker_gray</color>
+    <color name="stripePrivacyLinkColorDark" description="The color of the privacy text below the scan window when the background is a dark color">#D3D3D3</color>
     <color name="stripeInstructionsColorLight" description="The color of the instructions text above the scan window when the background is a light color">@android:color/black</color>
     <color name="stripeSecurityColorDark" description="The color of the security notification shown below the scan window when the background is a dark color">@android:color/white</color>
     <color name="stripeSecurityColorLight" description="The color of the security notification shown below the scan window when the background is a light color">@android:color/black</color>

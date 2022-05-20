@@ -28,6 +28,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.primaryButtonLabel
+import com.stripe.android.ui.core.DefaultPaymentsTheme
 
 @Preview
 @Composable
@@ -103,7 +104,9 @@ internal fun PaymentMethodBody(
             style = MaterialTheme.typography.h2,
             color = MaterialTheme.colors.onPrimary
         )
-        formContent()
+        DefaultPaymentsTheme {
+            formContent()
+        }
         PrimaryButton(
             label = primaryButtonLabel,
             state = when {

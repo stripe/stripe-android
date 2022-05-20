@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface TextFieldController : InputController {
-    fun onValueChange(displayFormatted: String)
+    fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
 
     val debugLabel: String
@@ -108,11 +108,18 @@ class SimpleTextFieldController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String): TextFieldState? {
+        val originalTextStateValue = _fieldState.value
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
+
+        return if (_fieldState.value != originalTextStateValue) {
+            _fieldState.value
+        } else {
+            null
+        }
     }
 
     /**
@@ -124,5 +131,17 @@ class SimpleTextFieldController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    companion object {
+        fun createEmailSectionController(initialValue: String?) = SimpleTextFieldController(
+            EmailConfig(),
+            initialValue = initialValue
+        )
+
+        fun createNameSectionController(initialValue: String?) = SimpleTextFieldController(
+            NameConfig(),
+            initialValue = initialValue
+        )
     }
 }

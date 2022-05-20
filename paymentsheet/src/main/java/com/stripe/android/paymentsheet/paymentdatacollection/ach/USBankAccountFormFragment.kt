@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -50,13 +52,11 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.H6Text
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionCard
-import com.stripe.android.ui.core.elements.SectionController
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.ui.core.elements.TextFieldSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -393,24 +393,12 @@ internal class USBankAccountFormFragment : Fragment() {
                     .padding(0.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                SectionElementUI(
-                    enabled = !processing.value,
-                    element = SectionElement(
-                        identifier = IdentifierSpec.Name,
-                        fields = listOf(
-                            viewModel.nameElement.apply {
-                                setRawValue(
-                                    mapOf(IdentifierSpec.Name to name)
-                                )
-                            }
-                        ),
-                        controller = SectionController(
-                            null,
-                            listOf(viewModel.nameElement.sectionFieldErrorController())
-                        ),
-                    ),
-                    emptyList(),
-                    null
+                TextFieldSection(
+                    textFieldController = viewModel.nameController.apply {
+                        onRawValueChange(name)
+                    },
+                    imeAction = ImeAction.Next,
+                    enabled = !processing.value
                 )
             }
             Box(
@@ -419,24 +407,12 @@ internal class USBankAccountFormFragment : Fragment() {
                     .padding(0.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                SectionElementUI(
-                    enabled = !processing.value,
-                    element = SectionElement(
-                        identifier = IdentifierSpec.Email,
-                        fields = listOf(
-                            viewModel.emailElement.apply {
-                                setRawValue(
-                                    mapOf(IdentifierSpec.Email to email)
-                                )
-                            }
-                        ),
-                        controller = SectionController(
-                            null,
-                            listOf(viewModel.emailElement.sectionFieldErrorController())
-                        )
-                    ),
-                    emptyList(),
-                    viewModel.emailElement.identifier
+                TextFieldSection(
+                    textFieldController = viewModel.emailController.apply {
+                        onRawValueChange(email ?: "")
+                    },
+                    imeAction = ImeAction.Done,
+                    enabled = !processing.value
                 )
             }
         }
@@ -480,7 +456,7 @@ internal class USBankAccountFormFragment : Fragment() {
                         Text(
                             text = "$bankName ••••$last4",
                             modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
-                            color = PaymentsTheme.colors.onComponent
+                            color = MaterialTheme.paymentsColors.onComponent
                         )
                     }
                     Image(

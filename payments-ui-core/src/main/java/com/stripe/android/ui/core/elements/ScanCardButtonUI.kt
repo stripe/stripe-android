@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanActivity
 
@@ -56,7 +56,7 @@ internal fun ScanCardButtonUI(
             contentDescription = stringResource(
                 R.string.scan_card
             ),
-            colorFilter = ColorFilter.tint(PaymentsTheme.colors.material.primary),
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
             modifier = Modifier
                 .width(18.dp)
                 .height(18.dp)
@@ -65,8 +65,8 @@ internal fun ScanCardButtonUI(
             stringResource(R.string.scan_card),
             Modifier
                 .padding(start = 4.dp),
-            color = PaymentsTheme.colors.material.primary,
-            style = PaymentsTheme.typography.h6,
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.h6,
         )
     }
 }

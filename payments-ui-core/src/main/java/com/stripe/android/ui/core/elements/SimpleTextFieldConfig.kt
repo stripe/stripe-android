@@ -42,4 +42,12 @@ class SimpleTextFieldConfig(
     override fun convertToRaw(displayName: String) = displayName
 
     override fun convertFromRaw(rawValue: String) = rawValue
+
+    companion object {
+        val NAME = SimpleTextFieldConfig(
+            label = com.stripe.android.ui.core.R.string.address_label_name,
+            capitalization = KeyboardCapitalization.Words,
+            keyboard = KeyboardType.Text
+        )
+    }
 }

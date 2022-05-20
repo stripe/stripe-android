@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -36,11 +37,10 @@ import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
-import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinWidth
+import com.stripe.android.ui.core.paymentsColors
 import kotlin.math.max
 import kotlin.math.min
 
@@ -69,7 +69,7 @@ internal fun DropDown(
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        PaymentsTheme.colors.onComponent
+        MaterialTheme.paymentsColors.onComponent
     } else {
         TextFieldDefaults
             .textFieldColors()
@@ -81,7 +81,7 @@ internal fun DropDown(
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(PaymentsTheme.colors.component)
+            .background(MaterialTheme.paymentsColors.component)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -139,7 +139,7 @@ internal fun DropDown(
             },
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .background(color = PaymentsTheme.colors.component)
+                .background(color = MaterialTheme.paymentsColors.component)
                 .width(DropdownMenuItemDefaultMaxWidth)
                 .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
         ) {
@@ -171,7 +171,6 @@ internal fun DropdownMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .requiredSizeIn(
-                minWidth = DropdownMenuItemDefaultMinWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
             )
             .clickable {
@@ -183,15 +182,11 @@ internal fun DropdownMenuItem(
             modifier = Modifier
                 // This padding makes up for the checkmark at the end.
                 .padding(
-                    horizontal = if (isSelected) {
-                        13.dp
-                    } else {
-                        0.dp
-                    }
+                    start = 13.dp
                 )
                 .fillMaxWidth(.8f),
             color = if (isSelected) {
-                PaymentsTheme.colors.material.primary
+                MaterialTheme.colors.primary
             } else {
                 currentTextColor
             },
@@ -208,7 +203,7 @@ internal fun DropdownMenuItem(
                 contentDescription = null,
                 modifier = Modifier
                     .height(24.dp),
-                tint = PaymentsTheme.colors.material.primary
+                tint = MaterialTheme.colors.primary
             )
         }
     }

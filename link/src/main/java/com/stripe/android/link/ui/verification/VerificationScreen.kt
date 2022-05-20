@@ -33,6 +33,7 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.OTPSpec
@@ -145,11 +146,13 @@ internal fun VerificationBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        OTPElementUI(
-            enabled = !isProcessing,
-            element = otpElement,
-            modifier = Modifier.padding(vertical = 22.dp)
-        )
+        DefaultPaymentsTheme {
+            OTPElementUI(
+                enabled = !isProcessing,
+                element = otpElement,
+                modifier = Modifier.padding(vertical = 22.dp)
+            )
+        }
         if (showChangeEmailMessage) {
             Row(
                 modifier = Modifier
