@@ -32,8 +32,8 @@ internal class DefaultGooglePayRepository(
     private val environment: GooglePayEnvironment,
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
-    private val logger: Logger = Logger.noop(),
-    private val allowCreditCards: Boolean? = null
+    private val allowCreditCards: Boolean?,
+    private val logger: Logger = Logger.noop()
 ) : GooglePayRepository {
 
     @Inject
@@ -46,8 +46,8 @@ internal class DefaultGooglePayRepository(
         googlePayConfig.environment,
         googlePayConfig.billingAddressConfig.convert(),
         googlePayConfig.existingPaymentMethodRequired,
-        logger,
-        googlePayConfig.allowCreditCards
+        googlePayConfig.allowCreditCards,
+        logger
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(context)

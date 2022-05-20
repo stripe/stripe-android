@@ -242,8 +242,8 @@ internal class GooglePayLauncherViewModel(
                 environment = args.config.environment,
                 billingAddressParameters = args.config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
-                logger = logger,
-                allowCreditCards = args.config.allowCreditCards
+                allowCreditCards = args.config.allowCreditCards,
+                logger = logger
             )
 
             return GooglePayLauncherViewModel(

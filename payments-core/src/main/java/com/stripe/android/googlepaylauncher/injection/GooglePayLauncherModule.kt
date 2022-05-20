@@ -28,8 +28,8 @@ class GooglePayLauncherModule {
             environment,
             GooglePayJsonFactory.BillingAddressParameters(),
             true,
-            logger,
-            true
+            null,
+            logger
         )
     }
 }

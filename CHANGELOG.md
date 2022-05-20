@@ -12,6 +12,7 @@ This release adds [appearance customization APIs](https://github.com/stripe/stri
 * [ADDED][5042](https://github.com/stripe/stripe-android/pull/5042) Added Affirm and AU BECS Direct Debit.
 * [ADDED][5020](https://github.com/stripe/stripe-android/pull/5020) Merge Appearance APIs to master. 
 * [FIXED][5022](https://github.com/stripe/stripe-android/pull/5022) Add missing translation for card information.
+* [FIXED][5048](https://github.com/stripe/stripe-android/pull/5048) Fixed a crash when removing the last payment method in the custom flow editor.
 
 ## 20.3.0 - 2022-05-16
 This release adds `us_bank_account` PaymentMethod to PaymentSheet.
