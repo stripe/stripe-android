@@ -171,6 +171,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:ignore="HardcodedText" />
+
+            <RadioButton
+                android:id="@+id/currency_gbp_button"
+                android:text="@string/currency_gbp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
         </RadioGroup>
 
         <TextView

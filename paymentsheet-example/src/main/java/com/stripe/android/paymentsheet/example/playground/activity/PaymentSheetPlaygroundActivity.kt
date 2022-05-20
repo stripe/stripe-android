@@ -70,6 +70,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
             R.id.currency_usd_button -> CheckoutCurrency.USD
             R.id.currency_aud_button -> CheckoutCurrency.AUD
+            R.id.currency_gbp_button -> CheckoutCurrency.GBP
             else -> CheckoutCurrency.EUR
         }
 
@@ -107,7 +108,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
-            val mode = if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            val mode =
+                if (shouldUseDarkMode) {
+                    AppCompatDelegate.MODE_NIGHT_YES
+                } else {
+                    AppCompatDelegate.MODE_NIGHT_NO
+                }
             AppCompatDelegate.setDefaultNightMode(mode)
         }
         super.onCreate(savedInstanceState)

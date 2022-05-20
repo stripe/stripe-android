@@ -12,7 +12,8 @@ enum class CheckoutMode(val value: String) {
 enum class CheckoutCurrency(val value: String) {
     USD("usd"),
     EUR("eur"),
-    AUD("aud")
+    AUD("aud"),
+    GBP("gbp"),
 }
 
 enum class Toggle(val key: String, val default: Any) {
