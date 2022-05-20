@@ -19,7 +19,6 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,14 +131,6 @@ internal class FormViewModel @Inject internal constructor(
         externalHiddenIdentifiers.value = identifierSpecs
     }
 
-    private val sectionToFieldIdentifierMap = layout.items
-        .filterIsInstance<SectionSpec>()
-        .associate { sectionSpec ->
-            sectionSpec.api_path to sectionSpec.fields.map {
-                it.identifier
-            }
-        }
-
     internal val hiddenIdentifiers = combine(
         saveForFutureUseVisible,
         cardBillingElement.map {
@@ -148,23 +139,13 @@ internal class FormViewModel @Inject internal constructor(
         externalHiddenIdentifiers
     ) { showFutureUse, cardBillingIdentifiers, saveFutureUseIdentifiers ->
         val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
-        // For hidden *section* identifiers, list of identifiers of elements in the section
-        val identifiers = sectionToFieldIdentifierMap
-            .filter { idControllerPair ->
-                hiddenIdentifiers.contains(idControllerPair.key)
-            }
-            .flatMap { sectionToSectionFieldEntry ->
-                sectionToSectionFieldEntry.value
-            }
 
         val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
         if (!showFutureUse && saveForFutureUseElement != null) {
             hiddenIdentifiers
-                .plus(identifiers)
                 .plus(saveForFutureUseElement.identifier)
         } else {
             hiddenIdentifiers
-                .plus(identifiers)
         }
     }
 

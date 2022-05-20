@@ -6,15 +6,11 @@ import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
 
-internal val idealNameSection = SectionSpec(
-    IdentifierSpec.Generic("name_section"),
-    SimpleTextSpec.NAME
-)
-internal val idealBankSection = SectionSpec(
-    IdentifierSpec.Generic("bank_section"),
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val IdealForm = LayoutSpec.create(
+    NameSpec(),
     DropdownSpec(
         IdentifierSpec.Generic("ideal[bank]"),
         R.string.ideal_bank,
@@ -73,10 +69,4 @@ internal val idealBankSection = SectionSpec(
             )
         )
     )
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val IdealForm = LayoutSpec.create(
-    idealNameSection,
-    idealBankSection,
 )
