@@ -9,8 +9,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Suppress("DataClassPrivateConstructor")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
-data class LayoutSpec private constructor(val items: List<FormItemSpec>) : Parcelable {
+data class LayoutSpec private constructor(val items: List<FormItemSpec>) {
     companion object {
         fun create(vararg item: FormItemSpec) = LayoutSpec(item.toList())
 

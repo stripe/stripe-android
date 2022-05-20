@@ -2,11 +2,14 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * This is for elements that do not receive user input
  */
-@Parcelize
+@Serializable
+@SerialName("static_text")
 internal data class StaticTextSpec(
     override val api_path: IdentifierSpec,
     @StringRes val stringResId: Int

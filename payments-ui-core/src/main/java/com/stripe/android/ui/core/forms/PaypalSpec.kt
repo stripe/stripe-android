@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val PaypalForm = LayoutSpec.create()
+val PaypalForm: List<FormItemSpec> = listOf()

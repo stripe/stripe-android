@@ -3,11 +3,14 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Mandate text element spec.
  */
-@Parcelize
+@Serializable
+@SerialName("mandate")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class MandateTextSpec(
     override val api_path: IdentifierSpec,

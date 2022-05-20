@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * This is the specification for a country field.
@@ -9,7 +11,8 @@ import kotlinx.parcelize.Parcelize
  * countries will be shown.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
+@Serializable
+@SerialName("country")
 data class CountrySpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Country,
     val onlyShowCountryCodes: Set<String> = emptySet()

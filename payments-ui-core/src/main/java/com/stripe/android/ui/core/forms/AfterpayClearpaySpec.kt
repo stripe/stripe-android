@@ -4,8 +4,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
@@ -14,7 +14,7 @@ internal val afterpayClearpayHeader = AfterpayClearpayTextSpec(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val AfterpayClearpayForm = LayoutSpec.create(
+val AfterpayClearpayForm: List<FormItemSpec> = listOf(
     afterpayClearpayHeader,
     NameSpec(),
     EmailSpec(),

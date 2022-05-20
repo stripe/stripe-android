@@ -2,9 +2,11 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
+@SerialName("selector")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class DropdownSpec(
     override val api_path: IdentifierSpec,

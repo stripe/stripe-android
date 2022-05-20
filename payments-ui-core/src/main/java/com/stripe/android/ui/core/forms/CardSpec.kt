@@ -3,20 +3,20 @@ package com.stripe.android.ui.core.forms
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val CardForm = LayoutSpec.create(
+val CardForm: List<FormItemSpec> = listOf(
     CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
     CardBillingSpec(countryCodes = supportedBillingCountries),
     SaveForFutureUseSpec()
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val LinkCardForm = LayoutSpec.create(
+val LinkCardForm: List<FormItemSpec> = listOf(
     CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
     CardBillingSpec(countryCodes = supportedBillingCountries)
 )

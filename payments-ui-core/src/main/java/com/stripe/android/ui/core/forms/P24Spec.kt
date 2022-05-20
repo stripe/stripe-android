@@ -5,12 +5,12 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val P24Form = LayoutSpec.create(
+val P24Form: List<FormItemSpec> = listOf(
     NameSpec(),
     EmailSpec(),
     DropdownSpec(

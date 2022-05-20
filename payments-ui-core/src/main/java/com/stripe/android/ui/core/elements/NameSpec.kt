@@ -4,10 +4,12 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
+@Serializable
+@SerialName("name")
 data class NameSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Name
 ) : FormItemSpec(), RequiredItemSpec {

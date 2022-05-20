@@ -1,14 +1,16 @@
 package com.stripe.android.ui.core.elements
 
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Header that displays promo information about Affirm
  */
-@Parcelize
+@Serializable
+@SerialName("affirm_header")
 internal data class AffirmTextSpec(
-    val identifier: IdentifierSpec
+    override val api_path: IdentifierSpec
 ) : FormItemSpec() {
     fun transform(): FormElement =
-        AffirmHeaderElement(this.identifier)
+        AffirmHeaderElement(this.api_path)
 }

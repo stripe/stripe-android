@@ -1,13 +1,16 @@
 package com.stripe.android.ui.core.elements
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import kotlinx.serialization.Serializable
 
 /**
  * This is used to define each section in the visual form layout specification
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class FormItemSpec : Parcelable {
+@Serializable
+sealed class FormItemSpec {
+    abstract val api_path: IdentifierSpec?
+
     internal fun createSectionElement(
         sectionFieldElement: SectionFieldElement,
         label: Int? = null

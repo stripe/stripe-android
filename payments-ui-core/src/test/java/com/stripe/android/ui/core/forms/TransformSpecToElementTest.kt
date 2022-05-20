@@ -1,11 +1,10 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CountryConfig
 import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -15,6 +14,7 @@ import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionElement
@@ -116,7 +116,7 @@ internal class TransformSpecToElementTest {
         assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
-        assertThat(nameElement.controller.capitalization).isEqualTo(KeyboardCapitalization.Words)
+        assertThat(nameElement.controller.capitalization).isEqualTo(Capitalization.Words)
         assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
     }
 
@@ -129,7 +129,7 @@ internal class TransformSpecToElementTest {
                     R.string.address_label_name,
                     showOptionalLabel = true,
                     keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Words
+                    capitalization = Capitalization.Words
                 )
             )
         )

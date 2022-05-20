@@ -4,9 +4,12 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-@Parcelize
+@Serializable
+@SerialName("card_billing")
 data class CardBillingSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
     val countryCodes: Set<String>

@@ -83,10 +83,6 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is AddressSpec -> it.transform(
-                    initialValues,
-                    resourceRepository.getAddressRepository()
-                )
                 is SimpleTextSpec -> it.transform(initialValues)
             }
         }

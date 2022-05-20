@@ -4,12 +4,12 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val EpsForm = LayoutSpec.create(
+val EpsForm: List<FormItemSpec> = listOf(
     NameSpec(),
     DropdownSpec(
         api_path = IdentifierSpec.Generic("eps[bank]"),

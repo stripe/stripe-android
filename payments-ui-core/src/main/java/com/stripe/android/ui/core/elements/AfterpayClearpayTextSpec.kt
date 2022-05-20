@@ -2,11 +2,14 @@ package com.stripe.android.ui.core.elements
 
 import com.stripe.android.ui.core.Amount
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Header that displays information about installments for Afterpay
  */
-@Parcelize
+@Serializable
+@SerialName("afterpay_header")
 internal data class AfterpayClearpayTextSpec(
     override val api_path: IdentifierSpec
 ) : FormItemSpec(), RequiredItemSpec {
