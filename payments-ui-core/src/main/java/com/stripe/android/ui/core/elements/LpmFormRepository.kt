@@ -10,9 +10,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class SharedSpec(
-    val type: String,
-    val async: Boolean,
-    val fields: List<FormItemSpec>,
+    val type: String, // api payment method type/code <TODO: Add url>
+    val async: Boolean, // this correlates to delayed on Mobile SDKs
+    val fields: List<FormItemSpec>
 )
 
 @Singleton
