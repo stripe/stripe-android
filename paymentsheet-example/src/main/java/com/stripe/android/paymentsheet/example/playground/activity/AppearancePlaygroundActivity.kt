@@ -449,6 +449,21 @@ internal class AppearancePlaygroundActivity : BasePaymentSheetActivity() {
             )
         }
 
+        val currentFontSize = currentButton.typography.fontSizeSp
+            ?: (currentAppearance.typography.sizeScaleFactor * 16)
+        Divider()
+        IncrementDecrementItem("fontSizeSp", currentFontSize) {
+            viewModel.appearance.postValue(
+                currentAppearance.copy(
+                    primaryButton = currentButton.copy(
+                        typography = currentButton.typography.copy(
+                            fontSizeSp = it
+                        )
+                    )
+                )
+            )
+        }
+
         val currentFontFamily = currentButton.typography.fontResId
             ?: currentAppearance.typography.fontResId
         Divider()

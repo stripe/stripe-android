@@ -7,7 +7,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -56,7 +55,7 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
+            viewModel.emailController.onRawValueChange("valid@email.com")
 
             val linkAccount = LinkAccount(
                 mockConsumerSessionWithVerificationSession(
@@ -78,7 +77,7 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
+            viewModel.emailController.onRawValueChange("valid@email.com")
 
             whenever(linkAccountManager.lookupConsumer(any(), any()))
                 .thenReturn(Result.success(null))

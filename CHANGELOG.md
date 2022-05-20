@@ -2,10 +2,12 @@
 
 ## x.x.x - xxxx-xx-xx
 
+### Payments
+* [CHANGED] [5038](https://github.com/stripe/stripe-android/pull/5038) Remove force portrait mode in Google Pay.
+
 ### PaymentSheet
 - [FIXED] Fixed the format of the country dropdown in PaymentSheet for all languages.
 - [ADDED] Added Affirm and AU BECS Direct Debit.
-
 
 ## 20.3.0 - 2022-05-16
 This release adds `us_bank_account` PaymentMethod to PaymentSheet.
