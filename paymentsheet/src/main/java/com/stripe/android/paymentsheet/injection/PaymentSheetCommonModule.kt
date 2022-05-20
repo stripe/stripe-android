@@ -56,8 +56,8 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(appContext: Context): () -> String =
-            { PaymentConfiguration.getInstance(appContext).publishableKey }
+        fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>): () -> String =
+            { paymentConfiguration.get().publishableKey }
 
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
