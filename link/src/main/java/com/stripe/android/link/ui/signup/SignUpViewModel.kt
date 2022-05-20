@@ -50,8 +50,6 @@ internal class SignUpViewModel @Inject constructor(
      */
     private val consumerEmail: StateFlow<String?> =
         emailController.formFieldValue.map {
-            // formFieldsList contains only one element, for the email. Take the second value of
-            // the pair, which is the FormFieldEntry containing the value entered by the user.
             it.takeIf { it.isComplete }?.value
         }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
 
