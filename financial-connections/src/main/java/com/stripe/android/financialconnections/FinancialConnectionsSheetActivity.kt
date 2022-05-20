@@ -1,30 +1,40 @@
 package com.stripe.android.financialconnections
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import com.airbnb.mvrx.asMavericksArgs
+import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.airbnb.mvrx.withState
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 
 internal class FinancialConnectionsSheetActivity :
-    AppCompatActivity(R.layout.activity_financialconnections_sheet) {
+    AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
 
     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
 
+    private val startForResult = registerForActivityResult(StartActivityForResult()) {
+        viewModel.onActivityResult()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
-            val fragment = FinancialConnectionsSheetFragment().apply {
-                arguments = requireNotNull(
-                    FinancialConnectionsSheetActivityArgs.fromIntent(intent)
-                ).asMavericksArgs()
-            }
-            supportFragmentManager.beginTransaction()
-                .setReorderingAllowed(true)
-                .add(R.id.nav_host_fragment, fragment, null)
-                .commit()
-        }
+        viewModel.onEach { postInvalidate() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
     }
 
     /**
@@ -33,5 +43,30 @@ internal class FinancialConnectionsSheetActivity :
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         viewModel.handleOnNewIntent(intent)
+    }
+
+    /**
+     * handle state changes here.
+     */
+    override fun invalidate() {
+        withState(viewModel) { state ->
+            state.viewEffect?.let {
+                when (it) {
+                    is OpenAuthFlowWithUrl -> startForResult.launch(
+                        CreateBrowserIntentForUrl(
+                            context = this,
+                            uri = Uri.parse(it.url),
+                        )
+                    )
+                    is FinishWithResult -> finishWithResult(it.result)
+                }
+                viewModel.onViewEffectLaunched()
+            }
+        }
+    }
+
+    private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
+        setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
+        finish()
     }
 }
