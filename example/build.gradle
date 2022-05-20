@@ -25,6 +25,10 @@ def getPublishableKey() {
     return findProperty('STRIPE_EXAMPLE_PUBLISHABLE_KEY') ?: ""
 }
 
+def getSecretKey() {
+    return findProperty('STRIPE_SECRET_KEY') ?: ""
+}
+
 def getAccountId() {
     return findProperty('STRIPE_ACCOUNT_ID') ?: ""
 }
@@ -68,6 +72,10 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
     // end of Jetpack Compose
 
+    // Terminal tap on mobile testing
+    implementation "com.stripe:stripeterminal-localmobile:2.5.2"
+    implementation "com.stripe:stripeterminal-core:2.5.2"
+    implementation "com.stripe:stripe-java:17.14.0"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
@@ -132,7 +140,8 @@ android {
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
                 PUBLISHABLE_KEY: getPublishableKey(),
-                STRIPE_ACCOUNT_ID: getAccountId()
+                STRIPE_ACCOUNT_ID: getAccountId(),
+                STRIPE_SECRET_KEY: getSecretKey(),
         ]
     }
 
@@ -142,6 +151,8 @@ android {
 
     packagingOptions {
         exclude 'LICENSE.txt'
+        exclude 'org/bouncycastle/x509/CertPathReviewerMessages_de.properties'
+        exclude 'org/bouncycastle/x509/CertPathReviewerMessages.properties'
     }
 
     lintOptions {

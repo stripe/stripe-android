@@ -67,6 +67,8 @@ class PaymentAuthActivity : StripeIntentActivity() {
                 createAndConfirmPaymentIntent(
                     "us",
                     it,
+                    // TODO: Also changing CAPTURE_METHOD
+                    supportedPaymentMethods = "card,card_present",
                     shippingDetails = SHIPPING,
                     stripeAccountId = stripeAccountId
                 )

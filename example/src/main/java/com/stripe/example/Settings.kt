@@ -12,6 +12,7 @@ class Settings(context: Context) {
     private val backendMetadata = getMetadata(METADATA_KEY_BACKEND_URL_KEY)
     private val publishableKeyMetadata = getMetadata(METADATA_KEY_PUBLISHABLE_KEY)
     private val stripeAccountIdMetadata = getMetadata(METADATA_KEY_STRIPE_ACCOUNT_ID)
+    private val stripeSecretKeyMetadata = getMetadata(METADATA_KEY_STRIPE_SECRET_KEY)
 
     val backendUrl: String
         get() {
@@ -26,6 +27,11 @@ class Settings(context: Context) {
     val stripeAccountId: String?
         get() {
             return stripeAccountIdMetadata ?: STRIPE_ACCOUNT_ID
+        }
+
+    val stripeSecretKey: String?
+        get() {
+            return stripeSecretKeyMetadata ?: STRIPE_ACCOUNT_ID
         }
 
     private fun getMetadata(key: String): String? {
@@ -68,5 +74,7 @@ class Settings(context: Context) {
             "com.stripe.example.metadata.publishable_key"
         private const val METADATA_KEY_STRIPE_ACCOUNT_ID =
             "com.stripe.example.metadata.stripe_account_id"
+        private const val METADATA_KEY_STRIPE_SECRET_KEY =
+            "com.stripe.example.metadata.stripe_secret_key"
     }
 }

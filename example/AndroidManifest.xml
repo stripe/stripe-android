@@ -27,6 +27,9 @@
         <meta-data
             android:name="com.stripe.example.metadata.stripe_account_id"
             android:value="${STRIPE_ACCOUNT_ID}" />
+        <meta-data
+            android:name="com.stripe.example.metadata.stripe_secret_key"
+            android:value="${STRIPE_SECRET_KEY}" />
 
         <!-- Enables the Google Payment API -->
         <meta-data

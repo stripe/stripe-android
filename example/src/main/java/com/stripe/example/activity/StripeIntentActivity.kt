@@ -1,8 +1,18 @@
 package com.stripe.example.activity
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
+import com.stripe.Stripe
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -10,8 +20,27 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.example.BuildConfig
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
+import com.stripe.model.terminal.ConnectionToken
+import com.stripe.stripeterminal.Terminal
+import com.stripe.stripeterminal.external.callable.Callback
+import com.stripe.stripeterminal.external.callable.ConnectionTokenCallback
+import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider
+import com.stripe.stripeterminal.external.callable.DiscoveryListener
+import com.stripe.stripeterminal.external.callable.PaymentIntentCallback
+import com.stripe.stripeterminal.external.callable.ReaderCallback
+import com.stripe.stripeterminal.external.callable.TerminalListener
+import com.stripe.stripeterminal.external.models.ConnectionConfiguration
+import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
+import com.stripe.stripeterminal.external.models.DiscoveryMethod
+import com.stripe.stripeterminal.external.models.PaymentIntent
+import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TerminalException
+import com.stripe.stripeterminal.log.LogLevel
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 /**
@@ -24,11 +53,98 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
     }
+    private val stripeSecretKey: String? by lazy {
+        Settings(this).stripeSecretKey
+    }
+
 
     private lateinit var paymentLauncher: PaymentLauncher
+//    internal val DEFAULT_KEY = BuildConfig.STRIPE_API_KEY ?: ""
+
+    private var terminalInstance: Terminal? = null
+    private var availableCotsReader: Reader? = null
+    private var activeSecret: String? = null
 
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
+    }
+
+    // Register the permissions callback to handles the response to the system permissions dialog.
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+        ::onPermissionResult
+    )
+
+    private fun initializeTerminal() {
+        if (!Terminal.isInitialized()) {
+            Terminal.initTerminal(
+                applicationContext,
+                LogLevel.VERBOSE,
+                object: ConnectionTokenProvider {
+                    override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
+                        Stripe.apiKey = stripeSecretKey
+                        callback.onSuccess(ConnectionToken.create(mapOf()).secret)
+                    }
+                },
+                object: TerminalListener {
+                    override fun onUnexpectedReaderDisconnect(reader: Reader) {
+
+                    }
+                }
+            )
+
+            terminalInstance = Terminal.getInstance()
+            terminalInstance?.discoverReaders(DiscoveryConfiguration(
+                timeout = 100,
+                discoveryMethod = DiscoveryMethod.LOCAL_MOBILE,
+                isSimulated = false,
+            ),
+                object: DiscoveryListener {
+                    override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+                        Log.i("StripeIntentActivity", "Terminal initialized")
+                        availableCotsReader = readers[0]
+                    }
+                },
+                object: Callback {
+                    override fun onFailure(e: TerminalException) { }
+
+                    override fun onSuccess() { }
+                }
+            )
+        }
+    }
+
+    /**
+     * Receive the result of our permissions check, and initialize if we can
+     */
+    private fun onPermissionResult(result: Map<String, Boolean>) {
+        // TODO: Location services
+//        val deniedPermissions: Map<PermissionChecker.PermissionResult, List<String>> = result
+//            .filter { !it.value }
+//            .map { it.key }
+//            .groupBy { permission ->
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) DENIED
+//                else DENIED_PERMANENTLY
+//            }
+
+//        if (deniedPermissions.isNotEmpty()) {
+//            deniedPermissions[DENIED]?.let {
+//                Toast.makeText(
+//                    this,
+//                    "Please enable required permissions",
+//                    Toast.LENGTH_LONG
+//                ).show()
+//            }
+//            deniedPermissions[DENIED_PERMANENTLY]?.let {
+//                Toast.makeText(
+//                    this,
+//                    "Please enable required permissions via app settings",
+//                    Toast.LENGTH_LONG
+//                ).show()
+//            }
+//        }
+        // TODO: Check for lack of permission
+        initializeTerminal()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +183,24 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                         onConfirmError(it)
                     }
                 }
+
             }
+
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            initializeTerminal()
+        } else {
+            requestPermissionLauncher.launch(arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+
+            ))
+        }
     }
 
     protected fun createAndConfirmPaymentIntent(
@@ -127,6 +260,45 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     }
 
     private fun handleCreatePaymentIntentResponse(
+        responseData: JSONObject,
+        params: PaymentMethodCreateParams?,
+        shippingDetails: ConfirmPaymentIntentParams.Shipping?,
+        stripeAccountId: String?,
+        existingPaymentMethodId: String?,
+        mandateDataParams: MandateDataParams?,
+        onPaymentIntentCreated: (String) -> Unit = {}
+    ) {
+        val secret = responseData.getString("secret")
+        activeSecret = secret
+
+        Log.i("StripeIntentActivity", "Payment response: $responseData")
+
+        onPaymentIntentCreated(secret)
+        viewModel.status.postValue(
+            viewModel.status.value +
+                "\n\nStarting PaymentIntent confirmation" + (
+                stripeAccountId?.let {
+                    " for $it"
+                } ?: ""
+                )
+        )
+        val confirmPaymentIntentParams = if (existingPaymentMethodId == null) {
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = requireNotNull(params),
+                clientSecret = secret,
+                shipping = shippingDetails
+            )
+        } else {
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                paymentMethodId = existingPaymentMethodId,
+                clientSecret = secret,
+                mandateData = mandateDataParams
+            )
+        }
+        paymentLauncher.confirm(confirmPaymentIntentParams)
+    }
+
+    private fun handleCreatePaymentIntentRecoverableDecline(
         responseData: JSONObject,
         params: PaymentMethodCreateParams?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
@@ -205,9 +377,73 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.inProgress.value = false
     }
 
+    private val confirmPaymentIntentCallback = object: PaymentIntentCallback {
+        override fun onFailure(e: TerminalException) {
+            Log.i("StripeIntentActivity", "collectPaymentIntentCallback failed")
+        }
+
+        override fun onSuccess(paymentIntent: PaymentIntent) {
+            Log.i("StripeIntentActivity", "onSuccess")
+
+            MainScope().launch { onConfirmSuccess() }
+        }
+    }
+
+    private val collectPaymentIntentCallback = object: PaymentIntentCallback {
+        override fun onFailure(e: TerminalException) {
+            Log.i("StripeIntentActivity", "collectPaymentIntentCallback failed")
+        }
+
+        override fun onSuccess(paymentIntent: PaymentIntent) {
+            Log.i("StripeIntentActivity", "collectPaymentIntentCallback onSuccess")
+
+            terminalInstance?.processPayment(paymentIntent, confirmPaymentIntentCallback)
+        }
+    }
+
+    private val retrievePaymentIntentCallback = object: PaymentIntentCallback {
+        override fun onFailure(e: TerminalException) {
+            Log.i("StripeIntentActivity", "retrievePaymentIntentCallback failed")
+        }
+
+        override fun onSuccess(paymentIntent: PaymentIntent) {
+            Log.i("StripeIntentActivity", "retrieved $paymentIntent")
+            terminalInstance?.collectPaymentMethod(paymentIntent, collectPaymentIntentCallback)
+        }
+    }
+
     protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
-        viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable " +
-            "${failedResult.throwable} \n\n"
-        viewModel.inProgress.value = false
+        Log.i("StripeIntentActivity", "Going to start terminal: $availableCotsReader $terminalInstance")
+
+        availableCotsReader?.let {
+            viewModel.status.value += "\n\nPaymentIntent confirmation failed, attempting TapOnMobile recovery"
+
+            terminalInstance?.connectLocalMobileReader(
+                it,
+                ConnectionConfiguration.LocalMobileConnectionConfiguration(
+                    // Hardcode location for experiment, may need as input
+                    "tml_DvnJjANjxsPT0L",
+                ),
+                object: ReaderCallback {
+                    override fun onFailure(e: TerminalException) {
+                        Log.i("StripeIntentActivity", "Failed to connect")
+
+                    }
+
+                    override fun onSuccess(reader: Reader) {
+                        Log.i("StripeIntentActivity", "Connected $reader")
+                        val secret = activeSecret ?: ""
+
+                        terminalInstance?.retrievePaymentIntent(secret, retrievePaymentIntentCallback)
+                    }
+
+                }
+            )
+        } ?: run {
+            viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable " +
+                "${failedResult.throwable} \n\n"
+
+            viewModel.inProgress.value = false
+        }
     }
 }
