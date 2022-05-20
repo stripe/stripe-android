@@ -892,7 +892,7 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun providePublishableKey (Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+	public static fun providePublishableKey (Ljavax/inject/Provider;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {
