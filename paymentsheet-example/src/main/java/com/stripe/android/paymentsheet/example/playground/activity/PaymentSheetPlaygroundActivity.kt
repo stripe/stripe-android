@@ -191,7 +191,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
         }
 
-        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { group, checkedId ->
+        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
+            // when the currency changes the merchant may change, so the new customer id
+            // created might not match the previous new customer
             viewModel.temporaryCustomerId = null
         }
 
