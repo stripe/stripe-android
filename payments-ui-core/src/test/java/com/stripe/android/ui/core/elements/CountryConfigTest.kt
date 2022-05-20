@@ -9,7 +9,7 @@ class CountryConfigTest {
 
     @Test
     fun `Verify the displayed country list`() {
-        assertThat(CountryConfig(locale = Locale.US).getDisplayItems()[0])
+        assertThat(CountryConfig(locale = Locale.US).displayItems[0])
             .isEqualTo("United States")
     }
 
@@ -25,8 +25,53 @@ class CountryConfigTest {
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US
-            ).getDisplayItems()[0]
+            ).displayItems[0]
         ).isEqualTo("Austria")
+    }
+
+    @Test
+    fun `Verify converts diplay name to country`() {
+        val config = CountryConfig(
+            onlyShowCountryCodes = setOf("AT"),
+            locale = Locale.US
+        )
+        assertThat(
+            config.convertToRaw(config.displayItems[0])
+        ).isEqualTo("AT")
+    }
+
+    @Test
+    fun `Flag mode shows flag next to country name`() {
+        assertThat(
+            CountryConfig(
+                onlyShowCountryCodes = setOf("AT"),
+                locale = Locale.US,
+                flagMode = true
+            ).displayItems[0]
+        ).isEqualTo("🇦🇹 Austria")
+    }
+
+    @Test
+    fun `Flag mode shows only flag when collapsed`() {
+        assertThat(
+            CountryConfig(
+                onlyShowCountryCodes = setOf("AT"),
+                locale = Locale.US,
+                flagMode = true
+            ).getSelectedItemLabel(0)
+        ).isEqualTo("🇦🇹")
+    }
+
+    @Test
+    fun `Flag mode converts diplay name to country`() {
+        val config = CountryConfig(
+            onlyShowCountryCodes = setOf("AT"),
+            locale = Locale.US,
+            flagMode = true
+        )
+        assertThat(
+            config.convertToRaw(config.displayItems[0])
+        ).isEqualTo("AT")
     }
 
     @Test
@@ -34,11 +79,11 @@ class CountryConfigTest {
         val defaultCountries = CountryConfig(
             onlyShowCountryCodes = emptySet(),
             locale = Locale.US
-        ).getDisplayItems()
+        ).displayItems
         val supportedCountries = CountryConfig(
             onlyShowCountryCodes = supportedBillingCountries,
             locale = Locale.US
-        ).getDisplayItems()
+        ).displayItems
 
         val excludedCountries = setOf(
             "American Samoa", "Christmas Island", "Cocos (Keeling) Islands", "Cuba",

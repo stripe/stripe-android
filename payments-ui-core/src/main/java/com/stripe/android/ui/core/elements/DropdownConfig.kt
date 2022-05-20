@@ -11,7 +11,14 @@ sealed interface DropdownConfig {
     val label: Int
 
     /** This is the list of displayable items to show in the drop down **/
-    fun getDisplayItems(): List<String>
+    val displayItems: List<String>
+
+    /** Whether the dropdown menu should be shown in a small form when collapsed **/
+    val tinyMode: Boolean
+        get() = false
+
+    /** The label identifying the selected item used when the dropdown menu is collapsed **/
+    fun getSelectedItemLabel(index: Int): String
 
     /**
      * This will convert the field to a raw value to use in the parameter map
