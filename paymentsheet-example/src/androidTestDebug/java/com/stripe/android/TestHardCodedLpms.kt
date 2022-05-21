@@ -220,7 +220,8 @@ class TestHardCodedLpms {
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.PayPal,
                 authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.GBP
+                currency = Currency.GBP,
+                automatic = Automatic.Off
             )
         )
     }
