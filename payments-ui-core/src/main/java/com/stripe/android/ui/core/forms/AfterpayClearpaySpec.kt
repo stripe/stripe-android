@@ -9,13 +9,11 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.supportedBillingCountries
 
-internal val afterpayClearpayHeader = AfterpayClearpayTextSpec(
-    IdentifierSpec.Generic("afterpay_clearpay_header")
-)
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val AfterpayClearpayForm: List<FormItemSpec> = listOf(
-    afterpayClearpayHeader,
+    AfterpayClearpayTextSpec(
+        IdentifierSpec.Generic("afterpay_clearpay_header")
+    ),
     NameSpec(),
     EmailSpec(),
     AddressSpec(

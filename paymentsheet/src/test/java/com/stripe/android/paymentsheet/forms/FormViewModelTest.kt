@@ -243,7 +243,7 @@ internal class FormViewModelTest {
         )
 
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
 
         // Add text to the name to make it valid
         emailController?.onValueChange("email@valid.com")
@@ -283,7 +283,7 @@ internal class FormViewModelTest {
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
             .filterIsInstance(SaveForFutureUseController::class.java).first()
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
 
         // Add text to the email to make it invalid
         emailController?.onValueChange("email is invalid")
@@ -336,9 +336,9 @@ internal class FormViewModelTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.address_label_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
 
         nameElement?.onValueChange("joe")
         assertThat(
@@ -385,7 +385,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.address_label_name
+            com.stripe.android.ui.core.R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
@@ -394,7 +394,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.email
+            com.stripe.android.ui.core.R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
@@ -403,7 +403,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.iban
+            com.stripe.android.ui.core.R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
@@ -456,7 +456,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.address_label_name
+            com.stripe.android.ui.core.R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
@@ -465,7 +465,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.email
+            com.stripe.android.ui.core.R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
@@ -474,7 +474,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.iban
+            com.stripe.android.ui.core.R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
@@ -484,7 +484,7 @@ internal class FormViewModelTest {
         // Fill all address values except line2
         val addressControllers = AddressControllers.create(formViewModel)
         val populateAddressControllers = addressControllers.controllers
-            .filter { it.label.first() != R.string.address_label_address_line2 }
+            .filter { it.label.first() != com.stripe.android.ui.core.R.string.address_label_address_line2 }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("1234")
@@ -532,23 +532,23 @@ internal class FormViewModelTest {
                     listOfNotNull(
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address_line1
+                            com.stripe.android.ui.core.R.string.address_label_address_line1
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address_line2
+                            com.stripe.android.ui.core.R.string.address_label_address_line2
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_city
+                            com.stripe.android.ui.core.R.string.address_label_city
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_state
+                            com.stripe.android.ui.core.R.string.address_label_state
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_zip_code
+                            com.stripe.android.ui.core.R.string.address_label_zip_code
                         ),
                     )
                 )

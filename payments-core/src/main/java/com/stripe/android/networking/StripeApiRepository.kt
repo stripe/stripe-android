@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
@@ -100,7 +101,8 @@ import kotlin.coroutines.CoroutineContext
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
  */
-internal class StripeApiRepository @JvmOverloads internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
     publishableKeyProvider: () -> String,
     private val appInfo: AppInfo? = Stripe.appInfo,
