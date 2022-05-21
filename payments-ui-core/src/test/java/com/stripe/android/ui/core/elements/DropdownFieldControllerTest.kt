@@ -13,9 +13,9 @@ class DropdownFieldControllerTest {
     @Test
     fun `Verify that when the selected index changes the paymentMethod param value updates`() =
         runBlocking {
-            assertThat(controller.fieldValue.first()).isEqualTo("United States")
+            assertThat(controller.fieldValue.first()).isEqualTo("🇺🇸 United States")
             controller.onValueChange(1)
-            assertThat(controller.fieldValue.first()).isEqualTo("Afghanistan")
+            assertThat(controller.fieldValue.first()).isEqualTo("🇦🇫 Afghanistan")
         }
 
     @Test

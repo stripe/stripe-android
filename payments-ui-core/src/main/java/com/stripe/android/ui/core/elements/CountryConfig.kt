@@ -49,8 +49,12 @@ class CountryConfig(
         } ?: ""
 
     override fun convertFromRaw(rawValue: String) =
-        CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())?.name
-            ?: displayItems[0]
+        CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())
+            ?.let { country ->
+                countries.indexOf(country).takeUnless { it == -1 }?.let {
+                    displayItems[it]
+                }
+            } ?: displayItems.firstOrNull() ?: ""
 
     override fun convertToRaw(displayName: String) =
         CountryUtils.getCountryCodeByName(getCountryName(displayName), Locale.getDefault())?.value

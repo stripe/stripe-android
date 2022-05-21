@@ -21,12 +21,12 @@ sealed interface DropdownConfig {
     fun getSelectedItemLabel(index: Int): String
 
     /**
-     * This will convert the field to a raw value to use in the parameter map
+     * This will convert from a raw value used in the parameter map to a displayValue
      */
     fun convertFromRaw(rawValue: String): String
 
     /**
-     * This will convert from a raw value used in the parameter map to a disiplayValue
+     * This will convert the field to a raw value to use in the parameter map
      */
     fun convertToRaw(displayName: String): String?
 }
