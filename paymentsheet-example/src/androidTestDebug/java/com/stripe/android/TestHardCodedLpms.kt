@@ -165,6 +165,18 @@ class TestHardCodedLpms {
     }
 
     @Test
+    fun testSofort() {
+        testDriver.confirmNewOrGuestComplete(
+            newUser.copy(
+                paymentMethod = SupportedPaymentMethod.Sofort,
+                authorizationAction = AuthorizeAction.Authorize,
+                currency = Currency.EUR,
+                delayed = DelayedPMs.On
+            )
+        )
+    }
+
+    @Test
     fun testAffirm() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
@@ -202,14 +214,13 @@ class TestHardCodedLpms {
         )
     }
 
-    @Ignore("Need to add GBP currency to playground")
+    @Ignore("Cannot be tested requires EU-based merchant")
     fun testPayPal() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.PayPal,
                 authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.EUR,
-                automatic = Automatic.Off
+                currency = Currency.USD
             )
         )
     }
