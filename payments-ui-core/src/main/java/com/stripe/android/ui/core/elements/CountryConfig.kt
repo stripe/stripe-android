@@ -36,21 +36,17 @@ class CountryConfig(
         }
 
     override val displayItems: List<String> = countries.map { country ->
-        if (flagMode) {
-            "${countryCodeToEmoji(country.code.value)} ${country.name}"
-        } else {
-            country.name
-        }
+        "${countryCodeToEmoji(country.code.value)} ${country.name}"
     }
 
     override fun getSelectedItemLabel(index: Int) =
-        if (index < 0 || index >= countries.size) {
-            ""
-        } else if (flagMode) {
-            countryCodeToEmoji(countries[index].code.value)
-        } else {
-            displayItems[index]
-        }
+        countries.getOrNull(index)?.let {
+            if (flagMode) {
+                countryCodeToEmoji(it.code.value)
+            } else {
+                it.name
+            }
+        } ?: ""
 
     override fun convertFromRaw(rawValue: String) =
         CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())?.name
@@ -73,10 +69,7 @@ class CountryConfig(
         return String(Character.toChars(firstLetter)) + String(Character.toChars(secondLetter))
     }
 
-    private fun getCountryName(displayName: String) = if (flagMode) {
-        // In flag mode, remove the flag which is located before the first space
+    private fun getCountryName(displayName: String) =
+        // Remove the flag which is located before the first space
         displayName.substring(displayName.indexOf(" ") + 1)
-    } else {
-        displayName
-    }
 }

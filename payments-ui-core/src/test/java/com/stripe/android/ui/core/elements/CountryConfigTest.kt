@@ -10,7 +10,7 @@ class CountryConfigTest {
     @Test
     fun `Verify the displayed country list`() {
         assertThat(CountryConfig(locale = Locale.US).displayItems[0])
-            .isEqualTo("United States")
+            .isEqualTo("🇺🇸 United States")
     }
 
     @Test
@@ -26,7 +26,7 @@ class CountryConfigTest {
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US
             ).displayItems[0]
-        ).isEqualTo("Austria")
+        ).isEqualTo("🇦🇹 Austria")
     }
 
     @Test
@@ -41,14 +41,14 @@ class CountryConfigTest {
     }
 
     @Test
-    fun `Flag mode shows flag next to country name`() {
+    fun `Regular mode shows only country name when collapsed`() {
         assertThat(
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                flagMode = true
-            ).displayItems[0]
-        ).isEqualTo("🇦🇹 Austria")
+                flagMode = false
+            ).getSelectedItemLabel(0)
+        ).isEqualTo("Austria")
     }
 
     @Test
