@@ -191,7 +191,10 @@ class FieldPopulator(
                         }
                     }
                 }
-                is AuBankAccountNumberSpec -> {}
+                is AuBankAccountNumberSpec -> {
+                    selectors.getAuAccountNumber().apply {
+                        performTextInput(values.auBecsAccountNumber)
+                    }}
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CountrySpec -> {}
