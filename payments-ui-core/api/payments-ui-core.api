@@ -248,10 +248,6 @@ public final class com/stripe/android/ui/core/elements/SimpleTextFieldController
 	public final fun createNameSectionController (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SimpleTextFieldController;
 }
 
-public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion {
-	public final fun getNAME ()Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
-}
-
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 

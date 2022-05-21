@@ -44,9 +44,6 @@ data class CheckoutRequest(
     val set_shipping_address: Boolean,
     val automatic_payment_methods: Boolean,
     val use_link: Boolean,
-
-    // when used with the glitch backend: mature-buttery-bumper, which skyler has access to
-    // this will use a different merchant based on the country code
     val merchant_country_code: String? = when (currency.uppercase()) {
         "AUD" -> "AU"
         "EUR" -> "GB"

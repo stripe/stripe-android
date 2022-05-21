@@ -14,11 +14,10 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
-import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
@@ -63,15 +62,9 @@ class FormViewModelTest {
         // Using Sofort as a complex enough example to test the form view model class.
         val formViewModel = FormViewModel(
             LayoutSpec.create(
-                SectionSpec(
-                    IdentifierSpec.Generic("name_section"),
-                    NAME
-                ),
-                SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec),
-                SectionSpec(
-                    IdentifierSpec.Generic("country_section"),
-                    CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
-                ),
+                NameSpec(),
+                EmailSpec(),
+                CountrySpec(onlyShowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                 SaveForFutureUseSpec()
             ),
             resourceRepository = resourceRepository,
@@ -94,14 +87,14 @@ class FormViewModelTest {
                 ?.value
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.get(NAME.identifier)
+            formViewModel.completeFormValues.first()?.get(NameSpec().api_path)
                 ?.value
         ).isEqualTo("joe")
 
         emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.get(NAME.identifier)
+            formViewModel.completeFormValues.first()?.get(NameSpec().api_path)
         ).isNull()
     }
 

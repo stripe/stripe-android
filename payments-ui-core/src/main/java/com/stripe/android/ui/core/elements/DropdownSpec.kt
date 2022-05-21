@@ -7,19 +7,22 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class DropdownSpec(
-    override val identifier: IdentifierSpec,
+    override val api_path: IdentifierSpec,
     @StringRes val label: Int,
     val items: List<DropdownItemSpec>
-) : SectionFieldSpec(identifier) {
-    fun transform(initialValue: String?): SectionFieldElement =
+) : FormItemSpec(), RequiredItemSpec {
+    fun transform(
+        initialValues: Map<IdentifierSpec, String?> = mapOf()
+    ) = createSectionElement(
         SimpleDropdownElement(
-            this.identifier,
+            this.api_path,
             DropdownFieldController(
                 SimpleDropdownConfig(
                     label,
                     items
                 ),
-                initialValue = initialValue
+                initialValue = initialValues[api_path]
             )
         )
+    )
 }

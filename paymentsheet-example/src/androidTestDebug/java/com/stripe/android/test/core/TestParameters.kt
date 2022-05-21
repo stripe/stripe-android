@@ -92,12 +92,13 @@ enum class IntentType {
 }
 
 /**
- * Indicates the currency to use on teh PaymentIntent
+ * Indicates the currency to use on the PaymentIntent
  */
 enum class Currency {
     USD,
     EUR,
-    AUD
+    AUD,
+    GBP
 }
 
 /**

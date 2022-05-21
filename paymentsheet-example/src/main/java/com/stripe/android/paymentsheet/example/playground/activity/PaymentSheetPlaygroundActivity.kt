@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.widget.RadioGroup
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -193,6 +194,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             } else {
                 disableViews()
             }
+        }
+
+        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
+            // when the currency changes the merchant may change, so the new customer id
+            // created might not match the previous new customer
+            viewModel.temporaryCustomerId = null
         }
 
         disableViews()

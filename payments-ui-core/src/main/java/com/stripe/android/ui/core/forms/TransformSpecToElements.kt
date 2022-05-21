@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.forms
 
 import android.content.Context
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -23,12 +22,9 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionController
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionFieldSpec
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -55,11 +51,6 @@ class TransformSpecToElements(
                     saveForFutureUseInitialValue,
                     merchantName
                 )
-                is SectionSpec -> it.transform(
-                    initialValues,
-                    amount?.currencyCode,
-                    resourceRepository.getAddressRepository()
-                )
                 is StaticTextSpec -> it.transform()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AfterpayClearpayTextSpec ->
@@ -71,59 +62,32 @@ class TransformSpecToElements(
                 is CardDetailsSectionSpec -> it.transform(context, initialValues)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
-            }
-        }
-
-    private fun SectionSpec.transform(
-        initialValues: Map<IdentifierSpec, String?>,
-        currencyCode: String?,
-        addressRepository: AddressFieldElementRepository
-    ): SectionElement {
-        val fieldElements = this.fields.transform(
-            initialValues,
-            currencyCode,
-            addressRepository
-        )
-
-        // The controller of the section element will be the same as the field element
-        // as there is only a single field in a section
-        return SectionElement(
-            this.api_path,
-            fieldElements,
-            SectionController(
-                this.title,
-                fieldElements.map { it.sectionFieldErrorController() }
-            )
-        )
-    }
-
-    /**
-     * This function will transform a list of specs into a list of elements
-     */
-    private fun List<SectionFieldSpec>.transform(
-        initialValues: Map<IdentifierSpec, String?>,
-        currencyCode: String?,
-        addressRepository: AddressFieldElementRepository
-    ) =
-        this.map {
-            when (it) {
                 is EmailSpec -> it.transform(initialValues)
+                is NameSpec -> it.transform(initialValues)
+                is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
-                is DropdownSpec -> it.transform(initialValues[it.identifier])
+                is KlarnaCountrySpec -> it.transform(
+                    amount?.currencyCode,
+                    initialValues
+                )
+                is DropdownSpec -> it.transform(initialValues)
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
-                    addressRepository
+                    resourceRepository.getAddressRepository()
                 )
                 is CountrySpec -> it.transform(
                     initialValues
                 )
-                is KlarnaCountrySpec -> it.transform(
-                    currencyCode,
+                is CardBillingSpec -> it.transform(
+                    resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is CardBillingSpec -> it.transform(addressRepository, initialValues)
-                is AuBankAccountNumberSpec -> it.transform(initialValues)
+                is AddressSpec -> it.transform(
+                    initialValues,
+                    resourceRepository.getAddressRepository()
+                )
+                is SimpleTextSpec -> it.transform(initialValues)
             }
         }
 }

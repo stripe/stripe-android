@@ -16,8 +16,8 @@ import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
@@ -41,15 +41,9 @@ internal class TransformSpecToElementTest {
         R.style.StripeDefaultTheme
     )
 
-    private val nameSection = SectionSpec(
-        IdentifierSpec.Generic("name_section"),
-        SimpleTextSpec.NAME
-    )
+    private val nameSection = NameSpec()
 
-    private val emailSection = SectionSpec(
-        IdentifierSpec.Generic("email_section"),
-        EmailSpec
-    )
+    private val emailSection = EmailSpec()
 
     private lateinit var transformSpecToElements: TransformSpecToElements
 
@@ -69,32 +63,9 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Section with multiple fields contains all fields in the section element`() {
-        val formElement = transformSpecToElements.transform(
-            listOf(
-                SectionSpec(
-                    IdentifierSpec.Generic("multifield_section"),
-                    listOf(
-                        CountrySpec(),
-                        IDEAL_BANK_CONFIG
-                    )
-                )
-            )
-        )
-
-        val sectionElement = formElement[0] as SectionElement
-        assertThat(sectionElement.fields.size).isEqualTo(2)
-        assertThat(sectionElement.fields[0]).isInstanceOf(CountryElement::class.java)
-        assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdownElement::class.java)
-    }
-
-    @Test
     fun `Adding a country section sets up the section and country elements correctly`() =
         runBlocking {
-            val countrySection = SectionSpec(
-                IdentifierSpec.Generic("country_section"),
-                CountrySpec(onlyShowCountryCodes = setOf("AT"))
-            )
+            val countrySection = CountrySpec(onlyShowCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
                 listOf(countrySection)
             )
@@ -108,7 +79,7 @@ internal class TransformSpecToElementTest {
             // Verify the correct config is setup for the controller
             assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
 
-            assertThat(countrySectionElement.identifier.v1).isEqualTo("country_section")
+            assertThat(countrySectionElement.identifier.v1).isEqualTo("billing_details[address][country]_section")
 
             assertThat(countryElement.identifier.v1).isEqualTo("billing_details[address][country]")
         }
@@ -116,10 +87,7 @@ internal class TransformSpecToElementTest {
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() =
         runBlocking {
-            val idealSection = SectionSpec(
-                IdentifierSpec.Generic("ideal_section"),
-                IDEAL_BANK_CONFIG
-            )
+            val idealSection = IDEAL_BANK_CONFIG
             val formElement = transformSpecToElements.transform(
                 listOf(idealSection)
             )
@@ -130,7 +98,7 @@ internal class TransformSpecToElementTest {
             // Verify the correct config is setup for the controller
             assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
 
-            assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal_section")
+            assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal[bank]_section")
 
             assertThat(idealElement.identifier.v1).isEqualTo("ideal[bank]")
         }
@@ -156,15 +124,12 @@ internal class TransformSpecToElementTest {
     fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(
-                SectionSpec(
-                    IdentifierSpec.Generic("simple_section"),
-                    SimpleTextSpec(
-                        IdentifierSpec.Generic("simple"),
-                        R.string.address_label_name,
-                        showOptionalLabel = true,
-                        keyboardType = KeyboardType.Text,
-                        capitalization = KeyboardCapitalization.Words
-                    )
+                SimpleTextSpec(
+                    IdentifierSpec.Generic("simple"),
+                    R.string.address_label_name,
+                    showOptionalLabel = true,
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Words
                 )
             )
         )

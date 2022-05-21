@@ -734,7 +734,7 @@ public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowCon
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/paymentsheet/model/PaymentOptionFactory;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/activity/result/ActivityResultCaller;Ljava/lang/String;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;ZLjava/util/Set;Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
+	public static fun newInstance (Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/paymentsheet/model/PaymentOptionFactory;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/activity/result/ActivityResultCaller;Ljava/lang/String;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljavax/inject/Provider;Lkotlin/coroutines/CoroutineContext;ZLjava/util/Set;Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
 }
 
 public final class com/stripe/android/paymentsheet/forms/ComposableSingletons$FormUIKt {
@@ -892,7 +892,7 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun providePublishableKey (Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+	public static fun providePublishableKey (Ljavax/inject/Provider;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {
@@ -900,7 +900,7 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun provideStripeAccountId (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
+	public static fun provideStripeAccountId (Ljavax/inject/Provider;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
@@ -967,7 +967,7 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USB
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Args;Landroid/app/Application;Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Args;Landroid/app/Application;Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -1028,7 +1028,7 @@ public final class com/stripe/android/paymentsheet/repositories/CustomerApiRepos
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/util/Set;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/util/Set;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository;
 }
 
 public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepository_Api_Factory : dagger/internal/Factory {
@@ -1036,6 +1036,6 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository_Api_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 }
 
