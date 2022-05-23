@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.paymentsColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -121,7 +123,10 @@ internal fun PhoneNumberElementUI(
                                 enabled = enabled
                             )
                             prefix.takeIf { it.isNotBlank() }?.let {
-                                Text(text = it)
+                                Text(
+                                    text = it,
+                                    color = MaterialTheme.paymentsColors.placeholderText
+                                )
                             }
                         }
                     }
