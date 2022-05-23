@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'shot'
 }
 
 assemble.dependsOn('lint')
@@ -103,6 +104,11 @@ dependencies {
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
+shot {
+    applicationId = "com.stripe.android.paymentsheet.test"
+    tolerance = 1 // 1% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 vs m1 emulators
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -111,7 +117,8 @@ android {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
+        testApplicationId "com.stripe.android.paymentsheet.test"
 
         vectorDrawables.useSupportLibrary = true
 

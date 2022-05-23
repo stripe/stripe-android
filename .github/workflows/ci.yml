@@ -97,3 +97,49 @@ jobs:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
 
+  screenshot-regression-tests:
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 28
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          sdcard-path-or-size: 512M
+          profile: Nexus 6
+          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot && ./gradlew paymentsheet:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.paymentsheet.screenshot
+      - uses: actions/upload-artifact@v2
+        with:
+          name: screenshot-test-report-paymentsheet-example
+          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
+      - uses: actions/upload-artifact@v2
+        with:
+          name: screenshot-test-report-paymentsheet
+          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        if: failure()
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}

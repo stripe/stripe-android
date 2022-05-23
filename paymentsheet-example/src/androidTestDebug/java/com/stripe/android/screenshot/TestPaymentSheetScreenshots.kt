@@ -120,6 +120,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetNewCustomerAppearance() {
         testDriver.screenshotRegression(
             testParams.copy(
@@ -130,6 +131,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetNewCustomerDark() {
         testDriver.screenshotRegression(
             testParams.copy(forceDarkMode = true)
@@ -137,6 +139,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetNewCustomerDarkAppearance() {
         testDriver.screenshotRegression(
             testParams.copy(forceDarkMode = true, appearance = appearance)
@@ -144,6 +147,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetReturningCustomerLight() {
         testDriver.screenshotRegression(
             testParams.copy(forceDarkMode = false, customer = Customer.Returning)
@@ -151,6 +155,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetReturningCustomerLightAppearance() {
         testDriver.screenshotRegression(
             testParams.copy(
@@ -162,6 +167,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetReturningCustomerDark() {
         testDriver.screenshotRegression(
             testParams.copy(forceDarkMode = true, customer = Customer.Returning)
@@ -169,6 +175,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetReturningCustomerDarkAppearance() {
         testDriver.screenshotRegression(
             testParams.copy(
@@ -180,6 +187,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetEditPaymentMethodsLight() {
         testDriver.screenshotRegression(
             testParameters = testParams.copy(forceDarkMode = false, customer = Customer.Returning),
@@ -190,6 +198,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetEditPaymentMethodsLightAppearance() {
         testDriver.screenshotRegression(
             testParameters = testParams.copy(
@@ -204,6 +213,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetEditPaymentMethodsDark() {
         testDriver.screenshotRegression(
             testParameters = testParams.copy(forceDarkMode = true, customer = Customer.Returning),
@@ -214,6 +224,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetEditPaymentMethodsDarkAppearance() {
         testDriver.screenshotRegression(
             testParameters = testParams.copy(
@@ -228,6 +239,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetPrimaryButtonAppearanceLight() {
         testDriver.screenshotRegression(
             testParams.copy(
@@ -240,6 +252,7 @@ class TestPaymentSheetScreenshots {
     }
 
     @Test
+    @Ignore
     fun testPaymentSheetPrimaryButtonAppearanceDark() {
         testDriver.screenshotRegression(
             testParams.copy(
