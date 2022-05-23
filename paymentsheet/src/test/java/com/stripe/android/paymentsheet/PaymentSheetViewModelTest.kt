@@ -23,10 +23,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -43,6 +42,8 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,6 +81,7 @@ internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val prefsRepository = FakePrefsRepository()
+    private val resourceRepository = StaticResourceRepository(mock())
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
@@ -1003,7 +1005,7 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
-            mock(),
+            resourceRepository,
             mock(),
             mock(),
             Logger.noop(),

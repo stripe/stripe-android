@@ -65,8 +65,6 @@ internal class FormViewModelTest {
 
     private val resourceRepository =
         StaticResourceRepository(
-            LpmRepository(),
-            mock(),
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             )

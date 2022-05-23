@@ -46,8 +46,6 @@ internal class PaymentOptionsViewModelTest {
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
     private val resourceRepository =
         StaticResourceRepository(
-            LpmRepository(),
-            mock(),
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             )
