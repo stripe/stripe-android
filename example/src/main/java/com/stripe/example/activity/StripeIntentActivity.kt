@@ -373,6 +373,36 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     protected open fun onConfirmSuccess() {
         viewModel.status.value += "\n\nPaymentIntent confirmation succeeded\n\n"
         viewModel.inProgress.value = false
+
+        availableCotsReader?.let {
+            viewModel.status.value += "\n\nPaymentIntent confirmation failed, attempting TapOnMobile recovery"
+
+            terminalInstance?.connectLocalMobileReader(
+                it,
+                ConnectionConfiguration.LocalMobileConnectionConfiguration(
+                    // Hardcode location for experiment, may need as input
+                    "tml_DvnJjANjxsPT0L",
+                ),
+                object: ReaderCallback {
+                    override fun onFailure(e: TerminalException) {
+                        Log.i("StripeIntentActivity", "Failed to connect")
+
+                    }
+
+                    override fun onSuccess(reader: Reader) {
+                        Log.i("StripeIntentActivity", "Connected $reader")
+                        val secret = activeSecret ?: ""
+
+                        terminalInstance?.retrievePaymentIntent(secret, retrievePaymentIntentCallback)
+                    }
+
+                }
+            )
+        } ?: run {
+            viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable"
+
+            viewModel.inProgress.value = false
+        }
     }
 
     protected open fun onConfirmCanceled() {
