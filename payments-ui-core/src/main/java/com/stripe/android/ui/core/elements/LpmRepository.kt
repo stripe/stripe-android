@@ -271,5 +271,4 @@ class LpmRepository {
             return type.code
         }
     }
-
 }
