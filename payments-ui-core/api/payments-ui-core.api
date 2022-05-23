@@ -59,12 +59,6 @@ public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateElement
 public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/CardDetailsSectionController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;Ljava/util/Map;)V
-	public fun getError ()Lkotlinx/coroutines/flow/Flow;
-}
-
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
 }
 
@@ -228,6 +222,14 @@ public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/OTPElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberController$Companion {
+	public final fun createPhoneNumberController (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
+	public static synthetic fun createPhoneNumberController$default (Lcom/stripe/android/ui/core/elements/PhoneNumberController$Companion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
