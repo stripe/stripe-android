@@ -108,7 +108,8 @@ internal class GooglePayLauncherViewModel(
                 },
                 isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
             ),
-            isEmailRequired = args.config.isEmailRequired
+            isEmailRequired = args.config.isEmailRequired,
+            allowCreditCards = args.config.allowCreditCards
         )
     }
 
@@ -237,11 +238,12 @@ internal class GooglePayLauncherViewModel(
             )
 
             val googlePayRepository = DefaultGooglePayRepository(
-                application,
-                args.config.environment,
-                args.config.billingAddressConfig.convert(),
-                args.config.existingPaymentMethodRequired,
-                logger
+                context = application,
+                environment = args.config.environment,
+                billingAddressParameters = args.config.billingAddressConfig.convert(),
+                existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
+                allowCreditCards = args.config.allowCreditCards,
+                logger = logger
             )
 
             return GooglePayLauncherViewModel(
