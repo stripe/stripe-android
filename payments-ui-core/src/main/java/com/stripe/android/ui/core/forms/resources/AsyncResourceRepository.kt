@@ -38,7 +38,7 @@ class AsyncResourceRepository @Inject constructor(
         loadingJobs.add(
             CoroutineScope(workContext).launch {
                 // THis is dependent on StringRepository being initialized.
-                lpmRepository = LpmRepository(resources)
+                lpmRepository = LpmRepository()
             }
         )
         loadingJobs.add(
@@ -62,7 +62,7 @@ class AsyncResourceRepository @Inject constructor(
 
     override fun isLoaded() = loadingJobs.isEmpty()
 
-    override fun getLpmFormRepository() = lpmRepository
+    override fun getLpmRepository() = lpmRepository
     override fun getStringRepository() = stringRepository
     override fun getAddressRepository() = addressRepository
 }

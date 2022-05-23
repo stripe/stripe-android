@@ -43,6 +43,8 @@ import javax.inject.Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository {
 
+    fun values() = exposedPaymentMethods
+
     /**
      * This is a list of the payment methods that we are allowing in the release
      */

@@ -262,7 +262,12 @@ internal class PaymentOptionsAdapter(
             ViewType.Link ->
                 LinkViewHolder(parent, width, linkClickListener)
             ViewType.SavedPaymentMethod ->
-                SavedPaymentMethodViewHolder(parent, width, lpmRepository, ::onItemSelected) { position ->
+                SavedPaymentMethodViewHolder(
+                    parent,
+                    width,
+                    lpmRepository,
+                    ::onItemSelected
+                ) { position ->
                     onItemSelected(
                         position = findInitialSelectedPosition(savedSelection),
                         isClick = false,

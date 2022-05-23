@@ -126,7 +126,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter = PaymentOptionsAdapter(
-            sheetViewModel.resourceRepository.getLpmFormRepository(),
+            sheetViewModel.resourceRepository.getLpmRepository(),
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,

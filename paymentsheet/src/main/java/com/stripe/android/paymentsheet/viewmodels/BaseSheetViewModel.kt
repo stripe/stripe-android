@@ -298,8 +298,19 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * they will be ready in the onViewCreated method of
          * the [BaseAddPaymentMethodFragment]
          */
-        val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmFormRepository())
+        val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmRepository())
         savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
+
+        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
+            onFatal(
+                IllegalArgumentException(
+                    "None of the requested payment methods" +
+                        " (${stripeIntent.paymentMethodTypes})" +
+                        " match the supported payment types" +
+                        " (${resourceRepository.getLpmRepository().values().toList()})"
+                )
+            )
+        }
 
         if (stripeIntent is PaymentIntent) {
             runCatching {
@@ -366,7 +377,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun getAddFragmentSelectedLpm() =
         savedStateHandle.getLiveData(
             SAVE_SELECTED_ADD_LPM,
-            resourceRepository.getLpmFormRepository().fromCode(
+            resourceRepository.getLpmRepository().fromCode(
                 newLpm?.paymentMethodCreateParams?.typeCode
             ) ?: SupportedPaymentMethod.Card
         )

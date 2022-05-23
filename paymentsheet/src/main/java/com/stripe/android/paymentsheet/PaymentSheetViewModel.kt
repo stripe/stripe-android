@@ -264,7 +264,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     getSupportedSavedCustomerPMs(
                         stripeIntent,
                         config,
-                        resourceRepository.getLpmFormRepository()
+                        resourceRepository.getLpmRepository()
                     ).map {
                         it.type
                     }.let {

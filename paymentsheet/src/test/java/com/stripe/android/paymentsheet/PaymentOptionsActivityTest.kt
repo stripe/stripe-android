@@ -411,9 +411,8 @@ class PaymentOptionsActivityTest {
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
             resourceRepository = StaticResourceRepository(
-                LpmRepository(
-                    ApplicationProvider.getApplicationContext<Context>().resources
-                ),
+                LpmRepository(),
+                mock(),
                 AddressFieldElementRepository(
                     ApplicationProvider.getApplicationContext<Context>().resources
                 )

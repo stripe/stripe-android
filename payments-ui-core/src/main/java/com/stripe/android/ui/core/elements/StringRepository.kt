@@ -18,7 +18,7 @@ data class StringRepository @Inject constructor(
 
     @Serializable
     enum class TranslationId(val resourceId: Int) {
-        //https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/master/src/lib/inner/messages/en.json
+        // https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/master/src/lib/inner/messages/en.json
         @SerialName("upe.labels.ideal.bank")
         IdealBank(R.string.ideal_bank),
 
