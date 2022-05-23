@@ -7,7 +7,7 @@ sealed interface DropdownConfig {
     /** This is a label for debug logs **/
     val debugLabel: String
 
-    /** This is the label to describe the field */
+    /** This is the label to describe the field **/
     val label: Int
 
     /** This is the list of displayable items to show in the drop down **/
@@ -20,13 +20,9 @@ sealed interface DropdownConfig {
     /** The label identifying the selected item used when the dropdown menu is collapsed **/
     fun getSelectedItemLabel(index: Int): String
 
-    /**
-     * This will convert the field to a raw value to use in the parameter map
-     */
+    /** This will convert from a raw value used in the parameter map to a display value **/
     fun convertFromRaw(rawValue: String): String
 
-    /**
-     * This will convert from a raw value used in the parameter map to a disiplayValue
-     */
+    /** This will convert the field to a raw value to use in the parameter map **/
     fun convertToRaw(displayName: String): String?
 }

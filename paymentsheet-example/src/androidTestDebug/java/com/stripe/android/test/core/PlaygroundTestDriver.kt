@@ -245,6 +245,7 @@ class PlaygroundTestDriver(
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
+        selectors.automatic.click()
         selectors.currency.click()
         selectors.checkout.click()
         selectors.delayed.click()

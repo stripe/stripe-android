@@ -121,6 +121,9 @@
     <string name="google_pay_billing_required">Billing Required</string>
     <string name="google_pay_billing_required_true">True</string>
     <string name="google_pay_billing_required_false">False</string>
+    <string name="google_pay_allow_credit_cards">Billing Required</string>
+    <string name="google_pay_allow_credit_cards_true">True</string>
+    <string name="google_pay_allow_credit_cards_false">False</string>
     <string name="google_pay_merchant_name">Merchant Name</string>
     <string name="google_pay_merchant_name_default">Widget Store</string>
     <string name="google_pay_merchant_country_code">Merchant Country Code</string>

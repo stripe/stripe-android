@@ -72,7 +72,12 @@ class GooglePayJsonFactory constructor(
          * viewer is ready to pay with one or more payment methods specified in
          * `allowedPaymentMethods`.
          */
-        existingPaymentMethodRequired: Boolean? = null
+        existingPaymentMethodRequired: Boolean? = null,
+
+        /**
+         * Set to false if you don't support credit cards
+         */
+        allowCreditCards: Boolean? = null
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -80,7 +85,12 @@ class GooglePayJsonFactory constructor(
             .put(
                 "allowedPaymentMethods",
                 JSONArray()
-                    .put(createCardPaymentMethod(billingAddressParameters))
+                    .put(
+                        createCardPaymentMethod(
+                            billingAddressParameters,
+                            allowCreditCards
+                        )
+                    )
             )
             .apply {
                 if (existingPaymentMethodRequired != null) {
@@ -119,7 +129,12 @@ class GooglePayJsonFactory constructor(
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
          * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant” message is displayed in the payment sheet.
          */
-        merchantInfo: MerchantInfo? = null
+        merchantInfo: MerchantInfo? = null,
+
+        /**
+         * Set to false if you don't support credit cards
+         */
+        allowCreditCards: Boolean? = null
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -127,7 +142,12 @@ class GooglePayJsonFactory constructor(
             .put(
                 "allowedPaymentMethods",
                 JSONArray()
-                    .put(createCardPaymentMethod(billingAddressParameters))
+                    .put(
+                        createCardPaymentMethod(
+                            billingAddressParameters,
+                            allowCreditCards
+                        )
+                    )
             )
             .put("transactionInfo", createTransactionInfo(transactionInfo))
             .put("emailRequired", isEmailRequired)
@@ -202,7 +222,8 @@ class GooglePayJsonFactory constructor(
     }
 
     private fun createCardPaymentMethod(
-        billingAddressParameters: BillingAddressParameters?
+        billingAddressParameters: BillingAddressParameters?,
+        allowCreditCards: Boolean?
     ): JSONObject {
         val cardPaymentMethodParams = createBaseCardPaymentMethodParams()
             .apply {
@@ -217,6 +238,9 @@ class GooglePayJsonFactory constructor(
                             )
                             .put("format", billingAddressParameters.format.code)
                     )
+                }
+                allowCreditCards?.let {
+                    put("allowCreditCards", it)
                 }
             }
 

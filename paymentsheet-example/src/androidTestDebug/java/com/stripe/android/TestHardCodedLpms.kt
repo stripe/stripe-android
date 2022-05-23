@@ -176,8 +176,7 @@ class TestHardCodedLpms {
         )
     }
 
-    @Ignore("Ignored until ready to release")
-//    @Test
+    @Test
     fun testAffirm() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
@@ -190,14 +189,16 @@ class TestHardCodedLpms {
         )
     }
 
-    @Ignore("Cannot be tested requires AU-based merchant")
+    @Test
     fun testAuBecsDD() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AuBecsDebit,
-                authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.USD,
-                shipping = Shipping.On
+                authorizationAction = null,
+                currency = Currency.AUD,
+                shipping = Shipping.On,
+                delayed = DelayedPMs.On,
+                automatic = Automatic.Off,
             )
         )
     }
