@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -42,10 +43,12 @@ import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.PhoneCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldColors
+import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.menu.Checkbox
+import com.stripe.android.ui.core.getBorderStroke
+import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Preview
@@ -55,7 +58,7 @@ private fun Preview() {
         Surface {
             LinkInlineSignup(
                 merchantName = "Example, Inc.",
-                emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email@me.co")),
+                emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
@@ -97,7 +100,7 @@ private fun LinkInlineSignup(
 
     LinkInlineSignup(
         merchantName = viewModel.merchantName,
-        emailElement = viewModel.emailElement,
+        emailController = viewModel.emailController,
         signUpState = signUpState,
         enabled = enabled,
         expanded = isExpanded,
@@ -110,7 +113,7 @@ private fun LinkInlineSignup(
 @Composable
 internal fun LinkInlineSignup(
     merchantName: String,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
     signUpState: SignUpState,
     enabled: Boolean,
     expanded: Boolean,
@@ -124,18 +127,14 @@ internal fun LinkInlineSignup(
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
     ) {
-        DefaultLinkTheme {
+        PaymentsTheme {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(
-                        width = 1.dp,
-                        color = PaymentsTheme.colors.colorComponentBorder,
-                        shape = PaymentsTheme.shapes.material.medium
-                    )
+                    .border(MaterialTheme.getBorderStroke(isSelected = false))
                     .background(
-                        color = PaymentsTheme.colors.component,
-                        shape = PaymentsTheme.shapes.material.medium
+                        color = MaterialTheme.paymentsColors.component,
+                        shape = MaterialTheme.shapes.medium
                     )
             ) {
                 Row(
@@ -155,8 +154,8 @@ internal fun LinkInlineSignup(
                     Column {
                         Text(
                             text = stringResource(id = R.string.inline_sign_up_header),
-                            style = PaymentsTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                            color = PaymentsTheme.colors.material.onSurface
+                            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colors.onSurface
                                 .copy(alpha = LocalContentAlpha.current)
                         )
                         Text(
@@ -164,8 +163,8 @@ internal fun LinkInlineSignup(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 4.dp),
-                            style = PaymentsTheme.typography.body1,
-                            color = PaymentsTheme.colors.material.onSurface
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onSurface
                                 .copy(alpha = LocalContentAlpha.current)
                         )
                     }
@@ -181,7 +180,7 @@ internal fun LinkInlineSignup(
                     ) {
                         EmailCollectionSection(
                             enabled = enabled,
-                            emailElement = emailElement,
+                            emailController = emailController,
                             signUpState = signUpState
                         )
 
@@ -192,6 +191,7 @@ internal fun LinkInlineSignup(
                                 // TODO(brnunes-stripe): Migrate to phone number collection element
                                 PhoneCollectionSection(
                                     phoneNumber = phoneNumber,
+                                    textFieldColors = TextFieldColors(),
                                     onPhoneNumberChanged = {
                                         phoneNumber = it
                                         if (phoneNumber.length == 10) {

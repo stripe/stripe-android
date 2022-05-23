@@ -12,6 +12,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,13 +41,11 @@ import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
-import com.stripe.android.ui.core.elements.SectionController
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionElementUI
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.elements.TextFieldSection
 
 @Preview
 @Composable
@@ -55,10 +54,8 @@ private fun SignUpBodyPreview() {
         Surface {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailElement = EmailSpec.transform(
-                    mapOf(
-                        IdentifierSpec.Email to "email"
-                    )
+                emailController = SimpleTextFieldController.createEmailSectionController(
+                    "email"
                 ),
                 signUpState = SignUpState.InputtingPhone,
                 onSignUpClick = {}
@@ -83,7 +80,7 @@ internal fun SignUpBody(
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
-        emailElement = signUpViewModel.emailElement,
+        emailController = signUpViewModel.emailController,
         signUpState = signUpStatus,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
@@ -92,7 +89,7 @@ internal fun SignUpBody(
 @Composable
 internal fun SignUpBody(
     merchantName: String,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
     signUpState: SignUpState,
     onSignUpClick: (String) -> Unit
 ) {
@@ -126,22 +123,27 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        EmailCollectionSection(
-            enabled = true,
-            emailElement = emailElement,
-            signUpState = signUpState
-        )
+        DefaultPaymentsTheme {
+            EmailCollectionSection(
+                enabled = true,
+                emailController = emailController,
+                signUpState = signUpState
+            )
+        }
         AnimatedVisibility(
             visible = signUpState == SignUpState.InputtingPhone
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // TODO(brnunes-stripe): Migrate to phone number collection element
-                PhoneCollectionSection(
-                    phoneNumber = phoneNumber,
-                    onPhoneNumberChanged = {
-                        phoneNumber = it
-                    }
-                )
+                DefaultPaymentsTheme {
+                    PhoneCollectionSection(
+                        phoneNumber = phoneNumber,
+                        onPhoneNumberChanged = {
+                            phoneNumber = it
+                        },
+                        textFieldColors = linkTextFieldColors()
+                    )
+                }
                 LinkTerms(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,7 +169,7 @@ internal fun SignUpBody(
 @Composable
 internal fun EmailCollectionSection(
     enabled: Boolean,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
     signUpState: SignUpState
 ) {
     Box(
@@ -176,18 +178,10 @@ internal fun EmailCollectionSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        SectionElementUI(
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
-            element = SectionElement(
-                identifier = IdentifierSpec.Email,
-                fields = listOf(emailElement),
-                controller = SectionController(
-                    null,
-                    listOf(emailElement.sectionFieldErrorController())
-                )
-            ),
-            emptyList(),
-            emailElement.identifier
+        TextFieldSection(
+            textFieldController = emailController,
+            imeAction = ImeAction.Done,
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail
         )
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
@@ -212,6 +206,7 @@ internal fun EmailCollectionSection(
 @Composable
 internal fun PhoneCollectionSection(
     phoneNumber: String,
+    textFieldColors: TextFieldColors = linkTextFieldColors(),
     onPhoneNumberChanged: (String) -> Unit
 ) {
     Column(
@@ -228,7 +223,7 @@ internal fun PhoneCollectionSection(
                     Text(text = "Mobile Number")
                 },
                 shape = MaterialTheme.shapes.medium,
-                colors = linkTextFieldColors(),
+                colors = textFieldColors,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Go

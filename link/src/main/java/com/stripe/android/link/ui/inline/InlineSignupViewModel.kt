@@ -11,9 +11,7 @@ import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,17 +30,16 @@ internal class InlineSignupViewModel @Inject constructor(
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
 
-    val emailElement: SectionFieldElement =
-        EmailSpec.transform(mapOf(IdentifierSpec.Email to prefilledEmail))
+    val emailController = SimpleTextFieldController.createEmailSectionController(
+        prefilledEmail
+    )
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> =
-        emailElement.getFormFieldValueFlow().map { formFieldsList ->
-            // formFieldsList contains only one element, for the email. Take the second value of
-            // the pair, which is the FormFieldEntry containing the value entered by the user.
-            formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
+        emailController.formFieldValue.map {
+            it.takeIf { it.isComplete }?.value
         }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)

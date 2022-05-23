@@ -1,12 +1,15 @@
 package com.stripe.android.ui.core.elements
 
 import android.view.KeyEvent
+import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -30,21 +33,61 @@ import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.paymentsColors
 
 /**
- * This is focused on converting an `Element` into what is displayed in a textField.
+ * This is focused on converting an [TextFieldController] into what is displayed in a section
+ * with a single textField.
  * - some focus logic
  * - observes values that impact how things show on the screen
- * - calls through to the Elements worker functions for focus change and value change events
  */
 @Composable
-internal fun TextField(
+fun TextFieldSection(
+    textFieldController: TextFieldController,
+    @StringRes sectionTitle: Int? = null,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction,
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit = {},
+    onTextStateChanged: (TextFieldState?) -> Unit = {}
+) {
+    val error by textFieldController.error.collectAsState(null)
+
+    val sectionErrorString = error?.let {
+        it.formatArgs?.let { args ->
+            stringResource(
+                it.errorMessage,
+                *args
+            )
+        } ?: stringResource(it.errorMessage)
+    }
+
+    Section(sectionTitle, sectionErrorString) {
+        TextField(
+            textFieldController = textFieldController,
+            enabled = enabled,
+            imeAction = imeAction,
+            modifier = modifier,
+            onValueChanged = onValueChanged,
+            onTextStateChanged = onTextStateChanged
+        )
+    }
+}
+
+/**
+ * This is focused on converting an [TextFieldController] into what is displayed in a textField.
+ * - some focus logic
+ * - observes values that impact how things show on the screen
+ */
+@Composable
+fun TextField(
     textFieldController: TextFieldController,
     modifier: Modifier = Modifier,
     imeAction: ImeAction,
-    enabled: Boolean
+    enabled: Boolean,
+    onValueChanged: (String) -> Unit = {},
+    onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
@@ -79,7 +122,13 @@ internal fun TextField(
 
     TextField(
         value = value,
-        onValueChange = { textFieldController.onValueChange(it) },
+        onValueChange = {
+            val newTextState = textFieldController.onValueChange(it)
+
+            if (newTextState != null) {
+                onTextStateChanged(newTextState)
+            }
+        },
         modifier = modifier
             .fillMaxWidth()
             .onPreviewKeyEvent { event ->
@@ -140,22 +189,23 @@ internal fun TextField(
 }
 
 @Composable
-internal fun TextFieldColors(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun TextFieldColors(
     shouldShowError: Boolean = false
 ) = TextFieldDefaults.textFieldColors(
     textColor = if (shouldShowError) {
-        PaymentsTheme.colors.material.error
+        MaterialTheme.colors.error
     } else {
-        PaymentsTheme.colors.onComponent
+        MaterialTheme.paymentsColors.onComponent
     },
-    unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
-    focusedLabelColor = PaymentsTheme.colors.placeholderText,
-    placeholderColor = PaymentsTheme.colors.placeholderText,
-    backgroundColor = PaymentsTheme.colors.component,
+    unfocusedLabelColor = MaterialTheme.paymentsColors.placeholderText,
+    focusedLabelColor = MaterialTheme.paymentsColors.placeholderText,
+    placeholderColor = MaterialTheme.paymentsColors.placeholderText,
+    backgroundColor = MaterialTheme.paymentsColors.component,
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = PaymentsTheme.colors.colorTextCursor
+    cursorColor = MaterialTheme.paymentsColors.textCursor
 )
 
 @Composable

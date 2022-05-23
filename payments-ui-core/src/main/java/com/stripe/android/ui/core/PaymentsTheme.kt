@@ -20,6 +20,7 @@ import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
+import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -40,8 +41,6 @@ import androidx.core.graphics.ColorUtils
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
-    val primary: Color,
-    val surface: Color,
     val component: Color,
     val componentBorder: Color,
     val componentDivider: Color,
@@ -49,9 +48,8 @@ data class PaymentsColors(
     val subtitle: Color,
     val textCursor: Color,
     val placeholderText: Color,
-    val onSurface: Color,
     val appBarIcon: Color,
-    val error: Color,
+    val materialColors: Colors
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -101,7 +99,8 @@ data class PrimaryButtonShape(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonTypography(
     @FontRes
-    val fontFamily: Int?
+    val fontFamily: Int?,
+    val fontSize: TextUnit
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -111,8 +110,6 @@ object PaymentsThemeDefaults {
     }
 
     val colorsLight = PaymentsColors(
-        primary = Color(0xFF007AFF),
-        surface = Color.White,
         component = Color.White,
         componentBorder = Color(0x33787880),
         componentDivider = Color(0x33787880),
@@ -120,14 +117,16 @@ object PaymentsThemeDefaults {
         subtitle = Color(0x99000000),
         textCursor = Color.Black,
         placeholderText = Color(0x993C3C43),
-        onSurface = Color.Black,
         appBarIcon = Color(0x99000000),
-        error = Color.Red,
+        materialColors = lightColors(
+            primary = Color(0xFF007AFF),
+            surface = Color.White,
+            onSurface = Color.Black,
+            error = Color.Red
+        )
     )
 
     val colorsDark = PaymentsColors(
-        primary = Color(0xFF0074D4),
-        surface = Color(0xff2e2e2e),
         component = Color.DarkGray,
         componentBorder = Color(0xFF787880),
         componentDivider = Color(0xFF787880),
@@ -135,9 +134,13 @@ object PaymentsThemeDefaults {
         subtitle = Color(0x99FFFFFF),
         textCursor = Color.White,
         placeholderText = Color(0x61FFFFFF),
-        onSurface = Color.White,
         appBarIcon = Color.White,
-        error = Color.Red,
+        materialColors = darkColors(
+            primary = Color(0xFF0074D4),
+            surface = Color(0xff2e2e2e),
+            onSurface = Color.White,
+            error = Color.Red
+        )
     )
 
     val shapes = PaymentsShapes(
@@ -162,12 +165,12 @@ object PaymentsThemeDefaults {
 
     val primaryButtonStyle = PrimaryButtonStyle(
         colorsLight = PrimaryButtonColors(
-            background = colors(false).primary,
+            background = colors(false).materialColors.primary,
             onBackground = Color.White,
             border = Color.Transparent
         ),
         colorsDark = PrimaryButtonColors(
-            background = colors(true).primary,
+            background = colors(true).materialColors.primary,
             onBackground = Color.White,
             border = Color.Transparent
         ),
@@ -177,21 +180,10 @@ object PaymentsThemeDefaults {
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
+            fontSize = typography.largeFontSize
         )
     )
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentsComposeColors(
-    val component: Color,
-    val colorComponentBorder: Color,
-    val colorComponentDivider: Color,
-    val subtitle: Color,
-    val colorTextCursor: Color,
-    val placeholderText: Color,
-    val onComponent: Color,
-    val material: Colors
-)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsComposeShapes(
@@ -199,28 +191,6 @@ data class PaymentsComposeShapes(
     val borderStrokeWidthSelected: Dp,
     val material: Shapes
 )
-
-@Composable
-@ReadOnlyComposable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentsColors.toComposeColors(): PaymentsComposeColors {
-    return PaymentsComposeColors(
-        component = component,
-        colorComponentBorder = componentBorder,
-        colorComponentDivider = componentDivider,
-        onComponent = onComponent,
-        subtitle = subtitle,
-        colorTextCursor = textCursor,
-        placeholderText = placeholderText,
-
-        material = lightColors(
-            primary = primary,
-            surface = surface,
-            onSurface = onSurface,
-            error = error,
-        )
-    )
-}
 
 @Composable
 @ReadOnlyComposable
@@ -313,64 +283,96 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     )
 }
 
+val LocalColors = staticCompositionLocalOf { PaymentsTheme.getColors(false) }
+val LocalShapes = staticCompositionLocalOf { PaymentsTheme.shapesMutable }
+val LocalTypography = staticCompositionLocalOf { PaymentsTheme.typographyMutable }
+
+/**
+ * Base Theme for Payments Composables.
+ * CAUTION: This theme is mutable by merchant configurations.
+ */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
     content: @Composable () -> Unit
 ) {
-    val colors = PaymentsTheme.colors
-    val localColors = staticCompositionLocalOf { colors }
-
-    val shapes = PaymentsTheme.shapes
-    val localShapes = staticCompositionLocalOf { shapes }
+    val colors = PaymentsTheme.getColors(isSystemInDarkTheme())
+    val shapes = PaymentsTheme.shapesMutable
+    val typography = PaymentsTheme.typographyMutable
 
     CompositionLocalProvider(
-        localColors provides colors,
-        localShapes provides shapes
+        LocalColors provides colors,
+        LocalShapes provides shapes,
+        LocalTypography provides typography
     ) {
         MaterialTheme(
-            colors = colors.material,
-            typography = PaymentsTheme.typography,
-            shapes = shapes.material,
+            colors = colors.materialColors,
+            typography = typography.toComposeTypography(),
+            shapes = shapes.toComposeShapes().material,
             content = content
         )
     }
 }
 
-// This object lets you access colors in composables via
-// StripeTheme.colors.primary etc
-// This mirrors an object that lives inside of MaterialTheme.
+/**
+ * Base Theme for Payments Composables that are not merchant configurable.
+ * Use this theme if you do not want merchant configurations to change your UI
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun DefaultPaymentsTheme(
+    content: @Composable () -> Unit
+) {
+    val colors = PaymentsThemeDefaults.colors(isSystemInDarkTheme())
+    val shapes = PaymentsThemeDefaults.shapes
+    val typography = PaymentsThemeDefaults.typography
+
+    CompositionLocalProvider(
+        LocalColors provides colors,
+        LocalShapes provides shapes,
+        LocalTypography provides typography
+    ) {
+        MaterialTheme(
+            colors = colors.materialColors,
+            typography = typography.toComposeTypography(),
+            shapes = shapes.toComposeShapes().material,
+            content = content
+        )
+    }
+}
+
+val MaterialTheme.paymentsColors: PaymentsColors
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalColors.current
+
+val MaterialTheme.paymentsShapes: PaymentsShapes
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalShapes.current
+
+@Composable
+@ReadOnlyComposable
+fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke {
+    val width = if (isSelected) paymentsShapes.borderStrokeWidthSelected else paymentsShapes.borderStrokeWidth
+    val color = if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
+    return BorderStroke(width.dp, color)
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
     const val minContrastForWhite = 2.2
     var colorsDarkMutable = PaymentsThemeDefaults.colorsDark
     var colorsLightMutable = PaymentsThemeDefaults.colorsLight
 
-    val colors: PaymentsComposeColors
-        @Composable
-        @ReadOnlyComposable
-        get() = (if (isSystemInDarkTheme()) colorsDarkMutable else colorsLightMutable).toComposeColors()
-
     var shapesMutable = PaymentsThemeDefaults.shapes
-    val shapes: PaymentsComposeShapes
-        @Composable
-        @ReadOnlyComposable
-        get() = shapesMutable.toComposeShapes()
 
     var typographyMutable = PaymentsThemeDefaults.typography
-    val typography: Typography
-        @Composable
-        @ReadOnlyComposable
-        get() = typographyMutable.toComposeTypography()
 
     var primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle
 
-    @Composable
-    @ReadOnlyComposable
-    fun getBorderStroke(isSelected: Boolean): BorderStroke {
-        val width = if (isSelected) shapes.borderStrokeWidthSelected else shapes.borderStrokeWidth
-        val color = if (isSelected) colors.material.primary else colors.colorComponentBorder
-        return BorderStroke(width, color)
+    fun getColors(isDark: Boolean): PaymentsColors {
+        return if (isDark) colorsDarkMutable else colorsLightMutable
     }
 }
 
@@ -470,12 +472,18 @@ fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
-    val baseStyle = PaymentsTheme.typography.h5.copy(
+    val baseStyle = MaterialTheme.typography.h5.copy(
         color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
+        fontSize = typography.fontSize
     )
     return if (typography.fontFamily != null) {
         baseStyle.copy(fontFamily = FontFamily(Font(typography.fontFamily)))
     } else {
         baseStyle
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Context.getRawValueFromDimenResource(resource: Int): Float {
+    return resources.getDimension(resource) / resources.displayMetrics.density
 }

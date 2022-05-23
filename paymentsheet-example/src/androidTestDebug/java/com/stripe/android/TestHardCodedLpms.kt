@@ -164,6 +164,18 @@ class TestHardCodedLpms {
         )
     }
 
+    @Test
+    fun testSofort() {
+        testDriver.confirmNewOrGuestComplete(
+            newUser.copy(
+                paymentMethod = SupportedPaymentMethod.Sofort,
+                authorizationAction = AuthorizeAction.Authorize,
+                currency = Currency.EUR,
+                delayed = DelayedPMs.On
+            )
+        )
+    }
+
     @Ignore("Ignored until ready to release")
 //    @Test
     fun testAffirm() {

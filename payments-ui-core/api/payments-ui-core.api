@@ -16,6 +16,12 @@ public final class com/stripe/android/ui/core/MeasureComposableWidthKt {
 }
 
 public final class com/stripe/android/ui/core/PaymentsThemeKt {
+	public static final fun getBorderStroke (Landroidx/compose/material/MaterialTheme;ZLandroidx/compose/runtime/Composer;I)Landroidx/compose/foundation/BorderStroke;
+	public static final fun getLocalColors ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalShapes ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalTypography ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getPaymentsColors (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/ui/core/PaymentsColors;
+	public static final fun getPaymentsShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/ui/core/PaymentsShapes;
 }
 
 public final class com/stripe/android/ui/core/address/AddressFieldElementRepository$Companion {
@@ -233,11 +239,21 @@ public final class com/stripe/android/ui/core/elements/SectionUIKt {
 public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion {
-	public final fun getNAME ()Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
+public final class com/stripe/android/ui/core/elements/SimpleTextFieldConfig$Companion {
+	public final fun getNAME ()Lcom/stripe/android/ui/core/elements/SimpleTextFieldConfig;
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleTextFieldController$Companion {
+	public final fun createEmailSectionController (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SimpleTextFieldController;
+	public final fun createNameSectionController (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SimpleTextFieldController;
 }
 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
+	public static final fun TextField-skw0Wq0 (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection-7FxtGnE (Lcom/stripe/android/ui/core/elements/TextFieldController;Ljava/lang/Integer;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {

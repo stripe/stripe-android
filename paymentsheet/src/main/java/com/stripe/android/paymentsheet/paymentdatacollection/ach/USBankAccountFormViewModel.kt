@@ -15,9 +15,9 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -33,13 +33,10 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
-import com.stripe.android.ui.core.elements.SimpleTextSpec
-import dagger.Lazy
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,26 +52,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val nameElement: SectionFieldElement = SimpleTextSpec.NAME.transform(
-        mapOf(
-            IdentifierSpec.Name to args.formArgs.billingDetails?.name
-        )
-    )
-    val name: StateFlow<String> = nameElement.getFormFieldValueFlow().map { formFieldsList ->
-        formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value ?: ""
+    val nameController: TextFieldController = SimpleTextFieldController
+        .createNameSectionController(args.formArgs.billingDetails?.name)
+
+    val name: StateFlow<String> = nameController.formFieldValue.map { formFieldEntry ->
+        formFieldEntry.takeIf { it.isComplete }?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(
-        mapOf(
-            IdentifierSpec.Email to args.formArgs.billingDetails?.email
-        )
-    )
-    val email: StateFlow<String?> = emailElement.getFormFieldValueFlow().map { formFieldsList ->
-        formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
+    val emailController: TextFieldController = SimpleTextFieldController
+        .createEmailSectionController(args.formArgs.billingDetails?.email)
+
+    val email: StateFlow<String?> = emailController.formFieldValue.map { formFieldEntry ->
+        formFieldEntry.takeIf { it.isComplete }?.value
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _currentScreenState: MutableStateFlow<USBankAccountFormScreenState> =
@@ -98,11 +91,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, args.formArgs.showCheckbox)
 
     val requiredFields = combine(
-        nameElement.getFormFieldValueFlow().map { formFieldsList ->
-            formFieldsList.firstOrNull()?.second?.value?.isNotBlank() ?: false
+        nameController.formFieldValue.map { formFieldEntry ->
+            formFieldEntry.isComplete
         },
-        emailElement.getFormFieldValueFlow().map { formFieldsList ->
-            formFieldsList.firstOrNull()?.second?.isComplete ?: false
+        emailController.formFieldValue.map { formFieldEntry ->
+            formFieldEntry.isComplete
         }
     ) { validName, validEmail ->
         validName && validEmail
@@ -244,7 +237,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     }
                 }
             }
-            else -> { /* no op */ }
+            else -> { /* no op */
+            }
         }
     }
 

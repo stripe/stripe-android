@@ -8,5 +8,5 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface RequiredItemSpec : Parcelable {
-    val api_path: IdentifierSpec
+    val api_path: IdentifierSpec?
 }

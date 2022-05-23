@@ -10,40 +10,18 @@ import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
-internal val auBecsDebitNameSection = SectionSpec(
-    IdentifierSpec.Generic("name_section"),
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val AuBecsDebitForm = LayoutSpec.create(
+    EmailSpec(),
+    BsbSpec(),
+    AuBankAccountNumberSpec(),
     SimpleTextSpec(
         IdentifierSpec.Name,
         label = R.string.au_becs_account_name,
         capitalization = KeyboardCapitalization.Words,
         keyboardType = KeyboardType.Text
-    )
-)
-
-internal val auBecsDebitEmailSection = SectionSpec(
-    IdentifierSpec.Generic("email_section"),
-    EmailSpec
-)
-
-internal val auBecsBsbNumberSection = BsbSpec()
-
-internal val auBecsDebitAccountNumberSection = SectionSpec(
-    IdentifierSpec.Generic("account_number_section"),
-    AuBankAccountNumberSpec
-)
-
-internal val auBecsDebitCustomMandate = AuBecsDebitMandateTextSpec(
-    IdentifierSpec.Generic("au_becs_mandate")
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val AuBecsDebitForm = LayoutSpec.create(
-    auBecsDebitEmailSection,
-    auBecsBsbNumberSection,
-    auBecsDebitAccountNumberSection,
-    auBecsDebitNameSection,
-    auBecsDebitCustomMandate
+    ),
+    AuBecsDebitMandateTextSpec()
 )
