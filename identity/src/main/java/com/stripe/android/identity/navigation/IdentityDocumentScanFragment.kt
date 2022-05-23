@@ -63,7 +63,7 @@ internal abstract class IdentityDocumentScanFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (!shouldStartFromBack()) {
-            identityViewModel.resetUploadedState()
+            identityViewModel.resetDocumentUploadedState()
         }
         super.onViewCreated(view, savedInstanceState)
     }
@@ -115,7 +115,7 @@ internal abstract class IdentityDocumentScanFragment(
     }
 
     /**
-     * Collect the [IdentityViewModel.uploadState] and update UI accordingly.
+     * Collect the [IdentityViewModel.documentUploadState] and update UI accordingly.
      *
      * Try to [postVerificationPageDataAndMaybeSubmit] when all images are uploaded and navigates
      * to error when error occurs.
@@ -123,7 +123,7 @@ internal abstract class IdentityDocumentScanFragment(
     protected fun collectUploadedStateAndUploadForBothSides(type: CollectedDataParam.Type) =
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                identityViewModel.uploadState.collectLatest {
+                identityViewModel.documentUploadState.collectLatest {
                     when {
                         it.hasError() -> {
                             Log.e(TAG, "Fail to upload files: ${it.getError()}")

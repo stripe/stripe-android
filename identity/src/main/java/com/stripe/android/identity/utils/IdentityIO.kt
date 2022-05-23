@@ -3,7 +3,6 @@ package com.stripe.android.identity.utils
 import android.graphics.Bitmap
 import android.net.Uri
 import com.stripe.android.identity.ml.BoundingBox
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import java.io.File
 import java.io.IOException
 
@@ -48,8 +47,7 @@ internal interface IdentityIO {
     fun resizeBitmapAndCreateFileToUpload(
         bitmap: Bitmap,
         verificationId: String,
-        isFullFrame: Boolean,
-        side: String? = null,
+        fileName: String,
         maxDimension: Int,
         compressionQuality: Float,
     ): File
@@ -64,7 +62,7 @@ internal interface IdentityIO {
     fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
-        docCapturePage: VerificationPageStaticContentDocumentCapturePage
+        paddingSize: Float
     ): Bitmap
 
     /**
