@@ -73,7 +73,7 @@ internal fun LinkAppBar(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_link_close),
                     contentDescription = stringResource(id = R.string.accessibility_close),
-                    tint = Color.Unspecified
+                    tint = MaterialTheme.linkColors.closeButton
                 )
             }
         }

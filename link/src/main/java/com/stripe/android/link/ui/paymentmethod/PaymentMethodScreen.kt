@@ -3,13 +3,10 @@ package com.stripe.android.link.ui.paymentmethod
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +22,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.primaryButtonLabel
@@ -117,21 +115,9 @@ internal fun PaymentMethodBody(
             icon = R.drawable.stripe_ic_lock,
             onButtonClick = onPrimaryButtonClick
         )
-        TextButton(
-            onClick = onPayAnotherWayClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+        PayAnotherWayButton(
             enabled = !isProcessing,
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.secondary
-            )
-        ) {
-            Text(
-                text = stringResource(id = R.string.wallet_pay_another_way),
-                color = MaterialTheme.colors.onSecondary
-            )
-        }
+            onClick = onPayAnotherWayClick
+        )
     }
 }

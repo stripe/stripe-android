@@ -19,6 +19,8 @@ private val LightTextSecondary = Color(0xFF6A7383)
 private val LightTextDisabled = Color(0xFFA3ACBA)
 private val LightBackground = Color.White
 private val LightFill = Color(0xFFF6F8FA)
+private val LightCloseButton = Color(0xFF30313D)
+private val LightSecondaryButtonLabel = Color(0xFF1D3944)
 
 private val DarkComponentBackground = Color(0x2E747480)
 private val DarkComponentBorder = Color(0x5C787880)
@@ -28,6 +30,8 @@ private val DarkTextSecondary = Color(0x99EBEBF5)
 private val DarkTextDisabled = Color(0x61FFFFFF)
 private val DarkBackground = Color(0xFF1C1C1E)
 private val DarkFill = Color(0x33787880)
+private val DarkCloseButton = Color(0x99EBEBF5)
+private val DarkSecondaryButtonLabel = Color(0xFF05A87F)
 
 internal data class LinkColors(
     val componentBackground: Color,
@@ -35,6 +39,8 @@ internal data class LinkColors(
     val componentDivider: Color,
     val buttonLabel: Color,
     val disabledText: Color,
+    val closeButton: Color,
+    val secondaryButtonLabel: Color,
     val materialColors: Colors
 )
 
@@ -60,6 +66,8 @@ internal object LinkThemeConfig {
         componentDivider = LightComponentDivider,
         buttonLabel = ButtonLabel,
         disabledText = LightTextDisabled,
+        closeButton = LightCloseButton,
+        secondaryButtonLabel = LightSecondaryButtonLabel,
         materialColors = lightColors(
             primary = LinkGreen,
             secondary = LightFill,
@@ -76,6 +84,8 @@ internal object LinkThemeConfig {
         componentDivider = DarkComponentDivider,
         buttonLabel = ButtonLabel,
         disabledText = DarkTextDisabled,
+        closeButton = DarkCloseButton,
+        secondaryButtonLabel = DarkSecondaryButtonLabel,
         materialColors = darkColors(
             primary = LinkGreen,
             secondary = DarkFill,
