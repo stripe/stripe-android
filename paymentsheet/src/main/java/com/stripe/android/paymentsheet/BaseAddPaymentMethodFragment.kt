@@ -196,14 +196,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
         showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
-            selectedPaymentMethod.type == PaymentMethod.Type.Card &&
+            selectedPaymentMethod.paymentMethodType == PaymentMethod.Type.Card &&
             sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
 
         viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup
     }
 
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-        when (paymentMethod.type) {
+        when (paymentMethod.paymentMethodType) {
             PaymentMethod.Type.USBankAccount -> USBankAccountFormFragment::class.java
             else -> ComposeFormDataCollectionFragment::class.java
         }
@@ -237,7 +237,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                    it == showPaymentMethod.type.code
+                    it == showPaymentMethod.paymentMethodType.code
                 }?.let {
                     when (newLpm) {
                         is PaymentSelection.New.GenericPaymentMethod ->

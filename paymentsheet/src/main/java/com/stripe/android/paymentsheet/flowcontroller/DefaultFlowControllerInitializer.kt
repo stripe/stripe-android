@@ -87,7 +87,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                     config,
                     resourceRepository.getLpmRepository()
                 ).map {
-                    it.type
+                    it.paymentMethodType
                 }
                 customerRepository.getPaymentMethods(
                     customerConfig,

@@ -71,7 +71,7 @@ class LpmRepository(resources: Resources) {
         )
     }
 
-    private var codeToForm = exposedPaymentMethods.associateBy { it.type.code }
+    private var codeToForm = exposedPaymentMethods.associateBy { it.paymentMethodType.code }
     private val format = Json { ignoreUnknownKeys = true }
 
     init {
@@ -82,7 +82,7 @@ class LpmRepository(resources: Resources) {
 
     @VisibleForTesting
     fun initialize(inputStream: InputStream?) {
-        codeToForm = parseLpms(inputStream)?.associateBy { it.type.code } ?: emptyMap()
+        codeToForm = parseLpms(inputStream)?.associateBy { it.paymentMethodType.code } ?: emptyMap()
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -111,7 +111,8 @@ class LpmRepository(resources: Resources) {
          * This describes the PaymentMethod Type as described
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
          */
-        val type: PaymentMethod.Type,
+        // TODO: Convert this to a string
+        val paymentMethodType: PaymentMethod.Type,
 
         /** This describes the name that appears under the selector. */
         @StringRes val displayNameResource: Int,
@@ -291,7 +292,7 @@ class LpmRepository(resources: Resources) {
         }
 
         override fun toString(): String {
-            return type.code
+            return paymentMethodType.code
         }
     }
 }
