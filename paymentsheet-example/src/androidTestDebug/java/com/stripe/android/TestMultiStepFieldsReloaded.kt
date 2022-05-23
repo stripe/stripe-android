@@ -175,7 +175,7 @@ class TestMultiStepFieldsReloaded {
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AuBecsDebit,
                 delayed = DelayedPMs.On,
-//                currency = Currency.AUD,
+                currency = Currency.AUD,
             )
         )
     }

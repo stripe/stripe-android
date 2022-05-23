@@ -81,7 +81,7 @@ internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val prefsRepository = FakePrefsRepository()
-    private val resourceRepository = StaticResourceRepository(mock())
+    private val resourceRepository = StaticResourceRepository(mock(), mock())
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()

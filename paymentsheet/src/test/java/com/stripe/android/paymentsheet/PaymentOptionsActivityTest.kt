@@ -412,7 +412,8 @@ class PaymentOptionsActivityTest {
             resourceRepository = StaticResourceRepository(
                 AddressFieldElementRepository(
                     ApplicationProvider.getApplicationContext<Context>().resources
-                )
+                ),
+                mock()
             ),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()

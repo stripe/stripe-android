@@ -989,7 +989,7 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
-            StaticResourceRepository(mock()),
+            StaticResourceRepository(mock(), mock()),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),

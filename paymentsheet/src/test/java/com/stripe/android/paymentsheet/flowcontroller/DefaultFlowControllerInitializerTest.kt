@@ -42,7 +42,7 @@ internal class DefaultFlowControllerInitializerTest {
     private val stripeIntentRepository =
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val resourceRepository = StaticResourceRepository(mock())
+    private val resourceRepository = StaticResourceRepository(mock(), mock())
 
     private val prefsRepository = FakePrefsRepository()
     private val initializer = createInitializer()

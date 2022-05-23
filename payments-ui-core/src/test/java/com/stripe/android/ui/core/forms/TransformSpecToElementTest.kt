@@ -51,6 +51,7 @@ internal class TransformSpecToElementTest {
         transformSpecToElements =
             TransformSpecToElements(
                 resourceRepository = StaticResourceRepository(
+                    mock(),
                     mock()
                 ),
                 initialValues = mapOf(),

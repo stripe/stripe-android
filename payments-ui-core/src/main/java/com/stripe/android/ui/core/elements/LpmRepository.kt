@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
@@ -37,11 +38,14 @@ import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.USBankAccountForm
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.io.InputStream
 import javax.inject.Singleton
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository {
+class LpmRepository(resources: Resources) {
     fun values() = exposedPaymentMethods
 
     /**
@@ -67,9 +71,28 @@ class LpmRepository {
         )
     }
 
-    private val codeToForm = exposedPaymentMethods.associate {
-        it.type.code to it
+    private var codeToForm = exposedPaymentMethods.associateBy { it.type.code }
+    private val format = Json { ignoreUnknownKeys = true }
+
+    init {
+        initialize(
+            resources.assets?.open("lpms.json")
+        )
     }
+
+    @VisibleForTesting
+    fun initialize(inputStream: InputStream?) {
+        codeToForm = parseLpms(inputStream)?.associateBy { it.type.code } ?: emptyMap()
+    }
+
+    private fun parseLpms(inputStream: InputStream?) =
+        getJsonStringFromInputStream(inputStream)?.let { string ->
+            format.decodeFromString<List<SupportedPaymentMethod>>(string)
+        }
+
+    private fun getJsonStringFromInputStream(inputStream: InputStream?) =
+        inputStream?.bufferedReader().use { it?.readText() }
+
 
     fun fromCode(code: String?) = code?.let {
         codeToForm[code]

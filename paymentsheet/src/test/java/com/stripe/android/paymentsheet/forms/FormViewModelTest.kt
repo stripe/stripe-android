@@ -66,7 +66,8 @@ internal class FormViewModelTest {
         StaticResourceRepository(
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
-            )
+            ),
+            mock()
         )
 
     @Test

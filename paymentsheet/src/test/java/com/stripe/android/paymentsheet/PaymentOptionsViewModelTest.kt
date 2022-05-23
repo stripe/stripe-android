@@ -47,7 +47,8 @@ internal class PaymentOptionsViewModelTest {
         StaticResourceRepository(
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
-            )
+            ),
+            mock()
         )
 
     private val viewModel = PaymentOptionsViewModel(

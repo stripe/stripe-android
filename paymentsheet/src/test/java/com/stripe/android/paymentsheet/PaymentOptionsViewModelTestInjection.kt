@@ -58,7 +58,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = injectorKey,
-            resourceRepository = StaticResourceRepository(mock()),
+            resourceRepository = StaticResourceRepository(mock(), mock()),
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },

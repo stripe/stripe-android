@@ -89,7 +89,7 @@ internal open class PaymentSheetViewModelTestInjection {
             StripeIntentValidator(),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
-            resourceRepository = StaticResourceRepository(mock()),
+            resourceRepository = StaticResourceRepository(mock(), mock()),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
