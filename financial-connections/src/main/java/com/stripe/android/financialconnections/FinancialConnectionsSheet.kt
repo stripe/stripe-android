@@ -2,8 +2,12 @@ package com.stripe.android.financialconnections
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import kotlinx.parcelize.Parcelize
@@ -72,6 +76,24 @@ class FinancialConnectionsSheet internal constructor(
         }
 
         /**
+         * Create a [FinancialConnectionsSheet] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [androidx.activity.result.ActivityResultLauncher] into the current activity,
+         * so it should be called as part of Compose initialization path.
+         */
+        @Composable
+        fun createComposable(
+            callback: (FinancialConnectionsSheetResult) -> Unit
+        ): FinancialConnectionsSheet = FinancialConnectionsSheet(
+            FinancialConnectionsSheetForDataLauncher(
+                rememberLauncherForActivityResult(
+                    FinancialConnectionsSheetForDataContract()
+                ) { callback(it) }
+            )
+        )
+
+        /**
          * Constructor to be used when launching the connections sheet from an Activity.
          *
          * @param activity  the Activity that is presenting the connections sheet.
@@ -100,5 +122,23 @@ class FinancialConnectionsSheet internal constructor(
                 FinancialConnectionsSheetForTokenLauncher(fragment, callback)
             )
         }
+
+        /**
+         * Create a [FinancialConnectionsSheet] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [androidx.activity.result.ActivityResultLauncher] into the current activity,
+         * so it should be called as part of Compose initialization path.
+         */
+        @Composable
+        private fun createComposableForToken(
+            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        ): FinancialConnectionsSheet = FinancialConnectionsSheet(
+            FinancialConnectionsSheetForTokenLauncher(
+                rememberLauncherForActivityResult(
+                    FinancialConnectionsSheetForTokenContract()
+                ) { callback(it) }
+            )
+        )
     }
 }
