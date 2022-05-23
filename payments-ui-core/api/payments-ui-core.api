@@ -82,6 +82,10 @@ public final class com/stripe/android/ui/core/elements/ComposableSingletons$Sect
 	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/ui/core/elements/DropdownConfig$DefaultImpls {
+	public static fun getTinyMode (Lcom/stripe/android/ui/core/elements/DropdownConfig;)Z
+}
+
 public final class com/stripe/android/ui/core/elements/EmailConfig$Companion {
 	public final fun getPATTERN ()Ljava/util/regex/Pattern;
 }
@@ -252,8 +256,8 @@ public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
-	public static final fun TextField-skw0Wq0 (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-	public static final fun TextFieldSection-7FxtGnE (Lcom/stripe/android/ui/core/elements/TextFieldController;Ljava/lang/Integer;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
