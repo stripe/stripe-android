@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.forms.resources
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.LpmFormRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.elements.StringRepository
 
 /**
@@ -10,7 +10,7 @@ import com.stripe.android.ui.core.elements.StringRepository
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StaticResourceRepository(
-    private val lpmFormRepository: LpmFormRepository,
+    private val lpmRepository: LpmRepository,
     private val stringRepository: StringRepository,
     private val addressRepository: AddressFieldElementRepository
 ) : ResourceRepository {
@@ -20,8 +20,8 @@ class StaticResourceRepository(
 
     override fun isLoaded() = true
 
-    override fun getLpmFormRepository(): LpmFormRepository {
-        return lpmFormRepository
+    override fun getLpmFormRepository(): LpmRepository {
+        return lpmRepository
     }
 
     override fun getStringRepository(): StringRepository {

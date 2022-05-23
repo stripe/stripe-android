@@ -12,12 +12,11 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressElement
-import com.stripe.android.ui.core.elements.LpmFormRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -66,7 +65,7 @@ internal class FormViewModelTest {
 
     private val resourceRepository =
         StaticResourceRepository(
-            LpmFormRepository(
+            LpmRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             ),
             AddressFieldElementRepository(

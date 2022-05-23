@@ -5,12 +5,12 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import java.io.File
 
-class LpmFormRepositoryTest {
-    private val lpmFormRepository = LpmFormRepository(mock())
+class LpmRepositoryTest {
+    private val lpmRepository = LpmRepository(mock())
 
     @Test
     fun `Correct supported bank is returned`() {
-        lpmFormRepository.initialize(
+        lpmRepository.initialize(
             mapOf(
                 SupportedBankType.Eps to
                     """
@@ -26,7 +26,7 @@ class LpmFormRepositoryTest {
             )
         )
 
-        val listOfBanks = lpmFormRepository.get(SupportedBankType.Eps)
+        val listOfBanks = lpmRepository.get(SupportedBankType.Eps)
         assertThat(listOfBanks.size).isEqualTo(1)
 
         assertThat(listOfBanks[0])
@@ -40,7 +40,7 @@ class LpmFormRepositoryTest {
 
     @Test
     fun `Verify all supported banks are successfully read`() {
-        lpmFormRepository.initialize(
+        lpmRepository.initialize(
             SupportedBankType.values().associateWith { bankType ->
                 getInputStream(bankType)
             }
@@ -49,7 +49,7 @@ class LpmFormRepositoryTest {
         // If any exceptions are thrown we know something went awry
         SupportedBankType.values()
             .forEach {
-                println(lpmFormRepository.get(it))
+                println(lpmRepository.get(it))
             }
     }
 

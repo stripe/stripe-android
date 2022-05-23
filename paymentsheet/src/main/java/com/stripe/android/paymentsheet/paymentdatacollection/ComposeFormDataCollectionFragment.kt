@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec

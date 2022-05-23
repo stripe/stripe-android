@@ -49,7 +49,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -261,9 +261,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                    getSupportedSavedCustomerPMs(
                         stripeIntent,
-                        config
+                        config,
+                        resourceRepository.getLpmFormRepository()
                     ).map {
                         it.type
                     }.let {

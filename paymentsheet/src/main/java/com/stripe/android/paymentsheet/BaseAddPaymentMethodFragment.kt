@@ -25,7 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 

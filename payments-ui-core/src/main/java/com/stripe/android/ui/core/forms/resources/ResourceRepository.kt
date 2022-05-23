@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.forms.resources
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.LpmFormRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.elements.StringRepository
 
 /**
@@ -18,7 +18,7 @@ interface ResourceRepository {
 
     fun isLoaded(): Boolean
 
-    fun getLpmFormRepository(): LpmFormRepository
+    fun getLpmFormRepository(): LpmRepository
     fun getStringRepository(): StringRepository
     fun getAddressRepository(): AddressFieldElementRepository
 }

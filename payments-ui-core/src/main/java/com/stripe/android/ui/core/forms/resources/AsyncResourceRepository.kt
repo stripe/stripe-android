@@ -5,7 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.LpmFormRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.elements.StringRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -26,21 +26,19 @@ class AsyncResourceRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : ResourceRepository {
-    private lateinit var lpmFormRepository: LpmFormRepository
-    private lateinit var stringRepository: StringRepository
+    private lateinit var lpmRepository: LpmRepository
+    private val stringRepository: StringRepository
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
+        stringRepository = StringRepository(resources)
+
         loadingJobs.add(
             CoroutineScope(workContext).launch {
-                stringRepository = StringRepository(resources)
-            }
-        )
-        loadingJobs.add(
-            CoroutineScope(workContext).launch {
-                lpmFormRepository = LpmFormRepository(resources)
+                // THis is dependent on StringRepository being initialized.
+                lpmRepository = LpmRepository(resources)
             }
         )
         loadingJobs.add(
@@ -64,7 +62,7 @@ class AsyncResourceRepository @Inject constructor(
 
     override fun isLoaded() = loadingJobs.isEmpty()
 
-    override fun getLpmFormRepository() = lpmFormRepository
+    override fun getLpmFormRepository() = lpmRepository
     override fun getStringRepository() = stringRepository
     override fun getAddressRepository() = addressRepository
 }

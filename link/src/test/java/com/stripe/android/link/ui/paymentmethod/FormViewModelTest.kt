@@ -10,7 +10,7 @@ import com.stripe.android.link.injection.FormViewModelSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.LpmFormRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -43,7 +43,7 @@ class FormViewModelTest {
 
     private val resourceRepository =
         StaticResourceRepository(
-            LpmFormRepository(
+            LpmRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             ),
             AddressFieldElementRepository(

@@ -1,20 +1,21 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,12 +25,13 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+        (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
+    private val lpmRepository: LpmRepository,
     private val logger: Logger,
     @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
@@ -80,9 +82,10 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                val paymentMethodTypes = getSupportedSavedCustomerPMs(
                     stripeIntent,
                     config,
+                    lpmRepository
                 ).map {
                     it.type
                 }
