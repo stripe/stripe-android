@@ -35,7 +35,7 @@ class AsyncResourceRepository @Inject constructor(
     init {
         stringRepository = StringRepository(resources)
 
-        lpmRepository = LpmRepository()
+        lpmRepository = LpmRepository(resources)
         loadingJobs.add(
             CoroutineScope(workContext).launch {
                 addressRepository = AddressFieldElementRepository(resources)
