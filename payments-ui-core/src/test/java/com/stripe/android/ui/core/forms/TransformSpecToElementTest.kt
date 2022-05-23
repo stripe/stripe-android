@@ -233,11 +233,5 @@ internal class TransformSpecToElementTest {
                 )
             )
         )
-
-        val IDEAL_BANKS_JSON =
-            File("src/main/assets/idealBanks.json")
-                .inputStream()
-                .bufferedReader()
-                .use { it.readText() }
     }
 }

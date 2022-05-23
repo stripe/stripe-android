@@ -42,6 +42,31 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository {
+    fun values() = exposedPaymentMethods
+
+    /**
+     * This is a list of the payment methods that we are allowing in the release
+     */
+    @VisibleForTesting
+    internal val exposedPaymentMethods by lazy {
+        listOf(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Bancontact,
+            SupportedPaymentMethod.Sofort,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.SepaDebit,
+            SupportedPaymentMethod.Eps,
+            SupportedPaymentMethod.Giropay,
+            SupportedPaymentMethod.P24,
+            SupportedPaymentMethod.Klarna,
+            SupportedPaymentMethod.PayPal,
+            SupportedPaymentMethod.AfterpayClearpay,
+            SupportedPaymentMethod.USBankAccount,
+            // SupportedPaymentMethod.Affirm, // TODO: uncomment once we are ready to go live
+            // SupportedPaymentMethod.AuBecsDebit // TODO: uncomment once we are ready to go live
+        )
+    }
+
     private val codeToForm = exposedPaymentMethods.associate {
         it.type.code to it
     }
@@ -247,30 +272,4 @@ class LpmRepository {
         }
     }
 
-    companion object {
-        fun values() = exposedPaymentMethods
-
-        /**
-         * This is a list of the payment methods that we are allowing in the release
-         */
-        @VisibleForTesting
-        internal val exposedPaymentMethods by lazy {
-            listOf(
-                SupportedPaymentMethod.Card,
-                SupportedPaymentMethod.Bancontact,
-                SupportedPaymentMethod.Sofort,
-                SupportedPaymentMethod.Ideal,
-                SupportedPaymentMethod.SepaDebit,
-                SupportedPaymentMethod.Eps,
-                SupportedPaymentMethod.Giropay,
-                SupportedPaymentMethod.P24,
-                SupportedPaymentMethod.Klarna,
-                SupportedPaymentMethod.PayPal,
-                SupportedPaymentMethod.AfterpayClearpay,
-                SupportedPaymentMethod.USBankAccount,
-                // SupportedPaymentMethod.Affirm, // TODO: uncomment once we are ready to go live
-                // SupportedPaymentMethod.AuBecsDebit // TODO: uncomment once we are ready to go live
-            )
-        }
-    }
 }

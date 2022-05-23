@@ -68,7 +68,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     @InjectorKey val injectorKey: String,
     val resourceRepository: ResourceRepository,
     val savedStateHandle: SavedStateHandle,
-    internal val linkPaymentLauncherFactory: LinkPaymentLauncherFactory,
+    internal val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -308,7 +308,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     "None of the requested payment methods" +
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
-                        " (${LpmRepository.values().toList()})"
+                        " (${resourceRepository.getLpmRepository().values().toList()})"
                 )
             )
         }

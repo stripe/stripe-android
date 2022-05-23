@@ -23,7 +23,7 @@ import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
  * payment method.  It should be known that this payment method has a form
  * that matches the capabilities already.
  */
-fun SupportedPaymentMethod.getPMAddForm(
+internal fun SupportedPaymentMethod.getPMAddForm(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
 ) = requireNotNull(getSpecWithFullfilledRequirements(stripeIntent, config))

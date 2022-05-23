@@ -24,7 +24,8 @@ class SupportedPaymentMethodTest {
      */
     @Test
     fun `Test supported payment method baseline`() {
-        LpmRepository.values()
+        val lpmRepository = LpmRepository()
+        lpmRepository.values()
             .forEach { lpm ->
                 val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
@@ -42,7 +43,7 @@ class SupportedPaymentMethodTest {
                             supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                                 testInput.getIntent(lpm),
                                 testInput.getConfig(),
-                                LpmRepository()
+                                lpmRepository
                             ).contains(lpm),
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
@@ -50,7 +51,7 @@ class SupportedPaymentMethodTest {
                             supportsAdding = getPMsToAdd(
                                 testInput.getIntent(lpm),
                                 testInput.getConfig(),
-                                LpmRepository()
+                                lpmRepository
                             ).contains(lpm)
                         )
                         val actualLine = "${lpm.type.code}, ${

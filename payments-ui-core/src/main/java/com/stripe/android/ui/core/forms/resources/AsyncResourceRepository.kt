@@ -31,12 +31,7 @@ class AsyncResourceRepository @Inject constructor(
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
-        loadingJobs.add(
-            CoroutineScope(workContext).launch {
-                // THis is dependent on StringRepository being initialized.
-                lpmRepository = LpmRepository()
-            }
-        )
+        lpmRepository = LpmRepository()
         loadingJobs.add(
             CoroutineScope(workContext).launch {
                 addressRepository = AddressFieldElementRepository(resources)
