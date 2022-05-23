@@ -218,7 +218,7 @@ class GooglePayLauncher internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean? = null,
+        var allowCreditCards: Boolean = true,
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean

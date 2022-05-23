@@ -27,9 +27,9 @@ class GooglePayLauncherModule {
             appContext,
             environment,
             GooglePayJsonFactory.BillingAddressParameters(),
-            true,
-            null,
-            logger
+            existingPaymentMethodRequired = true,
+            allowCreditCards = true,
+            logger = logger
         )
     }
 }
