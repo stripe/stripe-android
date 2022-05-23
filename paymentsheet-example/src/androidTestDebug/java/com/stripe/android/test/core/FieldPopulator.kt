@@ -10,6 +10,7 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
+import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -89,12 +90,18 @@ class FieldPopulator(
         val state: String = "CA",
         val cardNumber: String = "4242424242424242",
         val cardExpiration: String = "1230",
-        val cardCvc: String = "321"
+        val cardCvc: String = "321",
+        val auBecsBsbNumber: String = "000000",
+        val auBecsAccountNumber: String = "000123456"
     )
 
     private fun verifyPlatformLpmFields(values: Values = Values()) {
         formSpec.items.forEach {
             when (it) {
+                is BsbSpec -> {
+                    selectors.getAuBsb()
+                        .assertContentDescriptionEquals(values.auBecsBsbNumber)
+                }
                 is CardDetailsSectionSpec -> {
                     selectors.getCardNumber()
                         .assertContentDescriptionEquals(values.cardNumber)
@@ -132,7 +139,10 @@ class FieldPopulator(
                 }
                 is CountrySpec -> {}
                 is SimpleTextSpec -> {}
-                is AuBankAccountNumberSpec -> {}
+                is AuBankAccountNumberSpec -> {
+                    selectors.getAuAccountNumber()
+                        .assertContentDescriptionEquals(values.state)
+                }
                 is DropdownSpec -> {}
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
@@ -150,6 +160,11 @@ class FieldPopulator(
     private fun populatePlatformLpmFields(values: Values = Values()) {
         formSpec.items.forEach {
             when (it) {
+                is BsbSpec -> {
+                    selectors.getAuBsb().apply {
+                        performTextInput(values.auBecsBsbNumber)
+                    }
+                }
                 is CardDetailsSectionSpec -> {
                     selectors.getCardNumber().performTextInput(values.cardNumber)
                     selectors.composeTestRule.waitForIdle()
@@ -176,7 +191,10 @@ class FieldPopulator(
                         }
                     }
                 }
-                is AuBankAccountNumberSpec -> {}
+                is AuBankAccountNumberSpec -> {
+                    selectors.getAuAccountNumber().apply {
+                        performTextInput(values.auBecsAccountNumber)
+                    }}
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CountrySpec -> {}
@@ -207,7 +225,11 @@ class FieldPopulator(
                 }
                 is CountrySpec -> {}
                 is SimpleTextSpec -> {}
-                is AuBankAccountNumberSpec -> {}
+                is AuBankAccountNumberSpec -> {
+                    selectors.getAuAccountNumber().apply {
+                        performTextInput(values.auBecsAccountNumber)
+                    }
+                }
                 is DropdownSpec -> {}
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}

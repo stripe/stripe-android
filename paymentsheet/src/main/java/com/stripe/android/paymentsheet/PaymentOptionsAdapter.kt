@@ -274,6 +274,7 @@ internal class PaymentOptionsAdapter(
                         force = true
                     )
                     paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
+                    notifyItemRemoved(position)
                 }
         }
     }

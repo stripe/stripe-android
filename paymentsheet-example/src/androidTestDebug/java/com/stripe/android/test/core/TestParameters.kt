@@ -96,7 +96,8 @@ enum class IntentType {
  */
 enum class Currency {
     USD,
-    EUR
+    EUR,
+    AUD
 }
 
 /**

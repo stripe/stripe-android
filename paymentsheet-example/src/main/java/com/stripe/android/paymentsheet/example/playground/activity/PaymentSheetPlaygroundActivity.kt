@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.widget.RadioGroup
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -107,7 +108,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
-            val mode = if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            val mode =
+                if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             AppCompatDelegate.setDefaultNightMode(mode)
         }
         super.onCreate(savedInstanceState)
@@ -187,6 +189,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             } else {
                 disableViews()
             }
+        }
+
+        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
+            // when the currency changes the merchant may change, so the new customer id
+            // created might not match the previous new customer
+            viewModel.temporaryCustomerId = null
         }
 
         disableViews()

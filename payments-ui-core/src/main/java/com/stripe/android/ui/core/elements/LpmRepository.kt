@@ -62,8 +62,8 @@ class LpmRepository {
             SupportedPaymentMethod.PayPal,
             SupportedPaymentMethod.AfterpayClearpay,
             SupportedPaymentMethod.USBankAccount,
-            // SupportedPaymentMethod.Affirm, // TODO: uncomment once we are ready to go live
-            // SupportedPaymentMethod.AuBecsDebit // TODO: uncomment once we are ready to go live
+            SupportedPaymentMethod.Affirm,
+            SupportedPaymentMethod.AuBecsDebit
         )
     }
 
