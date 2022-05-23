@@ -407,8 +407,8 @@ sealed class SupportedPaymentMethod(
                 PayPal,
                 AfterpayClearpay,
                 USBankAccount,
-                // Affirm // TODO: uncomment once we are ready to go live
-                // AuBecsDebit // TODO: uncomment once we are ready to go live
+                Affirm,
+                AuBecsDebit
             )
         }
 
