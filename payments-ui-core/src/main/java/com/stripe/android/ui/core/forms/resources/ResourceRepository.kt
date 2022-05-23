@@ -18,7 +18,7 @@ interface ResourceRepository {
 
     fun isLoaded(): Boolean
 
-    fun getBankRepository(): LpmFormRepository
+    fun getLpmFormRepository(): LpmFormRepository
     fun getStringRepository(): StringRepository
     fun getAddressRepository(): AddressFieldElementRepository
 }

@@ -20,7 +20,7 @@ class StaticResourceRepository(
 
     override fun isLoaded() = true
 
-    override fun getBankRepository(): LpmFormRepository {
+    override fun getLpmFormRepository(): LpmFormRepository {
         return lpmFormRepository
     }
 

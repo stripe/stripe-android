@@ -64,7 +64,7 @@ class AsyncResourceRepository @Inject constructor(
 
     override fun isLoaded() = loadingJobs.isEmpty()
 
-    override fun getBankRepository() = lpmFormRepository
+    override fun getLpmFormRepository() = lpmFormRepository
     override fun getStringRepository() = stringRepository
     override fun getAddressRepository() = addressRepository
 }
