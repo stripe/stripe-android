@@ -1,4 +1,8 @@
 # CHANGELOG
+## XX.X.X - 2022-XX-XX
+
+### PaymentSheet
+* [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
 
 ## 20.4.0 - 2022-05-23
 This release adds [appearance customization APIs](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L186) to payment sheet and enables Affirm and AU BECS direct debit as payment methods within Payment Sheet.
