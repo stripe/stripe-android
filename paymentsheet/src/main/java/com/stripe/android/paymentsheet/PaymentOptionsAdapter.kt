@@ -308,7 +308,7 @@ internal class PaymentOptionsAdapter(
     internal class SavedPaymentMethodViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
-        val lpmRepository: LpmRepository,
+        private val lpmRepository: LpmRepository,
         private val onRemoveListener: (Int) -> Unit,
         private val onItemSelectedListener: ((Int, Boolean) -> Unit)
     ) : PaymentOptionViewHolder(
