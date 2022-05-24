@@ -382,13 +382,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             SAVE_SELECTED_ADD_LPM,
             resourceRepository.getLpmRepository().fromCode(
                 newLpm?.paymentMethodCreateParams?.typeCode
-            ) ?: resourceRepository.getLpmRepository().fromCode("card")
+            ) ?: resourceRepository.getLpmRepository().getCard()
         )
 
     fun getAddFragmentSelectedLpmValue() =
         savedStateHandle.get<SupportedPaymentMethod>(
             SAVE_SELECTED_ADD_LPM
-        ) ?: resourceRepository.getLpmRepository().fromCode("card")
+        ) ?: resourceRepository.getLpmRepository().getCard()
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing

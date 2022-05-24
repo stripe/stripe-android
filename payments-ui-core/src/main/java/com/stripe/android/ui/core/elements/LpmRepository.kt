@@ -43,6 +43,8 @@ class LpmRepository(resources: Resources) {
 
     fun values() = codeToSupportedPaymentMethod.values
 
+    fun getCard() = requireNotNull(codeToSupportedPaymentMethod["card"])
+
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
