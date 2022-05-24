@@ -8,7 +8,7 @@
 
     <string name="sign_up_header">Save your info for secure 1-click checkout</string>
     <string name="sign_up_message">Pay faster at %1$s and thousands of merchants.</string>
-    <string name="sign_up_terms">By joining Link, you agree to the Terms and Privacy Policy.</string>
+    <string name="sign_up_terms">By joining Link, you agree to the &lt;a href=\"https://link.co/terms\"&gt;Terms&lt;/a&gt; and &lt;a href=\"https://link.co/privacy\"&gt;Privacy Policy&lt;/a&gt;.</string>
     <string name="sign_up">Join Link</string>
 
     <string name="verification_header">Enter your verification code</string>
