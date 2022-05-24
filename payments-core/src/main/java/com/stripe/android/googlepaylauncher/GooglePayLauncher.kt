@@ -65,10 +65,11 @@ class GooglePayLauncher internal constructor(
         },
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
-                activity.application,
-                config.environment,
-                config.billingAddressConfig.convert(),
-                config.existingPaymentMethodRequired
+                context = activity.application,
+                environment = config.environment,
+                billingAddressParameters = config.billingAddressConfig.convert(),
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                allowCreditCards = config.allowCreditCards
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -106,10 +107,11 @@ class GooglePayLauncher internal constructor(
         },
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
-                fragment.requireActivity().application,
-                config.environment,
-                config.billingAddressConfig.convert(),
-                config.existingPaymentMethodRequired
+                context = fragment.requireActivity().application,
+                environment = config.environment,
+                billingAddressParameters = config.billingAddressConfig.convert(),
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                allowCreditCards = config.allowCreditCards
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -209,7 +211,14 @@ class GooglePayLauncher internal constructor(
          *
          * Default to `true`.
          */
-        var existingPaymentMethodRequired: Boolean = true
+        var existingPaymentMethodRequired: Boolean = true,
+
+        /**
+         * Set to false if you don't support credit cards.
+         *
+         * Default: The credit card class is supported for the card networks specified.
+         */
+        var allowCreditCards: Boolean = true,
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean

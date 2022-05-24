@@ -3,12 +3,14 @@ package com.stripe.android
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.model.StripeJsonUtils
+import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayJsonFactoryTest {
@@ -254,5 +256,49 @@ class GooglePayJsonFactoryTest {
 
         assertThat(allowedCardNetworks)
             .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "JCB"))
+    }
+
+    @Test
+    fun allowCreditCards_whenTrue_shouldIncludeAllowCreditCardsInRequest() {
+        val allowCreditCards =
+            GooglePayJsonFactory(googlePayConfig)
+                .createIsReadyToPayRequest(
+                    allowCreditCards = true
+                )
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getBoolean("allowCreditCards")
+
+        assertThat(allowCreditCards)
+            .isEqualTo(true)
+    }
+
+    @Test
+    fun allowCreditCards_whenFalse_shouldIncludeAllowCreditCardsInRequest() {
+        val allowCreditCards =
+            GooglePayJsonFactory(googlePayConfig)
+                .createIsReadyToPayRequest(
+                    allowCreditCards = false
+                )
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getBoolean("allowCreditCards")
+
+        assertThat(allowCreditCards)
+            .isEqualTo(false)
+    }
+
+    @Test
+    fun allowCreditCards_whenNull_shouldNotIncludeAllowCreditCardsInRequest() {
+        assertFailsWith<JSONException> {
+            GooglePayJsonFactory(googlePayConfig)
+                .createIsReadyToPayRequest()
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getBoolean("allowCreditCards")
+        }
     }
 }

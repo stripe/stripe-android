@@ -1,5 +1,11 @@
 # Migration Guide
 
+## Migrating from versions < 20.X.X
+- Changes to `PaymentSheet.Configuration`
+  * `primaryButtonColor` is now deprecated. Please use the new `Appearance` parameter instead:
+    * `Appearance.colorsLight/colorsDark.primary`
+    * `PrimaryButton.colorsLight/colorsDark.backgroundColor`
+
 ## Migrating from versions < 20.2.0
 
 - Changes to `CollectBankAccountLauncher`

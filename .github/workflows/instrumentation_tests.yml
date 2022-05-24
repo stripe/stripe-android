@@ -111,11 +111,15 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ./gradlew executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
+          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot && ./gradlew paymentsheet:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.paymentsheet.screenshot
       - uses: actions/upload-artifact@v2
         with:
-          name: screenshot-test-report
+          name: screenshot-test-report-paymentsheet-example
           path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
+      - uses: actions/upload-artifact@v2
+        with:
+          name: screenshot-test-report-paymentsheet
+          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
         if: failure()

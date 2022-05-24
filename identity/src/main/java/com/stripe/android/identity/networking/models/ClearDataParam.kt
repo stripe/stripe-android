@@ -53,5 +53,14 @@ internal data class ClearDataParam(
             idDocumentFront = false,
             idDocumentBack = false
         )
+
+        internal val SELFIE_TO_CONFIRM = ClearDataParam(
+            biometricConsent = false,
+            idDocumentType = false,
+            idDocumentFront = false,
+            idDocumentBack = false,
+            face = false,
+            trainingConsent = false
+        )
     }
 }

@@ -54,7 +54,7 @@ class DefaultIdentityRepositoryTest {
             whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
                 StripeResponse(
                     code = HTTP_OK,
-                    body = VERIFICATION_PAGE_JSON_STRING
+                    body = VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING
                 )
             )
             val verificationPage = identityRepository.retrieveVerificationPage(

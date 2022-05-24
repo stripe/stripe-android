@@ -29,6 +29,7 @@ import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * An abstract [Fragment] class to access camera scanning for Identity.
@@ -71,16 +72,22 @@ internal abstract class IdentityCameraScanFragment(
                     if (finalResult.identityState is IdentityScanState.Finished) {
                         identityViewModel.uploadScanResult(
                             finalResult,
-                            verificationPage.documentCapture,
+                            verificationPage,
                             identityScanViewModel.targetScanType
                         )
                     } else if (finalResult.identityState is IdentityScanState.TimeOut) {
                         findNavController().navigate(
                             R.id.action_global_couldNotCaptureFragment,
                             bundleOf(
-                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType,
-                                ARG_REQUIRE_LIVE_CAPTURE to verificationPage.documentCapture.requireLiveCapture
-                            )
+                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
+                            ).also {
+                                if (identityScanViewModel.targetScanType != IdentityScanState.ScanType.SELFIE) {
+                                    it.putBoolean(
+                                        ARG_REQUIRE_LIVE_CAPTURE,
+                                        verificationPage.documentCapture.requireLiveCapture
+                                    )
+                                }
+                            }
                         )
                     }
                 },
@@ -97,9 +104,12 @@ internal abstract class IdentityCameraScanFragment(
             when (it.status) {
                 Status.SUCCESS -> {
                     requireNotNull(it.data).let { pageFilePair ->
+                        // TODO(IDPROD-3944) - download faceDetector model file
+                        val faceDetectorModelFile = File("path/to/faceDetector")
                         identityScanViewModel.initializeScanFlow(
                             pageFilePair.first,
-                            pageFilePair.second
+                            idDetectorModelFile = pageFilePair.second,
+                            faceDetectorModelFile = faceDetectorModelFile
                         )
                         lifecycleScope.launch(Dispatchers.Main) {
                             onCameraReady()

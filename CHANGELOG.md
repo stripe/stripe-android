@@ -1,13 +1,22 @@
 # CHANGELOG
-
-## x.x.x - xxxx-xx-xx
-
-### Payments
-* [CHANGED] [5038](https://github.com/stripe/stripe-android/pull/5038) Remove force portrait mode in Google Pay.
+## XX.X.X - 2022-XX-XX
 
 ### PaymentSheet
-- [FIXED] Fixed the format of the country dropdown in PaymentSheet for all languages.
-- [ADDED] Added Affirm and AU BECS Direct Debit.
+* [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
+
+## 20.4.0 - 2022-05-23
+This release adds [appearance customization APIs](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L186) to payment sheet and enables Affirm and AU BECS direct debit as payment methods within Payment Sheet.
+
+### Payments
+* [CHANGED][5038](https://github.com/stripe/stripe-android/pull/5038) Remove force portrait mode in Google Pay.
+* [ADDED][5011](https://github.com/stripe/stripe-android/pull/5011) Add `allowCreditCards` to `GooglePayLauncher`
+
+### PaymentSheet
+* [FIXED][5039](https://github.com/stripe/stripe-android/pull/5039) Fixed the format of the country dropdown in PaymentSheet for all languages.
+* [ADDED][5042](https://github.com/stripe/stripe-android/pull/5042) Added Affirm and AU BECS Direct Debit.
+* [ADDED][5020](https://github.com/stripe/stripe-android/pull/5020) Merge Appearance APIs to master. 
+* [FIXED][5022](https://github.com/stripe/stripe-android/pull/5022) Add missing translation for card information.
+* [FIXED][5048](https://github.com/stripe/stripe-android/pull/5048) Fixed a crash when removing the last payment method in the custom flow editor.
 
 ## 20.3.0 - 2022-05-16
 This release adds `us_bank_account` PaymentMethod to PaymentSheet.
