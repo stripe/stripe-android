@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class DropdownSpec(
     override val api_path: IdentifierSpec,
-    val label: TranslationId,
+    val label_translation_id: TranslationId,
     val items: List<DropdownItemSpec>
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
@@ -19,7 +19,7 @@ data class DropdownSpec(
             this.api_path,
             DropdownFieldController(
                 SimpleDropdownConfig(
-                    label.resourceId,
+                    label_translation_id.resourceId,
                     items
                 ),
                 initialValue = initialValues[api_path]

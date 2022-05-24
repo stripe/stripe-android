@@ -80,7 +80,7 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                EmptyFormSpec -> EmptyFormElement()
+                else -> EmptyFormElement()
             }
         }
 }
