@@ -2,8 +2,6 @@ package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
@@ -55,29 +53,20 @@ internal data class LinkColors(
 internal fun PaymentsThemeForLink(
     content: @Composable () -> Unit
 ) {
-    val paymentsTheme = PaymentsThemeDefaults.colors(isSystemInDarkTheme())
+    val paymentsColors = PaymentsThemeDefaults.colors(isSystemInDarkTheme())
 
     PaymentsTheme(
-        colors = paymentsTheme.copy(
-            materialColors = paymentsTheme.materialColors.copy(
+        colors = paymentsColors.copy(
+            materialColors = paymentsColors.materialColors.copy(
                 primary = ActionGreen
             )
-        )
+        ),
+        shapes = PaymentsThemeDefaults.shapes,
+        typography = PaymentsThemeDefaults.typography
     ) {
         content()
     }
 }
-
-@Composable
-internal fun linkTextFieldColors() =
-    TextFieldDefaults.textFieldColors(
-        backgroundColor = MaterialTheme.colors.background,
-        cursorColor = LinkTeal,
-        focusedLabelColor = LinkTeal,
-        focusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-    )
 
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
