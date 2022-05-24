@@ -22,11 +22,11 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.primaryButtonLabel
-import com.stripe.android.ui.core.DefaultPaymentsTheme
 
 @Preview
 @Composable
@@ -102,7 +102,7 @@ internal fun PaymentMethodBody(
             style = MaterialTheme.typography.h2,
             color = MaterialTheme.colors.onPrimary
         )
-        DefaultPaymentsTheme {
+        PaymentsThemeForLink {
             formContent()
         }
         PrimaryButton(
