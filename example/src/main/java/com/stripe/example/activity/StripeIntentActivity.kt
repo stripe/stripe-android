@@ -1,18 +1,14 @@
 package com.stripe.example.activity
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.PermissionChecker
 import com.stripe.Stripe
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -21,7 +17,6 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.example.BuildConfig
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
 import com.stripe.model.terminal.ConnectionToken
@@ -79,32 +74,32 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             Terminal.initTerminal(
                 applicationContext,
                 LogLevel.VERBOSE,
-                object: ConnectionTokenProvider {
+                object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
                         Stripe.apiKey = stripeSecretKey
                         callback.onSuccess(ConnectionToken.create(mapOf()).secret)
                     }
                 },
-                object: TerminalListener {
+                object : TerminalListener {
                     override fun onUnexpectedReaderDisconnect(reader: Reader) {
-
                     }
                 }
             )
 
             terminalInstance = Terminal.getInstance()
-            terminalInstance?.discoverReaders(DiscoveryConfiguration(
-                timeout = 100,
-                discoveryMethod = DiscoveryMethod.LOCAL_MOBILE,
-                isSimulated = false,
-            ),
-                object: DiscoveryListener {
+            terminalInstance?.discoverReaders(
+                DiscoveryConfiguration(
+                    timeout = 100,
+                    discoveryMethod = DiscoveryMethod.LOCAL_MOBILE,
+                    isSimulated = false,
+                ),
+                object : DiscoveryListener {
                     override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
                         Log.i("StripeIntentActivity", "Terminal initialized")
                         availableCotsReader = readers[0]
                     }
                 },
-                object: Callback {
+                object : Callback {
                     override fun onFailure(e: TerminalException) { }
 
                     override fun onSuccess() { }
@@ -182,7 +177,6 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                         onConfirmError(it)
                     }
                 }
-
             }
 
         if (
@@ -193,12 +187,14 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         ) {
             initializeTerminal()
         } else {
-            requestPermissionLauncher.launch(arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.BLUETOOTH_SCAN
+            requestPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
 
-            ))
+                )
+            )
         }
     }
 
@@ -375,7 +371,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.inProgress.value = false
 
         availableCotsReader?.let {
-            viewModel.status.value += "\n\nPaymentIntent confirmation failed, attempting TapOnMobile recovery"
+            viewModel.status.value +=
+                "\n\nPaymentIntent confirmation failed, attempting TapOnMobile recovery"
 
             terminalInstance?.connectLocalMobileReader(
                 it,
@@ -383,19 +380,20 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     // Hardcode location for experiment, may need as input
                     "tml_EonXKgW19MKlb8",
                 ),
-                object: ReaderCallback {
+                object : ReaderCallback {
                     override fun onFailure(e: TerminalException) {
                         Log.i("StripeIntentActivity", "Failed to connect")
-
                     }
 
                     override fun onSuccess(reader: Reader) {
                         Log.i("StripeIntentActivity", "Connected $reader")
                         val secret = activeSecret ?: ""
 
-                        terminalInstance?.retrievePaymentIntent(secret, retrievePaymentIntentCallback)
+                        terminalInstance?.retrievePaymentIntent(
+                            secret,
+                            retrievePaymentIntentCallback
+                        )
                     }
-
                 }
             )
         } ?: run {
@@ -410,7 +408,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.inProgress.value = false
     }
 
-    private val confirmPaymentIntentCallback = object: PaymentIntentCallback {
+    private val confirmPaymentIntentCallback = object : PaymentIntentCallback {
         override fun onFailure(e: TerminalException) {
             Log.i("StripeIntentActivity", "collectPaymentIntentCallback failed")
         }
@@ -422,7 +420,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         }
     }
 
-    private val collectPaymentIntentCallback = object: PaymentIntentCallback {
+    private val collectPaymentIntentCallback = object : PaymentIntentCallback {
         override fun onFailure(e: TerminalException) {
             Log.i("StripeIntentActivity", "collectPaymentIntentCallback failed")
         }
@@ -434,7 +432,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         }
     }
 
-    private val retrievePaymentIntentCallback = object: PaymentIntentCallback {
+    private val retrievePaymentIntentCallback = object : PaymentIntentCallback {
         override fun onFailure(e: TerminalException) {
             Log.i("StripeIntentActivity", "retrievePaymentIntentCallback failed")
         }
@@ -446,10 +444,14 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     }
 
     protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
-        Log.i("StripeIntentActivity", "Going to start terminal: $availableCotsReader $terminalInstance")
+        Log.i(
+            "StripeIntentActivity",
+            "Going to start terminal: $availableCotsReader $terminalInstance"
+        )
 
         availableCotsReader?.let {
-            viewModel.status.value += "\n\nPaymentIntent confirmation failed, attempting TapOnMobile recovery"
+            viewModel.status.value +=
+                "\n\nPaymentIntent confirmation failed, attempting TapOnMobile recovery"
 
             terminalInstance?.connectLocalMobileReader(
                 it,
@@ -457,19 +459,20 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     // Hardcode location for experiment, may need as input
                     "tml_EonXKgW19MKlb8",
                 ),
-                object: ReaderCallback {
+                object : ReaderCallback {
                     override fun onFailure(e: TerminalException) {
                         Log.i("StripeIntentActivity", "Failed to connect")
-
                     }
 
                     override fun onSuccess(reader: Reader) {
                         Log.i("StripeIntentActivity", "Connected $reader")
                         val secret = activeSecret ?: ""
 
-                        terminalInstance?.retrievePaymentIntent(secret, retrievePaymentIntentCallback)
+                        terminalInstance?.retrievePaymentIntent(
+                            secret,
+                            retrievePaymentIntentCallback
+                        )
                     }
-
                 }
             )
         } ?: run {
