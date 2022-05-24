@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.ui.core.R
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,8 +13,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("sepa_mandate")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Parcelize
 internal data class MandateTextSpec(
-    override val api_path: IdentifierSpec,
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes
     val stringResId: Int = R.string.sepa_mandate,
 ) : FormItemSpec(), RequiredItemSpec {

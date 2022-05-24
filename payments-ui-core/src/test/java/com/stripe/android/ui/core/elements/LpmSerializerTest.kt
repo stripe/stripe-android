@@ -1,17 +1,19 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.json.Json
 import org.junit.Test
+import java.io.File
 
-class SerializeJson {
+class LpmSerializerTest {
 
-    private val serializer = Serializer()
+    private val lpmSerializer = LpmSerializer()
 
     private val format = Json {
         ignoreUnknownKeys = true
         prettyPrint = true
-        serializersModule = Serializer.module
+        serializersModule = LpmSerializer.module
         encodeDefaults = true
     }
 
@@ -19,16 +21,24 @@ class SerializeJson {
     fun `Verify serialize and deserialize successfully`() {
         NewLpms.values()
             .forEach { lpm ->
-                val jsonElement = serializer.serialize(lpm)
+                val jsonElement = lpmSerializer.serialize(lpm)
                 val serializedString = jsonElement.toString()
 
-                serializer.deserialize(serializedString)
+                lpmSerializer.deserialize(serializedString)
                     .onSuccess {
                         println(collapsedPrettyPrint(it))
-                        assertThat(serializer.serialize(it).toString())
+                        assertThat(lpmSerializer.serialize(it).toString())
                             .isEqualTo(serializedString)
                     }
             }
+    }
+
+    @Test
+    fun deserializeLpmJsonFile() {
+        lpmSerializer.deserializeList(
+            File("src/main/assets/lpms.json")
+                .bufferedReader().use { it.readText() }
+        )
     }
 
     @Test
@@ -49,18 +59,17 @@ class SerializeJson {
     fun `Verify deserialize unknown type`() {
         val lpm = SharedDataSpec(
             "bancontact",
-            async = false,
             fields = listOf(
                 NameSpec(api_path = IdentifierSpec.Generic("billing_details[name]")) as FormItemSpec,
             )
         )
-        val serializedString = serializer.serialize(lpm).toString().replace("name", "unknown type")
+        val serializedString =
+            lpmSerializer.serialize(lpm).toString().replace("name", "unknown type")
         println(serializedString)
-        serializer.deserialize(serializedString)
+        lpmSerializer.deserialize(serializedString)
     }
 
     private fun collapsedPrettyPrint(lpm: SharedDataSpec): String {
-
         val fieldTypeRx = "\\{\\s+\"type\": \"([^\"]*)\"\\s*\\}".toRegex()
         val selectorsRx = (
             "\\{" +
@@ -84,9 +93,9 @@ class SerializeJson {
                 "\\s*\"v1\": \"([^\"]*)\"\\s*" +
                 "\\s*\\}"
             ).toRegex().replace(
-            json,
-            "\"api_path\": { \"v1\": \"\$1\"}"
-        )
+                json,
+                "\"api_path\": { \"v1\": \"\$1\"}"
+            )
 
         return json
     }

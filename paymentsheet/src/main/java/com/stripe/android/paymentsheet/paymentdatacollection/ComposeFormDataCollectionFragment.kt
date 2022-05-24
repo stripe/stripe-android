@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -134,9 +134,9 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                     entry.key == IdentifierSpec.SaveForFutureUse ||
                         entry.key == IdentifierSpec.CardBrand
                 },
-            selectedPaymentMethodResources.type
+            selectedPaymentMethodResources.paymentMethodType
         ).run {
-            if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
+            if (selectedPaymentMethodResources.paymentMethodType == PaymentMethod.Type.Card) {
                 PaymentSelection.New.Card(
                     paymentMethodCreateParams = this,
                     brand = CardBrand.fromCode(

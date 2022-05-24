@@ -23,7 +23,7 @@ val SepaDebitForm: List<FormItemSpec> = listOf(
     IbanSpec(),
     AddressSpec(
         IdentifierSpec.Generic("address"),
-        countryCodes = supportedBillingCountries
+        valid_country_codes = supportedBillingCountries
     ),
     sepaDebitMandate,
 )

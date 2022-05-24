@@ -380,6 +380,10 @@ public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
 	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
 }
 
+public final class com/stripe/android/ui/core/elements/LpmRepository$Companion {
+	public final fun values ()Ljava/util/List;
+}
+
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 

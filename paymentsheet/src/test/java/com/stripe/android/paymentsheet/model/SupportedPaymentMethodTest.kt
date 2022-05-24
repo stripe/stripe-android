@@ -7,6 +7,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.ui.core.elements.LpmRepository
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,9 +24,10 @@ class SupportedPaymentMethodTest {
      */
     @Test
     fun `Test supported payment method baseline`() {
-        SupportedPaymentMethod.values()
+        val lpmRepository = LpmRepository()
+        lpmRepository.values()
             .forEach { lpm ->
-                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
+                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.paymentMethodType.code}-support.csv").file)
                 val baseline = resource.readText()
                 val baselineLines = baseline.split("\n")
 
@@ -37,21 +40,23 @@ class SupportedPaymentMethodTest {
 
                         val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                                 testInput.getIntent(lpm),
-                                testInput.getConfig()
+                                testInput.getConfig(),
+                                lpmRepository
                             ).contains(lpm),
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = SupportedPaymentMethod.getPMsToAdd(
+                            supportsAdding = getPMsToAdd(
                                 testInput.getIntent(lpm),
-                                testInput.getConfig()
+                                testInput.getConfig(),
+                                lpmRepository
                             ).contains(lpm)
                         )
-                        val actualLine = "${lpm.type.code}, ${
+                        val actualLine = "${lpm.paymentMethodType.code}, ${
                         testInput.copy(
-                            intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                            intentPMs = testInput.intentPMs.plus(lpm.paymentMethodType.code)
                         ).toCsv()
                         }, ${testOutput.toCsv()}\n"
 
@@ -82,7 +87,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     @Test
@@ -94,7 +99,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     @Test
@@ -106,7 +111,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>()
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     @Test
@@ -118,7 +123,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     /**
@@ -139,14 +144,14 @@ class SupportedPaymentMethodTest {
                             listOf(
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
-                                    intentPMs = setOf(SupportedPaymentMethod.Card.type.code),
+                                    intentPMs = setOf(SupportedPaymentMethod.Card.paymentMethodType.code),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
                                     allowsDelayedPayment = delayed
                                 ),
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
-                                    intentPMs = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
+                                    intentPMs = setOf(SupportedPaymentMethod.Card.paymentMethodType.code, SupportedPaymentMethod.Eps.paymentMethodType.code),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
                                     allowsDelayedPayment = delayed
@@ -197,12 +202,12 @@ class SupportedPaymentMethodTest {
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     shipping = null,
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.paymentMethodType.code).toList()
                 )
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.paymentMethodType.code).toList()
                 )
         }
 

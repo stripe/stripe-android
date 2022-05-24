@@ -1,13 +1,13 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.StringRepository
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val P24Form: List<FormItemSpec> = listOf(
@@ -15,7 +15,7 @@ val P24Form: List<FormItemSpec> = listOf(
     EmailSpec(),
     DropdownSpec(
         IdentifierSpec.Generic("p24[bank]"),
-        R.string.p24_bank,
+        StringRepository.TranslationId.P24Bank,
         listOf(
             DropdownItemSpec(
                 api_value = "alior_bank",

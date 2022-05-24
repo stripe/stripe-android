@@ -31,7 +31,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
@@ -52,6 +51,7 @@ internal class TransformSpecToElementTest {
         transformSpecToElements =
             TransformSpecToElements(
                 resourceRepository = StaticResourceRepository(
+                    mock(),
                     mock()
                 ),
                 initialValues = mapOf(),
@@ -233,11 +233,5 @@ internal class TransformSpecToElementTest {
                 )
             )
         )
-
-        val IDEAL_BANKS_JSON =
-            File("src/main/assets/idealBanks.json")
-                .inputStream()
-                .bufferedReader()
-                .use { it.readText() }
     }
 }

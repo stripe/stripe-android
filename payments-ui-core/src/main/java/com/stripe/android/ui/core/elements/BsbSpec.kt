@@ -2,12 +2,14 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.view.BecsDebitBanks
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("au_becs_bsb_number")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Parcelize
 data class BsbSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
 ) : FormItemSpec(), RequiredItemSpec {

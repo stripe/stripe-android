@@ -25,7 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -195,14 +196,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
         showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
-            selectedPaymentMethod.type == PaymentMethod.Type.Card &&
+            selectedPaymentMethod.paymentMethodType == PaymentMethod.Type.Card &&
             sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
 
         viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup
     }
 
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-        when (paymentMethod.type) {
+        when (paymentMethod.paymentMethodType) {
             PaymentMethod.Type.USBankAccount -> USBankAccountFormFragment::class.java
             else -> ComposeFormDataCollectionFragment::class.java
         }
@@ -236,7 +237,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                    it == showPaymentMethod.type.code
+                    it == showPaymentMethod.paymentMethodType.code
                 }?.let {
                     when (newLpm) {
                         is PaymentSelection.New.GenericPaymentMethod ->

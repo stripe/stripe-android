@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import kotlinx.parcelize.Parcelize
 
 /**
  * This uniquely identifies a element in the form.  The vals here are for identifier
@@ -8,7 +10,8 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @kotlinx.serialization.Serializable
-data class IdentifierSpec(val v1: String) {
+@Parcelize
+data class IdentifierSpec(val v1: String) : Parcelable {
     constructor() : this("") {
     }
 

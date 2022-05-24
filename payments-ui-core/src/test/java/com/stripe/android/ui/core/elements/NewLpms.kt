@@ -35,80 +35,67 @@ class NewLpms {
         // Shipping requirement still enforced in the mobile SDK
         val AfterpayClearpayJson: SharedDataSpec = SharedDataSpec(
             "afterpay_clearpay",
-            async = false,
             fields = AfterpayClearpayForm
         )
 
         // Shipping requirement still enforced in the mobile SDK
         val AffirmJson: SharedDataSpec = SharedDataSpec(
             "affirm",
-            async = false,
             fields = AffirmForm
         )
 
         val KlarnaJson: SharedDataSpec = SharedDataSpec(
             "klarna",
-            async = false,
             fields = KlarnaForm
         )
 
         val CardJson: SharedDataSpec = SharedDataSpec(
             "card",
-            async = false,
             fields = CardForm
         )
 
         val BancontactJson: SharedDataSpec = SharedDataSpec(
             "bancontact",
-            async = false,
             fields = BancontactForm
         )
 
         val SofortJson: SharedDataSpec = SharedDataSpec(
             "sofort",
-            async = true,
             fields = SofortForm
         )
 
         val SepaDebitJson: SharedDataSpec = SharedDataSpec(
             "sepa_debit",
-            async = true,
             fields = SepaDebitForm
         )
 
         val AuBecsDebitJson: SharedDataSpec = SharedDataSpec(
             "au_becs_debit",
-            async = false,
             fields = AuBecsDebitForm
         )
 
         val IdealJson: SharedDataSpec = SharedDataSpec(
             "ideal",
-            async = false,
             fields = IdealForm
         )
 
         val EpsJson: SharedDataSpec = SharedDataSpec(
             "eps",
-            async = false,
             fields = EpsForm
         )
 
         val P24Json: SharedDataSpec = SharedDataSpec(
             "p24",
-            async = false,
             fields = P24Form
         )
 
         val GiropayJson: SharedDataSpec = SharedDataSpec(
             "giropay",
-            async = false,
             fields = GiropayForm
         )
 
         val PayPalJson: SharedDataSpec = SharedDataSpec(
             "paypal",
-            async = false,
             fields = PaypalForm
         )
     }

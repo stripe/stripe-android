@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -29,6 +30,7 @@ enum class KeyboardType {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 @SerialName("text")
+@Parcelize
 data class SimpleTextSpec(
     override val api_path: IdentifierSpec,
     @StringRes val label: Int,

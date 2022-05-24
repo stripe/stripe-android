@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("au_becs_account_number")
+@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class AuBankAccountNumberSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[account_number]")

@@ -12,7 +12,6 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
@@ -67,7 +66,8 @@ internal class FormViewModelTest {
         StaticResourceRepository(
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
-            )
+            ),
+            mock()
         )
 
     @Test

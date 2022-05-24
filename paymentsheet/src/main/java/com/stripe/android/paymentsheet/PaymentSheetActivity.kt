@@ -26,7 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
@@ -276,7 +276,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupGooglePayButton()
         val dividerText = resources.getString(
             if (viewModel.supportedPaymentMethods.size == 1 &&
-                viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
+                viewModel.supportedPaymentMethods.contains(
+                    viewModel.resourceRepository.getLpmRepository().getCard()
+                )
             ) {
                 R.string.stripe_paymentsheet_or_pay_with_card
             } else {

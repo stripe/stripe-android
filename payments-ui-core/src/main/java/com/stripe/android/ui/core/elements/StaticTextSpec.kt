@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,6 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("static_text")
+@Parcelize
 internal data class StaticTextSpec(
     override val api_path: IdentifierSpec,
     @StringRes val stringResId: Int

@@ -84,7 +84,6 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is SimpleTextSpec -> it.transform(initialValues)
                 is KlarnaHeaderStaticTextSpec -> it.transform()
             }
         }

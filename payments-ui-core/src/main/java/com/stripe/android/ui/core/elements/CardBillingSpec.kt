@@ -3,15 +3,17 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 @SerialName("card_billing")
+@Parcelize
 data class CardBillingSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
-    val countryCodes: Set<String>
+    val valid_country_codes: Set<String>
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         addressRepository: AddressFieldElementRepository,
@@ -20,7 +22,7 @@ data class CardBillingSpec(
         CardBillingAddressElement(
             IdentifierSpec.Generic("credit_billing"),
             addressFieldRepository = addressRepository,
-            countryCodes = countryCodes,
+            countryCodes = valid_country_codes,
             rawValuesMap = initialValues
         ),
         label = R.string.billing_details
