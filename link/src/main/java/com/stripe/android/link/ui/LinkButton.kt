@@ -94,8 +94,8 @@ private fun LinkButton(
                         .height(22.dp)
                         .padding(
                             start = 5.dp,
-                            top = 4.dp,
-                            bottom = 4.dp
+                            top = 3.dp,
+                            bottom = 3.dp
                         ),
                     tint = MaterialTheme.linkColors.buttonLabel
                         .copy(alpha = LocalContentAlpha.current)
