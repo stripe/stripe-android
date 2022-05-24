@@ -183,7 +183,7 @@ internal fun VerificationBody(
             modifier = Modifier
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.linkColors.disabledText,
+                    color = MaterialTheme.linkColors.componentBorder,
                     shape = MaterialTheme.shapes.small
                 )
                 .clickable(

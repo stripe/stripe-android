@@ -21,6 +21,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
@@ -116,5 +117,28 @@ internal fun PrimaryButton(
                 )
             }
         }
+    }
+}
+
+@Composable
+internal fun PayAnotherWayButton(
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = enabled,
+        shape = MaterialTheme.shapes.medium,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary
+        )
+    ) {
+        Text(
+            text = stringResource(id = R.string.wallet_pay_another_way),
+            color = MaterialTheme.linkColors.secondaryButtonLabel
+        )
     }
 }

@@ -19,7 +19,7 @@
         <!-- This empty ComposeView is used to open a LinkVerificationDialog when needed -->
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/link_auth"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp" />
 
         <com.google.android.material.appbar.AppBarLayout
