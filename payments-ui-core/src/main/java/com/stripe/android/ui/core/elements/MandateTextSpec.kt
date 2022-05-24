@@ -17,7 +17,7 @@ internal open class MandateTextSpec(
     val stringResId: Int,
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(merchantName: String): FormElement =
-    // It could be argued that the static text should have a controller, but
+        // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         MandateTextElement(
             this.api_path,
