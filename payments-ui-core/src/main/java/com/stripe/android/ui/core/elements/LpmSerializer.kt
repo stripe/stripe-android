@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.elements
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
-class LpmSerializer {
+internal class LpmSerializer {
     private val format = Json {
         ignoreUnknownKeys = true
         classDiscriminator = "#class"

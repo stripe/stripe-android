@@ -1,9 +1,11 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 enum class TranslationId(val resourceId: Int) {
     // https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/master/src/lib/inner/messages/en.json

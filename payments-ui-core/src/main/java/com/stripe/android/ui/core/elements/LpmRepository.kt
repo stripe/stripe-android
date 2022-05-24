@@ -31,7 +31,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Serializable
-data class SharedDataSpec(
+internal data class SharedDataSpec(
     val type: String,
     val async: Boolean = false,
     val fields: List<FormItemSpec> = emptyList()
