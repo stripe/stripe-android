@@ -381,7 +381,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 it,
                 ConnectionConfiguration.LocalMobileConnectionConfiguration(
                     // Hardcode location for experiment, may need as input
-                    "tml_DvnJjANjxsPT0L",
+                    "tml_EonXKgW19MKlb8",
                 ),
                 object: ReaderCallback {
                     override fun onFailure(e: TerminalException) {
@@ -455,7 +455,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 it,
                 ConnectionConfiguration.LocalMobileConnectionConfiguration(
                     // Hardcode location for experiment, may need as input
-                    "tml_DvnJjANjxsPT0L",
+                    "tml_EonXKgW19MKlb8",
                 ),
                 object: ReaderCallback {
                     override fun onFailure(e: TerminalException) {
