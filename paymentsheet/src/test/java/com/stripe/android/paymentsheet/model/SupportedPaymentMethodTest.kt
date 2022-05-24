@@ -31,7 +31,7 @@ class SupportedPaymentMethodTest {
     fun `Test supported payment method baseline`() {
         lpmRepository.values()
             .forEach { lpm ->
-                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.paymentMethodType.code}-support.csv").file)
+                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
                 val baselineLines = baseline.split("\n")
 
@@ -58,9 +58,9 @@ class SupportedPaymentMethodTest {
                                 lpmRepository
                             ).contains(lpm)
                         )
-                        val actualLine = "${lpm.paymentMethodType.code}, ${
+                        val actualLine = "${lpm.type.code}, ${
                             testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.paymentMethodType.code)
+                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
                             ).toCsv()
                         }, ${testOutput.toCsv()}\n"
 
@@ -148,7 +148,7 @@ class SupportedPaymentMethodTest {
                             listOf(
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
-                                    intentPMs = setOf(card.paymentMethodType.code),
+                                    intentPMs = setOf(card.type.code),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
                                     allowsDelayedPayment = delayed
@@ -156,8 +156,8 @@ class SupportedPaymentMethodTest {
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
                                     intentPMs = setOf(
-                                        card.paymentMethodType.code,
-                                        eps.paymentMethodType.code
+                                        card.type.code,
+                                        eps.type.code
                                     ),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
@@ -209,12 +209,12 @@ class SupportedPaymentMethodTest {
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     shipping = null,
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentPMs.plus(lpm.paymentMethodType.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
                 )
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentPMs.plus(lpm.paymentMethodType.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
                 )
         }
 

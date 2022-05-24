@@ -65,7 +65,7 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod = parseLpms(inputStream)
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
-            ?.associateBy { it.paymentMethodType.code } ?: emptyMap()
+            ?.associateBy { it.type.code } ?: emptyMap()
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -203,7 +203,7 @@ class LpmRepository @Inject constructor(
          * This describes the PaymentMethod Type as described
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
          */
-        val paymentMethodType: PaymentMethod.Type,
+        val type: PaymentMethod.Type,
 
         /** This describes the name that appears under the selector. */
         @StringRes val displayNameResource: Int,
@@ -242,7 +242,7 @@ class LpmRepository @Inject constructor(
                 PaymentMethod.Type.Card,
                 PaymentMethod.Type.AuBecsDebit,
                 PaymentMethod.Type.USBankAccount
-            ).contains(this.paymentMethodType)
+            ).contains(this.type)
         }
     }
 
@@ -262,19 +262,19 @@ class LpmRepository @Inject constructor(
         internal val exposedPaymentMethods by lazy {
             listOf(
                 PaymentMethod.Type.Card.code,
-//                PaymentMethod.Type.Bancontact.code,
-//                PaymentMethod.Type.Sofort.code,
-//                PaymentMethod.Type.Ideal.code,
-//                PaymentMethod.Type.SepaDebit.code,
-//                PaymentMethod.Type.Eps.code,
-//                PaymentMethod.Type.Giropay.code,
-//                PaymentMethod.Type.P24.code,
-//                PaymentMethod.Type.Klarna.code,
-//                PaymentMethod.Type.PayPal.code,
-//                PaymentMethod.Type.AfterpayClearpay.code,
-//                PaymentMethod.Type.USBankAccount.code,
-//                PaymentMethod.Type.Affirm.code,
-//                PaymentMethod.Type.AuBecsDebit.code
+                PaymentMethod.Type.Bancontact.code,
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Ideal.code,
+                PaymentMethod.Type.SepaDebit.code,
+                PaymentMethod.Type.Eps.code,
+                PaymentMethod.Type.Giropay.code,
+                PaymentMethod.Type.P24.code,
+                PaymentMethod.Type.Klarna.code,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.AfterpayClearpay.code,
+                PaymentMethod.Type.USBankAccount.code,
+                PaymentMethod.Type.Affirm.code,
+                PaymentMethod.Type.AuBecsDebit.code
             )
         }
     }

@@ -134,9 +134,9 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                     entry.key == IdentifierSpec.SaveForFutureUse ||
                         entry.key == IdentifierSpec.CardBrand
                 },
-            selectedPaymentMethodResources.paymentMethodType
+            selectedPaymentMethodResources.type
         ).run {
-            if (selectedPaymentMethodResources.paymentMethodType == PaymentMethod.Type.Card) {
+            if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
                 PaymentSelection.New.Card(
                     paymentMethodCreateParams = this,
                     brand = CardBrand.fromCode(

@@ -309,7 +309,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " match the supported payment types" +
                         " (${
                             resourceRepository.getLpmRepository().values()
-                                .map { it.paymentMethodType.code }.toList()
+                                .map { it.type.code }.toList()
                         })"
                 )
             )

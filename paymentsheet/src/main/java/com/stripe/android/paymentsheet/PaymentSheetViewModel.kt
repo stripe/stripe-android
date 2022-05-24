@@ -266,7 +266,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         config,
                         resourceRepository.getLpmRepository()
                     ).map {
-                        it.paymentMethodType
+                        it.type
                     }.let {
                         customerRepository.getPaymentMethods(
                             customerConfig,
