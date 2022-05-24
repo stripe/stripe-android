@@ -27,7 +27,6 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
@@ -390,14 +389,11 @@ internal class DriverLicenseScanFragmentTest {
             any()
         )
 
-        val mockDocumentCapture = mock<VerificationPageStaticContentDocumentCapturePage>()
-        val mockVerificationPage = mock<VerificationPage> {
-            on { documentCapture } doReturn mockDocumentCapture
-        }
+        val mockVerificationPage = mock<VerificationPage>()
         successCaptor.lastValue.invoke(mockVerificationPage)
         verify(mockIdentityViewModel).uploadScanResult(
             same(finalResult),
-            same(mockDocumentCapture),
+            same(mockVerificationPage),
             eq(targetType)
         )
     }

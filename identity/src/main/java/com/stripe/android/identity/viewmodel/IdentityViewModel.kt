@@ -26,12 +26,15 @@ import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
 import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
 import com.stripe.android.identity.ml.BoundingBox
+import com.stripe.android.identity.ml.FaceDetectorAnalyzer
+import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -40,6 +43,8 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadM
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +74,12 @@ internal class IdentityViewModel @Inject constructor(
     val documentUploadState: StateFlow<DocumentUploadState> = _documentUploadedState
 
     /**
+     * StateFlow to track the upload status of high/low resolution images of selfies.
+     */
+    private val _selfieUploadedState = MutableStateFlow(SelfieUploadState())
+    val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
+
+    /**
      * Response for initial VerificationPage, used for building UI.
      */
     private val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
@@ -81,11 +92,17 @@ internal class IdentityViewModel @Inject constructor(
     val idDetectorModelFile: LiveData<Resource<File>> = _idDetectorModelFile
 
     /**
+     * Network response for the FaceDetector model.
+     */
+    private val _faceDetectorModelFile = MutableLiveData<Resource<File>>()
+    val faceDetectorModelFile: LiveData<Resource<File>> = _faceDetectorModelFile
+
+    /**
      * Wrapper for both page and model
      */
     val pageAndModel = object : MediatorLiveData<Resource<Pair<VerificationPage, File>>>() {
         private var page: VerificationPage? = null
-        private var model: File? = null
+        private var idDetectorModel: File? = null
 
         init {
             postValue(Resource.loading())
@@ -104,7 +121,7 @@ internal class IdentityViewModel @Inject constructor(
             addSource(idDetectorModelFile) {
                 when (it.status) {
                     Status.SUCCESS -> {
-                        model = it.data
+                        idDetectorModel = it.data
                         maybePostSuccess()
                     }
                     Status.ERROR -> {
@@ -117,7 +134,7 @@ internal class IdentityViewModel @Inject constructor(
 
         private fun maybePostSuccess() {
             page?.let { page ->
-                model?.let { model ->
+                idDetectorModel?.let { model ->
                     postValue(Resource.success(Pair(page, model)))
                 }
             }
@@ -130,6 +147,15 @@ internal class IdentityViewModel @Inject constructor(
     internal fun resetDocumentUploadedState() {
         _documentUploadedState.update {
             DocumentUploadState()
+        }
+    }
+
+    /**
+     * Reset selfie uploaded state to loading state.
+     */
+    internal fun resetSelfieUploadedState() {
+        _selfieUploadedState.update {
+            SelfieUploadState()
         }
     }
 
@@ -166,47 +192,72 @@ internal class IdentityViewModel @Inject constructor(
      */
     internal fun uploadScanResult(
         result: IdentityAggregator.FinalResult,
-        documentCapturePage: VerificationPageStaticContentDocumentCapturePage,
+        verificationPage: VerificationPage,
         targetScanType: IdentityScanState.ScanType?
     ) {
-        require(result.result is IDDetectorOutput) {
-            "Unexpected output type: ${result.result}"
-        }
-        val originalBitmap = result.frame.cameraPreviewImage.image
-        val boundingBox = result.result.boundingBox
-        val scores = result.result.allScores
+        when (result.result) {
+            is IDDetectorOutput -> {
+                val originalBitmap = result.frame.cameraPreviewImage.image
+                val boundingBox = result.result.boundingBox
+                val scores = result.result.allScores
 
-        val isFront = when (targetScanType) {
-            IdentityScanState.ScanType.ID_FRONT -> true
-            IdentityScanState.ScanType.ID_BACK -> false
-            IdentityScanState.ScanType.DL_FRONT -> true
-            IdentityScanState.ScanType.DL_BACK -> false
-            // passport is always uploaded as front
-            IdentityScanState.ScanType.PASSPORT -> true
-            else -> {
-                Log.e(TAG, "incorrect targetScanType: $targetScanType")
-                throw IllegalStateException("incorrect targetScanType: $targetScanType")
+                val isFront = when (targetScanType) {
+                    IdentityScanState.ScanType.ID_FRONT -> true
+                    IdentityScanState.ScanType.ID_BACK -> false
+                    IdentityScanState.ScanType.DL_FRONT -> true
+                    IdentityScanState.ScanType.DL_BACK -> false
+                    // passport is always uploaded as front
+                    IdentityScanState.ScanType.PASSPORT -> true
+                    else -> {
+                        Log.e(TAG, "incorrect targetScanType: $targetScanType")
+                        throw IllegalStateException("incorrect targetScanType: $targetScanType")
+                    }
+                }
+                // upload high res
+                processDocumentScanResultAndUpload(
+                    originalBitmap,
+                    boundingBox,
+                    verificationPage.documentCapture,
+                    isHighRes = true,
+                    isFront = isFront,
+                    scores
+                )
+
+                // upload low res
+                processDocumentScanResultAndUpload(
+                    originalBitmap,
+                    boundingBox,
+                    verificationPage.documentCapture,
+                    isHighRes = false,
+                    isFront = isFront,
+                    scores
+                )
+            }
+            is FaceDetectorOutput -> {
+                val filteredFrames =
+                    (result.identityState.transitioner as FaceDetectorTransitioner).filteredFrames
+                require(filteredFrames.size == FaceDetectorTransitioner.NUM_FILTERED_FRAMES) {
+                    "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
+                        "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
+                }
+
+                listOf(
+                    (FaceDetectorTransitioner.Selfie.FIRST),
+                    (FaceDetectorTransitioner.Selfie.BEST),
+                    (FaceDetectorTransitioner.Selfie.LAST)
+                ).forEach { selfie ->
+                    listOf(true, false).forEach { isHighRes ->
+                        processSelfieScanResultAndUpload(
+                            originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
+                            boundingBox = filteredFrames[selfie.index].second.boundingBox,
+                            selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
+                            isHighRes = isHighRes,
+                            selfie = selfie
+                        )
+                    }
+                }
             }
         }
-        // upload high res
-        processDocumentScanResultAndUpload(
-            originalBitmap,
-            boundingBox,
-            documentCapturePage,
-            isHighRes = true,
-            isFront = isFront,
-            scores
-        )
-
-        // upload low res
-        processDocumentScanResultAndUpload(
-            originalBitmap,
-            boundingBox,
-            documentCapturePage,
-            isHighRes = false,
-            isFront = isFront,
-            scores
-        )
     }
 
     /**
@@ -314,6 +365,107 @@ internal class IdentityViewModel @Inject constructor(
     }
 
     /**
+     * Processes selfie scan result by cropping and padding the bitmap if necessary,
+     * then upload the processed file.
+     */
+    private fun processSelfieScanResultAndUpload(
+        originalBitmap: Bitmap,
+        boundingBox: BoundingBox,
+        selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie
+    ) {
+        identityIO.resizeBitmapAndCreateFileToUpload(
+            bitmap =
+            if (isHighRes)
+                identityIO.cropAndPadBitmap(
+                    originalBitmap,
+                    boundingBox,
+                    boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH * selfieCapturePage.highResImageCropPadding
+                )
+            else
+                originalBitmap,
+            verificationId = verificationArgs.verificationSessionId,
+            fileName =
+            StringBuilder().also { nameBuilder ->
+                nameBuilder.append(verificationArgs.verificationSessionId)
+                nameBuilder.append("_face")
+                if (isHighRes) {
+                    if (selfie != FaceDetectorTransitioner.Selfie.BEST) {
+                        nameBuilder.append("_${selfie.value}_crop_frame")
+                    }
+                } else {
+                    if (selfie == FaceDetectorTransitioner.Selfie.BEST) {
+                        nameBuilder.append("_full_frame")
+                    } else {
+                        nameBuilder.append("_${selfie.value}_full_frame")
+                    }
+                }
+                nameBuilder.append(".jpeg")
+            }.toString(),
+            maxDimension =
+            if (isHighRes)
+                selfieCapturePage.highResImageMaxDimension
+            else
+                selfieCapturePage.lowResImageMaxDimension,
+            compressionQuality =
+            if (isHighRes)
+                selfieCapturePage.highResImageCompressionQuality
+            else
+                selfieCapturePage.lowResImageCompressionQuality
+        ).let { imageFile ->
+            uploadSelfieImagesAndNotify(
+                imageFile = imageFile,
+                filePurpose = requireNotNull(
+                    StripeFilePurpose.fromCode(selfieCapturePage.filePurpose)
+                ),
+                isHighRes = isHighRes,
+                selfie = selfie
+            )
+        }
+    }
+
+    private fun uploadSelfieImagesAndNotify(
+        imageFile: File,
+        filePurpose: StripeFilePurpose,
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                identityRepository.uploadImage(
+                    verificationId = verificationArgs.verificationSessionId,
+                    ephemeralKey = verificationArgs.ephemeralKeySecret,
+                    imageFile = imageFile,
+                    filePurpose = filePurpose
+                )
+            }.fold(
+                onSuccess = { uploadedStripeFile ->
+                    _selfieUploadedState.update { currentState ->
+                        currentState.update(
+                            isHighRes = isHighRes,
+                            newResult = UploadedResult(
+                                uploadedStripeFile
+                            ),
+                            selfie = selfie
+                        )
+                    }
+                },
+                onFailure = {
+                    _selfieUploadedState.update { currentState ->
+                        currentState.updateError(
+                            isHighRes = isHighRes,
+                            selfie = selfie,
+                            message = "Failed to upload file : ${imageFile.name}",
+                            throwable = it
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    /**
      * Simple wrapper for observing [verificationPage].
      */
     fun observeForVerificationPage(
@@ -350,7 +502,17 @@ internal class IdentityViewModel @Inject constructor(
                 onSuccess = {
                     _verificationPage.postValue(Resource.success(it))
                     if (shouldRetrieveModel) {
-                        downloadIDDetectorModel(it.documentCapture.models.idDetectorUrl)
+                        downloadModelAndPost(
+                            it.documentCapture.models.idDetectorUrl,
+                            _idDetectorModelFile
+                        )
+                        // TODO(IDPROD-3944): download FaceDetectorModel
+                        it.selfieCapture?.let { selfieCapture ->
+                            downloadModelAndPost(
+                                selfieCapture.models.faceDetectorUrl,
+                                _faceDetectorModelFile
+                            )
+                        }
                     }
                 },
                 onFailure = {
@@ -367,19 +529,19 @@ internal class IdentityViewModel @Inject constructor(
     }
 
     /**
-     * Download the IDDetector model and post its value to [idDetectorModelFile].
+     * Download an ML model and post its value to [target].
      */
-    private fun downloadIDDetectorModel(modelUrl: String) {
+    private fun downloadModelAndPost(modelUrl: String, target: MutableLiveData<Resource<File>>) {
         viewModelScope.launch {
             runCatching {
-                _idDetectorModelFile.postValue(Resource.loading())
+                target.postValue(Resource.loading())
                 identityModelFetcher.fetchIdentityModel(modelUrl)
             }.fold(
                 onSuccess = {
-                    _idDetectorModelFile.postValue(Resource.success(it))
+                    target.postValue(Resource.success(it))
                 },
                 onFailure = {
-                    _idDetectorModelFile.postValue(
+                    target.postValue(
                         Resource.error(
                             "Failed to download model from $modelUrl",
                             it

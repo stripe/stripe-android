@@ -19,7 +19,6 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
             "Argument to CouldNotCaptureFragment is null"
         }
         val scanType = args[ARG_COULD_NOT_CAPTURE_SCAN_TYPE] as IdentityScanState.ScanType
-        val requireLiveCapture = args[ARG_REQUIRE_LIVE_CAPTURE] as Boolean
 
         title.text = getString(R.string.could_not_capture_title)
         message1.text = getString(R.string.could_not_capture_body1)
@@ -34,7 +33,7 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
                 navigateToUploadFragment(
                     scanType.toUploadDestinationId(),
                     shouldShowTakePhoto = true,
-                    shouldShowChoosePhoto = !requireLiveCapture
+                    shouldShowChoosePhoto = !(args[ARG_REQUIRE_LIVE_CAPTURE] as Boolean)
                 )
             }
         }
