@@ -1,19 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.serialization.json.Json
 import org.junit.Test
-import java.io.File
 
 class LpmSerializerTest {
-
     private val lpmSerializer = LpmSerializer()
-
-    private val format = Json {
-        ignoreUnknownKeys = true
-        prettyPrint = true
-        encodeDefaults = true
-    }
 
     @Test
     fun `Verify that unknown field in Json spec deserializes - ignoring the field`() {
@@ -60,69 +51,121 @@ class LpmSerializerTest {
     }
 
     @Test
-    fun `Verify serialize and deserialize successfully`() {
-//        NewLpms.values()
-//            .forEach { lpm ->
-                val jsonElement = lpmSerializer.serialize(NewLpms.AfterpayClearpayJson)
-                val serializedString = jsonElement.toString()
+    fun deserializeFields() {
+        val lpms = lpmSerializer.deserializeList(JSON_ALL_FIELDS)
+        assertThat(lpms.first().fields.size).isEqualTo(17)
 
-                lpmSerializer.deserialize(serializedString)
-                    .onSuccess {
-                        println(collapsedPrettyPrint(it))
-                        assertThat(lpmSerializer.serialize(it).toString())
-                            .isEqualTo(serializedString)
-                    }
-//            }
+        // Empty would mean a field is not recognized.
+        assertThat(lpms.filterIsInstance<EmptyFormSpec>()).isEmpty()
     }
 
-    @Test
-    fun deserializeLpmJsonFile() {
-        assertThat(
-            lpmSerializer.deserializeList(
-                File("src/main/assets/lpms.json")
-                    .bufferedReader().use { it.readText() }
-            ).size
-        ).isEqualTo(14)
-    }
-
-    @Test
-    fun `Print serialized LPMs`() {
-        println("[")
-        NewLpms.values()
-            .forEach { lpm ->
-                println(collapsedPrettyPrint(lpm) + ", ")
-            }
-        println("]")
-    }
-
-    private fun collapsedPrettyPrint(lpm: SharedDataSpec): String {
-        val fieldTypeRx = "\\{\\s+\"type\": \"([^\"]*)\"\\s*\\}".toRegex()
-        val selectorsRx = (
-            "\\{" +
-                "\\s*\"api_value\": \"([^\"]*)\",\\s*" +
-                "\\s*\"display_text\": \"([^\"]*)\"\\s*" +
-                "\\s*\\}"
-            ).toRegex()
-
-        var json = format.encodeToString(SharedDataSpec.serializer(), lpm)
-        json = fieldTypeRx.replace(
-            json,
-            "{\"type\":\"$1\"}"
-        )
-        json = selectorsRx.replace(
-            json,
-            "{\"display_text\":\"$2\", \"api_value\":\"$1\"}"
-        )
-
-        json = (
-            "\"api_path\": \\{" +
-                "\\s*\"v1\": \"([^\"]*)\"\\s*" +
-                "\\s*\\}"
-            ).toRegex().replace(
-                json,
-                "\"api_path\": { \"v1\": \"\$1\"}"
-            )
-
-        return json
+    companion object {
+        val JSON_ALL_FIELDS = """
+                [
+                  {
+                    "type": "llamaBucks",
+                    "async": false,
+                    "fields": [
+                      {
+                        "type": "name",
+                        "api_path": {
+                          "v1": "billing_details[name]"
+                        }
+                      },
+                      {
+                        "type": "afterpay_header"
+                      },
+                      {
+                        "type": "email",
+                        "api_path": {
+                          "v1": "billing_details[email]"
+                        }
+                      },
+                      {
+                        "type": "billing_address",
+                        "api_path": {
+                          "v1": "billing_details[address]"
+                        }
+                      },
+                      {
+                        "type": "affirm_header"
+                      },
+                      {
+                        "type": "klarna_header"
+                      },
+                      {
+                        "type": "klarna_country",
+                        "api_path": {
+                          "v1": "billing_details[address][country]"
+                        }
+                      },
+                      {
+                        "type": "selector",
+                        "label": "upe.labels.ideal.bank",
+                        "items": [
+                          {
+                            "display_text": "ABN Amro",
+                            "api_value": "abn_amro"
+                          }
+                        ],
+                        "api_path": {
+                          "v1": "ideal[bank]"
+                        }
+                      },
+                      {
+                        "type": "billing_address",
+                        "valid_country_codes": [
+                          "AT",
+                          "BE",
+                          "DE",
+                          "ES",
+                          "IT",
+                          "NL"
+                        ],
+                        "display_fields": [
+                          "country"
+                        ]
+                      },
+                      {
+                        "type": "iban",
+                        "api_path": {
+                          "v1": "sepa_debit[iban]"
+                        }
+                      },
+                      {
+                        "type": "sepa_mandate"
+                      },
+                      {
+                        "type": "name",
+                        "api_path": {
+                          "v1": "billing_details[name]"
+                        },
+                        "label": "upe.labels.name.onAccount"
+                      },
+                      {
+                        "type": "au_becs_bsb_number",
+                        "api_path": {
+                          "v1": "au_becs_debit[bsb_number]"
+                        }
+                      },
+                      {
+                        "type": "au_becs_account_number",
+                        "api_path": {
+                          "v1": "au_becs_debit[account_number]"
+                        }
+                      },
+                      {
+                        "type": "au_becs_mandate"
+                      },
+                      {
+                        "type": "card_details"
+                      },
+                      {
+                        "type": "card_billing"
+                      }
+                    ]
+                  }
+               ]
+            """.trimIndent()
     }
 }
