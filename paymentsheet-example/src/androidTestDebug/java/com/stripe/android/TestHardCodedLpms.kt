@@ -176,7 +176,8 @@ class TestHardCodedLpms {
                 paymentMethod = lpmRepository.fromCode("sofort")!!,
                 authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.EUR,
-                delayed = DelayedPMs.On
+                delayed = DelayedPMs.On,
+                automatic = Automatic.Off
             )
         )
     }

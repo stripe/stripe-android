@@ -80,7 +80,9 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                else -> EmptyFormElement()
+                is SimpleTextSpec -> it.transform(initialValues)
+                is KlarnaHeaderStaticTextSpec -> it.transform()
+                is SepaMandateTextSpec -> it.transform(merchantName)
             }
         }
 }
