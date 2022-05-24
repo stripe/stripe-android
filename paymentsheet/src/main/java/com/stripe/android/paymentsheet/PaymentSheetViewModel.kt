@@ -130,7 +130,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkoutIdentifier: CheckoutIdentifier
     ): MediatorLiveData<PaymentSheetViewState?> {
         val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
-        outputLiveData.addSource(_viewState) { currentValue ->
+        outputLiveData.addSource(viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue
             }
