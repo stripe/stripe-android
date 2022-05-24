@@ -438,14 +438,6 @@ public final class com/stripe/android/ui/core/elements/LpmRepository_Factory : d
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/LpmRepository;
 }
 
-public final class com/stripe/android/ui/core/elements/LpmSerializer {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun deserialize-IoAF18A (Ljava/lang/String;)Ljava/lang/Object;
-	public final fun deserializeList (Ljava/lang/String;)Ljava/util/List;
-	public final fun serialize (Lcom/stripe/android/ui/core/elements/SharedDataSpec;)Lkotlinx/serialization/json/JsonElement;
-}
-
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 
@@ -504,43 +496,6 @@ public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
 public final class com/stripe/android/ui/core/elements/SectionUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/SharedDataSpec {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/elements/SharedDataSpec$Companion;
-	public synthetic fun <init> (ILjava/lang/String;ZLjava/util/List;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;ZLjava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
-	public final fun component3 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;ZLjava/util/List;)Lcom/stripe/android/ui/core/elements/SharedDataSpec;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SharedDataSpec;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SharedDataSpec;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAsync ()Z
-	public final fun getFields ()Ljava/util/List;
-	public final fun getType ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/SharedDataSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
-}
-
-public final class com/stripe/android/ui/core/elements/SharedDataSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/SharedDataSpec$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/SharedDataSpec;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/SharedDataSpec;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/SharedDataSpec$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {
 }
 
@@ -576,18 +531,6 @@ public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
 	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class com/stripe/android/ui/core/elements/TranslationId : java/lang/Enum {
-	public static final field AddressName Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field AuBecsAccountName Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field Companion Lcom/stripe/android/ui/core/elements/TranslationId$Companion;
-	public static final field EpsBank Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field IdealBank Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field P24Bank Lcom/stripe/android/ui/core/elements/TranslationId;
-	public final fun getResourceId ()I
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static fun values ()[Lcom/stripe/android/ui/core/elements/TranslationId;
 }
 
 public final class com/stripe/android/ui/core/elements/TranslationId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
