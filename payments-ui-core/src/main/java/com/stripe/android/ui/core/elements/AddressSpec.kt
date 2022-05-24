@@ -18,7 +18,6 @@ enum class DisplayField : Parcelable {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 @Parcelize
-@SerialName("billing_address")
 data class AddressSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
     val valid_country_codes: Set<String> = supportedBillingCountries,

@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Suppress("EnumEntryName")
@@ -31,9 +30,8 @@ enum class KeyboardType {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-@SerialName("text")
 @Parcelize
-open class SimpleTextSpec(
+data class SimpleTextSpec(
     override val api_path: IdentifierSpec,
     @StringRes val label: Int,
     val capitalization: Capitalization = Capitalization.none,

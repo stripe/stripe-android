@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,7 +8,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-@SerialName("affirm_header")
 internal data class AffirmTextSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("affirm_header")
 ) : FormItemSpec() {

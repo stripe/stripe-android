@@ -12,30 +12,49 @@ class LpmSerializerTest {
     private val format = Json {
         ignoreUnknownKeys = true
         prettyPrint = true
-        serializersModule = LpmSerializer.module
         encodeDefaults = true
     }
 
     @Test
-    fun `Verify that unknown field in Json spec deserializes ignoring the field`() {
+    fun `Verify that unknown field in Json spec deserializes - ignoring the field`() {
         val serializedString =
             """
                 {
                     "type": "au_becs_debit",
-                    "async": false,
                     "fields": [
                       {
                         "type": "unknown_field",
-                        "api_path": {
-                          "v1": "billing_details[name]"
-                        },
-                        "label": "upe.labels.name.onAccount"
+                        "unknown_value": {
+                          "some_stuff": "some_value"
+                        }
                       }
                     ]
                   }
             """.trimIndent()
 
-        lpmSerializer.deserialize(serializedString)
+        val result = lpmSerializer.deserialize(serializedString)
+        assertThat(result.isSuccess).isTrue()
+        result.onSuccess {
+            assertThat(it.fields).isEmpty()
+        }
+    }
+
+    @Test
+    fun `Verify that async defaults to false and fields to empty`() {
+        // TODO: Test this with LPM Repository too
+        val serializedString =
+            """
+                {
+                    "type": "unknown_lpm"
+                }
+            """.trimIndent()
+
+        val result = lpmSerializer.deserialize(serializedString)
+        assertThat(result.isSuccess).isTrue()
+        result.onSuccess {
+            assertThat(it.async).isFalse()
+            assertThat(it.fields).isEmpty()
+        }
     }
 
     @Test
@@ -56,10 +75,12 @@ class LpmSerializerTest {
 
     @Test
     fun deserializeLpmJsonFile() {
-        lpmSerializer.deserializeList(
-            File("src/main/assets/lpms.json")
-                .bufferedReader().use { it.readText() }
-        )
+        assertThat(
+            lpmSerializer.deserializeList(
+                File("src/main/assets/lpms.json")
+                    .bufferedReader().use { it.readText() }
+            ).size
+        ).isEqualTo(14)
     }
 
     @Test
@@ -70,24 +91,6 @@ class LpmSerializerTest {
                 println(collapsedPrettyPrint(lpm) + ", ")
             }
         println("]")
-    }
-
-    @Test
-    fun `deserialize unknown property on field`() {
-    }
-
-    @Test
-    fun `Verify deserialize unknown type`() {
-        val lpm = SharedDataSpec(
-            "bancontact",
-            fields = listOf(
-                NameSpec(api_path = IdentifierSpec.Generic("billing_details[name]")) as FormItemSpec,
-            )
-        )
-        val serializedString =
-            lpmSerializer.serialize(lpm).toString().replace("name", "unknown type")
-        println(serializedString)
-        lpmSerializer.deserialize(serializedString)
     }
 
     private fun collapsedPrettyPrint(lpm: SharedDataSpec): String {

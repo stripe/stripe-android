@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
  * This is for elements that do not receive user input
  */
 @Serializable
-@SerialName("klarna_header")
 @Parcelize
 internal data class KlarnaHeaderStaticTextSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("klarna_header_text")
