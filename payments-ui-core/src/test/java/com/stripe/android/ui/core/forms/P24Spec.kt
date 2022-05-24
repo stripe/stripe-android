@@ -7,7 +7,7 @@ import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.StringRepository
+import com.stripe.android.ui.core.elements.TranslationId
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val P24Form: List<FormItemSpec> = listOf(
@@ -15,7 +15,7 @@ val P24Form: List<FormItemSpec> = listOf(
     EmailSpec(),
     DropdownSpec(
         IdentifierSpec.Generic("p24[bank]"),
-        StringRepository.TranslationId.P24Bank,
+        TranslationId.P24Bank,
         listOf(
             DropdownItemSpec(
                 api_value = "alior_bank",

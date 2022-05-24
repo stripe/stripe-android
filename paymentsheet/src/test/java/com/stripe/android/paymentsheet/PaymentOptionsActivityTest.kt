@@ -415,7 +415,6 @@ class PaymentOptionsActivityTest {
                 AddressFieldElementRepository(
                     ApplicationProvider.getApplicationContext<Context>().resources
                 ),
-                mock(),
                 LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
             ),
             savedStateHandle = SavedStateHandle(),

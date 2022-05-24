@@ -6,14 +6,14 @@ import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.StringRepository
+import com.stripe.android.ui.core.elements.TranslationId
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val IdealForm: List<FormItemSpec> = listOf(
     NameSpec(),
     DropdownSpec(
         IdentifierSpec.Generic("ideal[bank]"),
-        StringRepository.TranslationId.IdealBank,
+        TranslationId.IdealBank,
         listOf(
             DropdownItemSpec(
                 api_value = "abn_amro",

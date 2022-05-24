@@ -24,7 +24,7 @@ import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
-import com.stripe.android.ui.core.elements.StringRepository
+import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -132,7 +132,7 @@ internal class TransformSpecToElementTest {
             listOf(
                 SimpleTextSpec(
                     IdentifierSpec.Generic("simple"),
-                    StringRepository.TranslationId.AddressName.resourceId,
+                    TranslationId.AddressName.resourceId,
                     showOptionalLabel = true,
                     keyboardType = KeyboardType.text,
                     capitalization = Capitalization.words
@@ -183,7 +183,7 @@ internal class TransformSpecToElementTest {
     companion object {
         val IDEAL_BANK_CONFIG = DropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
-            StringRepository.TranslationId.IdealBank,
+            TranslationId.IdealBank,
             listOf(
                 DropdownItemSpec(
                     api_value = "abn_amro",

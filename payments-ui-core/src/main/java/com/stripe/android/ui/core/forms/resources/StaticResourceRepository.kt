@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.forms.resources
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.LpmRepository
-import com.stripe.android.ui.core.elements.StringRepository
 
 /**
  * [ResourceRepository] that receives all resources pre-loaded.
@@ -11,7 +10,6 @@ import com.stripe.android.ui.core.elements.StringRepository
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StaticResourceRepository(
     private val addressRepository: AddressFieldElementRepository,
-    private val stringRepository: StringRepository,
     private val lpmRepository: LpmRepository = LpmRepository(null)
 ) : ResourceRepository {
     override suspend fun waitUntilLoaded() {
@@ -22,10 +20,6 @@ class StaticResourceRepository(
 
     override fun getLpmRepository(): LpmRepository {
         return lpmRepository
-    }
-
-    override fun getStringRepository(): StringRepository {
-        return stringRepository
     }
 
     override fun getAddressRepository(): AddressFieldElementRepository {

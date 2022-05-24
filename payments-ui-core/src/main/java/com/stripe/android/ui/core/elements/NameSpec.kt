@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class NameSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Name,
-    val label: StringRepository.TranslationId = StringRepository.TranslationId.AddressName
+    val label: TranslationId = TranslationId.AddressName
 ) : FormItemSpec(), RequiredItemSpec {
     @IgnoredOnParcel
     private val simpleTextSpec =

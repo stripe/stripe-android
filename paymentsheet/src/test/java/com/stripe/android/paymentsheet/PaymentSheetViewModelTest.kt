@@ -85,7 +85,7 @@ internal class PaymentSheetViewModelTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val lpmRepository = LpmRepository(application.resources)
     private val prefsRepository = FakePrefsRepository()
-    private val resourceRepository = StaticResourceRepository(mock(), mock(), lpmRepository)
+    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
 
     private val primaryButtonUIState = PrimaryButton.UIState(
         label = "Test",

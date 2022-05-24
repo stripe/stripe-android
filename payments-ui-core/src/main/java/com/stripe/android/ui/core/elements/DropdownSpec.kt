@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class DropdownSpec(
     override val api_path: IdentifierSpec,
-    val label: StringRepository.TranslationId,
+    val label: TranslationId,
     val items: List<DropdownItemSpec>
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(

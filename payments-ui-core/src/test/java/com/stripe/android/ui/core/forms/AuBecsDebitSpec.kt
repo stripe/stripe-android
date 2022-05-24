@@ -8,7 +8,7 @@ import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.StringRepository
+import com.stripe.android.ui.core.elements.TranslationId
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val AuBecsDebitForm: List<FormItemSpec> = listOf(
@@ -17,7 +17,7 @@ val AuBecsDebitForm: List<FormItemSpec> = listOf(
     AuBankAccountNumberSpec(),
     NameSpec(
         IdentifierSpec.Name,
-        label = StringRepository.TranslationId.AuBecsAccountName
+        label = TranslationId.AuBecsAccountName
     ),
     AuBecsDebitMandateTextSpec()
 )

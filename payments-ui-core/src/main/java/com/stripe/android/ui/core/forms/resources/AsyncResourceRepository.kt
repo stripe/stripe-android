@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.LpmRepository
-import com.stripe.android.ui.core.elements.StringRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
@@ -27,7 +26,6 @@ class AsyncResourceRepository @Inject constructor(
     private val locale: Locale?
 ) : ResourceRepository {
     private val lpmRepository: LpmRepository = LpmRepository(resources)
-    private val stringRepository: StringRepository = StringRepository(resources)
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()
@@ -55,6 +53,5 @@ class AsyncResourceRepository @Inject constructor(
     override fun isLoaded() = loadingJobs.isEmpty()
 
     override fun getLpmRepository() = lpmRepository
-    override fun getStringRepository() = stringRepository
     override fun getAddressRepository() = addressRepository
 }
