@@ -1,27 +1,23 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
-import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.KeyboardType
-import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.StringRepository
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val AuBecsDebitForm: List<FormItemSpec> = listOf(
     EmailSpec(),
     BsbSpec(),
     AuBankAccountNumberSpec(),
-    SimpleTextSpec(
+    NameSpec(
         IdentifierSpec.Name,
-        label = R.string.au_becs_account_name,
-        capitalization = Capitalization.Words,
-        keyboardType = KeyboardType.Text
+        label = StringRepository.TranslationId.AuBecsAccountName
     ),
     AuBecsDebitMandateTextSpec()
 )

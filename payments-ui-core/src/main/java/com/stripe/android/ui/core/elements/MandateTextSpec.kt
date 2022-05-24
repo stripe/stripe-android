@@ -11,13 +11,13 @@ import kotlinx.serialization.Serializable
  * Mandate text element spec.
  */
 @Serializable
-@SerialName("sepa_mandate")
+@SerialName("mandate") // TODO: Would like to just call this mandate
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-internal data class MandateTextSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
+internal open class MandateTextSpec(
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
-    val stringResId: Int = R.string.sepa_mandate,
+    val stringResId: Int,
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(merchantName: String): FormElement =
         // It could be argued that the static text should have a controller, but

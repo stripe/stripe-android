@@ -116,7 +116,7 @@ internal class TransformSpecToElementTest {
         assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
-        assertThat(nameElement.controller.capitalization).isEqualTo(Capitalization.Words)
+        assertThat(nameElement.controller.capitalization).isEqualTo(Capitalization.words)
         assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
     }
 
@@ -129,7 +129,7 @@ internal class TransformSpecToElementTest {
                     R.string.address_label_name,
                     showOptionalLabel = true,
                     keyboardType = KeyboardType.Text,
-                    capitalization = Capitalization.Words
+                    capitalization = Capitalization.words
                 )
             )
         )

@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @SerialName("static_text")
 @Parcelize
 internal data class StaticTextSpec(
-    override val api_path: IdentifierSpec,
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("static_text"),
     @StringRes val stringResId: Int
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(): FormElement =
@@ -23,3 +23,4 @@ internal data class StaticTextSpec(
             this.stringResId
         )
 }
+

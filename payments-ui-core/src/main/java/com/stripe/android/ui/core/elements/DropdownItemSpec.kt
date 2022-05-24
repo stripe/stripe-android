@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class DropdownItemSpec(
-    val api_value: String?,
-    val display_text: String
+    val api_value: String? = null,
+    val display_text: String = "Other"
 ) : Parcelable

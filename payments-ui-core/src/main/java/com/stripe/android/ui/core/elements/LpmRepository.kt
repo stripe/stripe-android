@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
+import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
@@ -32,7 +33,8 @@ import javax.inject.Singleton
 @Serializable
 data class SharedDataSpec(
     val type: String,
-    val fields: List<FormItemSpec>
+    val async: Boolean = false,
+    val fields: List<FormItemSpec> = emptyList()
 )
 
 @Singleton
@@ -66,8 +68,6 @@ class LpmRepository @Inject constructor(
             ?.associateBy { it.paymentMethodType.code } ?: emptyMap()
     }
 
-    // TODO: We have a problem here that we can't decode the translation string for the dropdown
-    // can we hardcode or ignore for an initial test, and then add it in?
     private fun parseLpms(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let { string ->
             lpmSerializer.deserializeList(string)
@@ -83,7 +83,11 @@ class LpmRepository @Inject constructor(
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
                 CardRequirement,
-                LayoutSpec(sharedDataSpec.fields)
+                if (sharedDataSpec.fields.isEmpty()) {
+                    LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec()))
+                } else {
+                    LayoutSpec(sharedDataSpec.fields)
+                }
             )
             PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Bancontact,
@@ -177,6 +181,12 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             else -> null
+        }?.apply {
+            requirement.piRequirements = if (sharedDataSpec.async) {
+                this.requirement.piRequirements?.plus(Delayed)
+            } else {
+                this.requirement.piRequirements
+            }
         }
 
     /**

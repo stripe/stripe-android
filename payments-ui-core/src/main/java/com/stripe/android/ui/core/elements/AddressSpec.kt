@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
+@Suppress("EnumEntryName")
 enum class DisplayField : Parcelable {
     country
 }
@@ -20,7 +21,7 @@ enum class DisplayField : Parcelable {
 @SerialName("billing_address")
 data class AddressSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
-    val valid_country_codes: Set<String> = emptySet(),
+    val valid_country_codes: Set<String> = supportedBillingCountries,
     val display_fields: Set<DisplayField> = emptySet()
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(

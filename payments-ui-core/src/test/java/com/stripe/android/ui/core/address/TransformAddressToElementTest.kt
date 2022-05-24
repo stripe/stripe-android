@@ -26,7 +26,7 @@ class TransformAddressToElementTest {
         val addressLine1 = SimpleTextSpec(
             IdentifierSpec.Line1,
             R.string.address_label_address_line1,
-            Capitalization.Words,
+            Capitalization.words,
             KeyboardType.Text,
             showOptionalLabel = false
         )
@@ -34,7 +34,7 @@ class TransformAddressToElementTest {
         val addressLine2 = SimpleTextSpec(
             IdentifierSpec.Line2,
             R.string.address_label_address_line2,
-            Capitalization.Words,
+            Capitalization.words,
             KeyboardType.Text,
             showOptionalLabel = true
         )
@@ -42,7 +42,7 @@ class TransformAddressToElementTest {
         val city = SimpleTextSpec(
             IdentifierSpec.City,
             R.string.address_label_city,
-            Capitalization.Words,
+            Capitalization.words,
             KeyboardType.Text,
             showOptionalLabel = false
         )
@@ -50,7 +50,7 @@ class TransformAddressToElementTest {
         val state = SimpleTextSpec(
             IdentifierSpec.State,
             R.string.address_label_state,
-            Capitalization.Words,
+            Capitalization.words,
             KeyboardType.Text,
             showOptionalLabel = false
         )
@@ -58,7 +58,7 @@ class TransformAddressToElementTest {
         val zip = SimpleTextSpec(
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
-            Capitalization.None,
+            Capitalization.none,
             KeyboardType.NumberPassword,
             showOptionalLabel = false
         )

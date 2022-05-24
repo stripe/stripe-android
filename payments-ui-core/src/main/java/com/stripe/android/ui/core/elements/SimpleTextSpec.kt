@@ -1,41 +1,42 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Suppress("EnumEntryName")
 @Serializable
 enum class Capitalization {
-    None,
-    Characters,
-    Words,
-    Sentences
+    none,
+    characters,
+    words,
+    sentences
 }
 
+@Suppress("EnumEntryName")
 @Serializable
 enum class KeyboardType {
-    Text,
-    Ascii,
-    Number,
-    Phone,
-    Uri,
-    Email,
-    Password,
-    NumberPassword,
+    text,
+    ascii,
+    number,
+    phone,
+    uri,
+    email,
+    password,
+    number_password,
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 @SerialName("text")
 @Parcelize
-data class SimpleTextSpec(
+internal open class SimpleTextSpec(
     override val api_path: IdentifierSpec,
-    @StringRes val label: Int,
-    val capitalization: Capitalization,
-    val keyboardType: KeyboardType,
+    val label: StringRepository.TranslationId,
+    val capitalization: Capitalization = Capitalization.none,
+    val keyboardType: KeyboardType = KeyboardType.ascii,
     val showOptionalLabel: Boolean = false
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
@@ -45,22 +46,22 @@ data class SimpleTextSpec(
             this.api_path,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
-                    label = this.label,
+                    label = this.label.resourceId,
                     capitalization = when (this.capitalization) {
-                        Capitalization.None -> KeyboardCapitalization.None
-                        Capitalization.Characters -> KeyboardCapitalization.Characters
-                        Capitalization.Words -> KeyboardCapitalization.Words
-                        Capitalization.Sentences -> KeyboardCapitalization.Sentences
+                        Capitalization.none -> KeyboardCapitalization.None
+                        Capitalization.characters -> KeyboardCapitalization.Characters
+                        Capitalization.words -> KeyboardCapitalization.Words
+                        Capitalization.sentences -> KeyboardCapitalization.Sentences
                     },
                     keyboard = when (this.keyboardType) {
-                        KeyboardType.Text -> androidx.compose.ui.text.input.KeyboardType.Text
-                        KeyboardType.Ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
-                        KeyboardType.Number -> androidx.compose.ui.text.input.KeyboardType.Number
-                        KeyboardType.Phone -> androidx.compose.ui.text.input.KeyboardType.Phone
-                        KeyboardType.Uri -> androidx.compose.ui.text.input.KeyboardType.Uri
-                        KeyboardType.Email -> androidx.compose.ui.text.input.KeyboardType.Email
-                        KeyboardType.Password -> androidx.compose.ui.text.input.KeyboardType.Password
-                        KeyboardType.NumberPassword -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
+                        KeyboardType.text -> androidx.compose.ui.text.input.KeyboardType.Text
+                        KeyboardType.ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
+                        KeyboardType.number -> androidx.compose.ui.text.input.KeyboardType.Number
+                        KeyboardType.phone -> androidx.compose.ui.text.input.KeyboardType.Phone
+                        KeyboardType.uri -> androidx.compose.ui.text.input.KeyboardType.Uri
+                        KeyboardType.email -> androidx.compose.ui.text.input.KeyboardType.Email
+                        KeyboardType.password -> androidx.compose.ui.text.input.KeyboardType.Password
+                        KeyboardType.number_password -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
                     }
                 ),
                 initialValue = initialValues[this.api_path],

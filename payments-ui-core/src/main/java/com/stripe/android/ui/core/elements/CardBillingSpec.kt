@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class CardBillingSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
-    val valid_country_codes: Set<String>
+    val valid_country_codes: Set<String> = supportedBillingCountries
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         addressRepository: AddressFieldElementRepository,

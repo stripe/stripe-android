@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class CountrySpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Country,
-    val onlyShowCountryCodes: Set<String> = emptySet()
+    val onlyShowCountryCodes: Set<String> = supportedBillingCountries
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
