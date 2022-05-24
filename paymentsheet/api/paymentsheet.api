@@ -957,10 +957,6 @@ public final class com/stripe/android/paymentsheet/model/StripeIntentValidator_F
 	public static fun newInstance ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;
 }
 
-public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethodKtxKt {
-	public static final fun getPMAddForm (Lcom/stripe/android/ui/core/elements/LpmRepository$SupportedPaymentMethod;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)Lcom/stripe/android/ui/core/elements/LayoutFormDescriptor;
-}
-
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel_Factory;
