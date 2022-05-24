@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * This defines an empty form spec. It is not intended to be used when building forms for
@@ -8,5 +9,9 @@ import kotlinx.parcelize.Parcelize
  * returns null when filtering no elements. If given this EmptyFormSpec, the filtering will view
  * the form as complete. {@link LayoutSpec#create()} is the way to build a form with no elements.
  */
+@Serializable
 @Parcelize
-internal object EmptyFormSpec : FormItemSpec()
+internal object EmptyFormSpec : FormItemSpec() {
+    override val api_path: IdentifierSpec?
+        get() = IdentifierSpec.Generic("empty")
+}

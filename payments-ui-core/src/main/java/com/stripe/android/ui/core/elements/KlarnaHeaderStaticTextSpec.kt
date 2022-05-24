@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -9,15 +8,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-internal data class StaticTextSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("static_text"),
-    @StringRes val stringResId: Int
+internal data class KlarnaHeaderStaticTextSpec(
+    override val api_path: IdentifierSpec = IdentifierSpec.Generic("klarna_header_text")
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(): FormElement =
     // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.api_path,
-            this.stringResId
+            stringResId = KlarnaHelper.getKlarnaHeader(),
         )
 }

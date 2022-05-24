@@ -20,11 +20,13 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
+import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -83,11 +85,9 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is AddressSpec -> it.transform(
-                    initialValues,
-                    resourceRepository.getAddressRepository()
-                )
                 is SimpleTextSpec -> it.transform(initialValues)
+                is KlarnaHeaderStaticTextSpec -> it.transform()
+                is SepaMandateTextSpec -> it.transform(merchantName)
             }
         }
 }

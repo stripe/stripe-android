@@ -1,11 +1,12 @@
 package com.stripe.android.ui.core.address
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository.Companion.supportedCountries
+import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
@@ -26,40 +27,40 @@ class TransformAddressToElementTest {
         val addressLine1 = SimpleTextSpec(
             IdentifierSpec.Line1,
             R.string.address_label_address_line1,
-            KeyboardCapitalization.Words,
-            KeyboardType.Text,
+            Capitalization.words,
+            KeyboardType.text,
             showOptionalLabel = false
         )
 
         val addressLine2 = SimpleTextSpec(
             IdentifierSpec.Line2,
             R.string.address_label_address_line2,
-            KeyboardCapitalization.Words,
-            KeyboardType.Text,
+            Capitalization.words,
+            KeyboardType.text,
             showOptionalLabel = true
         )
 
         val city = SimpleTextSpec(
             IdentifierSpec.City,
             R.string.address_label_city,
-            KeyboardCapitalization.Words,
-            KeyboardType.Text,
+            Capitalization.words,
+            KeyboardType.text,
             showOptionalLabel = false
         )
 
         val state = SimpleTextSpec(
             IdentifierSpec.State,
             R.string.address_label_state,
-            KeyboardCapitalization.Words,
-            KeyboardType.Text,
+            Capitalization.words,
+            KeyboardType.text,
             showOptionalLabel = false
         )
 
         val zip = SimpleTextSpec(
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
-            KeyboardCapitalization.None,
-            KeyboardType.NumberPassword,
+            Capitalization.none,
+            KeyboardType.number_password,
             showOptionalLabel = false
         )
 
@@ -93,10 +94,24 @@ class TransformAddressToElementTest {
     ) {
         val actualController = textElement.controller as TextFieldController
         assertThat(actualController.capitalization).isEqualTo(
-            simpleTextSpec.capitalization
+            when (simpleTextSpec.capitalization) {
+                Capitalization.none -> KeyboardCapitalization.None
+                Capitalization.characters -> KeyboardCapitalization.Characters
+                Capitalization.words -> KeyboardCapitalization.Words
+                Capitalization.sentences -> KeyboardCapitalization.Sentences
+            }
         )
         assertThat(actualController.keyboardType).isEqualTo(
-            simpleTextSpec.keyboardType
+            when (simpleTextSpec.keyboardType) {
+                KeyboardType.text -> androidx.compose.ui.text.input.KeyboardType.Text
+                KeyboardType.ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
+                KeyboardType.number -> androidx.compose.ui.text.input.KeyboardType.Number
+                KeyboardType.phone -> androidx.compose.ui.text.input.KeyboardType.Phone
+                KeyboardType.uri -> androidx.compose.ui.text.input.KeyboardType.Uri
+                KeyboardType.email -> androidx.compose.ui.text.input.KeyboardType.Email
+                KeyboardType.password -> androidx.compose.ui.text.input.KeyboardType.Password
+                KeyboardType.number_password -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
+            }
         )
         assertThat(actualController.label.first()).isEqualTo(
             simpleTextSpec.label

@@ -2,8 +2,10 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Serializable
 @Parcelize
 data class EmailSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Email

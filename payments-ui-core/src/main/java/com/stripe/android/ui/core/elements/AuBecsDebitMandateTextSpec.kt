@@ -1,7 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 internal data class AuBecsDebitMandateTextSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("au_becs_mandate")

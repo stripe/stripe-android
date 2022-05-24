@@ -1,14 +1,15 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Serializable
+@Parcelize
 data class DropdownSpec(
     override val api_path: IdentifierSpec,
-    @StringRes val label: Int,
+    val label: TranslationId,
     val items: List<DropdownItemSpec>
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
@@ -18,7 +19,7 @@ data class DropdownSpec(
             this.api_path,
             DropdownFieldController(
                 SimpleDropdownConfig(
-                    label,
+                    label.resourceId,
                     items
                 ),
                 initialValue = initialValues[api_path]

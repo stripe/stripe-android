@@ -2,9 +2,11 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Serializable
+@Parcelize
 data class IbanSpec(
     override val api_path: IdentifierSpec = IdentifierSpec.Generic("sepa_debit[iban]")
 ) : FormItemSpec(), RequiredItemSpec {

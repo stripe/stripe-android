@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed interface Requirement : Parcelable
@@ -28,6 +29,7 @@ object Delayed : PIRequirement, SIRequirement
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object ShippingAddress : PIRequirement
 
+@Serializable
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class PaymentMethodRequirements(
@@ -37,7 +39,7 @@ data class PaymentMethodRequirements(
      *  - Only [PIRequirement]s are allowed in this set.
      * - If this is null, PaymentIntents (even if SFU is set) are not supported by this LPM.
      */
-    val piRequirements: Set<PIRequirement>?,
+    var piRequirements: Set<PIRequirement>?,
 
     /**
      * These are the requirements for using a SetupIntent.

@@ -5,56 +5,47 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
- * This uniquely identifies a element in the form.  The objects here are for identifier
+ * This uniquely identifies a element in the form.  The vals here are for identifier
  * specs that need to be found when pre-populating fields, or when extracting data.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class IdentifierSpec(val v1: String) : Parcelable {
-    @Parcelize
-    data class Generic(private val _value: String) : IdentifierSpec(_value)
-
-    // Needed to pre-populate forms
-    @Parcelize
-    object Name : IdentifierSpec("billing_details[name]")
-
-    @Parcelize
-    object CardBrand : IdentifierSpec("card[brand]")
-
-    @Parcelize
-    object CardNumber : IdentifierSpec("card[number]")
-
-    @Parcelize
-    object CardCvc : IdentifierSpec("card[cvc]")
-
-    @Parcelize
-    object Email : IdentifierSpec("billing_details[email]")
-
-    @Parcelize
-    object Phone : IdentifierSpec("billing_details[phone]")
-
-    @Parcelize
-    object Line1 : IdentifierSpec("billing_details[address][line1]")
-
-    @Parcelize
-    object Line2 : IdentifierSpec("billing_details[address][line2]")
-
-    @Parcelize
-    object City : IdentifierSpec("billing_details[address][city]")
-
-    @Parcelize
-    object PostalCode : IdentifierSpec("billing_details[address][postal_code]")
-
-    @Parcelize
-    object State : IdentifierSpec("billing_details[address][state]")
-
-    @Parcelize
-    object Country : IdentifierSpec("billing_details[address][country]")
-
-    // Unique extracting functionality
-    @Parcelize
-    object SaveForFutureUse : IdentifierSpec("save_for_future_use")
+@kotlinx.serialization.Serializable
+@Parcelize
+data class IdentifierSpec(val v1: String) : Parcelable {
+    constructor() : this("") {
+    }
 
     companion object {
+        fun Generic(_value: String) = IdentifierSpec(_value)
+
+        // Needed to pre-populate forms
+        val Name = IdentifierSpec("billing_details[name]")
+
+        val CardBrand = IdentifierSpec("card[brand]")
+
+        val CardNumber = IdentifierSpec("card[number]")
+
+        val CardCvc = IdentifierSpec("card[cvc]")
+
+        val Email = IdentifierSpec("billing_details[email]")
+
+        val Phone = IdentifierSpec("billing_details[phone]")
+
+        val Line1 = IdentifierSpec("billing_details[address][line1]")
+
+        val Line2 = IdentifierSpec("billing_details[address][line2]")
+
+        val City = IdentifierSpec("billing_details[address][city]")
+
+        val PostalCode = IdentifierSpec("billing_details[address][postal_code]")
+
+        val State = IdentifierSpec("billing_details[address][state]")
+
+        val Country = IdentifierSpec("billing_details[address][country]")
+
+        // Unique extracting functionality
+        val SaveForFutureUse = IdentifierSpec("save_for_future_use")
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand

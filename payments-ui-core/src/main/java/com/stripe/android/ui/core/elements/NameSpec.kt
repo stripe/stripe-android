@@ -1,27 +1,21 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.ui.core.R
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Serializable
 @Parcelize
 data class NameSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Name
+    override val api_path: IdentifierSpec = IdentifierSpec.Name,
+    val label: TranslationId = TranslationId.AddressName
 ) : FormItemSpec(), RequiredItemSpec {
-    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
-        SimpleTextElement(
-            this.api_path,
-            SimpleTextFieldController(
-                SimpleTextFieldConfig(
-                    label = R.string.address_label_name,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboard = KeyboardType.Text
-                ),
-                initialValue = initialValues[this.api_path]
-            ),
-        )
-    )
+    @IgnoredOnParcel
+    private val simpleTextSpec =
+        SimpleTextSpec(api_path, label.resourceId, Capitalization.words, KeyboardType.text)
+
+    fun transform(initialValues: Map<IdentifierSpec, String?>) =
+        simpleTextSpec.transform(initialValues)
 }
