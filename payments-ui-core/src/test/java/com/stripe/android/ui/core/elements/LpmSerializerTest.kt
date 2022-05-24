@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.json.Json
 import org.junit.Test
@@ -15,6 +14,28 @@ class LpmSerializerTest {
         prettyPrint = true
         serializersModule = LpmSerializer.module
         encodeDefaults = true
+    }
+
+    @Test
+    fun `Verify that unknown field in Json spec deserializes ignoring the field`() {
+        val serializedString =
+            """
+                {
+                    "type": "au_becs_debit",
+                    "async": false,
+                    "fields": [
+                      {
+                        "type": "unknown_field",
+                        "api_path": {
+                          "v1": "billing_details[name]"
+                        },
+                        "label": "upe.labels.name.onAccount"
+                      }
+                    ]
+                  }
+            """.trimIndent()
+
+        lpmSerializer.deserialize(serializedString)
     }
 
     @Test

@@ -1,3 +1,20 @@
+public final class com/stripe/android/paymentsheet/forms/PaymentMethodRequirements$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/PaymentMethodRequirements$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/forms/PaymentMethodRequirements;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/forms/PaymentMethodRequirements;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/forms/PaymentMethodRequirements$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/ui/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -111,11 +128,11 @@ public final class com/stripe/android/ui/core/elements/BsbSpec$Companion {
 }
 
 public final class com/stripe/android/ui/core/elements/Capitalization : java/lang/Enum {
-	public static final field Characters Lcom/stripe/android/ui/core/elements/Capitalization;
 	public static final field Companion Lcom/stripe/android/ui/core/elements/Capitalization$Companion;
-	public static final field None Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field Sentences Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field Words Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field characters Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field none Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field sentences Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field words Lcom/stripe/android/ui/core/elements/Capitalization;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/Capitalization;
 	public static fun values ()[Lcom/stripe/android/ui/core/elements/Capitalization;
 }
@@ -152,12 +169,6 @@ public final class com/stripe/android/ui/core/elements/CardBillingSpec$$serializ
 
 public final class com/stripe/android/ui/core/elements/CardBillingSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/CardDetailsSectionController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;Ljava/util/Map;)V
-	public fun getError ()Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
@@ -209,6 +220,37 @@ public final class com/stripe/android/ui/core/elements/CountrySpec$$serializer :
 
 public final class com/stripe/android/ui/core/elements/CountrySpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/Enum, android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/ui/core/elements/DisplayField$Companion;
+	public static final field country Lcom/stripe/android/ui/core/elements/DisplayField;
+	public fun describeContents ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/DisplayField;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/DisplayField;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/DisplayField$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/DisplayField$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/DisplayField;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/DisplayField;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/DisplayField$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/DropdownConfig$DefaultImpls {
+	public static fun getTinyMode (Lcom/stripe/android/ui/core/elements/DropdownConfig;)Z
 }
 
 public final class com/stripe/android/ui/core/elements/DropdownItemSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -328,15 +370,15 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 }
 
 public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
-	public static final field Ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static final field Companion Lcom/stripe/android/ui/core/elements/KeyboardType$Companion;
-	public static final field Email Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Number Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field NumberPassword Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Password Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Phone Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Text Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field Uri Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field email Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field number Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field number_password Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field password Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field phone Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field text Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field uri Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static fun values ()[Lcom/stripe/android/ui/core/elements/KeyboardType;
 }
@@ -380,6 +422,30 @@ public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
 	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
 }
 
+public final class com/stripe/android/ui/core/elements/LpmRepository$Companion {
+}
+
+public final class com/stripe/android/ui/core/elements/LpmRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/elements/LpmRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/elements/LpmRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/LpmRepository;
+}
+
+public final class com/stripe/android/ui/core/elements/LpmSerializer {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/ui/core/elements/LpmSerializer$Companion;
+	public fun <init> ()V
+	public final fun deserialize-IoAF18A (Ljava/lang/String;)Ljava/lang/Object;
+	public final fun deserializeList (Ljava/lang/String;)Ljava/util/List;
+	public final fun serialize (Lcom/stripe/android/ui/core/elements/SharedDataSpec;)Lkotlinx/serialization/json/JsonElement;
+}
+
+public final class com/stripe/android/ui/core/elements/LpmSerializer$Companion {
+	public final fun getModule ()Lkotlinx/serialization/modules/SerializersModule;
+}
+
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 
@@ -401,6 +467,14 @@ public final class com/stripe/android/ui/core/elements/NameSpec$Companion {
 }
 
 public final class com/stripe/android/ui/core/elements/OTPElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberController$Companion {
+	public final fun createPhoneNumberController (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
+	public static synthetic fun createPhoneNumberController$default (Lcom/stripe/android/ui/core/elements/PhoneNumberController$Companion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
@@ -430,23 +504,12 @@ public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
 public final class com/stripe/android/ui/core/elements/SectionUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/Serializer {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/elements/Serializer$Companion;
-	public fun <init> ()V
-	public final fun deserialize-IoAF18A (Ljava/lang/String;)Ljava/lang/Object;
-	public final fun serialize (Lcom/stripe/android/ui/core/elements/SharedDataSpec;)Lkotlinx/serialization/json/JsonElement;
-}
-
-public final class com/stripe/android/ui/core/elements/Serializer$Companion {
-	public final fun getModule ()Lkotlinx/serialization/modules/SerializersModule;
-}
-
 public final class com/stripe/android/ui/core/elements/SharedDataSpec {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/ui/core/elements/SharedDataSpec$Companion;
 	public synthetic fun <init> (ILjava/lang/String;ZLjava/util/List;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;ZLjava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
 	public final fun component3 ()Ljava/util/List;
@@ -510,75 +573,60 @@ public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 
+public final class com/stripe/android/ui/core/elements/StringRepository$TranslationId : java/lang/Enum {
+	public static final field AddressName Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public static final field AuBecsAccountName Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public static final field Companion Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId$Companion;
+	public static final field EpsBank Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public static final field IdealBank Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public static final field P24Bank Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public static final field SepaDebitBilling Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public final fun getResourceId ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+}
+
+public final class com/stripe/android/ui/core/elements/StringRepository$TranslationId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/StringRepository$TranslationId;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/StringRepository$TranslationId$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/StringRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/elements/StringRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/elements/StringRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/StringRepository;
+}
+
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
-	public static final fun TextField-skw0Wq0 (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-	public static final fun TextFieldSection-7FxtGnE (Lcom/stripe/android/ui/core/elements/TextFieldController;Ljava/lang/Integer;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
 }
 
-public final class com/stripe/android/ui/core/forms/AffirmSpecKt {
-	public static final fun getAffirmForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
-	public static final fun getAfterpayClearpayForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/AuBecsDebitSpecKt {
-	public static final fun getAuBecsDebitForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
-	public static final fun getBancontactForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/CardSpecKt {
-	public static final fun getCardForm ()Ljava/util/List;
+public final class com/stripe/android/ui/core/forms/LinkCardFormKt {
 	public static final fun getLinkCardForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/EpsSpecKt {
-	public static final fun getEpsForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/GiropaySpecKt {
-	public static final fun getGiropayForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/IdealSpecKt {
-	public static final fun getIdealForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/KlarnaSpecKt {
-	public static final fun getKlarnaForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/P24SpecKt {
-	public static final fun getP24Form ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/PaypalSpecKt {
-	public static final fun getPaypalForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/SepaDebitSpecKt {
-	public static final fun getSepaDebitForm ()Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/SofortSpecKt {
-	public static final fun getSofortForm ()Ljava/util/List;
 }
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;ZLjava/lang/String;Landroid/content/Context;)V
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
-}
-
-public final class com/stripe/android/ui/core/forms/USBankAccountSpecKt {
-	public static final fun getUSBankAccountForm ()Ljava/util/List;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory : dagger/internal/Factory {

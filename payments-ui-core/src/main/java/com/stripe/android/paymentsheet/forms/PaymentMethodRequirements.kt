@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.forms
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 

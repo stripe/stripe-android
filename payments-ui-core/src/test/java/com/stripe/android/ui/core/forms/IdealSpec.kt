@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.FormItemSpec

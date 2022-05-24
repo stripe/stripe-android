@@ -6,7 +6,6 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import kotlinx.serialization.serializer
 
-
 class LpmSerializer {
     private val format = Json {
         ignoreUnknownKeys = true

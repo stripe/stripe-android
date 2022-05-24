@@ -23,4 +23,3 @@ internal data class StaticTextSpec(
             this.stringResId
         )
 }
-
