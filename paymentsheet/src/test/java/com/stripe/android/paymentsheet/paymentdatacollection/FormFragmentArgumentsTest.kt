@@ -4,12 +4,29 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.LpmRepository
 import org.junit.Test
 
 class FormFragmentArgumentsTest {
+    private val card = LpmRepository.SupportedPaymentMethod(
+        PaymentMethod.Type.Card,
+        R.string.stripe_paymentsheet_payment_method_card,
+        R.drawable.stripe_ic_paymentsheet_pm_card,
+        PaymentMethodRequirements(
+            piRequirements = emptySet(),
+            siRequirements = emptySet(),
+            confirmPMFromCustomer = true
+        ),
+        LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec()))
+    )
+
     private val billingDetails = PaymentSheet.BillingDetails(
         PaymentSheet.Address(
             line1 = "123 Main Street",
@@ -19,7 +36,7 @@ class FormFragmentArgumentsTest {
             postalCode = "T37 F8HK",
             country = "IE",
 
-        ),
+            ),
         "email.email.com",
         "Jenny Smith"
     )
@@ -56,7 +73,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            card,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",
@@ -89,7 +106,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify if only default billing address they appear in the initial values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            card,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",

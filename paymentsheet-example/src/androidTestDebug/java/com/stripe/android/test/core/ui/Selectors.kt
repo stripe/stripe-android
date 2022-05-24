@@ -1,6 +1,7 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
+import androidx.annotation.StringRes
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -222,8 +223,8 @@ class Selectors(
         getResourceString(R.string.email)
     )
 
-    fun getName() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_name)
+    fun getName(@StringRes id: Int) = composeTestRule.onNodeWithText(
+        getResourceString(id)
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(

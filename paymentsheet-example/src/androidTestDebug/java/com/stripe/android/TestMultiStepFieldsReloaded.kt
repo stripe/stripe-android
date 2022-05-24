@@ -7,7 +7,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -22,6 +21,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
+import com.stripe.android.ui.core.elements.LpmRepository
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -45,7 +45,7 @@ class TestMultiStepFieldsReloaded {
     private lateinit var testDriver: PlaygroundTestDriver
 
     private val newUser = TestParameters(
-        SupportedPaymentMethod.Bancontact,
+        paymentMethod = lpmRepository.fromCode("bancontact")!!,
         Customer.New,
         GooglePayState.Off,
         Currency.EUR,
@@ -70,7 +70,7 @@ class TestMultiStepFieldsReloaded {
     fun testCard() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Card,
+                paymentMethod = lpmRepository.getCard(),
                 saveCheckboxValue = true,
                 saveForFutureUseCheckboxVisible = true,
             )
@@ -81,7 +81,7 @@ class TestMultiStepFieldsReloaded {
     fun testBancontact() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Bancontact,
+                paymentMethod = lpmRepository.fromCode("bancontact")!!,
             )
         )
     }
@@ -90,7 +90,7 @@ class TestMultiStepFieldsReloaded {
     fun testSepaDebit() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.SepaDebit,
+                paymentMethod = lpmRepository.fromCode("sepa_debit")!!,
                 delayed = DelayedPMs.On,
                 authorizationAction = null
             ),
@@ -116,7 +116,7 @@ class TestMultiStepFieldsReloaded {
     fun testIdeal() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Ideal
+                paymentMethod = lpmRepository.fromCode("ideal")!!,
             )
         )
     }
@@ -125,7 +125,7 @@ class TestMultiStepFieldsReloaded {
     fun testEps() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Eps
+                paymentMethod = lpmRepository.fromCode("eps")!!,
             )
         )
     }
@@ -134,7 +134,7 @@ class TestMultiStepFieldsReloaded {
     fun testGiropay() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Giropay
+                paymentMethod = lpmRepository.fromCode("giropay")!!,
             )
         )
     }
@@ -143,7 +143,7 @@ class TestMultiStepFieldsReloaded {
     fun testP24() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.P24
+                paymentMethod = lpmRepository.fromCode("p24")!!,
             )
         )
     }
@@ -152,7 +152,7 @@ class TestMultiStepFieldsReloaded {
     fun testAfterpay() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.AfterpayClearpay,
+                paymentMethod = lpmRepository.fromCode("afterpay_clearpay")!!,
                 currency = Currency.USD,
                 shipping = Shipping.On
             )
@@ -163,7 +163,7 @@ class TestMultiStepFieldsReloaded {
     fun testAffirm() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Affirm,
+                paymentMethod = lpmRepository.fromCode("affirm")!!,
                 currency = Currency.USD,
             )
         )
@@ -173,7 +173,7 @@ class TestMultiStepFieldsReloaded {
     fun testAuBecsDD() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.AuBecsDebit,
+                paymentMethod = lpmRepository.fromCode("au_becs_debit")!!,
                 delayed = DelayedPMs.On,
                 currency = Currency.AUD,
             )
@@ -184,7 +184,7 @@ class TestMultiStepFieldsReloaded {
     fun testKlarna() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Klarna
+                paymentMethod = lpmRepository.fromCode("klarna")!!,
             )
         )
     }
@@ -193,7 +193,7 @@ class TestMultiStepFieldsReloaded {
     fun testPayPal() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.PayPal
+                paymentMethod = lpmRepository.fromCode("paypal")!!,
             )
         )
     }
@@ -202,5 +202,8 @@ class TestMultiStepFieldsReloaded {
         // There exists only one screenshot processor so that all tests put
         // their files in the same directory.
         private val screenshotProcessor = MyScreenCaptureProcessor()
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
+        )
     }
 }

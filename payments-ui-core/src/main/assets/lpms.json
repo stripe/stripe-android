@@ -504,6 +504,9 @@
   },
   {
     "type": "card"
+  },
+  {
+    "type": "us_bank_account"
   }
 ]
 

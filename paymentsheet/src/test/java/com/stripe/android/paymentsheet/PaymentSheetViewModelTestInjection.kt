@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -89,7 +91,11 @@ internal open class PaymentSheetViewModelTestInjection {
             StripeIntentValidator(),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
-            resourceRepository = StaticResourceRepository(mock(), mock()),
+            resourceRepository = StaticResourceRepository(
+                mock(),
+                mock(),
+                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+            ),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),

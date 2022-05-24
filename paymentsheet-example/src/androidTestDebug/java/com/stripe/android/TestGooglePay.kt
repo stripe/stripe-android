@@ -24,6 +24,7 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.test.core.ui.Selectors
+import com.stripe.android.ui.core.elements.LpmRepository
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -57,7 +58,7 @@ class TestGooglePay {
     }
 
     private val testParameters = TestParameters(
-        SupportedPaymentMethod.Bancontact,
+        lpmRepository.fromCode("bancontact")!!,
         Customer.New,
         GooglePayState.On,
         Currency.EUR,
@@ -86,7 +87,7 @@ class TestGooglePay {
     fun testGooglePayWithOnlyCards() {
         verifyGooglePayDividerText(
             testParameters.copy(
-                paymentMethod = SupportedPaymentMethod.Card,
+                paymentMethod = lpmRepository.getCard(),
                 currency = Currency.USD,
                 intentType = IntentType.Setup, // This means only card will show
             ),
@@ -127,5 +128,11 @@ class TestGooglePay {
             )
             testDriver.teardown()
         }
+    }
+
+    companion object {
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
+        )
     }
 }

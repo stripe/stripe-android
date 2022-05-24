@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
@@ -32,9 +33,9 @@ enum class KeyboardType {
 @Serializable
 @SerialName("text")
 @Parcelize
-internal open class SimpleTextSpec(
+open class SimpleTextSpec(
     override val api_path: IdentifierSpec,
-    val label: StringRepository.TranslationId,
+    @StringRes val label: Int,
     val capitalization: Capitalization = Capitalization.none,
     val keyboardType: KeyboardType = KeyboardType.ascii,
     val showOptionalLabel: Boolean = false
@@ -46,7 +47,7 @@ internal open class SimpleTextSpec(
             this.api_path,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
-                    label = this.label.resourceId,
+                    label = this.label,
                     capitalization = when (this.capitalization) {
                         Capitalization.none -> KeyboardCapitalization.None
                         Capitalization.characters -> KeyboardCapitalization.Characters

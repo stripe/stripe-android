@@ -185,16 +185,16 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName().apply {
+                        selectors.getName(it.label.resourceId).apply {
                             performTextInput(values.name)
-
                         }
                     }
                 }
                 is AuBankAccountNumberSpec -> {
                     selectors.getAuAccountNumber().apply {
                         performTextInput(values.auBecsAccountNumber)
-                    }}
+                    }
+                }
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
                 is CountrySpec -> {}

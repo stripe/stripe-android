@@ -21,6 +21,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
+import com.stripe.android.ui.core.elements.LpmRepository
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -49,7 +50,7 @@ class TestPaymentSheetScreenshots {
     }
 
     private val testParams = TestParameters(
-        SupportedPaymentMethod.Card,
+        lpmRepository.getCard(),
         Customer.New,
         GooglePayState.On,
         Currency.EUR,
@@ -246,6 +247,12 @@ class TestPaymentSheetScreenshots {
                     primaryButton = primaryButton
                 )
             )
+        )
+    }
+
+    companion object {
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
         )
     }
 }

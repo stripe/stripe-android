@@ -20,6 +20,7 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseController
@@ -29,8 +30,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.forms.SepaDebitForm
-import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -61,6 +60,9 @@ internal class FormViewModelTest {
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(), com.stripe.android.ui.core.R.style.StripeDefaultTheme
     )
+    val lpmRepository = LpmRepository(context.resources)
+    val sofortForm = lpmRepository.fromCode("sofort")!!.formSpec
+    val sepaDebitForm = lpmRepository.fromCode("sepa_debit")!!.formSpec
 
     private val resourceRepository =
         StaticResourceRepository(
@@ -93,7 +95,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            SofortForm
+            sofortForm
         ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
@@ -110,7 +112,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            SofortForm
+            sofortForm
         ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
@@ -377,7 +379,7 @@ internal class FormViewModelTest {
             billingDetails = null
         )
         val formViewModel = FormViewModel(
-            SepaDebitForm,
+            sepaDebitForm,
             args,
             resourceRepository = resourceRepository,
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -448,7 +450,7 @@ internal class FormViewModelTest {
             billingDetails = null
         )
         val formViewModel = FormViewModel(
-            SepaDebitForm,
+            sepaDebitForm,
             args,
             resourceRepository = resourceRepository,
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)

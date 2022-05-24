@@ -20,6 +20,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
+import com.stripe.android.ui.core.elements.LpmRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -54,7 +55,7 @@ class TestFieldPopulation {
     }
 
     private val sepaDebit = TestParameters(
-        paymentMethod = SupportedPaymentMethod.SepaDebit,
+        paymentMethod = lpmRepository.fromCode("sepa_debit")!!,
         customer = Customer.New,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
@@ -70,7 +71,7 @@ class TestFieldPopulation {
     )
 
     private val card = TestParameters(
-        paymentMethod = SupportedPaymentMethod.Card,
+        paymentMethod = lpmRepository.getCard(),
         customer = Customer.New,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
@@ -133,5 +134,11 @@ class TestFieldPopulation {
             composeTestRule.onNodeWithText("IBAN")
                 .performTextInput("DE89370400440532013000")
         }
+    }
+
+    companion object {
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
+        )
     }
 }

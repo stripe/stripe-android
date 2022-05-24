@@ -47,7 +47,7 @@ class LpmRepository @Inject constructor(
 
     fun values() = codeToSupportedPaymentMethod.values
 
-    fun getCard() = requireNotNull(codeToSupportedPaymentMethod["card"])
+    fun getCard() = codeToSupportedPaymentMethod["card"] ?: HardcodedCard
 
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
         codeToSupportedPaymentMethod[paymentMethodCode]
@@ -84,7 +84,7 @@ class LpmRepository @Inject constructor(
                 R.drawable.stripe_ic_paymentsheet_pm_card,
                 CardRequirement,
                 if (sharedDataSpec.fields.isEmpty()) {
-                    LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec()))
+                    HardcodedCard.formSpec
                 } else {
                     LayoutSpec(sharedDataSpec.fields)
                 }
@@ -247,6 +247,14 @@ class LpmRepository @Inject constructor(
     }
 
     companion object {
+        private val HardcodedCard = SupportedPaymentMethod(
+            PaymentMethod.Type.Card,
+            R.string.stripe_paymentsheet_payment_method_card,
+            R.drawable.stripe_ic_paymentsheet_pm_card,
+            CardRequirement,
+            LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec(), SaveForFutureUseSpec()))
+        )
+
         /**
          * This is a list of the payment methods that we are allowing in the release
          */
@@ -254,19 +262,19 @@ class LpmRepository @Inject constructor(
         internal val exposedPaymentMethods by lazy {
             listOf(
                 PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.Bancontact.code,
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.SepaDebit.code,
-                PaymentMethod.Type.Eps.code,
-                PaymentMethod.Type.Giropay.code,
-                PaymentMethod.Type.P24.code,
-                PaymentMethod.Type.Klarna.code,
-                PaymentMethod.Type.PayPal.code,
-                PaymentMethod.Type.AfterpayClearpay.code,
-                PaymentMethod.Type.USBankAccount.code,
-                PaymentMethod.Type.Affirm.code,
-                PaymentMethod.Type.AuBecsDebit.code
+//                PaymentMethod.Type.Bancontact.code,
+//                PaymentMethod.Type.Sofort.code,
+//                PaymentMethod.Type.Ideal.code,
+//                PaymentMethod.Type.SepaDebit.code,
+//                PaymentMethod.Type.Eps.code,
+//                PaymentMethod.Type.Giropay.code,
+//                PaymentMethod.Type.P24.code,
+//                PaymentMethod.Type.Klarna.code,
+//                PaymentMethod.Type.PayPal.code,
+//                PaymentMethod.Type.AfterpayClearpay.code,
+//                PaymentMethod.Type.USBankAccount.code,
+//                PaymentMethod.Type.Affirm.code,
+//                PaymentMethod.Type.AuBecsDebit.code
             )
         }
     }

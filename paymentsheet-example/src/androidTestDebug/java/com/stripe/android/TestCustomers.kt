@@ -20,6 +20,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
+import com.stripe.android.ui.core.elements.LpmRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -53,7 +54,7 @@ class TestCustomers {
     }
 
     private val bancontactNewUser = TestParameters(
-        SupportedPaymentMethod.Bancontact,
+        lpmRepository.fromCode("bancontact")!!,
         Customer.New,
         GooglePayState.On,
         Currency.EUR,
@@ -83,6 +84,12 @@ class TestCustomers {
             bancontactNewUser.copy(
                 customer = Customer.New,
             )
+        )
+    }
+
+    companion object {
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
         )
     }
 }

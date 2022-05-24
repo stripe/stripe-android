@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
@@ -23,6 +24,7 @@ import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
+import com.stripe.android.ui.core.elements.StringRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -116,8 +118,12 @@ internal class TransformSpecToElementTest {
         assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
-        assertThat(nameElement.controller.capitalization).isEqualTo(Capitalization.words)
-        assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
+        assertThat(nameElement.controller.capitalization).isEqualTo(
+            KeyboardCapitalization.Words
+        )
+        assertThat(nameElement.controller.keyboardType).isEqualTo(
+            androidx.compose.ui.text.input.KeyboardType.Text
+        )
     }
 
     @Test
@@ -126,9 +132,9 @@ internal class TransformSpecToElementTest {
             listOf(
                 SimpleTextSpec(
                     IdentifierSpec.Generic("simple"),
-                    R.string.address_label_name,
+                    StringRepository.TranslationId.AddressName.resourceId,
                     showOptionalLabel = true,
-                    keyboardType = KeyboardType.Text,
+                    keyboardType = KeyboardType.text,
                     capitalization = Capitalization.words
                 )
             )
@@ -177,7 +183,7 @@ internal class TransformSpecToElementTest {
     companion object {
         val IDEAL_BANK_CONFIG = DropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
-            R.string.ideal_bank,
+            StringRepository.TranslationId.IdealBank,
             listOf(
                 DropdownItemSpec(
                     api_value = "abn_amro",

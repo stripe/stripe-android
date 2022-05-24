@@ -15,7 +15,8 @@ data class NameSpec(
     val label: StringRepository.TranslationId = StringRepository.TranslationId.AddressName
 ) : FormItemSpec(), RequiredItemSpec {
     @IgnoredOnParcel
-    private val simpleTextSpec = SimpleTextSpec(api_path, label)
+    private val simpleTextSpec =
+        SimpleTextSpec(api_path, label.resourceId, Capitalization.words, KeyboardType.text)
 
     fun transform(initialValues: Map<IdentifierSpec, String?>) =
         simpleTextSpec.transform(initialValues)

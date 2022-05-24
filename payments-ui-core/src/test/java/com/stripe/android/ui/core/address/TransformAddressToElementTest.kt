@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.address
 
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository.Companion.supportedCountries
@@ -27,7 +28,7 @@ class TransformAddressToElementTest {
             IdentifierSpec.Line1,
             R.string.address_label_address_line1,
             Capitalization.words,
-            KeyboardType.Text,
+            KeyboardType.text,
             showOptionalLabel = false
         )
 
@@ -35,7 +36,7 @@ class TransformAddressToElementTest {
             IdentifierSpec.Line2,
             R.string.address_label_address_line2,
             Capitalization.words,
-            KeyboardType.Text,
+            KeyboardType.text,
             showOptionalLabel = true
         )
 
@@ -43,7 +44,7 @@ class TransformAddressToElementTest {
             IdentifierSpec.City,
             R.string.address_label_city,
             Capitalization.words,
-            KeyboardType.Text,
+            KeyboardType.text,
             showOptionalLabel = false
         )
 
@@ -51,7 +52,7 @@ class TransformAddressToElementTest {
             IdentifierSpec.State,
             R.string.address_label_state,
             Capitalization.words,
-            KeyboardType.Text,
+            KeyboardType.text,
             showOptionalLabel = false
         )
 
@@ -59,7 +60,7 @@ class TransformAddressToElementTest {
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
             Capitalization.none,
-            KeyboardType.NumberPassword,
+            KeyboardType.number_password,
             showOptionalLabel = false
         )
 
@@ -93,10 +94,24 @@ class TransformAddressToElementTest {
     ) {
         val actualController = textElement.controller as TextFieldController
         assertThat(actualController.capitalization).isEqualTo(
-            simpleTextSpec.capitalization
+            when (simpleTextSpec.capitalization) {
+                Capitalization.none -> KeyboardCapitalization.None
+                Capitalization.characters -> KeyboardCapitalization.Characters
+                Capitalization.words -> KeyboardCapitalization.Words
+                Capitalization.sentences -> KeyboardCapitalization.Sentences
+            }
         )
         assertThat(actualController.keyboardType).isEqualTo(
-            simpleTextSpec.keyboardType
+            when (simpleTextSpec.keyboardType) {
+                KeyboardType.text -> androidx.compose.ui.text.input.KeyboardType.Text
+                KeyboardType.ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
+                KeyboardType.number -> androidx.compose.ui.text.input.KeyboardType.Number
+                KeyboardType.phone -> androidx.compose.ui.text.input.KeyboardType.Phone
+                KeyboardType.uri -> androidx.compose.ui.text.input.KeyboardType.Uri
+                KeyboardType.email -> androidx.compose.ui.text.input.KeyboardType.Email
+                KeyboardType.password -> androidx.compose.ui.text.input.KeyboardType.Password
+                KeyboardType.number_password -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
+            }
         )
         assertThat(actualController.label.first()).isEqualTo(
             simpleTextSpec.label

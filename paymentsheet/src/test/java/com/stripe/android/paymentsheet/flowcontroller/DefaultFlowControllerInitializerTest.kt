@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -16,6 +18,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.ui.core.elements.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -42,7 +45,11 @@ internal class DefaultFlowControllerInitializerTest {
     private val stripeIntentRepository =
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val resourceRepository = StaticResourceRepository(mock(), mock())
+    private val resourceRepository = StaticResourceRepository(
+        mock(),
+        mock(),
+        LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+    )
 
     private val prefsRepository = FakePrefsRepository()
     private val initializer = createInitializer()

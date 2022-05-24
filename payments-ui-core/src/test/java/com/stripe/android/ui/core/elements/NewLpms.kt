@@ -4,7 +4,6 @@ import com.stripe.android.ui.core.forms.AffirmForm
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
 import com.stripe.android.ui.core.forms.AuBecsDebitForm
 import com.stripe.android.ui.core.forms.BancontactForm
-import com.stripe.android.ui.core.forms.CardForm
 import com.stripe.android.ui.core.forms.EpsForm
 import com.stripe.android.ui.core.forms.GiropayForm
 import com.stripe.android.ui.core.forms.IdealForm
@@ -51,7 +50,7 @@ class NewLpms {
 
         val CardJson: SharedDataSpec = SharedDataSpec(
             "card",
-            fields = CardForm
+            fields = listOf(CardDetailsSectionSpec(), CardBillingSpec())
         )
 
         val BancontactJson: SharedDataSpec = SharedDataSpec(
