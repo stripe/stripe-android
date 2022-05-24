@@ -166,6 +166,6 @@ class LpmSerializerTest {
                     ]
                   }
                ]
-            """.trimIndent()
+        """.trimIndent()
     }
 }
