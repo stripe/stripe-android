@@ -59,6 +59,7 @@ class Selectors(
     val currency = when (testParameters.currency) {
         Currency.EUR -> EspressoLabelIdButton(R.string.currency_eur)
         Currency.USD -> EspressoLabelIdButton(R.string.currency_usd)
+        Currency.AUD -> EspressoLabelIdButton(R.string.currency_aud)
     }
 
     val checkout = when (testParameters.intentType) {
@@ -239,6 +240,14 @@ class Selectors(
 
     fun getZip() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_zip_code)
+    )
+
+    fun getAuBsb() = composeTestRule.onNodeWithText(
+        getResourceString(com.stripe.android.ui.core.R.string.becs_widget_bsb)
+    )
+
+    fun getAuAccountNumber() = composeTestRule.onNodeWithText(
+        getResourceString(R.string.becs_widget_account_number)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(

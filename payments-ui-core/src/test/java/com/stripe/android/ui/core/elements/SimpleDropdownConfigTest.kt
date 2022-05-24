@@ -25,7 +25,7 @@ class SimpleDropdownConfigTest {
 
     @Test
     fun `Verify getDisplayItems gets list of display strings`() {
-        assertThat(config.getDisplayItems())
+        assertThat(config.displayItems)
             .isEqualTo(
                 listOf(
                     "ABN AMRO",
