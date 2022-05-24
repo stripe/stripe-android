@@ -13,7 +13,7 @@ val EpsForm = LayoutSpec.create(
     NameSpec(),
     DropdownSpec(
         api_path = IdentifierSpec.Generic("eps[bank]"),
-        label = TranslationId.EpsBank,
+        label_translation_id = TranslationId.EpsBank,
         items = listOf(
             DropdownItemSpec(
                 api_value = "arzte_und_apotheker_bank",
