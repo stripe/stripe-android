@@ -188,8 +188,8 @@ internal class LinkAccountManager @Inject constructor(
         linkAccount.value?.let { account ->
             val cookie = cookie()
             cookieStore.logout(account.email)
-            _linkAccount.value = null
             userHasLoggedOut = true
+            _linkAccount.value = null
             GlobalScope.launch {
                 linkRepository.logout(account.clientSecret, cookie)
             }
@@ -199,9 +199,8 @@ internal class LinkAccountManager @Inject constructor(
      * Whether the user has logged out from any account during this session, or the last logout was
      * from the [email] passed as parameter, even if in a previous session.
      */
-    fun hasUserLoggedOut(email: String?) = userHasLoggedOut || email?.let {
-        cookieStore.isEmailLoggedOut(it)
-    } ?: false
+    fun hasUserLoggedOut(email: String?) = userHasLoggedOut ||
+        (email?.let { cookieStore.isEmailLoggedOut(it) } ?: false)
 
     private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {
         _linkAccount.value = linkAccount

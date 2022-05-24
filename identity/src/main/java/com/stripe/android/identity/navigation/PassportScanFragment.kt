@@ -40,7 +40,7 @@ internal class PassportScanFragment(
     }
 
     /**
-     * Collect the [IdentityViewModel.uploadState] and upload when frontHighRes and frontLowRes
+     * Collect the [IdentityViewModel.documentUploadState] and upload when frontHighRes and frontLowRes
      * are uploaded.
      *
      * Try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
@@ -48,7 +48,7 @@ internal class PassportScanFragment(
     private fun collectUploadedStateAndUploadForFrontSide() =
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                identityViewModel.uploadState.collectLatest {
+                identityViewModel.documentUploadState.collectLatest {
                     when {
                         it.hasError() -> {
                             navigateToDefaultErrorFragment()

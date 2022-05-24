@@ -12,6 +12,7 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -45,13 +47,26 @@ internal class SignUpViewModel @Inject constructor(
     val emailController: TextFieldController = SimpleTextFieldController
         .createEmailSectionController(prefilledEmail)
 
+    val phoneController: PhoneNumberController =
+        PhoneNumberController.createPhoneNumberController()
+
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> =
-        emailController.formFieldValue.map {
-            it.takeIf { it.isComplete }?.value
-        }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
+        emailController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, prefilledEmail)
+
+    /**
+     * Emits the phone number entered in the form if valid, null otherwise.
+     */
+    private val consumerPhoneNumber: StateFlow<String?> =
+        phoneController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val isReadyToSignUp = combine(consumerEmail, consumerPhoneNumber) { email, phone ->
+        email != null && phone != null
+    }
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
@@ -73,12 +88,13 @@ internal class SignUpViewModel @Inject constructor(
         )
     }
 
-    fun onSignUpClick(phone: String) {
-        // Email must be valid otherwise sign up button would not be displayed
+    fun onSignUpClick() {
+        // All inputs must be valid otherwise sign up button would not be displayed
         val email = requireNotNull(consumerEmail.value)
+        val phone = phoneController.getE164PhoneNumber(requireNotNull(consumerPhoneNumber.value))
+        val country = phoneController.getCountryCode()
         viewModelScope.launch {
-            // TODO(brnunes-stripe): Read formatted phone and country code from phone number element
-            linkAccountManager.signUp(email, "+1$phone", "US").fold(
+            linkAccountManager.signUp(email, phone, country).fold(
                 onSuccess = {
                     onAccountFetched(it)
                 },

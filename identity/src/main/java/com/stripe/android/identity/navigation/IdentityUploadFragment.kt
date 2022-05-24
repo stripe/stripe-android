@@ -21,6 +21,7 @@ import androidx.navigation.NavArgument
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
@@ -100,7 +101,7 @@ internal abstract class IdentityUploadFragment(
             findNavController().previousBackStackEntry?.destination?.id == R.id.couldNotCaptureFragment
 
         if (findNavController().isNavigatedUpTo() || !isPreviousEntryCouldNotCapture) {
-            identityViewModel.resetUploadedState()
+            identityViewModel.resetDocumentUploadedState()
         }
 
         // flip the argument to indicate it's no longer navigated through back pressed
@@ -190,7 +191,7 @@ internal abstract class IdentityUploadFragment(
     private fun collectUploadedStateAndUpdateUI() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                identityViewModel.uploadState.collectLatest { latestState ->
+                identityViewModel.documentUploadState.collectLatest { latestState ->
                     if (latestState.hasError()) {
                         Log.e(TAG, "Fail to upload files: ${latestState.getError()}")
                         navigateToDefaultErrorFragment()
@@ -329,7 +330,7 @@ internal abstract class IdentityUploadFragment(
         binding.finishedCheckMarkFront.visibility = View.GONE
     }
 
-    protected open fun showFrontDone(latestState: IdentityViewModel.UploadState) {
+    protected open fun showFrontDone(latestState: DocumentUploadState) {
         binding.selectFront.visibility = View.GONE
         binding.progressCircularFront.visibility = View.GONE
         binding.finishedCheckMarkFront.visibility = View.VISIBLE
@@ -347,7 +348,7 @@ internal abstract class IdentityUploadFragment(
         binding.finishedCheckMarkBack.visibility = View.VISIBLE
     }
 
-    private fun showBothDone(latestState: IdentityViewModel.UploadState) {
+    private fun showBothDone(latestState: DocumentUploadState) {
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
             binding.kontinue.toggleToLoading()
@@ -363,13 +364,13 @@ internal abstract class IdentityUploadFragment(
                                 highResImage = requireNotNull(front.uploadedStripeFile.id) {
                                     "front uploaded file id is null"
                                 },
-                                uploadMethod = front.uploadMethod
+                                uploadMethod = requireNotNull(front.uploadMethod)
                             ),
                             idDocumentBack = DocumentUploadParam(
                                 highResImage = requireNotNull(back.uploadedStripeFile.id) {
                                     "back uploaded file id is null"
                                 },
-                                uploadMethod = back.uploadMethod
+                                uploadMethod = requireNotNull(back.uploadMethod)
                             ),
                             idDocumentType = frontScanType.toType()
                         )

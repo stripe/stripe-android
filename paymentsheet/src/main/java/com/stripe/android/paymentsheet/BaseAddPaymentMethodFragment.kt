@@ -92,13 +92,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
                     viewBinding.linkInlineSignup.isSelected,
-                    viewBinding.linkInlineSignup.isReady
-                ) { isSelected, isReady ->
+                    viewBinding.linkInlineSignup.isReady,
+                    sheetViewModel.selection.asFlow()
+                ) { isSelected, isReady, selection ->
                     if (isSelected) {
                         PrimaryButton.UIState(
                             label = null,
                             onClick = sheetViewModel::payWithLink,
-                            enabled = isReady,
+                            enabled = isReady && selection != null,
                             visible = true
                         )
                     } else {
