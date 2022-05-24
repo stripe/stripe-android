@@ -3,6 +3,7 @@ package com.stripe.android.camera.framework.image
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Build
 import android.util.Size
@@ -226,3 +227,31 @@ fun Bitmap.shorterEdge(): Int =
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.longerEdge(): Int =
     if (width > height) width else height
+
+@CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Bitmap.mirrorHorizontally(): Bitmap =
+    Bitmap.createBitmap(
+        this, 0, 0, this.width, this.height,
+        Matrix().also {
+            it.preScale(
+                -1f,
+                1f
+            )
+        },
+        false
+    )
+
+@CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Bitmap.mirrorVertically(): Bitmap =
+    Bitmap.createBitmap(
+        this, 0, 0, this.width, this.height,
+        Matrix().also {
+            it.preScale(
+                1f,
+                -1f
+            )
+        },
+        false
+    )

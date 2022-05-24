@@ -45,11 +45,10 @@ import com.stripe.android.ui.core.paymentsColors
 @Composable
 fun TextFieldSection(
     textFieldController: TextFieldController,
-    @StringRes sectionTitle: Int? = null,
     modifier: Modifier = Modifier,
+    @StringRes sectionTitle: Int? = null,
     imeAction: ImeAction,
     enabled: Boolean,
-    onValueChanged: (String) -> Unit = {},
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
     val error by textFieldController.error.collectAsState(null)
@@ -69,7 +68,6 @@ fun TextFieldSection(
             enabled = enabled,
             imeAction = imeAction,
             modifier = modifier,
-            onValueChanged = onValueChanged,
             onTextStateChanged = onTextStateChanged
         )
     }
@@ -86,7 +84,6 @@ fun TextField(
     modifier: Modifier = Modifier,
     imeAction: ImeAction,
     enabled: Boolean,
-    onValueChanged: (String) -> Unit = {},
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -101,9 +98,7 @@ fun TextField(
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
-    val label by textFieldController.label.collectAsState(
-        null
-    )
+    val label by textFieldController.label.collectAsState(null)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     /**
@@ -166,7 +161,7 @@ fun TextField(
             )
         },
         trailingIcon = trailingIcon?.let {
-            { TrailingIcon(it, colors, loading) }
+            { TrailingIcon(it, loading) }
         },
         isError = shouldShowError,
         visualTransformation = textFieldController.visualTransformation,
@@ -211,7 +206,6 @@ fun TextFieldColors(
 @Composable
 internal fun TrailingIcon(
     trailingIcon: TextFieldIcon,
-    colors: androidx.compose.material.TextFieldColors,
     loading: Boolean
 ) {
     if (loading) {

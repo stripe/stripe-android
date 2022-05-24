@@ -48,6 +48,7 @@ class GooglePayLauncherPlaygroundActivity : StripeIntentActivity() {
         viewBinding.googlePayBillingRequired.setOnCheckedChangeListener { _, _ -> updateConfig() }
         viewBinding.googlePayEnvironment.setOnCheckedChangeListener { _, _ -> updateConfig() }
         viewBinding.googlePayExistingPm.setOnCheckedChangeListener { _, _ -> updateConfig() }
+        viewBinding.googlePayAllowCreditCards.setOnCheckedChangeListener { _, _ -> updateConfig() }
 
         viewModel.createPaymentIntent(COUNTRY_CODE)
             .observe(this) { result ->
@@ -97,7 +98,8 @@ class GooglePayLauncherPlaygroundActivity : StripeIntentActivity() {
                 },
                 isPhoneNumberRequired = viewBinding.googlePayPhoneRequiredTrue.isChecked
             ),
-            existingPaymentMethodRequired = viewBinding.googlePayExistingPmTrue.isChecked
+            existingPaymentMethodRequired = viewBinding.googlePayExistingPmTrue.isChecked,
+            allowCreditCards = viewBinding.googlePayAllowCreditCardsTrue.isChecked
         )
     }
 

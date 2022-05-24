@@ -180,10 +180,11 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         context,
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
-                context,
-                config.environment,
-                config.billingAddressConfig.convert(),
-                config.existingPaymentMethodRequired
+                context = context,
+                environment = config.environment,
+                billingAddressParameters = config.billingAddressConfig.convert(),
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                allowCreditCards = config.allowCreditCards
             )
         },
         productUsage = setOf(PRODUCT_USAGE_TOKEN),
@@ -274,7 +275,14 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          *
          * Default to `true`.
          */
-        var existingPaymentMethodRequired: Boolean = true
+        var existingPaymentMethodRequired: Boolean = true,
+
+        /**
+         * Set to false if you don't support credit cards.
+         *
+         * Default: The credit card class is supported for the card networks specified.
+         */
+        var allowCreditCards: Boolean = true,
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean

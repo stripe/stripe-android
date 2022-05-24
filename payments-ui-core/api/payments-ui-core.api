@@ -59,12 +59,6 @@ public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateElement
 public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/CardDetailsSectionController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;Ljava/util/Map;)V
-	public fun getError ()Lkotlinx/coroutines/flow/Flow;
-}
-
 public final class com/stripe/android/ui/core/elements/CardDetailsSectionElementUIKt {
 }
 
@@ -80,6 +74,10 @@ public final class com/stripe/android/ui/core/elements/ComposableSingletons$Sect
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/ui/core/elements/DropdownConfig$DefaultImpls {
+	public static fun getTinyMode (Lcom/stripe/android/ui/core/elements/DropdownConfig;)Z
 }
 
 public final class com/stripe/android/ui/core/elements/EmailConfig$Companion {
@@ -230,6 +228,14 @@ public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 public final class com/stripe/android/ui/core/elements/OTPElementUIKt {
 }
 
+public final class com/stripe/android/ui/core/elements/PhoneNumberController$Companion {
+	public final fun createPhoneNumberController (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
+	public static synthetic fun createPhoneNumberController$default (Lcom/stripe/android/ui/core/elements/PhoneNumberController$Companion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberElementUIKt {
+}
+
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
 	public static final field SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
@@ -256,8 +262,8 @@ public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
-	public static final fun TextField-skw0Wq0 (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-	public static final fun TextFieldSection-7FxtGnE (Lcom/stripe/android/ui/core/elements/TextFieldController;Ljava/lang/Integer;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {

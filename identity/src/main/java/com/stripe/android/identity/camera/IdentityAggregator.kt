@@ -7,8 +7,6 @@ import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
@@ -36,30 +34,8 @@ internal class IdentityAggregator(
         type = identityScanType,
         transitioner =
         if (identityScanType == IdentityScanState.ScanType.SELFIE) {
-            // TODO(ccen) Read params from VerificationPage
             FaceDetectorTransitioner(
-                VerificationPageStaticContentSelfieCapturePage(
-                    autoCaptureTimeout = 15000,
-                    filePurpose = "selfie",
-                    numSamples = 8,
-                    sampleInterval = 200,
-                    models = VerificationPageStaticContentSelfieModels(
-                        faceDetectorUrl = "",
-                        faceDetectorMinScore = 0.8f,
-                        faceDetectorIou = 0.5f
-                    ),
-                    maxCenteredThresholdX = 0.2f,
-                    maxCenteredThresholdY = 0.2f,
-                    minEdgeThreshold = 0.05f,
-                    minCoverageThreshold = 0.07f,
-                    maxCoverageThreshold = 0.8f,
-                    lowResImageMaxDimension = 800,
-                    lowResImageCompressionQuality = 0.82f,
-                    highResImageMaxDimension = 1440,
-                    highResImageCompressionQuality = 0.92f,
-                    highResImageCropPadding = 0.5f,
-                    consentText = "consent"
-                )
+                requireNotNull(verificationPage.selfieCapture)
             )
         } else
             IDDetectorTransitioner(
@@ -79,8 +55,7 @@ internal class IdentityAggregator(
     internal data class FinalResult(
         val frame: AnalyzerInput,
         val result: AnalyzerOutput,
-        val identityState: IdentityScanState,
-        val savedFrames: List<AnalyzerInput>?
+        val identityState: IdentityScanState
     )
 
     override suspend fun aggregateResult(
@@ -91,27 +66,16 @@ internal class IdentityAggregator(
             val previousState = state
             state = previousState.consumeTransition(frame, result)
             val interimResult = InterimResult(state)
-            return interimResult to when (state) {
-                is IdentityScanState.Finished -> {
+            return interimResult to
+                if (state.isFinal) {
                     FinalResult(
                         frame,
                         result,
-                        state,
-                        (state.transitioner as? FaceDetectorTransitioner)?.filteredFrames
+                        state
                     )
-                }
-                is IdentityScanState.TimeOut -> {
-                    FinalResult(
-                        frame,
-                        result,
-                        state,
-                        null
-                    )
-                }
-                else -> {
+                } else {
                     null
                 }
-            }
         } else {
             // If this is the very first result, don't transition state and post InterimResult with
             // current state(IdentityScanState.Initial).

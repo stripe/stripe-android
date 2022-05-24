@@ -108,6 +108,13 @@ class PaymentSheet internal constructor(
          *
          * If set, PaymentSheet displays the button with this color.
          */
+        @Deprecated(
+            message = "Use Appearance parameter to customize primary button color",
+            replaceWith = ReplaceWith(
+                expression = "Appearance.colorsLight/colorsDark.primary " +
+                    "or PrimaryButton.colorsLight/colorsDark.background"
+            )
+        )
         val primaryButtonColor: ColorStateList? = null,
 
         /**
@@ -158,6 +165,13 @@ class PaymentSheet internal constructor(
             fun googlePay(googlePay: GooglePayConfiguration?) =
                 apply { this.googlePay = googlePay }
 
+            @Deprecated(
+                message = "Use Appearance parameter to customize primary button color",
+                replaceWith = ReplaceWith(
+                    expression = "Appearance.colorsLight/colorsDark.primary " +
+                        "or PrimaryButton.colorsLight/colorsDark.background"
+                )
+            )
             fun primaryButtonColor(primaryButtonColor: ColorStateList?) =
                 apply { this.primaryButtonColor = primaryButtonColor }
 

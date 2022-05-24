@@ -6,28 +6,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,13 +28,13 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.ui.core.DefaultPaymentsTheme
-import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
+import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.TextFieldSection
@@ -54,10 +46,10 @@ private fun SignUpBodyPreview() {
         Surface {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailController = SimpleTextFieldController.createEmailSectionController(
-                    "email"
-                ),
+                emailController = SimpleTextFieldController.createEmailSectionController("email"),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 signUpState = SignUpState.InputtingPhone,
+                isReadyToSignUp = false,
                 onSignUpClick = {}
             )
         }
@@ -77,11 +69,14 @@ internal fun SignUpBody(
     )
 
     val signUpStatus by signUpViewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
+    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState(false)
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailController = signUpViewModel.emailController,
+        phoneNumberController = signUpViewModel.phoneController,
         signUpState = signUpStatus,
+        isReadyToSignUp = isReadyToSignUp,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
 }
@@ -90,14 +85,11 @@ internal fun SignUpBody(
 internal fun SignUpBody(
     merchantName: String,
     emailController: TextFieldController,
+    phoneNumberController: PhoneNumberController,
     signUpState: SignUpState,
-    onSignUpClick: (String) -> Unit
+    isReadyToSignUp: Boolean,
+    onSignUpClick: () -> Unit
 ) {
-    if (signUpState == SignUpState.VerifyingEmail) {
-        LocalFocusManager.current.clearFocus()
-    }
-
-    var phoneNumber by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
@@ -134,14 +126,11 @@ internal fun SignUpBody(
             visible = signUpState == SignUpState.InputtingPhone
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // TODO(brnunes-stripe): Migrate to phone number collection element
                 DefaultPaymentsTheme {
-                    PhoneCollectionSection(
-                        phoneNumber = phoneNumber,
-                        onPhoneNumberChanged = {
-                            phoneNumber = it
-                        },
-                        textFieldColors = linkTextFieldColors()
+                    PhoneNumberCollectionSection(
+                        enabled = true,
+                        phoneNumberController = phoneNumberController,
+                        requestFocusWhenShown = true
                     )
                 }
                 LinkTerms(
@@ -152,13 +141,13 @@ internal fun SignUpBody(
                 )
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),
-                    state = if (phoneNumber.length == 10) {
+                    state = if (isReadyToSignUp) {
                         PrimaryButtonState.Enabled
                     } else {
                         PrimaryButtonState.Disabled
                     }
                 ) {
-                    onSignUpClick(phoneNumber)
+                    onSignUpClick()
                     keyboardController?.hide()
                 }
             }
@@ -180,7 +169,11 @@ internal fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
-            imeAction = ImeAction.Done,
+            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+                ImeAction.Next
+            } else {
+                ImeAction.Done
+            },
             enabled = enabled && signUpState != SignUpState.VerifyingEmail
         )
         if (signUpState == SignUpState.VerifyingEmail) {
@@ -198,37 +191,6 @@ internal fun EmailCollectionSection(
                     },
                 color = MaterialTheme.linkColors.buttonLabel,
                 strokeWidth = 2.dp
-            )
-        }
-    }
-}
-
-@Composable
-internal fun PhoneCollectionSection(
-    phoneNumber: String,
-    textFieldColors: TextFieldColors = linkTextFieldColors(),
-    onPhoneNumberChanged: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SectionCard {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = phoneNumber,
-                onValueChange = onPhoneNumberChanged,
-                label = {
-                    Text(text = "Mobile Number")
-                },
-                shape = MaterialTheme.shapes.medium,
-                colors = textFieldColors,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone,
-                    imeAction = ImeAction.Go
-                ),
-                singleLine = true
             )
         }
     }

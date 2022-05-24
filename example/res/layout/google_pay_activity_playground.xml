@@ -167,6 +167,35 @@
                     android:layout_height="wrap_content" />
             </RadioGroup>
 
+            <RadioGroup
+                android:id="@+id/google_pay_allow_credit_cards"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:text="@string/google_pay_allow_credit_cards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_allow_credit_cards_true"
+                    android:text="@string/google_pay_allow_credit_cards_true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_allow_credit_cards_false"
+                    android:text="@string/google_pay_allow_credit_cards_false"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

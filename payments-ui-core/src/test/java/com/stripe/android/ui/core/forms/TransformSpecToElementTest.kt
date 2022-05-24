@@ -73,7 +73,7 @@ internal class TransformSpecToElementTest {
             val countryElement = countrySectionElement.fields[0] as CountryElement
 
             assertThat(countryElement.controller.displayItems).hasSize(1)
-            assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
+            assertThat(countryElement.controller.displayItems[0]).isEqualTo("🇦🇹 Austria")
 
             // Verify the correct config is setup for the controller
             assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)

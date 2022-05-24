@@ -150,7 +150,9 @@ class SignUpViewModelTest {
             whenever(linkAccountManager.signUp(any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
-            viewModel.onSignUpClick("phone")
+            viewModel.emailController.onRawValueChange("email@valid.co")
+            viewModel.phoneController.onRawValueChange("1234567890")
+            viewModel.onSignUpClick()
 
             verify(navigator).navigateTo(LinkScreen.Verification)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
@@ -171,7 +173,9 @@ class SignUpViewModelTest {
             whenever(linkAccountManager.signUp(any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
-            viewModel.onSignUpClick("phone")
+            viewModel.emailController.onRawValueChange("email@valid.co")
+            viewModel.phoneController.onRawValueChange("1234567890")
+            viewModel.onSignUpClick()
 
             verify(navigator).navigateTo(LinkScreen.Wallet, true)
         }

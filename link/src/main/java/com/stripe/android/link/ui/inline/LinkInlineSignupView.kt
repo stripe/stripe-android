@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
@@ -40,11 +39,11 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
-import com.stripe.android.link.ui.signup.PhoneCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
+import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldColors
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
@@ -59,11 +58,11 @@ private fun Preview() {
             LinkInlineSignup(
                 merchantName = "Example, Inc.",
                 emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
                 toggleExpanded = {},
-                onPhoneInput = {},
                 onUserInteracted = {}
             )
         }
@@ -91,9 +90,9 @@ private fun LinkInlineSignup(
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(isReady) {
-        if (isReady) {
-            focusManager.clearFocus()
+    LaunchedEffect(signUpState) {
+        if (signUpState == SignUpState.InputtingEmail && isReady) {
+            focusManager.clearFocus(true)
             keyboardController?.hide()
         }
     }
@@ -101,11 +100,11 @@ private fun LinkInlineSignup(
     LinkInlineSignup(
         merchantName = viewModel.merchantName,
         emailController = viewModel.emailController,
+        phoneNumberController = viewModel.phoneController,
         signUpState = signUpState,
         enabled = enabled,
         expanded = isExpanded,
         toggleExpanded = viewModel::toggleExpanded,
-        onPhoneInput = viewModel::onPhoneInput,
         onUserInteracted = onUserInteracted
     )
 }
@@ -114,16 +113,13 @@ private fun LinkInlineSignup(
 internal fun LinkInlineSignup(
     merchantName: String,
     emailController: TextFieldController,
+    phoneNumberController: PhoneNumberController,
     signUpState: SignUpState,
     enabled: Boolean,
     expanded: Boolean,
     toggleExpanded: () -> Unit,
-    onPhoneInput: (String?) -> Unit,
     onUserInteracted: () -> Unit
 ) {
-    var phoneNumber by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
     ) {
@@ -169,6 +165,7 @@ internal fun LinkInlineSignup(
                         )
                     }
                 }
+
                 AnimatedVisibility(
                     visible = expanded,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -188,19 +185,10 @@ internal fun LinkInlineSignup(
                             visible = signUpState == SignUpState.InputtingPhone
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
-                                // TODO(brnunes-stripe): Migrate to phone number collection element
-                                PhoneCollectionSection(
-                                    phoneNumber = phoneNumber,
-                                    textFieldColors = TextFieldColors(),
-                                    onPhoneNumberChanged = {
-                                        phoneNumber = it
-                                        if (phoneNumber.length == 10) {
-                                            onPhoneInput(phoneNumber)
-                                            keyboardController?.hide()
-                                        } else {
-                                            onPhoneInput(null)
-                                        }
-                                    }
+                                PhoneNumberCollectionSection(
+                                    enabled = enabled,
+                                    phoneNumberController = phoneNumberController,
+                                    requestFocusWhenShown = true
                                 )
                                 LinkTerms(
                                     modifier = Modifier

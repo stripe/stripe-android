@@ -16,6 +16,8 @@ import com.stripe.android.identity.states.IdentityScanState.Initial
 import com.stripe.android.identity.states.IdentityScanState.Satisfied
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
 import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * [IdentityScanStateTransitioner] for FaceDetector model.
@@ -44,7 +46,7 @@ internal class FaceDetectorTransitioner(
         Clock.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds,
     internal val selfieFrameSaver: SelfieFrameSaver = SelfieFrameSaver()
 ) : IdentityScanStateTransitioner {
-    internal val filteredFrames: List<AnalyzerInput>
+    internal val filteredFrames: List<Pair<AnalyzerInput, FaceDetectorOutput>>
         get() {
             val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[SELFIES]) {
                 "No frames saved"
@@ -55,24 +57,45 @@ internal class FaceDetectorTransitioner(
 
             // return the first, the best(based on resultScore) and the last frame collected
             return mutableListOf(
-                savedFrames.last.first,
+                savedFrames.last,
                 requireNotNull(
                     savedFrames.subList(1, savedFrames.size - 1)
-                        .maxByOrNull { it.second }
-                ) { "Couldn't find best frame" }
-                    .first,
-                savedFrames.first.first
+                        .maxByOrNull { it.second.resultScore }
+                ) { "Couldn't find best frame" },
+                savedFrames.first
+            )
+        }
+
+    internal val numFrames = selfieCapturePage.numSamples
+
+    internal val scoreVariance: Float
+        get() {
+            val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[SELFIES]) {
+                "No frames saved"
+            }
+            require(savedFrames.size == numFrames) {
+                "Not enough frames saved, score variance not calculated"
+            }
+            val mean =
+                savedFrames.fold(0f) { acc, pair ->
+                    acc + pair.second.resultScore
+                }.div(numFrames.toFloat())
+
+            return sqrt(
+                savedFrames.fold(0f) { acc, pair ->
+                    acc + (pair.second.resultScore - mean).pow(2)
+                }.div(numFrames.toFloat())
             )
         }
 
     internal class SelfieFrameSaver :
-        FrameSaver<String, Pair<AnalyzerInput, Float>, AnalyzerOutput>() {
+        FrameSaver<String, Pair<AnalyzerInput, FaceDetectorOutput>, AnalyzerOutput>() {
         // Don't limit max number of saved frames, let the transitioner decide when to stop saving
         // new frames.
         override fun getMaxSavedFrames(savedFrameIdentifier: String) = Int.MAX_VALUE
 
         override fun getSaveFrameIdentifier(
-            frame: Pair<AnalyzerInput, Float>,
+            frame: Pair<AnalyzerInput, FaceDetectorOutput>,
             metaData: AnalyzerOutput
         ) = SELFIES
 
@@ -96,7 +119,7 @@ internal class FaceDetectorTransitioner(
             isFaceValid(analyzerOutput) -> {
                 Log.d(TAG, "Valid face found, transition to Found")
                 selfieFrameSaver.saveFrame(
-                    (analyzerInput to analyzerOutput.resultScore),
+                    (analyzerInput to analyzerOutput),
                     analyzerOutput
                 )
                 Found(initialState.type, this)
@@ -131,7 +154,7 @@ internal class FaceDetectorTransitioner(
             }
             isFaceValid(analyzerOutput) -> {
                 selfieFrameSaver.saveFrame(
-                    (analyzerInput to analyzerOutput.resultScore),
+                    (analyzerInput to analyzerOutput),
                     analyzerOutput
                 )
                 if (selfieFrameSaver.selfieCollected() >= selfieCapturePage.numSamples) {
@@ -223,9 +246,19 @@ internal class FaceDetectorTransitioner(
     private fun isFaceScoreOverThreshold(actualScore: Float) =
         actualScore > selfieCapturePage.models.faceDetectorMinScore
 
+    internal enum class Selfie(val index: Int, val value: String) {
+        FIRST(INDEX_FIRST, VALUE_FIRST), BEST(INDEX_BEST, VALUE_BEST), LAST(INDEX_LAST, VALUE_LAST)
+    }
+
     internal companion object {
         val TAG: String = FaceDetectorTransitioner::class.java.simpleName
         const val SELFIES = "SELFIES"
         const val NUM_FILTERED_FRAMES = 3
+        const val INDEX_FIRST = 0
+        const val INDEX_BEST = 1
+        const val INDEX_LAST = 2
+        const val VALUE_FIRST = "first"
+        const val VALUE_LAST = "last"
+        const val VALUE_BEST = "best"
     }
 }
