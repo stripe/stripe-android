@@ -285,7 +285,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                         html = text,
                         imageGetter = mapOf(),
                         color = MaterialTheme.paymentsColors.subtitle,
-                        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center)
+                        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
             }

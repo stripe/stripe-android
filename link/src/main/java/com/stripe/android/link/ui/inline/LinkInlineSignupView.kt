@@ -127,7 +127,10 @@ internal fun LinkInlineSignup(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(MaterialTheme.getBorderStroke(isSelected = false))
+                    .border(
+                        border = MaterialTheme.getBorderStroke(isSelected = false),
+                        shape = MaterialTheme.shapes.medium
+                    )
                     .background(
                         color = MaterialTheme.paymentsColors.component,
                         shape = MaterialTheme.shapes.medium
@@ -191,9 +194,7 @@ internal fun LinkInlineSignup(
                                     requestFocusWhenShown = true
                                 )
                                 LinkTerms(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 16.dp),
+                                    modifier = Modifier.padding(top = 8.dp),
                                     textAlign = TextAlign.Left
                                 )
                             }

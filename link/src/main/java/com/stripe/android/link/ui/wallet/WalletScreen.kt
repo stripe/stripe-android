@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -23,7 +22,6 @@ import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Surface
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +49,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.primaryButtonLabel
@@ -182,22 +181,10 @@ internal fun WalletBody(
             ) {
                 onPrimaryButtonClick(paymentDetails[selectedIndex])
             }
-            TextButton(
-                onClick = onPayAnotherWayClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+            PayAnotherWayButton(
                 enabled = !isProcessing,
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.secondary
-                )
-            ) {
-                Text(
-                    text = stringResource(id = R.string.wallet_pay_another_way),
-                    color = MaterialTheme.colors.onSecondary
-                )
-            }
+                onClick = onPayAnotherWayClick
+            )
         }
     }
 }
