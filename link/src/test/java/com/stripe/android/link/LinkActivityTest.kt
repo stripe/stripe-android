@@ -27,7 +27,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 // TODO:(brnunes-stripe) Enable these tests
-@Ignore("CircularProgressIndicator hangs tests. Need to comment it out before running.")
+@Ignore("CircularProgressIndicator hangs tests. Need to comment it out.")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityTest {
