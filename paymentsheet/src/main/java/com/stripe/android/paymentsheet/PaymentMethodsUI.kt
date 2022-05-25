@@ -23,11 +23,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod.Companion.shouldTintOnSelection
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.MeasureComposableWidth
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.paymentsColors
 

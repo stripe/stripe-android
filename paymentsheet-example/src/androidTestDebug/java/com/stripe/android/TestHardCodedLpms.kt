@@ -6,7 +6,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -171,7 +171,8 @@ class TestHardCodedLpms {
                 paymentMethod = SupportedPaymentMethod.Sofort,
                 authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.EUR,
-                delayed = DelayedPMs.On
+                delayed = DelayedPMs.On,
+                automatic = Automatic.Off
             )
         )
     }

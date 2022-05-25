@@ -7,6 +7,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +24,8 @@ class SupportedPaymentMethodTest {
      */
     @Test
     fun `Test supported payment method baseline`() {
-        SupportedPaymentMethod.values()
+        val lpmRepository = LpmRepository()
+        lpmRepository.values()
             .forEach { lpm ->
                 val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
@@ -37,16 +40,18 @@ class SupportedPaymentMethodTest {
 
                         val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                                 testInput.getIntent(lpm),
-                                testInput.getConfig()
+                                testInput.getConfig(),
+                                lpmRepository
                             ).contains(lpm),
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = SupportedPaymentMethod.getPMsToAdd(
+                            supportsAdding = getPMsToAdd(
                                 testInput.getIntent(lpm),
-                                testInput.getConfig()
+                                testInput.getConfig(),
+                                lpmRepository
                             ).contains(lpm)
                         )
                         val actualLine = "${lpm.type.code}, ${
@@ -82,7 +87,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     @Test
@@ -94,7 +99,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     @Test
@@ -106,7 +111,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>()
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     @Test
@@ -118,7 +123,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, LpmRepository())).isEqualTo(expected)
     }
 
     /**

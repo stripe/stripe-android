@@ -1,27 +1,36 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
-internal sealed interface Requirement : Parcelable
-internal sealed interface PIRequirement : Requirement
-internal sealed interface SIRequirement : Requirement
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed interface Requirement : Parcelable
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed interface PIRequirement : Requirement
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed interface SIRequirement : Requirement
 
 /**
  * This requirement is dependent on the configuration passed by the app to the SDK.
  */
 @Parcelize
-internal object Delayed : PIRequirement, SIRequirement
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object Delayed : PIRequirement, SIRequirement
 
 /**
  * The Payment Method requires a shipping address in the Payment Intent.
  * The fields required are name, address line 1, country, and postal code.
  */
 @Parcelize
-internal object ShippingAddress : PIRequirement
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object ShippingAddress : PIRequirement
 
 @Parcelize
-internal data class PaymentMethodRequirements(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+data class PaymentMethodRequirements(
 
     /**
      * These are the requirements for using a PaymentIntent.

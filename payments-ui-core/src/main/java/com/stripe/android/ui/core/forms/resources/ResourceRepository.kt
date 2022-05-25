@@ -16,5 +16,6 @@ interface ResourceRepository {
 
     fun isLoaded(): Boolean
 
+    fun getLpmRepository(): LpmRepository
     fun getAddressRepository(): AddressFieldElementRepository
 }

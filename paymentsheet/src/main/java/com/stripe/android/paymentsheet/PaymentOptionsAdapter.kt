@@ -48,12 +48,12 @@ import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTION
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.paymentsColors
@@ -62,6 +62,7 @@ import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
+    val lpmRepository: LpmRepository,
     private val canClickSelectedItem: Boolean,
     val paymentOptionSelectedListener:
         (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
@@ -261,7 +262,12 @@ internal class PaymentOptionsAdapter(
             ViewType.Link ->
                 LinkViewHolder(parent, width, linkClickListener)
             ViewType.SavedPaymentMethod ->
-                SavedPaymentMethodViewHolder(parent, width, ::onItemSelected) { position ->
+                SavedPaymentMethodViewHolder(
+                    parent,
+                    width,
+                    lpmRepository,
+                    ::onItemSelected
+                ) { position ->
                     onItemSelected(
                         position = findInitialSelectedPosition(savedSelection),
                         isClick = false,
@@ -302,6 +308,7 @@ internal class PaymentOptionsAdapter(
     internal class SavedPaymentMethodViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
+        private val lpmRepository: LpmRepository,
         private val onRemoveListener: (Int) -> Unit,
         private val onItemSelectedListener: ((Int, Boolean) -> Unit)
     ) : PaymentOptionViewHolder(
@@ -310,11 +317,13 @@ internal class PaymentOptionsAdapter(
         constructor(
             parent: ViewGroup,
             width: Dp,
+            lpmRepository: LpmRepository,
             onItemSelectedListener: ((Int, Boolean) -> Unit),
             onRemoveListener: (Int) -> Unit
         ) : this(
             composeView = ComposeView(parent.context),
             width = width,
+            lpmRepository = lpmRepository,
             onRemoveListener = onRemoveListener,
             onItemSelectedListener = onItemSelectedListener
         )
@@ -331,7 +340,7 @@ internal class PaymentOptionsAdapter(
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
             val removeTitle = itemView.resources.getString(
                 R.string.stripe_paymentsheet_remove_pm,
-                SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
+                lpmRepository.fromCode(item.paymentMethod.type?.code)
                     ?.run {
                         itemView.resources.getString(
                             displayNameResource

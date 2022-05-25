@@ -38,12 +38,13 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -65,7 +66,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
     @InjectorKey val injectorKey: String,
-    resourceRepository: ResourceRepository,
+    val resourceRepository: ResourceRepository,
     val savedStateHandle: SavedStateHandle,
     internal val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : AndroidViewModel(application) {
@@ -298,7 +299,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * they will be ready in the onViewCreated method of
          * the [BaseAddPaymentMethodFragment]
          */
-        val pmsToAdd = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
+        val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmRepository())
         savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
@@ -307,7 +308,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     "None of the requested payment methods" +
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
-                        " (${SupportedPaymentMethod.values().toList()})"
+                        " (${resourceRepository.getLpmRepository().values().toList()})"
                 )
             )
         }
@@ -377,7 +378,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun getAddFragmentSelectedLpm() =
         savedStateHandle.getLiveData(
             SAVE_SELECTED_ADD_LPM,
-            SupportedPaymentMethod.fromCode(
+            resourceRepository.getLpmRepository().fromCode(
                 newLpm?.paymentMethodCreateParams?.typeCode
             ) ?: SupportedPaymentMethod.Card
         )

@@ -20,10 +20,11 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AsyncResourceRepository @Inject constructor(
-    private val resources: Resources?,
+    private val resources: Resources,
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : ResourceRepository {
+    private val lpmRepository = LpmRepository()
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()
@@ -50,5 +51,6 @@ class AsyncResourceRepository @Inject constructor(
 
     override fun isLoaded() = loadingJobs.isEmpty()
 
+    override fun getLpmRepository() = lpmRepository
     override fun getAddressRepository() = addressRepository
 }

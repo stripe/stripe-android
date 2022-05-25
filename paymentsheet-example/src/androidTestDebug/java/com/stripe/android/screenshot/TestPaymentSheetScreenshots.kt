@@ -2,13 +2,12 @@ package com.stripe.android.screenshot
 
 import android.graphics.Color
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.test.espresso.IdlingPolicies
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
@@ -23,7 +22,6 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
