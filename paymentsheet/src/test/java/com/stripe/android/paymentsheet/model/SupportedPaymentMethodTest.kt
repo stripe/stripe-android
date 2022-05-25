@@ -21,7 +21,7 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
     private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
-    private val card = lpmRepository.getCard()
+    private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
     /**
      * To create a baseline for a payment method, create a new file <payment_method>-support.csv,

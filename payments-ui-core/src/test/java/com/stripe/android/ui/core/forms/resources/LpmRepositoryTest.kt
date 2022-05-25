@@ -10,14 +10,13 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
-
     private val lpmRepository = LpmRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
-        assertThat(lpmRepository.getCard()).isNotNull()
+        assertThat(lpmRepository.fromCode("card")).isNotNull()
         lpmRepository.initialize(
             """
           [
@@ -33,7 +32,7 @@ class LpmRepositoryTest {
          ]
         """.trimIndent().byteInputStream()
         )
-        assertThat(lpmRepository.getCard()).isNull()
+        assertThat(lpmRepository.fromCode("card")).isNull()
     }
 
     //TODO(michelleb): Once we have the server implemented in production we can do filtering there instead
@@ -43,6 +42,15 @@ class LpmRepositoryTest {
         lpmRepository.initialize(
             """
               [
+                {
+                    "type": "affirm",
+                    "async": false,
+                    "fields": [
+                      {
+                        "type": "affirm_header"
+                      }
+                    ]
+                  },
                 {
                     "type": "unknown_lpm",
                     "async": false,
@@ -61,7 +69,7 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that payment methods described as async in the json have the delayed requirement set`() {
         assertThat(
-            lpmRepository.getCard()?.requirement?.piRequirements
+            lpmRepository.fromCode("card")?.requirement?.piRequirements
         ).doesNotContain(Delayed)
 
         lpmRepository.initialize(
@@ -76,7 +84,7 @@ class LpmRepositoryTest {
         """.trimIndent().byteInputStream()
         )
         assertThat(
-            lpmRepository.getCard()?.requirement?.piRequirements
+            lpmRepository.fromCode("card")?.requirement?.piRequirements
         ).contains(Delayed)
     }
 

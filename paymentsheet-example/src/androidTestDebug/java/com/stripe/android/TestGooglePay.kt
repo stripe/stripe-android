@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -86,7 +87,7 @@ class TestGooglePay {
     fun testGooglePayWithOnlyCards() {
         verifyGooglePayDividerText(
             testParameters.copy(
-                paymentMethod = lpmRepository.getCard(),
+                paymentMethod = LpmRepository.HardcodedCard,
                 currency = Currency.USD,
                 intentType = IntentType.Setup, // This means only card will show
             ),

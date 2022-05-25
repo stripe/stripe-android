@@ -80,7 +80,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 billing = Billing.On,
-                paymentMethod = lpmRepository.getCard(),
+                paymentMethod = LpmRepository.HardcodedCard,
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
                 saveCheckboxValue = false,

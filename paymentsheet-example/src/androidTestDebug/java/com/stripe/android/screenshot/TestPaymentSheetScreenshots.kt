@@ -49,7 +49,7 @@ class TestPaymentSheetScreenshots {
     }
 
     private val testParams = TestParameters(
-        lpmRepository.getCard(),
+        LpmRepository.HardcodedCard,
         Customer.New,
         GooglePayState.On,
         Currency.EUR,

@@ -45,11 +45,14 @@ class LpmRepository @Inject constructor(
     resources: Resources?
 ) {
     private val lpmSerializer: LpmSerializer = LpmSerializer()
+    private var first: SupportedPaymentMethod? = null
     private lateinit var codeToSupportedPaymentMethod: Map<String, SupportedPaymentMethod>
 
     fun values() = codeToSupportedPaymentMethod.values
 
     fun getCard() = codeToSupportedPaymentMethod["card"]
+
+    fun getFirst() = first
 
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
         codeToSupportedPaymentMethod[paymentMethodCode]
@@ -63,11 +66,13 @@ class LpmRepository @Inject constructor(
 
     @VisibleForTesting
     fun initialize(inputStream: InputStream?) {
-        // By mapNotNull we will not accept any Lpms that are not known by the platform.
-        codeToSupportedPaymentMethod = parseLpms(inputStream)
+        val parsedSupportedPaymentMethod = parseLpms(inputStream)
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
-            ?.associateBy { it.type.code } ?: emptyMap()
+        first = parsedSupportedPaymentMethod.firstOrNull()
+
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        codeToSupportedPaymentMethod = parsedSupportedPaymentMethod.associateBy { it.type.code }
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -249,7 +254,8 @@ class LpmRepository @Inject constructor(
     }
 
     companion object {
-        private val HardcodedCard = SupportedPaymentMethod(
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val HardcodedCard = SupportedPaymentMethod(
             PaymentMethod.Type.Card,
             R.string.stripe_paymentsheet_payment_method_card,
             R.drawable.stripe_ic_paymentsheet_pm_card,

@@ -9,9 +9,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.elements.NameSpec
 import org.mockito.kotlin.mock
 

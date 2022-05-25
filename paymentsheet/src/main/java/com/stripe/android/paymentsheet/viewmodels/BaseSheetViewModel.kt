@@ -308,8 +308,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        resourceRepository.getLpmRepository().values()
-                            .map { it.type.code }.toList()
+                            resourceRepository.getLpmRepository().values()
+                                .map { it.type.code }.toList()
                         })"
                 )
             )
@@ -382,13 +382,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             SAVE_SELECTED_ADD_LPM,
             resourceRepository.getLpmRepository().fromCode(
                 newLpm?.paymentMethodCreateParams?.typeCode
-            ) ?: resourceRepository.getLpmRepository().getCard()
+            ) ?: resourceRepository.getLpmRepository().getFirst()
         )
 
     fun getAddFragmentSelectedLpmValue() =
         savedStateHandle.get<SupportedPaymentMethod>(
             SAVE_SELECTED_ADD_LPM
-        ) ?: resourceRepository.getLpmRepository().getCard()
+        ) ?: resourceRepository.getLpmRepository().getFirst()
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
@@ -413,8 +413,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

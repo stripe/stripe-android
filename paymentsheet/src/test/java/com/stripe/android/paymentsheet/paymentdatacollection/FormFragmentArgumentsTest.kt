@@ -5,17 +5,17 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 
 class FormFragmentArgumentsTest {
-    private val card = LpmRepository.SupportedPaymentMethod(
+    private val card = SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,

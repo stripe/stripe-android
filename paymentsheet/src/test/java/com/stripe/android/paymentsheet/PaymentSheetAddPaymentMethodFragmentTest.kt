@@ -183,7 +183,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             emptySet()
         )
         val actualFromArguments = BaseAddPaymentMethodFragment.getFormArguments(
-            lpmRepository.getCard(),
+            LpmRepository.HardcodedCard,
             paymentIntent,
             CONFIG_MINIMUM,
             MERCHANT_DISPLAY_NAME,
@@ -290,9 +290,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(
-                lpmRepository.getCard(),
-            )
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
 
             idleLooper()
 
@@ -308,8 +306,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod =
-                        lpmRepository.getCard(),
+                        paymentMethod = LpmRepository.HardcodedCard,
                         amount = createAmount(),
                         showCheckbox = true,
                         showCheckboxControlledFields = false,
@@ -327,7 +324,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             stripeIntent = stripeIntent,
             args = args
         ) { fragment, viewBinding, _ ->
-            fragment.onPaymentMethodSelected(lpmRepository.getCard())
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
 
             idleLooper()
 
@@ -344,7 +341,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = lpmRepository.getCard(),
+                        paymentMethod = LpmRepository.HardcodedCard,
                         amount = createAmount(),
                         showCheckbox = true,
                         showCheckboxControlledFields = false,
@@ -373,7 +370,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
 
-            fragment.onPaymentMethodSelected(lpmRepository.getCard())
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
             idleLooper()
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
         }
@@ -391,7 +388,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(lpmRepository.getCard())
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
 
             idleLooper()
 
@@ -407,7 +404,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = lpmRepository.getCard(),
+                        paymentMethod = LpmRepository.HardcodedCard,
                         amount = createAmount(PI_OFF_SESSION),
                         showCheckbox = false,
                         showCheckboxControlledFields = true,

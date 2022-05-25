@@ -22,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ComposeFormDataCollectionFragmentTest {
     private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
-    private val card = lpmRepository.getCard()
+    private val card = LpmRepository.HardcodedCard
     private val sofort = lpmRepository.fromCode("sofort")!!
 
     @Test
