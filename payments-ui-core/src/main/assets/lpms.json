@@ -68,7 +68,7 @@
       },
       {
         "type": "selector",
-        "label": "upe.labels.ideal.bank",
+        "label_translation_id": "upe.labels.ideal.bank",
         "items": [
           {
             "display_text": "ABN Amro",
@@ -206,7 +206,7 @@
       },
       {
         "type": "selector",
-        "label": "upe.labels.eps.bank",
+        "label_translation_id": "upe.labels.eps.bank",
         "items": [
           {
             "display_text": "Ärzte- und Apothekerbank",
@@ -357,7 +357,7 @@
       },
       {
         "type": "selector",
-        "label": "upe.labels.p24.bank",
+        "label_translation_id": "upe.labels.p24.bank",
         "items": [
           {
             "display_text": "Alior Bank",
@@ -477,7 +477,7 @@
         "api_path": {
           "v1": "billing_details[name]"
         },
-        "label": "upe.labels.name.onAccount"
+        "label_translation_id": "upe.labels.name.onAccount"
       },
       {
         "type": "email",

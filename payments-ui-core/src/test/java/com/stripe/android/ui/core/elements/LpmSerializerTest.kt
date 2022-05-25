@@ -101,7 +101,7 @@ class LpmSerializerTest {
                       },
                       {
                         "type": "selector",
-                        "label": "upe.labels.ideal.bank",
+                        "label_translation_id": "upe.labels.ideal.bank",
                         "items": [
                           {
                             "display_text": "ABN Amro",
@@ -140,7 +140,7 @@ class LpmSerializerTest {
                         "api_path": {
                           "v1": "billing_details[name]"
                         },
-                        "label": "upe.labels.name.onAccount"
+                        "label_translation_id": "upe.labels.name.onAccount"
                       },
                       {
                         "type": "au_becs_bsb_number",
