@@ -51,11 +51,11 @@ class LpmSerializerTest {
     }
 
     @Test
-    fun deserializeFields() {
+    fun `Deserialize each field type`() {
         val lpms = lpmSerializer.deserializeList(JSON_ALL_FIELDS)
         assertThat(lpms.first().fields.size).isEqualTo(17)
 
-        // Empty would mean a field is not recognized.
+        // Empty would mean a field is not recognized/ignored.
         assertThat(lpms.filterIsInstance<EmptyFormSpec>()).isEmpty()
     }
 
