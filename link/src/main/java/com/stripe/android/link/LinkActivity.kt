@@ -42,7 +42,7 @@ internal class LinkActivity : ComponentActivity() {
     internal var viewModelFactory: ViewModelProvider.Factory =
         LinkActivityViewModel.Factory(
             applicationSupplier = { application },
-            starterArgsSupplier = { requireNotNull(starterArgs) }
+            starterArgsSupplier = { starterArgs }
         )
 
     private val viewModel: LinkActivityViewModel by viewModels { viewModelFactory }
@@ -50,8 +50,8 @@ internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
     lateinit var navController: NavHostController
 
-    private val starterArgs: LinkActivityContract.Args? by lazy {
-        LinkActivityContract.Args.fromIntent(intent)
+    private val starterArgs by lazy {
+        requireNotNull(LinkActivityContract.Args.fromIntent(intent))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +77,7 @@ internal class LinkActivity : ComponentActivity() {
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
+
                             composable(LinkScreen.Loading.route) {
                                 Box(
                                     modifier = Modifier
@@ -87,6 +88,7 @@ internal class LinkActivity : ComponentActivity() {
                                     CircularProgressIndicator()
                                 }
                             }
+
                             composable(
                                 LinkScreen.SignUp.route,
                                 arguments = listOf(
@@ -100,6 +102,7 @@ internal class LinkActivity : ComponentActivity() {
                                     backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
                                 SignUpBody(viewModel.injector, email)
                             }
+
                             composable(LinkScreen.Verification.route) {
                                 linkAccount?.let { account ->
                                     VerificationBodyFullFlow(
@@ -108,6 +111,7 @@ internal class LinkActivity : ComponentActivity() {
                                     )
                                 }
                             }
+
                             composable(LinkScreen.Wallet.route) {
                                 linkAccount?.let { account ->
                                     WalletBody(
@@ -116,6 +120,7 @@ internal class LinkActivity : ComponentActivity() {
                                     )
                                 }
                             }
+
                             composable(LinkScreen.PaymentMethod.route) {
                                 linkAccount?.let { account ->
                                     PaymentMethodBody(
@@ -140,10 +145,13 @@ internal class LinkActivity : ComponentActivity() {
                     lifecycleScope.launch {
                         viewModel.navigator.navigateTo(
                             target = when (viewModel.linkAccountManager.accountStatus.first()) {
-                                AccountStatus.Verified -> LinkScreen.Wallet
+                                AccountStatus.Verified ->
+                                    LinkScreen.Wallet
                                 AccountStatus.NeedsVerification,
-                                AccountStatus.VerificationStarted -> LinkScreen.Verification
-                                AccountStatus.SignedOut -> LinkScreen.SignUp()
+                                AccountStatus.VerificationStarted ->
+                                    LinkScreen.Verification
+                                AccountStatus.SignedOut ->
+                                    LinkScreen.SignUp(starterArgs.customerEmail)
                             },
                             clearBackStack = true
                         )
