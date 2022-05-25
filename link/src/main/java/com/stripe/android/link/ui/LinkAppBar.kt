@@ -50,6 +50,7 @@ internal fun LinkAppBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 20.dp)
             .defaultMinSize(minHeight = AppBarHeight)
     ) {
         Row(
