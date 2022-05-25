@@ -91,21 +91,32 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
                     viewBinding.linkInlineSignup.isSelected,
-                    viewBinding.linkInlineSignup.isReady,
+                    viewBinding.linkInlineSignup.userInput,
                     sheetViewModel.selection.asFlow()
-                ) { isSelected, isReady, selection ->
+                ) { isSelected, userInput, selection ->
                     if (isSelected) {
-                        PrimaryButton.UIState(
-                            label = null,
-                            onClick = sheetViewModel::payWithLink,
-                            enabled = isReady && selection != null,
-                            visible = true
-                        )
+                        if (userInput != null && selection != null) {
+                            PrimaryButton.UIState(
+                                label = null,
+                                onClick = { sheetViewModel.payWithLink(userInput) },
+                                enabled = true,
+                                visible = true
+                            )
+                        } else {
+                            PrimaryButton.UIState(
+                                label = null,
+                                onClick = null,
+                                enabled = false,
+                                visible = true
+                            )
+                        }
                     } else {
                         null
                     }
                 }.collect {
-                    sheetViewModel.updatePrimaryButtonUIState(it)
+                    if (showLinkInlineSignup) {
+                        sheetViewModel.updatePrimaryButtonUIState(it)
+                    }
                 }
             }
         }
@@ -157,6 +168,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         ViewCompat.getWindowInsetsController(requireView())
             ?.hide(WindowInsetsCompat.Type.ime())
 
+        sheetViewModel.updatePrimaryButtonUIState(null)
         updateLinkInlineSignupVisibility(paymentMethod)
         replacePaymentMethodFragment(paymentMethod)
     }

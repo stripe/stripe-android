@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
@@ -819,7 +820,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() {
         var isEnabled = false
-        viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
+        viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
@@ -860,10 +861,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.setEditing(false)
         assertThat(isEnabled)
             .isFalse()
-
-        viewModel.updateSelection(mock())
-        assertThat(isEnabled)
-            .isTrue()
     }
 
     @Test
