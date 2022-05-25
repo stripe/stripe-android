@@ -532,6 +532,7 @@ public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
+	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
 	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }

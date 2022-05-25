@@ -30,7 +30,7 @@ class IbanConfig : TextFieldConfig {
     override val keyboard = KeyboardType.Ascii
 
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(
-        TextFieldIcon(
+        TextFieldIcon.Trailing(
             R.drawable.stripe_ic_bank_generic,
             isIcon = true
         )

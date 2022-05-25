@@ -45,6 +45,30 @@ enum class CardBrand(
      */
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
 ) {
+    Visa(
+        "visa",
+        "Visa",
+        R.drawable.stripe_ic_visa,
+        pattern = Pattern.compile("^(4)[0-9]*$"),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^4$")
+        ),
+    ),
+
+    MasterCard(
+        "mastercard",
+        "Mastercard",
+        R.drawable.stripe_ic_mastercard,
+        pattern = Pattern.compile(
+            "^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|" +
+                "227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$"
+        ),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^2|5|6$"),
+            2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
+        )
+    ),
+
     AmericanExpress(
         "amex",
         "American Express",
@@ -102,30 +126,6 @@ enum class CardBrand(
         ),
         variantMaxLength = mapOf(
             Pattern.compile("^(36)[0-9]*$") to 14
-        )
-    ),
-
-    Visa(
-        "visa",
-        "Visa",
-        R.drawable.stripe_ic_visa,
-        pattern = Pattern.compile("^(4)[0-9]*$"),
-        partialPatterns = mapOf(
-            1 to Pattern.compile("^4$")
-        ),
-    ),
-
-    MasterCard(
-        "mastercard",
-        "Mastercard",
-        R.drawable.stripe_ic_mastercard,
-        pattern = Pattern.compile(
-            "^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|" +
-                "227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$"
-        ),
-        partialPatterns = mapOf(
-            1 to Pattern.compile("^2|5|6$"),
-            2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
         )
     ),
 
@@ -215,7 +215,9 @@ enum class CardBrand(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun getCardBrands(cardNumber: String?): List<CardBrand> {
             if (cardNumber.isNullOrBlank()) {
-                return listOf(Unknown)
+                return values().toList().filter {
+                    it != Unknown
+                }
             }
 
             return getMatchingCards(cardNumber).takeIf {

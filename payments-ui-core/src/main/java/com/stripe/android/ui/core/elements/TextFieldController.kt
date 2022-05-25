@@ -35,15 +35,24 @@ interface TextFieldController : InputController {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-data class TextFieldIcon(
-    @DrawableRes
-    val idRes: Int,
-    @StringRes
-    val contentDescription: Int? = null,
+sealed class TextFieldIcon {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Trailing(
+        @DrawableRes
+        val idRes: Int,
+        @StringRes
+        val contentDescription: Int? = null,
 
-    /** If it is an icon that should be tinted to match the text the value should be true */
-    val isIcon: Boolean
-)
+        /** If it is an icon that should be tinted to match the text the value should be true */
+        val isIcon: Boolean
+    ) : TextFieldIcon()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class MultiTrailing(
+        val staticIcons: List<Trailing>,
+        val animatedIcons: List<Trailing>
+    ) : TextFieldIcon()
+}
 
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's

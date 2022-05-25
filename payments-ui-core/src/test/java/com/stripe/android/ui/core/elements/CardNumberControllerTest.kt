@@ -6,6 +6,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.AccountRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -128,6 +129,52 @@ internal class CardNumberControllerTest {
         cardNumberController.onValueChange("6216828050000000000")
         idleLooper()
         assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(19)
+    }
+
+    @Test
+    fun `trailingIcon should have multi trailing icons when field is empty`() {
+        val trailingIcons = mutableListOf<TextFieldIcon?>()
+        cardNumberController.trailingIcon.asLiveData().observeForever {
+            trailingIcons.add(it)
+        }
+        cardNumberController.onValueChange("")
+        idleLooper()
+        assertThat(trailingIcons.first() as TextFieldIcon.MultiTrailing)
+            .isEqualTo(
+                TextFieldIcon.MultiTrailing(
+                    staticIcons = listOf(
+                        TextFieldIcon.Trailing(CardBrand.Visa.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isIcon = false),
+                    ),
+                    animatedIcons = listOf(
+                        TextFieldIcon.Trailing(CardBrand.Discover.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.JCB.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isIcon = false),
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `trailingIcon should have trailing icon when field matches bin`() {
+        val trailingIcons = mutableListOf<TextFieldIcon?>()
+        cardNumberController.trailingIcon.asLiveData().observeForever {
+            trailingIcons.add(it)
+        }
+        cardNumberController.onValueChange("4")
+        idleLooper()
+        cardNumberController.onValueChange("")
+        idleLooper()
+        assertThat(trailingIcons[0])
+            .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+        assertThat(trailingIcons[1] as TextFieldIcon.Trailing)
+            .isEqualTo(
+                TextFieldIcon.Trailing(CardBrand.Visa.icon, isIcon = false)
+            )
+        assertThat(trailingIcons[2])
+            .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {

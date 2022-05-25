@@ -65,11 +65,20 @@ internal class CardNumberController constructor(
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
         val cardBrands = CardBrand.getCardBrands(it)
         if (accountRangeService.accountRange != null) {
-            TextFieldIcon(accountRangeService.accountRange!!.brand.icon, isIcon = false)
-        } else if (cardBrands.size == 1) {
-            TextFieldIcon(cardBrands.first().icon, isIcon = false)
+            TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isIcon = false)
         } else {
-            TextFieldIcon(CardBrand.Unknown.icon, isIcon = false)
+            val staticIcons = cardBrands.map { cardBrand ->
+                TextFieldIcon.Trailing(cardBrand.icon, isIcon = false)
+            }.filterIndexed { index, _ -> index < 3 }
+
+            val animatedIcons = cardBrands.map { cardBrand ->
+                TextFieldIcon.Trailing(cardBrand.icon, isIcon = false)
+            }.filterIndexed { index, _ -> index > 2 }
+
+            TextFieldIcon.MultiTrailing(
+                staticIcons = staticIcons,
+                animatedIcons = animatedIcons
+            )
         }
     }
 
