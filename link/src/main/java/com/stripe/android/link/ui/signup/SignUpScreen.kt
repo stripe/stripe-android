@@ -27,12 +27,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -115,7 +115,7 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        DefaultPaymentsTheme {
+        PaymentsThemeForLink {
             EmailCollectionSection(
                 enabled = true,
                 emailController = emailController,
@@ -126,19 +126,19 @@ internal fun SignUpBody(
             visible = signUpState == SignUpState.InputtingPhone
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                DefaultPaymentsTheme {
+                PaymentsThemeForLink {
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,
                         requestFocusWhenShown = true
                     )
+                    LinkTerms(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 16.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
-                LinkTerms(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
-                    textAlign = TextAlign.Center
-                )
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),
                     state = if (isReadyToSignUp) {

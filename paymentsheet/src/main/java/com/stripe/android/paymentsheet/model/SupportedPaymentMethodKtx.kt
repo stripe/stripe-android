@@ -9,8 +9,8 @@ import com.stripe.android.paymentsheet.forms.PIRequirement
 import com.stripe.android.paymentsheet.forms.SIRequirement
 import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
-import com.stripe.android.ui.core.elements.LpmRepository
-import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
  * This file hold functions that extend the functionality of the SupportedPaymentMethod

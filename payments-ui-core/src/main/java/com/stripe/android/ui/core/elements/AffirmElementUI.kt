@@ -21,8 +21,8 @@ fun AffirmElementUI() {
                 R.string.stripe_paymentsheet_payment_method_affirm
             )
         ),
-        modifier = Modifier.padding(bottom = 4.dp),
         color = MaterialTheme.paymentsColors.subtitle,
-        style = MaterialTheme.typography.h6
+        style = MaterialTheme.typography.h6,
+        modifier = Modifier.padding(vertical = 8.dp)
     )
 }
