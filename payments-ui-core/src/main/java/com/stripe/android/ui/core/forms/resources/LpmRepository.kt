@@ -2,11 +2,13 @@ package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
 import android.os.Parcelable
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -86,6 +88,7 @@ class LpmRepository @Inject constructor(
         when (sharedDataSpec.type) {
             PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Card,
+                "card",
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
                 CardRequirement,
@@ -97,6 +100,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Bancontact,
+                "bancontact",
                 R.string.stripe_paymentsheet_payment_method_bancontact,
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 BancontactRequirement,
@@ -104,6 +108,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Sofort,
+                "sofort",
                 R.string.stripe_paymentsheet_payment_method_sofort,
                 R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 SofortRequirement,
@@ -111,6 +116,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Ideal,
+                "ideal",
                 R.string.stripe_paymentsheet_payment_method_ideal,
                 R.drawable.stripe_ic_paymentsheet_pm_ideal,
                 IdealRequirement,
@@ -118,6 +124,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.SepaDebit,
+                "sepa_debit",
                 R.string.stripe_paymentsheet_payment_method_sepa_debit,
                 R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
                 SepaDebitRequirement,
@@ -125,6 +132,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Eps,
+                "eps",
                 R.string.stripe_paymentsheet_payment_method_eps,
                 R.drawable.stripe_ic_paymentsheet_pm_eps,
                 EpsRequirement,
@@ -132,6 +140,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.P24,
+                "p24",
                 R.string.stripe_paymentsheet_payment_method_p24,
                 R.drawable.stripe_ic_paymentsheet_pm_p24,
                 P24Requirement,
@@ -139,6 +148,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Giropay,
+                "giropay",
                 R.string.stripe_paymentsheet_payment_method_giropay,
                 R.drawable.stripe_ic_paymentsheet_pm_giropay,
                 GiropayRequirement,
@@ -146,6 +156,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.AfterpayClearpay,
+                "afterpay_clearpay",
                 R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
                 R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
                 AfterpayClearpayRequirement,
@@ -153,6 +164,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Klarna,
+                "klarna",
                 R.string.stripe_paymentsheet_payment_method_klarna,
                 R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 KlarnaRequirement,
@@ -160,6 +172,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.PayPal,
+                "paypal",
                 R.string.stripe_paymentsheet_payment_method_paypal,
                 R.drawable.stripe_ic_paymentsheet_pm_paypal,
                 PaypalRequirement,
@@ -167,6 +180,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.Affirm,
+                "affirm",
                 R.string.stripe_paymentsheet_payment_method_affirm,
                 R.drawable.stripe_ic_paymentsheet_pm_affirm,
                 AffirmRequirement,
@@ -174,6 +188,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.AuBecsDebit,
+                "au_becs_debit",
                 R.string.stripe_paymentsheet_payment_method_au_becs_debit,
                 R.drawable.stripe_ic_paymentsheet_pm_bank,
                 AuBecsDebitRequirement,
@@ -181,6 +196,7 @@ class LpmRepository @Inject constructor(
             )
             PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
                 PaymentMethod.Type.USBankAccount,
+                "us_bank_account",
                 R.string.stripe_paymentsheet_payment_method_us_bank_account,
                 R.drawable.stripe_ic_paymentsheet_pm_bank,
                 USBankAccountRequirement,
@@ -210,6 +226,7 @@ class LpmRepository @Inject constructor(
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
          */
         val type: PaymentMethod.Type,
+        val code: PaymentMethodCode = type.code,
 
         /** This describes the name that appears under the selector. */
         @StringRes val displayNameResource: Int,
@@ -256,6 +273,7 @@ class LpmRepository @Inject constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(
             PaymentMethod.Type.Card,
+            "card",
             R.string.stripe_paymentsheet_payment_method_card,
             R.drawable.stripe_ic_paymentsheet_pm_card,
             CardRequirement,

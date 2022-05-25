@@ -135,6 +135,7 @@ internal object PaymentSheetFixtures {
         get() = FormFragmentArguments(
             SupportedPaymentMethod(
                 PaymentMethod.Type.Bancontact,
+                "bancontact",
                 R.string.stripe_paymentsheet_payment_method_bancontact,
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 PaymentMethodRequirements(emptySet(), null, false),

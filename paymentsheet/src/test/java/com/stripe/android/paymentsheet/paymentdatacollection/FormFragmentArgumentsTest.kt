@@ -17,6 +17,7 @@ import org.junit.Test
 class FormFragmentArgumentsTest {
     private val card = SupportedPaymentMethod(
         PaymentMethod.Type.Card,
+        "card",
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
         PaymentMethodRequirements(
