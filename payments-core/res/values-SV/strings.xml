@@ -11,11 +11,11 @@
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Postkod</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="added">Tillagt %s</string>
+  <string name="added">La till %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Ange ort</string>
   <!-- Error text indicating country is invalid -->
-  <string name="address_country_invalid">Ditt land är felaktigt</string>
+  <string name="address_country_invalid">Ditt land är ogiltigt</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Ange land</string>
   <!-- Caption for Address field on address form -->
@@ -83,38 +83,38 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="au_becs_bsb_number">BSB-nummer</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="au_becs_mandate">Genom att tillhandahålla dina bankkontouppgifter och bekräfta denna betalning samtycker du till denna Direktdebitering och &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Serviceavtal med direktdebitering&lt;/a&gt;, och godkänner att Stripe Payments Australia Pty Ltd ACN 160 180 343 Användar-ID för direktdebitering 507156 (“Stripe”) debiterar ditt konto via Bulk Electronic Clearing System (BECS) på uppdrag av %s (\"säljaren\") för eventuella belopp som separat meddelats till dig av säljaren. Du intygar att du antingen är kontoinnehavare eller auktoriserad undertecknare på det konto som anges ovan.</string>
+  <string name="au_becs_mandate">Genom att tillhandahålla dina bankkontouppgifter och bekräfta denna betalning samtycker du till denna begäran om autogiro och &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;användaravtalet för autogiro&lt;/a&gt;, och godkänner att Stripe Payments Australia Pty Ltd ACN 160 180 343 Användar-ID för autogiro 507156 (“Stripe”) debiterar ditt konto via Bulk Electronic Clearing System (BECS) på uppdrag av %s (”handlaren”) för alla belopp som separat meddelats till dig av handlaren. Du intygar att du antingen är kontoinnehavare eller auktoriserad undertecknare på det konto som anges ovan.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="becs_mandate_acceptance">\n    Genom att tillhandahålla dina bankkontouppgifter och bekräfta denna betalning, samtycker du till denna \n    Direktdebitering och serviceavtal med direktdebitering, och godkänner att\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Användar-ID för direktdebitering 507156\n    (“Stripe”) debiterar ditt konto via Bulk Electronic Clearing System (BECS) på \n    uppdrag av %1$s (\"säljaren\") för eventuella belopp som separat meddelats till dig\n    av säljaren. Du intygar att du antingen är kontoinnehavare eller auktoriserad\n    undertecknare på det konto som anges ovan.\n    </string>
+  <string name="becs_mandate_acceptance">\n    Genom att tillhandahålla dina bankkontouppgifter och bekräfta denna betalning, samtycker du till denna \n    begäran om autogiro och användaravtalet för autogiro, och godkänner att\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Användar-ID för autogiro 507156\n    (“Stripe”) debiterar ditt konto via Bulk Electronic Clearing System (BECS) på \n    uppdrag av %1$s (\"handlaren\") för alla belopp som separat meddelats till dig\n    av handlaren. Du intygar att du antingen är kontoinnehavare eller auktoriserad\n    undertecknare på det konto som anges ovan.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="becs_widget_account_number">Kontonummer</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="becs_widget_account_number_incomplete">Ditt kontonummer är ofullständigt.</string>
+  <string name="becs_widget_account_number_incomplete">Kontonumret är ofullständigt.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
-  <string name="becs_widget_account_number_required">Ditt kontonummer krävs.</string>
+  <string name="becs_widget_account_number_required">Kontonummer är obligatoriskt.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
   <string name="becs_widget_bsb">BSB</string>
   <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
-  <string name="becs_widget_bsb_incomplete">Den BSB du angav är inkomplett.</string>
+  <string name="becs_widget_bsb_incomplete">Det BSB du angav är ofullständigt.</string>
   <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
-  <string name="becs_widget_bsb_invalid">Den BSB du angav är fel.</string>
+  <string name="becs_widget_bsb_invalid">Det BSB du angav är ogiltigt.</string>
   <!-- BECS Debit Widget - email address field - label -->
   <string name="becs_widget_email">E-postadress</string>
   <!-- BECS Debit Widget - email address field - invalid error message -->
-  <string name="becs_widget_email_invalid">Din e-postadress är ogiltig.</string>
+  <string name="becs_widget_email_invalid">E-postadressen är ogiltig.</string>
   <!-- BECS Debit Widget - email address field - required error message -->
-  <string name="becs_widget_email_required">Din e-postadress krävs.</string>
+  <string name="becs_widget_email_required">E-postadress är obligatoriskt.</string>
   <!-- BECS Debit Widget - name field - label -->
   <string name="becs_widget_name">Namn</string>
   <!-- BECS Debit Widget - name field - required error message -->
-  <string name="becs_widget_name_required">Ditt namn krävs.</string>
+  <string name="becs_widget_name_required">Namn är obligatoriskt.</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s slutar med %2$s</string>
+  <string name="card_ending_in">%1$s med slutsiffrorna %2$s</string>
   <!-- Text for close button -->
   <string name="close">Stäng</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Ta bort betalningsmetoden</string>
-  <string name="delete_payment_method_prompt_title">T bort betalningsmetoden?</string>
+  <string name="delete_payment_method_prompt_title">Ta bort betalningsmetoden?</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/ÅÅ</string>
   <string name="expiry_label_short">Giltighetstid</string>
@@ -138,14 +138,14 @@
   <!-- Label for free shipping method -->
   <string name="price_free">Gratis</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="removed">Borttaget %s</string>
+  <string name="removed">%s har tagits bort</string>
   <string name="secure_checkout">Säker betalning</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Vi kan inte verifiera din betalningsmetod. Välj en annan betalningsmetod och försök igen.</string>
   <!-- Error when 3DS2 authentication timed out. -->
-  <string name="stripe_failure_reason_timed_out">Tidsgränsen passerades vid autentisering av betalningsmetoden – försök igen</string>
+  <string name="stripe_failure_reason_timed_out">Tidsgränsen överskreds vid autentisering av betalningsmetoden – försök igen</string>
   <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
+  <string name="stripe_paymentsheet_expiration_date_hint">MM/ÅÅ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifiera din betalning</string>
   <string name="title_add_a_card">Lägg till kort</string>

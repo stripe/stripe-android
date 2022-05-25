@@ -14,7 +14,7 @@
    Text for remove button -->
   <string name="remove">Ta bort</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betalningstjänster. Kontrollera internetanslutningen och försök igen.</string>
+  <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betaltjänster. Kontrollera internetanslutningen och försök igen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Ett internt fel uppstod.</string>
   <!-- Text providing link to terms for ACH payments -->
@@ -41,7 +41,7 @@
   <!-- Payment Method type brand name  -->
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Payment Method type brand name. -->
-  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS autogiro</string>
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kort</string>
   <!-- Payment method brand name -->
@@ -53,7 +53,7 @@
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Spara för framtida betalningar</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spara detta kort för framtiden %s betalningar</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spara detta kort för framtida betalningar hos %s</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Välj din betalningsmetod</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
