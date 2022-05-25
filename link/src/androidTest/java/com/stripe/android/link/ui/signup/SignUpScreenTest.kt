@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivity
@@ -71,24 +70,45 @@ internal class SignUpScreenTest {
         onPhoneField().assertExists()
         onPhoneField().assertIsEnabled()
         onSignUpButton().assertExists()
+    }
+
+    @Test
+    fun header_message_is_correct_before_collecting_email() {
+        setContent(SignUpState.InputtingEmail)
+
+        composeTestRule.onNodeWithText("Secure 1-click checkout").assertExists()
+        composeTestRule.onNodeWithText("Save your info for secure 1-click checkout")
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun header_message_is_correct_when_collecting_phone_number() {
+        setContent(SignUpState.InputtingPhone)
+
+        composeTestRule.onNodeWithText("Secure 1-click checkout").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Save your info for secure 1-click checkout").assertExists()
+    }
+
+    @Test
+    fun signup_button_is_disabled_when_not_ready_to_sign_up() {
+        setContent(SignUpState.InputtingPhone, isReadyToSignUp = false)
+
+        onSignUpButton().assertExists()
         onSignUpButton().assertIsNotEnabled()
     }
 
     @Test
-    fun signup_button_is_enabled_only_when_inputs_are_valid() {
-        setContent(SignUpState.InputtingPhone)
+    fun signup_button_is_enabled_when_ready_to_sign_up() {
+        setContent(SignUpState.InputtingPhone, isReadyToSignUp = true)
 
         onSignUpButton().assertExists()
-        onSignUpButton().assertIsNotEnabled()
-
-        onPhoneField().performTextInput("12345")
-        onSignUpButton().assertIsNotEnabled()
-
-        onPhoneField().performTextInput("67890")
         onSignUpButton().assertIsEnabled()
     }
 
-    private fun setContent(signUpState: SignUpState) =
+    private fun setContent(
+        signUpState: SignUpState,
+        isReadyToSignUp: Boolean = true
+    ) =
         composeTestRule.setContent {
             DefaultLinkTheme {
                 SignUpBody(
@@ -97,7 +117,7 @@ internal class SignUpScreenTest {
                         .createEmailSectionController(""),
                     phoneNumberController = PhoneNumberController.createPhoneNumberController(),
                     signUpState = signUpState,
-                    isReadyToSignUp = true,
+                    isReadyToSignUp = isReadyToSignUp,
                     onSignUpClick = {}
                 )
             }
@@ -105,6 +125,6 @@ internal class SignUpScreenTest {
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
-    private fun onPhoneField() = composeTestRule.onNodeWithText("Mobile Number")
+    private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
 }
