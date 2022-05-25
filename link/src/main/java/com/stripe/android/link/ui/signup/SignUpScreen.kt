@@ -99,7 +99,13 @@ internal fun SignUpBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.sign_up_header),
+            text = stringResource(
+                if (signUpState == SignUpState.InputtingPhone) {
+                    R.string.sign_up_header_new_user
+                } else {
+                    R.string.sign_up_header
+                }
+            ),
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
