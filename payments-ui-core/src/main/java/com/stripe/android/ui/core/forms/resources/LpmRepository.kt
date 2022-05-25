@@ -45,14 +45,13 @@ class LpmRepository @Inject constructor(
     resources: Resources?
 ) {
     private val lpmSerializer: LpmSerializer = LpmSerializer()
-    private var first: SupportedPaymentMethod? = null
+
+    // This is set by the session/element api, it should not be set from the hard coded
+    // list of lpms, until we receive this list from the server.
+    lateinit var first: SupportedPaymentMethod
     private lateinit var codeToSupportedPaymentMethod: Map<String, SupportedPaymentMethod>
 
     fun values() = codeToSupportedPaymentMethod.values
-
-    fun getCard() = codeToSupportedPaymentMethod["card"]
-
-    fun getFirst() = first
 
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
         codeToSupportedPaymentMethod[paymentMethodCode]
@@ -69,10 +68,10 @@ class LpmRepository @Inject constructor(
         val parsedSupportedPaymentMethod = parseLpms(inputStream)
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
-        first = parsedSupportedPaymentMethod.firstOrNull()
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        codeToSupportedPaymentMethod = parsedSupportedPaymentMethod.associateBy { it.type.code }
+        codeToSupportedPaymentMethod =
+            parsedSupportedPaymentMethod?.associateBy { it.type.code } ?: emptyMap()
     }
 
     private fun parseLpms(inputStream: InputStream?) =

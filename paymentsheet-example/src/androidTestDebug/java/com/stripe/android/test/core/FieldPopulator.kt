@@ -120,7 +120,7 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName(it.label.resourceId)
+                        selectors.getName(it.label_translation_id.resourceId)
                             .assertContentDescriptionEquals(values.name)
                     }
                 }
@@ -141,7 +141,7 @@ class FieldPopulator(
                 is SimpleTextSpec -> {}
                 is AuBankAccountNumberSpec -> {
                     selectors.getAuAccountNumber()
-                        .assertContentDescriptionEquals(values.state)
+                        .assertContentDescriptionEquals(values.auBecsAccountNumber)
                 }
                 is DropdownSpec -> {}
                 is IbanSpec -> {}
@@ -185,7 +185,7 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName(it.label.resourceId).apply {
+                        selectors.getName(it.label_translation_id.resourceId).apply {
                             performTextInput(values.name)
                         }
                     }

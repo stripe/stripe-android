@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
@@ -301,6 +302,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmRepository())
         savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
 
+        // The LPM resource repository should be set so the first/default LPM is set
+        // to the exposed list of LPMs in the list.
+        resourceRepository.getLpmRepository().first = pmsToAdd.first()
+
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
                 IllegalArgumentException(
@@ -382,13 +387,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             SAVE_SELECTED_ADD_LPM,
             resourceRepository.getLpmRepository().fromCode(
                 newLpm?.paymentMethodCreateParams?.typeCode
-            ) ?: resourceRepository.getLpmRepository().getFirst()
+            ) ?: resourceRepository.getLpmRepository().first
         )
 
     fun getAddFragmentSelectedLpmValue() =
         savedStateHandle.get<SupportedPaymentMethod>(
             SAVE_SELECTED_ADD_LPM
-        ) ?: resourceRepository.getLpmRepository().getFirst()
+        ) ?: resourceRepository.getLpmRepository().first
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
