@@ -915,7 +915,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            lpmRepository.fromCode("code")!!,
+            lpmRepository.fromCode("card")!!,
             lpmRepository.fromCode("ideal")!!
         )
     }
@@ -944,7 +944,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            lpmRepository.fromCode("code")!!,
+            lpmRepository.fromCode("card")!!,
             lpmRepository.fromCode("ideal")!!,
             lpmRepository.fromCode("sepa_debit")!!,
             lpmRepository.fromCode("sofort")!!
