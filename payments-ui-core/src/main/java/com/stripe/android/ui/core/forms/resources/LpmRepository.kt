@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.ui.core.forms.resources
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.AffirmForm
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
 import com.stripe.android.ui.core.forms.AuBecsDebitForm
