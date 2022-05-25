@@ -1,8 +1,8 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -10,7 +10,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -26,6 +25,7 @@ import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.primaryButtonLabel
 
 @Preview
@@ -87,13 +87,7 @@ internal fun PaymentMethodBody(
     onPayAnotherWayClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    ScrollableTopLevelColumn {
         Text(
             text = stringResource(R.string.pm_add_new_card),
             modifier = Modifier
@@ -105,6 +99,7 @@ internal fun PaymentMethodBody(
         PaymentsThemeForLink {
             formContent()
         }
+        Spacer(modifier = Modifier.height(8.dp))
         PrimaryButton(
             label = primaryButtonLabel,
             state = when {

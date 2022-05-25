@@ -246,6 +246,10 @@ public final class com/stripe/android/link/repositories/LinkApiRepository_Factor
 	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/link/repositories/LinkApiRepository;
 }
 
+public final class com/stripe/android/link/ui/CommonKt {
+	public static final fun ScrollableTopLevelColumn (Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
