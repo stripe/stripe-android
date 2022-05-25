@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -238,17 +239,16 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            )
-                .isEqualTo(
-                    FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact,
-                        showCheckbox = false,
-                        showCheckboxControlledFields = false,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount(),
-                        injectorKey = "testInjectorKeyAddFragmentTest"
-                    )
+            ).isEqualTo(
+                FormFragmentArguments(
+                    SupportedPaymentMethod.Bancontact,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = false,
+                    merchantName = MERCHANT_DISPLAY_NAME,
+                    amount = createAmount(),
+                    injectorKey = "testInjectorKeyAddFragmentTest"
                 )
+            )
         }.recreate().onFragment { fragment ->
             val addedFragment = fragment.childFragmentManager.findFragmentById(
                 FragmentPaymentsheetAddPaymentMethodBinding.bind(
@@ -261,17 +261,16 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            )
-                .isEqualTo(
-                    FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact,
-                        showCheckbox = false,
-                        showCheckboxControlledFields = false,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount(),
-                        injectorKey = "testInjectorKeyAddFragmentTest"
-                    )
+            ).isEqualTo(
+                FormFragmentArguments(
+                    SupportedPaymentMethod.Bancontact,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = false,
+                    merchantName = MERCHANT_DISPLAY_NAME,
+                    amount = createAmount(),
+                    injectorKey = "testInjectorKeyAddFragmentTest"
                 )
+            )
         }
     }
 
@@ -302,16 +301,15 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
+            ).isEqualTo(
+                COMPOSE_FRAGMENT_ARGS.copy(
+                    paymentMethod = SupportedPaymentMethod.Card,
+                    amount = createAmount(),
+                    showCheckbox = true,
+                    showCheckboxControlledFields = false,
+                    billingDetails = null
+                ),
             )
-                .isEqualTo(
-                    COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = SupportedPaymentMethod.Card,
-                        amount = createAmount(),
-                        showCheckbox = true,
-                        showCheckboxControlledFields = false,
-                        billingDetails = null
-                    ),
-                )
         }
     }
 
@@ -337,16 +335,15 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
+            ).isEqualTo(
+                COMPOSE_FRAGMENT_ARGS.copy(
+                    paymentMethod = SupportedPaymentMethod.Card,
+                    amount = createAmount(),
+                    showCheckbox = true,
+                    showCheckboxControlledFields = false,
+                    billingDetails = null
+                ),
             )
-                .isEqualTo(
-                    COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = SupportedPaymentMethod.Card,
-                        amount = createAmount(),
-                        showCheckbox = true,
-                        showCheckboxControlledFields = false,
-                        billingDetails = null
-                    ),
-                )
         }
     }
 
@@ -372,6 +369,42 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
             idleLooper()
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
+        }
+    }
+
+    @Test
+    fun `when payment method is selected then primary button action is reset`() {
+        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            paymentMethodTypes = listOf("card", "bancontact")
+        )
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
+            idleLooper()
+            assertThat(
+                fragment.childFragmentManager.findFragmentById(
+                    viewBinding.paymentMethodFragmentContainer.id
+                )
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+
+            var primaryButtonState: PrimaryButton.UIState? = null
+            fragment.sheetViewModel.primaryButtonUIState.observeForever {
+                primaryButtonState = it
+            }
+
+            val manualState = PrimaryButton.UIState(
+                label = "Test",
+                onClick = {},
+                enabled = false,
+                visible = true
+            )
+
+            fragment.sheetViewModel.updatePrimaryButtonUIState(manualState)
+
+            assertThat(primaryButtonState).isEqualTo(manualState)
+
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            idleLooper()
+
+            assertThat(primaryButtonState).isEqualTo(null)
         }
     }
 

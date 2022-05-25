@@ -927,7 +927,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
-            viewModel.updateSelection(mock())
+            viewModel.updatePrimaryButtonUIState(null)
             assertThat(activity.viewBinding.buyButton.externalLabel)
                 .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()

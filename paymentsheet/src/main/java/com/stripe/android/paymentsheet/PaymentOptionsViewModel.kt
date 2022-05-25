@@ -110,9 +110,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         onUserSelection()
     }
 
-    override fun onError(@StringRes error: Int?) {
+    override fun onError(@StringRes error: Int?) =
+        onError(error?.let { getApplication<Application>().getString(it) })
+
+    override fun onError(error: String?) {
         error?.let {
-            _error.value = getApplication<Application>().getString(error)
+            _error.value = it
         }
     }
 
