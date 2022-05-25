@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.MeasureComposableWidth
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.paymentsColors
 

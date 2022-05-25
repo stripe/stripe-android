@@ -11,7 +11,7 @@ import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 
 class FormFragmentArgumentsTest {

@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.stateIn

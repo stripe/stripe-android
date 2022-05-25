@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.forms.resources
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.LpmRepository
 
 /**
  * Interface that provides all resources needed by the forms.

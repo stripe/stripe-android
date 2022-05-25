@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
 import android.os.Parcelable
@@ -24,19 +24,21 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.LpmSerializer
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Serializable
-internal data class SharedDataSpec(
-    val type: String,
-    val async: Boolean = false,
-    val fields: List<FormItemSpec> = emptyList()
-)
-
+/**
+ * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
+ * a particular requested LPM.
+ */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository @Inject constructor(
@@ -47,7 +49,7 @@ class LpmRepository @Inject constructor(
 
     fun values() = codeToSupportedPaymentMethod.values
 
-    fun getCard() = codeToSupportedPaymentMethod["card"] ?: HardcodedCard
+    fun getCard() = codeToSupportedPaymentMethod["card"]
 
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
         codeToSupportedPaymentMethod[paymentMethodCode]

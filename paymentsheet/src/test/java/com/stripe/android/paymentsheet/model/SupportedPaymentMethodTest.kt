@@ -9,8 +9,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.ui.core.elements.LpmRepository
-import com.stripe.android.ui.core.elements.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith

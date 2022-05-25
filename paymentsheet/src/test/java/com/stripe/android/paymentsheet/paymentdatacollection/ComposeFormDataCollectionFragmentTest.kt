@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment.Companion.EXTRA_CONFIG
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import org.junit.Test
 import org.junit.runner.RunWith
