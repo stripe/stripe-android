@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -568,6 +569,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
+            println(
+                "saveStateHandle: ${
+                    savedStateHandle.get<List<LpmRepository.SupportedPaymentMethod>>(SAVE_SUPPORTED_PAYMENT_METHOD)
+                }"
+            )
             return subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)
