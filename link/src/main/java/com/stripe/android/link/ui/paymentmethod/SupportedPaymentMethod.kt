@@ -18,6 +18,7 @@ internal sealed class SupportedPaymentMethod(
     val type: PaymentMethod.Type,
     val formSpec: List<FormItemSpec>,
 ) : Parcelable {
+    internal val requiresMandate = type.requiresMandate
 
     /**
      * Builds the [ConsumerPaymentDetailsCreateParams] used to create this payment method.

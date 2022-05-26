@@ -136,6 +136,7 @@ internal object PaymentSheetFixtures {
             SupportedPaymentMethod(
                 PaymentMethod.Type.Bancontact,
                 "bancontact",
+                true,
                 R.string.stripe_paymentsheet_payment_method_bancontact,
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 PaymentMethodRequirements(emptySet(), null, false),

@@ -10,6 +10,7 @@ import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -111,7 +112,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            PaymentMethod.Type.Bancontact,
+            "bancontact",
+            true,
             mapOf(
                 "type" to "bancontact",
                 "billing_details" to mapOf(
@@ -168,7 +170,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            PaymentMethod.Type.Card,
+            "card",
+            false,
             mapOf(
                 "type" to "card",
                 "card" to mapOf(
@@ -340,14 +343,14 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
             ).isEqualTo(
-                    COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = LpmRepository.HardcodedCard,
-                        amount = createAmount(),
-                        showCheckbox = true,
-                        showCheckboxControlledFields = false,
-                        billingDetails = null
-                    ),
-                )
+                COMPOSE_FRAGMENT_ARGS.copy(
+                    paymentMethod = LpmRepository.HardcodedCard,
+                    amount = createAmount(),
+                    showCheckbox = true,
+                    showCheckboxControlledFields = false,
+                    billingDetails = null
+                ),
+            )
         }
     }
 
@@ -405,7 +408,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             assertThat(primaryButtonState).isEqualTo(manualState)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(Bancontact)
             idleLooper()
 
             assertThat(primaryButtonState).isEqualTo(null)
@@ -510,5 +513,12 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewModel
             )
         }
+    }
+
+    companion object {
+        val lpmRepository =
+            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources)
+        val Bancontact = lpmRepository.fromCode("bancontact")!!
+        val SepaDebit = lpmRepository.fromCode("sepa_debit")!!
     }
 }

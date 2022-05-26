@@ -18,6 +18,7 @@ class FormFragmentArgumentsTest {
     private val card = SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         "card",
+        false,
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
         PaymentMethodRequirements(
@@ -57,7 +58,8 @@ class FormFragmentArgumentsTest {
     )
 
     private val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-        PaymentMethod.Type.Card,
+        PaymentMethod.Type.Card.code,
+        PaymentMethod.Type.Card.requiresMandate,
         mapOf(
             "type" to "card",
             parameterMapBillingDetails,

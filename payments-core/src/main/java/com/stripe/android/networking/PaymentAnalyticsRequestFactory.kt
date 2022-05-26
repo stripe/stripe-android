@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -94,12 +95,12 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
-        paymentMethodType: PaymentMethod.Type?,
+        paymentMethodCode: PaymentMethodCode?,
         productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentMethodCreate,
-            sourceType = paymentMethodType?.code,
+            sourceType = paymentMethodCode,
             productUsageTokens = productUsageTokens
         )
     }
