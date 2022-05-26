@@ -138,7 +138,6 @@ public final class com/stripe/android/financialconnections/analytics/DefaultFina
 public final class com/stripe/android/financialconnections/di/DaggerFinancialConnectionsSheetComponent : com/stripe/android/financialconnections/di/FinancialConnectionsSheetComponent {
 	public static fun builder ()Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetComponent$Builder;
 	public fun getViewModel ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
-	public fun inject (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel$Companion;)V
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesApplicationIdFactory : dagger/internal/Factory {
