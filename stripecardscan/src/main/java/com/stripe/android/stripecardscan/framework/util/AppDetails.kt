@@ -26,7 +26,8 @@ internal data class AppDetails(
     }
 }
 
-internal fun getAppPackageName(context: Context?): String? = context?.applicationContext?.packageName
+internal fun getAppPackageName(context: Context?): String? =
+    context?.applicationContext?.packageName
 
 private fun getApplicationId(): String = "" // no longer available in later versions of gradle.
 
