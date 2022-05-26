@@ -26,7 +26,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
-@Ignore("Fix CircularProgressIndicator hanging tests")
+// TODO:(brnunes-stripe) Enable these tests
+@Ignore("CircularProgressIndicator hangs tests. Need to comment it out.")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityTest {
@@ -34,7 +35,8 @@ class LinkActivityTest {
     private val args = LinkActivityContract.Args(
         StripeIntentFixtures.PI_SUCCEEDED,
         true,
-        "Example, Inc."
+        "Example, Inc.",
+        "email@stripe.com"
     )
     private val intent = LinkActivityContract().createIntent(context, args)
 
@@ -64,6 +66,20 @@ class LinkActivityTest {
             verify(navigator).navigateTo(
                 argWhere {
                     it.route.startsWith(LinkScreen.SignUp.route.substringBefore('?'))
+                },
+                eq(true)
+            )
+        }
+    }
+
+    @Test
+    fun `When consumer email provided then it's auto-filled in SignUp screen`() {
+        whenever(linkAccountManager.accountStatus).thenReturn(flowOf(AccountStatus.SignedOut))
+
+        activityScenario().launch(intent).onActivity {
+            verify(navigator).navigateTo(
+                argWhere {
+                    it.route == "SignUp?email=email%40stripe.com"
                 },
                 eq(true)
             )

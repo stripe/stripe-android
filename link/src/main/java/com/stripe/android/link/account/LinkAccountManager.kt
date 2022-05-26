@@ -5,6 +5,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.GlobalScope
@@ -27,30 +28,27 @@ internal class LinkAccountManager @Inject constructor(
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
-    var userSignUpInput: UserSignUpInput? = null
-
-    val accountStatus =
-        linkAccount.transform { value ->
-            emit(
-                // If we already fetched an account, return its status
-                value?.accountStatus
-                    ?: (
-                        // If consumer has previously logged in, fetch their account
-                        cookieStore.getAuthSessionCookie()?.let {
-                            lookupConsumer(null).getOrNull()?.accountStatus
-                        }
-                            // If a customer email was passed in, lookup the account,
-                            // unless the user has logged out of this account
-                            ?: args.customerEmail?.let {
-                                if (hasUserLoggedOut(it)) {
-                                    AccountStatus.SignedOut
-                                } else {
-                                    lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
-                                }
-                            } ?: AccountStatus.SignedOut
-                        )
-            )
-        }
+    val accountStatus = linkAccount.transform { value ->
+        emit(
+            // If we already fetched an account, return its status
+            value?.accountStatus
+                ?: (
+                    // If consumer has previously logged in, fetch their account
+                    cookieStore.getAuthSessionCookie()?.let {
+                        lookupConsumer(null).getOrNull()?.accountStatus
+                    }
+                        // If a customer email was passed in, lookup the account,
+                        // unless the user has logged out of this account
+                        ?: args.customerEmail?.let {
+                            if (hasUserLoggedOut(it)) {
+                                AccountStatus.SignedOut
+                            } else {
+                                lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+                            }
+                        } ?: AccountStatus.SignedOut
+                    )
+        )
+    }
 
     /**
      * Keeps track of whether the user has logged out during this session. If that's the case, we
@@ -59,51 +57,55 @@ internal class LinkAccountManager @Inject constructor(
     private var userHasLoggedOut = false
 
     /**
-     * Retrieves the Link account associated with the email and optionally starts verification, if
-     * needed.
-     * When the [email] parameter is null, will lookup the account for the currently stored cookie.
+     * Retrieves the Link account associated with the email if it exists.
+     *
+     * Optionally starts a user session, by storing the cookie for the account and starting a
+     * verification if needed.
+     *
+     * When the [email] parameter is null, will try to fetch the account for the currently stored
+     * cookie.
      */
     suspend fun lookupConsumer(
         email: String?,
-        startVerification: Boolean = true
+        startSession: Boolean = true
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
             .map { consumerSessionLookup ->
-                setAndReturnNullable(
-                    consumerSessionLookup.consumerSession?.let { consumerSession ->
-                        LinkAccount(consumerSession)
-                    }
-                )
+                consumerSessionLookup.consumerSession?.let { consumerSession ->
+                    LinkAccount(consumerSession)
+                }
+            }.map { account ->
+                if (startSession) {
+                    setAndReturnNullable(account)
+                } else {
+                    account
+                }
             }.mapCatching {
                 it?.let { account ->
-                    if (account.isVerified) {
-                        account
-                    } else {
+                    if (startSession && !account.isVerified) {
                         setAndReturn(
-                            if (startVerification) {
-                                LinkAccount(
-                                    linkRepository.startVerification(account.clientSecret, cookie())
-                                        .getOrThrow()
-                                )
-                            } else {
-                                account
-                            }
+                            LinkAccount(
+                                linkRepository
+                                    .startVerification(account.clientSecret, cookie())
+                                    .getOrThrow()
+                            )
                         )
+                    } else {
+                        account
                     }
                 }
             }
 
     /**
-     * Use the locally stored user input to sign up for a new Link account, starting verification
-     * if needed.
+     * Use the user input in memory to sign in to an existing account or sign up for a new Link
+     * account, starting verification if needed.
      */
-    suspend fun signUpWithUserInput(): Result<LinkAccount> =
-        userSignUpInput?.let {
-            signUp(it.email, it.phone, it.country)
-        } ?: run {
-            Result.failure(
-                IllegalStateException("Must collect consumer info before trying to sign up")
-            )
+    suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> =
+        when (userInput) {
+            is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
+                requireNotNull(it) { "Error fetching user account" }
+            }
+            is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
         }
 
     /**
@@ -220,10 +222,4 @@ internal class LinkAccountManager @Inject constructor(
         }
 
     private fun cookie() = cookieStore.getAuthSessionCookie()
-
-    data class UserSignUpInput(
-        val email: String,
-        val phone: String,
-        val country: String
-    )
 }

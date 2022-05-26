@@ -219,13 +219,14 @@ class TestHardCodedLpms {
         )
     }
 
-    @Ignore("Cannot be tested requires EU-based merchant")
+    @Test
     fun testPayPal() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("paypal")!!,
                 authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.USD
+                currency = Currency.GBP,
+                automatic = Automatic.Off
             )
         )
     }

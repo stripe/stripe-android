@@ -285,19 +285,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
-                    savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
+                    savedStateHandle[SAVE_PAYMENT_METHODS] = it
                     setStripeIntent(stripeIntent)
                     resetViewState()
                 },
                 onFailure = ::onFatal
             )
         }
-    }
-
-    private fun resetViewState(@IntegerRes stringResId: Int?) {
-        resetViewState(
-            stringResId?.let { getApplication<Application>().resources.getString(it) }
-        )
     }
 
     private fun resetViewState(userErrorMessage: String? = null) {
@@ -356,8 +350,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
-
-        updatePrimaryButtonUIState(null)
 
         when (selection) {
             is PaymentSelection.Saved -> {
@@ -469,7 +461,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     onSuccess = {
                         resetViewState(
                             when (paymentResult) {
-                                is PaymentResult.Failed -> paymentResult.throwable.message
+                                is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
                                 else -> null // indicates canceled payment
                             }
                         )
@@ -488,7 +480,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                resetViewState(
+                onError(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
                             R.string.stripe_failure_connection_error
@@ -514,9 +506,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.value = PaymentSheetResult.Completed
     }
 
-    override fun onError(@IntegerRes error: Int?) {
-        resetViewState(error)
-    }
+    override fun onError(@IntegerRes error: Int?) =
+        onError(error?.let { getApplication<Application>().resources.getString(it) })
+
+    override fun onError(error: String?) = resetViewState(error)
 
     private fun LinkActivityResult.convertToPaymentResult() =
         when (this) {

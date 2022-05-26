@@ -51,11 +51,12 @@ class InlineSignupViewModelTest {
         }
 
     @Test
-    fun `When entered existing account then it becomes ready`() =
+    fun `When entered existing account then it emits user input`() =
         runTest(UnconfinedTestDispatcher()) {
+            val email = "valid@email.com"
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            viewModel.emailController.onRawValueChange("valid@email.com")
+            viewModel.emailController.onRawValueChange(email)
 
             val linkAccount = LinkAccount(
                 mockConsumerSessionWithVerificationSession(
@@ -69,7 +70,7 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            Truth.assertThat(viewModel.isReady.value).isTrue()
+            Truth.assertThat(viewModel.userInput.value).isEqualTo(UserInput.SignIn(email))
         }
 
     @Test
@@ -85,8 +86,62 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            Truth.assertThat(viewModel.isReady.value).isFalse()
+            Truth.assertThat(viewModel.userInput.value).isNull()
             Truth.assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+        }
+
+    @Test
+    fun `When entered all fields for new account then it emits user input`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "valid@email.com"
+            val viewModel = createViewModel()
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange(email)
+
+            Truth.assertThat(viewModel.userInput.value).isNull()
+
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.success(null))
+
+            // Advance past lookup debounce delay
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+
+            Truth.assertThat(viewModel.userInput.value).isNull()
+
+            val phone = "1234567890"
+            viewModel.phoneController.onRawValueChange(phone)
+
+            Truth.assertThat(viewModel.userInput.value)
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+        }
+
+    @Test
+    fun `When user input becomes invalid then it emits null user input`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "valid@email.com"
+            val viewModel = createViewModel()
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange(email)
+
+            Truth.assertThat(viewModel.userInput.value).isNull()
+
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.success(null))
+
+            // Advance past lookup debounce delay
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+
+            Truth.assertThat(viewModel.userInput.value).isNull()
+
+            val phone = "1234567890"
+            viewModel.phoneController.onRawValueChange(phone)
+
+            Truth.assertThat(viewModel.userInput.value)
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+
+            viewModel.phoneController.onRawValueChange("")
+
+            Truth.assertThat(viewModel.userInput.value).isNull()
         }
 
     private fun createViewModel() = InlineSignupViewModel(
