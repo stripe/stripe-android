@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Meno</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Vyžaduje sa vaše meno.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Zrušiť</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">Karta %1$s s poslednými štyrmi číslami %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Odstrániť spôsob platby</string>
   <string name="delete_payment_method_prompt_title">Vymazať spôsob platby?</string>
+  <!-- Done button title -->
+  <string name="done">Hotovo</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Upraviť</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/RR</string>
   <string name="expiry_label_short">Ukončenie platnosti</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Zvoľte bankový účet (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Zdarma</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Odstrániť</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Spôsob platby %s odstránený</string>
   <string name="secure_checkout">Bezpečná pokladňa</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Vyskytli sa problémy s pripojením k nášmu poskytovateľovi platieb. Skontrolujte pripojenie k internetu a skúste to znova.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nemôžeme overiť váš spôsob platby. Vyberte iný spôsob platby a skúste to znova.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Vypršal čas autentifikácie vášho spôsobu platby -- skúste znova</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Vyskytla sa interná chyba.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Naziv</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Vaše ime je obavezno.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Otkaži</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s završava na %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Izbriši način plaćanja</string>
   <string name="delete_payment_method_prompt_title">Izbrisati način plaćanja?</string>
+  <!-- Done button title -->
+  <string name="done">Gotovo</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Uredi</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/GG</string>
   <string name="expiry_label_short">Istek</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Odaberite bankovni račun (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Besplatno</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Ukloni</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s je uklonjeno</string>
   <string name="secure_checkout">Sigurna naplata</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Imamo problema u povezivanju s našim pružateljem platnih usluga. Provjerite vašu internet vezu i pokušajte ponovo.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nismo mogli potvrditi vaš način plaćanja. Odaberite drugi način plaćanja i pokušajte ponovno.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Istek vremena pri provjeri načina plaćanja -- pokušajte ponovno</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Došlo je do pogreške sustava.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / GG</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
