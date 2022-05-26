@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcompone
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -107,7 +106,7 @@ internal open class PaymentSheetViewModelTestInjection {
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
         formViewModel: FormViewModel = FormViewModel(
-            layout = LayoutSpec.create(),
+            paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
             resourceRepository = mock(),
             transformSpecToElement = mock()
@@ -134,7 +133,7 @@ internal open class PaymentSheetViewModelTestInjection {
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.layout(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

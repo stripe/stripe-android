@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.forms.resources
 
-import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -37,7 +36,6 @@ import com.stripe.android.ui.core.forms.PaypalForm
 import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.USBankAccountForm
-import kotlinx.parcelize.Parcelize
 import javax.inject.Singleton
 
 @Singleton
@@ -84,7 +82,7 @@ class LpmRepository {
      * compose model.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    sealed class SupportedPaymentMethod(
+    open class SupportedPaymentMethod(
         /**
          * This describes the PaymentMethod Type as described
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
@@ -108,9 +106,8 @@ class LpmRepository {
          * This describes how the UI should look.
          */
         val formSpec: LayoutSpec,
-    ) : Parcelable {
+    ) {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Card : SupportedPaymentMethod(
             PaymentMethod.Type.Card,
             R.string.stripe_paymentsheet_payment_method_card,
@@ -120,7 +117,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Bancontact : SupportedPaymentMethod(
             PaymentMethod.Type.Bancontact,
             R.string.stripe_paymentsheet_payment_method_bancontact,
@@ -130,7 +126,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Sofort : SupportedPaymentMethod(
             PaymentMethod.Type.Sofort,
             R.string.stripe_paymentsheet_payment_method_sofort,
@@ -140,7 +135,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Ideal : SupportedPaymentMethod(
             PaymentMethod.Type.Ideal,
             R.string.stripe_paymentsheet_payment_method_ideal,
@@ -150,7 +144,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object SepaDebit : SupportedPaymentMethod(
             PaymentMethod.Type.SepaDebit,
             R.string.stripe_paymentsheet_payment_method_sepa_debit,
@@ -160,7 +153,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Eps : SupportedPaymentMethod(
             PaymentMethod.Type.Eps,
             R.string.stripe_paymentsheet_payment_method_eps,
@@ -170,7 +162,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object P24 : SupportedPaymentMethod(
             PaymentMethod.Type.P24,
             R.string.stripe_paymentsheet_payment_method_p24,
@@ -180,7 +171,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Giropay : SupportedPaymentMethod(
             PaymentMethod.Type.Giropay,
             R.string.stripe_paymentsheet_payment_method_giropay,
@@ -190,7 +180,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object AfterpayClearpay : SupportedPaymentMethod(
             PaymentMethod.Type.AfterpayClearpay,
             R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
@@ -200,7 +189,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Klarna : SupportedPaymentMethod(
             PaymentMethod.Type.Klarna,
             R.string.stripe_paymentsheet_payment_method_klarna,
@@ -210,7 +198,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object PayPal : SupportedPaymentMethod(
             PaymentMethod.Type.PayPal,
             R.string.stripe_paymentsheet_payment_method_paypal,
@@ -220,7 +207,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object Affirm : SupportedPaymentMethod(
             PaymentMethod.Type.Affirm,
             R.string.stripe_paymentsheet_payment_method_affirm,
@@ -230,7 +216,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object AuBecsDebit : SupportedPaymentMethod(
             PaymentMethod.Type.AuBecsDebit,
             R.string.stripe_paymentsheet_payment_method_au_becs_debit,
@@ -240,7 +225,6 @@ class LpmRepository {
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        @Parcelize
         object USBankAccount : SupportedPaymentMethod(
             PaymentMethod.Type.USBankAccount,
             R.string.stripe_paymentsheet_payment_method_us_bank_account,

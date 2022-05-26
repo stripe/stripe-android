@@ -42,6 +42,8 @@ internal class CompleteFormFieldValueFilter(
             !hiddenIdentifiers.contains(it.key)
         }
 
+        val notcomplete = hiddenFilteredFieldSnapshotMap.values.filter { !it.isComplete }
+
         return FormFieldValues(
             hiddenFilteredFieldSnapshotMap,
             showingMandate,

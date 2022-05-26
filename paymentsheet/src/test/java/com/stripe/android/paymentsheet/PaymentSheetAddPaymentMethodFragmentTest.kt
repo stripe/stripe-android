@@ -241,7 +241,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 FormFragmentArguments(
-                    SupportedPaymentMethod.Bancontact,
+                    SupportedPaymentMethod.Bancontact.type.code,
                     showCheckbox = false,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
@@ -263,7 +263,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 FormFragmentArguments(
-                    SupportedPaymentMethod.Bancontact,
+                    PaymentMethod.Type.Bancontact.code,
                     showCheckbox = false,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
@@ -303,7 +303,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethod = SupportedPaymentMethod.Card,
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -337,7 +337,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethod = SupportedPaymentMethod.Card,
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -436,7 +436,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = SupportedPaymentMethod.Card,
+                        paymentMethodCode = PaymentMethod.Type.Card.code,
                         amount = createAmount(PI_OFF_SESSION),
                         showCheckbox = false,
                         showCheckboxControlledFields = true,

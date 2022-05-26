@@ -76,7 +76,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             setupRecyclerView(
                 viewBinding,
                 paymentMethods,
-                sheetViewModel.getAddFragmentSelectedLpmValue()
+                sheetViewModel.addFragmentSelectedLPM
             )
         }
 
@@ -154,7 +154,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = !processing,
                     paymentMethods = paymentMethods,
                     onItemSelectedListener = { selectedLpm ->
-                        if (sheetViewModel.getAddFragmentSelectedLpmValue() != selectedLpm) {
+                        if (sheetViewModel.addFragmentSelectedLPM != selectedLpm) {
                             onPaymentMethodSelected(selectedLpm)
                         }
                     }
@@ -175,7 +175,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
+        sheetViewModel.addFragmentSelectedLPM = paymentMethod
 
         val args = requireArguments()
         args.putParcelable(
@@ -238,7 +238,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
-                paymentMethod = showPaymentMethod,
+                paymentMethodCode = showPaymentMethod.type.code,
                 showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
                 showCheckboxControlledFields = newLpm?.let {
                     newLpm.customerRequestedSave ==

@@ -44,7 +44,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -94,10 +94,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     internal var supportedPaymentMethods
-        get() = savedStateHandle.get<List<SupportedPaymentMethod>>(
+        get() = savedStateHandle.get<List<String>>(
             SAVE_SUPPORTED_PAYMENT_METHOD
-        ) ?: emptyList()
-        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value)
+        )?.mapNotNull {
+            resourceRepository.getLpmRepository().fromCode(it)
+        } ?: emptyList()
+        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.type.code })
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _paymentMethods =
@@ -116,8 +118,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val headerText = MutableLiveData<String>()
     internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    private var addFragmentSelectedLPM =
-        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+    internal var addFragmentSelectedLPM
+        get() = requireNotNull(
+            resourceRepository.getLpmRepository().fromCode(
+                savedStateHandle.get<String>(SAVE_SELECTED_ADD_LPM)
+            ) ?: supportedPaymentMethods.first()
+        )
+        set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.type.code)
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -300,7 +307,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * the [BaseAddPaymentMethodFragment]
          */
         val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmRepository())
-        savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
+        supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
@@ -371,22 +378,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         updateBelowButtonText(null)
     }
 
-    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
-        savedStateHandle[SAVE_SELECTED_ADD_LPM] = lpm
-    }
-
     fun getAddFragmentSelectedLpm() =
         savedStateHandle.getLiveData(
             SAVE_SELECTED_ADD_LPM,
-            resourceRepository.getLpmRepository().fromCode(
-                newLpm?.paymentMethodCreateParams?.typeCode
-            ) ?: SupportedPaymentMethod.Card
-        )
-
-    fun getAddFragmentSelectedLpmValue() =
-        savedStateHandle.get<SupportedPaymentMethod>(
-            SAVE_SELECTED_ADD_LPM
-        ) ?: SupportedPaymentMethod.Card
+            newLpm?.paymentMethodCreateParams?.typeCode
+        ).map {
+            resourceRepository.getLpmRepository().fromCode(it)
+                ?: supportedPaymentMethods.first()
+        }
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
@@ -411,8 +410,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

@@ -56,7 +56,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",
@@ -89,7 +89,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify if only default billing address they appear in the initial values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",
