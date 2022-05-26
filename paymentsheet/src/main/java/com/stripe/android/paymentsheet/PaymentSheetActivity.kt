@@ -277,8 +277,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupGooglePayButton()
         val dividerText = resources.getString(
             if (viewModel.supportedPaymentMethods.size == 1 &&
-                viewModel.supportedPaymentMethods.map{it.type.code}.contains(
-                    LpmRepository.HardcodedCard.type.code
+                viewModel.supportedPaymentMethods.map{it.code}.contains(
+                    LpmRepository.HardcodedCard.code
                 )
             ) {
                 R.string.stripe_paymentsheet_or_pay_with_card

@@ -53,7 +53,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
         showCheckboxControlledFields = false
     )
 
-    if (!stripeIntent.paymentMethodTypes.contains(type.code)) {
+    if (!stripeIntent.paymentMethodTypes.contains(code)) {
         return null
     }
 
@@ -204,5 +204,5 @@ internal fun getPMsToAdd(
     ) != null
 }?.filterNot { supportedPaymentMethod ->
     stripeIntent.isLiveMode &&
-        stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.type.code)
+        stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.code)
 } ?: emptyList()

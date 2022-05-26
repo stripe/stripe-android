@@ -70,7 +70,7 @@ class LpmRepository @Inject constructor(
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
         codeToSupportedPaymentMethod =
-            parsedSupportedPaymentMethod?.associateBy { it.type.code } ?: emptyMap()
+            parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -259,10 +259,10 @@ class LpmRepository @Inject constructor(
          */
         fun shouldTintOnSelection(): Boolean {
             return setOf(
-                PaymentMethod.Type.Card,
-                PaymentMethod.Type.AuBecsDebit,
-                PaymentMethod.Type.USBankAccount
-            ).contains(this.type)
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.AuBecsDebit.code,
+                PaymentMethod.Type.USBankAccount.code
+            ).contains(this.code)
         }
     }
 

@@ -136,7 +136,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                 },
             selectedPaymentMethodResources.type
         ).run {
-            if (selectedPaymentMethodResources.type == PaymentMethod.Type.Card) {
+            if (selectedPaymentMethodResources.code == PaymentMethod.Type.Card.code) {
                 PaymentSelection.New.Card(
                     paymentMethodCreateParams = this,
                     brand = CardBrand.fromCode(
