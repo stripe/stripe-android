@@ -75,7 +75,7 @@ private fun LinkInlineSignup(
     enabled: Boolean,
     onUserInteracted: () -> Unit,
     onSelected: (Boolean) -> Unit,
-    onReady: (Boolean) -> Unit
+    onUserInput: (UserInput?) -> Unit
 ) {
     val viewModel: InlineSignupViewModel = viewModel(
         factory = InlineSignupViewModel.Factory(injector)
@@ -83,15 +83,15 @@ private fun LinkInlineSignup(
 
     val signUpState by viewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
     val isExpanded by viewModel.isExpanded.collectAsState(false)
-    val isReady by viewModel.isReady.collectAsState()
+    val userInput by viewModel.userInput.collectAsState()
 
     onSelected(isExpanded)
-    onReady(isReady)
+    onUserInput(userInput)
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(signUpState) {
-        if (signUpState == SignUpState.InputtingEmail && isReady) {
+        if (signUpState == SignUpState.InputtingEmail && userInput != null) {
             focusManager.clearFocus(true)
             keyboardController?.hide()
         }
@@ -225,11 +225,12 @@ class LinkInlineSignupView @JvmOverloads constructor(
     var hasUserInteracted = false
 
     /**
-     * Whether enough information has been collected to proceed with the payment flow.
-     * This will be true when the user has entered an email that already has a link account and just
-     * needs verification, or when they entered a new email and phone number.
+     * The collected input from the user, always valid unless null.
+     * When not null, enough information has been collected to proceed with the payment flow.
+     * This means that the user has entered an email that already has a link account and just
+     * needs verification, or entered a new email and phone number.
      */
-    val isReady = MutableStateFlow(true)
+    val userInput = MutableStateFlow<UserInput?>(null)
 
     val isSelected = MutableStateFlow(false)
 
@@ -249,7 +250,7 @@ class LinkInlineSignupView @JvmOverloads constructor(
                     enabled = enabledState,
                     onUserInteracted = { hasUserInteracted = true },
                     onSelected = { isSelected.value = it },
-                    onReady = { isReady.value = it }
+                    onUserInput = { userInput.value = it }
                 )
             }
         }

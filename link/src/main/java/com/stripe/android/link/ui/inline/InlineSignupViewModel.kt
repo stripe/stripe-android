@@ -58,11 +58,12 @@ internal class InlineSignupViewModel @Inject constructor(
     val isExpanded = MutableStateFlow(false)
 
     /**
-     * Whether we have enough information to proceed with the payment flow.
-     * This will be true when the user has entered an email that already has a link account and just
-     * needs verification, or when they entered a new email and phone number.
+     * The collected input from the user, always valid unless null.
+     * When not null, enough information has been collected to proceed with the payment flow.
+     * This means that the user has entered an email that already has a link account and just
+     * needs verification, or entered a new email and phone number.
      */
-    val isReady = MutableStateFlow(false)
+    val userInput = MutableStateFlow<UserInput?>(null)
     private var hasExpanded = false
 
     private var debouncer = SignUpViewModel.Debouncer(prefilledEmail)
@@ -83,9 +84,9 @@ internal class InlineSignupViewModel @Inject constructor(
             onStateChanged = {
                 _signUpStatus.value = it
                 if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
-                    isReady.value = false
-                } else if (it == SignUpState.InputtingPhone && !consumerPhoneNumber.value.isNullOrBlank()) {
-                    isReady.value = true
+                    userInput.value = null
+                } else if (it == SignUpState.InputtingPhone) {
+                    onPhoneInput(consumerPhoneNumber.value)
                 }
             },
             onValidEmailEntered = {
@@ -109,23 +110,20 @@ internal class InlineSignupViewModel @Inject constructor(
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
             val country = phoneController.getCountryCode()
 
-            linkAccountManager.userSignUpInput =
-                LinkAccountManager.UserSignUpInput(email, phone, country)
-            isReady.value = true
+            userInput.value = UserInput.SignUp(email, phone, country)
         } else {
-            linkAccountManager.userSignUpInput = null
-            isReady.value = false
+            userInput.value = null
         }
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
-        linkAccountManager.lookupConsumer(email, startVerification = false).fold(
+        linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
-                    isReady.value = true
+                    userInput.value = UserInput.SignIn(email)
                     _signUpStatus.value = SignUpState.InputtingEmail
                 } else {
-                    isReady.value = false
+                    userInput.value = null
                     _signUpStatus.value = SignUpState.InputtingPhone
                 }
             },

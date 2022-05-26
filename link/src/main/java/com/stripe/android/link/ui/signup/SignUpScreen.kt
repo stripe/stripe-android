@@ -32,6 +32,7 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
 import com.stripe.android.ui.core.elements.PhoneNumberController
@@ -92,12 +93,7 @@ internal fun SignUpBody(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    ScrollableTopLevelColumn {
         Text(
             text = stringResource(
                 if (signUpState == SignUpState.InputtingPhone) {

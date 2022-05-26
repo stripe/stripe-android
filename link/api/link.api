@@ -246,6 +246,10 @@ public final class com/stripe/android/link/repositories/LinkApiRepository_Factor
 	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/link/repositories/LinkApiRepository;
 }
 
+public final class com/stripe/android/link/ui/CommonKt {
+	public static final fun ScrollableTopLevelColumn (Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -289,6 +293,38 @@ public final class com/stripe/android/link/ui/inline/InlineSignupViewModel_Facto
 	public fun injectMembers (Lcom/stripe/android/link/ui/inline/InlineSignupViewModel$Factory;)V
 	public synthetic fun injectMembers (Ljava/lang/Object;)V
 	public static fun injectViewModel (Lcom/stripe/android/link/ui/inline/InlineSignupViewModel$Factory;Lcom/stripe/android/link/ui/inline/InlineSignupViewModel;)V
+}
+
+public abstract class com/stripe/android/link/ui/inline/UserInput {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/link/ui/inline/UserInput$SignIn : com/stripe/android/link/ui/inline/UserInput {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/link/ui/inline/UserInput$SignIn;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/ui/inline/UserInput$SignIn;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/link/ui/inline/UserInput$SignIn;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEmail ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/ui/inline/UserInput$SignUp : com/stripe/android/link/ui/inline/UserInput {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/ui/inline/UserInput$SignUp;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCountry ()Ljava/lang/String;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/link/ui/paymentmethod/ComposableSingletons$FormUIKt {

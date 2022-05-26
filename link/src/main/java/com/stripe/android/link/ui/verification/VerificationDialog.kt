@@ -65,7 +65,7 @@ fun LinkVerificationDialog(
                                     .padding(16.dp),
                                 shape = MaterialTheme.shapes.medium
                             ) {
-                                Column(Modifier.padding(horizontal = 20.dp)) {
+                                Column {
                                     LinkAppBar(
                                         email = account.email,
                                         onCloseButtonClick = {
