@@ -14,11 +14,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class SepaMandateTextSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes
     val stringResId: Int = R.string.sepa_mandate,
 ) : FormItemSpec(), RequiredItemSpec {
     @IgnoredOnParcel
-    private val mandateTextSpec = MandateTextSpec(api_path, stringResId)
+    private val mandateTextSpec = MandateTextSpec(apiPath, stringResId)
     fun transform(merchantName: String): FormElement = mandateTextSpec.transform(merchantName)
 }

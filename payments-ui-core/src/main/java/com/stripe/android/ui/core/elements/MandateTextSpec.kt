@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal open class MandateTextSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("mandate"),
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
     val stringResId: Int,
 ) : FormItemSpec(), RequiredItemSpec {
@@ -20,7 +20,7 @@ internal open class MandateTextSpec(
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         MandateTextElement(
-            this.api_path,
+            this.apiPath,
             this.stringResId,
             merchantName
         )

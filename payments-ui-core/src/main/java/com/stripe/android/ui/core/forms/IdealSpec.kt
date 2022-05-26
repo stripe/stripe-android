@@ -16,56 +16,56 @@ val IdealForm = LayoutSpec.create(
         TranslationId.IdealBank,
         listOf(
             DropdownItemSpec(
-                api_value = "abn_amro",
-                display_text = "ABN Amro"
+                apiValue = "abn_amro",
+                displayText = "ABN Amro"
             ),
             DropdownItemSpec(
-                api_value = "asn_bank",
-                display_text = "ASN Bank"
+                apiValue = "asn_bank",
+                displayText = "ASN Bank"
             ),
             DropdownItemSpec(
-                api_value = "bunq",
-                display_text = "bunq B.V.‎"
+                apiValue = "bunq",
+                displayText = "bunq B.V.‎"
             ),
             DropdownItemSpec(
-                api_value = "handelsbanken",
-                display_text = "Handelsbanken"
+                apiValue = "handelsbanken",
+                displayText = "Handelsbanken"
             ),
             DropdownItemSpec(
-                api_value = "ing",
-                display_text = "ING Bank"
+                apiValue = "ing",
+                displayText = "ING Bank"
             ),
             DropdownItemSpec(
-                api_value = "knab",
-                display_text = "Knab"
+                apiValue = "knab",
+                displayText = "Knab"
             ),
             DropdownItemSpec(
-                api_value = "rabobank",
-                display_text = "Rabobank"
+                apiValue = "rabobank",
+                displayText = "Rabobank"
             ),
             DropdownItemSpec(
-                api_value = "regiobank",
-                display_text = "RegioBank"
+                apiValue = "regiobank",
+                displayText = "RegioBank"
             ),
             DropdownItemSpec(
-                api_value = "revolut",
-                display_text = "Revolut"
+                apiValue = "revolut",
+                displayText = "Revolut"
             ),
             DropdownItemSpec(
-                api_value = "sns_bank",
-                display_text = "SNS Bank"
+                apiValue = "sns_bank",
+                displayText = "SNS Bank"
             ),
             DropdownItemSpec(
-                api_value = "triodos_bank",
-                display_text = "Triodos Bank"
+                apiValue = "triodos_bank",
+                displayText = "Triodos Bank"
             ),
             DropdownItemSpec(
-                api_value = "van_lanschot",
-                display_text = "Van Lanschot"
+                apiValue = "van_lanschot",
+                displayText = "Van Lanschot"
             ),
             DropdownItemSpec(
-                api_value = null, // HIGHLIGHT
-                display_text = "Other"
+                apiValue = null, // HIGHLIGHT
+                displayText = "Other"
             )
         )
     )

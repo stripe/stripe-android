@@ -142,7 +142,7 @@ internal class FormViewModelTest {
         assertThat(values[0]).isTrue()
 
         formViewModel.setSaveForFutureUse(false)
-        formViewModel.addHiddenIdentifiers(listOf(emailSection.api_path))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.apiPath))
 
         assertThat(values[1]).isFalse()
     }
@@ -216,12 +216,12 @@ internal class FormViewModelTest {
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
             .filterIsInstance(SaveForFutureUseController::class.java).first()
 
-        formViewModel.addHiddenIdentifiers(listOf(emailSection.api_path))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.apiPath))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
-            nameSection.api_path.v1
+            nameSection.apiPath.v1
         )
     }
 
@@ -251,14 +251,14 @@ internal class FormViewModelTest {
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs
         ).containsKey(
-            emailSection.api_path
+            emailSection.apiPath
         )
 
         formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.api_path
+            emailSection.apiPath
         )
     }
 
@@ -290,7 +290,7 @@ internal class FormViewModelTest {
         // Verify formFieldValues is null because the email is required and invalid
         assertThat(formViewModel.completeFormValues.first()).isNull()
 
-        formViewModel.addHiddenIdentifiers(listOf(emailSection.api_path))
+        formViewModel.addHiddenIdentifiers(listOf(emailSection.apiPath))
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues is not null even though the email is invalid
@@ -300,7 +300,7 @@ internal class FormViewModelTest {
             completeFormFieldValues
         ).isNotNull()
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            emailSection.api_path
+            emailSection.apiPath
         )
         assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
             PaymentSelection.CustomerRequestedSave.RequestNoReuse
@@ -418,7 +418,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.api_path)
+                        ?.get(emailSection.apiPath)
                         ?.value
                 ).isNotNull()
             } else {
@@ -427,7 +427,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.api_path)
+                        ?.get(emailSection.apiPath)
                         ?.value
                 ).isNull()
             }
@@ -458,7 +458,7 @@ internal class FormViewModelTest {
             com.stripe.android.ui.core.R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
                 ?.value
         ).isNull()
 
@@ -467,7 +467,7 @@ internal class FormViewModelTest {
             com.stripe.android.ui.core.R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
                 ?.value
         ).isNull()
 
@@ -476,7 +476,7 @@ internal class FormViewModelTest {
             com.stripe.android.ui.core.R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
                 ?.value
         ).isNull()
 
@@ -494,7 +494,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(emailSection.api_path)
+                            ?.get(emailSection.apiPath)
                             ?.value
                     ).isNotNull()
                 } else {
@@ -503,7 +503,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(emailSection.api_path)
+                            ?.get(emailSection.apiPath)
                             ?.value
                     ).isNull()
                 }

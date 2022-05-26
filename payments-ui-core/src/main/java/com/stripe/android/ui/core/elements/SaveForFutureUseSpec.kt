@@ -12,11 +12,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class SaveForFutureUseSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.SaveForFutureUse
+    override val apiPath: IdentifierSpec = IdentifierSpec.SaveForFutureUse
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(initialValue: Boolean, merchantName: String): FormElement =
         SaveForFutureUseElement(
-            this.api_path,
+            this.apiPath,
             SaveForFutureUseController(
                 initialValue
             ),

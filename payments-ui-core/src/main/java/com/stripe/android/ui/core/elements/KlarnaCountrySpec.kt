@@ -11,14 +11,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 class KlarnaCountrySpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Country
+    override val apiPath: IdentifierSpec = IdentifierSpec.Country
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         currencyCode: String?,
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(
         CountryElement(
-            this.api_path,
+            this.apiPath,
             DropdownFieldController(
                 CountryConfig(KlarnaHelper.getAllowedCountriesForCurrency(currencyCode)),
                 initialValues[IdentifierSpec.Country]

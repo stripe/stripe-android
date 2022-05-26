@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -13,17 +14,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class CountrySpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Country,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Country,
+
+    @SerialName("allowed_countries")
     val onlyShowCountryCodes: Set<String> = supportedBillingCountries
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(
         CountryElement(
-            this.api_path,
+            this.apiPath,
             DropdownFieldController(
                 CountryConfig(this.onlyShowCountryCodes),
-                initialValue = initialValues[this.api_path]
+                initialValue = initialValues[this.apiPath]
             )
         )
     )

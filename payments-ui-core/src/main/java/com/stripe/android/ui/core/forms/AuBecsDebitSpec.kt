@@ -20,8 +20,8 @@ val AuBecsDebitForm = LayoutSpec.create(
     SimpleTextSpec(
         IdentifierSpec.Name,
         label = R.string.au_becs_account_name,
-        capitalization = Capitalization.words,
-        keyboardType = KeyboardType.text
+        capitalization = Capitalization.Words,
+        keyboardType = KeyboardType.Text
     ),
     AuBecsDebitMandateTextSpec()
 )

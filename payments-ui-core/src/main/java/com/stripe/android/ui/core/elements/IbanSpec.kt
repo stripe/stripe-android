@@ -8,14 +8,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class IbanSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("sepa_debit[iban]")
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_debit[iban]")
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         IbanElement(
-            this.api_path,
+            this.apiPath,
             SimpleTextFieldController(
                 IbanConfig(),
-                initialValue = initialValues[this.api_path]
+                initialValue = initialValues[this.apiPath]
             )
         )
     )

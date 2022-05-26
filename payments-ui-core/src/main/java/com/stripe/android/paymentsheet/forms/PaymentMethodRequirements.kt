@@ -39,7 +39,7 @@ data class PaymentMethodRequirements(
      *  - Only [PIRequirement]s are allowed in this set.
      * - If this is null, PaymentIntents (even if SFU is set) are not supported by this LPM.
      */
-    var piRequirements: Set<PIRequirement>?,
+    val piRequirements: Set<PIRequirement>?,
 
     /**
      * These are the requirements for using a SetupIntent.

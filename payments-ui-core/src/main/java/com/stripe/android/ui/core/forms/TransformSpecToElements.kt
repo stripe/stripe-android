@@ -88,6 +88,7 @@ class TransformSpecToElements(
                 is SimpleTextSpec -> it.transform(initialValues)
                 is KlarnaHeaderStaticTextSpec -> it.transform()
                 is SepaMandateTextSpec -> it.transform(merchantName)
+                else -> EmptyFormElement()
             }
         }
 }

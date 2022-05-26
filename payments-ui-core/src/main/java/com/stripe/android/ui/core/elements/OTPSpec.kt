@@ -8,12 +8,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 object OTPSpec : FormItemSpec(), RequiredItemSpec {
-    override val api_path: IdentifierSpec
+    override val apiPath: IdentifierSpec
         get() = IdentifierSpec.Generic("otp")
 
     fun transform(): OTPElement {
         return OTPElement(
-            identifier = api_path,
+            identifier = apiPath,
             controller = OTPController()
         )
     }
