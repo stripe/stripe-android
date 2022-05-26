@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Parcelable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
@@ -10,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class FormFragmentArguments(
-    val paymentMethodCode: String, // TODO(michelleb): Convert to PaymentMethodCode
+    val paymentMethodCode: PaymentMethodCode,
     val showCheckbox: Boolean,
     val showCheckboxControlledFields: Boolean,
     val merchantName: String,
