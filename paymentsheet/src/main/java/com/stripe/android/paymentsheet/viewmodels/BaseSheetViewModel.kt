@@ -412,8 +412,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                        it.type != PaymentMethod.Type.USBankAccount
-                    } == true
+                    it.type != PaymentMethod.Type.USBankAccount
+                } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(
