@@ -134,7 +134,6 @@ internal object PaymentSheetFixtures {
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormFragmentArguments(
             SupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
                 "bancontact",
                 true,
                 R.string.stripe_paymentsheet_payment_method_bancontact,

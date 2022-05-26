@@ -14,17 +14,25 @@ class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
+
     @Test
     fun `Verify no fields in the default json are ignored`() {
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
-        LpmRepository.exposedPaymentMethods.forEach {
+        LpmRepository.exposedPaymentMethods.forEach { code ->
             assertThat(
-                lpmRepository.fromCode(it)!!.formSpec.items
-                    .filterIsInstance(EmptyFormSpec::class.java)
+                lpmRepository.fromCode(code)!!.formSpec.items
+                    .filter {
+                        it is EmptyFormSpec && !hasEmptyForm(code)
+                    }
+
             ).isEmpty()
         }
     }
+
+    private fun hasEmptyForm(code: String) =
+        (code != "paypal" && code != "us_bank_account") &&
+            lpmRepository.fromCode(code)!!.formSpec.items.size == 1
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {

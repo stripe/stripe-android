@@ -2,11 +2,11 @@ package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
 import android.os.Parcelable
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -85,7 +85,6 @@ class LpmRepository @Inject constructor(
     private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) =
         when (sharedDataSpec.type) {
             PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Card,
                 "card",
                 false,
                 R.string.stripe_paymentsheet_payment_method_card,
@@ -98,7 +97,6 @@ class LpmRepository @Inject constructor(
                 }
             )
             PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
                 "bancontact",
                 true,
                 R.string.stripe_paymentsheet_payment_method_bancontact,
@@ -107,7 +105,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Sofort,
                 "sofort",
                 true,
                 R.string.stripe_paymentsheet_payment_method_sofort,
@@ -116,7 +113,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Ideal,
                 "ideal",
                 true,
                 R.string.stripe_paymentsheet_payment_method_ideal,
@@ -125,7 +121,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
                 "sepa_debit",
                 true,
                 R.string.stripe_paymentsheet_payment_method_sepa_debit,
@@ -134,7 +129,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Eps,
                 "eps",
                 true,
                 R.string.stripe_paymentsheet_payment_method_eps,
@@ -143,7 +137,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.P24,
                 "p24",
                 false,
                 R.string.stripe_paymentsheet_payment_method_p24,
@@ -152,7 +145,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Giropay,
                 "giropay",
                 false,
                 R.string.stripe_paymentsheet_payment_method_giropay,
@@ -161,7 +153,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.AfterpayClearpay,
                 "afterpay_clearpay",
                 false,
                 R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
@@ -170,7 +161,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Klarna,
                 "klarna",
                 false,
                 R.string.stripe_paymentsheet_payment_method_klarna,
@@ -179,7 +169,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.PayPal,
                 "paypal",
                 false,
                 R.string.stripe_paymentsheet_payment_method_paypal,
@@ -188,7 +177,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Affirm,
                 "affirm",
                 false,
                 R.string.stripe_paymentsheet_payment_method_affirm,
@@ -197,7 +185,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.AuBecsDebit,
                 "au_becs_debit",
                 true,
                 R.string.stripe_paymentsheet_payment_method_au_becs_debit,
@@ -206,7 +193,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.USBankAccount,
                 "us_bank_account",
                 true,
                 R.string.stripe_paymentsheet_payment_method_us_bank_account,
@@ -237,8 +223,9 @@ class LpmRepository @Inject constructor(
          * This describes the PaymentMethod Type as described
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
          */
-        val type: PaymentMethod.Type,
-        val code: PaymentMethodCode = type.code,
+        val code: PaymentMethodCode,
+
+        /** This describes if the LPM requires a mandate see [ConfirmPaymentIntentParams.mandateDataParams]. */
         val requiresMandate: Boolean,
 
         /** This describes the name that appears under the selector. */
@@ -299,7 +286,6 @@ class LpmRepository @Inject constructor(
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(
-            PaymentMethod.Type.Card,
             "card",
             false,
             R.string.stripe_paymentsheet_payment_method_card,
