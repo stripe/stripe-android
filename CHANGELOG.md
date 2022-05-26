@@ -6,7 +6,7 @@
 * [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text
 
 ### Payments
-* [FIXED][XXXX](https://github.com/stripe/stripe-android/pull/XXXX) Add 3ds2 url to list of completion URLs so callbacks work correctly.
+* [FIXED][5079](https://github.com/stripe/stripe-android/pull/5079) Add 3ds2 url to list of completion URLs so callbacks work correctly.
 
 ## 20.4.0 - 2022-05-23
 This release adds [appearance customization APIs](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L186) to payment sheet and enables Affirm and AU BECS direct debit as payment methods within Payment Sheet.
