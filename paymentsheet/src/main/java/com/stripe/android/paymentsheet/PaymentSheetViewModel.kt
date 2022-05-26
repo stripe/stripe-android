@@ -562,11 +562,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
-            println(
-                "saveStateHandle: ${
-                savedStateHandle.get<List<LpmRepository.SupportedPaymentMethod>>(SAVE_SUPPORTED_PAYMENT_METHOD)
-                }"
-            )
             return subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)
