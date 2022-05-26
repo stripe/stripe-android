@@ -22,17 +22,12 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.airbnb.mvrx.viewModel
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.screens.BankPickerScreen
 import com.stripe.android.financialconnections.screens.BankPickerViewModel
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
-
-    private val starterArgs: FinancialConnectionsSheetActivityArgs? by lazy {
-        FinancialConnectionsSheetActivityArgs.fromIntent(intent)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
