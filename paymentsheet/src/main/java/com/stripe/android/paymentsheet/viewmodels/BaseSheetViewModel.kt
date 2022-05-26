@@ -121,7 +121,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal var addFragmentSelectedLPM
         get() = requireNotNull(
             resourceRepository.getLpmRepository().fromCode(
-                savedStateHandle.get<PaymentMethodCode>(SAVE_SELECTED_ADD_LPM)
+                savedStateHandle.get<PaymentMethodCode>(
+                    SAVE_SELECTED_ADD_LPM
+                ) ?: newLpm?.paymentMethodCreateParams?.typeCode
             ) ?: supportedPaymentMethods.first()
         )
         set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.type.code)
