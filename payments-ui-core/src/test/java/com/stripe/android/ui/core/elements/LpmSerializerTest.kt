@@ -46,7 +46,7 @@ class LpmSerializerTest {
         assertThat(result.isSuccess).isTrue()
         result.onSuccess {
             assertThat(it.async).isFalse()
-            assertThat(it.fields).isEmpty()
+            assertThat(it.fields).isEqualTo(listOf(EmptyFormSpec))
         }
     }
 

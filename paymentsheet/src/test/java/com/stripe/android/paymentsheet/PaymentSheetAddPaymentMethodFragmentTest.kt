@@ -10,6 +10,7 @@ import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -405,7 +406,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             assertThat(primaryButtonState).isEqualTo(manualState)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(Bancontact)
             idleLooper()
 
             assertThat(primaryButtonState).isEqualTo(null)
@@ -510,5 +511,12 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewModel
             )
         }
+    }
+
+    companion object {
+        val lpmRepository =
+            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources)
+        val Bancontact = lpmRepository.fromCode("bancontact")!!
+        val SepaDebit = lpmRepository.fromCode("sepa_debit")!!
     }
 }
