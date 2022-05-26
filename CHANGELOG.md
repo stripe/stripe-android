@@ -5,6 +5,9 @@
 * [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
 * [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
 
+### CardScan
+* [FIXED] [5075](https://github.com/stripe/stripe-android/pull/5075) Prevent a crash when the fragment is detached.
+
 ## 20.0.1 - 2022-04-11
 This release includes several PaymentSheet bug fixes.
 
