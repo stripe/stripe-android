@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="link">Link</string>
-
-    <string name="accessibility_close">Close</string>
-
+    
     <string name="inline_sign_up_header">Save my info for secure 1-click checkout</string>
 
     <string name="sign_up_header">Secure 1-click checkout</string>
