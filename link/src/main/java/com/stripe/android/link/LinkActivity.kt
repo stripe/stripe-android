@@ -10,14 +10,24 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Surface
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -28,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodBody
 import com.stripe.android.link.ui.signup.SignUpBody
@@ -36,6 +47,7 @@ import com.stripe.android.link.ui.wallet.WalletBody
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
@@ -59,12 +71,35 @@ internal class LinkActivity : ComponentActivity() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         setContent {
-            navController = rememberNavController()
 
-            viewModel.navigator.navigationController = navController
+            var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+            val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+            val coroutineScope = rememberCoroutineScope()
+
+            if (bottomSheetContent != null) {
+                DisposableEffect(bottomSheetContent) {
+                    coroutineScope.launch { sheetState.show() }
+                    onDispose {
+                        coroutineScope.launch { sheetState.hide() }
+                    }
+                }
+            }
 
             DefaultLinkTheme {
-                Surface(Modifier.fillMaxHeight()) {
+
+                ModalBottomSheetLayout(
+                    sheetContent = bottomSheetContent ?: {
+                        // Must have some content at startup or bottom sheet crashes when
+                        // calculating its initial size
+                        Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
+                    },
+                    modifier = Modifier.fillMaxHeight(),
+                    sheetState = sheetState,
+                ) {
+                    navController = rememberNavController()
+
+                    viewModel.navigator.navigationController = navController
+
                     Column(Modifier.fillMaxWidth()) {
                         val linkAccount by viewModel.linkAccount.collectAsState(initial = null)
 
@@ -114,7 +149,12 @@ internal class LinkActivity : ComponentActivity() {
                                     WalletBody(
                                         account,
                                         viewModel.injector
-                                    )
+                                    ) {
+                                        bottomSheetContent = it
+                                        if (it == null) {
+                                            coroutineScope.launch { sheetState.hide() }
+                                        }
+                                    }
                                 }
                             }
 
