@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class FormFragmentArguments(
-    val paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
+    val paymentMethodCode: String, // TODO(michelleb): Convert to PaymentMethodCode
     val showCheckbox: Boolean,
     val showCheckboxControlledFields: Boolean,
     val merchantName: String,

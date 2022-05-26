@@ -69,7 +69,7 @@ internal open class PaymentOptionsViewModelTestInjection {
     @ExperimentalCoroutinesApi
     fun createFormViewModel(): FormViewModel = runBlocking {
         FormViewModel(
-            paymentMethodCode = mock(),
+            paymentMethodCode = "",
             config = mock(),
             resourceRepository = mock(),
             transformSpecToElement = mock()

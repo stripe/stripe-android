@@ -66,8 +66,7 @@ data class PaymentMethodRequirements(
     val confirmPMFromCustomer: Boolean?,
 ) : Parcelable
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-val CardRequirement = PaymentMethodRequirements(
+internal val CardRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = emptySet(),
     confirmPMFromCustomer = true

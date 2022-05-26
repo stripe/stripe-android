@@ -43,7 +43,7 @@ import javax.inject.Provider
  */
 @FlowPreview
 internal class FormViewModel @Inject internal constructor(
-    paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
+    paymentMethodCode: String, // TODO(michelleb): Convert to PaymentMethodCode
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElement
@@ -51,7 +51,7 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormFragmentArguments,
         val resource: Resources,
-        var paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
+        var paymentMethodCode: String, // TODO(michelleb): Convert to PaymentMethodCode
         private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
@@ -110,7 +110,6 @@ internal class FormViewModel @Inject internal constructor(
                 paymentMethodCode
             )
         ).formSpec.items
-
     }
 
     internal val enabled = MutableStateFlow(true)

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.injection
 
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.ui.core.elements.LayoutSpec
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -13,7 +12,9 @@ internal interface FormViewModelSubcomponent {
     @Subcomponent.Builder
     interface Builder {
         @BindsInstance
-        fun paymentMethodCode(paymentMethodCode: String): Builder
+        fun paymentMethodCode(
+            paymentMethodCode: String//TODO(michelleb): R
+        ): Builder
 
         @BindsInstance
         fun formFragmentArguments(

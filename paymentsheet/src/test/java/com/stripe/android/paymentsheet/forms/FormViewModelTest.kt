@@ -18,9 +18,14 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressElement
+import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.MandateTextSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
@@ -55,7 +60,7 @@ import javax.inject.Provider
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
     private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(), com.stripe.android.ui.core.R.style.StripeDefaultTheme
+        ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme
     )
 
     private val resourceRepository =
@@ -127,7 +132,7 @@ internal class FormViewModelTest {
                 paymentMethodType,
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
-                CardRequirement,
+                PaymentMethodRequirements(emptySet(), emptySet(), true),
                 layoutSpec
             )
         )
@@ -158,7 +163,7 @@ internal class FormViewModelTest {
 
         // Set all the card fields, billing is set in the args
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
         emailController?.onValueChange("joe@email.com")
 
@@ -190,17 +195,13 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    SaveForFutureUseSpec()
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
-        )
-
-        val defaultHiddenIdentifiers = listOf(
-            IdentifierSpec.Line1,
-            IdentifierSpec.Line2,
-            IdentifierSpec.City,
-            IdentifierSpec.PostalCode,
-            IdentifierSpec.State,
-            IdentifierSpec.Name,
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -208,16 +209,14 @@ internal class FormViewModelTest {
             .observeForever {
                 values.add(it)
             }
-        assertThat(values[0]).isEqualTo(defaultHiddenIdentifiers)
+        assertThat(values[0]).isEmpty()
 
         formViewModel.saveForFutureUseVisible.value = false
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
         assertThat(values[1][0]).isEqualTo(
-            defaultHiddenIdentifiers.plus(
-                IdentifierSpec.SaveForFutureUse
-            )
+            IdentifierSpec.SaveForFutureUse
         )
     }
 
@@ -227,9 +226,14 @@ internal class FormViewModelTest {
         // Here we have just a country, no text fields.
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
-            PaymentMethod.Type.Sofort.code,
+            PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    CountrySpec(),
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
@@ -242,13 +246,20 @@ internal class FormViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun `Verify if the last text field is hidden the second to last text field is the last text field id`() = runTest {
-        // Here we have one hidden (email) and one required field (name), bank will always be in the result,
+        // Here we have one hidden (email) and one required field (name), country will always be in the result,
         //  and email only if it is not hidden
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             PaymentMethod.Type.P24.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.P24,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    CountrySpec(),
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
@@ -267,14 +278,20 @@ internal class FormViewModelTest {
         //  and name only if not hidden
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
-            PaymentMethod.Type.P24.code,
+            PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    EmailSpec(),
+                    CountrySpec(),
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
         // Add text to the name to make it valid
         emailController?.onValueChange("email@valid.com")
@@ -298,14 +315,21 @@ internal class FormViewModelTest {
         //  and email only if not hidden
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
-            PaymentMethod.Type.Klarna.code,
+            PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    EmailSpec(),
+                    CountrySpec(),
+                    SaveForFutureUseSpec()
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
         // Add text to the email to make it invalid
         emailController?.onValueChange("joe")
@@ -333,9 +357,6 @@ internal class FormViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
-        /**
-         * Using P24 as a complex enough example to test the form view model class.
-         */
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             billingDetails = null,
             showCheckbox = true,
@@ -344,14 +365,22 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.P24.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.P24,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    CountrySpec(onlyShowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
+                    SaveForFutureUseSpec()
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, com.stripe.android.ui.core.R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
         nameElement?.onValueChange("joe")
         assertThat(
@@ -378,9 +407,6 @@ internal class FormViewModelTest {
     @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element address fields are complete`() = runTest {
-        /**
-         * Using sepa debit as a complex enough example to test the address portion.
-         */
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             showCheckbox = false,
             showCheckboxControlledFields = true,
@@ -389,13 +415,28 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.SepaDebit.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.SepaDebit,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    IbanSpec(),
+                    AddressSpec(
+                        IdentifierSpec.Generic("address"),
+                        countryCodes = setOf("US", "JP")
+                    ),
+                    MandateTextSpec(
+                        IdentifierSpec.Generic("mandate"),
+                        R.string.sepa_mandate
+                    ),
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            com.stripe.android.ui.core.R.string.address_label_name
+            R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
@@ -404,7 +445,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            com.stripe.android.ui.core.R.string.email
+            R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
@@ -413,7 +454,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            com.stripe.android.ui.core.R.string.iban
+            R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
@@ -460,13 +501,28 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.SepaDebit.code,
             args,
-            resourceRepository = resourceRepository,
+            resourceRepository = createRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.SepaDebit,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    IbanSpec(),
+                    AddressSpec(
+                        IdentifierSpec.Generic("address"),
+                        countryCodes = setOf("US", "JP")
+                    ),
+                    MandateTextSpec(
+                        IdentifierSpec.Generic("mandate"),
+                        R.string.sepa_mandate
+                    ),
+                )
+            ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            com.stripe.android.ui.core.R.string.address_label_name
+            R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
@@ -475,7 +531,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            com.stripe.android.ui.core.R.string.email
+            R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
@@ -484,7 +540,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            com.stripe.android.ui.core.R.string.iban
+            R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
@@ -494,7 +550,7 @@ internal class FormViewModelTest {
         // Fill all address values except line2
         val addressControllers = AddressControllers.create(formViewModel)
         val populateAddressControllers = addressControllers.controllers
-            .filter { it.label.first() != com.stripe.android.ui.core.R.string.address_label_address_line2 }
+            .filter { it.label.first() != R.string.address_label_address_line2 }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("1234")
@@ -542,23 +598,23 @@ internal class FormViewModelTest {
                     listOfNotNull(
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            com.stripe.android.ui.core.R.string.address_label_address_line1
+                            R.string.address_label_address_line1
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            com.stripe.android.ui.core.R.string.address_label_address_line2
+                            R.string.address_label_address_line2
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            com.stripe.android.ui.core.R.string.address_label_city
+                            R.string.address_label_city
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            com.stripe.android.ui.core.R.string.address_label_state
+                            R.string.address_label_state
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            com.stripe.android.ui.core.R.string.address_label_zip_code
+                            R.string.address_label_zip_code
                         ),
                     )
                 )
@@ -592,6 +648,7 @@ internal class FormViewModelTest {
     }
 }
 
+@OptIn(FlowPreview::class)
 internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
     elements
         .firstOrNull()
