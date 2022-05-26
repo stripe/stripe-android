@@ -3,6 +3,7 @@ package com.stripe.android.link
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewTreeObserver
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -11,14 +12,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -42,7 +41,7 @@ internal class LinkActivity : ComponentActivity() {
     internal var viewModelFactory: ViewModelProvider.Factory =
         LinkActivityViewModel.Factory(
             applicationSupplier = { application },
-            starterArgsSupplier = { requireNotNull(starterArgs) }
+            starterArgsSupplier = { starterArgs }
         )
 
     private val viewModel: LinkActivityViewModel by viewModels { viewModelFactory }
@@ -50,12 +49,14 @@ internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
     lateinit var navController: NavHostController
 
-    private val starterArgs: LinkActivityContract.Args? by lazy {
-        LinkActivityContract.Args.fromIntent(intent)
+    private val starterArgs by lazy {
+        requireNotNull(LinkActivityContract.Args.fromIntent(intent))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         setContent {
             navController = rememberNavController()
@@ -63,12 +64,8 @@ internal class LinkActivity : ComponentActivity() {
             viewModel.navigator.navigationController = navController
 
             DefaultLinkTheme {
-                Surface {
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
-                    ) {
+                Surface(Modifier.fillMaxHeight()) {
+                    Column(Modifier.fillMaxWidth()) {
                         val linkAccount by viewModel.linkAccount.collectAsState(initial = null)
 
                         LinkAppBar(
@@ -77,6 +74,7 @@ internal class LinkActivity : ComponentActivity() {
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
+
                             composable(LinkScreen.Loading.route) {
                                 Box(
                                     modifier = Modifier
@@ -87,6 +85,7 @@ internal class LinkActivity : ComponentActivity() {
                                     CircularProgressIndicator()
                                 }
                             }
+
                             composable(
                                 LinkScreen.SignUp.route,
                                 arguments = listOf(
@@ -100,6 +99,7 @@ internal class LinkActivity : ComponentActivity() {
                                     backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
                                 SignUpBody(viewModel.injector, email)
                             }
+
                             composable(LinkScreen.Verification.route) {
                                 linkAccount?.let { account ->
                                     VerificationBodyFullFlow(
@@ -108,6 +108,7 @@ internal class LinkActivity : ComponentActivity() {
                                     )
                                 }
                             }
+
                             composable(LinkScreen.Wallet.route) {
                                 linkAccount?.let { account ->
                                     WalletBody(
@@ -116,6 +117,7 @@ internal class LinkActivity : ComponentActivity() {
                                     )
                                 }
                             }
+
                             composable(LinkScreen.PaymentMethod.route) {
                                 linkAccount?.let { account ->
                                     PaymentMethodBody(
@@ -140,10 +142,13 @@ internal class LinkActivity : ComponentActivity() {
                     lifecycleScope.launch {
                         viewModel.navigator.navigateTo(
                             target = when (viewModel.linkAccountManager.accountStatus.first()) {
-                                AccountStatus.Verified -> LinkScreen.Wallet
+                                AccountStatus.Verified ->
+                                    LinkScreen.Wallet
                                 AccountStatus.NeedsVerification,
-                                AccountStatus.VerificationStarted -> LinkScreen.Verification
-                                AccountStatus.SignedOut -> LinkScreen.SignUp()
+                                AccountStatus.VerificationStarted ->
+                                    LinkScreen.Verification
+                                AccountStatus.SignedOut ->
+                                    LinkScreen.SignUp(starterArgs.customerEmail)
                             },
                             clearBackStack = true
                         )

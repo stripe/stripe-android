@@ -61,6 +61,7 @@ class Selectors(
         Currency.EUR -> EspressoLabelIdButton(R.string.currency_eur)
         Currency.USD -> EspressoLabelIdButton(R.string.currency_usd)
         Currency.AUD -> EspressoLabelIdButton(R.string.currency_aud)
+        Currency.GBP -> EspressoLabelIdButton(R.string.currency_gbp)
     }
 
     val checkout = when (testParameters.intentType) {

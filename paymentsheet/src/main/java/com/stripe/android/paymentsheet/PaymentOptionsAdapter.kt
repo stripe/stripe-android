@@ -349,21 +349,23 @@ internal class PaymentOptionsAdapter(
             )
 
             composeView.setContent {
-                PaymentOptionUi(
-                    viewWidth = width,
-                    isEditing = isEditing,
-                    isSelected = isSelected,
-                    isEnabled = isEnabled,
-                    iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
-                    labelIcon = labelIcon,
-                    labelText = labelText,
-                    removePmDialogTitle = removeTitle,
-                    description = item.getDescription(itemView.resources),
-                    onRemoveListener = { onRemoveListener(position) },
-                    onRemoveAccessibilityDescription =
-                    savedPaymentMethod.getRemoveDescription(itemView.resources),
-                    onItemSelectedListener = { onItemSelectedListener(position, true) },
-                )
+                PaymentsTheme {
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = isEditing,
+                        isSelected = isSelected,
+                        isEnabled = isEnabled,
+                        iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+                        labelIcon = labelIcon,
+                        labelText = labelText,
+                        removePmDialogTitle = removeTitle,
+                        description = item.getDescription(itemView.resources),
+                        onRemoveListener = { onRemoveListener(position) },
+                        onRemoveAccessibilityDescription =
+                        savedPaymentMethod.getRemoveDescription(itemView.resources),
+                        onItemSelectedListener = { onItemSelectedListener(position, true) },
+                    )
+                }
             }
         }
     }
@@ -390,26 +392,28 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                val iconRes = if (
-                    MaterialTheme.paymentsColors.component.shouldUseDarkDynamicColor()
-                ) {
-                    R.drawable.stripe_ic_paymentsheet_add_dark
-                } else {
-                    R.drawable.stripe_ic_paymentsheet_add_light
+                PaymentsTheme {
+                    val iconRes = if (
+                        MaterialTheme.paymentsColors.component.shouldUseDarkDynamicColor()
+                    ) {
+                        R.drawable.stripe_ic_paymentsheet_add_dark
+                    } else {
+                        R.drawable.stripe_ic_paymentsheet_add_light
+                    }
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = false,
+                        isSelected = false,
+                        isEnabled = isEnabled,
+                        labelText = itemView.resources.getString(
+                            R.string.stripe_paymentsheet_add_payment_method_button_label
+                        ),
+                        iconRes = iconRes,
+                        onItemSelectedListener = onItemSelectedListener,
+                        description =
+                        itemView.resources.getString(R.string.add_new_payment_method),
+                    )
                 }
-                PaymentOptionUi(
-                    viewWidth = width,
-                    isEditing = false,
-                    isSelected = false,
-                    isEnabled = isEnabled,
-                    labelText = itemView.resources.getString(
-                        R.string.stripe_paymentsheet_add_payment_method_button_label
-                    ),
-                    iconRes = iconRes,
-                    onItemSelectedListener = onItemSelectedListener,
-                    description =
-                    itemView.resources.getString(R.string.add_new_payment_method),
-                )
             }
         }
     }
@@ -440,16 +444,18 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                PaymentOptionUi(
-                    viewWidth = width,
-                    isEditing = false,
-                    isSelected = isSelected,
-                    isEnabled = isEnabled,
-                    iconRes = R.drawable.stripe_google_pay_mark,
-                    labelText = itemView.resources.getString(R.string.google_pay),
-                    description = itemView.resources.getString(R.string.google_pay),
-                    onItemSelectedListener = { onItemSelectedListener(position, true) },
-                )
+                PaymentsTheme {
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = false,
+                        isSelected = isSelected,
+                        isEnabled = isEnabled,
+                        iconRes = R.drawable.stripe_google_pay_mark,
+                        labelText = itemView.resources.getString(R.string.google_pay),
+                        description = itemView.resources.getString(R.string.google_pay),
+                        onItemSelectedListener = { onItemSelectedListener(position, true) },
+                    )
+                }
             }
         }
     }
@@ -602,131 +608,129 @@ internal fun PaymentOptionUi(
 ) {
     // An attempt was made to not use constraint layout here but it was unsuccessful in
     // precisely positioning the check and delete icons to match the mocks.
-    PaymentsTheme {
-        ConstraintLayout(
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .width(viewWidth)
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .selectable(selected = isSelected, enabled = isEnabled, onClick = {
+                onItemSelectedListener()
+            })
+    ) {
+        val (checkIcon, deleteIcon, label, card) = createRefs()
+        SectionCard(
+            isSelected = isSelected,
             modifier = Modifier
-                .padding(top = 12.dp)
-                .width(viewWidth)
-                .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-                .selectable(selected = isSelected, enabled = isEnabled, onClick = {
-                    onItemSelectedListener()
-                })
+                .height(64.dp)
+                .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
+                .fillMaxWidth()
+                .constrainAs(card) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
         ) {
-            val (checkIcon, deleteIcon, label, card) = createRefs()
-            SectionCard(
-                isSelected = isSelected,
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(56.dp)
+                )
+            }
+        }
+        if (isSelected) {
+            val iconColor = MaterialTheme.colors.primary
+            val checkSymbolColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .height(64.dp)
-                    .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
-                    .fillMaxWidth()
-                    .constrainAs(card) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
+                    .clip(CircleShape)
+                    .size(24.dp)
+                    .background(MaterialTheme.colors.primary)
+                    .constrainAs(checkIcon) {
+                        top.linkTo(card.bottom, (-18).dp)
+                        end.linkTo(card.end)
                     }
             ) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Image(
-                        painter = painterResource(iconRes),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .height(40.dp)
-                            .width(56.dp)
-                    )
-                }
-            }
-            if (isSelected) {
-                val iconColor = MaterialTheme.colors.primary
-                val checkSymbolColor = if (iconColor.shouldUseDarkDynamicColor()) {
-                    Color.Black
-                } else {
-                    Color.White
-                }
-                Box(
-                    contentAlignment = Alignment.Center,
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = checkSymbolColor,
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .size(24.dp)
-                        .background(MaterialTheme.colors.primary)
-                        .constrainAs(checkIcon) {
-                            top.linkTo(card.bottom, (-18).dp)
-                            end.linkTo(card.end)
-                        }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = null,
-                        tint = checkSymbolColor,
-                        modifier = Modifier
-                            .size(12.dp)
-                    )
-                }
-            }
-            if (isEditing && onRemoveListener != null) {
-                val openDialog = remember { mutableStateOf(false) }
-
-                SimpleDialogElementUI(
-                    openDialog = openDialog,
-                    titleText = removePmDialogTitle,
-                    messageText = description,
-                    confirmText = stringResource(R.string.remove),
-                    dismissText = stringResource(R.string.cancel),
-                    onConfirmListener = onRemoveListener
-                )
-
-                // tint the delete symbol so it contrasts well with the error color around it.
-                val iconColor = MaterialTheme.colors.error
-                val deleteIconColor = if (iconColor.shouldUseDarkDynamicColor()) {
-                    Color.Black
-                } else {
-                    Color.White
-                }
-                Image(
-                    painter = painterResource(R.drawable.stripe_ic_delete_symbol),
-                    contentDescription = onRemoveAccessibilityDescription,
-                    colorFilter = ColorFilter.tint(deleteIconColor),
-                    modifier = Modifier
-                        .constrainAs(deleteIcon) {
-                            top.linkTo(card.top, margin = (-9).dp)
-                            end.linkTo(card.end)
-                        }
-                        .size(20.dp)
-                        .clip(CircleShape)
-                        .background(color = iconColor)
-                        .clickable(
-                            onClick = {
-                                openDialog.value = true
-                            }
-                        )
+                        .size(12.dp)
                 )
             }
+        }
+        if (isEditing && onRemoveListener != null) {
+            val openDialog = remember { mutableStateOf(false) }
 
-            LpmSelectorText(
-                icon = labelIcon,
-                text = labelText,
-                textColor = MaterialTheme.colors.onSurface,
-                isEnabled = isEnabled,
+            SimpleDialogElementUI(
+                openDialog = openDialog,
+                titleText = removePmDialogTitle,
+                messageText = description,
+                confirmText = stringResource(R.string.remove),
+                dismissText = stringResource(R.string.cancel),
+                onConfirmListener = onRemoveListener
+            )
+
+            // tint the delete symbol so it contrasts well with the error color around it.
+            val iconColor = MaterialTheme.colors.error
+            val deleteIconColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            Image(
+                painter = painterResource(R.drawable.stripe_ic_delete_symbol),
+                contentDescription = onRemoveAccessibilityDescription,
+                colorFilter = ColorFilter.tint(deleteIconColor),
                 modifier = Modifier
-                    .constrainAs(label) {
-                        top.linkTo(card.bottom)
-                        start.linkTo(card.start)
+                    .constrainAs(deleteIcon) {
+                        top.linkTo(card.top, margin = (-9).dp)
+                        end.linkTo(card.end)
                     }
-                    .padding(
-                        top = 4.dp,
-                        start = PM_OPTIONS_DEFAULT_PADDING.dp,
-                        end = PM_OPTIONS_DEFAULT_PADDING.dp
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color = iconColor)
+                    .clickable(
+                        onClick = {
+                            openDialog.value = true
+                        }
                     )
-                    .semantics {
-                        // This makes the screen reader read out numbers digit by digit
-                        // one one one one vs one thousand one hundred eleven
-                        this.contentDescription =
-                            description.replace("\\d".toRegex(), "$0 ")
-                    },
             )
         }
+
+        LpmSelectorText(
+            icon = labelIcon,
+            text = labelText,
+            textColor = MaterialTheme.colors.onSurface,
+            isEnabled = isEnabled,
+            modifier = Modifier
+                .constrainAs(label) {
+                    top.linkTo(card.bottom)
+                    start.linkTo(card.start)
+                }
+                .padding(
+                    top = 4.dp,
+                    start = PM_OPTIONS_DEFAULT_PADDING.dp,
+                    end = PM_OPTIONS_DEFAULT_PADDING.dp
+                )
+                .semantics {
+                    // This makes the screen reader read out numbers digit by digit
+                    // one one one one vs one thousand one hundred eleven
+                    this.contentDescription =
+                        description.replace("\\d".toRegex(), "$0 ")
+                },
+        )
     }
 }

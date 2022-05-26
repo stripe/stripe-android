@@ -48,9 +48,6 @@ class LpmRepository @Inject constructor(
 ) {
     private val lpmSerializer: LpmSerializer = LpmSerializer()
 
-    // This is set by the session/element api, it should not be set from the hard coded
-    // list of lpms, until we receive this list from the server.
-    lateinit var first: SupportedPaymentMethod
     private lateinit var codeToSupportedPaymentMethod: Map<String, SupportedPaymentMethod>
 
     fun values() = codeToSupportedPaymentMethod.values

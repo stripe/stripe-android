@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -52,6 +49,7 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -126,21 +124,19 @@ internal fun WalletBody(
 ) {
     var isWalletExpanded by rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(vertical = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = if (paymentDetails.isEmpty()) {
-            Arrangement.Center
-        } else {
-            Arrangement.Top
-        }
-    ) {
-        if (paymentDetails.isEmpty()) {
+    if (paymentDetails.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator()
-        } else {
+        }
+    } else {
+        ScrollableTopLevelColumn {
+            Spacer(modifier = Modifier.height(12.dp))
+
             var selectedIndex by rememberSaveable {
                 mutableStateOf(
                     paymentDetails.indexOfFirst { it.isDefault }.takeUnless { it == -1 } ?: 0
@@ -281,24 +277,21 @@ internal fun ExpandedPaymentDetails(
                 tint = MaterialTheme.colors.onPrimary
             )
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = HorizontalPadding)
-        ) {
-            itemsIndexed(paymentDetails) { index, item ->
-                when (item) {
-                    is ConsumerPaymentDetails.Card -> {
-                        CardPaymentMethodItem(
-                            cardDetails = item,
-                            isSelected = selectedIndex == index
-                        ) {
-                            onIndexSelected(index)
-                        }
+
+        // TODO(brnunes-stripe): Use LazyColumn.
+        paymentDetails.forEachIndexed { index, item ->
+            when (item) {
+                is ConsumerPaymentDetails.Card -> {
+                    CardPaymentMethodItem(
+                        cardDetails = item,
+                        isSelected = selectedIndex == index
+                    ) {
+                        onIndexSelected(index)
                     }
                 }
             }
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -331,6 +324,7 @@ internal fun CardPaymentMethodItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = HorizontalPadding)
             .height(56.dp)
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically

@@ -38,14 +38,6 @@
   <string name="stripe_paymentsheet_or_pay_with_card">Atau bayar dengan kad</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Bayar</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
-  <!-- Payment Method type brand name. -->
-  <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debit Terus BECS AU</string>
-  <!-- Title for credit card number entry field -->
-  <string name="stripe_paymentsheet_payment_method_card">Kad</string>
-  <!-- Payment method brand name -->
-  <string name="stripe_paymentsheet_payment_method_sepa_debit">Debit SEPA</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Sedang diproses...</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

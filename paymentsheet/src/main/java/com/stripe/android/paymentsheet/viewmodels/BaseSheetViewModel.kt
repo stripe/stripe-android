@@ -22,6 +22,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -52,6 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
+import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -99,7 +101,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         ) ?: emptyList()
         set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value)
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _paymentMethods =
         savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
 
@@ -147,7 +149,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val editing = MutableLiveData(false)
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
@@ -302,10 +304,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmRepository())
         savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
 
-        // The LPM resource repository should be set so the first/default LPM is set
-        // to the exposed list of LPMs in the list.
-        resourceRepository.getLpmRepository().first = pmsToAdd.first()
-
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
                 IllegalArgumentException(
@@ -387,13 +385,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             SAVE_SELECTED_ADD_LPM,
             resourceRepository.getLpmRepository().fromCode(
                 newLpm?.paymentMethodCreateParams?.typeCode
-            ) ?: resourceRepository.getLpmRepository().first
+            ) ?: supportedPaymentMethods.first()
         )
 
     fun getAddFragmentSelectedLpmValue() =
         savedStateHandle.get<SupportedPaymentMethod>(
             SAVE_SELECTED_ADD_LPM
-        ) ?: resourceRepository.getLpmRepository().first
+        ) ?: supportedPaymentMethods.first()
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
@@ -463,7 +461,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    fun payWithLink() {
+    fun payWithLink(userInput: UserInput) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
@@ -487,11 +485,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
                 AccountStatus.SignedOut -> {
                     viewModelScope.launch {
-                        linkLauncher.signUpWithUserInput().fold(
+                        linkLauncher.signInWithUserInput(userInput).fold(
                             onSuccess = {
-                                createLinkPaymentDetails(params)
+                                // If successful, the account was fetched or created, so try again
+                                payWithLink(userInput)
                             },
                             onFailure = {
+                                onError(it.localizedMessage)
                                 savedStateHandle[SAVE_PROCESSING] = false
                                 updatePrimaryButtonState(PrimaryButton.State.Ready)
                             }
@@ -546,6 +546,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract fun onFinish()
 
     abstract fun onError(@StringRes error: Int? = null)
+
+    abstract fun onError(error: String? = null)
 
     /**
      * Used to set up any dependencies that require a reference to the current Activity.
