@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
@@ -90,7 +91,7 @@ class LpmRepository @Inject constructor(
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
                 CardRequirement,
-                if (sharedDataSpec.fields.isEmpty()) {
+                if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
                     HardcodedCard.formSpec
                 } else {
                     LayoutSpec(sharedDataSpec.fields)

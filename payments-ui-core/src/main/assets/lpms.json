@@ -464,9 +464,7 @@
   },
   {
     "type": "paypal",
-    "async": false,
-    "fields": [
-    ]
+    "async": false
   },
   {
     "type": "au_becs_debit",

@@ -6,5 +6,8 @@ import kotlinx.serialization.Serializable
 internal data class SharedDataSpec(
     val type: String,
     val async: Boolean = false,
-    val fields: List<FormItemSpec> = emptyList()
+
+    // If a form is empty, it must still have an EmptyFormSpec
+    // field to get the form into a complete state (i.e. PayPal).
+    val fields: List<FormItemSpec> = listOf(EmptyFormSpec)
 )
