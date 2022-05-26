@@ -14,7 +14,7 @@ internal data class AppDetails(
 ) {
     companion object {
         @JvmStatic
-        fun fromContext(context: Context) = AppDetails(
+        fun fromContext(context: Context?) = AppDetails(
             appPackageName = getAppPackageName(context),
             applicationId = getApplicationId(),
             libraryPackageName = getLibraryPackageName(),
@@ -26,7 +26,7 @@ internal data class AppDetails(
     }
 }
 
-internal fun getAppPackageName(context: Context): String? = context.applicationContext.packageName
+internal fun getAppPackageName(context: Context?): String? = context?.applicationContext?.packageName
 
 private fun getApplicationId(): String = "" // no longer available in later versions of gradle.
 
