@@ -43,12 +43,12 @@ class LpmRepositoryTest {
                 ]
               }
          ]
-        """.trimIndent().byteInputStream()
+            """.trimIndent().byteInputStream()
         )
         assertThat(lpmRepository.fromCode("card")).isNull()
     }
 
-    //TODO(michelleb): Once we have the server implemented in production we can do filtering there instead
+    // TODO(michelleb): Once we have the server implemented in production we can do filtering there instead
     // of in code here.
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
@@ -74,7 +74,7 @@ class LpmRepositoryTest {
                     ]
                   }
              ]
-        """.trimIndent().byteInputStream()
+            """.trimIndent().byteInputStream()
         )
         assertThat(lpmRepository.fromCode("unknown_lpm")).isNull()
     }
@@ -94,7 +94,7 @@ class LpmRepositoryTest {
                     "fields": []
                   }
              ]
-        """.trimIndent().byteInputStream()
+            """.trimIndent().byteInputStream()
         )
         assertThat(
             lpmRepository.fromCode("card")?.requirement?.piRequirements
@@ -116,7 +116,7 @@ class LpmRepositoryTest {
                     "fields": []
                   }
              ]
-        """.trimIndent().byteInputStream()
+            """.trimIndent().byteInputStream()
         )
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements

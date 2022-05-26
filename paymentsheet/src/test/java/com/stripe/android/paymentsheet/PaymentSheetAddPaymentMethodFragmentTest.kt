@@ -340,14 +340,14 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
             ).isEqualTo(
-                    COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = LpmRepository.HardcodedCard,
-                        amount = createAmount(),
-                        showCheckbox = true,
-                        showCheckboxControlledFields = false,
-                        billingDetails = null
-                    ),
-                )
+                COMPOSE_FRAGMENT_ARGS.copy(
+                    paymentMethod = LpmRepository.HardcodedCard,
+                    amount = createAmount(),
+                    showCheckbox = true,
+                    showCheckboxControlledFields = false,
+                    billingDetails = null
+                ),
+            )
         }
     }
 
@@ -485,7 +485,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             injectorKey = args.injectorKey
         )
 
-        //somehow the saveInstanceState for the viewModel needs to be present
+        // somehow the saveInstanceState for the viewModel needs to be present
 
         return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
             bundleOf(
