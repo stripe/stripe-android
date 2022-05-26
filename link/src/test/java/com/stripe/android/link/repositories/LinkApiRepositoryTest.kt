@@ -258,6 +258,38 @@ class LinkApiRepositoryTest {
     }
 
     @Test
+    fun `deletePaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val id = "payment_details_id"
+        linkRepository.deletePaymentDetails(secret, id)
+
+        verify(stripeRepository).deletePaymentDetails(
+            eq(secret),
+            eq(id),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Unit)
+
+        val result = linkRepository.deletePaymentDetails("secret", "id")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.deletePaymentDetails("secret", "id")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
     fun `createPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
         val consumerPaymentDetailsCreateParams =

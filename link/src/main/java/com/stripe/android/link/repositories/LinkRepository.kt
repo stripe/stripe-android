@@ -71,4 +71,12 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         extraConfirmationParams: Map<String, Any>? = null
     ): Result<LinkPaymentDetails>
+
+    /**
+     * Delete the payment method from the consumer account.
+     */
+    suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String
+    ): Result<Unit>
 }
