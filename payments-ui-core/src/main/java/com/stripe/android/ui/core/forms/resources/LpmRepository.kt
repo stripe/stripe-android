@@ -279,7 +279,7 @@ class LpmRepository @Inject constructor(
          * payment method of this type.  See [PaymentMethodRequirements] for
          * description of the values
          */
-        fun supportsCustomerSavedPM() = requirement.confirmPMFromCustomer == true
+        fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
 
         /**
          * This is a list of payment methods that we should tint their icons

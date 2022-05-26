@@ -97,7 +97,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
  */
 private fun SupportedPaymentMethod.supportsSetupIntent(
     config: PaymentSheet.Configuration?
-) = requirement.confirmPMFromCustomer == true &&
+) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 
 /**
@@ -109,7 +109,7 @@ private fun SupportedPaymentMethod.supportsSetupIntent(
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
-) = requirement.confirmPMFromCustomer == true &&
+) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
 
@@ -136,7 +136,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
 ) = config?.customer != null &&
-    requirement.confirmPMFromCustomer == true &&
+    requirement.getConfirmPMFromCustomer(code) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 

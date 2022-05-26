@@ -14,7 +14,6 @@ class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
-
     @Test
     fun `Verify no fields in the default json are ignored`() {
         // If this test fails, check to make sure the spec's serializer is added to

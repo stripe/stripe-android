@@ -25,9 +25,9 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+        (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
@@ -86,8 +86,10 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                     stripeIntent,
                     config,
                     resourceRepository.getLpmRepository()
-                ).map {
-                    it.type
+                ).mapNotNull {
+                    // The SDK is only able to parse customer LPMs
+                    // that are hard coded in the SDK.
+                    PaymentMethod.Type.fromCode(it.code)
                 }
                 customerRepository.getPaymentMethods(
                     customerConfig,
