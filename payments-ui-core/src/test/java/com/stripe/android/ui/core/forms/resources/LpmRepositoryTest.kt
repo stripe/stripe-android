@@ -20,19 +20,22 @@ class LpmRepositoryTest {
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
-            assertThat(
-                lpmRepository.fromCode(code)!!.formSpec.items
-                    .filter {
-                        it is EmptyFormSpec && !hasEmptyForm(code)
-                    }
+            if(!hasEmptyForm(code)) {
+                assertThat(
+                    lpmRepository.fromCode(code)!!.formSpec.items
+                        .filter {
+                            it is EmptyFormSpec && !hasEmptyForm(code)
+                        }
 
-            ).isEmpty()
+                ).isEmpty()
+            }
         }
     }
 
     private fun hasEmptyForm(code: String) =
-        (code != "paypal" && code != "us_bank_account") &&
-            lpmRepository.fromCode(code)!!.formSpec.items.size == 1
+        (code == "paypal" || code == "us_bank_account") &&
+            lpmRepository.fromCode(code)!!.formSpec.items.size == 1 &&
+            lpmRepository.fromCode(code)!!.formSpec.items.first() == EmptyFormSpec
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
