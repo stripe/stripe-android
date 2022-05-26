@@ -139,7 +139,7 @@ internal open class PaymentSheetViewModelTestInjection {
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.layout(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

@@ -13,7 +13,7 @@ internal interface FormViewModelSubcomponent {
     @Subcomponent.Builder
     interface Builder {
         @BindsInstance
-        fun layout(layoutSpec: LayoutSpec): Builder
+        fun paymentMethodCode(paymentMethodCode: String): Builder
 
         @BindsInstance
         fun formFragmentArguments(

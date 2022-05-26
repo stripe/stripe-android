@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
-import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -31,7 +30,6 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import kotlinx.parcelize.Parcelize
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -201,7 +199,6 @@ class LpmRepository @Inject constructor(
      * compose model.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    @Parcelize
     data class SupportedPaymentMethod(
         /**
          * This describes the PaymentMethod Type as described
@@ -226,7 +223,7 @@ class LpmRepository @Inject constructor(
          * This describes how the UI should look.
          */
         val formSpec: LayoutSpec,
-    ) : Parcelable {
+    ) {
 
         /**
          * Returns true if the payment method supports confirming from a saved

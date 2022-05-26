@@ -79,7 +79,7 @@ internal class FormViewModelTest {
         val mockViewModel = mock<FormViewModel>()
 
         whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.layout(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
         whenever(mockSubcomponent.viewModel).thenReturn(mockViewModel)
 

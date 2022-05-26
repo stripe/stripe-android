@@ -14,8 +14,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
@@ -43,7 +43,7 @@ import javax.inject.Provider
  */
 @FlowPreview
 internal class FormViewModel @Inject internal constructor(
-    layout: LayoutSpec,
+    paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElement
@@ -51,7 +51,7 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormFragmentArguments,
         val resource: Resources,
-        var layout: LayoutSpec,
+        var paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
         private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
@@ -68,7 +68,7 @@ internal class FormViewModel @Inject internal constructor(
             injectWithFallback(config.injectorKey, FallbackInitializeParam(resource, context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
-                .layout(layout)
+                .paymentMethodCode(paymentMethodCode)
                 .build().viewModel as T
         }
 
@@ -86,15 +86,31 @@ internal class FormViewModel @Inject internal constructor(
 
     init {
         if (resourceRepository.isLoaded()) {
-            elements = MutableStateFlow(transformSpecToElement.transform(layout.items))
+            elements = MutableStateFlow(
+                transformSpecToElement.transform(
+                    getLpmItems(paymentMethodCode)
+                )
+            )
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
                 resourceRepository.waitUntilLoaded()
-                delayedElements.value = transformSpecToElement.transform(layout.items)
+                delayedElements.value = transformSpecToElement.transform(
+                    getLpmItems(paymentMethodCode)
+                )
             }
             this.elements = delayedElements
         }
+    }
+
+    private fun getLpmItems(paymentMethodCode: String): List<FormItemSpec> {
+        require(resourceRepository.isLoaded())
+        return requireNotNull(
+            resourceRepository.getLpmRepository().fromCode(
+                paymentMethodCode
+            )
+        ).formSpec.items
+
     }
 
     internal val enabled = MutableStateFlow(true)
