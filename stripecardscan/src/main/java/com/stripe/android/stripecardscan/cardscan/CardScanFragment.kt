@@ -124,7 +124,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             ) {
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
-                    cameraAdapter.unbindFromLifecycle(requireActivity())
+                    activity?.let { cameraAdapter.unbindFromLifecycle(it) }
                     resultListener.cardScanComplete(ScannedCard(result.pan))
                 }.let { }
             }
@@ -203,13 +203,13 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
      * Set up viewFinderWindowView and viewFinderBorderView centered with predefined margins
      */
     private fun setupViewFinderConstraints() {
-
         val screenSize = Resources.getSystem().displayMetrics.let {
             Size(it.widthPixels, it.heightPixels)
         }
+
         val viewFinderMargin = (
             min(screenSize.width, screenSize.height) *
-                requireActivity().getFloatResource(R.dimen.stripeViewFinderMargin)
+                (context?.getFloatResource(R.dimen.stripeViewFinderMargin) ?: 0F)
             ).roundToInt()
 
         listOf(viewBinding.viewFinderWindow, viewBinding.viewFinderBorder).forEach { view ->
@@ -241,14 +241,16 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
      * Once the camera stream is available, start processing images.
      */
     override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
-        scanFlow.startFlow(
-            context = requireActivity(),
-            imageStream = cameraStream,
-            viewFinder = viewBinding.viewFinderWindow.asRect(),
-            lifecycleOwner = this,
-            coroutineScope = this,
-            parameters = null
-        )
+        context?.let {
+            scanFlow.startFlow(
+                context = it,
+                imageStream = cameraStream,
+                viewFinder = viewBinding.viewFinderWindow.asRect(),
+                lifecycleOwner = this,
+                coroutineScope = this,
+                parameters = null
+            )
+        }
     }
 
     /**
@@ -267,20 +269,24 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {
             is CardScanState.NotFound, CardScanState.Found -> {
-                viewBinding.viewFinderBackground
-                    .setBackgroundColor(
-                        requireActivity().getColorByRes(R.color.stripeNotFoundBackground)
-                    )
+                context?.let {
+                    viewBinding.viewFinderBackground
+                        .setBackgroundColor(
+                            it.getColorByRes(R.color.stripeNotFoundBackground)
+                        )
+                }
                 viewBinding.viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_not_found)
                 viewBinding.viewFinderBorder
                     .startAnimation(R.drawable.stripe_paymentsheet_card_border_not_found)
             }
             is CardScanState.Correct -> {
-                viewBinding.viewFinderBackground
-                    .setBackgroundColor(
-                        requireActivity().getColorByRes(R.color.stripeCorrectBackground)
-                    )
+                context?.let {
+                    viewBinding.viewFinderBackground
+                        .setBackgroundColor(
+                            it.getColorByRes(R.color.stripeCorrectBackground)
+                        )
+                }
                 viewBinding.viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_correct)
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_correct)
@@ -293,8 +299,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             stripePublishableKey = params.stripePublishableKey,
             instanceId = Stats.instanceId,
             scanId = Stats.scanId,
-            device = Device.fromContext(requireActivity()),
-            appDetails = AppDetails.fromContext(requireActivity()),
+            device = Device.fromContext(context),
+            appDetails = AppDetails.fromContext(context),
             scanStatistics = ScanStatistics.fromStats(),
             scanConfig = ScanConfig(0),
         )

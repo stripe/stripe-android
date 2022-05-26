@@ -73,8 +73,10 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
         super.onStart()
         Stats.startScan()
 
-        if (!CameraAdapter.isCameraSupported(requireActivity())) {
-            showCameraNotSupported()
+        context?.let {
+            if (!CameraAdapter.isCameraSupported(it)) {
+                showCameraNotSupported()
+            }
         }
     }
 
@@ -94,7 +96,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
 
     protected open fun hideSystemUi() {
         // Prevent screenshots and keep the screen on while scanning.
-        requireActivity().window.setFlags(
+        activity?.window?.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE +
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_SECURE +
