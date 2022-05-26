@@ -564,7 +564,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             println(
                 "saveStateHandle: ${
-                    savedStateHandle.get<List<LpmRepository.SupportedPaymentMethod>>(SAVE_SUPPORTED_PAYMENT_METHOD)
+                savedStateHandle.get<List<LpmRepository.SupportedPaymentMethod>>(SAVE_SUPPORTED_PAYMENT_METHOD)
                 }"
             )
             return subComponentBuilderProvider.get()

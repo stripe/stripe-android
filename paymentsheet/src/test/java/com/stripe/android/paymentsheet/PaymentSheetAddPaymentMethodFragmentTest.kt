@@ -488,7 +488,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             injectorKey = args.injectorKey
         )
 
-        //somehow the saveInstanceState for the viewModel needs to be present
+        // somehow the saveInstanceState for the viewModel needs to be present
 
         return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
             bundleOf(
