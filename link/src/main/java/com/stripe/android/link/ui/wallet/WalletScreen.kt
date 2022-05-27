@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -52,6 +51,8 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -86,6 +87,7 @@ private fun WalletBodyPreview() {
                     )
                 ),
                 primaryButtonLabel = "Pay $10.99",
+                errorMessage = null,
                 onAddNewPaymentMethodClick = {},
                 onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
@@ -110,12 +112,14 @@ internal fun WalletBody(
     )
 
     val paymentDetails by viewModel.paymentDetails.collectAsState()
-    val isProcessing by viewModel.isProcessing.observeAsState(false)
+    val isProcessing by viewModel.isProcessing.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     WalletBody(
         isProcessing = isProcessing,
         paymentDetails = paymentDetails,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+        errorMessage = errorMessage,
         onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
         onDeletePaymentMethod = viewModel::deletePaymentMethod,
         onPrimaryButtonClick = viewModel::onSelectedPaymentDetails,
@@ -129,6 +133,7 @@ internal fun WalletBody(
     isProcessing: Boolean,
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
     primaryButtonLabel: String,
+    errorMessage: ErrorMessage?,
     onAddNewPaymentMethodClick: () -> Unit,
     onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -211,6 +216,9 @@ internal fun WalletBody(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
+            errorMessage?.let {
+                ErrorText(text = it.getMessage(LocalContext.current.resources))
+            }
             PrimaryButton(
                 label = primaryButtonLabel,
                 state = if (isProcessing) {

@@ -35,6 +35,7 @@ import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.coroutines.launch
@@ -233,7 +234,15 @@ internal class WalletScreenTest {
         onRemoveConfirmationDialog().assertExists()
     }
 
+    @Test
+    fun when_error_message_is_not_null_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(errorMessage = ErrorMessage.Raw(errorMessage))
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
     private fun setContent(
+        errorMessage: ErrorMessage? = null,
         onAddNewPaymentMethodClick: () -> Unit = {},
         onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
@@ -268,6 +277,7 @@ internal class WalletScreenTest {
                     isProcessing = false,
                     paymentDetails = paymentDetails,
                     primaryButtonLabel = primaryButtonLabel,
+                    errorMessage = errorMessage,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onDeletePaymentMethod = onDeletePaymentMethod,
                     onPrimaryButtonClick = onPayButtonClick,

@@ -12,8 +12,9 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +35,10 @@ internal class VerificationViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: Flow<Boolean> = _isProcessing
+    val isProcessing: StateFlow<Boolean> = _isProcessing
+
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     /**
      * Callback when user has successfully verified their account. If not overridden, defaults to
@@ -68,8 +72,10 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onVerificationCodeEntered(code: String) {
+        _isProcessing.value = true
+        clearError()
+
         viewModelScope.launch {
-            _isProcessing.value = true
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
                     _isProcessing.value = false
@@ -81,6 +87,8 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun startVerification() {
+        clearError()
+
         viewModelScope.launch {
             linkAccountManager.startVerification().fold(
                 onSuccess = {
@@ -92,19 +100,25 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onBack() {
+        clearError()
         navigator.onBack()
         linkAccountManager.logout()
     }
 
     fun onChangeEmailClicked() {
+        clearError()
         navigator.navigateTo(LinkScreen.SignUp(), clearBackStack = true)
         linkAccountManager.logout()
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
+    private fun clearError() {
+        _errorMessage.value = null
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
         _isProcessing.value = false
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+        _errorMessage.value = it
     }
 
     internal class Factory(
