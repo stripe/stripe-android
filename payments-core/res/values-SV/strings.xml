@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Namn</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Namn är obligatoriskt.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Avbryt</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s med slutsiffrorna %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Ta bort betalningsmetoden</string>
   <string name="delete_payment_method_prompt_title">Ta bort betalningsmetoden?</string>
+  <!-- Done button title -->
+  <string name="done">Klar</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Redigera</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/ÅÅ</string>
   <string name="expiry_label_short">Giltighetstid</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Välj bankkonto (FPX) ...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Gratis</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Ta bort</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s har tagits bort</string>
   <string name="secure_checkout">Säker betalning</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betaltjänster. Kontrollera internetanslutningen och försök igen.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Vi kan inte verifiera din betalningsmetod. Välj en annan betalningsmetod och försök igen.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Tidsgränsen överskreds vid autentisering av betalningsmetoden – försök igen</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Ett internt fel uppstod.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM/ÅÅ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

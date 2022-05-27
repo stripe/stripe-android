@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Όνομα</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Το όνομά σας απαιτείται.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Ακύρωση</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s λήγει σε %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Διαγραφή μεθόδου πληρωμής</string>
   <string name="delete_payment_method_prompt_title">Να γίνει διαγραφή μεθόδου πληρωμής;</string>
+  <!-- Done button title -->
+  <string name="done">Τέλος</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Επεξεργασία</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">ΜΜ/ΕΕ</string>
   <string name="expiry_label_short">Λήξη</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Επιλογή τραπεζικού λογαριασμού (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Δωρεάν</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Αφαίρεση</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Αφαιρέθηκε %s</string>
   <string name="secure_checkout">Ασφαλές Checkout</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Αντιμετωπίζουμε προβλήματα κατά τη σύνδεση με τον πάροχο υπηρεσιών πληρωμής μας. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο και δοκιμάστε ξανά.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Δεν μπορούμε να επαληθεύσουμε τη μέθοδο πληρωμής σας. Επιλέξτε διαφορετική μέθοδο πληρωμής και προσπαθήστε ξανά.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Έληξε το χρονικό όριο επαλήθευσης της μεθόδου πληρωμής σας -- δοκιμάστε ξανά</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Προέκυψε εσωτερικό σφάλμα.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">ΜΜ / ΕΕ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
