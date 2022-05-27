@@ -73,7 +73,7 @@ internal open class PaymentOptionsViewModelTestInjection {
     @ExperimentalCoroutinesApi
     fun createFormViewModel(): FormViewModel = runBlocking {
         FormViewModel(
-            layout = mock(),
+            paymentMethodCode = "",
             config = mock(),
             resourceRepository = mock(),
             transformSpecToElement = mock()
@@ -100,7 +100,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.layout(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.paymentMethodCode(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

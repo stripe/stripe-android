@@ -244,17 +244,16 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            )
-                .isEqualTo(
-                    FormFragmentArguments(
-                        lpmRepository.fromCode("bancontact")!!,
-                        showCheckbox = false,
-                        showCheckboxControlledFields = false,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount(),
-                        injectorKey = "testInjectorKeyAddFragmentTest"
-                    )
+            ).isEqualTo(
+                FormFragmentArguments(
+                    lpmRepository.fromCode("bancontact")!!.type.code,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = false,
+                    merchantName = MERCHANT_DISPLAY_NAME,
+                    amount = createAmount(),
+                    injectorKey = "testInjectorKeyAddFragmentTest"
                 )
+            )
         }.recreate().onFragment { fragment ->
             val addedFragment = fragment.childFragmentManager.findFragmentById(
                 FragmentPaymentsheetAddPaymentMethodBinding.bind(
@@ -267,17 +266,16 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            )
-                .isEqualTo(
-                    FormFragmentArguments(
-                        lpmRepository.fromCode("bancontact")!!,
-                        showCheckbox = false,
-                        showCheckboxControlledFields = false,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount(),
-                        injectorKey = "testInjectorKeyAddFragmentTest"
-                    )
+            ).isEqualTo(
+                FormFragmentArguments(
+                    lpmRepository.fromCode("bancontact")!!.type.code,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = false,
+                    merchantName = MERCHANT_DISPLAY_NAME,
+                    amount = createAmount(),
+                    injectorKey = "testInjectorKeyAddFragmentTest"
                 )
+            )
         }
     }
 
@@ -310,7 +308,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethod = LpmRepository.HardcodedCard,
+                    paymentMethodCode = LpmRepository.HardcodedCard.type.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -344,7 +342,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethod = LpmRepository.HardcodedCard,
+                    paymentMethodCode = LpmRepository.HardcodedCard.type.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -443,7 +441,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethod = LpmRepository.HardcodedCard,
+                        paymentMethodCode = LpmRepository.HardcodedCard.type.code,
                         amount = createAmount(PI_OFF_SESSION),
                         showCheckbox = false,
                         showCheckboxControlledFields = true,

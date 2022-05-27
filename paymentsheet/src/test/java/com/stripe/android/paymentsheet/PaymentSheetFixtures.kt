@@ -6,13 +6,9 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.NameSpec
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -133,14 +129,7 @@ internal object PaymentSheetFixtures {
 
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormFragmentArguments(
-            SupportedPaymentMethod(
-                "bancontact",
-                true,
-                R.string.stripe_paymentsheet_payment_method_bancontact,
-                R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-                PaymentMethodRequirements(emptySet(), null, false),
-                LayoutSpec(listOf(NameSpec()))
-            ),
+            PaymentMethod.Type.Bancontact.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",

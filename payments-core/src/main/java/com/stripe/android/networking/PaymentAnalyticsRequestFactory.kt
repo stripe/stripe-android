@@ -8,7 +8,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token

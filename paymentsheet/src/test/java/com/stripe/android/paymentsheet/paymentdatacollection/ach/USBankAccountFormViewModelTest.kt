@@ -47,7 +47,7 @@ class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         formArgs = FormFragmentArguments(
-            paymentMethod = usBankAccount,
+            paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             showCheckbox = false,
             showCheckboxControlledFields = false,
             merchantName = MERCHANT_NAME,

@@ -39,17 +39,17 @@ import kotlinx.coroutines.launch
  */
 @OptIn(FlowPreview::class)
 internal class ComposeFormDataCollectionFragment : Fragment() {
-    private val formLayout by lazy {
+    private val paymentMethodCode by lazy {
         requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
-                ?.paymentMethod?.formSpec
+                ?.paymentMethodCode
         )
     }
 
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             resource = resources,
-            layout = formLayout,
+            paymentMethodCode = paymentMethodCode,
             config = requireNotNull(
                 requireArguments().getParcelable(
                     EXTRA_CONFIG
@@ -108,7 +108,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                     sheetViewModel.updateSelection(
                         transformToPaymentSelection(
                             formFieldValues,
-                            sheetViewModel.getAddFragmentSelectedLpmValue()
+                            sheetViewModel.addFragmentSelectedLPM
                         )
                     )
                 }

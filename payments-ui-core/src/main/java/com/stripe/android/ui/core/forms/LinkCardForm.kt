@@ -10,5 +10,5 @@ import com.stripe.android.ui.core.elements.supportedBillingCountries
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LinkCardForm: List<FormItemSpec> = listOf(
     CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
-    CardBillingSpec(valid_country_codes = supportedBillingCountries)
+    CardBillingSpec(validCountryCodes = supportedBillingCountries)
 )

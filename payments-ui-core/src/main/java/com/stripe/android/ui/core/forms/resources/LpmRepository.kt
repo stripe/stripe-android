@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
-import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -14,7 +13,6 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
-import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
@@ -33,7 +31,6 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import kotlinx.parcelize.Parcelize
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -201,12 +198,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             else -> null
-        }?.apply {
-            requirement.piRequirements = if (sharedDataSpec.async) {
-                this.requirement.piRequirements?.plus(Delayed)
-            } else {
-                this.requirement.piRequirements
-            }
         }
 
     /**
@@ -217,7 +208,6 @@ class LpmRepository @Inject constructor(
      * compose model.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    @Parcelize
     data class SupportedPaymentMethod(
         /**
          * This describes the PaymentMethod Type as described
@@ -245,7 +235,7 @@ class LpmRepository @Inject constructor(
          * This describes how the UI should look.
          */
         val formSpec: LayoutSpec,
-    ) : Parcelable {
+    ) {
 
 //        init {
 //            if (code != type.code) {

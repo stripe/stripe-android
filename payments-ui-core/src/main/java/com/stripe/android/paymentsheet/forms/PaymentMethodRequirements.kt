@@ -1,14 +1,12 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-sealed interface Requirement : Parcelable
+sealed interface Requirement
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed interface PIRequirement : Requirement
@@ -19,7 +17,6 @@ sealed interface SIRequirement : Requirement
 /**
  * This requirement is dependent on the configuration passed by the app to the SDK.
  */
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object Delayed : PIRequirement, SIRequirement
 
@@ -27,12 +24,10 @@ object Delayed : PIRequirement, SIRequirement
  * The Payment Method requires a shipping address in the Payment Intent.
  * The fields required are name, address line 1, country, and postal code.
  */
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object ShippingAddress : PIRequirement
 
 @Serializable
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class PaymentMethodRequirements(
 
@@ -41,7 +36,7 @@ data class PaymentMethodRequirements(
      *  - Only [PIRequirement]s are allowed in this set.
      * - If this is null, PaymentIntents (even if SFU is set) are not supported by this LPM.
      */
-    var piRequirements: Set<PIRequirement>?,
+    val piRequirements: Set<PIRequirement>?,
 
     /**
      * These are the requirements for using a SetupIntent.
@@ -69,7 +64,7 @@ data class PaymentMethodRequirements(
      *  - true means that a PM of this type attached to a customer can be confirmed
      */
     private val confirmPMFromCustomer: Boolean?
-) : Parcelable {
+) {
     // Confirming from a customer assumes that we can parse the PaymentMethod
     fun getConfirmPMFromCustomer(code: PaymentMethodCode) =
         (PaymentMethod.Type.fromCode(code) != null) && (confirmPMFromCustomer == true)

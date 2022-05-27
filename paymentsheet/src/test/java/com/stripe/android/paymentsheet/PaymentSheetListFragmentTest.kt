@@ -8,6 +8,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -306,7 +308,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 updatePaymentMethods(fragmentConfig.stripeIntent)
                 setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
-                registerViewModel(starterArgs.injectorKey, this)
+                registerViewModel(starterArgs.injectorKey, this, lpmRepository)
             }
         }
         return launchFragmentInContainer(
@@ -326,5 +328,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         )
 
         private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
+
+        val lpmRepository =
+            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources)
     }
 }

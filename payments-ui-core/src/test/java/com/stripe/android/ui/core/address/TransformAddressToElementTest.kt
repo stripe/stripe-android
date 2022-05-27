@@ -27,40 +27,40 @@ class TransformAddressToElementTest {
         val addressLine1 = SimpleTextSpec(
             IdentifierSpec.Line1,
             R.string.address_label_address_line1,
-            Capitalization.words,
-            KeyboardType.text,
+            Capitalization.Words,
+            KeyboardType.Text,
             showOptionalLabel = false
         )
 
         val addressLine2 = SimpleTextSpec(
             IdentifierSpec.Line2,
             R.string.address_label_address_line2,
-            Capitalization.words,
-            KeyboardType.text,
+            Capitalization.Words,
+            KeyboardType.Text,
             showOptionalLabel = true
         )
 
         val city = SimpleTextSpec(
             IdentifierSpec.City,
             R.string.address_label_city,
-            Capitalization.words,
-            KeyboardType.text,
+            Capitalization.Words,
+            KeyboardType.Text,
             showOptionalLabel = false
         )
 
         val state = SimpleTextSpec(
             IdentifierSpec.State,
             R.string.address_label_state,
-            Capitalization.words,
-            KeyboardType.text,
+            Capitalization.Words,
+            KeyboardType.Text,
             showOptionalLabel = false
         )
 
         val zip = SimpleTextSpec(
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
-            Capitalization.none,
-            KeyboardType.number_password,
+            Capitalization.None,
+            KeyboardType.NumberPassword,
             showOptionalLabel = false
         )
 
@@ -95,22 +95,22 @@ class TransformAddressToElementTest {
         val actualController = textElement.controller as TextFieldController
         assertThat(actualController.capitalization).isEqualTo(
             when (simpleTextSpec.capitalization) {
-                Capitalization.none -> KeyboardCapitalization.None
-                Capitalization.characters -> KeyboardCapitalization.Characters
-                Capitalization.words -> KeyboardCapitalization.Words
-                Capitalization.sentences -> KeyboardCapitalization.Sentences
+                Capitalization.None -> KeyboardCapitalization.None
+                Capitalization.Characters -> KeyboardCapitalization.Characters
+                Capitalization.Words -> KeyboardCapitalization.Words
+                Capitalization.Sentences -> KeyboardCapitalization.Sentences
             }
         )
         assertThat(actualController.keyboardType).isEqualTo(
             when (simpleTextSpec.keyboardType) {
-                KeyboardType.text -> androidx.compose.ui.text.input.KeyboardType.Text
-                KeyboardType.ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
-                KeyboardType.number -> androidx.compose.ui.text.input.KeyboardType.Number
-                KeyboardType.phone -> androidx.compose.ui.text.input.KeyboardType.Phone
-                KeyboardType.uri -> androidx.compose.ui.text.input.KeyboardType.Uri
-                KeyboardType.email -> androidx.compose.ui.text.input.KeyboardType.Email
-                KeyboardType.password -> androidx.compose.ui.text.input.KeyboardType.Password
-                KeyboardType.number_password -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
+                KeyboardType.Text -> androidx.compose.ui.text.input.KeyboardType.Text
+                KeyboardType.Ascii -> androidx.compose.ui.text.input.KeyboardType.Ascii
+                KeyboardType.Number -> androidx.compose.ui.text.input.KeyboardType.Number
+                KeyboardType.Phone -> androidx.compose.ui.text.input.KeyboardType.Phone
+                KeyboardType.Uri -> androidx.compose.ui.text.input.KeyboardType.Uri
+                KeyboardType.Email -> androidx.compose.ui.text.input.KeyboardType.Email
+                KeyboardType.Password -> androidx.compose.ui.text.input.KeyboardType.Password
+                KeyboardType.NumberPassword -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
             }
         )
         assertThat(actualController.label.first()).isEqualTo(

@@ -1,7 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import kotlinx.parcelize.IgnoredOnParcel
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,8 +9,6 @@ import kotlinx.serialization.Serializable
  * the form as complete. {@link LayoutSpec#create()} is the way to build a form with no elements.
  */
 @Serializable
-@Parcelize
 internal object EmptyFormSpec : FormItemSpec() {
-    @IgnoredOnParcel
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("empty")
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("empty")
 }
