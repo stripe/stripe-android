@@ -22,6 +22,7 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -269,6 +270,20 @@ class PaymentMethodViewModelTest {
         viewModel.startPayment(cardFormFieldValues)
 
         assertThat(isProcessing).isFalse()
+    }
+
+    @Test
+    fun `when startPayment fails then an error message is shown`() = runTest {
+        val errorMessage = "Error message"
+        whenever(
+            linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.failure(RuntimeException(errorMessage)))
+
+        val viewModel = createViewModel()
+
+        viewModel.startPayment(cardFormFieldValues)
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
     }
 
     @Test

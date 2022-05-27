@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -18,6 +17,8 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,9 +42,11 @@ internal class WalletViewModel @Inject constructor(
         MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
     val paymentDetails: StateFlow<List<ConsumerPaymentDetails.PaymentDetails>> = _paymentDetails
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
+    private val _isProcessing = MutableStateFlow(false)
+    val isProcessing: StateFlow<Boolean> = _isProcessing
 
-    val isProcessing = MutableLiveData(false)
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     init {
         viewModelScope.launch {
@@ -61,7 +64,7 @@ internal class WalletViewModel @Inject constructor(
 
     fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
         clearError()
-        isProcessing.value = true
+        _isProcessing.value = true
 
         if (args.completePayment) {
             val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
@@ -88,7 +91,7 @@ internal class WalletViewModel @Inject constructor(
                     onFailure = ::onError
                 )
 
-                isProcessing.value = false
+                _isProcessing.value = false
             }
         } else {
             val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
@@ -111,7 +114,7 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun deletePaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
-        isProcessing.value = true
+        _isProcessing.value = true
         clearError()
 
         viewModelScope.launch {
@@ -122,7 +125,7 @@ internal class WalletViewModel @Inject constructor(
                 onSuccess = {
                     _paymentDetails.value =
                         _paymentDetails.value.filterNot { it.id == paymentDetails.id }
-                    isProcessing.value = false
+                    _isProcessing.value = false
                 },
                 onFailure = {
                     onError(it)
@@ -132,13 +135,13 @@ internal class WalletViewModel @Inject constructor(
     }
 
     private fun clearError() {
-        _errorMessage.tryEmit(null)
+        _errorMessage.value = null
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
-        isProcessing.value = false
-        _errorMessage.tryEmit(error.localizedMessage)
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
+        _isProcessing.value = false
+        _errorMessage.value = it
     }
 
     internal class Factory(

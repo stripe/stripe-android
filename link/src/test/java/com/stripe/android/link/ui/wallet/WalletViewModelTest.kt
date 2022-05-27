@@ -22,6 +22,7 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -134,6 +135,21 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `when payment confirmation fails then an error message is shown`() {
+        val errorThrown = "Error message"
+        val viewModel = createViewModel()
+
+        viewModel.onSelectedPaymentDetails(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+
+        val callbackCaptor = argumentCaptor<PaymentConfirmationCallback>()
+        verify(confirmationManager).confirmStripeIntent(any(), callbackCaptor.capture())
+
+        callbackCaptor.firstValue(Result.success(PaymentResult.Failed(RuntimeException(errorThrown))))
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorThrown))
+    }
+
+    @Test
     fun `deletePaymentMethod removes payment details when successful`() = runTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
         whenever(linkRepository.listPaymentDetails(anyOrNull()))
@@ -154,6 +170,22 @@ class WalletViewModelTest {
         // Only the second should remain
         assertThat(viewModel.paymentDetails.value)
             .containsExactly(paymentDetails.paymentDetails[1])
+    }
+
+    @Test
+    fun `when payment method deletion fails then an error message is shown`() = runTest {
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val errorThrown = "Error message"
+        val viewModel = createViewModel()
+
+        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(RuntimeException(errorThrown)))
+
+        viewModel.deletePaymentMethod(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorThrown))
     }
 
     @Test
