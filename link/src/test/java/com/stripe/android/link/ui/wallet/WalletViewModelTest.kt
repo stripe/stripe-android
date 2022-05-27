@@ -45,7 +45,9 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
-    private val linkAccount = mock<LinkAccount>()
+    private val linkAccount = mock<LinkAccount>().apply {
+        whenever(clientSecret).thenReturn(CLIENT_SECRET)
+    }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
     private val linkAccountManager = mock<LinkAccountManager>()
@@ -91,8 +93,6 @@ class WalletViewModelTest {
     @Test
     fun `onSelectedPaymentDetails returns PaymentMethodCreateParams when completePayment is false`() {
         whenever(args.completePayment).thenReturn(false)
-        val clientSecret = "client_secret"
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
         createViewModel().onSelectedPaymentDetails(paymentDetails)
@@ -106,7 +106,7 @@ class WalletViewModelTest {
                     paymentDetails,
                     PaymentMethodCreateParams.createLink(
                         paymentDetails.id,
-                        clientSecret
+                        CLIENT_SECRET
                     )
                 )
             )
@@ -115,8 +115,6 @@ class WalletViewModelTest {
 
     @Test
     fun `onSelectedPaymentDetails starts payment confirmation when completePayment is true`() {
-        val clientSecret = "client_secret"
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
         createViewModel().onSelectedPaymentDetails(paymentDetails)
@@ -128,11 +126,34 @@ class WalletViewModelTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 PaymentMethodCreateParams.createLink(
                     paymentDetails.id,
-                    clientSecret
+                    CLIENT_SECRET
                 ),
                 StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!
             )
         )
+    }
+
+    @Test
+    fun `deletePaymentMethod removes payment details when successful`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(paymentDetails))
+
+        val viewModel = createViewModel()
+
+        // Initially has two elements
+        assertThat(viewModel.paymentDetails.value)
+            .containsExactlyElementsIn(paymentDetails.paymentDetails)
+
+        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(Unit))
+
+        // Delete the first element
+        viewModel.deletePaymentMethod(paymentDetails.paymentDetails.first())
+
+        // Only the second should remain
+        assertThat(viewModel.paymentDetails.value)
+            .containsExactly(paymentDetails.paymentDetails[1])
     }
 
     @Test
@@ -142,7 +163,6 @@ class WalletViewModelTest {
                 it(Result.success(PaymentResult.Completed))
             }
         }
-        whenever(linkAccount.clientSecret).thenReturn("secret")
         whenever(linkRepository.listPaymentDetails(anyOrNull()))
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
@@ -216,4 +236,8 @@ class WalletViewModelTest {
         )
 
     private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
+
+    companion object {
+        const val CLIENT_SECRET = "client_secret"
+    }
 }
