@@ -97,6 +97,11 @@ class LpmRepository {
         /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
         @DrawableRes val iconResource: Int,
 
+        /** Indicates if the lpm icon in the selector is a single color and should be tinted
+         * on selection.
+         */
+        val tintIconOnSelection: Boolean,
+
         /**
          * This describes the requirements of the LPM including if it is supported with
          * PaymentIntents w/ or w/out SetupFutureUsage set, SetupIntent, or on-session when attached
@@ -115,6 +120,7 @@ class LpmRepository {
             PaymentMethod.Type.Card,
             R.string.stripe_paymentsheet_payment_method_card,
             R.drawable.stripe_ic_paymentsheet_pm_card,
+            true,
             CardRequirement,
             CardForm
         )
@@ -125,6 +131,7 @@ class LpmRepository {
             PaymentMethod.Type.Bancontact,
             R.string.stripe_paymentsheet_payment_method_bancontact,
             R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+            false,
             BancontactRequirement,
             BancontactForm
         )
@@ -135,6 +142,7 @@ class LpmRepository {
             PaymentMethod.Type.Sofort,
             R.string.stripe_paymentsheet_payment_method_sofort,
             R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            false,
             SofortRequirement,
             SofortForm
         )
@@ -145,6 +153,7 @@ class LpmRepository {
             PaymentMethod.Type.Ideal,
             R.string.stripe_paymentsheet_payment_method_ideal,
             R.drawable.stripe_ic_paymentsheet_pm_ideal,
+            false,
             IdealRequirement,
             IdealForm
         )
@@ -155,6 +164,7 @@ class LpmRepository {
             PaymentMethod.Type.SepaDebit,
             R.string.stripe_paymentsheet_payment_method_sepa_debit,
             R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+            false,
             SepaDebitRequirement,
             SepaDebitForm
         )
@@ -165,6 +175,7 @@ class LpmRepository {
             PaymentMethod.Type.Eps,
             R.string.stripe_paymentsheet_payment_method_eps,
             R.drawable.stripe_ic_paymentsheet_pm_eps,
+            false,
             EpsRequirement,
             EpsForm
         )
@@ -175,6 +186,7 @@ class LpmRepository {
             PaymentMethod.Type.P24,
             R.string.stripe_paymentsheet_payment_method_p24,
             R.drawable.stripe_ic_paymentsheet_pm_p24,
+            false,
             P24Requirement,
             P24Form
         )
@@ -185,6 +197,7 @@ class LpmRepository {
             PaymentMethod.Type.Giropay,
             R.string.stripe_paymentsheet_payment_method_giropay,
             R.drawable.stripe_ic_paymentsheet_pm_giropay,
+            false,
             GiropayRequirement,
             GiropayForm
         )
@@ -195,6 +208,7 @@ class LpmRepository {
             PaymentMethod.Type.AfterpayClearpay,
             R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
             R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+            false,
             AfterpayClearpayRequirement,
             AfterpayClearpayForm
         )
@@ -205,6 +219,7 @@ class LpmRepository {
             PaymentMethod.Type.Klarna,
             R.string.stripe_paymentsheet_payment_method_klarna,
             R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            false,
             KlarnaRequirement,
             KlarnaForm
         )
@@ -215,6 +230,7 @@ class LpmRepository {
             PaymentMethod.Type.PayPal,
             R.string.stripe_paymentsheet_payment_method_paypal,
             R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            false,
             PaypalRequirement,
             PaypalForm
         )
@@ -225,6 +241,7 @@ class LpmRepository {
             PaymentMethod.Type.Affirm,
             R.string.stripe_paymentsheet_payment_method_affirm,
             R.drawable.stripe_ic_paymentsheet_pm_affirm,
+            false,
             AffirmRequirement,
             AffirmForm
         )
@@ -235,6 +252,7 @@ class LpmRepository {
             PaymentMethod.Type.AuBecsDebit,
             R.string.stripe_paymentsheet_payment_method_au_becs_debit,
             R.drawable.stripe_ic_paymentsheet_pm_bank,
+            true,
             AuBecsDebitRequirement,
             AuBecsDebitForm
         )
@@ -245,6 +263,7 @@ class LpmRepository {
             PaymentMethod.Type.USBankAccount,
             R.string.stripe_paymentsheet_payment_method_us_bank_account,
             R.drawable.stripe_ic_paymentsheet_pm_bank,
+            true,
             USBankAccountRequirement,
             USBankAccountForm
         )
@@ -255,18 +274,6 @@ class LpmRepository {
          * description of the values
          */
         fun supportsCustomerSavedPM() = requirement.confirmPMFromCustomer == true
-
-        /**
-         * This is a list of payment methods that we should tint their icons
-         * when they are selected in UI.
-         */
-        fun shouldTintOnSelection(): Boolean {
-            return setOf(
-                Card,
-                AuBecsDebit,
-                USBankAccount
-            ).contains(this)
-        }
 
         override fun toString(): String {
             return type.code

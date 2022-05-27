@@ -85,7 +85,7 @@ internal fun PaymentMethodsUI(
                         title = stringResource(item.displayNameResource),
                         isSelected = index == selectedIndex,
                         isEnabled = isEnabled,
-                        tintOnSelected = item.shouldTintOnSelection(),
+                        tintOnSelected = item.tintIconOnSelection,
                         itemIndex = index,
                         onItemSelectedListener = {
                             onItemSelectedListener(paymentMethods[it])
