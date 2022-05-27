@@ -14,6 +14,7 @@ import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
 import kotlinx.coroutines.Dispatchers
@@ -133,6 +134,36 @@ class SignUpViewModelTest {
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
+        }
+
+    @Test
+    fun `When lookupConsumer fails then an error message is shown`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val errorMessage = "Error message"
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.failure(RuntimeException(errorMessage)))
+
+            val viewModel = createViewModel()
+            viewModel.emailController.onRawValueChange("valid@email.com")
+            // Advance past lookup debounce delay
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
+
+            assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+        }
+
+    @Test
+    fun `When signUp fails then an error message is shown`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val errorMessage = "Error message"
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.failure(RuntimeException(errorMessage)))
+
+            val viewModel = createViewModel()
+            viewModel.emailController.onRawValueChange("email@valid.co")
+            viewModel.phoneController.onRawValueChange("1234567890")
+            viewModel.onSignUpClick()
+
+            assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
         }
 
     @Test

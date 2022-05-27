@@ -16,12 +16,15 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,12 +46,16 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val stripeIntent = args.stripeIntent
 
     private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: Flow<Boolean> = _isProcessing
+    val isProcessing: StateFlow<Boolean> = _isProcessing
     val isEnabled: Flow<Boolean> = _isProcessing.map { !it }
+
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     val paymentMethod = SupportedPaymentMethod.Card()
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
+        clearError()
         val paymentMethodCreateParams =
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
@@ -56,7 +63,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             )
 
         viewModelScope.launch {
-            _isProcessing.emit(true)
+            _isProcessing.value = true
 
             linkRepository.createPaymentDetails(
                 paymentMethod.createParams(paymentMethodCreateParams, linkAccount.email),
@@ -77,6 +84,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     fun payAnotherWay() {
+        clearError()
         navigator.dismiss()
         linkAccountManager.logout()
     }
@@ -102,14 +110,18 @@ internal class PaymentMethodViewModel @Inject constructor(
                 onFailure = ::onError
             )
 
-            _isProcessing.tryEmit(false)
+            _isProcessing.value = false
         }
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
-        _isProcessing.tryEmit(false)
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+    private fun clearError() {
+        _errorMessage.value = null
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
+        _isProcessing.value = false
+        _errorMessage.value = it
     }
 
     internal class Factory(
