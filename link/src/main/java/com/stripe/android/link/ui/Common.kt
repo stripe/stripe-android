@@ -26,6 +26,11 @@ import com.stripe.android.link.theme.linkColors
  */
 typealias BottomSheetContent = @Composable ColumnScope.() -> Unit
 
+/**
+ * A Composable that is shown in the ModalBottomSheetLayout.
+ */
+typealias BottomSheetContent = @Composable ColumnScope.() -> Unit
+
 @Composable
 internal fun ScrollableTopLevelColumn(
     content: @Composable ColumnScope.() -> Unit
