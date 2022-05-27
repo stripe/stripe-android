@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcompone
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,6 +79,7 @@ internal open class PaymentSheetViewModelTestInjection {
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        lpmRepository: LpmRepository = LpmRepository()
     ): PaymentSheetViewModel = runBlocking {
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -88,7 +90,7 @@ internal open class PaymentSheetViewModelTestInjection {
             StripeIntentValidator(),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
-            resourceRepository = StaticResourceRepository(mock()),
+            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
@@ -105,10 +107,11 @@ internal open class PaymentSheetViewModelTestInjection {
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
+        resourceRepository: StaticResourceRepository = StaticResourceRepository(mock(), LpmRepository()),
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
-            resourceRepository = mock(),
+            resourceRepository = resourceRepository,
             transformSpecToElement = mock()
         )
     ) {

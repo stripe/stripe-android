@@ -29,11 +29,11 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymen
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -489,11 +489,15 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             R.style.StripePaymentSheetDefaultTheme,
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment {
-            viewModel.updatePaymentMethods(stripeIntent)
-            viewModel.setStripeIntent(stripeIntent)
-            idleLooper()
             if (registerInjector) {
+                viewModel.updatePaymentMethods(stripeIntent)
+                viewModel.setStripeIntent(stripeIntent)
+                idleLooper()
                 registerViewModel(args.injectorKey, viewModel)
+            }else{
+                it.sheetViewModel.updatePaymentMethods(stripeIntent)
+                it.sheetViewModel.setStripeIntent(stripeIntent)
+                idleLooper()
             }
         }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             onReady(
