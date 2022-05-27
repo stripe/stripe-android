@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,10 +8,9 @@ import kotlinx.serialization.Serializable
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
-@Parcelize
 class KlarnaCountrySpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Country
-) : FormItemSpec(), RequiredItemSpec {
+) : FormItemSpec() {
     fun transform(
         currencyCode: String?,
         initialValues: Map<IdentifierSpec, String?>

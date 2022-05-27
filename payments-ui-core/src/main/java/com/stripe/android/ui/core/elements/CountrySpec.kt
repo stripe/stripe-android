@@ -12,13 +12,12 @@ import kotlinx.serialization.Serializable
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-@Parcelize
 data class CountrySpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Country,
 
-    @SerialName("allowed_countries")
+    @SerialName("valid_country_codes")
     val onlyShowCountryCodes: Set<String> = supportedBillingCountries
-) : FormItemSpec(), RequiredItemSpec {
+) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(

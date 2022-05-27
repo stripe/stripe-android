@@ -11,7 +11,6 @@ import kotlinx.serialization.Serializable
  * the form as complete. {@link LayoutSpec#create()} is the way to build a form with no elements.
  */
 @Serializable
-@Parcelize
 internal object EmptyFormSpec : FormItemSpec() {
     @IgnoredOnParcel
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("empty")

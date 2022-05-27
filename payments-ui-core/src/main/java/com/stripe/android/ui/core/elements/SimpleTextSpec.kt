@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -53,7 +52,6 @@ enum class KeyboardType {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-@Parcelize
 data class SimpleTextSpec(
     override val apiPath: IdentifierSpec,
 
@@ -68,7 +66,7 @@ data class SimpleTextSpec(
 
     @SerialName("show_optional_label")
     val showOptionalLabel: Boolean = false
-) : FormItemSpec(), RequiredItemSpec {
+) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?> = mapOf()
     ) = createSectionElement(

@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,10 +9,9 @@ import kotlinx.serialization.Serializable
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-@Parcelize
 data class SaveForFutureUseSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.SaveForFutureUse
-) : FormItemSpec(), RequiredItemSpec {
+) : FormItemSpec() {
     fun transform(initialValue: Boolean, merchantName: String): FormElement =
         SaveForFutureUseElement(
             this.apiPath,

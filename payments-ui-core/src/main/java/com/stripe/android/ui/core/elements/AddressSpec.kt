@@ -1,23 +1,19 @@
 package com.stripe.android.ui.core.elements
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Parcelize
-enum class DisplayField : Parcelable {
+enum class DisplayField {
     @SerialName("country")
     Country
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
-@Parcelize
 data class AddressSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
 
@@ -26,7 +22,7 @@ data class AddressSpec(
 
     @SerialName("display_fields")
     val displayFields: Set<DisplayField> = emptySet()
-) : FormItemSpec(), RequiredItemSpec {
+) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressFieldElementRepository
