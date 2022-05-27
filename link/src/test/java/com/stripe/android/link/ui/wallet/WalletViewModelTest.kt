@@ -58,7 +58,7 @@ class WalletViewModelTest {
 
     @Before
     fun before() {
-        linkRepository = mock<LinkRepository>().apply { }
+        linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
     }
