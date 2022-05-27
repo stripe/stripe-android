@@ -184,7 +184,8 @@ internal class PaymentAuthWebViewClient(
 
         private val COMPLETION_URLS = setOf(
             "https://hooks.stripe.com/redirect/complete/",
-            "https://hooks.stripe.com/3d_secure/complete/"
+            "https://hooks.stripe.com/3d_secure/complete/",
+            "https://hooks.stripe.com/3d_secure_2/hosted/complete"
         )
 
         private const val PARAM_RETURN_URL = "return_url"

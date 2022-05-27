@@ -449,6 +449,13 @@ abstract class StripeRepository {
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails?
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    )
+
     // ACHv2 endpoints
 
     internal abstract suspend fun createPaymentIntentFinancialConnectionsSession(

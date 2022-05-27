@@ -280,6 +280,14 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testGetConsumerPaymentDetailsUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/payment_details/csmrpd*123",
+            StripeApiRepository.getConsumerPaymentDetailsUrl("csmrpd*123")
+        )
+    }
+
+    @Test
     fun createSource_shouldLogSourceCreation_andReturnSource() = runTest {
         // Check that we get a token back; we don't care about its fields for this test.
         requireNotNull(
@@ -1863,6 +1871,38 @@ internal class StripeApiRepositoryTest {
             val credentials = params["credentials"] as Map<*, *>
             assertEquals(credentials["consumer_session_client_secret"], clientSecret)
             assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
+        }
+
+    @Test
+    fun `deletePaymentDetails() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                "",
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val paymentDetailsId = "id"
+            create().deletePaymentDetails(
+                clientSecret,
+                paymentDetailsId,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
+
+            assertEquals(
+                "https://api.stripe.com/v1/consumers/payment_details/$paymentDetailsId",
+                request.baseUrl
+            )
+
+            val credentials = params["credentials"] as Map<*, *>
+            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
         }
 
     @Test

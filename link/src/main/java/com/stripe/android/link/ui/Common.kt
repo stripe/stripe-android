@@ -12,8 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * A Composable that is shown in the ModalBottomSheetLayout.
+ */
+typealias BottomSheetContent = @Composable ColumnScope.() -> Unit
+
 @Composable
-fun ScrollableTopLevelColumn(
+internal fun ScrollableTopLevelColumn(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(

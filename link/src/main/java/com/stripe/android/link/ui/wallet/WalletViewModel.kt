@@ -41,6 +41,8 @@ internal class WalletViewModel @Inject constructor(
         MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
     val paymentDetails: StateFlow<List<ConsumerPaymentDetails.PaymentDetails>> = _paymentDetails
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+
     val isProcessing = MutableLiveData(false)
 
     init {
@@ -58,6 +60,7 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        clearError()
         isProcessing.value = true
 
         if (args.completePayment) {
@@ -107,9 +110,35 @@ internal class WalletViewModel @Inject constructor(
         navigator.navigateTo(LinkScreen.PaymentMethod)
     }
 
+    fun deletePaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        isProcessing.value = true
+        clearError()
+
+        viewModelScope.launch {
+            linkRepository.deletePaymentDetails(
+                linkAccount.clientSecret,
+                paymentDetails.id
+            ).fold(
+                onSuccess = {
+                    _paymentDetails.value =
+                        _paymentDetails.value.filterNot { it.id == paymentDetails.id }
+                    isProcessing.value = false
+                },
+                onFailure = {
+                    onError(it)
+                }
+            )
+        }
+    }
+
+    private fun clearError() {
+        _errorMessage.tryEmit(null)
+    }
+
     private fun onError(error: Throwable) {
         logger.error(error.localizedMessage ?: "Internal error.")
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+        isProcessing.value = false
+        _errorMessage.tryEmit(error.localizedMessage)
     }
 
     internal class Factory(

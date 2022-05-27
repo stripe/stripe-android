@@ -494,7 +494,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewModel.setStripeIntent(stripeIntent)
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel)
-            }else{
+            } else {
                 it.sheetViewModel.updatePaymentMethods(stripeIntent)
                 it.sheetViewModel.setStripeIntent(stripeIntent)
                 idleLooper()
