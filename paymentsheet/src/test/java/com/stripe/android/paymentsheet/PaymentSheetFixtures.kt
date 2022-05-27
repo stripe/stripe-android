@@ -129,7 +129,7 @@ internal object PaymentSheetFixtures {
 
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormFragmentArguments(
-            SupportedPaymentMethod.Bancontact,
+            SupportedPaymentMethod.Bancontact.type.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",

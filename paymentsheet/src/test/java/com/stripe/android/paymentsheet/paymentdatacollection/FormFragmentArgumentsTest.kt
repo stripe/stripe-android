@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import org.junit.Test
@@ -56,7 +55,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",
@@ -89,7 +88,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify if only default billing address they appear in the initial values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",

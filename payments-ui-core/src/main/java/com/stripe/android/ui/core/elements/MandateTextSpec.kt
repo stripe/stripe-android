@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class MandateTextSpec(
+data class MandateTextSpec(
     override val api_path: IdentifierSpec,
     @StringRes
     val stringResId: Int,
