@@ -168,16 +168,18 @@ fun TextField(
         },
         trailingIcon = trailingIcon?.let {
             {
-                when (it) {
-                    is TextFieldIcon.Trailing -> {
-                        TrailingIcon(it, loading)
-                    }
-                    is TextFieldIcon.MultiTrailing -> {
-                        Row(modifier = Modifier.padding(end = 16.dp)) {
-                            it.staticIcons.forEach {
-                                TrailingIcon(it, loading)
+                Row {
+                    when (it) {
+                        is TextFieldIcon.Trailing -> {
+                            TrailingIcon(it, loading)
+                        }
+                        is TextFieldIcon.MultiTrailing -> {
+                            Row(modifier = Modifier.padding(10.dp)) {
+                                it.staticIcons.forEach {
+                                    TrailingIcon(it, loading)
+                                }
+                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
                             }
-                            AnimatedIcons(icons = it.animatedIcons, loading = loading)
                         }
                     }
                 }
@@ -251,7 +253,7 @@ internal fun TrailingIcon(
 ) {
     if (loading) {
         CircularProgressIndicator()
-    } else if (trailingIcon.isIcon) {
+    } else if (trailingIcon.isTintable) {
         Icon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {

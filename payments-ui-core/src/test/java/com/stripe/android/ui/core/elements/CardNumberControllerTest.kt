@@ -143,15 +143,15 @@ internal class CardNumberControllerTest {
             .isEqualTo(
                 TextFieldIcon.MultiTrailing(
                     staticIcons = listOf(
-                        TextFieldIcon.Trailing(CardBrand.Visa.icon, isIcon = false),
-                        TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isIcon = false),
-                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false),
                     ),
                     animatedIcons = listOf(
-                        TextFieldIcon.Trailing(CardBrand.Discover.icon, isIcon = false),
-                        TextFieldIcon.Trailing(CardBrand.JCB.icon, isIcon = false),
-                        TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isIcon = false),
-                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isIcon = false),
+                        TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false),
                     )
                 )
             )
@@ -169,9 +169,12 @@ internal class CardNumberControllerTest {
         idleLooper()
         assertThat(trailingIcons[0])
             .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
-        assertThat(trailingIcons[1] as TextFieldIcon.Trailing)
+        assertThat(trailingIcons[1] as TextFieldIcon.MultiTrailing)
             .isEqualTo(
-                TextFieldIcon.Trailing(CardBrand.Visa.icon, isIcon = false)
+                TextFieldIcon.MultiTrailing(
+                    staticIcons = listOf(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false)),
+                    animatedIcons = listOf()
+                )
             )
         assertThat(trailingIcons[2])
             .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
