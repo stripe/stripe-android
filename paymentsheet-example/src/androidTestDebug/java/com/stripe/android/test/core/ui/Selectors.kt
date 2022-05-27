@@ -224,8 +224,8 @@ class Selectors(
         getResourceString(R.string.email)
     )
 
-    fun getName(@StringRes id: Int) = composeTestRule.onNodeWithText(
-        getResourceString(id)
+    fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
+        getResourceString(resourceId)
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(

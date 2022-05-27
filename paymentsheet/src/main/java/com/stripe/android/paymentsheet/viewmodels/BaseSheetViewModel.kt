@@ -25,6 +25,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -93,7 +94,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     internal var supportedPaymentMethods
-        get() = savedStateHandle.get<List<String>>(
+        get() = savedStateHandle.get<List<PaymentMethodCode>>(
             SAVE_SUPPORTED_PAYMENT_METHOD
         )?.mapNotNull {
             resourceRepository.getLpmRepository().fromCode(it)
@@ -120,7 +121,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal var addFragmentSelectedLPM
         get() = requireNotNull(
             resourceRepository.getLpmRepository().fromCode(
-                savedStateHandle.get<String>(SAVE_SELECTED_ADD_LPM)
+                savedStateHandle.get<PaymentMethodCode>(
+                    SAVE_SELECTED_ADD_LPM
+                ) ?: newLpm?.paymentMethodCreateParams?.typeCode
             ) ?: supportedPaymentMethods.first()
         )
         set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.type.code)
@@ -315,8 +318,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                            resourceRepository.getLpmRepository().values()
-                                .map { it.type.code }.toList()
+                        resourceRepository.getLpmRepository().values()
+                            .map { it.type.code }.toList()
                         })"
                 )
             )
@@ -412,8 +415,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                        it.type != PaymentMethod.Type.USBankAccount
-                    } == true
+                    it.type != PaymentMethod.Type.USBankAccount
+                } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

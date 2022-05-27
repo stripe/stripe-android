@@ -69,7 +69,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            sheetViewModel.getAddFragmentSelectedLpm().value
+            sheetViewModel.addFragmentSelectedLPM
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {

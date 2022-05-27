@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,7 +44,7 @@ import javax.inject.Provider
  */
 @FlowPreview
 internal class FormViewModel @Inject internal constructor(
-    paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
+    paymentMethodCode: PaymentMethodCode,
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElement
@@ -51,7 +52,7 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormFragmentArguments,
         val resource: Resources,
-        var paymentMethodCode: String,//TODO(michelleb): Convert to PaymentMethodCode
+        var paymentMethodCode: PaymentMethodCode,
         private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
@@ -103,14 +104,13 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    private fun getLpmItems(paymentMethodCode: String): List<FormItemSpec> {
+    private fun getLpmItems(paymentMethodCode: PaymentMethodCode): List<FormItemSpec> {
         require(resourceRepository.isLoaded())
         return requireNotNull(
             resourceRepository.getLpmRepository().fromCode(
                 paymentMethodCode
             )
         ).formSpec.items
-
     }
 
     internal val enabled = MutableStateFlow(true)

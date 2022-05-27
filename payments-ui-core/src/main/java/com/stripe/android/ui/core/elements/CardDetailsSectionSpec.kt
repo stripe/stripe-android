@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,14 +9,13 @@ import kotlinx.serialization.Serializable
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
-@Parcelize
 data class CardDetailsSectionSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("card_details")
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details")
 ) : FormItemSpec() {
     fun transform(context: Context, initialValues: Map<IdentifierSpec, String?>): FormElement =
         CardDetailsSectionElement(
             context,
             initialValues,
-            api_path
+            apiPath
         )
 }

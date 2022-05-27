@@ -20,7 +20,7 @@ class LpmRepositoryTest {
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
-            if(!hasEmptyForm(code)) {
+            if (!hasEmptyForm(code)) {
                 assertThat(
                     lpmRepository.fromCode(code)!!.formSpec.items
                         .filter {

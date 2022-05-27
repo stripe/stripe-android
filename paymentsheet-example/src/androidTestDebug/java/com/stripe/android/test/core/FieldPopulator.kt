@@ -120,7 +120,7 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName(it.label_translation_id.resourceId)
+                        selectors.getName(it.labelTranslationId.resourceId)
                             .assertContentDescriptionEquals(values.name)
                     }
                 }
@@ -185,7 +185,7 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName(it.label_translation_id.resourceId).apply {
+                        selectors.getName(it.labelTranslationId.resourceId).apply {
                             performTextInput(values.name)
                         }
                     }

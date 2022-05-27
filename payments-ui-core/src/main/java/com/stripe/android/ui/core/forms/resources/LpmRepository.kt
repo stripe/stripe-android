@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
-import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
@@ -183,12 +182,6 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             else -> null
-        }?.apply {
-            requirement.piRequirements = if (sharedDataSpec.async) {
-                this.requirement.piRequirements?.plus(Delayed)
-            } else {
-                this.requirement.piRequirements
-            }
         }
 
     /**
