@@ -232,4 +232,28 @@ internal class LinkApiRepository @Inject constructor(
             }
         )
     }
+
+    override suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String
+    ): Result<Unit> = withContext(workContext) {
+        runCatching {
+            stripeRepository.deletePaymentDetails(
+                consumerSessionClientSecret,
+                paymentDetailsId,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                Result.success(Unit)
+            },
+            onFailure = {
+                logger.error("Error deleting consumer payment method", it)
+                Result.failure(it)
+            }
+        )
+    }
 }

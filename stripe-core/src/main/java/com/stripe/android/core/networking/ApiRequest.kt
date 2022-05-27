@@ -57,11 +57,11 @@ data class ApiRequest internal constructor(
     override val retryResponseCodes: Iterable<Int> = DEFAULT_RETRY_CODES
 
     /**
-     * If the HTTP method is [Method.GET], this is the URL with query string;
-     * otherwise, just the URL.
+     * If the HTTP method is [StripeRequest.Method.GET] or [StripeRequest.Method.DELETE], this is
+     * the URL with query string; otherwise, just the URL.
      */
     override val url: String
-        get() = if (Method.GET == method) {
+        get() = if (Method.GET == method || Method.DELETE == method) {
             listOfNotNull(
                 baseUrl,
                 query.takeIf { it.isNotEmpty() }
@@ -173,11 +173,13 @@ data class ApiRequest internal constructor(
 
         fun createDelete(
             url: String,
-            options: Options
+            options: Options,
+            params: Map<String, *>? = null
         ): ApiRequest {
             return ApiRequest(
                 Method.DELETE,
                 url,
+                params = params,
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,

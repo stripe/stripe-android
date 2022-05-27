@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Ad</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Adınız gereklidir.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">İptal</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%2$s İle Biten %1$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Ödeme Metodu Silinsin mi?</string>
   <string name="delete_payment_method_prompt_title">Ödeme yöntemi silinsin mi?</string>
+  <!-- Done button title -->
+  <string name="done">Tamam</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Düzenle</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">AA/YY</string>
   <string name="expiry_label_short">Son kullanma</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Banka Hesabı Seçin (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Ücretsiz</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Kaldır</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s çıkartıldı</string>
   <string name="secure_checkout">Güvenli Ödeme</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Ödeme sağlayıcımıza bağlanmayla ilgili sorun yaşıyoruz. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Ödeme metodunuzu doğrulayamadık. Lütfen farklı bir ödeme metodu seçin ve tekrar deneyin.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Dâhili bir hata oluştu.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">AA / YY</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

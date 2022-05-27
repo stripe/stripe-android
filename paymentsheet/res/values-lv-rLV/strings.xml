@@ -4,19 +4,6 @@
   <string name="add_new_payment_method">Pievienot jaunu maksājuma veidu</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">Noņemt bankas kontu, kas beidzas ar %s</string>
-  <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Atcelt</string>
-  <!-- Done button title -->
-  <string name="done">Gatavs</string>
-  <!-- Button title to enter editing mode -->
-  <string name="edit">Rediģēt</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Noņemt</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Ir radušās problēmas, veidojot savienojumu ar mūsu maksājumu nodrošinātāju. Lūdzu, pārbaudiet savu interneta savienojumu un mēģiniet vēlreiz.</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Radās iekšēja kļūda.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Turpinot, jūs piekrītat autorizēt maksājumus saskaņā ar <terms>šiem noteikumiem</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->

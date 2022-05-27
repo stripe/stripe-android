@@ -74,6 +74,26 @@ internal class ApiRequestTest {
         )
     }
 
+    @Test
+    fun getIncludesQueryParametersInUrl() {
+        val url = FACTORY.createGet(
+            SOURCES_URL,
+            OPTIONS,
+            mapOf("param" to "123")
+        ).url
+        assertEquals(url, "sources?param=123")
+    }
+
+    @Test
+    fun deleteIncludesQueryParametersInUrl() {
+        val url = FACTORY.createDelete(
+            SOURCES_URL,
+            OPTIONS,
+            mapOf("param" to "123")
+        ).url
+        assertEquals(url, "sources?param=123")
+    }
+
     private companion object {
         private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 

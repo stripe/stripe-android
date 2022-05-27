@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Nama</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Nama anda diperlukan.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Batalkan</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s – berakhiran %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Hapuskan Kaedah Pembayaran</string>
   <string name="delete_payment_method_prompt_title">Hapuskan kaedah pembayaran?</string>
+  <!-- Done button title -->
+  <string name="done">Selesai</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Edit</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">BB/TT</string>
   <string name="expiry_label_short">Tamat Tempoh</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Pilih Akaun Bank (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Percuma</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Alih Keluar</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Dialih Keluar %s</string>
   <string name="secure_checkout">Proses Bayar dan Keluar yang Selamat</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Kami mengalami masalah untuk membuat sambungan ke penyedia pembayaran kami. Sila periksa sambungan Internet anda dan cuba lagi.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Kami tidak dapat mensahihkan kaedah pembayaran anda. Sila pilih kaedah pembayaran yang berbeza dan cuba lagi.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Masa tamat ketika mensahihkan kaedah pembayaran anda -- cuba lagi</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Ada ralat dalaman berlaku.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">BB / TT</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

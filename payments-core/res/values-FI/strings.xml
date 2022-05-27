@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Nimi</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Nimesi vaaditaan.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Peruuta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s päättyy numeroihin %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Poista maksutapa</string>
   <string name="delete_payment_method_prompt_title">Poista maksutapa?</string>
+  <!-- Done button title -->
+  <string name="done">Valmis</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Muokkaa</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">KK/VV</string>
   <string name="expiry_label_short">Vanheneminen</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Valitse pankkitili (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Maksuton</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Poista</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Poistettu %s</string>
   <string name="secure_checkout">Turvallinen maksu</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Yhteydessä maksun käsittelijään esiintyi ongelmia. Tarkista Internet-yhteys ja yritä uudelleen.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Emme pystyneet todentamaan maksutapaasi. Valitse toinen maksutapa ja yritä uudelleen.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Maksutapasi todennus aikakatkaistiin – yritä uudelleen.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Sisäinen virhe on tapahtunut.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">KK/VV</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
