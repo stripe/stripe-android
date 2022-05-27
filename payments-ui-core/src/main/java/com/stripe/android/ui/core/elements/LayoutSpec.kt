@@ -7,7 +7,7 @@ import androidx.annotation.RestrictTo
  */
 @Suppress("DataClassPrivateConstructor")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class LayoutSpec private constructor(val items: List<FormItemSpec>) {
+data class LayoutSpec constructor(val items: List<FormItemSpec>) {
     companion object {
         fun create(vararg item: FormItemSpec) = LayoutSpec(item.toList())
 

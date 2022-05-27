@@ -1,20 +1,21 @@
 package com.stripe.android.ui.core.elements
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.view.BecsDebitBanks
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Serializable
 data class BsbSpec(
-    override val api_path: IdentifierSpec = IdentifierSpec.Generic("au_becs_debit[bsb_number]")
-) : FormItemSpec(), RequiredItemSpec, Parcelable {
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic(
+        "au_becs_debit[bsb_number]"
+    )
+) : FormItemSpec() {
     fun transform(initialValues: Map<IdentifierSpec, String?>): BsbElement =
         BsbElement(
-            this.api_path,
+            this.apiPath,
             banks,
-            initialValues[this.api_path]
+            initialValues[this.apiPath]
         )
 }
 

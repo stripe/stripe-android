@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-sealed interface Requirement : Parcelable
+sealed interface Requirement
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed interface PIRequirement : Requirement
@@ -16,7 +15,6 @@ sealed interface SIRequirement : Requirement
 /**
  * This requirement is dependent on the configuration passed by the app to the SDK.
  */
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object Delayed : PIRequirement, SIRequirement
 
@@ -24,11 +22,10 @@ object Delayed : PIRequirement, SIRequirement
  * The Payment Method requires a shipping address in the Payment Intent.
  * The fields required are name, address line 1, country, and postal code.
  */
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object ShippingAddress : PIRequirement
 
-@Parcelize
+@Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class PaymentMethodRequirements(
 
@@ -64,7 +61,7 @@ data class PaymentMethodRequirements(
      *  - true means that a PM of this type attached to a customer can be confirmed
      */
     val confirmPMFromCustomer: Boolean?,
-) : Parcelable
+)
 
 internal val CardRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),

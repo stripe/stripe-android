@@ -87,14 +87,14 @@ class FormViewModelTest {
                 ?.value
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.get(NameSpec().api_path)
+            formViewModel.completeFormValues.first()?.get(NameSpec().apiPath)
                 ?.value
         ).isEqualTo("joe")
 
         emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.get(NameSpec().api_path)
+            formViewModel.completeFormValues.first()?.get(NameSpec().apiPath)
         ).isNull()
     }
 

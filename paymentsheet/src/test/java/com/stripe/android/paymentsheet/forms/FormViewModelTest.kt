@@ -424,7 +424,7 @@ internal class FormViewModelTest {
                     IbanSpec(),
                     AddressSpec(
                         IdentifierSpec.Generic("address"),
-                        countryCodes = setOf("US", "JP")
+                        validCountryCodes = setOf("US", "JP")
                     ),
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
@@ -471,7 +471,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.api_path)
+                        ?.get(emailSection.apiPath)
                         ?.value
                 ).isNotNull()
             } else {
@@ -480,7 +480,7 @@ internal class FormViewModelTest {
                         .completeFormValues
                         .first()
                         ?.fieldValuePairs
-                        ?.get(emailSection.api_path)
+                        ?.get(emailSection.apiPath)
                         ?.value
                 ).isNull()
             }
@@ -510,7 +510,7 @@ internal class FormViewModelTest {
                     IbanSpec(),
                     AddressSpec(
                         IdentifierSpec.Generic("address"),
-                        countryCodes = setOf("US", "JP")
+                        validCountryCodes = setOf("US", "JP")
                     ),
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
@@ -526,7 +526,7 @@ internal class FormViewModelTest {
             R.string.address_label_name
         )?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
                 ?.value
         ).isNull()
 
@@ -535,7 +535,7 @@ internal class FormViewModelTest {
             R.string.email
         )?.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
                 ?.value
         ).isNull()
 
@@ -544,7 +544,7 @@ internal class FormViewModelTest {
             R.string.iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.api_path)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
                 ?.value
         ).isNull()
 
@@ -562,7 +562,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(emailSection.api_path)
+                            ?.get(emailSection.apiPath)
                             ?.value
                     ).isNotNull()
                 } else {
@@ -571,7 +571,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(emailSection.api_path)
+                            ?.get(emailSection.apiPath)
                             ?.value
                     ).isNull()
                 }

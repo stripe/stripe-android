@@ -9,7 +9,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 
 internal val klarnaHeader = StaticTextSpec(
-    api_path = IdentifierSpec.Generic("klarna_header"),
+    apiPath = IdentifierSpec.Generic("klarna_header"),
     stringResId = KlarnaHelper.getKlarnaHeader(),
 )
 

@@ -11,12 +11,12 @@ import com.stripe.android.ui.core.elements.supportedBillingCountries
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val CardForm = LayoutSpec.create(
     CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
-    CardBillingSpec(countryCodes = supportedBillingCountries),
+    CardBillingSpec(validCountryCodes = supportedBillingCountries),
     SaveForFutureUseSpec()
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LinkCardForm = LayoutSpec.create(
     CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section")),
-    CardBillingSpec(countryCodes = supportedBillingCountries)
+    CardBillingSpec(validCountryCodes = supportedBillingCountries)
 )
