@@ -40,7 +40,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -456,7 +455,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
     }
 
-    @Ignore
+    @Test
     fun `Factory gets initialized with fallback when no Injector is available`() =
         kotlinx.coroutines.test.runTest(UnconfinedTestDispatcher()) {
             createFragment(registerInjector = false) { fragment, _, viewModel ->
@@ -494,11 +493,15 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             R.style.StripePaymentSheetDefaultTheme,
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment {
-            viewModel.updatePaymentMethods(stripeIntent)
-            viewModel.setStripeIntent(stripeIntent)
-            idleLooper()
             if (registerInjector) {
-                registerViewModel(args.injectorKey, viewModel)
+                viewModel.updatePaymentMethods(stripeIntent)
+                viewModel.setStripeIntent(stripeIntent)
+                idleLooper()
+                registerViewModel(args.injectorKey, viewModel, lpmRepository)
+            } else {
+                it.sheetViewModel.updatePaymentMethods(stripeIntent)
+                it.sheetViewModel.setStripeIntent(stripeIntent)
+                idleLooper()
             }
         }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             onReady(

@@ -110,10 +110,11 @@ internal open class PaymentSheetViewModelTestInjection {
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
+        lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
-            resourceRepository = mock(),
+            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
             transformSpecToElement = mock()
         )
     ) {
