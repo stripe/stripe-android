@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -70,7 +71,7 @@ class LpmRepository {
         it.type.code to it
     }
 
-    fun fromCode(code: String?) = code?.let {
+    fun fromCode(code: PaymentMethodCode?) = code?.let {
         codeToForm[code]
     }
 

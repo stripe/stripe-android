@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import kotlinx.parcelize.IgnoredOnParcel
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**

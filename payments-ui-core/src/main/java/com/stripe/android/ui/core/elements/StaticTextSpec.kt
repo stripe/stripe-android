@@ -12,7 +12,7 @@ internal data class StaticTextSpec(
     @StringRes val stringResId: Int
 ) : FormItemSpec() {
     fun transform(): FormElement =
-    // It could be argued that the static text should have a controller, but
+        // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.apiPath,

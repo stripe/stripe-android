@@ -128,11 +128,11 @@ public final class com/stripe/android/ui/core/elements/BsbSpec$Companion {
 }
 
 public final class com/stripe/android/ui/core/elements/Capitalization : java/lang/Enum {
+	public static final field Characters Lcom/stripe/android/ui/core/elements/Capitalization;
 	public static final field Companion Lcom/stripe/android/ui/core/elements/Capitalization$Companion;
-	public static final field characters Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field none Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field sentences Lcom/stripe/android/ui/core/elements/Capitalization;
-	public static final field words Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field None Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field Sentences Lcom/stripe/android/ui/core/elements/Capitalization;
+	public static final field Words Lcom/stripe/android/ui/core/elements/Capitalization;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/Capitalization;
 	public static fun values ()[Lcom/stripe/android/ui/core/elements/Capitalization;
 }
@@ -222,14 +222,11 @@ public final class com/stripe/android/ui/core/elements/CountrySpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/Enum, android/os/Parcelable {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
+public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/Enum {
 	public static final field Companion Lcom/stripe/android/ui/core/elements/DisplayField$Companion;
-	public static final field country Lcom/stripe/android/ui/core/elements/DisplayField;
-	public fun describeContents ()I
+	public static final field Country Lcom/stripe/android/ui/core/elements/DisplayField;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/DisplayField;
 	public static fun values ()[Lcom/stripe/android/ui/core/elements/DisplayField;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/ui/core/elements/DisplayField$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -375,15 +372,15 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 }
 
 public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
+	public static final field Ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static final field Companion Lcom/stripe/android/ui/core/elements/KeyboardType$Companion;
-	public static final field ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field email Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field number Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field number_password Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field password Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field phone Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field text Lcom/stripe/android/ui/core/elements/KeyboardType;
-	public static final field uri Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field Email Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field Number Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field NumberPassword Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field Password Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field Phone Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field Text Lcom/stripe/android/ui/core/elements/KeyboardType;
+	public static final field Uri Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static fun values ()[Lcom/stripe/android/ui/core/elements/KeyboardType;
 }
@@ -425,6 +422,23 @@ public final class com/stripe/android/ui/core/elements/KlarnaCountrySpec$Compani
 public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
 	public final fun create ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
+}
+
+public final class com/stripe/android/ui/core/elements/MandateTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/MandateTextSpec$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/MandateTextSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/MandateTextSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/MandateTextSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
