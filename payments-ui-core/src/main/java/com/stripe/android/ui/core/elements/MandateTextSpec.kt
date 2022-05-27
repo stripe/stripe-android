@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,8 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-@Parcelize
-internal open class MandateTextSpec(
+data class MandateTextSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
     val stringResId: Int,

@@ -76,8 +76,7 @@ class ComposeFormDataCollectionFragmentTest {
 
     private fun mockFragment(operations: (ComposeFormDataCollectionFragment) -> Unit) {
         val args = mock<FormFragmentArguments>()
-        whenever(args.paymentMethod).thenReturn(mock())
-        whenever(args.paymentMethod.formSpec).thenReturn(mock())
+        whenever(args.paymentMethodCode).thenReturn("")
         launchFragment<ComposeFormDataCollectionFragment>(
             bundleOf(
                 EXTRA_CONFIG to args
