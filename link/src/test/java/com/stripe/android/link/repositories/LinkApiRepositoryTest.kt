@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.confirmation.ConfirmPaymentIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentIntent
@@ -348,6 +349,53 @@ class LinkApiRepositoryTest {
             ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com"),
             "secret",
             paymentIntent
+        )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `updatePaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val params = ConsumerPaymentDetailsUpdateParams.Card("id")
+
+        linkRepository.updatePaymentDetails(
+            params,
+            secret
+        )
+
+        verify(stripeRepository).updatePaymentDetails(
+            eq(secret),
+            eq(params),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `updatePaymentDetails returns successful result`() = runTest {
+        val secret = "secret"
+        val consumerPaymentDetails = mock<ConsumerPaymentDetails>()
+
+        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+            .thenReturn(consumerPaymentDetails)
+
+        val result = linkRepository.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams.Card("id"),
+            secret
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerPaymentDetails)
+    }
+
+    @Test
+    fun `updatePaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams.Card("id"),
+            "secret"
         )
 
         assertThat(result.isFailure).isTrue()

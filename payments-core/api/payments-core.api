@@ -1950,6 +1950,7 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Card : com/st
 }
 
 public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Companion {
+	public final fun getAddressFromMap (Ljava/util/Map;)Lkotlin/Pair;
 }
 
 public abstract class com/stripe/android/model/ConsumerPaymentDetails$PaymentDetails : android/os/Parcelable {
@@ -1961,7 +1962,6 @@ public abstract class com/stripe/android/model/ConsumerPaymentDetails$PaymentDet
 
 public abstract class com/stripe/android/model/ConsumerPaymentDetailsCreateParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Companion;
 	public synthetic fun <init> (Lcom/stripe/android/model/PaymentMethod$Type;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun toParamMap ()Ljava/util/Map;
 }
@@ -1969,17 +1969,31 @@ public abstract class com/stripe/android/model/ConsumerPaymentDetailsCreateParam
 public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card : com/stripe/android/model/ConsumerPaymentDetailsCreateParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion;
 	public fun <init> (Ljava/util/Map;Ljava/lang/String;)V
 	public fun describeContents ()I
 	public fun toParamMap ()Ljava/util/Map;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion {
-}
-
-public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Companion {
+public final class com/stripe/android/model/ConsumerPaymentDetailsUpdateParams$Card : com/stripe/android/model/ConsumerPaymentDetailsUpdateParams {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodCreateParams;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodCreateParams;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodCreateParams;)Lcom/stripe/android/model/ConsumerPaymentDetailsUpdateParams$Card;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerPaymentDetailsUpdateParams$Card;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodCreateParams;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerPaymentDetailsUpdateParams$Card;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCardPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isDefault ()Ljava/lang/Boolean;
+	public fun toParamMap ()Ljava/util/Map;
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/ConsumerSession$VerificationSession : com/stripe/android/core/model/StripeModel {
