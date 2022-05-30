@@ -191,6 +191,13 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Co
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/ui/core/elements/SectionFieldErrorController, com/stripe/android/ui/core/elements/TextFieldController {
+	public static final field $stable I
+	public abstract fun getCardBrandFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getEnabled ()Z
+	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
+}
+
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

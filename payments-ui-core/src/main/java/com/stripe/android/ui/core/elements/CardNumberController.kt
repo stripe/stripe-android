@@ -21,8 +21,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-internal interface CardNumberController : TextFieldController, SectionFieldErrorController {
-    val cardBrandFlow: Flow<CardBrand>
+sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
+    abstract val cardBrandFlow: Flow<CardBrand>
 
     fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
         // Don't need to populate the card number if the result is Canceled or Failed
@@ -39,7 +39,7 @@ internal class CardNumberControllerEditable constructor(
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
     override val showOptionalLabel: Boolean = false
-) : CardNumberController {
+) : CardNumberController() {
 
     constructor(
         cardTextFieldConfig: CardNumberConfig,

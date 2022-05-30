@@ -15,12 +15,12 @@ import kotlinx.coroutines.flow.map
  * Controller for the card number field which is view only and never changes.
  *
  * @param initialValues The initial values of the field, which will never change.
- *      Should contain values for both [IdentifierSpec.CardNumber] and [IdentifierSpec.CardBrand]
+ *      Should contain values for both [IdentifierSpec.CardNumber] and [IdentifierSpec.CardBrand].
  */
 internal class CardNumberViewOnlyController(
     cardTextFieldConfig: CardNumberConfig,
     initialValues: Map<IdentifierSpec, String?>
-) : CardNumberController {
+) : CardNumberController() {
 
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
