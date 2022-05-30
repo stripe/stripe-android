@@ -21,7 +21,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -33,8 +32,6 @@ internal class DefaultCardAccountRangeRepositoryTest {
     private val realStore = DefaultCardAccountRangeStore(application)
     private val realRepository = createRealRepository(realStore)
 
-    @Ignore("Failing due to remote change")
-    @Suppress("LongMethod")
     @Test
     fun `repository with real sources returns expected results`() = runBlocking {
         assertThat(
