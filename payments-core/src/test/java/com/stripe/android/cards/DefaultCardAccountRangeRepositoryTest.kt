@@ -34,6 +34,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     private val realRepository = createRealRepository(realStore)
 
     @Ignore("Failing due to remote change")
+    @Suppress("LongMethod")
     @Test
     fun `repository with real sources returns expected results`() = runBlocking {
         assertThat(
