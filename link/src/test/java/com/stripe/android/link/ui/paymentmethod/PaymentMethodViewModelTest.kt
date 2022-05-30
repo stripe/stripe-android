@@ -61,8 +61,8 @@ class PaymentMethodViewModelTest {
     private val cardFormFieldValues = mapOf(
         IdentifierSpec.CardNumber to FormFieldEntry("5555555555554444", true),
         IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-        IdentifierSpec.Generic("card[exp_month]") to FormFieldEntry("12", true),
-        IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("2050", true),
+        IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
+        IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
         IdentifierSpec.Country to FormFieldEntry("US", true),
         IdentifierSpec.PostalCode to FormFieldEntry("12345", true),
     )
@@ -336,7 +336,8 @@ class PaymentMethodViewModelTest {
             linkAccountManager,
             navigator,
             confirmationManager,
-            logger
+            logger,
+            mock()
         )
 
     private fun createLinkPaymentDetails() =
