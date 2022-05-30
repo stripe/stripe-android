@@ -13,7 +13,8 @@ internal class CardNumberViewOnlyControllerTest {
 
     private val cardNumber = "123"
     private val cardNumberController = CardNumberViewOnlyController(
-        CardNumberConfig(), mapOf(
+        CardNumberConfig(),
+        mapOf(
             IdentifierSpec.CardNumber to cardNumber,
             IdentifierSpec.CardBrand to CardBrand.Visa.code
         )
