@@ -147,7 +147,7 @@ fun TextField(
                 this.contentDescription = contentDescription
                 this.editableText = AnnotatedString("")
             },
-        enabled = enabled,
+        enabled = enabled && textFieldController.enabled,
         label = {
             FormLabel(
                 text = if (textFieldController.showOptionalLabel) {

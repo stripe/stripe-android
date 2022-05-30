@@ -42,7 +42,8 @@ class TransformSpecToElements(
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
-    private val context: Context
+    private val context: Context,
+    private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
 ) {
     fun transform(
         list: List<FormItemSpec>
@@ -61,7 +62,7 @@ class TransformSpecToElements(
                     it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is CardDetailsSectionSpec -> it.transform(context, initialValues)
+                is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
                 is EmailSpec -> it.transform(initialValues)
@@ -85,10 +86,8 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is SimpleTextSpec -> it.transform(initialValues)
                 is KlarnaHeaderStaticTextSpec -> it.transform()
                 is SepaMandateTextSpec -> it.transform(merchantName)
-                else -> EmptyFormElement()
             }
         }
 }

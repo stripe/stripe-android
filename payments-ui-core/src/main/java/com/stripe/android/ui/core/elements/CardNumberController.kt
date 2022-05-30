@@ -21,16 +21,26 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-internal class CardNumberController constructor(
+internal interface CardNumberController : TextFieldController, SectionFieldErrorController {
+    val cardBrandFlow: Flow<CardBrand>
+
+    fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
+        // Don't need to populate the card number if the result is Canceled or Failed
+        if (cardScanSheetResult is CardScanSheetResult.Completed) {
+            onRawValueChange(cardScanSheetResult.scannedCard.pan)
+        }
+    }
+}
+
+internal class CardNumberControllerEditable constructor(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
     override val showOptionalLabel: Boolean = false
-) : TextFieldController, SectionFieldErrorController {
+) : CardNumberController {
 
-    @JvmOverloads
     constructor(
         cardTextFieldConfig: CardNumberConfig,
         context: Context,
@@ -57,7 +67,7 @@ internal class CardNumberController constructor(
 
     override val contentDescription: Flow<String> = _fieldValue
 
-    internal val cardBrandFlow = _fieldValue.map {
+    override val cardBrandFlow = _fieldValue.map {
         accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
             ?: CardBrand.Unknown
     }
@@ -147,12 +157,5 @@ internal class CardNumberController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
-    }
-
-    internal fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
-        // Don't need to populate the card number if the result is Canceled or Failed
-        if (cardScanSheetResult is CardScanSheetResult.Completed) {
-            onRawValueChange(cardScanSheetResult.scannedCard.pan)
-        }
     }
 }
