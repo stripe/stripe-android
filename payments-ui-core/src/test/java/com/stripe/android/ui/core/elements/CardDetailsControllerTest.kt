@@ -50,7 +50,7 @@ class CardDetailsControllerTest {
             CardDetailsController(context, emptyMap(), emptySet())
 
         assertThat(cardController.numberElement.controller)
-            .isInstanceOf(CardNumberControllerEditable::class.java)
+            .isInstanceOf(CardNumberEditableController::class.java)
     }
 
     @Test

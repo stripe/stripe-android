@@ -19,7 +19,7 @@ internal class CardDetailsController constructor(
                 initialValues
             )
         } else {
-            CardNumberControllerEditable(
+            CardNumberEditableController(
                 CardNumberConfig(),
                 context,
                 initialValues[IdentifierSpec.CardNumber]

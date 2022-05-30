@@ -35,6 +35,9 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
  * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
+ *
+ * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
+ * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 class TransformSpecToElements(
     private val resourceRepository: ResourceRepository,

@@ -32,7 +32,7 @@ sealed class CardNumberController : TextFieldController, SectionFieldErrorContro
     }
 }
 
-internal class CardNumberControllerEditable constructor(
+internal class CardNumberEditableController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
