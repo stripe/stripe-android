@@ -18,6 +18,7 @@ class CardDetailsSectionController(
         viewOnlyFields
     )
 
+    internal val isCardScanEnabled = cardDetailsElement.isCardScanEnabled
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     override val error = cardDetailsElement.controller.error
