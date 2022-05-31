@@ -15,6 +15,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.confirmation.PaymentConfirmationCallback
+import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -49,8 +50,8 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
     private val clientSecret = "client_secret"
-    private val linkAccount = mock<LinkAccount>().also {
-        whenever(it.email).thenReturn("email@stripe.com")
+    private val linkAccount = mock<LinkAccount>().apply {
+        whenever(email).thenReturn("email@stripe.com")
     }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
@@ -66,6 +67,18 @@ class PaymentMethodViewModelTest {
         IdentifierSpec.Country to FormFieldEntry("US", true),
         IdentifierSpec.PostalCode to FormFieldEntry("12345", true),
     )
+    private val formControllerSubcomponent = mock<FormControllerSubcomponent>().apply {
+        whenever(formController).thenReturn(mock())
+    }
+    private val formControllerProvider = Provider {
+        mock<FormControllerSubcomponent.Builder>().apply {
+            whenever(formSpec(anyOrNull())).thenReturn(this)
+            whenever(initialValues(anyOrNull())).thenReturn(this)
+            whenever(viewOnlyFields(anyOrNull())).thenReturn(this)
+            whenever(viewModelScope(anyOrNull())).thenReturn(this)
+            whenever(build()).thenReturn(formControllerSubcomponent)
+        }
+    }
 
     @Before
     fun before() {
@@ -337,7 +350,7 @@ class PaymentMethodViewModelTest {
             navigator,
             confirmationManager,
             logger,
-            mock()
+            formControllerProvider
         )
 
     private fun createLinkPaymentDetails() =
