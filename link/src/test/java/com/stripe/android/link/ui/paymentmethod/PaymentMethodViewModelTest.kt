@@ -1,11 +1,9 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
@@ -49,9 +47,9 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
-    private val clientSecret = "client_secret"
     private val linkAccount = mock<LinkAccount>().apply {
         whenever(email).thenReturn("email@stripe.com")
+        whenever(clientSecret).thenReturn(CLIENT_SECRET)
     }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
@@ -85,7 +83,6 @@ class PaymentMethodViewModelTest {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
     }
 
     @Test
@@ -157,7 +154,7 @@ class PaymentMethodViewModelTest {
                         "link" to mapOf(
                             "payment_details_id" to "QAAAKJ6",
                             "credentials" to mapOf(
-                                "consumer_session_client_secret" to clientSecret
+                                "consumer_session_client_secret" to CLIENT_SECRET
                             ),
                             "card" to mapOf(
                                 "cvc" to "123"
@@ -359,11 +356,13 @@ class PaymentMethodViewModelTest {
                 it,
                 PaymentMethodCreateParams.createLink(
                     it.id,
-                    clientSecret,
+                    CLIENT_SECRET,
                     mapOf("card" to mapOf("cvc" to "123"))
                 )
             )
         }
 
-    private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
+    companion object {
+        const val CLIENT_SECRET = "client_secret"
+    }
 }

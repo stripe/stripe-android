@@ -24,10 +24,10 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
-import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.primaryButtonLabel
 
@@ -116,8 +116,9 @@ internal fun PaymentMethodBody(
             icon = R.drawable.stripe_ic_lock,
             onButtonClick = onPrimaryButtonClick
         )
-        PayAnotherWayButton(
+        SecondaryButton(
             enabled = !isProcessing,
+            label = stringResource(id = R.string.wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
     }
