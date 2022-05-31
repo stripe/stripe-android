@@ -77,6 +77,10 @@ fun TextFieldSection(
  * This is focused on converting an [TextFieldController] into what is displayed in a textField.
  * - some focus logic
  * - observes values that impact how things show on the screen
+ *
+ * @param enabled Whether to show this TextField as enabled or not. Note that the `enabled`
+ * attribute of [textFieldController] is also taken into account to decide if the UI should be
+ * enabled.
  */
 @Composable
 fun TextField(

@@ -7,13 +7,13 @@ import java.util.UUID
 internal class CardDetailsController constructor(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec>
+    cardNumberReadOnly: Boolean = false
 ) : SectionFieldErrorController {
 
     val label: Int? = null
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
-        if (viewOnlyFields.contains(IdentifierSpec.CardNumber)) {
+        if (cardNumberReadOnly) {
             CardNumberViewOnlyController(
                 CardNumberConfig(),
                 initialValues

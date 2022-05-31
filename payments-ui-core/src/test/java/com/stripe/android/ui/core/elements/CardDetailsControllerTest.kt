@@ -18,7 +18,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `Verify the first field in error is returned in error flow`() {
-        val cardController = CardDetailsController(context, emptyMap(), emptySet())
+        val cardController = CardDetailsController(context, emptyMap())
 
         val flowValues = mutableListOf<FieldError?>()
         cardController.error.asLiveData()
@@ -47,7 +47,7 @@ class CardDetailsControllerTest {
     @Test
     fun `When card number is not view only then CardNumberControllerEditable is used`() {
         val cardController =
-            CardDetailsController(context, emptyMap(), emptySet())
+            CardDetailsController(context, emptyMap())
 
         assertThat(cardController.numberElement.controller)
             .isInstanceOf(CardNumberEditableController::class.java)
@@ -56,7 +56,7 @@ class CardDetailsControllerTest {
     @Test
     fun `When card number is view only then CardNumberControllerViewOnly is used`() {
         val cardController =
-            CardDetailsController(context, emptyMap(), setOf(IdentifierSpec.CardNumber))
+            CardDetailsController(context, emptyMap(), true)
 
         assertThat(cardController.numberElement.controller)
             .isInstanceOf(CardNumberViewOnlyController::class.java)
