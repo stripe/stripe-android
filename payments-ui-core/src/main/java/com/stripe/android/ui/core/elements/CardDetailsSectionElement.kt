@@ -9,10 +9,9 @@ import kotlinx.coroutines.flow.Flow
 class CardDetailsSectionElement(
     val context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec>,
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController =
-        CardDetailsSectionController(context, initialValues, viewOnlyFields)
+        CardDetailsSectionController(context, initialValues)
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.cardDetailsElement.getFormFieldValueFlow()

@@ -24,10 +24,6 @@ data class IdentifierSpec(val v1: String) {
 
         val CardCvc = IdentifierSpec("card[cvc]")
 
-        val CardExpMonth = IdentifierSpec("card[exp_month]")
-
-        val CardExpYear = IdentifierSpec("card[exp_year]")
-
         val Email = IdentifierSpec("billing_details[email]")
 
         val Phone = IdentifierSpec("billing_details[phone]")
