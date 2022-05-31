@@ -1,13 +1,10 @@
-package com.stripe.android.link.ui.paymentmethod
+package com.stripe.android.link.ui.forms
 
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.link.injection.FormViewModelSubcomponent
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -26,15 +23,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
-class FormViewModelTest {
+class FormControllerTest {
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
         R.style.StripeDefaultTheme
@@ -60,7 +52,7 @@ class FormViewModelTest {
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
         // Using Sofort as a complex enough example to test the form view model class.
-        val formViewModel = FormViewModel(
+        val formController = FormController(
             LayoutSpec.create(
                 NameSpec(),
                 EmailSpec(),
@@ -68,67 +60,42 @@ class FormViewModelTest {
                 SaveForFutureUseSpec()
             ),
             resourceRepository = resourceRepository,
-            transformSpecToElement = transformSpecToElements
+            transformSpecToElement = transformSpecToElements,
+            this
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formController, R.string.email)
 
         nameElement?.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.get(IdentifierSpec.Name)
+            formController.completeFormValues.first()?.get(IdentifierSpec.Name)
         ).isNull()
 
         emailElement?.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.get(IdentifierSpec.Email)
+            formController.completeFormValues.first()?.get(IdentifierSpec.Email)
                 ?.value
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.get(NameSpec().apiPath)
+            formController.completeFormValues.first()?.get(NameSpec().apiPath)
                 ?.value
         ).isEqualTo("joe")
 
         emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.get(NameSpec().apiPath)
+            formController.completeFormValues.first()?.get(NameSpec().apiPath)
         ).isNull()
     }
 
-    @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
-        val mockSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockViewModel = mock<FormViewModel>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.formSpec(any())).thenReturn(mockBuilder)
-        whenever(mockSubcomponent.formViewModel).thenReturn(mockViewModel)
-
-        val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as FormViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-
-        val factory = FormViewModel.Factory(
-            mock(),
-            injector
-        )
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(FormViewModel::class.java)
-        assertThat(createdViewModel).isEqualTo(mockViewModel)
-    }
-
     private suspend fun getSectionFieldTextControllerWithLabel(
-        formViewModel: FormViewModel,
+        formController: FormController,
         @StringRes label: Int
     ) =
-        formViewModel.elements.first()!!
+        formController.elements.first()!!
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
