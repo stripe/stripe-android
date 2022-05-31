@@ -4,19 +4,6 @@
   <string name="add_new_payment_method">Pridajte nový spôsob platby</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">Odstrániť bankový účet končiaci na %s</string>
-  <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Zrušiť</string>
-  <!-- Done button title -->
-  <string name="done">Hotovo</string>
-  <!-- Button title to enter editing mode -->
-  <string name="edit">Upraviť</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Odstrániť</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Vyskytli sa problémy s pripojením k nášmu poskytovateľovi platieb. Skontrolujte pripojenie k internetu a skúste to znova.</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Vyskytla sa interná chyba.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Pokračovaním súhlasíte s autorizáciou platieb podľa <terms>týchto podmienok</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->

@@ -22,6 +22,8 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -38,6 +40,7 @@ private fun PaymentMethodBodyPreview() {
                 isProcessing = false,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonEnabled = true,
+                errorMessage = null,
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
             ) {}
@@ -62,12 +65,14 @@ internal fun PaymentMethodBody(
     )
 
     val formValues by formViewModel.completeFormValues.collectAsState(null)
-    val isProcessing by viewModel.isProcessing.collectAsState(false)
+    val isProcessing by viewModel.isProcessing.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     PaymentMethodBody(
         isProcessing = isProcessing,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         primaryButtonEnabled = formValues != null,
+        errorMessage = errorMessage,
         onPrimaryButtonClick = {
             formValues?.let {
                 viewModel.startPayment(it)
@@ -87,6 +92,7 @@ internal fun PaymentMethodBody(
     isProcessing: Boolean,
     primaryButtonLabel: String,
     primaryButtonEnabled: Boolean,
+    errorMessage: ErrorMessage?,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
@@ -104,6 +110,9 @@ internal fun PaymentMethodBody(
             formContent()
         }
         Spacer(modifier = Modifier.height(8.dp))
+        errorMessage?.let {
+            ErrorText(text = it.getMessage(LocalContext.current.resources))
+        }
         PrimaryButton(
             label = primaryButtonLabel,
             state = when {

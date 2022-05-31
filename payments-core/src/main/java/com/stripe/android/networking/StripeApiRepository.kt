@@ -1373,6 +1373,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ) {
+        makeApiRequest(
+            apiRequestFactory.createDelete(
+                getConsumerPaymentDetailsUrl(paymentDetailsId),
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    )
+                )
+            )
+        ) {
+            // no-op
+        }
+    }
+
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
@@ -1462,7 +1482,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachFinancialConnectionsSessionToSetupIntentUrl(setupIntentId, financialConnectionsSessionId),
+                getAttachFinancialConnectionsSessionToSetupIntentUrl(
+                    setupIntentId,
+                    financialConnectionsSessionId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
@@ -1902,6 +1925,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/:id`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getConsumerPaymentDetailsUrl(paymentDetailsId: String): String {
+            return getApiUrl("consumers/payment_details/$paymentDetailsId")
+        }
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

@@ -342,6 +342,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
+    override suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ) {
+    }
+
     override suspend fun attachFinancialConnectionsSessionToPaymentIntent(
         clientSecret: String,
         paymentIntentId: String,

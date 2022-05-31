@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import org.junit.Rule
 import org.junit.Test
@@ -92,9 +93,17 @@ internal class PaymentMethodScreenTest {
         assertThat(count).isEqualTo(1)
     }
 
+    @Test
+    fun when_error_message_is_not_null_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(errorMessage = ErrorMessage.Raw(errorMessage))
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
     private fun setContent(
         isProcessing: Boolean = false,
         payButtonEnabled: Boolean = false,
+        errorMessage: ErrorMessage? = null,
         onPayButtonClick: () -> Unit = {},
         onPayAnotherWayClick: () -> Unit = {}
     ) = composeTestRule.setContent {
@@ -103,6 +112,7 @@ internal class PaymentMethodScreenTest {
                 isProcessing = isProcessing,
                 primaryButtonLabel = primaryButtonLabel,
                 primaryButtonEnabled = payButtonEnabled,
+                errorMessage = errorMessage,
                 onPrimaryButtonClick = onPayButtonClick,
                 onPayAnotherWayClick = onPayAnotherWayClick,
                 formContent = {}

@@ -13,17 +13,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Surface
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +50,9 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -80,9 +87,12 @@ private fun WalletBodyPreview() {
                     )
                 ),
                 primaryButtonLabel = "Pay $10.99",
+                errorMessage = null,
+                onAddNewPaymentMethodClick = {},
+                onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
-                onAddNewPaymentMethodClick = {}
+                showBottomSheetContent = {}
             )
         }
     }
@@ -91,7 +101,8 @@ private fun WalletBodyPreview() {
 @Composable
 internal fun WalletBody(
     linkAccount: LinkAccount,
-    injector: NonFallbackInjector
+    injector: NonFallbackInjector,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     val viewModel: WalletViewModel = viewModel(
         factory = WalletViewModel.Factory(
@@ -101,15 +112,19 @@ internal fun WalletBody(
     )
 
     val paymentDetails by viewModel.paymentDetails.collectAsState()
-    val isProcessing by viewModel.isProcessing.observeAsState(false)
+    val isProcessing by viewModel.isProcessing.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     WalletBody(
         isProcessing = isProcessing,
         paymentDetails = paymentDetails,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+        errorMessage = errorMessage,
+        onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
+        onDeletePaymentMethod = viewModel::deletePaymentMethod,
         onPrimaryButtonClick = viewModel::onSelectedPaymentDetails,
         onPayAnotherWayClick = viewModel::payAnotherWay,
-        onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod
+        showBottomSheetContent = showBottomSheetContent
     )
 }
 
@@ -118,11 +133,32 @@ internal fun WalletBody(
     isProcessing: Boolean,
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
     primaryButtonLabel: String,
+    errorMessage: ErrorMessage?,
     onAddNewPaymentMethodClick: () -> Unit,
+    onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onPayAnotherWayClick: () -> Unit
+    onPayAnotherWayClick: () -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     var isWalletExpanded by rememberSaveable { mutableStateOf(false) }
+    var cardBeingRemoved by remember { mutableStateOf<ConsumerPaymentDetails.Card?>(null) }
+    var openDialog by remember { mutableStateOf(false) }
+
+    cardBeingRemoved?.let {
+        // Launch dialog when the value of [cardBeingRemoved] changes.
+        LaunchedEffect(it) {
+            openDialog = true
+        }
+
+        ConfirmRemoveDialog(openDialog) { confirmed ->
+            if (confirmed) {
+                onDeletePaymentMethod(it)
+            }
+
+            openDialog = false
+            cardBeingRemoved = null
+        }
+    }
 
     if (paymentDetails.isEmpty()) {
         Box(
@@ -139,7 +175,8 @@ internal fun WalletBody(
 
             var selectedIndex by rememberSaveable {
                 mutableStateOf(
-                    paymentDetails.indexOfFirst { it.isDefault }.takeUnless { it == -1 } ?: 0
+                    paymentDetails.indexOfFirst { it.isDefault }
+                        .takeUnless { it == -1 } ?: 0
                 )
             }
 
@@ -150,6 +187,19 @@ internal fun WalletBody(
                     enabled = !isProcessing,
                     onIndexSelected = {
                         selectedIndex = it
+                    },
+                    onMenuButtonClick = {
+                        showBottomSheetContent {
+                            WalletBottomSheetContent(
+                                onCancelClick = {
+                                    showBottomSheetContent(null)
+                                },
+                                onRemoveClick = {
+                                    showBottomSheetContent(null)
+                                    cardBeingRemoved = it
+                                }
+                            )
+                        }
                     },
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onCollapse = {
@@ -166,6 +216,9 @@ internal fun WalletBody(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
+            errorMessage?.let {
+                ErrorText(text = it.getMessage(LocalContext.current.resources))
+            }
             PrimaryButton(
                 label = primaryButtonLabel,
                 state = if (isProcessing) {
@@ -222,7 +275,7 @@ internal fun CollapsedPaymentDetails(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
             modifier = Modifier
-                .padding(horizontal = HorizontalPadding)
+                .padding(end = 22.dp)
                 .semantics {
                     testTag = "ChevronIcon"
                 },
@@ -237,6 +290,7 @@ internal fun ExpandedPaymentDetails(
     selectedIndex: Int,
     enabled: Boolean,
     onIndexSelected: (Int) -> Unit,
+    onMenuButtonClick: (ConsumerPaymentDetails.Card) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
@@ -256,12 +310,13 @@ internal fun ExpandedPaymentDetails(
         Row(
             modifier = Modifier
                 .height(44.dp)
-                .padding(start = HorizontalPadding, top = 20.dp, end = HorizontalPadding)
                 .clickable(enabled = enabled, onClick = onCollapse),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(id = R.string.wallet_expanded_title),
+                modifier = Modifier
+                    .padding(start = HorizontalPadding, top = 20.dp),
                 color = MaterialTheme.colors.onPrimary,
                 style = MaterialTheme.typography.button
             )
@@ -270,6 +325,7 @@ internal fun ExpandedPaymentDetails(
                 painter = painterResource(id = R.drawable.ic_link_chevron),
                 contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
                 modifier = Modifier
+                    .padding(top = 20.dp, end = 22.dp)
                     .rotate(180f)
                     .semantics {
                         testTag = "ChevronIcon"
@@ -284,10 +340,14 @@ internal fun ExpandedPaymentDetails(
                 is ConsumerPaymentDetails.Card -> {
                     CardPaymentMethodItem(
                         cardDetails = item,
-                        isSelected = selectedIndex == index
-                    ) {
-                        onIndexSelected(index)
-                    }
+                        isSelected = selectedIndex == index,
+                        onClick = {
+                            onIndexSelected(index)
+                        },
+                        onMenuButtonClick = {
+                            onMenuButtonClick(item)
+                        }
+                    )
                 }
             }
         }
@@ -296,18 +356,18 @@ internal fun ExpandedPaymentDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .padding(start = HorizontalPadding, end = HorizontalPadding, bottom = 4.dp)
                 .clickable(onClick = onAddNewPaymentMethodClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_link_add),
                 contentDescription = null,
-                modifier = Modifier.padding(end = 12.dp),
+                modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
                 tint = Color.Unspecified
             )
             Text(
                 text = stringResource(id = R.string.wallet_add_new_payment_method),
+                modifier = Modifier.padding(end = HorizontalPadding, bottom = 4.dp),
                 color = MaterialTheme.colors.onPrimary,
                 style = MaterialTheme.typography.button
             )
@@ -319,12 +379,12 @@ internal fun ExpandedPaymentDetails(
 internal fun CardPaymentMethodItem(
     cardDetails: ConsumerPaymentDetails.Card,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onMenuButtonClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = HorizontalPadding)
             .height(56.dp)
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
@@ -332,7 +392,7 @@ internal fun CardPaymentMethodItem(
         RadioButton(
             selected = isSelected,
             onClick = null,
-            modifier = Modifier.padding(end = 6.dp),
+            modifier = Modifier.padding(start = 20.dp, end = 6.dp),
             colors = RadioButtonDefaults.colors(
                 selectedColor = MaterialTheme.colors.primary,
                 unselectedColor = MaterialTheme.linkColors.disabledText
@@ -358,6 +418,16 @@ internal fun CardPaymentMethodItem(
                     fontWeight = FontWeight.Medium
                 )
             }
+        }
+        IconButton(
+            onClick = onMenuButtonClick,
+            modifier = Modifier.padding(end = 6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.edit),
+                tint = MaterialTheme.colors.primary
+            )
         }
     }
     Divider(color = MaterialTheme.linkColors.componentDivider, thickness = 1.dp)

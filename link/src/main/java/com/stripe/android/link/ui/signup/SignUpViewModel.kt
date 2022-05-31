@@ -12,6 +12,8 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
@@ -44,6 +46,7 @@ internal class SignUpViewModel @Inject constructor(
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
 
     val merchantName: String = args.merchantName
+
     val emailController: TextFieldController = SimpleTextFieldController
         .createEmailSectionController(prefilledEmail)
 
@@ -71,6 +74,9 @@ internal class SignUpViewModel @Inject constructor(
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
+
     private val debouncer = Debouncer(prefilledEmail)
 
     init {
@@ -89,6 +95,7 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     fun onSignUpClick() {
+        clearError()
         // All inputs must be valid otherwise sign up button would not be displayed
         val email = requireNotNull(consumerEmail.value)
         val phone = phoneController.getE164PhoneNumber(requireNotNull(consumerPhoneNumber.value))
@@ -104,6 +111,7 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
+        clearError()
         linkAccountManager.lookupConsumer(email).fold(
             onSuccess = {
                 if (it != null) {
@@ -127,9 +135,13 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+    private fun clearError() {
+        _errorMessage.value = null
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
+        _errorMessage.value = it
     }
 
     internal class Debouncer(
