@@ -25,7 +25,7 @@ internal class CardNumberControllerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val cardNumberController = CardNumberController(
+    private val cardNumberController = CardNumberEditableController(
         CardNumberConfig(), FakeCardAccountRangeRepository(), testDispatcher, initialValue = null
     )
 
@@ -101,7 +101,7 @@ internal class CardNumberControllerTest {
     @Test
     fun `Entering VISA BIN does not call accountRangeRepository`() {
         var repositoryCalls = 0
-        val cardNumberController = CardNumberController(
+        val cardNumberController = CardNumberEditableController(
             CardNumberConfig(),
             object : CardAccountRangeRepository {
                 private val staticCardAccountRangeSource = StaticCardAccountRangeSource()

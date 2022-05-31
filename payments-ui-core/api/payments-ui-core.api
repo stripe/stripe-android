@@ -191,6 +191,14 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Co
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/ui/core/elements/SectionFieldErrorController, com/stripe/android/ui/core/elements/TextFieldController {
+	public static final field $stable I
+	public abstract fun getCardBrandFlow ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getCardScanEnabled ()Z
+	public fun getEnabled ()Z
+	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
+}
+
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -357,6 +365,8 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCardBrand ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCardCvc ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getCardExpMonth ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getCardExpYear ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCardNumber ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCity ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCountry ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
@@ -531,6 +541,10 @@ public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 
+public final class com/stripe/android/ui/core/elements/TextFieldController$DefaultImpls {
+	public static fun getEnabled (Lcom/stripe/android/ui/core/elements/TextFieldController;)Z
+}
+
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
 	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
@@ -624,7 +638,8 @@ public final class com/stripe/android/ui/core/forms/SofortSpecKt {
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;ZLjava/lang/String;Landroid/content/Context;)V
+	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;ZLjava/lang/String;Landroid/content/Context;Ljava/util/Set;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;ZLjava/lang/String;Landroid/content/Context;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
 }
 
