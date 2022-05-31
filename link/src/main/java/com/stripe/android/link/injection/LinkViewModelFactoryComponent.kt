@@ -8,7 +8,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
-import com.stripe.android.link.ui.paymentmethod.FormViewModel
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
@@ -42,7 +41,6 @@ internal interface LinkViewModelFactoryComponent {
     fun inject(factory: VerificationViewModel.Factory)
     fun inject(factory: WalletViewModel.Factory)
     fun inject(factory: PaymentMethodViewModel.Factory)
-    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {

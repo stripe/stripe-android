@@ -28,6 +28,7 @@ import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.primaryButtonLabel
 
 @Preview
@@ -56,11 +57,7 @@ internal fun PaymentMethodBody(
         factory = PaymentMethodViewModel.Factory(linkAccount, injector)
     )
 
-    val formViewModel: FormViewModel = viewModel(
-        factory = FormViewModel.Factory(viewModel.paymentMethod.formSpec, injector)
-    )
-
-    val formValues by formViewModel.completeFormValues.collectAsState(null)
+    val formValues by viewModel.formController.completeFormValues.collectAsState(null)
     val isProcessing by viewModel.isProcessing.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
@@ -77,7 +74,7 @@ internal fun PaymentMethodBody(
         onPayAnotherWayClick = viewModel::payAnotherWay
     ) {
         Form(
-            formViewModel,
+            viewModel.formController,
             viewModel.isEnabled
         )
     }
