@@ -44,6 +44,11 @@ enum class CardBrand(
      * By default, a [CardBrand] does not have variants.
      */
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
+
+    /**
+     * The rendering order in the card details cell
+     */
+    private val renderingOrder: Int
 ) {
     Visa(
         "visa",
@@ -53,6 +58,7 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^4$")
         ),
+        renderingOrder = 1
     ),
 
     MasterCard(
@@ -66,7 +72,8 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^2|5|6$"),
             2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
-        )
+        ),
+        renderingOrder = 2
     ),
 
     AmericanExpress(
@@ -79,7 +86,8 @@ enum class CardBrand(
         pattern = Pattern.compile("^(34|37)[0-9]*$"),
         partialPatterns = mapOf(
             1 to Pattern.compile("^3$")
-        )
+        ),
+        renderingOrder = 3
     ),
 
     Discover(
@@ -90,6 +98,7 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^6$")
         ),
+        renderingOrder = 4
     ),
 
     /**
@@ -106,7 +115,8 @@ enum class CardBrand(
             1 to Pattern.compile("^3$"),
             2 to Pattern.compile("^(35)$"),
             3 to Pattern.compile("^(35[2-8])$")
-        )
+        ),
+        renderingOrder = 5
     ),
 
     /**
@@ -126,7 +136,8 @@ enum class CardBrand(
         ),
         variantMaxLength = mapOf(
             Pattern.compile("^(36)[0-9]*$") to 14
-        )
+        ),
+        renderingOrder = 6
     ),
 
     UnionPay(
@@ -136,7 +147,8 @@ enum class CardBrand(
         pattern = Pattern.compile("^(62|81)[0-9]*$"),
         partialPatterns = mapOf(
             1 to Pattern.compile("^6|8$"),
-        )
+        ),
+        renderingOrder = 7
     ),
 
     Unknown(
@@ -144,7 +156,8 @@ enum class CardBrand(
         "Unknown",
         R.drawable.stripe_ic_unknown,
         cvcLength = setOf(3, 4),
-        partialPatterns = emptyMap()
+        partialPatterns = emptyMap(),
+        renderingOrder = -1
     );
 
     val maxCvcLength: Int
@@ -215,9 +228,7 @@ enum class CardBrand(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun getCardBrands(cardNumber: String?): List<CardBrand> {
             if (cardNumber.isNullOrBlank()) {
-                return values().toList().filter {
-                    it != Unknown
-                }
+                return orderedBrands
             }
 
             return getMatchingCards(cardNumber).takeIf {
@@ -237,6 +248,11 @@ enum class CardBrand(
         fun fromCode(code: String?): CardBrand {
             return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
+
+        val orderedBrands = values()
+            .toList()
+            .filter { it.renderingOrder > 0 }
+            .sortedBy { it.renderingOrder }
 
         private const val CVC_COMMON_LENGTH: Int = 3
     }

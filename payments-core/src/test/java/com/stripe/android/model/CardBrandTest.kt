@@ -189,10 +189,9 @@ class CardBrandTest {
                 CardBrand.Discover,
                 CardBrand.JCB,
                 CardBrand.DinersClub,
-                CardBrand.UnionPay,
-                CardBrand.Unknown
+                CardBrand.UnionPay
             ),
-            CardBrand.values()
+            CardBrand.orderedBrands.toTypedArray()
         )
     }
 }
