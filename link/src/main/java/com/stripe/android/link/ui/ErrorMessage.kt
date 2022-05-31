@@ -1,9 +1,11 @@
 package com.stripe.android.link.ui
 
 import android.content.res.Resources
+import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.link.R
+import kotlinx.parcelize.Parcelize
 
 internal fun Throwable.getErrorMessage() = when (this) {
     is APIConnectionException ->
@@ -16,9 +18,10 @@ internal fun Throwable.getErrorMessage() = when (this) {
 /**
  * Represents a user-facing error message.
  */
-internal sealed class ErrorMessage {
+internal sealed class ErrorMessage : Parcelable {
     abstract fun getMessage(resources: Resources): String
 
+    @Parcelize
     data class FromResources(
         @StringRes val stringResId: Int
     ) : ErrorMessage() {
@@ -26,6 +29,7 @@ internal sealed class ErrorMessage {
             resources.getString(stringResId)
     }
 
+    @Parcelize
     data class Raw(
         val errorMessage: String
     ) : ErrorMessage() {

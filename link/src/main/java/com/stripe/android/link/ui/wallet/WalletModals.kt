@@ -11,13 +11,25 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 
+@Preview
+@Composable
+internal fun WalletBottomSheetContent() {
+    WalletBottomSheetContent(
+        onCancelClick = {},
+        onEditClick = {},
+        onRemoveClick = {}
+    )
+}
+
 @Composable
 internal fun WalletBottomSheetContent(
     onCancelClick: () -> Unit,
+    onEditClick: () -> Unit,
     onRemoveClick: () -> Unit
 ) {
     Column(
@@ -27,16 +39,31 @@ internal fun WalletBottomSheetContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onRemoveClick)
+                .clickable(onClick = onEditClick)
         ) {
             Text(
-                text = stringResource(R.string.wallet_remove_card),
+                text = stringResource(R.string.wallet_update_card),
                 modifier = Modifier
                     .padding(
                         start = HorizontalPadding,
                         top = 24.dp,
                         end = HorizontalPadding,
                         bottom = 10.dp
+                    )
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onRemoveClick)
+        ) {
+            Text(
+                text = stringResource(R.string.wallet_remove_card),
+                modifier = Modifier
+                    .padding(
+                        horizontal = HorizontalPadding,
+                        vertical = 10.dp
                     )
             )
         }

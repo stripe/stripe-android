@@ -52,6 +52,7 @@ class PaymentMethodViewModelTest {
     private val clientSecret = "client_secret"
     private val linkAccount = mock<LinkAccount>().apply {
         whenever(email).thenReturn("email@stripe.com")
+        whenever(clientSecret).thenReturn(clientSecret)
     }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
@@ -85,7 +86,6 @@ class PaymentMethodViewModelTest {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
     }
 
     @Test

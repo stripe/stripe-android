@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -46,6 +47,7 @@ internal abstract class LinkPaymentLauncherComponent {
     abstract fun inject(factory: WalletViewModel.Factory)
     abstract fun inject(factory: InlineSignupViewModel.Factory)
     abstract fun inject(factory: PaymentMethodViewModel.Factory)
+    abstract fun inject(factory: CardEditViewModel.Factory)
 
     @Component.Builder
     interface Builder {

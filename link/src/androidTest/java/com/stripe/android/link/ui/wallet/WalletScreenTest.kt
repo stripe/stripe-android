@@ -184,6 +184,21 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun update_item_triggers_callback() {
+        var paymentMethod: ConsumerPaymentDetails.PaymentDetails? = null
+        setContent(
+            onEditPaymentMethod = {
+                paymentMethod = it
+            }
+        )
+        toggleListExpanded()
+        onOptionsForPaymentMethod(paymentDetails.first()).performClick()
+        onUpdateCardButton().assertExists()
+        onUpdateCardButton().performClick()
+        assertThat(paymentMethod).isEqualTo(paymentDetails.first())
+    }
+
+    @Test
     fun canceling_bottom_sheet_dismisses_it() {
         setContent()
         toggleListExpanded()
@@ -242,8 +257,10 @@ internal class WalletScreenTest {
     }
 
     private fun setContent(
+        isProcessing: Boolean = false,
         errorMessage: ErrorMessage? = null,
         onAddNewPaymentMethodClick: () -> Unit = {},
+        onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayAnotherWayClick: () -> Unit = {},
@@ -274,11 +291,12 @@ internal class WalletScreenTest {
 
             DefaultLinkTheme {
                 WalletBody(
-                    isProcessing = false,
+                    isProcessing = isProcessing,
                     paymentDetails = paymentDetails,
                     primaryButtonLabel = primaryButtonLabel,
                     errorMessage = errorMessage,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
+                    onEditPaymentMethod = onEditPaymentMethod,
                     onDeletePaymentMethod = onDeletePaymentMethod,
                     onPrimaryButtonClick = onPayButtonClick,
                     onPayAnotherWayClick = onPayAnotherWayClick,
@@ -305,6 +323,8 @@ internal class WalletScreenTest {
     private fun onPrimaryButton() = composeTestRule.onNodeWithText(primaryButtonLabel)
 
     private fun onRemoveCardButton() = composeTestRule.onNodeWithText("Remove card")
+
+    private fun onUpdateCardButton() = composeTestRule.onNodeWithText("Update card")
 
     private fun onRemoveConfirmationDialog() =
         composeTestRule.onNodeWithText("Are you sure you want to remove this card?")

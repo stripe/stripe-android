@@ -23,19 +23,23 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -61,6 +65,13 @@ class WalletViewModelTest {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
+    }
+
+    @Test
+    fun `On initialization start collecting CardEdit result`() = runTest {
+        createViewModel()
+
+        verify(navigator).getResultFlow<CardEditViewModel.Result>(any())
     }
 
     @Test
@@ -150,12 +161,14 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `deletePaymentMethod removes payment details when successful`() = runTest {
+    fun `deletePaymentMethod fetches payment details when successful`() = runTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
         whenever(linkRepository.listPaymentDetails(anyOrNull()))
             .thenReturn(Result.success(paymentDetails))
 
         val viewModel = createViewModel()
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+        clearInvocations(linkRepository)
 
         // Initially has two elements
         assertThat(viewModel.paymentDetails.value)
@@ -167,9 +180,8 @@ class WalletViewModelTest {
         // Delete the first element
         viewModel.deletePaymentMethod(paymentDetails.paymentDetails.first())
 
-        // Only the second should remain
-        assertThat(viewModel.paymentDetails.value)
-            .containsExactly(paymentDetails.paymentDetails[1])
+        // Fetches payment details again
+        verify(linkRepository).listPaymentDetails(anyOrNull())
     }
 
     @Test
@@ -220,6 +232,50 @@ class WalletViewModelTest {
         viewModel.addNewPaymentMethod()
 
         verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
+    }
+
+    @Test
+    fun `Update payment method navigates to CardEdit screen`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(paymentDetails))
+
+        val viewModel = createViewModel()
+
+        viewModel.editPaymentMethod(paymentDetails.paymentDetails.first())
+
+        verify(navigator).navigateTo(
+            argWhere {
+                it.route.startsWith(LinkScreen.CardEdit.route.substringBefore('?'))
+            },
+            any()
+        )
+    }
+
+    @Test
+    fun `On CardEdit result successful then it reloads payment details`() = runTest {
+        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
+        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+
+        createViewModel()
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+        clearInvocations(linkRepository)
+
+        flow.emit(CardEditViewModel.Result.Success)
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+    }
+
+    @Test
+    fun `On CardEdit result failure then it shows error`() = runTest {
+        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
+        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+
+        val viewModel = createViewModel()
+
+        val error = ErrorMessage.Raw("Error message")
+        flow.emit(CardEditViewModel.Result.Failure(error))
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(error)
     }
 
     @Test
