@@ -20,7 +20,7 @@ class CardDetailsElementTest {
 
     @Test
     fun `test form field values returned and expiration date parsing`() {
-        val cardController = CardDetailsController(context, emptyMap(), emptySet())
+        val cardController = CardDetailsController(context, emptyMap())
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             context,

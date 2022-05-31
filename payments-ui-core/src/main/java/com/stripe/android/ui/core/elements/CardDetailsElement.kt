@@ -18,7 +18,7 @@ internal class CardDetailsElement(
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
-        viewOnlyFields
+        viewOnlyFields.contains(IdentifierSpec.CardNumber)
     ),
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled

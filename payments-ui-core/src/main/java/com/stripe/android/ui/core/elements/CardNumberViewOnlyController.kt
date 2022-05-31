@@ -13,9 +13,12 @@ import kotlinx.coroutines.flow.map
 
 /**
  * Controller for the card number field which is view only and never changes.
+ * The card number UI element will be shown as disabled to the user.
  *
  * @param initialValues The initial values of the field, which will never change.
  *      Should contain values for both [IdentifierSpec.CardNumber] and [IdentifierSpec.CardBrand].
+ *      These are the values that will be emitted in the completed FormFieldEntry flow, which means
+ *      empty values will be emitted if the initial values were not set.
  */
 internal class CardNumberViewOnlyController(
     cardTextFieldConfig: CardNumberConfig,
