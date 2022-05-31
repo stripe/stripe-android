@@ -31,6 +31,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -1843,6 +1844,48 @@ internal class StripeApiRepositoryTest {
                     assertEquals(this["number"], "4242424242424242")
                     assertEquals(this["exp_month"], 1)
                     assertEquals(this["exp_year"], 2024)
+                }
+            }
+        }
+
+    @Test
+    fun `updatePaymentDetails() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val id = "id"
+            val clientSecret = "secret"
+            val isDefault = true
+            val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams.Card(
+                id,
+                isDefault,
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            )
+            create().updatePaymentDetails(
+                clientSecret,
+                paymentDetailsUpdateParams,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                assertEquals(this["is_default"], true)
+                assertEquals(this["exp_month"], 1)
+                assertEquals(this["exp_year"], 2024)
+                withNestedParams("billing_address") {
+                    assertEquals(this["country_code"], "US")
+                    assertEquals(this["postal_code"], "94111")
                 }
             }
         }
