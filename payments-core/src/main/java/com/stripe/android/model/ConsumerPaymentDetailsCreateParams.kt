@@ -12,11 +12,7 @@ sealed class ConsumerPaymentDetailsCreateParams(
 ) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> =
-        mapOf(PARAM_TYPE to type.code)
-
-    companion object {
-        private const val PARAM_TYPE = "type"
-    }
+        mapOf("type" to type.code)
 
     /**
      * Represents a new Card payment method that will be created using the
@@ -33,43 +29,19 @@ sealed class ConsumerPaymentDetailsCreateParams(
 
         private fun convertParamsMap(): Map<String, Any> {
             val params: MutableMap<String, Any> = mutableMapOf()
-            params[PARAM_BILLING_EMAIL_ADDRESS] = email
+            params["billing_email_address"] = email
 
-            // card["billing_details"]["address"] becomes card["billing_address"]
-            (
-                (cardPaymentMethodCreateParamsMap[PARAM_BILLING_DETAILS] as? Map<*, *>)
-                    ?.get(PARAM_ADDRESS) as? Map<*, *>
-                )?.let {
-                params[PARAM_BILLING_ADDRESS] = mapOf(
-                    // card["billing_details"]["address"]["country"]
-                    // becomes card["billing_address"]["country_code"]
-                    PARAM_COUNTRY_CODE to it[PARAM_COUNTRY],
-                    PARAM_POSTAL_CODE to it[PARAM_POSTAL_CODE]
-                )
+            ConsumerPaymentDetails.Card.getAddressFromMap(cardPaymentMethodCreateParamsMap)?.let {
+                params.plusAssign(it)
             }
 
             // only card number, exp_month and exp_year are included
-            (cardPaymentMethodCreateParamsMap[PARAM_CARD] as? Map<*, *>)?.let {
-                params[PARAM_CARD] = it.toMutableMap().filterKeys { key ->
-                    key in setOf(PARAM_CARD_NUMBER, PARAM_CARD_EXP_MONTH, PARAM_CARD_EXP_YEAR)
+            (cardPaymentMethodCreateParamsMap["card"] as? Map<*, *>)?.let {
+                params["card"] = it.toMutableMap().filterKeys { key ->
+                    key in setOf("number", "exp_month", "exp_year")
                 }
             }
             return params
-        }
-
-        companion object {
-            private const val PARAM_CARD = "card"
-            private const val PARAM_CARD_NUMBER = "number"
-            private const val PARAM_CARD_EXP_MONTH = "exp_month"
-            private const val PARAM_CARD_EXP_YEAR = "exp_year"
-            private const val PARAM_BILLING_EMAIL_ADDRESS = "billing_email_address"
-            private const val PARAM_BILLING_ADDRESS = "billing_address"
-            private const val PARAM_COUNTRY_CODE = "country_code"
-            private const val PARAM_POSTAL_CODE = "postal_code"
-
-            private const val PARAM_BILLING_DETAILS = "billing_details"
-            private const val PARAM_ADDRESS = "address"
-            private const val PARAM_COUNTRY = "country"
         }
     }
 }
