@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -175,5 +176,22 @@ class CardBrandTest {
     fun fromCardNumber_withMaestroBin_shouldReturnMastercard() {
         assertThat(CardBrand.fromCardNumber("561243"))
             .isEqualTo(CardBrand.MasterCard)
+    }
+
+    @Test
+    fun cardBrandIsOrdered() {
+        // Ordered for rendering purposes in the card field
+        assertContentEquals(
+            arrayOf(
+                CardBrand.Visa,
+                CardBrand.MasterCard,
+                CardBrand.AmericanExpress,
+                CardBrand.Discover,
+                CardBrand.JCB,
+                CardBrand.DinersClub,
+                CardBrand.UnionPay
+            ),
+            CardBrand.orderedBrands.toTypedArray()
+        )
     }
 }
