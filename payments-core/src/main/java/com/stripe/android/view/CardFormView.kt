@@ -303,7 +303,7 @@ class CardFormView @JvmOverloads constructor(
             layout.error = null
         }
 
-        cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_paymentsheet_cvc)
+        cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_cvc)
 
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
