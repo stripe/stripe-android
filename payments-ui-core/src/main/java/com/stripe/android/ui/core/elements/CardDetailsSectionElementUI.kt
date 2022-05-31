@@ -36,7 +36,7 @@ fun CardDetailsSectionElementUI(
                     heading()
                 }
         )
-        if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
+        if (controller.isStripeCardScanAvailable()) {
             ScanCardButtonUI {
                 controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
                     it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
@@ -52,10 +52,7 @@ fun CardDetailsSectionElementUI(
         SectionElement(
             IdentifierSpec.Generic("credit_details"),
             listOf(controller.cardDetailsElement),
-            SectionController(
-                null,
-                listOf(controller.cardDetailsElement.sectionFieldErrorController())
-            )
+            SectionController(null, listOf(controller.cardDetailsElement.sectionFieldErrorController()))
         ),
         hiddenIdentifiers ?: emptyList(),
         IdentifierSpec.Generic("card_details")

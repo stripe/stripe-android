@@ -21,28 +21,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
-    abstract val cardBrandFlow: Flow<CardBrand>
-
-    abstract val cardScanEnabled: Boolean
-
-    fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
-        // Don't need to populate the card number if the result is Canceled or Failed
-        if (cardScanSheetResult is CardScanSheetResult.Completed) {
-            onRawValueChange(cardScanSheetResult.scannedCard.pan)
-        }
-    }
-}
-
-internal class CardNumberEditableController constructor(
+internal class CardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     initialValue: String?,
     override val showOptionalLabel: Boolean = false
-) : CardNumberController() {
+) : TextFieldController, SectionFieldErrorController {
 
+    @JvmOverloads
     constructor(
         cardTextFieldConfig: CardNumberConfig,
         context: Context,
@@ -69,12 +57,10 @@ internal class CardNumberEditableController constructor(
 
     override val contentDescription: Flow<String> = _fieldValue
 
-    override val cardBrandFlow = _fieldValue.map {
+    internal val cardBrandFlow = _fieldValue.map {
         accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
             ?: CardBrand.Unknown
     }
-
-    override val cardScanEnabled = true
 
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
         val cardBrands = CardBrand.getCardBrands(it)
@@ -170,5 +156,12 @@ internal class CardNumberEditableController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    internal fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
+        // Don't need to populate the card number if the result is Canceled or Failed
+        if (cardScanSheetResult is CardScanSheetResult.Completed) {
+            onRawValueChange(cardScanSheetResult.scannedCard.pan)
+        }
     }
 }
