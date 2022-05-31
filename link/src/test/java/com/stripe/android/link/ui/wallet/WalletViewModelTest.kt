@@ -99,7 +99,7 @@ class WalletViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
+        verify(navigator).navigateTo(LinkScreen.PaymentMethod, true)
     }
 
     @Test
@@ -322,8 +322,6 @@ class WalletViewModelTest {
             confirmationManager,
             logger
         )
-
-    private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
 
     companion object {
         const val CLIENT_SECRET = "client_secret"

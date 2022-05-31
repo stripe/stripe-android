@@ -49,10 +49,9 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
-    private val clientSecret = "client_secret"
     private val linkAccount = mock<LinkAccount>().apply {
         whenever(email).thenReturn("email@stripe.com")
-        whenever(clientSecret).thenReturn(clientSecret)
+        whenever(clientSecret).thenReturn(CLIENT_SECRET)
     }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
@@ -157,7 +156,7 @@ class PaymentMethodViewModelTest {
                         "link" to mapOf(
                             "payment_details_id" to "QAAAKJ6",
                             "credentials" to mapOf(
-                                "consumer_session_client_secret" to clientSecret
+                                "consumer_session_client_secret" to CLIENT_SECRET
                             ),
                             "card" to mapOf(
                                 "cvc" to "123"
@@ -359,11 +358,13 @@ class PaymentMethodViewModelTest {
                 it,
                 PaymentMethodCreateParams.createLink(
                     it.id,
-                    clientSecret,
+                    CLIENT_SECRET,
                     mapOf("card" to mapOf("cvc" to "123"))
                 )
             )
         }
 
-    private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
+    companion object {
+        const val CLIENT_SECRET = "client_secret"
+    }
 }
