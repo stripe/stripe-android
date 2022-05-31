@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.linkColors
 
 @Preview
 @Composable
@@ -103,7 +105,10 @@ internal fun ConfirmRemoveDialog(
                         onDialogDismissed(true)
                     }
                 ) {
-                    Text(stringResource(R.string.remove))
+                    Text(
+                        text = stringResource(R.string.remove),
+                        color = MaterialTheme.linkColors.dialogButtonLabel
+                    )
                 }
             },
             dismissButton = {
@@ -112,7 +117,10 @@ internal fun ConfirmRemoveDialog(
                         onDialogDismissed(false)
                     }
                 ) {
-                    Text(stringResource(R.string.cancel))
+                    Text(
+                        text = stringResource(R.string.cancel),
+                        color = MaterialTheme.linkColors.dialogButtonLabel
+                    )
                 }
             },
             text = {
