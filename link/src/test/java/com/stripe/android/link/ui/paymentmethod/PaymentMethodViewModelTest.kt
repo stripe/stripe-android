@@ -1,11 +1,9 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
