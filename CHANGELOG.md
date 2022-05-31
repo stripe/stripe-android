@@ -1,5 +1,6 @@
 # CHANGELOG
-## XX.X.X - 2022-XX-XX
+## 20.5.0 - 2022-05-31
+This release adds the Link beta and several big fixes for payment sheet. 
 
 ### PaymentSheet
 * [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
