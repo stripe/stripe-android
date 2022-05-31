@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -347,6 +348,14 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         paymentDetailsId: String,
         requestOptions: ApiRequest.Options
     ) {
+    }
+
+    override suspend fun updatePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
+        return null
     }
 
     override suspend fun attachFinancialConnectionsSessionToPaymentIntent(

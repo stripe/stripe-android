@@ -3,8 +3,11 @@ package com.stripe.android.ui.core.elements
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
@@ -16,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,8 +37,10 @@ import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.paymentsColors
+import kotlinx.coroutines.delay
 
 /**
  * This is focused on converting an [TextFieldController] into what is displayed in a section
@@ -161,7 +167,23 @@ fun TextField(
             )
         },
         trailingIcon = trailingIcon?.let {
-            { TrailingIcon(it, loading) }
+            {
+                Row {
+                    when (it) {
+                        is TextFieldIcon.Trailing -> {
+                            TrailingIcon(it, loading)
+                        }
+                        is TextFieldIcon.MultiTrailing -> {
+                            Row(modifier = Modifier.padding(10.dp)) {
+                                it.staticIcons.forEach {
+                                    TrailingIcon(it, loading)
+                                }
+                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
+                            }
+                        }
+                    }
+                }
+            }
         },
         isError = shouldShowError,
         visualTransformation = textFieldController.visualTransformation,
@@ -181,6 +203,27 @@ fun TextField(
         singleLine = true,
         colors = colors,
     )
+}
+
+@Composable
+fun AnimatedIcons(
+    icons: List<TextFieldIcon.Trailing>,
+    loading: Boolean
+) {
+    if (icons.isEmpty()) return
+
+    val target by produceState(initialValue = icons.first()) {
+        while (true) {
+            icons.forEach {
+                delay(1000)
+                value = it
+            }
+        }
+    }
+
+    Crossfade(targetState = target) {
+        TrailingIcon(it, loading)
+    }
 }
 
 @Composable
@@ -205,12 +248,12 @@ fun TextFieldColors(
 
 @Composable
 internal fun TrailingIcon(
-    trailingIcon: TextFieldIcon,
+    trailingIcon: TextFieldIcon.Trailing,
     loading: Boolean
 ) {
     if (loading) {
         CircularProgressIndicator()
-    } else if (trailingIcon.isIcon) {
+    } else if (trailingIcon.isTintable) {
         Icon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {

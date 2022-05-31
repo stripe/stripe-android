@@ -3,7 +3,8 @@
 
 ### PaymentSheet
 * [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
-* [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text
+* [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text.
+* [ADDED][5069](https://github.com/stripe/stripe-android/pull/5069) Add card brand icons to card details form.
 
 ### Payments
 * [FIXED][5079](https://github.com/stripe/stripe-android/pull/5079) Add 3ds2 url to list of completion URLs so callbacks work correctly.

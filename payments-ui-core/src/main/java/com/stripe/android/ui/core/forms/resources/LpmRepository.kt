@@ -243,7 +243,6 @@ class LpmRepository @Inject constructor(
          * description of the values
          */
         fun supportsCustomerSavedPM() = requirement.confirmPMFromCustomer == true
-
     }
 
     companion object {
