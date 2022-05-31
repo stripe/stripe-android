@@ -21,6 +21,8 @@ internal class CardDetailsElement(
         viewOnlyFields
     ),
 ) : SectionMultiFieldElement(identifier) {
+    val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
+
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 

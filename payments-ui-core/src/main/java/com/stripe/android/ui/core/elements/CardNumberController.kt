@@ -24,6 +24,8 @@ import kotlin.coroutines.CoroutineContext
 sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
 
+    abstract val cardScanEnabled: Boolean
+
     fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
         // Don't need to populate the card number if the result is Canceled or Failed
         if (cardScanSheetResult is CardScanSheetResult.Completed) {
@@ -71,6 +73,8 @@ internal class CardNumberEditableController constructor(
         accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull()
             ?: CardBrand.Unknown
     }
+
+    override val cardScanEnabled = true
 
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
         val cardBrands = CardBrand.getCardBrands(it)

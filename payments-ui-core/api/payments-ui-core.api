@@ -194,6 +194,7 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Co
 public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/ui/core/elements/SectionFieldErrorController, com/stripe/android/ui/core/elements/TextFieldController {
 	public static final field $stable I
 	public abstract fun getCardBrandFlow ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getCardScanEnabled ()Z
 	public fun getEnabled ()Z
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
 }
