@@ -42,6 +42,8 @@ internal class CardNumberViewOnlyController(
         } ?: CardBrand.Unknown
     )
 
+    override val cardScanEnabled = false
+
     override val trailingIcon = cardBrandFlow.map { TextFieldIcon(it.icon, isIcon = false) }
 
     override val fieldState = flowOf(TextFieldStateConstants.Valid.Full)
