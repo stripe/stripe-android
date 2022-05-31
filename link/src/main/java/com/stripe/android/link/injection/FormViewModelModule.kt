@@ -4,14 +4,13 @@ import android.content.Context
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Module
 import dagger.Provides
 
 @Module
-internal abstract class FormControllerModule {
+internal abstract class FormViewModelModule {
 
     companion object {
 
@@ -19,12 +18,10 @@ internal abstract class FormControllerModule {
         fun provideTransformSpecToElements(
             resourceRepository: ResourceRepository,
             context: Context,
-            starterArgs: LinkActivityContract.Args,
-            initialValues: Map<IdentifierSpec, String?>,
-            viewOnlyFields: Set<IdentifierSpec>
+            starterArgs: LinkActivityContract.Args
         ) = TransformSpecToElements(
             resourceRepository = resourceRepository,
-            initialValues = initialValues,
+            initialValues = emptyMap(),
             amount = (starterArgs.stripeIntent as? PaymentIntent)?.let {
                 val amount = it.amount
                 val currency = it.currency
@@ -35,8 +32,7 @@ internal abstract class FormControllerModule {
             },
             saveForFutureUseInitialValue = false,
             merchantName = starterArgs.merchantName,
-            context = context,
-            viewOnlyFields = viewOnlyFields
+            context = context
         )
     }
 }

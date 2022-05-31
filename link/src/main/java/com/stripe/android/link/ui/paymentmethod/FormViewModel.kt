@@ -1,12 +1,17 @@
-package com.stripe.android.link.ui.forms
+package com.stripe.android.link.ui.paymentmethod
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.link.injection.FormViewModelSubcomponent
+import com.stripe.android.link.injection.NonFallbackInjectable
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -16,19 +21,20 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
- * Controller that manages the user interaction with the payment method data collection form.
+ * ViewModel that manages the user interaction with the payment method data collection form.
  * When all fields are reported as complete, [completeFormValues] emits the valid payment method.
  *
  * @param: formSpec A representation of the layout which is used to display the UI fields on screen.
  */
-internal class FormController @Inject internal constructor(
+internal class FormViewModel @Inject internal constructor(
     private val formSpec: LayoutSpec,
     private val resourceRepository: ResourceRepository,
-    private val transformSpecToElement: TransformSpecToElements,
-    viewModelScope: CoroutineScope
-) {
+    private val transformSpecToElement: TransformSpecToElements
+) : ViewModel() {
+
     // Initial value is null while loading in the background
     internal val elements: StateFlow<List<FormElement>?>
 
@@ -97,6 +103,24 @@ internal class FormController @Inject internal constructor(
     ) { hiddenIds, textFieldControllerIds ->
         textFieldControllerIds.lastOrNull {
             !hiddenIds.contains(it)
+        }
+    }
+
+    class Factory(
+        private val formSpec: LayoutSpec,
+        private val injector: NonFallbackInjector
+    ) : ViewModelProvider.Factory, NonFallbackInjectable {
+
+        @Inject
+        lateinit var subComponentBuilderProvider:
+            Provider<FormViewModelSubcomponent.Builder>
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            injector.inject(this)
+            return subComponentBuilderProvider.get()
+                .formSpec(formSpec)
+                .build().formViewModel as T
         }
     }
 }

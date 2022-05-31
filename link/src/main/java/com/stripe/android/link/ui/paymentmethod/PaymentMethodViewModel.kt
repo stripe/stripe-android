@@ -10,7 +10,6 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
-import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
@@ -42,8 +41,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
-    private val logger: Logger,
-    formControllerProvider: Provider<FormControllerSubcomponent.Builder>
+    private val logger: Logger
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
@@ -55,12 +53,6 @@ internal class PaymentMethodViewModel @Inject constructor(
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     val paymentMethod = SupportedPaymentMethod.Card()
-    val formController = formControllerProvider.get()
-        .formSpec(paymentMethod.formSpec)
-        .initialValues(emptyMap())
-        .viewOnlyFields(emptySet())
-        .viewModelScope(viewModelScope)
-        .build().formController
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
         clearError()
