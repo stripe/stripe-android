@@ -36,8 +36,7 @@
                 android:id="@+id/guest_customer_button"
                 android:text="@string/customer_guest"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true" />
+                android:layout_height="wrap_content" />
 
             <RadioButton
                 android:id="@+id/new_customer_button"
@@ -49,7 +48,8 @@
                 android:id="@+id/returning_customer_button"
                 android:text="@string/customer_returning"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:checked="true" />
         </RadioGroup>
 
         <TextView
@@ -162,7 +162,6 @@
                 android:text="@string/currency_aud"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 tools:ignore="HardcodedText" />
 
             <RadioButton
@@ -238,8 +237,7 @@
                 android:id="@+id/default_billing_on_button"
                 android:text="@string/on"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="false" />
+                android:layout_height="wrap_content" />
 
             <RadioButton
                 android:id="@+id/default_billing_off_button"
@@ -344,14 +342,14 @@
                 android:text="@string/on"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true" />
+                android:checked="false" />
 
             <RadioButton
                 android:id="@+id/automatic_pm_off_button"
                 android:text="@string/off"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="false" />
+                android:checked="true" />
         </RadioGroup>
 
             <Button
