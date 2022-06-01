@@ -46,6 +46,7 @@ import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -102,11 +103,13 @@ internal class LinkActivity : ComponentActivity() {
                     viewModel.navigator.navigationController = navController
 
                     Column(Modifier.fillMaxWidth()) {
-                        val linkAccount by viewModel.linkAccount.collectAsState(initial = null)
+                        val linkAccount by viewModel.linkAccount.collectAsState(null)
+                        val iconResource by getIconFlow().collectAsState(R.drawable.ic_link_close)
 
                         LinkAppBar(
                             email = linkAccount?.email,
-                            onCloseButtonClick = { dismiss() }
+                            buttonIconResource = iconResource,
+                            onButtonClick = { viewModel.navigator.onBack() }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
@@ -234,4 +237,15 @@ internal class LinkActivity : ComponentActivity() {
         )
         finish()
     }
+
+    private fun getIconFlow() =
+        navController.currentBackStackEntryFlow.map {
+            if (navController.backQueue.size > 2) {
+                // The Loading screen is always at the bottom of the stack, so a
+                // size of 2 means there's only one screen in the stack.
+                R.drawable.ic_link_back
+            } else {
+                R.drawable.ic_link_close
+            }
+        }
 }

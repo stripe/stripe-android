@@ -8,7 +8,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
 
-internal val CloseIconWidth = 24.dp
+internal val MinimumTouchTargetSize = 48.dp
 internal val AppBarHeight = 56.dp
 internal val HorizontalPadding = 20.dp
 

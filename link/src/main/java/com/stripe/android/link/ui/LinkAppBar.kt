@@ -1,9 +1,8 @@
 package com.stripe.android.link.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -25,8 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.AppBarHeight
-import com.stripe.android.link.theme.CloseIconWidth
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
 
 @Preview
@@ -36,7 +36,8 @@ internal fun LinkAppBar() {
         Surface {
             LinkAppBar(
                 email = "email@example.com",
-                onCloseButtonClick = {}
+                buttonIconResource = R.drawable.ic_link_close,
+                onButtonClick = {}
             )
         }
     }
@@ -45,61 +46,56 @@ internal fun LinkAppBar() {
 @Composable
 internal fun LinkAppBar(
     email: String?,
-    onCloseButtonClick: () -> Unit
+    @DrawableRes buttonIconResource: Int,
+    onButtonClick: () -> Unit
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .defaultMinSize(minHeight = AppBarHeight)
+            .defaultMinSize(minHeight = AppBarHeight),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Top
     ) {
-        Row(
+        IconButton(
+            onClick = onButtonClick,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 18.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(4.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .width(CloseIconWidth)
-                    .clickable(onClick = onCloseButtonClick),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_link_close),
-                    contentDescription = stringResource(id = R.string.close),
-                    tint = MaterialTheme.linkColors.closeButton
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_link_logo),
-                    contentDescription = stringResource(R.string.link),
-                    tint = MaterialTheme.linkColors.linkLogo
-                )
-            }
-
-            Spacer(modifier = Modifier.width(CloseIconWidth))
+            Icon(
+                painter = painterResource(id = buttonIconResource),
+                contentDescription = stringResource(id = R.string.back),
+                tint = MaterialTheme.linkColors.closeButton
+            )
         }
 
-        AnimatedVisibility(visible = !email.isNullOrEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .height(24.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = email.orEmpty(),
-                    color = MaterialTheme.linkColors.disabledText
-                )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_link_logo),
+                contentDescription = stringResource(R.string.link),
+                tint = MaterialTheme.linkColors.linkLogo
+            )
+
+            AnimatedVisibility(visible = !email.isNullOrEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .height(24.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = email.orEmpty(),
+                        color = MaterialTheme.linkColors.disabledText
+                    )
+                }
             }
         }
+
+        Spacer(modifier = Modifier.width(MinimumTouchTargetSize))
     }
 }

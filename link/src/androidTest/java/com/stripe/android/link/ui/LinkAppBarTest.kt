@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import org.junit.Rule
 import org.junit.Test
@@ -26,11 +27,11 @@ internal class LinkAppBarTest {
     }
 
     @Test
-    fun close_button_callback_is_called() {
+    fun on_button_click_button_callback_is_called() {
         var count = 0
         setContent(onCloseButtonClick = { count++ })
 
-        composeTestRule.onNodeWithContentDescription("Close").performClick()
+        composeTestRule.onNodeWithContentDescription("Back").performClick()
         assertThat(count).isEqualTo(1)
     }
 
@@ -39,7 +40,11 @@ internal class LinkAppBarTest {
         onCloseButtonClick: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
-            LinkAppBar(email = email, onCloseButtonClick = onCloseButtonClick)
+            LinkAppBar(
+                email = email,
+                buttonIconResource = R.drawable.ic_link_close,
+                onButtonClick = onCloseButtonClick
+            )
         }
     }
 }
