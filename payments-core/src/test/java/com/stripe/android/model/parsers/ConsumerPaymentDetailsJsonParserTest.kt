@@ -56,6 +56,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `AMERICAN_EXPRESS and DINERS_CLUB card brands are fixed`() {
         val json = JSONObject(
