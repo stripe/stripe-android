@@ -68,7 +68,7 @@ fun LinkVerificationDialog(
                                 Column {
                                     LinkAppBar(
                                         email = account.email,
-                                        buttonIconResource = R.drawable.ic_link_close,
+                                        isRootScreen = true,
                                         onButtonClick = {
                                             openDialog = false
                                             verificationCallback(false)
