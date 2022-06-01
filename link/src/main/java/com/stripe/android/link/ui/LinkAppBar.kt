@@ -63,9 +63,9 @@ internal fun LinkAppBar(
             Icon(
                 painter = painterResource(
                     id = if (isRootScreen) {
-                        R.drawable.ic_link_back
-                    } else {
                         R.drawable.ic_link_close
+                    } else {
+                        R.drawable.ic_link_back
                     }
                 ),
                 contentDescription = stringResource(id = R.string.back),
