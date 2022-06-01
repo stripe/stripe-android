@@ -1,4 +1,4 @@
-package com.stripe.android.identity.utils
+package com.stripe.android.stripecardscan.scanui.util
 
 import android.os.Build
 import android.text.Html
