@@ -132,8 +132,6 @@ internal enum class NameType(@StringRes val stringResId: Int) {
 
 @Serializable
 internal class StateSchema(
-    @SerialName("ios_id")
-    val isoID: String, // sometimes empty string (i.e. Armed Forces (AP))
     @SerialName("key")
     val key: String, // abbreviation
     @SerialName("name")
@@ -142,11 +140,11 @@ internal class StateSchema(
 
 @Serializable
 internal class FieldSchema(
-    @SerialName("is_numeric")
+    @SerialName("isNumeric")
     val isNumeric: Boolean = false,
     @SerialName("examples")
     val examples: List<String> = emptyList(),
-    @SerialName("name_type")
+    @SerialName("nameType")
     val nameType: NameType, // label,
 )
 
