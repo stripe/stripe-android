@@ -64,7 +64,7 @@ class FormViewModelTest {
             LayoutSpec.create(
                 NameSpec(),
                 EmailSpec(),
-                CountrySpec(onlyShowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
+                CountrySpec(allowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                 SaveForFutureUseSpec()
             ),
             resourceRepository = resourceRepository,
