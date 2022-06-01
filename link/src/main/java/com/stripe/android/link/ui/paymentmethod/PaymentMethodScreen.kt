@@ -40,9 +40,10 @@ private fun PaymentMethodBodyPreview() {
                 isProcessing = false,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonEnabled = true,
+                secondaryButtonLabel = "Cancel",
                 errorMessage = null,
                 onPrimaryButtonClick = {},
-                onPayAnotherWayClick = {},
+                onSecondaryButtonClick = {},
             ) {}
         }
     }
@@ -65,13 +66,14 @@ internal fun PaymentMethodBody(
         isProcessing = isProcessing,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         primaryButtonEnabled = formValues != null,
+        secondaryButtonLabel = stringResource(id = viewModel.secondaryButtonLabel),
         errorMessage = errorMessage,
         onPrimaryButtonClick = {
             formValues?.let {
                 viewModel.startPayment(it)
             }
         },
-        onPayAnotherWayClick = viewModel::payAnotherWay
+        onSecondaryButtonClick = viewModel::onSecondaryButtonClick
     ) {
         Form(
             viewModel.formController,
@@ -85,9 +87,10 @@ internal fun PaymentMethodBody(
     isProcessing: Boolean,
     primaryButtonLabel: String,
     primaryButtonEnabled: Boolean,
+    secondaryButtonLabel: String,
     errorMessage: ErrorMessage?,
     onPrimaryButtonClick: () -> Unit,
-    onPayAnotherWayClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
     ScrollableTopLevelColumn {
@@ -118,8 +121,8 @@ internal fun PaymentMethodBody(
         )
         SecondaryButton(
             enabled = !isProcessing,
-            label = stringResource(id = R.string.wallet_pay_another_way),
-            onClick = onPayAnotherWayClick
+            label = secondaryButtonLabel,
+            onClick = onSecondaryButtonClick
         )
     }
 }
