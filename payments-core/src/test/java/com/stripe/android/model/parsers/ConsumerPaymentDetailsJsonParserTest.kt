@@ -122,7 +122,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         )
 
         assertEquals(
