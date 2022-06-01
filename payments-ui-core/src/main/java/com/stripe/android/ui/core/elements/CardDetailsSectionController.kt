@@ -7,15 +7,18 @@ import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionController(
     context: Context,
-    initialValues: Map<IdentifierSpec, String?>
+    initialValues: Map<IdentifierSpec, String?>,
+    viewOnlyFields: Set<IdentifierSpec>
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("card_detail"),
         context,
-        initialValues
+        initialValues,
+        viewOnlyFields
     )
 
+    internal val isCardScanEnabled = cardDetailsElement.isCardScanEnabled
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     override val error = cardDetailsElement.controller.error

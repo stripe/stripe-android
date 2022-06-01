@@ -60,7 +60,7 @@ internal fun ErrorText(
             .fillMaxWidth()
             .background(
                 color = MaterialTheme.linkColors.errorComponentBackground,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.small
             )
     ) {
         Icon(

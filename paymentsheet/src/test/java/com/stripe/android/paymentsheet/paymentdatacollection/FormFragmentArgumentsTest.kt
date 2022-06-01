@@ -16,8 +16,7 @@ class FormFragmentArgumentsTest {
             city = "Dublin",
             state = "Co. Dublin",
             postalCode = "T37 F8HK",
-            country = "IE",
-
+            country = "IE"
         ),
         "email.email.com",
         "Jenny Smith"
@@ -78,8 +77,8 @@ class FormFragmentArgumentsTest {
                 IdentifierSpec.Country to "DE",
                 IdentifierSpec.Generic("type") to "card",
                 IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.Generic("card[exp_month]") to "1",
-                IdentifierSpec.Generic("card[exp_year]") to "2024",
+                IdentifierSpec.CardExpMonth to "1",
+                IdentifierSpec.CardExpYear to "2024",
                 IdentifierSpec.CardCvc to "111"
             )
         )

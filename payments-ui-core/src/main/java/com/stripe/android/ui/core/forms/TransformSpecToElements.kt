@@ -35,6 +35,9 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
  * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
+ *
+ * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
+ * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 class TransformSpecToElements(
     private val resourceRepository: ResourceRepository,
@@ -42,7 +45,8 @@ class TransformSpecToElements(
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
-    private val context: Context
+    private val context: Context,
+    private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
 ) {
     fun transform(
         list: List<FormItemSpec>
@@ -59,7 +63,7 @@ class TransformSpecToElements(
                 is EmptyFormSpec -> EmptyFormElement()
                 is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is SepaMandateTextSpec -> it.transform(merchantName)
+                is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
                 is NameSpec -> it.transform(initialValues)
@@ -75,11 +79,11 @@ class TransformSpecToElements(
                     initialValues,
                     resourceRepository.getAddressRepository()
                 )
-                is CardDetailsSectionSpec -> it.transform(context, initialValues)
                 is CardBillingSpec -> it.transform(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
+                is SepaMandateTextSpec -> it.transform(merchantName)
                 else -> EmptyFormElement()
             }
         }

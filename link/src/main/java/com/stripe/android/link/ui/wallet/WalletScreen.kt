@@ -53,10 +53,10 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
-import com.stripe.android.link.ui.PayAnotherWayButton
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -89,6 +89,7 @@ private fun WalletBodyPreview() {
                 primaryButtonLabel = "Pay $10.99",
                 errorMessage = null,
                 onAddNewPaymentMethodClick = {},
+                onEditPaymentMethod = {},
                 onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
@@ -121,6 +122,7 @@ internal fun WalletBody(
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         errorMessage = errorMessage,
         onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
+        onEditPaymentMethod = viewModel::editPaymentMethod,
         onDeletePaymentMethod = viewModel::deletePaymentMethod,
         onPrimaryButtonClick = viewModel::onSelectedPaymentDetails,
         onPayAnotherWayClick = viewModel::payAnotherWay,
@@ -135,6 +137,7 @@ internal fun WalletBody(
     primaryButtonLabel: String,
     errorMessage: ErrorMessage?,
     onAddNewPaymentMethodClick: () -> Unit,
+    onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPayAnotherWayClick: () -> Unit,
@@ -194,6 +197,10 @@ internal fun WalletBody(
                                 onCancelClick = {
                                     showBottomSheetContent(null)
                                 },
+                                onEditClick = {
+                                    showBottomSheetContent(null)
+                                    onEditPaymentMethod(it)
+                                },
                                 onRemoveClick = {
                                     showBottomSheetContent(null)
                                     cardBeingRemoved = it
@@ -230,8 +237,9 @@ internal fun WalletBody(
             ) {
                 onPrimaryButtonClick(paymentDetails[selectedIndex])
             }
-            PayAnotherWayButton(
+            SecondaryButton(
                 enabled = !isProcessing,
+                label = stringResource(id = R.string.wallet_pay_another_way),
                 onClick = onPayAnotherWayClick
             )
         }
@@ -340,6 +348,7 @@ internal fun ExpandedPaymentDetails(
                 is ConsumerPaymentDetails.Card -> {
                     CardPaymentMethodItem(
                         cardDetails = item,
+                        enabled = enabled,
                         isSelected = selectedIndex == index,
                         onClick = {
                             onIndexSelected(index)
@@ -356,7 +365,7 @@ internal fun ExpandedPaymentDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .clickable(onClick = onAddNewPaymentMethodClick),
+                .clickable(enabled = enabled, onClick = onAddNewPaymentMethodClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -378,6 +387,7 @@ internal fun ExpandedPaymentDetails(
 @Composable
 internal fun CardPaymentMethodItem(
     cardDetails: ConsumerPaymentDetails.Card,
+    enabled: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
     onMenuButtonClick: () -> Unit
@@ -386,7 +396,7 @@ internal fun CardPaymentMethodItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
@@ -421,7 +431,8 @@ internal fun CardPaymentMethodItem(
         }
         IconButton(
             onClick = onMenuButtonClick,
-            modifier = Modifier.padding(end = 6.dp)
+            modifier = Modifier.padding(end = 6.dp),
+            enabled = enabled
         ) {
             Icon(
                 imageVector = Icons.Filled.MoreVert,

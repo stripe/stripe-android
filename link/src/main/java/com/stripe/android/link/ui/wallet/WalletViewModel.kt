@@ -18,6 +18,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -49,16 +50,17 @@ internal class WalletViewModel @Inject constructor(
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     init {
+        loadPaymentDetails()
+
         viewModelScope.launch {
-            linkRepository.listPaymentDetails(linkAccount.clientSecret).fold(
-                onSuccess = { response ->
-                    response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
-                        .takeIf { it.isNotEmpty() }?.let {
-                            _paymentDetails.value = it
-                        } ?: addNewPaymentMethod()
-                },
-                onFailure = ::onError
-            )
+            navigator.getResultFlow<CardEditViewModel.Result>(CardEditViewModel.Result.KEY)
+                ?.collect {
+                    when (it) {
+                        CardEditViewModel.Result.Success -> loadPaymentDetails()
+                        CardEditViewModel.Result.Cancelled -> {}
+                        is CardEditViewModel.Result.Failure -> onError(it.error)
+                    }
+                }
         }
     }
 
@@ -109,8 +111,13 @@ internal class WalletViewModel @Inject constructor(
         linkAccountManager.logout()
     }
 
-    fun addNewPaymentMethod() {
-        navigator.navigateTo(LinkScreen.PaymentMethod)
+    fun addNewPaymentMethod(clearBackStack: Boolean = false) {
+        navigator.navigateTo(LinkScreen.PaymentMethod, clearBackStack)
+    }
+
+    fun editPaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        clearError()
+        navigator.navigateTo(LinkScreen.CardEdit(paymentDetails.id))
     }
 
     fun deletePaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
@@ -123,13 +130,25 @@ internal class WalletViewModel @Inject constructor(
                 paymentDetails.id
             ).fold(
                 onSuccess = {
-                    _paymentDetails.value =
-                        _paymentDetails.value.filterNot { it.id == paymentDetails.id }
-                    _isProcessing.value = false
+                    loadPaymentDetails()
                 },
-                onFailure = {
-                    onError(it)
-                }
+                onFailure = ::onError
+            )
+        }
+    }
+
+    private fun loadPaymentDetails() {
+        _isProcessing.value = true
+        viewModelScope.launch {
+            linkRepository.listPaymentDetails(linkAccount.clientSecret).fold(
+                onSuccess = { response ->
+                    response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
+                        .takeIf { it.isNotEmpty() }?.let {
+                            _paymentDetails.value = it
+                            _isProcessing.value = false
+                        } ?: addNewPaymentMethod(clearBackStack = true)
+                },
+                onFailure = ::onError
             )
         }
     }
@@ -140,8 +159,12 @@ internal class WalletViewModel @Inject constructor(
 
     private fun onError(error: Throwable) = error.getErrorMessage().let {
         logger.error("Error: ", error)
+        onError(it)
+    }
+
+    private fun onError(error: ErrorMessage) {
         _isProcessing.value = false
-        _errorMessage.value = it
+        _errorMessage.value = error
     }
 
     internal class Factory(
