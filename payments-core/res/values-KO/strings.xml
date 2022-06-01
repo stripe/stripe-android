@@ -108,6 +108,8 @@
   <string name="becs_widget_name">이름</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">이름이 필요합니다.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">취소</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%2$s(으)로 끝나는 %1$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">결제 수단 삭제</string>
   <string name="delete_payment_method_prompt_title">결제 수단을 삭제하시겠습니까?</string>
+  <!-- Done button title -->
+  <string name="done">완료</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">편집</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/YY</string>
   <string name="expiry_label_short">만료</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">은행 계좌 선택(FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">무료</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">제거</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s 제거됨</string>
   <string name="secure_checkout">보안 체크 아웃</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">결제 수단을 인증할 수 없습니다. 다른 결제 수단을 선택하고 다시 시도하십시오.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">내부 오류가 발생했습니다.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

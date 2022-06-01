@@ -1,21 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-internal val addressParams: MutableMap<String, Any?> = mutableMapOf(
-    "city" to null,
-    "country" to null,
-    "line1" to null,
-    "line2" to null,
-    "postal_code" to null,
-    "state" to null,
-)
-
-internal val billingParams: MutableMap<String, Any?> = mutableMapOf(
-    "address" to addressParams,
-    "name" to null,
-    "email" to null,
-    "phone" to null,
-)
-
 // This comes from: stripe-js-v3/blob/master/src/lib/shared/checkoutSupportedCountries.js
 internal val supportedBillingCountries = setOf(
     "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AT", "AU", "AW", "AX",

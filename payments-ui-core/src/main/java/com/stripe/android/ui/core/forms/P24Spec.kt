@@ -1,13 +1,13 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.TranslationId
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val P24Form = LayoutSpec.create(
@@ -15,103 +15,103 @@ val P24Form = LayoutSpec.create(
     EmailSpec(),
     DropdownSpec(
         IdentifierSpec.Generic("p24[bank]"),
-        R.string.p24_bank,
+        TranslationId.P24Bank,
         listOf(
             DropdownItemSpec(
-                api_value = "alior_bank",
-                display_text = "Alior Bank"
+                apiValue = "alior_bank",
+                displayText = "Alior Bank"
             ),
             DropdownItemSpec(
-                api_value = "bank_millennium",
-                display_text = "Bank Millenium"
+                apiValue = "bank_millennium",
+                displayText = "Bank Millenium"
             ),
             DropdownItemSpec(
-                api_value = "bank_nowy_bfg_sa",
-                display_text = "Bank Nowy BFG S.A."
+                apiValue = "bank_nowy_bfg_sa",
+                displayText = "Bank Nowy BFG S.A."
             ),
             DropdownItemSpec(
-                api_value = "bank_pekao_sa",
-                display_text = "Bank PEKAO S.A"
+                apiValue = "bank_pekao_sa",
+                displayText = "Bank PEKAO S.A"
             ),
             DropdownItemSpec(
-                api_value = "banki_spbdzielcze",
-                display_text = "Bank spółdzielczy"
+                apiValue = "banki_spbdzielcze",
+                displayText = "Bank spółdzielczy"
             ),
             DropdownItemSpec(
-                api_value = "blik",
-                display_text = "BLIK"
+                apiValue = "blik",
+                displayText = "BLIK"
             ),
             DropdownItemSpec(
-                api_value = "bnp_paribas",
-                display_text = "BNP Paribas"
+                apiValue = "bnp_paribas",
+                displayText = "BNP Paribas"
             ),
             DropdownItemSpec(
-                api_value = "boz",
-                display_text = "BOZ"
+                apiValue = "boz",
+                displayText = "BOZ"
             ),
             DropdownItemSpec(
-                api_value = "citi_handlowy",
-                display_text = "CitiHandlowy"
+                apiValue = "citi_handlowy",
+                displayText = "CitiHandlowy"
             ),
             DropdownItemSpec(
-                api_value = "credit_agricole",
-                display_text = "Credit Agricole"
+                apiValue = "credit_agricole",
+                displayText = "Credit Agricole"
             ),
             DropdownItemSpec(
-                api_value = "etransfer_pocztowy24",
-                display_text = "e-Transfer Pocztowy24"
+                apiValue = "etransfer_pocztowy24",
+                displayText = "e-Transfer Pocztowy24"
             ),
             DropdownItemSpec(
-                api_value = "getin_bank",
-                display_text = "Getin Bank"
+                apiValue = "getin_bank",
+                displayText = "Getin Bank"
             ),
             DropdownItemSpec(
-                api_value = "ideabank",
-                display_text = "IdeaBank"
+                apiValue = "ideabank",
+                displayText = "IdeaBank"
             ),
             DropdownItemSpec(
-                api_value = "ing",
-                display_text = "ING"
+                apiValue = "ing",
+                displayText = "ING"
             ),
             DropdownItemSpec(
-                api_value = "inteligo",
-                display_text = "inteligo"
+                apiValue = "inteligo",
+                displayText = "inteligo"
             ),
             DropdownItemSpec(
-                api_value = "mbank_mtransfer",
-                display_text = "mBank"
+                apiValue = "mbank_mtransfer",
+                displayText = "mBank"
             ),
             DropdownItemSpec(
-                api_value = "nest_przelew",
-                display_text = "Nest Przelew"
+                apiValue = "nest_przelew",
+                displayText = "Nest Przelew"
             ),
             DropdownItemSpec(
-                api_value = "noble_pay",
-                display_text = "Noble Pay"
+                apiValue = "noble_pay",
+                displayText = "Noble Pay"
             ),
             DropdownItemSpec(
-                api_value = "pbac_z_ipko",
-                display_text = "PBac z iPKO (PKO+BP"
+                apiValue = "pbac_z_ipko",
+                displayText = "PBac z iPKO (PKO+BP"
             ),
             DropdownItemSpec(
-                api_value = "plus_bank",
-                display_text = "Plus Bank"
+                apiValue = "plus_bank",
+                displayText = "Plus Bank"
             ),
             DropdownItemSpec(
-                api_value = "santander_przelew24",
-                display_text = "Santander"
+                apiValue = "santander_przelew24",
+                displayText = "Santander"
             ),
             DropdownItemSpec(
-                api_value = "toyota_bank",
-                display_text = "Toyota Bank"
+                apiValue = "toyota_bank",
+                displayText = "Toyota Bank"
             ),
             DropdownItemSpec(
-                api_value = "volkswagen_bank",
-                display_text = "Volkswagen Bank"
+                apiValue = "volkswagen_bank",
+                displayText = "Volkswagen Bank"
             ),
             DropdownItemSpec(
-                api_value = null,
-                display_text = "Other"
+                apiValue = null,
+                displayText = "Other"
             )
         )
     )

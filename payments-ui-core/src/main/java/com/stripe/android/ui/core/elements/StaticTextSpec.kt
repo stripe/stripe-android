@@ -1,21 +1,21 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * This is for elements that do not receive user input
  */
-@Parcelize
+@Serializable
 internal data class StaticTextSpec(
-    override val api_path: IdentifierSpec,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("static_text"),
     @StringRes val stringResId: Int
-) : FormItemSpec(), RequiredItemSpec {
+) : FormItemSpec() {
     fun transform(): FormElement =
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
-            this.api_path,
+            this.apiPath,
             this.stringResId
         )
 }

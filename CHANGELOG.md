@@ -1,10 +1,15 @@
 # CHANGELOG
-## 20.5.0 - 2022-05-31
-This release adds the Link beta and several big fixes for payment sheet. 
+## 20.5.0 - 2022-06-01
+This release contains several bug fixes for Payments and PaymentSheet, deprecates the PaymentSheet's `primaryButtonColor` api in favor of the new [appearance api](https://stripe.com/docs/elements/appearance-api?platform=android), and adds card brand icons to the card details form. 
 
 ### PaymentSheet
 * [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
-* [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text
+* [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text.
+* [ADDED][5069](https://github.com/stripe/stripe-android/pull/5069) Add card brand icons to card details form.
+
+### Payments
+* [FIXED][5079](https://github.com/stripe/stripe-android/pull/5079) Add 3ds2 url to list of completion URLs so callbacks work correctly.
+* [FIXED][5094](https://github.com/stripe/stripe-android/pull/5094) Use correct cvc icon in card form view.
 
 ## 20.4.0 - 2022-05-23
 This release adds [appearance customization APIs](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L186) to payment sheet and enables Affirm and AU BECS direct debit as payment methods within Payment Sheet.
@@ -70,6 +75,9 @@ This release includes several Payments and PaymentSheet bug fixes.
 ### PaymentSheet
 * [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
 * [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
+
+### CardScan
+* [FIXED] [5075](https://github.com/stripe/stripe-android/pull/5075) Prevent a crash when the fragment is detached.
 
 ## 20.0.1 - 2022-04-11
 This release includes several PaymentSheet bug fixes.

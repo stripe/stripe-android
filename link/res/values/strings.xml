@@ -2,8 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="link">Link</string>
 
-    <string name="accessibility_close">Close</string>
-
     <string name="inline_sign_up_header">Save my info for secure 1-click checkout</string>
 
     <string name="sign_up_header">Secure 1-click checkout</string>
@@ -25,8 +23,14 @@
     <string name="wallet_expanded_title">Select a saved payment</string>
     <string name="wallet_expand_accessibility">Change selection</string>
     <string name="wallet_default">Default</string>
+    <string name="wallet_update_card">Update card</string>
+    <string name="wallet_remove_card">Remove card</string>
+    <string name="wallet_remove_confirmation">Are you sure you want to remove this card?</string>
+
     <string name="wallet_add_new_payment_method">Add a new payment method</string>
     <string name="wallet_pay_another_way">Pay another way</string>
 
     <string name="pm_add_new_card">Add a new card</string>
+    <string name="pm_your_default">This is your default</string>
+    <string name="pm_set_as_default">Set as default payment</string>
 </resources>

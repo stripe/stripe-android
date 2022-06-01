@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OTPController(val otpLength: Int = 6) : Controller {
-    internal val keyboardType = KeyboardType.Number
+    internal val keyboardType = KeyboardType.NumberPassword
 
     internal val fieldValues: List<MutableStateFlow<String>> = (0 until otpLength).map {
         MutableStateFlow("")

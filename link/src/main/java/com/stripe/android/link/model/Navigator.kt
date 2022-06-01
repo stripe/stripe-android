@@ -1,5 +1,6 @@
 package com.stripe.android.link.model
 
+import androidx.lifecycle.asFlow
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
@@ -29,6 +30,12 @@ internal class Navigator @Inject constructor() {
             }
         }
     }
+
+    fun setResult(key: String, value: Any) =
+        navigationController?.previousBackStackEntry?.savedStateHandle?.set(key, value)
+
+    fun <T> getResultFlow(key: String) =
+        navigationController?.currentBackStackEntry?.savedStateHandle?.getLiveData<T>(key)?.asFlow()
 
     /**
      * Behaves like a back button, popping the back stack and dismissing the Activity if this was

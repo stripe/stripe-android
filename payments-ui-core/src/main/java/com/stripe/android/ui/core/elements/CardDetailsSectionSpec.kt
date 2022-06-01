@@ -2,20 +2,25 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * Section containing card details form
  */
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Serializable
 data class CardDetailsSectionSpec(
-    val identifier: IdentifierSpec
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details")
 ) : FormItemSpec() {
-    fun transform(context: Context, initialValues: Map<IdentifierSpec, String?>): FormElement =
+    fun transform(
+        context: Context,
+        initialValues: Map<IdentifierSpec, String?>,
+        viewOnlyFields: Set<IdentifierSpec>
+    ): FormElement =
         CardDetailsSectionElement(
-            context,
-            initialValues,
-            identifier
+            context = context,
+            initialValues = initialValues,
+            viewOnlyFields = viewOnlyFields,
+            identifier = apiPath
         )
 }

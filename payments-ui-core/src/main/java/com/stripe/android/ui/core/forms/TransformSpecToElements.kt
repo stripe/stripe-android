@@ -20,11 +20,13 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
+import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -33,6 +35,9 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
  * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
+ *
+ * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
+ * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 class TransformSpecToElements(
     private val resourceRepository: ResourceRepository,
@@ -40,7 +45,8 @@ class TransformSpecToElements(
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
-    private val context: Context
+    private val context: Context,
+    private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
 ) {
     fun transform(
         list: List<FormItemSpec>
@@ -59,7 +65,7 @@ class TransformSpecToElements(
                     it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is CardDetailsSectionSpec -> it.transform(context, initialValues)
+                is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
                 is EmailSpec -> it.transform(initialValues)
@@ -83,11 +89,8 @@ class TransformSpecToElements(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is AddressSpec -> it.transform(
-                    initialValues,
-                    resourceRepository.getAddressRepository()
-                )
-                is SimpleTextSpec -> it.transform(initialValues)
+                is KlarnaHeaderStaticTextSpec -> it.transform()
+                is SepaMandateTextSpec -> it.transform(merchantName)
             }
         }
 }

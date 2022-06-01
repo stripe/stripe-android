@@ -120,7 +120,7 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName()
+                        selectors.getName(it.labelTranslationId.resourceId)
                             .assertContentDescriptionEquals(values.name)
                     }
                 }
@@ -141,7 +141,7 @@ class FieldPopulator(
                 is SimpleTextSpec -> {}
                 is AuBankAccountNumberSpec -> {
                     selectors.getAuAccountNumber()
-                        .assertContentDescriptionEquals(values.state)
+                        .assertContentDescriptionEquals(values.auBecsAccountNumber)
                 }
                 is DropdownSpec -> {}
                 is IbanSpec -> {}
@@ -185,19 +185,18 @@ class FieldPopulator(
                 }
                 is NameSpec -> {
                     if (testParameters.billing == Billing.Off) {
-                        selectors.getName().apply {
+                        selectors.getName(it.labelTranslationId.resourceId).apply {
                             performTextInput(values.name)
-
                         }
                     }
                 }
                 is AuBankAccountNumberSpec -> {
                     selectors.getAuAccountNumber().apply {
                         performTextInput(values.auBecsAccountNumber)
-                    }}
+                    }
+                }
                 is IbanSpec -> {}
                 is KlarnaCountrySpec -> {}
-                is CountrySpec -> {}
                 is CardBillingSpec -> {
                     if (testParameters.billing == Billing.Off) {
                         // TODO: This will not work when other countries are selected or defaulted
@@ -225,22 +224,7 @@ class FieldPopulator(
                 }
                 is CountrySpec -> {}
                 is SimpleTextSpec -> {}
-                is AuBankAccountNumberSpec -> {
-                    selectors.getAuAccountNumber().apply {
-                        performTextInput(values.auBecsAccountNumber)
-                    }
-                }
                 is DropdownSpec -> {}
-                is IbanSpec -> {}
-                is KlarnaCountrySpec -> {}
-                is CardBillingSpec -> {
-                    if (testParameters.billing == Billing.Off) {
-                        // TODO: This will not work when other countries are selected or defaulted
-                        selectors.getZip().apply {
-                            performTextInput(values.zip)
-                        }
-                    }
-                }
             }
         }
     }

@@ -21,7 +21,7 @@ internal data class Device(
     val platform: String
 ) {
     companion object {
-        private val getDeviceDetails = cacheFirstResult { context: Context ->
+        private val getDeviceDetails = cacheFirstResult { context: Context? ->
             Device(
                 android_id = getAndroidId(),
                 name = getDeviceName(),
@@ -37,7 +37,7 @@ internal data class Device(
         }
 
         @JvmStatic
-        fun fromContext(context: Context) = getDeviceDetails(context.applicationContext)
+        fun fromContext(context: Context?) = getDeviceDetails(context?.applicationContext)
     }
 }
 
@@ -51,10 +51,12 @@ internal data class Device(
 @SuppressLint("HardwareIds")
 private fun getAndroidId() = "Redacted"
 
-private fun getDeviceBootCount(context: Context): Int =
+private fun getDeviceBootCount(context: Context?): Int =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         try {
-            Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT)
+            context?.let {
+                Settings.Global.getInt(it.contentResolver, Settings.Global.BOOT_COUNT)
+            } ?: -1
         } catch (t: Throwable) {
             -1
         }
@@ -65,27 +67,27 @@ private fun getDeviceBootCount(context: Context): Int =
 private fun getDeviceLocale(): String =
     "${Locale.getDefault().isO3Language}_${Locale.getDefault().isO3Country}"
 
-private fun getDeviceCarrier(context: Context) = try {
-    (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.networkOperatorName
+private fun getDeviceCarrier(context: Context?) = try {
+    (context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.networkOperatorName
 } catch (t: Throwable) {
     null
 }
 
-private fun getDevicePhoneType(context: Context) = try {
-    (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.phoneType
+private fun getDevicePhoneType(context: Context?) = try {
+    (context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.phoneType
 } catch (t: Throwable) {
     null
 }
 
-private fun getDevicePhoneCount(context: Context) =
+private fun getDevicePhoneCount(context: Context?) =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)
+                (context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)
                     ?.activeModemCount ?: -1
             } else {
                 @Suppress("deprecation")
-                (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)
+                (context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)
                     ?.phoneCount ?: -1
             }
         } catch (t: Throwable) {
@@ -95,8 +97,8 @@ private fun getDevicePhoneCount(context: Context) =
         -1
     }
 
-private fun getNetworkOperator(context: Context) =
-    (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.networkOperator
+private fun getNetworkOperator(context: Context?) =
+    (context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?)?.networkOperator
 
 internal fun getOsVersion() = Build.VERSION.SDK_INT
 

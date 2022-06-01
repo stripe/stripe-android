@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -178,6 +179,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.startConfirm.observe(this) { event ->
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
                 lifecycleScope.launch {
                     viewModel.confirmStripeIntent(confirmParams)
                 }

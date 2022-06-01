@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import org.junit.Test
@@ -17,8 +16,7 @@ class FormFragmentArgumentsTest {
             city = "Dublin",
             state = "Co. Dublin",
             postalCode = "T37 F8HK",
-            country = "IE",
-
+            country = "IE"
         ),
         "email.email.com",
         "Jenny Smith"
@@ -56,7 +54,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",
@@ -79,8 +77,8 @@ class FormFragmentArgumentsTest {
                 IdentifierSpec.Country to "DE",
                 IdentifierSpec.Generic("type") to "card",
                 IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.Generic("card[exp_month]") to "1",
-                IdentifierSpec.Generic("card[exp_year]") to "2024",
+                IdentifierSpec.CardExpMonth to "1",
+                IdentifierSpec.CardExpYear to "2024",
                 IdentifierSpec.CardCvc to "111"
             )
         )
@@ -89,7 +87,7 @@ class FormFragmentArgumentsTest {
     @Test
     fun `Verify if only default billing address they appear in the initial values`() {
         val formFragmentArguments = FormFragmentArguments(
-            SupportedPaymentMethod.Card,
+            PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",

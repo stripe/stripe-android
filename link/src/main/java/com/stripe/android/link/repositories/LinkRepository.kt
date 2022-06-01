@@ -3,6 +3,7 @@ package com.stripe.android.link.repositories
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.StripeIntent
@@ -71,4 +72,20 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         extraConfirmationParams: Map<String, Any>? = null
     ): Result<LinkPaymentDetails>
+
+    /**
+     * Update an existing payment method in the consumer account.
+     */
+    suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Delete the payment method from the consumer account.
+     */
+    suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String
+    ): Result<Unit>
 }

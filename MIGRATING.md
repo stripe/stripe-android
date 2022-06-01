@@ -1,6 +1,6 @@
 # Migration Guide
 
-## Migrating from versions < 20.X.X
+## Migrating from versions < 20.5.0
 - Changes to `PaymentSheet.Configuration`
   * `primaryButtonColor` is now deprecated. Please use the new `Appearance` parameter instead:
     * `Appearance.colorsLight/colorsDark.primary`
