@@ -2,7 +2,7 @@
 
 echo "Running static analysis with checkstyle and ktlint..."
 
-./gradlew checkstyle ktlint apiCheck-daemon
+./gradlew checkstyle ktlint --daemon
 
 status=$?
 

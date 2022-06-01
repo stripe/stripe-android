@@ -40,6 +40,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.cardedit.CardEditBody
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodBody
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
@@ -150,9 +151,13 @@ internal class LinkActivity : ComponentActivity() {
                                         account,
                                         viewModel.injector
                                     ) {
-                                        bottomSheetContent = it
                                         if (it == null) {
-                                            coroutineScope.launch { sheetState.hide() }
+                                            coroutineScope.launch {
+                                                sheetState.hide()
+                                                bottomSheetContent = null
+                                            }
+                                        } else {
+                                            bottomSheetContent = it
                                         }
                                     }
                                 }
@@ -163,6 +168,25 @@ internal class LinkActivity : ComponentActivity() {
                                     PaymentMethodBody(
                                         account,
                                         viewModel.injector
+                                    )
+                                }
+                            }
+
+                            composable(
+                                LinkScreen.CardEdit.route,
+                                arguments = listOf(
+                                    navArgument(LinkScreen.CardEdit.idArg) {
+                                        type = NavType.StringType
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val id =
+                                    backStackEntry.arguments?.getString(LinkScreen.CardEdit.idArg)
+                                linkAccount?.let { account ->
+                                    CardEditBody(
+                                        account,
+                                        viewModel.injector,
+                                        requireNotNull(id)
                                     )
                                 }
                             }

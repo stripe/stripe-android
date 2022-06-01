@@ -36,7 +36,7 @@ internal sealed class SupportedPaymentMethod(
     @Parcelize
     class Card : SupportedPaymentMethod(
         PaymentMethod.Type.Card,
-        LinkCardForm
+        LinkCardForm.items
     ) {
         override fun createParams(
             paymentMethodCreateParams: PaymentMethodCreateParams,

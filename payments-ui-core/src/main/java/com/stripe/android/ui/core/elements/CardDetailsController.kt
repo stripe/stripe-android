@@ -6,17 +6,25 @@ import java.util.UUID
 
 internal class CardDetailsController constructor(
     context: Context,
-    initialValues: Map<IdentifierSpec, String?>
+    initialValues: Map<IdentifierSpec, String?>,
+    cardNumberReadOnly: Boolean = false
 ) : SectionFieldErrorController {
 
     val label: Int? = null
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
-        CardNumberController(
-            CardNumberConfig(),
-            context,
-            initialValue = initialValues[IdentifierSpec.CardNumber]
-        )
+        if (cardNumberReadOnly) {
+            CardNumberViewOnlyController(
+                CardNumberConfig(),
+                initialValues
+            )
+        } else {
+            CardNumberEditableController(
+                CardNumberConfig(),
+                context,
+                initialValues[IdentifierSpec.CardNumber]
+            )
+        }
     )
 
     val cvcElement = CvcElement(
@@ -32,8 +40,8 @@ internal class CardDetailsController constructor(
         IdentifierSpec.Generic("date"),
         SimpleTextFieldController(
             DateConfig(),
-            initialValue = initialValues[IdentifierSpec.Generic("card[exp_month]")] +
-                initialValues[IdentifierSpec.Generic("card[exp_year]")]?.takeLast(2)
+            initialValue = initialValues[IdentifierSpec.CardExpMonth] +
+                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2)
         ),
     )
 

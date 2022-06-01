@@ -14,6 +14,16 @@ internal sealed class LinkScreen(
     object Wallet : LinkScreen("Wallet")
     object PaymentMethod : LinkScreen("PaymentMethod")
 
+    class CardEdit(paymentDetailsId: String) :
+        LinkScreen("CardEdit?$idArg=${paymentDetailsId.urlEncode()}") {
+        override val route = super.route
+
+        companion object {
+            const val idArg = "id"
+            const val route = "CardEdit?$idArg={$idArg}"
+        }
+    }
+
     class SignUp(email: String? = null) :
         LinkScreen("SignUp${email?.let { "?$emailArg=${it.urlEncode()}" } ?: ""}") {
         override val route = super.route

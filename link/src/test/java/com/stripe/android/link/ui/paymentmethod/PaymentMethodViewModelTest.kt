@@ -1,11 +1,9 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
@@ -15,6 +13,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.confirmation.PaymentConfirmationCallback
+import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -48,9 +47,9 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
-    private val clientSecret = "client_secret"
-    private val linkAccount = mock<LinkAccount>().also {
-        whenever(it.email).thenReturn("email@stripe.com")
+    private val linkAccount = mock<LinkAccount>().apply {
+        whenever(email).thenReturn("email@stripe.com")
+        whenever(clientSecret).thenReturn(CLIENT_SECRET)
     }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
@@ -61,18 +60,29 @@ class PaymentMethodViewModelTest {
     private val cardFormFieldValues = mapOf(
         IdentifierSpec.CardNumber to FormFieldEntry("5555555555554444", true),
         IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-        IdentifierSpec.Generic("card[exp_month]") to FormFieldEntry("12", true),
-        IdentifierSpec.Generic("card[exp_year]") to FormFieldEntry("2050", true),
+        IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
+        IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
         IdentifierSpec.Country to FormFieldEntry("US", true),
         IdentifierSpec.PostalCode to FormFieldEntry("12345", true),
     )
+    private val formControllerSubcomponent = mock<FormControllerSubcomponent>().apply {
+        whenever(formController).thenReturn(mock())
+    }
+    private val formControllerProvider = Provider {
+        mock<FormControllerSubcomponent.Builder>().apply {
+            whenever(formSpec(anyOrNull())).thenReturn(this)
+            whenever(initialValues(anyOrNull())).thenReturn(this)
+            whenever(viewOnlyFields(anyOrNull())).thenReturn(this)
+            whenever(viewModelScope(anyOrNull())).thenReturn(this)
+            whenever(build()).thenReturn(formControllerSubcomponent)
+        }
+    }
 
     @Before
     fun before() {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
     }
 
     @Test
@@ -144,7 +154,7 @@ class PaymentMethodViewModelTest {
                         "link" to mapOf(
                             "payment_details_id" to "QAAAKJ6",
                             "credentials" to mapOf(
-                                "consumer_session_client_secret" to clientSecret
+                                "consumer_session_client_secret" to CLIENT_SECRET
                             ),
                             "card" to mapOf(
                                 "cvc" to "123"
@@ -336,7 +346,8 @@ class PaymentMethodViewModelTest {
             linkAccountManager,
             navigator,
             confirmationManager,
-            logger
+            logger,
+            formControllerProvider
         )
 
     private fun createLinkPaymentDetails() =
@@ -345,11 +356,13 @@ class PaymentMethodViewModelTest {
                 it,
                 PaymentMethodCreateParams.createLink(
                     it.id,
-                    clientSecret,
+                    CLIENT_SECRET,
                     mapOf("card" to mapOf("cvc" to "123"))
                 )
             )
         }
 
-    private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
+    companion object {
+        const val CLIENT_SECRET = "client_secret"
+    }
 }
