@@ -37,6 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.isOnRootScreen
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
@@ -104,11 +105,11 @@ internal class LinkActivity : ComponentActivity() {
 
                     Column(Modifier.fillMaxWidth()) {
                         val linkAccount by viewModel.linkAccount.collectAsState(null)
-                        val iconResource by getIconFlow().collectAsState(R.drawable.ic_link_close)
+                        val isOnRootScreen by isRootScreenFlow().collectAsState(true)
 
                         LinkAppBar(
                             email = linkAccount?.email,
-                            buttonIconResource = iconResource,
+                            isRootScreen = isOnRootScreen,
                             onButtonClick = { viewModel.navigator.onBack() }
                         )
 
@@ -238,14 +239,6 @@ internal class LinkActivity : ComponentActivity() {
         finish()
     }
 
-    private fun getIconFlow() =
-        navController.currentBackStackEntryFlow.map {
-            if (navController.backQueue.size > 2) {
-                // The Loading screen is always at the bottom of the stack, so a
-                // size of 2 means there's only one screen in the stack.
-                R.drawable.ic_link_back
-            } else {
-                R.drawable.ic_link_close
-            }
-        }
+    private fun isRootScreenFlow() =
+        navController.currentBackStackEntryFlow.map { navController.isOnRootScreen() }
 }

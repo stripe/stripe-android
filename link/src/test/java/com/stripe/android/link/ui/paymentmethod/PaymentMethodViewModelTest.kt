@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.confirmation.PaymentConfirmationCallback
@@ -297,8 +298,33 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
+    fun `when screen is root then secondaryButtonLabel is correct`() = runTest {
+        whenever(navigator.isOnRootScreen()).thenReturn(true)
+
+        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.wallet_pay_another_way)
+    }
+
+    @Test
+    fun `when screen is not root then secondaryButtonLabel is correct`() = runTest {
+        whenever(navigator.isOnRootScreen()).thenReturn(false)
+
+        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.cancel)
+    }
+
+    @Test
+    fun `cancel navigates back`() = runTest {
+        whenever(navigator.isOnRootScreen()).thenReturn(false)
+
+        createViewModel().onSecondaryButtonClick()
+
+        verify(navigator).onBack()
+    }
+
+    @Test
     fun `payAnotherWay dismisses and logs out`() = runTest {
-        createViewModel().payAnotherWay()
+        whenever(navigator.isOnRootScreen()).thenReturn(true)
+
+        createViewModel().onSecondaryButtonClick()
 
         verify(navigator).dismiss()
         verify(linkAccountManager).logout()

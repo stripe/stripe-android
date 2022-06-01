@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,7 @@ internal fun LinkAppBar() {
         Surface {
             LinkAppBar(
                 email = "email@example.com",
-                buttonIconResource = R.drawable.ic_link_close,
+                isRootScreen = true,
                 onButtonClick = {}
             )
         }
@@ -46,7 +45,7 @@ internal fun LinkAppBar() {
 @Composable
 internal fun LinkAppBar(
     email: String?,
-    @DrawableRes buttonIconResource: Int,
+    isRootScreen: Boolean,
     onButtonClick: () -> Unit
 ) {
     Row(
@@ -62,7 +61,13 @@ internal fun LinkAppBar(
                 .padding(4.dp)
         ) {
             Icon(
-                painter = painterResource(id = buttonIconResource),
+                painter = painterResource(
+                    id = if (isRootScreen) {
+                        R.drawable.ic_link_back
+                    } else {
+                        R.drawable.ic_link_close
+                    }
+                ),
                 contentDescription = stringResource(id = R.string.back),
                 tint = MaterialTheme.linkColors.closeButton
             )
