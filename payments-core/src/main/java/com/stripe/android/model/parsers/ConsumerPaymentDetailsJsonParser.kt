@@ -31,13 +31,24 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
                         json.getBoolean(FIELD_IS_DEFAULT),
                         cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
                         cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
-                        CardBrand.fromCode(cardDetails.getString(FIELD_CARD_BRAND)),
+                        CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
                         cardDetails.getString(FIELD_CARD_LAST_4)
                     )
                 }
                 else -> null
             }
         }
+
+    /**
+     * Fixes the incorrect brand enum values returned from the server in this service.
+     */
+    private fun cardBrandFix(original: String) = original.lowercase().let {
+        when (it) {
+            "american_express" -> "amex"
+            "diners_club" -> "diners"
+            else -> it
+        }
+    }
 
     private companion object {
         private const val FIELD_PAYMENT_DETAILS = "redacted_payment_details"
