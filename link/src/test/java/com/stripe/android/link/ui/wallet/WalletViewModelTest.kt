@@ -19,7 +19,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -52,17 +51,16 @@ class WalletViewModelTest {
         whenever(clientSecret).thenReturn(CLIENT_SECRET)
     }
     private val args = mock<LinkActivityContract.Args>()
-    private lateinit var linkRepository: LinkRepository
-    private val linkAccountManager = mock<LinkAccountManager>()
+    private lateinit var linkAccountManager: LinkAccountManager
     private val navigator = mock<Navigator>()
     private val confirmationManager = mock<ConfirmationManager>()
     private val logger = Logger.noop()
 
     @Before
     fun before() {
-        linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
+        linkAccountManager = mock()
     }
 
     @Test
@@ -79,7 +77,7 @@ class WalletViewModelTest {
         val paymentDetails = mock<ConsumerPaymentDetails>()
         whenever(paymentDetails.paymentDetails).thenReturn(listOf(card1, card2))
 
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(paymentDetails))
 
         val viewModel = createViewModel()
@@ -92,7 +90,7 @@ class WalletViewModelTest {
         val response = mock<ConsumerPaymentDetails>()
         whenever(response.paymentDetails).thenReturn(emptyList())
 
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(response))
 
         createViewModel()
@@ -161,36 +159,36 @@ class WalletViewModelTest {
     @Test
     fun `deletePaymentMethod fetches payment details when successful`() = runTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(paymentDetails))
 
         val viewModel = createViewModel()
-        verify(linkRepository).listPaymentDetails(anyOrNull())
-        clearInvocations(linkRepository)
+        verify(linkAccountManager).listPaymentDetails()
+        clearInvocations(linkAccountManager)
 
         // Initially has two elements
         assertThat(viewModel.paymentDetails.value)
             .containsExactlyElementsIn(paymentDetails.paymentDetails)
 
-        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull()))
+        whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
             .thenReturn(Result.success(Unit))
 
         // Delete the first element
         viewModel.deletePaymentMethod(paymentDetails.paymentDetails.first())
 
         // Fetches payment details again
-        verify(linkRepository).listPaymentDetails(anyOrNull())
+        verify(linkAccountManager).listPaymentDetails()
     }
 
     @Test
     fun `when payment method deletion fails then an error message is shown`() = runTest {
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val errorThrown = "Error message"
         val viewModel = createViewModel()
 
-        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull()))
+        whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
             .thenReturn(Result.failure(RuntimeException(errorThrown)))
 
         viewModel.deletePaymentMethod(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
@@ -205,7 +203,7 @@ class WalletViewModelTest {
                 it(Result.success(PaymentResult.Completed))
             }
         }
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
@@ -235,7 +233,7 @@ class WalletViewModelTest {
     @Test
     fun `Update payment method navigates to CardEdit screen`() = runTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(paymentDetails))
 
         val viewModel = createViewModel()
@@ -256,11 +254,11 @@ class WalletViewModelTest {
         whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
 
         createViewModel()
-        verify(linkRepository).listPaymentDetails(anyOrNull())
-        clearInvocations(linkRepository)
+        verify(linkAccountManager).listPaymentDetails()
+        clearInvocations(linkAccountManager)
 
         flow.emit(CardEditViewModel.Result.Success)
-        verify(linkRepository).listPaymentDetails(anyOrNull())
+        verify(linkAccountManager).listPaymentDetails()
     }
 
     @Test
@@ -314,7 +312,6 @@ class WalletViewModelTest {
         WalletViewModel(
             args,
             linkAccount,
-            linkRepository,
             linkAccountManager,
             navigator,
             confirmationManager,

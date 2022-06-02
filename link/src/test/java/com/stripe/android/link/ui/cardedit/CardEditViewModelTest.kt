@@ -2,11 +2,11 @@ package com.stripe.android.link.ui.cardedit
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -33,7 +33,7 @@ class CardEditViewModelTest {
         whenever(email).thenReturn("email@stripe.com")
         whenever(clientSecret).thenReturn(CLIENT_SECRET)
     }
-    private lateinit var linkRepository: LinkRepository
+    private lateinit var linkAccountManager: LinkAccountManager
     private val navigator = mock<Navigator>()
     private val formControllerSubcomponent = mock<FormControllerSubcomponent>().apply {
         whenever(formController).thenReturn(mock())
@@ -59,12 +59,12 @@ class CardEditViewModelTest {
 
     @Before
     fun before() {
-        linkRepository = mock()
+        linkAccountManager = mock()
     }
 
     @Test
     fun `On initialization when payment details exist then UI is loaded`() = runTest {
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val viewModel = createViewModel()
@@ -75,7 +75,7 @@ class CardEditViewModelTest {
 
     @Test
     fun `On initialization when payment details does not exist then return failure`() = runTest {
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val viewModel = createViewModel()
@@ -86,7 +86,7 @@ class CardEditViewModelTest {
 
     @Test
     fun `On initialization when failed fetching payment details then return failure`() = runTest {
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.failure(RuntimeException("Error")))
 
         val viewModel = createViewModel()
@@ -99,11 +99,11 @@ class CardEditViewModelTest {
     fun `updateCard makes api call with correct parameters when setting as default`() = runTest {
         val viewModel = createAndInitViewModel()
         viewModel.setAsDefault(true)
-        clearInvocations(linkRepository)
+        clearInvocations(linkAccountManager)
 
         viewModel.updateCard(formValues)
 
-        verify(linkRepository).updatePaymentDetails(
+        verify(linkAccountManager).updatePaymentDetails(
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
                     it.toParamMap().equals(
@@ -117,8 +117,7 @@ class CardEditViewModelTest {
                             )
                         )
                     )
-            },
-            eq(CLIENT_SECRET)
+            }
         )
     }
 
@@ -126,11 +125,11 @@ class CardEditViewModelTest {
     fun `updateCard makes api call with correct parameters when not setting as default`() =
         runTest {
             val viewModel = createAndInitViewModel()
-            clearInvocations(linkRepository)
+            clearInvocations(linkAccountManager)
 
             viewModel.updateCard(formValues)
 
-            verify(linkRepository).updatePaymentDetails(
+            verify(linkAccountManager).updatePaymentDetails(
                 argWhere {
                     it is ConsumerPaymentDetailsUpdateParams.Card &&
                         it.toParamMap().equals(
@@ -144,19 +143,18 @@ class CardEditViewModelTest {
                                 )
                             )
                         )
-                },
-                eq(CLIENT_SECRET)
+                }
             )
         }
 
     @Test
     fun `updateCard makes api call with correct parameters when already is default`() = runTest {
         val viewModel = createAndInitViewModel(DEFAULT_PAYMENT_DETAILS_ID)
-        clearInvocations(linkRepository)
+        clearInvocations(linkAccountManager)
 
         viewModel.updateCard(formValues)
 
-        verify(linkRepository).updatePaymentDetails(
+        verify(linkAccountManager).updatePaymentDetails(
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
                     it.toParamMap().equals(
@@ -169,8 +167,7 @@ class CardEditViewModelTest {
                             )
                         )
                     )
-            },
-            eq(CLIENT_SECRET)
+            }
         )
     }
 
@@ -188,7 +185,7 @@ class CardEditViewModelTest {
     private fun createViewModel() =
         CardEditViewModel(
             linkAccount = linkAccount,
-            linkRepository = linkRepository,
+            linkAccountManager = linkAccountManager,
             navigator = navigator,
             logger = Logger.noop(),
             formControllerProvider = formControllerProvider
@@ -197,7 +194,7 @@ class CardEditViewModelTest {
     private suspend fun createAndInitViewModel(
         paymentDetailsId: String = NON_DEFAULT_PAYMENT_DETAILS_ID
     ): CardEditViewModel {
-        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+        whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val viewModel = createViewModel()

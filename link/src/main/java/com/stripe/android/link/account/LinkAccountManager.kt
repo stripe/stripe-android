@@ -1,5 +1,7 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
@@ -7,7 +9,10 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -135,28 +140,29 @@ internal class LinkAccountManager @Inject constructor(
     /**
      * Triggers sending a verification code to the user.
      */
-    suspend fun startVerification(): Result<LinkAccount> =
-        linkAccount.value?.let { account ->
-            linkRepository.startVerification(account.clientSecret, cookie())
-                .map { consumerSession ->
-                    setAndReturn(LinkAccount(consumerSession))
-                }
-        } ?: Result.failure(
-            IllegalStateException("A non-null Link account is needed to start verification")
-        )
+    suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError {
+        linkRepository.startVerification(it, cookie())
+            .map { consumerSession ->
+                setAndReturn(LinkAccount(consumerSession))
+            }
+    }
 
     /**
      * Confirms a verification code sent to the user.
      */
-    suspend fun confirmVerification(code: String): Result<LinkAccount> =
-        linkAccount.value?.let { account ->
-            linkRepository.confirmVerification(account.clientSecret, code, cookie())
-                .map { consumerSession ->
-                    setAndReturn(LinkAccount(consumerSession))
-                }
-        } ?: Result.failure(
-            IllegalStateException("A non-null Link account is needed to confirm verification")
-        )
+    suspend fun confirmVerification(code: String): Result<LinkAccount> = retryingOnAuthError {
+        linkRepository.confirmVerification(it, code, cookie())
+            .map { consumerSession ->
+                setAndReturn(LinkAccount(consumerSession))
+            }
+    }
+
+    /**
+     * Fetch all saved payment methods for the signed in consumer.
+     */
+    suspend fun listPaymentDetails() = retryingOnAuthError {
+        linkRepository.listPaymentDetails(it)
+    }
 
     /**
      * Creates a new PaymentDetails attached to the current account.
@@ -169,14 +175,76 @@ internal class LinkAccountManager @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> =
         linkAccount.value?.let { account ->
-            linkRepository.createPaymentDetails(
+            createPaymentDetails(
                 paymentMethod.createParams(paymentMethodCreateParams, account.email),
-                account.clientSecret,
                 args.stripeIntent,
                 paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
             )
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")
+        )
+
+    /**
+     * Create a new payment method in the signed in consumer account.
+     */
+    suspend fun createPaymentDetails(
+        paymentDetails: ConsumerPaymentDetailsCreateParams,
+        stripeIntent: StripeIntent,
+        extraConfirmationParams: Map<String, Any>?
+    ) = retryingOnAuthError {
+        linkRepository.createPaymentDetails(
+            paymentDetails,
+            it,
+            stripeIntent,
+            extraConfirmationParams
+        )
+    }
+
+    /**
+     * Update an existing payment method in the signed in consumer account.
+     */
+    suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams) =
+        retryingOnAuthError {
+            linkRepository.updatePaymentDetails(updateParams, it)
+        }
+
+    /**
+     * Delete the payment method from the signed in consumer account.
+     */
+    suspend fun deletePaymentDetails(paymentDetailsId: String) = retryingOnAuthError {
+        linkRepository.deletePaymentDetails(it, paymentDetailsId)
+    }
+
+    /**
+     * Make an API call with the client_secret for the currently signed in account, retrying once
+     * if the call fails because of an [AuthenticationException].
+     */
+    private suspend fun <T> retryingOnAuthError(apiCall: suspend (String) -> Result<T>): Result<T> =
+        linkAccount.value?.let { account ->
+            apiCall(account.clientSecret).fold(
+                onSuccess = {
+                    Result.success(it)
+                },
+                onFailure = {
+                    if (it is AuthenticationException) {
+                        // Try fetching the user account with the stored cookie, then retry API call
+                        lookupConsumer(null).fold(
+                            onSuccess = {
+                                it?.let { updatedAccount ->
+                                    apiCall(updatedAccount.clientSecret)
+                                }
+                            },
+                            onFailure = {
+                                Result.failure(it)
+                            }
+                        )
+                    } else {
+                        Result.failure(it)
+                    }
+                }
+            )
+        } ?: Result.failure(
+            IllegalStateException("User not signed in")
         )
 
     /**
@@ -213,7 +281,8 @@ internal class LinkAccountManager @Inject constructor(
         return linkAccount
     }
 
-    private fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? =
+    @VisibleForTesting
+    fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? =
         linkAccount?.let {
             setAndReturn(it)
         } ?: run {
