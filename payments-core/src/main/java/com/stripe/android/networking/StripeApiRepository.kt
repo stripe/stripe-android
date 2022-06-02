@@ -1283,7 +1283,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     ),
                     "type" to "SMS",
                     "code" to verificationCode,
-                    "request_surface" to "android_payment_element"
                 ).plus(
                     authSessionCookie?.let {
                         mapOf(
