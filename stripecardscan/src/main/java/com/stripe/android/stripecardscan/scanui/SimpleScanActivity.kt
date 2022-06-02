@@ -20,11 +20,11 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.setDrawable
-import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
+import com.stripe.android.stripecardscan.scanui.util.setHtmlString
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import kotlinx.coroutines.Deferred

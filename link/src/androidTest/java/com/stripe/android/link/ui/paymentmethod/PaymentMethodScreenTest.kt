@@ -36,7 +36,7 @@ internal class PaymentMethodScreenTest {
     }
 
     private val primaryButtonLabel = "Pay $10.99"
-    private val payAnotherWayButtonLabel = "Pay another way"
+    private val secondaryButtonLabel = "Cancel"
 
     @Test
     fun primary_button_shows_progress_indicator_when_processing() {
@@ -52,13 +52,13 @@ internal class PaymentMethodScreenTest {
             onPayButtonClick = {
                 count++
             },
-            onPayAnotherWayClick = {
+            onSecondaryButtonClick = {
                 count++
             }
         )
 
         onPrimaryButton().assertDoesNotExist()
-        onPayAnotherWayButton().performClick()
+        onSecondaryButton().performClick()
 
         assertThat(count).isEqualTo(0)
     }
@@ -80,15 +80,15 @@ internal class PaymentMethodScreenTest {
     }
 
     @Test
-    fun pay_another_way_click_triggers_action() {
+    fun secondary_button_click_triggers_action() {
         var count = 0
         setContent(
-            onPayAnotherWayClick = {
+            onSecondaryButtonClick = {
                 count++
             }
         )
 
-        onPayAnotherWayButton().performClick()
+        onSecondaryButton().performClick()
 
         assertThat(count).isEqualTo(1)
     }
@@ -105,22 +105,23 @@ internal class PaymentMethodScreenTest {
         payButtonEnabled: Boolean = false,
         errorMessage: ErrorMessage? = null,
         onPayButtonClick: () -> Unit = {},
-        onPayAnotherWayClick: () -> Unit = {}
+        onSecondaryButtonClick: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             PaymentMethodBody(
                 isProcessing = isProcessing,
                 primaryButtonLabel = primaryButtonLabel,
+                secondaryButtonLabel = secondaryButtonLabel,
                 primaryButtonEnabled = payButtonEnabled,
                 errorMessage = errorMessage,
                 onPrimaryButtonClick = onPayButtonClick,
-                onPayAnotherWayClick = onPayAnotherWayClick,
+                onSecondaryButtonClick = onSecondaryButtonClick,
                 formContent = {}
             )
         }
     }
 
     private fun onPrimaryButton() = composeTestRule.onNodeWithText(primaryButtonLabel)
-    private fun onPayAnotherWayButton() = composeTestRule.onNodeWithText(payAnotherWayButtonLabel)
+    private fun onSecondaryButton() = composeTestRule.onNodeWithText(secondaryButtonLabel)
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
 }

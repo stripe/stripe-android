@@ -55,4 +55,10 @@ internal class Navigator @Inject constructor() {
         onDismiss?.let {
             it(result)
         }
+
+    fun isOnRootScreen() = navigationController?.isOnRootScreen()
 }
+
+// The Loading screen is always at the bottom of the stack, so a size of 2 means the current
+// screen is at the bottom of the navigation stack.
+fun NavHostController.isOnRootScreen() = backQueue.size <= 2
