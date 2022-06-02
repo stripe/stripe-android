@@ -147,16 +147,22 @@ def executeTests(appUrl, testUrl):
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
 def waitForBuildComplete(buildId):
-       print("WAITING for build id: {buildId}...".format(buildId=buildId), end='')
-       url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
-       responseStatus="running"
+    return 1
+#        print("WAITING for build id: {buildId}...".format(buildId=buildId), end='')
+#        url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
+#        responseStatus="running"
+#
+#        while(responseStatus == "running"):
+#            time.sleep(10)
+#            print(".", end='')
+#            response = requests.get(url, auth=(user, authKey))
+#            responseStatus = response.json()["status"]
+#        print("DONE.\nRESULT is: " + responseStatus)
+#        if(result == "passed"):
+#           return 0
+#        else:
+#           return 1
 
-       while(responseStatus == "running"):
-           time.sleep(10)
-           print(".", end='')
-           response = requests.get(url, auth=(user, authKey))
-           responseStatus = response.json()["status"]
-       print("DONE.\nRESULT is: " + responseStatus)
 
 def confirm(message):
     """
@@ -219,8 +225,7 @@ if __name__ == "__main__":
            buildId = executeTests(appUrl, testUrl)
            exitStatus = 1
            if(buildId != None):
-               waitForBuildComplete(buildId)
-               exitStatus = 0
+               exitStatus = waitForBuildComplete(buildId)
            else:
                deleteTestSuite(testUrl.replace("bs://", ""))
            sys.exit(exitStatus)
