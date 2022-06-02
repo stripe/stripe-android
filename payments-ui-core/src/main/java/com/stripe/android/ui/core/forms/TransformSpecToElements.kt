@@ -58,39 +58,33 @@ class TransformSpecToElements(
                     merchantName
                 )
                 is StaticTextSpec -> it.transform()
-                is MandateTextSpec -> it.transform(merchantName)
-                is AfterpayClearpayTextSpec ->
-                    it.transform(requireNotNull(amount))
-                is AffirmTextSpec ->
-                    it.transform()
+                is AfterpayClearpayTextSpec -> it.transform(requireNotNull(amount))
+                is AffirmTextSpec -> it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
+                is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
                 is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
-                is EmailSpec -> it.transform(initialValues)
                 is NameSpec -> it.transform(initialValues)
+                is EmailSpec -> it.transform(initialValues)
+                is SimpleTextSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
-                is KlarnaCountrySpec -> it.transform(
-                    amount?.currencyCode,
-                    initialValues
-                )
+                is KlarnaHeaderStaticTextSpec -> it.transform()
+                is KlarnaCountrySpec -> it.transform(amount?.currencyCode, initialValues)
                 is DropdownSpec -> it.transform(initialValues)
-                is SimpleTextSpec -> it.transform(initialValues)
+                is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
                     resourceRepository.getAddressRepository()
-                )
-                is CountrySpec -> it.transform(
-                    initialValues
                 )
                 is CardBillingSpec -> it.transform(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is KlarnaHeaderStaticTextSpec -> it.transform()
                 is SepaMandateTextSpec -> it.transform(merchantName)
+                else -> EmptyFormElement()
             }
         }
 }

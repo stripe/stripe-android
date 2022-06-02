@@ -317,7 +317,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     "None of the requested payment methods" +
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
-                        " (${resourceRepository.getLpmRepository().values().toList()})"
+                        " (${
+                        resourceRepository.getLpmRepository().values()
+                            .map { it.type.code }.toList()
+                        })"
                 )
             )
         }

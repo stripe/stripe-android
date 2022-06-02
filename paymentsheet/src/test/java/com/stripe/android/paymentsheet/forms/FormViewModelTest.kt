@@ -62,12 +62,14 @@ internal class FormViewModelTest {
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme
     )
+    val lpmRepository = LpmRepository(context.resources)
 
     private val resourceRepository =
         StaticResourceRepository(
             AddressFieldElementRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
-            )
+            ),
+            mock()
         )
 
     @Test

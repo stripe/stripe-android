@@ -551,18 +551,6 @@ public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
 	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class com/stripe/android/ui/core/elements/TranslationId : java/lang/Enum {
-	public static final field AddressName Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field AuBecsAccountName Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field Companion Lcom/stripe/android/ui/core/elements/TranslationId$Companion;
-	public static final field EpsBank Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field IdealBank Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static final field P24Bank Lcom/stripe/android/ui/core/elements/TranslationId;
-	public final fun getResourceId ()I
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TranslationId;
-	public static fun values ()[Lcom/stripe/android/ui/core/elements/TranslationId;
-}
-
 public final class com/stripe/android/ui/core/elements/TranslationId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/TranslationId$$serializer;
@@ -583,57 +571,8 @@ public final class com/stripe/android/ui/core/elements/TranslationId$Companion {
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
 }
 
-public final class com/stripe/android/ui/core/forms/AffirmSpecKt {
-	public static final fun getAffirmForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
-	public static final fun getAfterpayClearpayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/AuBecsDebitSpecKt {
-	public static final fun getAuBecsDebitForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
-	public static final fun getBancontactForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/CardSpecKt {
-	public static final fun getCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+public final class com/stripe/android/ui/core/forms/LinkCardFormKt {
 	public static final fun getLinkCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/EpsSpecKt {
-	public static final fun getEpsForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/GiropaySpecKt {
-	public static final fun getGiropayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/IdealSpecKt {
-	public static final fun getIdealForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/KlarnaSpecKt {
-	public static final fun getKlarnaForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/P24SpecKt {
-	public static final fun getP24Form ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/PaypalSpecKt {
-	public static final fun getPaypalForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/SepaDebitSpecKt {
-	public static final fun getSepaDebitForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
-public final class com/stripe/android/ui/core/forms/SofortSpecKt {
-	public static final fun getSofortForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 }
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
@@ -643,16 +582,24 @@ public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
 }
 
-public final class com/stripe/android/ui/core/forms/USBankAccountSpecKt {
-	public static final fun getUSBankAccountForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
-}
-
 public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory;
 	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Companion {
+	public final fun getHardcodedCard ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/LpmRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 }
 
 public abstract class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule {

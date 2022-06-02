@@ -43,7 +43,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
@@ -81,11 +81,12 @@ internal class PaymentSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val prefsRepository = FakePrefsRepository()
-    private val resourceRepository = StaticResourceRepository(mock())
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
+    private val lpmRepository = LpmRepository(application.resources)
+    private val prefsRepository = FakePrefsRepository()
+    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
 
     private val primaryButtonUIState = PrimaryButton.UIState(
         label = "Test",
@@ -716,7 +717,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.AfterpayClearpay
+            lpmRepository.fromCode("afterpay_clearpay")!!
         )
     }
 
@@ -740,7 +741,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.SepaDebit
+            lpmRepository.fromCode("sepa_debit")!!
         )
     }
 
@@ -761,7 +762,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.SepaDebit
+            lpmRepository.fromCode("sepa_debit")!!
         )
     }
 
@@ -911,8 +912,8 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal
+            lpmRepository.fromCode("card")!!,
+            lpmRepository.fromCode("ideal")!!
         )
     }
 
@@ -940,10 +941,10 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal,
-            SupportedPaymentMethod.SepaDebit,
-            SupportedPaymentMethod.Sofort
+            lpmRepository.fromCode("card")!!,
+            lpmRepository.fromCode("ideal")!!,
+            lpmRepository.fromCode("sepa_debit")!!,
+            lpmRepository.fromCode("sofort")!!
         )
     }
 

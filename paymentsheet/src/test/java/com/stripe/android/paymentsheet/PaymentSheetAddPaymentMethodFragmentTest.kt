@@ -10,6 +10,7 @@ import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -33,7 +34,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataColl
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -51,6 +52,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelTestInjection() {
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private val lpmRepository = LpmRepository(context.resources)
 
     @Before
     fun setup() {
@@ -119,7 +121,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             emptySet()
         )
         val actualFromArguments = BaseAddPaymentMethodFragment.getFormArguments(
-            SupportedPaymentMethod.Bancontact,
+            lpmRepository.fromCode("bancontact")!!,
             paymentIntent,
             CONFIG_MINIMUM,
             MERCHANT_DISPLAY_NAME,
@@ -183,7 +185,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             emptySet()
         )
         val actualFromArguments = BaseAddPaymentMethodFragment.getFormArguments(
-            SupportedPaymentMethod.Card,
+            LpmRepository.HardcodedCard,
             paymentIntent,
             CONFIG_MINIMUM,
             MERCHANT_DISPLAY_NAME,
@@ -227,7 +229,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(lpmRepository.fromCode("bancontact")!!)
             idleLooper()
 
             val addedFragment = fragment.childFragmentManager.findFragmentById(
@@ -241,7 +243,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 FormFragmentArguments(
-                    SupportedPaymentMethod.Bancontact.type.code,
+                    lpmRepository.fromCode("bancontact")!!.type.code,
                     showCheckbox = false,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
@@ -263,7 +265,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 FormFragmentArguments(
-                    PaymentMethod.Type.Bancontact.code,
+                    lpmRepository.fromCode("bancontact")!!.type.code,
                     showCheckbox = false,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
@@ -288,7 +290,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
 
             idleLooper()
 
@@ -303,7 +305,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    paymentMethodCode = LpmRepository.HardcodedCard.type.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -321,7 +323,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             stripeIntent = stripeIntent,
             args = args
         ) { fragment, viewBinding, _ ->
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
 
             idleLooper()
 
@@ -337,7 +339,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    paymentMethodCode = LpmRepository.HardcodedCard.type.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -366,7 +368,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
             idleLooper()
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
         }
@@ -401,7 +403,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             assertThat(primaryButtonState).isEqualTo(manualState)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(Bancontact)
             idleLooper()
 
             assertThat(primaryButtonState).isEqualTo(null)
@@ -420,7 +422,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
+            fragment.onPaymentMethodSelected(LpmRepository.HardcodedCard)
 
             idleLooper()
 
@@ -436,7 +438,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethodCode = PaymentMethod.Type.Card.code,
+                        paymentMethodCode = LpmRepository.HardcodedCard.type.code,
                         amount = createAmount(PI_OFF_SESSION),
                         showCheckbox = false,
                         showCheckboxControlledFields = true,
@@ -481,6 +483,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             injectorKey = args.injectorKey
         )
 
+        // somehow the saveInstanceState for the viewModel needs to be present
+
         return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
@@ -493,7 +497,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewModel.updatePaymentMethods(stripeIntent)
                 viewModel.setStripeIntent(stripeIntent)
                 idleLooper()
-                registerViewModel(args.injectorKey, viewModel)
+                registerViewModel(args.injectorKey, viewModel, lpmRepository)
             } else {
                 it.sheetViewModel.updatePaymentMethods(stripeIntent)
                 it.sheetViewModel.setStripeIntent(stripeIntent)
@@ -508,5 +512,12 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewModel
             )
         }
+    }
+
+    companion object {
+        val lpmRepository =
+            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources)
+        val Bancontact = lpmRepository.fromCode("bancontact")!!
+        val SepaDebit = lpmRepository.fromCode("sepa_debit")!!
     }
 }

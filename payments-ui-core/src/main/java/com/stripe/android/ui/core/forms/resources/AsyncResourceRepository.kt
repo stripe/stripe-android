@@ -24,7 +24,7 @@ class AsyncResourceRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : ResourceRepository {
-    private val lpmRepository = LpmRepository()
+    private val lpmRepository: LpmRepository = LpmRepository(resources)
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()

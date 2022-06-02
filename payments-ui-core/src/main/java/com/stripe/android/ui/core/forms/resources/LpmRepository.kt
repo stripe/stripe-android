@@ -1,11 +1,11 @@
 package com.stripe.android.ui.core.forms.resources
 
+import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -22,58 +22,181 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.forms.AffirmForm
-import com.stripe.android.ui.core.forms.AfterpayClearpayForm
-import com.stripe.android.ui.core.forms.AuBecsDebitForm
-import com.stripe.android.ui.core.forms.BancontactForm
-import com.stripe.android.ui.core.forms.CardForm
-import com.stripe.android.ui.core.forms.EpsForm
-import com.stripe.android.ui.core.forms.GiropayForm
-import com.stripe.android.ui.core.forms.IdealForm
-import com.stripe.android.ui.core.forms.KlarnaForm
-import com.stripe.android.ui.core.forms.P24Form
-import com.stripe.android.ui.core.forms.PaypalForm
-import com.stripe.android.ui.core.forms.SepaDebitForm
-import com.stripe.android.ui.core.forms.SofortForm
-import com.stripe.android.ui.core.forms.USBankAccountForm
+import com.stripe.android.ui.core.elements.LpmSerializer
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SharedDataSpec
+import java.io.InputStream
+import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
+ * a particular requested LPM.
+ */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository {
-    fun values() = exposedPaymentMethods
+class LpmRepository @Inject constructor(
+    resources: Resources?
+) {
+    private val lpmSerializer: LpmSerializer = LpmSerializer()
 
-    /**
-     * This is a list of the payment methods that we are allowing in the release
-     */
-    @VisibleForTesting
-    internal val exposedPaymentMethods by lazy {
-        listOf(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Bancontact,
-            SupportedPaymentMethod.Sofort,
-            SupportedPaymentMethod.Ideal,
-            SupportedPaymentMethod.SepaDebit,
-            SupportedPaymentMethod.Eps,
-            SupportedPaymentMethod.Giropay,
-            SupportedPaymentMethod.P24,
-            SupportedPaymentMethod.Klarna,
-            SupportedPaymentMethod.PayPal,
-            SupportedPaymentMethod.AfterpayClearpay,
-            SupportedPaymentMethod.USBankAccount,
-            SupportedPaymentMethod.Affirm,
-            SupportedPaymentMethod.AuBecsDebit
+    private lateinit var codeToSupportedPaymentMethod: Map<String, SupportedPaymentMethod>
+
+    fun values() = codeToSupportedPaymentMethod.values
+
+    fun fromCode(code: String?) = code?.let { paymentMethodCode ->
+        codeToSupportedPaymentMethod[paymentMethodCode]
+    }
+
+    init {
+        initialize(
+            resources?.assets?.open("lpms.json")
         )
     }
 
-    private val codeToForm = exposedPaymentMethods.associate {
-        it.type.code to it
+    @VisibleForTesting
+    fun initialize(inputStream: InputStream?) {
+        val parsedSupportedPaymentMethod = parseLpms(inputStream)
+            ?.filter { exposedPaymentMethods.contains(it.type) }
+            ?.mapNotNull { convertToSupportedPaymentMethod(it) }
+
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        codeToSupportedPaymentMethod =
+            parsedSupportedPaymentMethod?.associateBy { it.type.code } ?: emptyMap()
     }
 
-    fun fromCode(code: PaymentMethodCode?) = code?.let {
-        codeToForm[code]
-    }
+    private fun parseLpms(inputStream: InputStream?) =
+        getJsonStringFromInputStream(inputStream)?.let { string ->
+            lpmSerializer.deserializeList(string)
+        }
+
+    private fun getJsonStringFromInputStream(inputStream: InputStream?) =
+        inputStream?.bufferedReader().use { it?.readText() }
+
+    private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) =
+        when (sharedDataSpec.type) {
+            PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                R.string.stripe_paymentsheet_payment_method_card,
+                R.drawable.stripe_ic_paymentsheet_pm_card,
+                true,
+                CardRequirement,
+                if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
+                    HardcodedCard.formSpec
+                } else {
+                    LayoutSpec(sharedDataSpec.fields)
+                }
+            )
+            PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Bancontact,
+                R.string.stripe_paymentsheet_payment_method_bancontact,
+                R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                false,
+                BancontactRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Sofort,
+                R.string.stripe_paymentsheet_payment_method_sofort,
+                R.drawable.stripe_ic_paymentsheet_pm_klarna,
+                false,
+                SofortRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Ideal,
+                R.string.stripe_paymentsheet_payment_method_ideal,
+                R.drawable.stripe_ic_paymentsheet_pm_ideal,
+                false,
+                IdealRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.SepaDebit,
+                R.string.stripe_paymentsheet_payment_method_sepa_debit,
+                R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+                false,
+                SepaDebitRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Eps,
+                R.string.stripe_paymentsheet_payment_method_eps,
+                R.drawable.stripe_ic_paymentsheet_pm_eps,
+                false,
+                EpsRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.P24,
+                R.string.stripe_paymentsheet_payment_method_p24,
+                R.drawable.stripe_ic_paymentsheet_pm_p24,
+                false,
+                P24Requirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Giropay,
+                R.string.stripe_paymentsheet_payment_method_giropay,
+                R.drawable.stripe_ic_paymentsheet_pm_giropay,
+                false,
+                GiropayRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.AfterpayClearpay,
+                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+                R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+                false,
+                AfterpayClearpayRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Klarna,
+                R.string.stripe_paymentsheet_payment_method_klarna,
+                R.drawable.stripe_ic_paymentsheet_pm_klarna,
+                false,
+                KlarnaRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.PayPal,
+                R.string.stripe_paymentsheet_payment_method_paypal,
+                R.drawable.stripe_ic_paymentsheet_pm_paypal,
+                false,
+                PaypalRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.Affirm,
+                R.string.stripe_paymentsheet_payment_method_affirm,
+                R.drawable.stripe_ic_paymentsheet_pm_affirm,
+                false,
+                AffirmRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.AuBecsDebit,
+                R.string.stripe_paymentsheet_payment_method_au_becs_debit,
+                R.drawable.stripe_ic_paymentsheet_pm_bank,
+                true,
+                AuBecsDebitRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
+                PaymentMethod.Type.USBankAccount,
+                R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                R.drawable.stripe_ic_paymentsheet_pm_bank,
+                true,
+                USBankAccountRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            else -> null
+        }
 
     /**
      * Enum defining all payment method types for which Payment Sheet can collect
@@ -83,7 +206,7 @@ class LpmRepository {
      * compose model.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    open class SupportedPaymentMethod(
+    data class SupportedPaymentMethod(
         /**
          * This describes the PaymentMethod Type as described
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
@@ -113,145 +236,6 @@ class LpmRepository {
          */
         val formSpec: LayoutSpec,
     ) {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Card : SupportedPaymentMethod(
-            PaymentMethod.Type.Card,
-            R.string.stripe_paymentsheet_payment_method_card,
-            R.drawable.stripe_ic_paymentsheet_pm_card,
-            true,
-            CardRequirement,
-            CardForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Bancontact : SupportedPaymentMethod(
-            PaymentMethod.Type.Bancontact,
-            R.string.stripe_paymentsheet_payment_method_bancontact,
-            R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-            false,
-            BancontactRequirement,
-            BancontactForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Sofort : SupportedPaymentMethod(
-            PaymentMethod.Type.Sofort,
-            R.string.stripe_paymentsheet_payment_method_sofort,
-            R.drawable.stripe_ic_paymentsheet_pm_klarna,
-            false,
-            SofortRequirement,
-            SofortForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Ideal : SupportedPaymentMethod(
-            PaymentMethod.Type.Ideal,
-            R.string.stripe_paymentsheet_payment_method_ideal,
-            R.drawable.stripe_ic_paymentsheet_pm_ideal,
-            false,
-            IdealRequirement,
-            IdealForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object SepaDebit : SupportedPaymentMethod(
-            PaymentMethod.Type.SepaDebit,
-            R.string.stripe_paymentsheet_payment_method_sepa_debit,
-            R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
-            false,
-            SepaDebitRequirement,
-            SepaDebitForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Eps : SupportedPaymentMethod(
-            PaymentMethod.Type.Eps,
-            R.string.stripe_paymentsheet_payment_method_eps,
-            R.drawable.stripe_ic_paymentsheet_pm_eps,
-            false,
-            EpsRequirement,
-            EpsForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object P24 : SupportedPaymentMethod(
-            PaymentMethod.Type.P24,
-            R.string.stripe_paymentsheet_payment_method_p24,
-            R.drawable.stripe_ic_paymentsheet_pm_p24,
-            false,
-            P24Requirement,
-            P24Form
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Giropay : SupportedPaymentMethod(
-            PaymentMethod.Type.Giropay,
-            R.string.stripe_paymentsheet_payment_method_giropay,
-            R.drawable.stripe_ic_paymentsheet_pm_giropay,
-            false,
-            GiropayRequirement,
-            GiropayForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object AfterpayClearpay : SupportedPaymentMethod(
-            PaymentMethod.Type.AfterpayClearpay,
-            R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
-            R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-            false,
-            AfterpayClearpayRequirement,
-            AfterpayClearpayForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Klarna : SupportedPaymentMethod(
-            PaymentMethod.Type.Klarna,
-            R.string.stripe_paymentsheet_payment_method_klarna,
-            R.drawable.stripe_ic_paymentsheet_pm_klarna,
-            false,
-            KlarnaRequirement,
-            KlarnaForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object PayPal : SupportedPaymentMethod(
-            PaymentMethod.Type.PayPal,
-            R.string.stripe_paymentsheet_payment_method_paypal,
-            R.drawable.stripe_ic_paymentsheet_pm_paypal,
-            false,
-            PaypalRequirement,
-            PaypalForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object Affirm : SupportedPaymentMethod(
-            PaymentMethod.Type.Affirm,
-            R.string.stripe_paymentsheet_payment_method_affirm,
-            R.drawable.stripe_ic_paymentsheet_pm_affirm,
-            false,
-            AffirmRequirement,
-            AffirmForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object AuBecsDebit : SupportedPaymentMethod(
-            PaymentMethod.Type.AuBecsDebit,
-            R.string.stripe_paymentsheet_payment_method_au_becs_debit,
-            R.drawable.stripe_ic_paymentsheet_pm_bank,
-            true,
-            AuBecsDebitRequirement,
-            AuBecsDebitForm
-        )
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-        object USBankAccount : SupportedPaymentMethod(
-            PaymentMethod.Type.USBankAccount,
-            R.string.stripe_paymentsheet_payment_method_us_bank_account,
-            R.drawable.stripe_ic_paymentsheet_pm_bank,
-            true,
-            USBankAccountRequirement,
-            USBankAccountForm
-        )
 
         /**
          * Returns true if the payment method supports confirming from a saved
@@ -259,9 +243,40 @@ class LpmRepository {
          * description of the values
          */
         fun supportsCustomerSavedPM() = requirement.confirmPMFromCustomer == true
+    }
 
-        override fun toString(): String {
-            return type.code
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val HardcodedCard = SupportedPaymentMethod(
+            PaymentMethod.Type.Card,
+            R.string.stripe_paymentsheet_payment_method_card,
+            R.drawable.stripe_ic_paymentsheet_pm_card,
+            true,
+            CardRequirement,
+            LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec(), SaveForFutureUseSpec()))
+        )
+
+        /**
+         * This is a list of the payment methods that we are allowing in the release
+         */
+        @VisibleForTesting
+        internal val exposedPaymentMethods by lazy {
+            listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.Bancontact.code,
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Ideal.code,
+                PaymentMethod.Type.SepaDebit.code,
+                PaymentMethod.Type.Eps.code,
+                PaymentMethod.Type.Giropay.code,
+                PaymentMethod.Type.P24.code,
+                PaymentMethod.Type.Klarna.code,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.AfterpayClearpay.code,
+                PaymentMethod.Type.USBankAccount.code,
+                PaymentMethod.Type.Affirm.code,
+                PaymentMethod.Type.AuBecsDebit.code
+            )
         }
     }
 }

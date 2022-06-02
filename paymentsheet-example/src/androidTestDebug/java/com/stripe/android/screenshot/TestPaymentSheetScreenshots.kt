@@ -7,7 +7,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
@@ -21,6 +20,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -49,7 +49,7 @@ class TestPaymentSheetScreenshots {
     }
 
     private val testParams = TestParameters(
-        SupportedPaymentMethod.Card,
+        LpmRepository.HardcodedCard,
         Customer.New,
         GooglePayState.On,
         Currency.EUR,
@@ -246,6 +246,12 @@ class TestPaymentSheetScreenshots {
                     primaryButton = primaryButton
                 )
             )
+        )
+    }
+
+    companion object {
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
         )
     }
 }
