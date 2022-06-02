@@ -42,6 +42,10 @@ internal class LinkAccountManager @Inject constructor(
                     cookieStore.getAuthSessionCookie()?.let {
                         lookupConsumer(null).getOrNull()?.accountStatus
                     }
+                        // If the user recently signed up on this device, use their email
+                        ?: cookieStore.getNewUserEmail()?.let {
+                            lookupConsumer(it).getOrNull()?.accountStatus
+                        }
                         // If a customer email was passed in, lookup the account,
                         // unless the user has logged out of this account
                         ?: args.customerEmail?.let {
@@ -123,6 +127,7 @@ internal class LinkAccountManager @Inject constructor(
     ): Result<LinkAccount> =
         linkRepository.consumerSignUp(email, phone, country, cookie())
             .map { consumerSession ->
+                cookieStore.storeNewUserEmail(email)
                 setAndReturn(LinkAccount(consumerSession))
             }.mapCatching { account ->
                 if (account.isVerified) {
