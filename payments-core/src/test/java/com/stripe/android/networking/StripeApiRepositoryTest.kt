@@ -281,6 +281,14 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testListConsumerPaymentDetailsUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/payment_details/list",
+            StripeApiRepository.listConsumerPaymentDetailsUrl
+        )
+    }
+
+    @Test
     fun testGetConsumerPaymentDetailsUrl() {
         assertEquals(
             "https://api.stripe.com/v1/consumers/payment_details/csmrpd*123",
@@ -1910,7 +1918,15 @@ internal class StripeApiRepositoryTest {
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
+
+            assertEquals(
+                "https://api.stripe.com/v1/consumers/payment_details/list",
+                request.baseUrl
+            )
+            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
+
             val credentials = params["credentials"] as Map<*, *>
             assertEquals(credentials["consumer_session_client_secret"], clientSecret)
             assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
