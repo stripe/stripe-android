@@ -27,6 +27,7 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -198,7 +199,9 @@ internal class TransformSpecToElementTest {
                 viewOnlyFields = setOf(IdentifierSpec.CardNumber)
             )
 
-        val formElements = transformSpecToElements.transform(CardForm.items)
+        val formElements = transformSpecToElements.transform(
+            LpmRepository.HardcodedCard.formSpec.items
+        )
         val cardDetailsSection = formElements.first() as CardDetailsSectionElement
         val cardNumberElement =
             cardDetailsSection.controller.cardDetailsElement.controller.numberElement

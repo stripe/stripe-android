@@ -23,6 +23,7 @@ import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     val paymentMethod = SupportedPaymentMethod.Card()
     val formController = formControllerProvider.get()
-        .formSpec(paymentMethod.formSpec)
+        .formSpec(LayoutSpec(paymentMethod.formSpec))
         .initialValues(emptyMap())
         .viewOnlyFields(emptySet())
         .viewModelScope(viewModelScope)

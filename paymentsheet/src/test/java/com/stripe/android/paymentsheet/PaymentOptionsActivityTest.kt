@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -412,7 +414,8 @@ class PaymentOptionsActivityTest {
             resourceRepository = StaticResourceRepository(
                 AddressFieldElementRepository(
                     ApplicationProvider.getApplicationContext<Context>().resources
-                )
+                ),
+                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
             ),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()

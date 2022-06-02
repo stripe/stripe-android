@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,6 +10,5 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal object EmptyFormSpec : FormItemSpec() {
-    @IgnoredOnParcel
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("empty")
 }

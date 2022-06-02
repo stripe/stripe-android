@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
@@ -79,7 +80,6 @@ internal open class PaymentSheetViewModelTestInjection {
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        lpmRepository: LpmRepository = LpmRepository()
     ): PaymentSheetViewModel = runBlocking {
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -90,7 +90,10 @@ internal open class PaymentSheetViewModelTestInjection {
             StripeIntentValidator(),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
-            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
+            resourceRepository = StaticResourceRepository(
+                mock(),
+                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+            ),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
@@ -107,11 +110,11 @@ internal open class PaymentSheetViewModelTestInjection {
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
-        resourceRepository: StaticResourceRepository = StaticResourceRepository(mock(), LpmRepository()),
+        lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
-            resourceRepository = resourceRepository,
+            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
             transformSpecToElement = mock()
         )
     ) {

@@ -4,7 +4,6 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -20,6 +19,7 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -53,7 +53,7 @@ class TestCustomers {
     }
 
     private val bancontactNewUser = TestParameters(
-        SupportedPaymentMethod.Bancontact,
+        lpmRepository.fromCode("bancontact")!!,
         Customer.New,
         GooglePayState.On,
         Currency.EUR,
@@ -83,6 +83,12 @@ class TestCustomers {
             bancontactNewUser.copy(
                 customer = Customer.New,
             )
+        )
+    }
+
+    companion object {
+        private val lpmRepository = LpmRepository(
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
         )
     }
 }
