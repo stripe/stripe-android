@@ -79,7 +79,7 @@ class FinancialConnectionsSheet internal constructor(
          */
         fun createForBankAccountToken(
             activity: ComponentActivity,
-            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+            callback: FinancialConnectionsSheetResultForTokenCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForTokenLauncher(activity, callback)
@@ -94,7 +94,7 @@ class FinancialConnectionsSheet internal constructor(
          */
         fun createForBankAccountToken(
             fragment: Fragment,
-            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+            callback: FinancialConnectionsSheetResultForTokenCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForTokenLauncher(fragment, callback)

@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResultForTokenCallback
 import org.jetbrains.annotations.TestOnly
 
 internal class FinancialConnectionsSheetForTokenLauncher(
@@ -14,23 +15,23 @@ internal class FinancialConnectionsSheetForTokenLauncher(
 
     constructor(
         activity: ComponentActivity,
-        callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        callback: FinancialConnectionsSheetResultForTokenCallback
     ) : this(
         activity.registerForActivityResult(
             FinancialConnectionsSheetForTokenContract()
         ) {
-            callback(it)
+            callback.onFinancialConnectionsSheetResult(it)
         }
     )
 
     constructor(
         fragment: Fragment,
-        callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        callback: FinancialConnectionsSheetResultForTokenCallback
     ) : this(
         fragment.registerForActivityResult(
             FinancialConnectionsSheetForTokenContract()
         ) {
-            callback(it)
+            callback.onFinancialConnectionsSheetResult(it)
         }
     )
 
@@ -38,13 +39,13 @@ internal class FinancialConnectionsSheetForTokenLauncher(
     constructor(
         fragment: Fragment,
         registry: ActivityResultRegistry,
-        callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+        callback: FinancialConnectionsSheetResultForTokenCallback
     ) : this(
         fragment.registerForActivityResult(
             FinancialConnectionsSheetForTokenContract(),
             registry
         ) {
-            callback(it)
+            callback.onFinancialConnectionsSheetResult(it)
         },
     )
 
