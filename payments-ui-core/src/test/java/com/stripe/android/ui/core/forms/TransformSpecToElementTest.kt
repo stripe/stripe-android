@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.Capitalization
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardNumberViewOnlyController
 import com.stripe.android.ui.core.elements.CountryConfig
 import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -25,6 +27,7 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -178,6 +181,33 @@ internal class TransformSpecToElementTest {
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.apiPath)
+    }
+
+    @Test
+    fun `Setting card number to view only returns the correct elements`() {
+        transformSpecToElements =
+            TransformSpecToElements(
+                resourceRepository = StaticResourceRepository(
+                    mock(),
+                    mock()
+                ),
+                initialValues = mapOf(),
+                amount = null,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Merchant, Inc.",
+                context,
+                viewOnlyFields = setOf(IdentifierSpec.CardNumber)
+            )
+
+        val formElements = transformSpecToElements.transform(
+            LpmRepository.HardcodedCard.formSpec.items
+        )
+        val cardDetailsSection = formElements.first() as CardDetailsSectionElement
+        val cardNumberElement =
+            cardDetailsSection.controller.cardDetailsElement.controller.numberElement
+
+        assertThat(cardNumberElement.controller)
+            .isInstanceOf(CardNumberViewOnlyController::class.java)
     }
 
     companion object {

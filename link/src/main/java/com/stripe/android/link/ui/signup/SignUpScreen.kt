@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -29,6 +30,8 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -51,6 +54,7 @@ private fun SignUpBodyPreview() {
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 signUpState = SignUpState.InputtingPhone,
                 isReadyToSignUp = false,
+                errorMessage = null,
                 onSignUpClick = {}
             )
         }
@@ -69,15 +73,17 @@ internal fun SignUpBody(
         )
     )
 
-    val signUpStatus by signUpViewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
+    val signUpState by signUpViewModel.signUpState.collectAsState()
     val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState(false)
+    val errorMessage by signUpViewModel.errorMessage.collectAsState()
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailController = signUpViewModel.emailController,
         phoneNumberController = signUpViewModel.phoneController,
-        signUpState = signUpStatus,
+        signUpState = signUpState,
         isReadyToSignUp = isReadyToSignUp,
+        errorMessage = errorMessage,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
 }
@@ -89,6 +95,7 @@ internal fun SignUpBody(
     phoneNumberController: PhoneNumberController,
     signUpState: SignUpState,
     isReadyToSignUp: Boolean,
+    errorMessage: ErrorMessage?,
     onSignUpClick: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -140,6 +147,9 @@ internal fun SignUpBody(
                             .padding(top = 8.dp, bottom = 16.dp),
                         textAlign = TextAlign.Center
                     )
+                }
+                errorMessage?.let {
+                    ErrorText(text = it.getMessage(LocalContext.current.resources))
                 }
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),

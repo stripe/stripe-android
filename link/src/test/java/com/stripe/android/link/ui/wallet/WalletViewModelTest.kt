@@ -1,10 +1,8 @@
 package com.stripe.android.link.ui.wallet
 
-import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
@@ -22,19 +20,24 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -45,7 +48,9 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
-    private val linkAccount = mock<LinkAccount>()
+    private val linkAccount = mock<LinkAccount>().apply {
+        whenever(clientSecret).thenReturn(CLIENT_SECRET)
+    }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
     private val linkAccountManager = mock<LinkAccountManager>()
@@ -58,6 +63,13 @@ class WalletViewModelTest {
         linkRepository = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
+    }
+
+    @Test
+    fun `On initialization start collecting CardEdit result`() = runTest {
+        createViewModel()
+
+        verify(navigator).getResultFlow<CardEditViewModel.Result>(any())
     }
 
     @Test
@@ -85,14 +97,12 @@ class WalletViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
+        verify(navigator).navigateTo(LinkScreen.PaymentMethod, true)
     }
 
     @Test
     fun `onSelectedPaymentDetails returns PaymentMethodCreateParams when completePayment is false`() {
         whenever(args.completePayment).thenReturn(false)
-        val clientSecret = "client_secret"
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
         createViewModel().onSelectedPaymentDetails(paymentDetails)
@@ -106,7 +116,7 @@ class WalletViewModelTest {
                     paymentDetails,
                     PaymentMethodCreateParams.createLink(
                         paymentDetails.id,
-                        clientSecret
+                        CLIENT_SECRET
                     )
                 )
             )
@@ -115,8 +125,6 @@ class WalletViewModelTest {
 
     @Test
     fun `onSelectedPaymentDetails starts payment confirmation when completePayment is true`() {
-        val clientSecret = "client_secret"
-        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
         createViewModel().onSelectedPaymentDetails(paymentDetails)
@@ -128,11 +136,66 @@ class WalletViewModelTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 PaymentMethodCreateParams.createLink(
                     paymentDetails.id,
-                    clientSecret
+                    CLIENT_SECRET
                 ),
                 StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!
             )
         )
+    }
+
+    @Test
+    fun `when payment confirmation fails then an error message is shown`() {
+        val errorThrown = "Error message"
+        val viewModel = createViewModel()
+
+        viewModel.onSelectedPaymentDetails(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+
+        val callbackCaptor = argumentCaptor<PaymentConfirmationCallback>()
+        verify(confirmationManager).confirmStripeIntent(any(), callbackCaptor.capture())
+
+        callbackCaptor.firstValue(Result.success(PaymentResult.Failed(RuntimeException(errorThrown))))
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorThrown))
+    }
+
+    @Test
+    fun `deletePaymentMethod fetches payment details when successful`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(paymentDetails))
+
+        val viewModel = createViewModel()
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+        clearInvocations(linkRepository)
+
+        // Initially has two elements
+        assertThat(viewModel.paymentDetails.value)
+            .containsExactlyElementsIn(paymentDetails.paymentDetails)
+
+        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(Unit))
+
+        // Delete the first element
+        viewModel.deletePaymentMethod(paymentDetails.paymentDetails.first())
+
+        // Fetches payment details again
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+    }
+
+    @Test
+    fun `when payment method deletion fails then an error message is shown`() = runTest {
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val errorThrown = "Error message"
+        val viewModel = createViewModel()
+
+        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(RuntimeException(errorThrown)))
+
+        viewModel.deletePaymentMethod(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorThrown))
     }
 
     @Test
@@ -142,7 +205,6 @@ class WalletViewModelTest {
                 it(Result.success(PaymentResult.Completed))
             }
         }
-        whenever(linkAccount.clientSecret).thenReturn("secret")
         whenever(linkRepository.listPaymentDetails(anyOrNull()))
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
@@ -168,6 +230,50 @@ class WalletViewModelTest {
         viewModel.addNewPaymentMethod()
 
         verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
+    }
+
+    @Test
+    fun `Update payment method navigates to CardEdit screen`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(paymentDetails))
+
+        val viewModel = createViewModel()
+
+        viewModel.editPaymentMethod(paymentDetails.paymentDetails.first())
+
+        verify(navigator).navigateTo(
+            argWhere {
+                it.route.startsWith(LinkScreen.CardEdit.route.substringBefore('?'))
+            },
+            any()
+        )
+    }
+
+    @Test
+    fun `On CardEdit result successful then it reloads payment details`() = runTest {
+        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
+        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+
+        createViewModel()
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+        clearInvocations(linkRepository)
+
+        flow.emit(CardEditViewModel.Result.Success)
+        verify(linkRepository).listPaymentDetails(anyOrNull())
+    }
+
+    @Test
+    fun `On CardEdit result failure then it shows error`() = runTest {
+        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
+        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+
+        val viewModel = createViewModel()
+
+        val error = ErrorMessage.Raw("Error message")
+        flow.emit(CardEditViewModel.Result.Failure(error))
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(error)
     }
 
     @Test
@@ -215,5 +321,7 @@ class WalletViewModelTest {
             logger
         )
 
-    private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
+    companion object {
+        const val CLIENT_SECRET = "client_secret"
+    }
 }

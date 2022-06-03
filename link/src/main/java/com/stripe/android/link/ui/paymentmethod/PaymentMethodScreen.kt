@@ -22,12 +22,14 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
-import com.stripe.android.link.ui.PayAnotherWayButton
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.primaryButtonLabel
-import com.stripe.android.ui.core.elements.LayoutSpec
 
 @Preview
 @Composable
@@ -38,6 +40,7 @@ private fun PaymentMethodBodyPreview() {
                 isProcessing = false,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonEnabled = true,
+                errorMessage = null,
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
             ) {}
@@ -54,20 +57,15 @@ internal fun PaymentMethodBody(
         factory = PaymentMethodViewModel.Factory(linkAccount, injector)
     )
 
-    val formViewModel: FormViewModel = viewModel(
-        factory = FormViewModel.Factory(
-            LayoutSpec(viewModel.paymentMethod.formSpec),
-            injector
-        )
-    )
-
-    val formValues by formViewModel.completeFormValues.collectAsState(null)
-    val isProcessing by viewModel.isProcessing.collectAsState(false)
+    val formValues by viewModel.formController.completeFormValues.collectAsState(null)
+    val isProcessing by viewModel.isProcessing.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     PaymentMethodBody(
         isProcessing = isProcessing,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         primaryButtonEnabled = formValues != null,
+        errorMessage = errorMessage,
         onPrimaryButtonClick = {
             formValues?.let {
                 viewModel.startPayment(it)
@@ -76,7 +74,7 @@ internal fun PaymentMethodBody(
         onPayAnotherWayClick = viewModel::payAnotherWay
     ) {
         Form(
-            formViewModel,
+            viewModel.formController,
             viewModel.isEnabled
         )
     }
@@ -87,6 +85,7 @@ internal fun PaymentMethodBody(
     isProcessing: Boolean,
     primaryButtonLabel: String,
     primaryButtonEnabled: Boolean,
+    errorMessage: ErrorMessage?,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
@@ -104,6 +103,9 @@ internal fun PaymentMethodBody(
             formContent()
         }
         Spacer(modifier = Modifier.height(8.dp))
+        errorMessage?.let {
+            ErrorText(text = it.getMessage(LocalContext.current.resources))
+        }
         PrimaryButton(
             label = primaryButtonLabel,
             state = when {
@@ -114,8 +116,9 @@ internal fun PaymentMethodBody(
             icon = R.drawable.stripe_ic_lock,
             onButtonClick = onPrimaryButtonClick
         )
-        PayAnotherWayButton(
+        SecondaryButton(
             enabled = !isProcessing,
+            label = stringResource(id = R.string.wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
     }

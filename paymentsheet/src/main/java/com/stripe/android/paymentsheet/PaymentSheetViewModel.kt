@@ -485,7 +485,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
                             R.string.stripe_failure_connection_error
-                        else -> R.string.stripe_google_pay_error_internal
+                        else -> R.string.stripe_internal_error
                     }
                 )
             }

@@ -60,7 +60,18 @@ internal fun LinkAppBar(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.width(CloseIconWidth))
+            Box(
+                modifier = Modifier
+                    .width(CloseIconWidth)
+                    .clickable(onClick = onCloseButtonClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_link_close),
+                    contentDescription = stringResource(id = R.string.close),
+                    tint = MaterialTheme.linkColors.closeButton
+                )
+            }
 
             Column(
                 modifier = Modifier.weight(1f),
@@ -73,18 +84,7 @@ internal fun LinkAppBar(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .width(CloseIconWidth)
-                    .clickable(onClick = onCloseButtonClick),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_link_close),
-                    contentDescription = stringResource(id = R.string.accessibility_close),
-                    tint = MaterialTheme.linkColors.closeButton
-                )
-            }
+            Spacer(modifier = Modifier.width(CloseIconWidth))
         }
 
         AnimatedVisibility(visible = !email.isNullOrEmpty()) {

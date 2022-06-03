@@ -1,4 +1,4 @@
-package com.stripe.android.link.ui.paymentmethod
+package com.stripe.android.link.ui.forms
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -17,14 +17,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 internal fun Form(
-    formViewModel: FormViewModel,
+    formController: FormController,
     enabledFlow: Flow<Boolean>,
 ) {
     FormUI(
-        formViewModel.hiddenIdentifiers,
+        formController.hiddenIdentifiers,
         enabledFlow,
-        formViewModel.elements,
-        formViewModel.lastTextFieldIdentifier
+        formController.elements,
+        formController.lastTextFieldIdentifier
     ) {
         Row(
             modifier = Modifier

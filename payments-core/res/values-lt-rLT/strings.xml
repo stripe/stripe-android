@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Vardas, pavardė</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Privaloma nurodyti vardą, pavardę.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Atšaukti</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s, kuri baigiasi %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Pašalinti mokėjimo būdą?</string>
   <string name="delete_payment_method_prompt_title">Pašalinti mokėjimo būdą?</string>
+  <!-- Done button title -->
+  <string name="done">Atlikta</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Redaguoti</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">mm / MM</string>
   <string name="expiry_label_short">Galiojimo pabaigos data</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Pasirinkti banko sąskaitą (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Nemokamai</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Pašalinti</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s pašalintas</string>
   <string name="secure_checkout">Saugus pirkimo užbaigimas</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Kilo problemų jungiantis prie mūsų mokėjimo paslaugų teikėjo. Patikrinkite interneto ryšį ir bandykite dar kartą.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nepavyko autentifikuoti mokėjimo būdo. Pasirinkite kitą mokėjimo būdą ir bandykite dar kartą.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Baigėsi mokėjimo būdui autentifikuoti skirtas laikas, bandykite dar kartą</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Įvyko vidinė klaida.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">mm / MM</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

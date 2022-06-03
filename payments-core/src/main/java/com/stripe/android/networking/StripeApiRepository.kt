@@ -47,6 +47,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -1373,6 +1374,55 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    /**
+     * Deletes the consumer payment details with the given id.
+     */
+    override suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ) {
+        makeApiRequest(
+            apiRequestFactory.createDelete(
+                getConsumerPaymentDetailsUrl(paymentDetailsId),
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    )
+                )
+            )
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Updates the consumer payment details with the given id.
+     */
+    override suspend fun updatePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    )
+                ).plus(
+                    paymentDetailsUpdateParams.toParamMap()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
@@ -1462,7 +1512,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachFinancialConnectionsSessionToSetupIntentUrl(setupIntentId, financialConnectionsSessionId),
+                getAttachFinancialConnectionsSessionToSetupIntentUrl(
+                    setupIntentId,
+                    financialConnectionsSessionId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
@@ -1902,6 +1955,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/:id`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getConsumerPaymentDetailsUrl(paymentDetailsId: String): String {
+            return getApiUrl("consumers/payment_details/$paymentDetailsId")
+        }
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

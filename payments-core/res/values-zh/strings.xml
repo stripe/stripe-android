@@ -108,6 +108,8 @@
   <string name="becs_widget_name">姓名</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">您需要填写姓名。</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">取消</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s - 尾号：%2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">删除支付方式</string>
   <string name="delete_payment_method_prompt_title">删除支付方式？</string>
+  <!-- Done button title -->
+  <string name="done">完成</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">编辑</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">月份/年份</string>
   <string name="expiry_label_short">有效期</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">选择银行账户 (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">免费</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">移除</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">已移除 %s</string>
   <string name="secure_checkout">安全结账</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我们未能验证您的支付方式。请选择另一支付方式并重试。</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">验证您的支付方式时失败——请重试</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">发生了内部错误。</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">月份/年份</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

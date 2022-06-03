@@ -346,6 +346,14 @@ class PaymentAuthWebViewClientTest {
         assertThat(
             isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/Xyza1b2C345/tdsrc_456")
         ).isTrue()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure_2/hosted/complete")
+        ).isTrue()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure_2/hosted/complete/")
+        ).isTrue()
     }
 
     private fun createWebViewClient(

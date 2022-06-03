@@ -13,6 +13,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -105,9 +106,17 @@ internal class SignUpScreenTest {
         onSignUpButton().assertIsEnabled()
     }
 
+    @Test
+    fun when_error_message_is_not_null_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(SignUpState.InputtingPhone, errorMessage = ErrorMessage.Raw(errorMessage))
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
     private fun setContent(
         signUpState: SignUpState,
-        isReadyToSignUp: Boolean = true
+        isReadyToSignUp: Boolean = true,
+        errorMessage: ErrorMessage? = null
     ) =
         composeTestRule.setContent {
             DefaultLinkTheme {
@@ -118,6 +127,7 @@ internal class SignUpScreenTest {
                     phoneNumberController = PhoneNumberController.createPhoneNumberController(),
                     signUpState = signUpState,
                     isReadyToSignUp = isReadyToSignUp,
+                    errorMessage = errorMessage,
                     onSignUpClick = {}
                 )
             }

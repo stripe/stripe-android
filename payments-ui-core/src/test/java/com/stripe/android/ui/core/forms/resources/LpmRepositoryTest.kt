@@ -90,28 +90,6 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that payment methods described as async in the json have the delayed requirement set`() {
-        assertThat(
-            lpmRepository.fromCode("card")?.requirement?.piRequirements
-        ).doesNotContain(Delayed)
-
-        lpmRepository.initialize(
-            """
-              [
-                {
-                    "type": "card",
-                    "async": true,
-                    "fields": []
-                  }
-             ]
-            """.trimIndent().byteInputStream()
-        )
-        assertThat(
-            lpmRepository.fromCode("card")?.requirement?.piRequirements
-        ).contains(Delayed)
-    }
-
-    @Test
     fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
