@@ -1364,8 +1364,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails? {
         return fetchStripeModel(
-            apiRequestFactory.createGet(
-                consumerPaymentDetailsUrl,
+            apiRequestFactory.createPost(
+                listConsumerPaymentDetailsUrl,
                 requestOptions,
                 mapOf(
                     "request_surface" to "android_payment_element",
@@ -1964,6 +1964,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/list`
+         */
+        internal val listConsumerPaymentDetailsUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/payment_details/list")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`

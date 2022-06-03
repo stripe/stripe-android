@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.RestrictTo
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -34,6 +35,7 @@ data class PaymentMethodRequirements(
      *  - Only [PIRequirement]s are allowed in this set.
      * - If this is null, PaymentIntents (even if SFU is set) are not supported by this LPM.
      */
+    @SerialName("pi_requirements")
     val piRequirements: Set<PIRequirement>?,
 
     /**
@@ -44,12 +46,13 @@ data class PaymentMethodRequirements(
      *   no additional requirements this must be an emptySet.
      *   - In order to make sure the PM can be used when attached to a customer it
      *   must include the requirements of the saved payment method.  For instance,
-     *   Bancontact is not delayed, but when saved it is represented as a SEPA paymnent
+     *   Bancontact is not delayed, but when saved it is represented as a SEPA payment
      *   method which is delayed.  So there must be Delay support in order to meet
-     *   the requiremetns of this PM.  (There was a consideration of adding a SaveType
+     *   the requirements of this PM.  (There was a consideration of adding a SaveType
      *   that in cases where SI or PIw/SFU it would also check the requirements of
      *   the SaveType - not sure if the SaveType pi and/or si requirements should be checked).
      */
+    @SerialName("si_requirements")
     val siRequirements: Set<SIRequirement>?,
 
     /**
@@ -60,6 +63,7 @@ data class PaymentMethodRequirements(
      *  (likely because of a lack of mandate support)
      *  - true means that a PM of this type attached to a customer can be confirmed
      */
+    @SerialName("confirm_pm_from_customer")
     val confirmPMFromCustomer: Boolean?,
 )
 

@@ -17,8 +17,8 @@ enum class DisplayField {
 data class AddressSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
 
-    @SerialName("valid_country_codes")
-    val validCountryCodes: Set<String> = supportedBillingCountries,
+    @SerialName("allow_country_codes")
+    val allowCountryCodes: Set<String> = supportedBillingCountries,
 
     @SerialName("display_fields")
     val displayFields: Set<DisplayField> = emptySet()
@@ -31,7 +31,7 @@ data class AddressSpec(
             CountryElement(
                 IdentifierSpec.Generic("billing_details[address][country]"),
                 DropdownFieldController(
-                    CountryConfig(this.validCountryCodes),
+                    CountryConfig(this.allowCountryCodes),
                     initialValue = initialValues[this.apiPath]
                 )
             )
@@ -40,7 +40,7 @@ data class AddressSpec(
                 apiPath,
                 addressRepository,
                 initialValues,
-                countryCodes = validCountryCodes
+                countryCodes = allowCountryCodes
             )
         },
         label = R.string.billing_details
