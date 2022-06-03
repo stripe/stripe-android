@@ -232,6 +232,10 @@ public final class com/stripe/android/link/model/AccountStatus : java/lang/Enum 
 	public static fun values ()[Lcom/stripe/android/link/model/AccountStatus;
 }
 
+public final class com/stripe/android/link/model/NavigatorKt {
+	public static final fun isOnRootScreen (Landroidx/navigation/NavHostController;)Z
+}
+
 public final class com/stripe/android/link/model/Navigator_Factory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/link/model/Navigator_Factory;

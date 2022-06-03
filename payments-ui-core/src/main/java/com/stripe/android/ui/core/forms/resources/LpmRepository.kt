@@ -7,7 +7,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -255,28 +254,12 @@ class LpmRepository @Inject constructor(
          */
         val formSpec: LayoutSpec,
     ) {
-
-//        init {
-//            if (code != type.code) {
-//                Log.e("MLB", "ERROR: code does NOT match: ${code}")
-//            } else {
-//                Log.e("MLB", "code match: ${code}")
-//            }
-//
-//            if (requiresMandate != type.requiresMandate) {
-//                Log.e("MLB", "ERROR: Requiremandate does NOT match: ${code}")
-//            } else {
-//                Log.e("MLB", "Requiremandate match: ${code}")
-//            }
-//        }
-
         /**
          * Returns true if the payment method supports confirming from a saved
          * payment method of this type.  See [PaymentMethodRequirements] for
          * description of the values
          */
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
-
     }
 
     companion object {

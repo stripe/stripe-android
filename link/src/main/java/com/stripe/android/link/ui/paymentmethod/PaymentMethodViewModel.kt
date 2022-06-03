@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -55,6 +56,14 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
+    private val isRootScreen = navigator.isOnRootScreen() == true
+
+    val secondaryButtonLabel = if (isRootScreen) {
+        R.string.wallet_pay_another_way
+    } else {
+        R.string.cancel
+    }
+
     val paymentMethod = SupportedPaymentMethod.Card()
     val formController = formControllerProvider.get()
         .formSpec(LayoutSpec(paymentMethod.formSpec))
@@ -93,7 +102,15 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    fun payAnotherWay() {
+    fun onSecondaryButtonClick() {
+        if (isRootScreen) {
+            payAnotherWay()
+        } else {
+            navigator.onBack()
+        }
+    }
+
+    private fun payAnotherWay() {
         clearError()
         navigator.dismiss()
         linkAccountManager.logout()

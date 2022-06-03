@@ -68,7 +68,8 @@ fun LinkVerificationDialog(
                                 Column {
                                     LinkAppBar(
                                         email = account.email,
-                                        onCloseButtonClick = {
+                                        isRootScreen = true,
+                                        onButtonClick = {
                                             openDialog = false
                                             verificationCallback(false)
                                         }

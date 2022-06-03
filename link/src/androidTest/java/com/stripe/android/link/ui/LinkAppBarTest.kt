@@ -26,20 +26,24 @@ internal class LinkAppBarTest {
     }
 
     @Test
-    fun close_button_callback_is_called() {
+    fun on_button_click_button_callback_is_called() {
         var count = 0
-        setContent(onCloseButtonClick = { count++ })
+        setContent(onButtonClick = { count++ })
 
-        composeTestRule.onNodeWithContentDescription("Close").performClick()
+        composeTestRule.onNodeWithContentDescription("Back").performClick()
         assertThat(count).isEqualTo(1)
     }
 
     private fun setContent(
         email: String? = null,
-        onCloseButtonClick: () -> Unit = {}
+        onButtonClick: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
-            LinkAppBar(email = email, onCloseButtonClick = onCloseButtonClick)
+            LinkAppBar(
+                email = email,
+                isRootScreen = true,
+                onButtonClick = onButtonClick
+            )
         }
     }
 }

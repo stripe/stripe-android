@@ -37,6 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.isOnRootScreen
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
@@ -46,6 +47,7 @@ import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -102,11 +104,13 @@ internal class LinkActivity : ComponentActivity() {
                     viewModel.navigator.navigationController = navController
 
                     Column(Modifier.fillMaxWidth()) {
-                        val linkAccount by viewModel.linkAccount.collectAsState(initial = null)
+                        val linkAccount by viewModel.linkAccount.collectAsState(null)
+                        val isOnRootScreen by isRootScreenFlow().collectAsState(true)
 
                         LinkAppBar(
                             email = linkAccount?.email,
-                            onCloseButtonClick = { dismiss() }
+                            isRootScreen = isOnRootScreen,
+                            onButtonClick = { viewModel.navigator.onBack() }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
@@ -234,4 +238,7 @@ internal class LinkActivity : ComponentActivity() {
         )
         finish()
     }
+
+    private fun isRootScreenFlow() =
+        navController.currentBackStackEntryFlow.map { navController.isOnRootScreen() }
 }
