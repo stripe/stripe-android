@@ -17,8 +17,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
+import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 
 class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
 
@@ -35,16 +35,14 @@ class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
     @Composable
     private fun FinancialConnectionsScreen() {
         val state: FinancialConnectionsExampleState by viewModel.state.collectAsState()
-        val sideEffect: FinancialConnectionsExampleViewEffect? by viewModel.viewEffect.collectAsState(
-            null
-        )
-        val launcher =
-            FinancialConnectionsSheet.createComposable(viewModel::onFinancialConnectionsSheetResult)
+        val viewEffect: FinancialConnectionsExampleViewEffect? by viewModel.viewEffect.collectAsState(null)
+        val financialConnectionsSheet = rememberFinancialConnectionsSheet(viewModel::onFinancialConnectionsSheetResult)
 
-        LaunchedEffect(sideEffect) {
-            when (val effect = sideEffect) {
-                is OpenFinancialConnectionsSheetExample -> launcher.present(effect.configuration)
-                null -> Unit
+        LaunchedEffect(viewEffect) {
+            viewEffect?.let {
+                when (it) {
+                    is OpenFinancialConnectionsSheetExample -> financialConnectionsSheet.present(it.configuration)
+                }
             }
         }
 
