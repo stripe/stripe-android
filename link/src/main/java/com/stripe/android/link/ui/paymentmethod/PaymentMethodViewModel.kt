@@ -17,7 +17,6 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -40,7 +39,6 @@ import javax.inject.Provider
 internal class PaymentMethodViewModel @Inject constructor(
     val args: LinkActivityContract.Args,
     val linkAccount: LinkAccount,
-    private val linkRepository: LinkRepository,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
@@ -83,9 +81,8 @@ internal class PaymentMethodViewModel @Inject constructor(
         viewModelScope.launch {
             _isProcessing.value = true
 
-            linkRepository.createPaymentDetails(
+            linkAccountManager.createPaymentDetails(
                 paymentMethod.createParams(paymentMethodCreateParams, linkAccount.email),
-                linkAccount.clientSecret,
                 args.stripeIntent,
                 paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
             ).fold(
