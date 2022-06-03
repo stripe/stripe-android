@@ -157,7 +157,7 @@ def waitForBuildComplete(buildId):
            response = requests.get(url, auth=(user, authKey))
            responseStatus = response.json()["status"]
        print("DONE.\nRESULT is: " + responseStatus)
-       if(result == "passed"):
+       if(responseStatus == "passed"):
           return 0
        else:
           return 1
