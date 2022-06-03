@@ -1,4 +1,9 @@
 # CHANGELOG
+
+## X.X.X
+
+* [ADDED][5117](https://github.com/stripe/stripe-android/pull/5117) Adds createComposable and createComposableForToken to FinancialConnectionsSheet.
+
 ## 20.5.0 - 2022-06-01
 This release contains several bug fixes for Payments and PaymentSheet, deprecates the PaymentSheet's `primaryButtonColor` api in favor of the new [appearance api](https://stripe.com/docs/elements/appearance-api?platform=android), and adds card brand icons to the card details form. 
 
