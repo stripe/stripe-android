@@ -1,24 +1,24 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-object AuBankAccountNumberSpec :
-    SectionFieldSpec(
-        IdentifierSpec.Generic(
-            "au_becs_debit[account_number]"
-        )
-    ) {
+@Serializable
+class AuBankAccountNumberSpec(
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic(
+        "au_becs_debit[account_number]"
+    )
+) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
-    ): SectionFieldElement =
+    ) = createSectionElement(
         SimpleTextElement(
-            this.identifier,
+            this.apiPath,
             SimpleTextFieldController(
                 AuBankAccountNumberConfig(),
-                initialValue = initialValues[this.identifier]
+                initialValue = initialValues[this.apiPath]
             )
         )
+    )
 }

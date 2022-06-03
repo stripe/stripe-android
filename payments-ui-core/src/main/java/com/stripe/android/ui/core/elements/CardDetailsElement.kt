@@ -14,8 +14,15 @@ internal class CardDetailsElement(
     identifier: IdentifierSpec,
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    val controller: CardDetailsController = CardDetailsController(context, initialValues),
+    viewOnlyFields: Set<IdentifierSpec> = emptySet(),
+    val controller: CardDetailsController = CardDetailsController(
+        context,
+        initialValues,
+        viewOnlyFields.contains(IdentifierSpec.CardNumber)
+    ),
 ) : SectionMultiFieldElement(identifier) {
+    val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
+
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
@@ -52,10 +59,10 @@ internal class CardDetailsElement(
             controller.numberElement.identifier to number,
             controller.cvcElement.identifier to cvc,
             IdentifierSpec.CardBrand to FormFieldEntry(brand.code, true),
-            IdentifierSpec.Generic("card[exp_month]") to expirationDate.copy(
+            IdentifierSpec.CardExpMonth to expirationDate.copy(
                 value = month.toString()
             ),
-            IdentifierSpec.Generic("card[exp_year]") to expirationDate.copy(
+            IdentifierSpec.CardExpYear to expirationDate.copy(
                 value = year.toString()
             )
         )

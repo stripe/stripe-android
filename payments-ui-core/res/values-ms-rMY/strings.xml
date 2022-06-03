@@ -78,6 +78,16 @@
   <string name="stripe_continue_button_label">Teruskan</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Bayar %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Maklumat kad</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debit Terus BECS AU</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kad</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">Debit SEPA</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Sediakan</string>
 </resources>

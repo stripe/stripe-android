@@ -68,7 +68,7 @@ internal class CvcController constructor(
         }
 
     override val trailingIcon: Flow<TextFieldIcon?> = cardBrandFlow.map {
-        TextFieldIcon(it.cvcIcon, isIcon = false)
+        TextFieldIcon.Trailing(it.cvcIcon, isTintable = false)
     }
 
     override val loading: Flow<Boolean> = MutableStateFlow(false)
@@ -80,8 +80,10 @@ internal class CvcController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String): TextFieldState? {
         _fieldValue.value = cvcTextFieldConfig.filter(displayFormatted)
+
+        return null
     }
 
     /**

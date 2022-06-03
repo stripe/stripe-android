@@ -10,14 +10,15 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
-import com.stripe.android.ui.core.elements.BankDropdownSpec
+import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
-import com.stripe.android.ui.core.elements.SectionSpec
+import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
 class FieldPopulator(
@@ -89,12 +90,18 @@ class FieldPopulator(
         val state: String = "CA",
         val cardNumber: String = "4242424242424242",
         val cardExpiration: String = "1230",
-        val cardCvc: String = "321"
+        val cardCvc: String = "321",
+        val auBecsBsbNumber: String = "000000",
+        val auBecsAccountNumber: String = "000123456"
     )
 
     private fun verifyPlatformLpmFields(values: Values = Values()) {
         formSpec.items.forEach {
             when (it) {
+                is BsbSpec -> {
+                    selectors.getAuBsb()
+                        .assertContentDescriptionEquals(values.auBecsBsbNumber)
+                }
                 is CardDetailsSectionSpec -> {
                     selectors.getCardNumber()
                         .assertContentDescriptionEquals(values.cardNumber)
@@ -105,48 +112,45 @@ class FieldPopulator(
                             values.cardCvc.replace("\\d".toRegex(), "$0 ")
                         )
                 }
-                is SectionSpec -> {
-                    it.fields.forEach { sectionField ->
-                        when (sectionField) {
-                            is EmailSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getEmail()
-                                        .assertContentDescriptionEquals(values.email)
-                                }
-                            }
-                            SimpleTextSpec.NAME -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getName()
-                                        .assertContentDescriptionEquals(values.name)
-                                }
-                            }
-                            is AddressSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getLine1()
-                                        .assertContentDescriptionEquals(values.line1)
-                                    selectors.getCity()
-                                        .assertContentDescriptionEquals(values.city)
-                                    selectors.getZip()
-                                        .assertContentDescriptionEquals(values.zip)
-                                    selectors.getState()
-                                        .assertContentDescriptionEquals(values.state)
-                                }
-                            }
-                            is CountrySpec -> {}
-                            is SimpleTextSpec -> {}
-                            AuBankAccountNumberSpec -> {}
-                            is BankDropdownSpec -> {}
-                            IbanSpec -> {}
-                            is KlarnaCountrySpec -> {}
-                            is CardBillingSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getZip()
-                                        .assertContentDescriptionEquals(values.zip)
-                                }
-                            }
-                        }
+                is EmailSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getEmail()
+                            .assertContentDescriptionEquals(values.email)
+                    }
+                }
+                is NameSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getName(it.labelTranslationId.resourceId)
+                            .assertContentDescriptionEquals(values.name)
+                    }
+                }
+                is AddressSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getLine1()
+                            .assertContentDescriptionEquals(values.line1)
+                        selectors.getCity()
+                            .assertContentDescriptionEquals(values.city)
+                        selectors.getZip()
+                            .assertContentDescriptionEquals(values.zip)
+                        selectors.getState()
+                            .assertContentDescriptionEquals(values.state)
+                    }
+                }
+                is CountrySpec -> {}
+                is SimpleTextSpec -> {}
+                is AuBankAccountNumberSpec -> {
+                    selectors.getAuAccountNumber()
+                        .assertContentDescriptionEquals(values.auBecsAccountNumber)
+                }
+                is DropdownSpec -> {}
+                is IbanSpec -> {}
+                is KlarnaCountrySpec -> {}
+                is CardBillingSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getZip()
+                            .assertContentDescriptionEquals(values.zip)
                     }
                 }
             }
@@ -156,6 +160,11 @@ class FieldPopulator(
     private fun populatePlatformLpmFields(values: Values = Values()) {
         formSpec.items.forEach {
             when (it) {
+                is BsbSpec -> {
+                    selectors.getAuBsb().apply {
+                        performTextInput(values.auBecsBsbNumber)
+                    }
+                }
                 is CardDetailsSectionSpec -> {
                     selectors.getCardNumber().performTextInput(values.cardNumber)
                     selectors.composeTestRule.waitForIdle()
@@ -166,59 +175,56 @@ class FieldPopulator(
 
                     }
                 }
-                is SectionSpec -> {
-                    it.fields.forEach { sectionField ->
-                        when (sectionField) {
-                            is EmailSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getEmail().apply {
-                                        performClick()
-                                        performTextInput(values.email)
-                                    }
-                                }
-                            }
-                            SimpleTextSpec.NAME -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    selectors.getName().apply {
-                                        performTextInput(values.name)
-
-                                    }
-                                }
-                            }
-                            is AddressSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getLine1().apply {
-                                        performClick()
-                                        performTextInput(values.line1)
-                                    }
-                                    selectors.getCity()
-                                        .performTextInput(values.city)
-                                    selectors.getZip()
-                                        .performTextInput(values.zip)
-                                    selectors.getState().apply {
-                                        performTextInput(values.state)
-
-                                    }
-                                }
-                            }
-                            is CountrySpec -> {}
-                            is SimpleTextSpec -> {}
-                            AuBankAccountNumberSpec -> {}
-                            is BankDropdownSpec -> {}
-                            IbanSpec -> {}
-                            is KlarnaCountrySpec -> {}
-                            is CardBillingSpec -> {
-                                if (testParameters.billing == Billing.Off) {
-                                    // TODO: This will not work when other countries are selected or defaulted
-                                    selectors.getZip().apply {
-                                        performTextInput(values.zip)
-                                    }
-                                }
-                            }
+                is EmailSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getEmail().apply {
+                            performClick()
+                            performTextInput(values.email)
                         }
                     }
                 }
+                is NameSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        selectors.getName(it.labelTranslationId.resourceId).apply {
+                            performTextInput(values.name)
+                        }
+                    }
+                }
+                is AuBankAccountNumberSpec -> {
+                    selectors.getAuAccountNumber().apply {
+                        performTextInput(values.auBecsAccountNumber)
+                    }
+                }
+                is IbanSpec -> {}
+                is KlarnaCountrySpec -> {}
+                is CardBillingSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getZip().apply {
+                            performTextInput(values.zip)
+                        }
+                    }
+                }
+                is AddressSpec -> {
+                    if (testParameters.billing == Billing.Off) {
+                        // TODO: This will not work when other countries are selected or defaulted
+                        selectors.getLine1().apply {
+                            performClick()
+                            performTextInput(values.line1)
+                        }
+                        selectors.getCity()
+                            .performTextInput(values.city)
+                        selectors.getZip()
+                            .performTextInput(values.zip)
+                        selectors.getState().apply {
+                            performTextInput(values.state)
+
+                        }
+                    }
+                }
+                is CountrySpec -> {}
+                is SimpleTextSpec -> {}
+                is DropdownSpec -> {}
             }
         }
     }

@@ -1,31 +1,48 @@
 package com.stripe.android.identity.navigation
 
+import android.graphics.Bitmap
 import android.view.View
+import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
+import com.stripe.android.identity.ml.AnalyzerInput
+import com.stripe.android.identity.ml.FaceDetectorOutput
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.SelfieUploadState
+import com.stripe.android.identity.networking.UploadedResult
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.io.File
 
@@ -45,17 +62,42 @@ internal class SelfieFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
-    private val uploadState =
-        MutableStateFlow(IdentityViewModel.UploadState())
+    private val documentUploadState =
+        MutableStateFlow(DocumentUploadState())
+
+    private val selfieUploadState = MutableStateFlow(SelfieUploadState())
+
+    private val errorUploadState = mock<SelfieUploadState> {
+        on { hasError() } doReturn true
+    }
+
+    private val loadingUploadState = mock<SelfieUploadState> {
+        on { hasError() } doReturn false
+        on { isAnyLoading() } doReturn true
+    }
+
+    private val mockUploadedResult = mock<UploadedResult> {
+        on { uploadedStripeFile }.thenReturn(mock())
+    }
+    private val successUploadState = SelfieUploadState(
+        firstHighResResult = Resource.success(mockUploadedResult),
+        firstLowResResult = Resource.success(mockUploadedResult),
+        lastHighResResult = Resource.success(mockUploadedResult),
+        lastLowResResult = Resource.success(mockUploadedResult),
+        bestHighResResult = Resource.success(mockUploadedResult),
+        bestLowResResult = Resource.success(mockUploadedResult)
+    )
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModel } doReturn mockPageAndModel
-        on { uploadState } doReturn uploadState
+        on { documentUploadState } doReturn documentUploadState
+        on { selfieUploadState } doReturn selfieUploadState
     }
 
     @Test
     fun `when initialized UI is reset`() {
-        launchSelfieFragment { binding, _ ->
+        launchSelfieFragment { binding, _, _ ->
+            verify(mockIdentityViewModel).resetSelfieUploadedState()
             assertThat(binding.scanningView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.resultView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
@@ -63,18 +105,123 @@ internal class SelfieFragmentTest {
     }
 
     @Test
+    fun `when Found UI is set and flash once`() {
+        launchSelfieFragment { binding, _, fragment ->
+            assertThat(fragment.flashed).isFalse()
+
+            displayStateChanged.postValue((mock<IdentityScanState.Found>() to mock()))
+            assertThat(binding.message.text).isEqualTo(fragment.getText(R.string.capturing))
+            assertThat(fragment.flashed).isTrue()
+
+            displayStateChanged.postValue((mock<IdentityScanState.Found>() to mock()))
+            assertThat(binding.message.text).isEqualTo(fragment.getText(R.string.capturing))
+            assertThat(fragment.flashed).isTrue()
+        }
+    }
+
+    @Test
+    fun `when Satisfied UI is set`() {
+        launchSelfieFragment { binding, _, fragment ->
+            assertThat(fragment.flashed).isFalse()
+
+            displayStateChanged.postValue((mock<IdentityScanState.Satisfied>() to mock()))
+            assertThat(binding.message.text).isEqualTo(fragment.getText(R.string.selfie_capture_complete))
+        }
+    }
+
+    @Test
     fun `when finished UI is toggled`() {
-        launchSelfieFragment { binding, _ ->
-            // mock success of front scan
-            displayStateChanged.postValue((mock<IdentityScanState.Finished>() to mock()))
+        launchSelfieFragment { binding, _, fragment ->
+            assertThat(fragment.selfieResultAdapter.itemCount).isEqualTo(0)
+
+            displayStateChanged.postValue((FINISHED to mock()))
 
             assertThat(binding.scanningView.visibility).isEqualTo(View.GONE)
             assertThat(binding.resultView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(true)
+            assertThat(fragment.selfieResultAdapter.itemCount).isEqualTo(FILTERED_FRAMES.size)
         }
     }
 
-    private fun launchSelfieFragment(testBlock: (SelfieScanFragmentBinding, TestNavHostController) -> Unit) =
+    @Test
+    fun `when selfieUploadState all uploaded, clicking continue triggers navigation`() {
+        launchSelfieFragment { binding, _, _ ->
+            runBlocking {
+                displayStateChanged.postValue((FINISHED to mock()))
+                assertThat(binding.kontinue.isEnabled).isEqualTo(true)
+                selfieUploadState.update {
+                    successUploadState
+                }
+                finalResultLiveData.postValue(
+                    IdentityAggregator.FinalResult(
+                        mock(),
+                        mock(),
+                        FINISHED
+                    )
+                )
+                binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
+
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam.createForSelfie(
+                            firstHighResResult = requireNotNull(successUploadState.firstHighResResult.data),
+                            firstLowResResult = requireNotNull(successUploadState.firstLowResResult.data),
+                            lastHighResResult = requireNotNull(successUploadState.lastHighResResult.data),
+                            lastLowResResult = requireNotNull(successUploadState.lastLowResResult.data),
+                            bestHighResResult = requireNotNull(successUploadState.bestHighResResult.data),
+                            bestLowResResult = requireNotNull(successUploadState.bestLowResResult.data),
+                            trainingConsent = binding.allowImageCollection.isChecked,
+                            faceScoreVariance = SCORE_VARIANCE,
+                            numFrames = NUM_FRAMES
+                        )
+                    ),
+                    eq(ClearDataParam.SELFIE_TO_CONFIRM)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `when selfieUploadState hasError, clicking continue navigates to ErrorFragment`() {
+        launchSelfieFragment { binding, navController, _ ->
+            runBlocking {
+                displayStateChanged.postValue((FINISHED to mock()))
+                assertThat(binding.kontinue.isEnabled).isEqualTo(true)
+                selfieUploadState.update {
+                    errorUploadState
+                }
+                binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.errorFragment)
+            }
+        }
+    }
+
+    @Test
+    fun `when selfieUploadState isLoading, clicking continue triggers toggles loading state`() {
+        launchSelfieFragment { binding, navController, _ ->
+            runBlocking {
+                displayStateChanged.postValue((FINISHED to mock()))
+                assertThat(binding.kontinue.isEnabled).isEqualTo(true)
+                selfieUploadState.update {
+                    loadingUploadState
+                }
+                binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
+
+                assertThat(
+                    binding.kontinue.findViewById<MaterialButton>(R.id.button).isEnabled
+                ).isFalse()
+                assertThat(
+                    binding.kontinue.findViewById<CircularProgressIndicator>(R.id.indicator).visibility
+                ).isEqualTo(
+                    View.VISIBLE
+                )
+            }
+        }
+    }
+
+    private fun launchSelfieFragment(testBlock: (SelfieScanFragmentBinding, TestNavHostController, SelfieFragment) -> Unit) =
         launchFragmentInContainer(
             themeResId = R.style.Theme_MaterialComponents
         ) {
@@ -94,6 +241,54 @@ internal class SelfieFragmentTest {
                 it.requireView(),
                 navController
             )
-            testBlock(SelfieScanFragmentBinding.bind(it.requireView()), navController)
+            testBlock(SelfieScanFragmentBinding.bind(it.requireView()), navController, it)
         }
+
+    private companion object {
+        val dummyBitmap: Bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+        val FILTERED_FRAMES = listOf(
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = dummyBitmap,
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.81f
+            ), // first
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = dummyBitmap,
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.9f
+            ), // best
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = dummyBitmap,
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.82f
+            ), // last
+        )
+
+        const val SCORE_VARIANCE = 0.1f
+        const val NUM_FRAMES = 8
+
+        val FINISHED = IdentityScanState.Finished(
+            type = IdentityScanState.ScanType.SELFIE,
+            transitioner = mock<FaceDetectorTransitioner> {
+                on { filteredFrames }.thenReturn(FILTERED_FRAMES)
+                on { scoreVariance }.thenReturn(SCORE_VARIANCE)
+                on { numFrames }.thenReturn(NUM_FRAMES)
+            }
+        )
+    }
 }

@@ -49,6 +49,7 @@ com.stripe.android.cards
 com.stripe.android.model
 com.stripe.android.model.parsers
 module:payments-ui-core
+com.stripe.android.paymentsheet.forms
 com.stripe.android.ui.core
 com.stripe.android.ui.core.address
 com.stripe.android.ui.core.elements
@@ -59,7 +60,6 @@ com.stripe.android.ui.core.forms.resources.injection
 module:paymentsheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
-com.stripe.android.paymentsheet.paymentdatacollection.ach
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser

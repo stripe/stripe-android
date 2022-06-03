@@ -5,11 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
@@ -25,12 +27,12 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -88,7 +90,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setActivityResult(
@@ -102,12 +103,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             try {
                 starterArgs.config?.validate()
                 starterArgs.clientSecret.validate()
+                starterArgs.config?.appearance?.parseAppearance()
             } catch (e: InvalidParameterException) {
                 setActivityResult(PaymentSheetResult.Failed(e))
                 finish()
                 return
             }
         }
+        super.onCreate(savedInstanceState)
 
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -176,6 +179,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.startConfirm.observe(this) { event ->
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
                 lifecycleScope.launch {
                     viewModel.confirmStripeIntent(confirmParams)
                 }
@@ -275,7 +279,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupGooglePayButton()
         val dividerText = resources.getString(
             if (viewModel.supportedPaymentMethods.size == 1 &&
-                viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
+                viewModel.supportedPaymentMethods.map { it.type.code }.contains(
+                        LpmRepository.HardcodedCard.type.code
+                    )
             ) {
                 R.string.stripe_paymentsheet_or_pay_with_card
             } else {
@@ -294,7 +300,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        GooglePayDividerUi(dividerText)
+                        PaymentsTheme {
+                            GooglePayDividerUi(dividerText)
+                        }
                     }
                 }
             }
@@ -302,8 +310,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupGooglePayButton() {
-        val surfaceColor = PaymentsThemeDefaults.colors(isSystemDarkTheme()).surface
-        googlePayButton.setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
+        viewModel.config?.appearance?.getColors(isSystemDarkTheme())?.surface?.let {
+            googlePayButton.setBackgroundColor(Color(it).shouldUseDarkDynamicColor())
+        }
 
         googlePayButton.setOnClickListener {
             // The scroll will be made visible onResume of the activity

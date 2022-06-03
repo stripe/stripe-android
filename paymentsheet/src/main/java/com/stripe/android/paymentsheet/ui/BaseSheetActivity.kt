@@ -18,8 +18,10 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -40,6 +42,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
@@ -153,12 +156,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         val isDark = baseContext.isSystemDarkTheme()
-        bottomSheet.setBackgroundColor(
-            PaymentsThemeDefaults.colors(isDark).surface.toArgb()
-        )
-        toolbar.setBackgroundColor(
-            PaymentsThemeDefaults.colors(isDark).surface.toArgb()
-        )
+        viewModel.config?.let {
+            bottomSheet.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+            toolbar.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+        }
 
         setSheetWidthForTablets()
     }
@@ -199,16 +204,18 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         userMessage: BaseSheetViewModel.UserErrorMessage? = null
     ) {
         userMessage?.message.let { message ->
-            messageView.text = createTextSpanFromTextStyle(
-                text = message,
-                context = this,
-                fontSizeDp = (
-                    PaymentsThemeDefaults.typography.fontSizeMultiplier
-                        * PaymentsThemeDefaults.typography.smallFontSize.value
-                    ).dp,
-                color = PaymentsThemeDefaults.colors(baseContext.isSystemDarkTheme()).error,
-                fontFamily = PaymentsThemeDefaults.typography.fontFamily
-            )
+            viewModel.config?.appearance?.let {
+                messageView.text = createTextSpanFromTextStyle(
+                    text = message,
+                    context = this,
+                    fontSizeDp = (
+                        it.typography.sizeScaleFactor
+                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                        ).dp,
+                    color = Color(it.getColors(this.isSystemDarkTheme()).error),
+                    fontFamily = it.typography.fontResId
+                )
+            }
         }
 
         messageView.isVisible = userMessage != null
@@ -221,10 +228,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 val text = viewModel.headerText.observeAsState()
 
                 text.value?.let {
-                    H4Text(
-                        text = it,
-                        modifier = Modifier.padding(bottom = 2.dp)
-                    )
+                    PaymentsTheme {
+                        H4Text(
+                            text = it,
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                    }
                 }
             }
         }
@@ -272,12 +281,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
-                    Html(
-                        html = text,
-                        imageGetter = mapOf(),
-                        color = PaymentsTheme.colors.subtitle,
-                        style = PaymentsTheme.typography.body1.copy(textAlign = TextAlign.Center)
-                    )
+                    PaymentsTheme {
+                        Html(
+                            html = text,
+                            imageGetter = mapOf(),
+                            color = MaterialTheme.paymentsColors.subtitle,
+                            style = MaterialTheme.typography.body1.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
                 }
             }
             notesView.isVisible = showNotes
@@ -298,11 +311,13 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
-        navigationIconDrawable?.setTintList(
-            ColorStateList.valueOf(
-                PaymentsThemeDefaults.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
+        viewModel.config?.appearance?.let {
+            navigationIconDrawable?.setTintList(
+                ColorStateList.valueOf(
+                    it.getColors(baseContext.isSystemDarkTheme()).appBarIcon
+                )
             )
-        )
+        }
 
         toolbar.navigationIcon = navigationIconDrawable
         toolbar.navigationContentDescription = resources.getString(toolbarResources.description)

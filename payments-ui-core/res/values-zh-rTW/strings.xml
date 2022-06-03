@@ -21,7 +21,7 @@
   <!-- Used to describe an address field in Ireland -->
   <string name="address_label_ie_townland">鎮區</string>
   <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">郵編</string>
+  <string name="address_label_in_pin">郵遞區號</string>
   <!-- Used to describe part of an address -->
   <string name="address_label_island">島</string>
   <!-- Label of an address field -->
@@ -33,7 +33,7 @@
   <!-- Label of an address field -->
   <string name="address_label_oblast">州</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">郵編或城鎮</string>
+  <string name="address_label_post_town">郵遞區號或城鎮</string>
   <!-- Label of an address field -->
   <string name="address_label_suburb">郊區</string>
   <!-- Used to describe an address field. -->
@@ -78,6 +78,16 @@
   <string name="stripe_continue_button_label">繼續</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">支付 %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">金融卡資訊</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 直接借記 </string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">卡</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">設定</string>
 </resources>

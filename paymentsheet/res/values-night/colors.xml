@@ -30,5 +30,6 @@
     </color>
     <color name="stripe_paymentsheet_googlepay_divider_text">#99FFFFFF</color>
 
+    <color name="stripe_paymentsheet_link_mark">#FFFFFF</color>
     <!-- CardFormView -->
 </resources>

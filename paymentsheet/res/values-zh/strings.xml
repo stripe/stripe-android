@@ -4,27 +4,12 @@
   <string name="add_new_payment_method">添加新支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">移除尾号为 %s 的银行账户</string>
-  <!-- Button title to cancel action in an alert -->
-  <string name="cancel">取消</string>
-  <!-- Done button title -->
-  <string name="done">完成</string>
-  <!-- Button title to enter editing mode -->
-  <string name="edit">编辑</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">移除</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">发生了内部错误。</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[继续操作即表示您同意按照<terms>这些条款</terms>授权付款。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[保存您的 %s 银行账户即表示您同意按照<terms>这些条款</terms>授权付款。]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">国家或地区</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
@@ -40,14 +25,6 @@
   <string name="stripe_paymentsheet_or_pay_with_card">或用银行卡支付</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">支付</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
-  <!-- Payment Method type brand name. -->
-  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 直接借记</string>
-  <!-- Title for credit card number entry field -->
-  <string name="stripe_paymentsheet_payment_method_card">银行卡</string>
-  <!-- Payment method brand name -->
-  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

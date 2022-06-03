@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,7 +16,9 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,6 @@ import javax.inject.Provider
 internal class WalletViewModel @Inject constructor(
     val args: LinkActivityContract.Args,
     val linkAccount: LinkAccount,
-    private val linkRepository: LinkRepository,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
@@ -41,24 +41,30 @@ internal class WalletViewModel @Inject constructor(
         MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
     val paymentDetails: StateFlow<List<ConsumerPaymentDetails.PaymentDetails>> = _paymentDetails
 
-    val isProcessing = MutableLiveData(false)
+    private val _isProcessing = MutableStateFlow(false)
+    val isProcessing: StateFlow<Boolean> = _isProcessing
+
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     init {
+        loadPaymentDetails()
+
         viewModelScope.launch {
-            linkRepository.listPaymentDetails(linkAccount.clientSecret).fold(
-                onSuccess = { response ->
-                    response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
-                        .takeIf { it.isNotEmpty() }?.let {
-                            _paymentDetails.value = it
-                        } ?: addNewPaymentMethod()
-                },
-                onFailure = ::onError
-            )
+            navigator.getResultFlow<CardEditViewModel.Result>(CardEditViewModel.Result.KEY)
+                ?.collect {
+                    when (it) {
+                        CardEditViewModel.Result.Success -> loadPaymentDetails()
+                        CardEditViewModel.Result.Cancelled -> {}
+                        is CardEditViewModel.Result.Failure -> onError(it.error)
+                    }
+                }
         }
     }
 
     fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
-        isProcessing.value = true
+        clearError()
+        _isProcessing.value = true
 
         if (args.completePayment) {
             val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
@@ -85,7 +91,7 @@ internal class WalletViewModel @Inject constructor(
                     onFailure = ::onError
                 )
 
-                isProcessing.value = false
+                _isProcessing.value = false
             }
         } else {
             val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
@@ -103,13 +109,65 @@ internal class WalletViewModel @Inject constructor(
         linkAccountManager.logout()
     }
 
-    fun addNewPaymentMethod() {
-        navigator.navigateTo(LinkScreen.PaymentMethod)
+    fun addNewPaymentMethod(clearBackStack: Boolean = false) {
+        navigator.navigateTo(LinkScreen.PaymentMethod, clearBackStack)
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+    fun editPaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        clearError()
+        navigator.navigateTo(LinkScreen.CardEdit(paymentDetails.id))
+    }
+
+    fun deletePaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        _isProcessing.value = true
+        clearError()
+
+        viewModelScope.launch {
+            linkAccountManager.deletePaymentDetails(
+                paymentDetails.id
+            ).fold(
+                onSuccess = {
+                    loadPaymentDetails()
+                },
+                onFailure = ::onError
+            )
+        }
+    }
+
+    private fun loadPaymentDetails() {
+        _isProcessing.value = true
+        viewModelScope.launch {
+            linkAccountManager.listPaymentDetails().fold(
+                onSuccess = { response ->
+                    response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
+                        .takeIf { it.isNotEmpty() }?.let {
+                            _paymentDetails.value = it
+                            _isProcessing.value = false
+                        } ?: addNewPaymentMethod(clearBackStack = true)
+                },
+                // If we can't load the payment details there's nothing to see here
+                onFailure = ::onFatal
+            )
+        }
+    }
+
+    private fun clearError() {
+        _errorMessage.value = null
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
+        onError(it)
+    }
+
+    private fun onError(error: ErrorMessage) {
+        _isProcessing.value = false
+        _errorMessage.value = error
+    }
+
+    private fun onFatal(fatalError: Throwable) {
+        logger.error("Fatal error: ", fatalError)
+        navigator.dismiss(LinkActivityResult.Failed(fatalError))
     }
 
     internal class Factory(

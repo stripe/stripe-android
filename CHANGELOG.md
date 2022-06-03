@@ -1,10 +1,39 @@
 # CHANGELOG
-## XX.X.X - 2022-05.XX
+## 20.5.0 - 2022-06-01
+This release contains several bug fixes for Payments and PaymentSheet, deprecates the PaymentSheet's `primaryButtonColor` api in favor of the new [appearance api](https://stripe.com/docs/elements/appearance-api?platform=android), and adds card brand icons to the card details form. 
+
+### PaymentSheet
+* [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
+* [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text.
+* [ADDED][5069](https://github.com/stripe/stripe-android/pull/5069) Add card brand icons to card details form.
+
+### Payments
+* [FIXED][5079](https://github.com/stripe/stripe-android/pull/5079) Add 3ds2 url to list of completion URLs so callbacks work correctly.
+* [FIXED][5094](https://github.com/stripe/stripe-android/pull/5094) Use correct cvc icon in card form view.
+
+## 20.4.0 - 2022-05-23
+This release adds [appearance customization APIs](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L186) to payment sheet and enables Affirm and AU BECS direct debit as payment methods within Payment Sheet.
+
+### Payments
+* [CHANGED][5038](https://github.com/stripe/stripe-android/pull/5038) Remove force portrait mode in Google Pay.
+* [ADDED][5011](https://github.com/stripe/stripe-android/pull/5011) Add `allowCreditCards` to `GooglePayLauncher`
+
+### PaymentSheet
+* [FIXED][5039](https://github.com/stripe/stripe-android/pull/5039) Fixed the format of the country dropdown in PaymentSheet for all languages.
+* [ADDED][5042](https://github.com/stripe/stripe-android/pull/5042) Added Affirm and AU BECS Direct Debit.
+* [ADDED][5020](https://github.com/stripe/stripe-android/pull/5020) Merge Appearance APIs to master. 
+* [FIXED][5022](https://github.com/stripe/stripe-android/pull/5022) Add missing translation for card information.
+* [FIXED][5048](https://github.com/stripe/stripe-android/pull/5048) Fixed a crash when removing the last payment method in the custom flow editor.
+
+## 20.3.0 - 2022-05-16
 This release adds `us_bank_account` PaymentMethod to PaymentSheet.
 
 ### PaymentSheet
 * [FIXED][5011](https://github.com/stripe/stripe-android/pull/5011) fix flying payment sheet by downgrading material from 1.6 to 1.5
 * [ADDED][4964](https://github.com/stripe/stripe-android/pull/4964) `us_bank_account` PaymentMethod is now available in PaymentSheet
+
+### camera-core
+* [FIXED][5004](https://github.com/stripe/stripe-android/pull/5004) Fix front camera callback to return an upside down image
 
 ## 20.2.2 - 2022-05-09
 This release contains bug fixes in PaymentSheet.
@@ -46,6 +75,9 @@ This release includes several Payments and PaymentSheet bug fixes.
 ### PaymentSheet
 * [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
 * [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
+
+### CardScan
+* [FIXED] [5075](https://github.com/stripe/stripe-android/pull/5075) Prevent a crash when the fragment is detached.
 
 ## 20.0.1 - 2022-04-11
 This release includes several PaymentSheet bug fixes.

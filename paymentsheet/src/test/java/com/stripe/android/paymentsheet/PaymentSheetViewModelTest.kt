@@ -23,10 +23,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -35,14 +35,16 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -79,10 +81,12 @@ internal class PaymentSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
+    private val lpmRepository = LpmRepository(application.resources)
+    private val prefsRepository = FakePrefsRepository()
+    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
 
     private val primaryButtonUIState = PrimaryButton.UIState(
         label = "Test",
@@ -713,7 +717,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.AfterpayClearpay
+            lpmRepository.fromCode("afterpay_clearpay")!!
         )
     }
 
@@ -737,7 +741,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.SepaDebit
+            lpmRepository.fromCode("sepa_debit")!!
         )
     }
 
@@ -758,7 +762,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.SepaDebit
+            lpmRepository.fromCode("sepa_debit")!!
         )
     }
 
@@ -819,7 +823,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() {
         var isEnabled = false
-        viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
+        viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
@@ -860,10 +864,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.setEditing(false)
         assertThat(isEnabled)
             .isFalse()
-
-        viewModel.updateSelection(mock())
-        assertThat(isEnabled)
-            .isTrue()
     }
 
     @Test
@@ -912,8 +912,8 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal
+            lpmRepository.fromCode("card")!!,
+            lpmRepository.fromCode("ideal")!!
         )
     }
 
@@ -941,10 +941,10 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal,
-            SupportedPaymentMethod.SepaDebit,
-            SupportedPaymentMethod.Sofort
+            lpmRepository.fromCode("card")!!,
+            lpmRepository.fromCode("ideal")!!,
+            lpmRepository.fromCode("sepa_debit")!!,
+            lpmRepository.fromCode("sofort")!!
         )
     }
 
@@ -1003,7 +1003,7 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
-            mock(),
+            resourceRepository,
             mock(),
             mock(),
             Logger.noop(),

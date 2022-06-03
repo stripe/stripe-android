@@ -14,6 +14,8 @@ internal data class VerificationPage(
     val documentCapture: VerificationPageStaticContentDocumentCapturePage,
     @SerialName("document_select")
     val documentSelect: VerificationPageStaticContentDocumentSelectPage,
+    @SerialName("selfie") // TODO(IDPROD-3944) Verify with server change
+    val selfieCapture: VerificationPageStaticContentSelfieCapturePage? = null,
     /* The short-lived URL that can be used in the case that the client cannot support the VerificationSession. */
     @SerialName("fallback_url")
     val fallbackUrl: String,

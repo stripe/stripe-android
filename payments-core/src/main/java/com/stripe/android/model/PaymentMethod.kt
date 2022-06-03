@@ -9,6 +9,8 @@ import com.stripe.android.model.wallets.Wallet
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
+typealias PaymentMethodCode = String
+
 /**
  * [PaymentMethod](https://stripe.com/docs/api/payment_methods) objects represent your customer's
  * payment instruments. They can be used with
@@ -934,8 +936,10 @@ constructor(
         @Parcelize
         enum class USBankAccountHolderType(val value: String) : StripeModel {
             UNKNOWN("unknown"),
+
             // Account belongs to an individual
             INDIVIDUAL("individual"),
+
             // Account belongs to a company
             COMPANY("company")
         }
@@ -943,8 +947,10 @@ constructor(
         @Parcelize
         enum class USBankAccountType(val value: String) : StripeModel {
             UNKNOWN("unknown"),
+
             // Bank account type is checking
             CHECKING("checking"),
+
             // Bank account type is savings
             SAVINGS("savings")
         }

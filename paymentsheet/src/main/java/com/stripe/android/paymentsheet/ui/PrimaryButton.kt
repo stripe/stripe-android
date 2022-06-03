@@ -222,11 +222,13 @@ internal class PrimaryButton @JvmOverloads constructor(
 
 @Composable
 private fun LabelUI(label: String) {
-    Text(
-        text = label,
-        textAlign = TextAlign.Center,
-        style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
-        modifier = Modifier
-            .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
-    )
+    PaymentsTheme {
+        Text(
+            text = label,
+            textAlign = TextAlign.Center,
+            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
+            modifier = Modifier
+                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+        )
+    }
 }

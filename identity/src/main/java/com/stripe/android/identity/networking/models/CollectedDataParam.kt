@@ -2,7 +2,7 @@ package com.stripe.android.identity.networking.models
 
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.networking.UploadedResult
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -16,7 +16,12 @@ internal data class CollectedDataParam(
     @SerialName("id_document_front")
     val idDocumentFront: DocumentUploadParam? = null,
     @SerialName("id_document_back")
-    val idDocumentBack: DocumentUploadParam? = null
+    val idDocumentBack: DocumentUploadParam? = null,
+    // TODO(IDPROD-3944) - verify with server change
+    @SerialName("training_consent")
+    val trainingConsent: Boolean? = null,
+    @SerialName("face")
+    val face: FaceUploadParam? = null
 ) {
     @Serializable
     internal enum class Type {
@@ -44,10 +49,10 @@ internal data class CollectedDataParam(
 
         fun createFromUploadedResultsForAutoCapture(
             type: Type,
-            frontHighResResult: IdentityViewModel.UploadedResult,
-            frontLowResResult: IdentityViewModel.UploadedResult,
-            backHighResResult: IdentityViewModel.UploadedResult? = null,
-            backLowResResult: IdentityViewModel.UploadedResult? = null
+            frontHighResResult: UploadedResult,
+            frontLowResResult: UploadedResult,
+            backHighResResult: UploadedResult? = null,
+            backLowResResult: UploadedResult? = null
         ): CollectedDataParam =
             if (backHighResResult != null && backLowResResult != null) {
                 CollectedDataParam(
@@ -108,5 +113,29 @@ internal data class CollectedDataParam(
                     ),
                     idDocumentType = type
                 )
+
+        fun createForSelfie(
+            firstHighResResult: UploadedResult,
+            firstLowResResult: UploadedResult,
+            lastHighResResult: UploadedResult,
+            lastLowResResult: UploadedResult,
+            bestHighResResult: UploadedResult,
+            bestLowResResult: UploadedResult,
+            trainingConsent: Boolean,
+            faceScoreVariance: Float,
+            numFrames: Int
+        ) = CollectedDataParam(
+            trainingConsent = trainingConsent,
+            face = FaceUploadParam(
+                bestHighResImage = bestHighResResult.uploadedStripeFile.id,
+                bestLowResImage = bestLowResResult.uploadedStripeFile.id,
+                firstHighResImage = firstHighResResult.uploadedStripeFile.id,
+                firstLowResImage = firstLowResResult.uploadedStripeFile.id,
+                lastHighResImage = lastHighResResult.uploadedStripeFile.id,
+                lastLowResImage = lastLowResResult.uploadedStripeFile.id,
+                faceScoreVariance = faceScoreVariance,
+                numFrames = numFrames
+            )
+        )
     }
 }

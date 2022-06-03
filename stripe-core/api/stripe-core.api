@@ -215,7 +215,6 @@ public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/E
 	public static final field IdentityPrivate Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field PciDocument Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field TaxDocumentUserUpload Lcom/stripe/android/core/model/StripeFilePurpose;
-	public final fun getCode ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static fun values ()[Lcom/stripe/android/core/model/StripeFilePurpose;
 }

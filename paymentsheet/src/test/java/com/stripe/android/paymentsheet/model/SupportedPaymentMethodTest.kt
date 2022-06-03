@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -7,6 +9,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,13 +20,16 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
+    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+    private val card = LpmRepository.HardcodedCard
+    private val eps = lpmRepository.fromCode("eps")!!
     /**
      * To create a baseline for a payment method, create a new file <payment_method>-support.csv,
      * comment out the assert in this test, and copy the output into the new csv file
      */
     @Test
     fun `Test supported payment method baseline`() {
-        SupportedPaymentMethod.values()
+        lpmRepository.values()
             .forEach { lpm ->
                 val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
@@ -37,16 +44,18 @@ class SupportedPaymentMethodTest {
 
                         val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                                 testInput.getIntent(lpm),
-                                testInput.getConfig()
+                                testInput.getConfig(),
+                                lpmRepository
                             ).contains(lpm),
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = SupportedPaymentMethod.getPMsToAdd(
+                            supportsAdding = getPMsToAdd(
                                 testInput.getIntent(lpm),
-                                testInput.getConfig()
+                                testInput.getConfig(),
+                                lpmRepository
                             ).contains(lpm)
                         )
                         val actualLine = "${lpm.type.code}, ${
@@ -80,9 +89,9 @@ class SupportedPaymentMethodTest {
         whenever(mockIntent.isLiveMode).thenReturn(false)
         whenever(mockIntent.unactivatedPaymentMethods).thenReturn(emptyList())
 
-        val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
+        val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -92,9 +101,9 @@ class SupportedPaymentMethodTest {
         whenever(mockIntent.isLiveMode).thenReturn(true)
         whenever(mockIntent.unactivatedPaymentMethods).thenReturn(emptyList())
 
-        val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
+        val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -106,7 +115,7 @@ class SupportedPaymentMethodTest {
 
         val expected = listOf<SupportedPaymentMethod>()
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
     }
 
     @Test
@@ -116,9 +125,9 @@ class SupportedPaymentMethodTest {
         whenever(mockIntent.isLiveMode).thenReturn(false)
         whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
 
-        val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
+        val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
     }
 
     /**
@@ -139,14 +148,17 @@ class SupportedPaymentMethodTest {
                             listOf(
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
-                                    intentPMs = setOf(SupportedPaymentMethod.Card.type.code),
+                                    intentPMs = setOf(card.type.code),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
                                     allowsDelayedPayment = delayed
                                 ),
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
-                                    intentPMs = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
+                                    intentPMs = setOf(
+                                        card.type.code,
+                                        eps.type.code
+                                    ),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
                                     allowsDelayedPayment = delayed

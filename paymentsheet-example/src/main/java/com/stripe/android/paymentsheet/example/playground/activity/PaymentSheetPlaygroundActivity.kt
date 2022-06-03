@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.widget.RadioGroup
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -70,6 +71,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
             R.id.currency_usd_button -> CheckoutCurrency.USD
             R.id.currency_aud_button -> CheckoutCurrency.AUD
+            R.id.currency_gbp_button -> CheckoutCurrency.GBP
             else -> CheckoutCurrency.EUR
         }
 
@@ -107,7 +109,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
-            val mode = if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            val mode =
+                if (shouldUseDarkMode) {
+                    AppCompatDelegate.MODE_NIGHT_YES
+                } else {
+                    AppCompatDelegate.MODE_NIGHT_NO
+                }
             AppCompatDelegate.setDefaultNightMode(mode)
         }
         super.onCreate(savedInstanceState)
@@ -187,6 +194,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             } else {
                 disableViews()
             }
+        }
+
+        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
+            // when the currency changes the merchant may change, so the new customer id
+            // created might not match the previous new customer
+            viewModel.temporaryCustomerId = null
         }
 
         disableViews()
@@ -322,12 +335,19 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
 
+        val appearance: PaymentSheet.Appearance = intent.extras?.get(APPEARANCE_EXTRA)?.let {
+            it as PaymentSheet.Appearance
+        } ?: run {
+            PaymentSheet.Appearance()
+        }
+
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
-            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
+            appearance = appearance
         )
     }
 
@@ -393,6 +413,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
+        const val APPEARANCE_EXTRA = "Appearance"
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"

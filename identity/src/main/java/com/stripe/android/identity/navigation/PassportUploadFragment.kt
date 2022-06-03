@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.R
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -25,7 +25,7 @@ internal open class PassportUploadFragment(
     override val frontScanType = IdentityScanState.ScanType.PASSPORT
     override val fragmentId = R.id.passportUploadFragment
 
-    override fun showFrontDone(latestState: IdentityViewModel.UploadState) {
+    override fun showFrontDone(latestState: DocumentUploadState) {
         super.showFrontDone(latestState)
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
@@ -39,7 +39,7 @@ internal open class PassportUploadFragment(
                                 highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
                                     "front uploaded file id is null"
                                 },
-                                uploadMethod = frontResult.uploadMethod
+                                uploadMethod = requireNotNull(frontResult.uploadMethod)
                             ),
                             idDocumentType = CollectedDataParam.Type.PASSPORT
                         )

@@ -1,17 +1,17 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
-object EmailSpec : SectionFieldSpec(IdentifierSpec.Email) {
-    fun transform(initialValues: Map<IdentifierSpec, String?>): SectionFieldElement =
+@Serializable
+data class EmailSpec(
+    override val apiPath: IdentifierSpec = IdentifierSpec.Email
+) : FormItemSpec() {
+    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         EmailElement(
-            this.identifier,
-            SimpleTextFieldController(
-                EmailConfig(),
-                initialValue = initialValues[IdentifierSpec.Email]
-            ),
+            this.apiPath,
+            initialValue = initialValues[IdentifierSpec.Email]
         )
+    )
 }

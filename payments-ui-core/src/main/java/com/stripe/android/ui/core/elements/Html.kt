@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -16,7 +15,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -42,9 +40,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.paymentsColors
 
 private const val LINK_TAG = "URL"
 
@@ -64,9 +61,10 @@ data class EmbeddableImage(
 fun Html(
     html: String,
     imageGetter: Map<String, EmbeddableImage>,
-    modifier: Modifier = Modifier,
     color: Color,
-    style: TextStyle
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
 ) {
     val inlineContentMap = imageGetter.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
@@ -94,15 +92,14 @@ fun Html(
         )
     }
 
-    val annotatedText = annotatedStringResource(html, imageGetter)
+    val annotatedText = annotatedStringResource(html, imageGetter, urlSpanStyle)
 
     val context = LocalContext.current
     ClickableText(
         annotatedText,
-        inlineContent = inlineContentMap,
         modifier = modifier
-            .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item,
+        inlineContent = inlineContentMap,
         color = color,
         style = style,
         onClick = {
@@ -128,6 +125,7 @@ fun Html(
 private fun annotatedStringResource(
     text: String,
     imageGetter: Map<String, EmbeddableImage>,
+    urlSpanStyle: SpanStyle
 ): AnnotatedString {
     val spanned = remember(text) {
         HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -182,7 +180,7 @@ private fun annotatedStringResource(
                         }
                         is URLSpan -> {
                             addStyle(
-                                SpanStyle(textDecoration = TextDecoration.Underline),
+                                urlSpanStyle,
                                 start,
                                 end
                             )
@@ -206,10 +204,10 @@ private fun annotatedStringResource(
 @Composable
 private fun ClickableText(
     text: AnnotatedString,
+    modifier: Modifier = Modifier,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    color: Color = PaymentsTheme.colors.subtitle,
-    style: TextStyle = PaymentsTheme.typography.body2,
+    color: Color = MaterialTheme.paymentsColors.subtitle,
+    style: TextStyle = MaterialTheme.typography.body2,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,

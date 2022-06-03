@@ -159,7 +159,7 @@
 
             <RadioButton
                 android:id="@+id/currency_aud_button"
-                android:text="AUD"
+                android:text="@string/currency_aud"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"
@@ -168,6 +168,13 @@
             <RadioButton
                 android:id="@+id/currency_eur_button"
                 android:text="@string/currency_eur"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
+
+            <RadioButton
+                android:id="@+id/currency_gbp_button"
+                android:text="@string/currency_gbp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:ignore="HardcodedText" />

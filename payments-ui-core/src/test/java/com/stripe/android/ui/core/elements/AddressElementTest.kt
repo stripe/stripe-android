@@ -31,7 +31,7 @@ class AddressElementTest {
             listOf(
                 EmailElement(
                     IdentifierSpec.Email,
-                    SimpleTextFieldController(EmailConfig())
+                    controller = SimpleTextFieldController(EmailConfig())
                 )
             )
         )

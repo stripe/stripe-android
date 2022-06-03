@@ -21,9 +21,11 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -37,7 +39,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -64,7 +66,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
     @InjectorKey val injectorKey: String,
-    resourceRepository: ResourceRepository,
+    val resourceRepository: ResourceRepository,
     val savedStateHandle: SavedStateHandle,
     internal val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : AndroidViewModel(application) {
@@ -92,12 +94,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     internal var supportedPaymentMethods
-        get() = savedStateHandle.get<List<SupportedPaymentMethod>>(
+        get() = savedStateHandle.get<List<PaymentMethodCode>>(
             SAVE_SUPPORTED_PAYMENT_METHOD
-        ) ?: emptyList()
-        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value)
+        )?.mapNotNull {
+            resourceRepository.getLpmRepository().fromCode(it)
+        } ?: emptyList()
+        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.type.code })
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _paymentMethods =
         savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
 
@@ -114,8 +118,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val headerText = MutableLiveData<String>()
     internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    private var addFragmentSelectedLPM =
-        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+    internal var addFragmentSelectedLPM
+        get() = requireNotNull(
+            resourceRepository.getLpmRepository().fromCode(
+                savedStateHandle.get<PaymentMethodCode>(
+                    SAVE_SELECTED_ADD_LPM
+                ) ?: newLpm?.paymentMethodCreateParams?.typeCode
+            ) ?: supportedPaymentMethods.first()
+        )
+        set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.type.code)
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -145,7 +156,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val editing = MutableLiveData(false)
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
@@ -297,8 +308,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * they will be ready in the onViewCreated method of
          * the [BaseAddPaymentMethodFragment]
          */
-        val pmsToAdd = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
-        savedStateHandle[SAVE_SUPPORTED_PAYMENT_METHOD] = pmsToAdd
+        val pmsToAdd = getPMsToAdd(stripeIntent, config, resourceRepository.getLpmRepository())
+        supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
@@ -306,7 +317,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     "None of the requested payment methods" +
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
-                        " (${SupportedPaymentMethod.values().toList()})"
+                        " (${
+                        resourceRepository.getLpmRepository().values()
+                            .map { it.type.code }.toList()
+                        })"
                 )
             )
         }
@@ -369,22 +383,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         updateBelowButtonText(null)
     }
 
-    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
-        savedStateHandle[SAVE_SELECTED_ADD_LPM] = lpm
-    }
-
     fun getAddFragmentSelectedLpm() =
         savedStateHandle.getLiveData(
             SAVE_SELECTED_ADD_LPM,
-            SupportedPaymentMethod.fromCode(
-                newLpm?.paymentMethodCreateParams?.typeCode
-            ) ?: SupportedPaymentMethod.Card
-        )
-
-    fun getAddFragmentSelectedLpmValue() =
-        savedStateHandle.get<SupportedPaymentMethod>(
-            SAVE_SELECTED_ADD_LPM
-        ) ?: SupportedPaymentMethod.Card
+            newLpm?.paymentMethodCreateParams?.typeCode
+        ).map {
+            resourceRepository.getLpmRepository().fromCode(it)
+                ?: supportedPaymentMethods.first()
+        }
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
@@ -454,7 +460,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    fun payWithLink() {
+    fun payWithLink(userInput: UserInput) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
@@ -478,11 +484,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
                 AccountStatus.SignedOut -> {
                     viewModelScope.launch {
-                        linkLauncher.signUpWithUserInput().fold(
+                        linkLauncher.signInWithUserInput(userInput).fold(
                             onSuccess = {
-                                createLinkPaymentDetails(params)
+                                // If successful, the account was fetched or created, so try again
+                                payWithLink(userInput)
                             },
                             onFailure = {
+                                onError(it.localizedMessage)
                                 savedStateHandle[SAVE_PROCESSING] = false
                                 updatePrimaryButtonState(PrimaryButton.State.Ready)
                             }
@@ -537,6 +545,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract fun onFinish()
 
     abstract fun onError(@StringRes error: Int? = null)
+
+    abstract fun onError(error: String? = null)
 
     /**
      * Used to set up any dependencies that require a reference to the current Activity.

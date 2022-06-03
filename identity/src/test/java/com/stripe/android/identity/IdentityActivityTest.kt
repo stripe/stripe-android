@@ -1,6 +1,7 @@
 package com.stripe.android.identity
 
 import android.app.Activity
+import android.app.Application
 import android.net.Uri
 import android.view.View
 import android.widget.ImageButton
@@ -31,8 +32,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(application = TestApplication::class)
 internal class IdentityActivityTest {
     private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
     private val mockAppSettingsOpenable = mock<AppSettingsOpenable>()
@@ -334,5 +337,13 @@ internal class IdentityActivityTest {
             BRAND_LOGO,
             DUMMY_INJECTOR_KEY
         )
+    }
+}
+
+// A material themed application is needed to inflate MaterialToolbar in IdentityActivity
+internal class TestApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        setTheme(R.style.Theme_MaterialComponents_DayNight_NoActionBar)
     }
 }

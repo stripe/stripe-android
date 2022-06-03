@@ -14,11 +14,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.3'
+        classpath 'com.android.tools.build:gradle:7.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.9.0"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.10.0"
         classpath 'com.karumi:shot:5.14.1'
         classpath buildLibs.detektGradlePlugin
     }
@@ -64,7 +64,7 @@ ext {
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
     androidxComposeVersion = '1.1.1'
-    androidxConstraintlayoutComposeVersion = '1.0.0'
+    androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.3'
     androidxCoreVersion = '1.7.0'
     androidxFragmentVersion = '1.4.1'

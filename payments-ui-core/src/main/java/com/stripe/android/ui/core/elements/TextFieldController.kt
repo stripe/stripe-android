@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface TextFieldController : InputController {
-    fun onValueChange(displayFormatted: String)
+    fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
 
     val debugLabel: String
@@ -29,21 +29,35 @@ interface TextFieldController : InputController {
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
     val loading: Flow<Boolean>
+
+    // Whether the TextField should be enabled or not
+    val enabled: Boolean
+        get() = true
+
     // This dictates how the accessibility reader reads the text in the field.
     // Default this to _fieldValue to read the field normally
     val contentDescription: Flow<String>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-data class TextFieldIcon(
-    @DrawableRes
-    val idRes: Int,
-    @StringRes
-    val contentDescription: Int? = null,
+sealed class TextFieldIcon {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Trailing(
+        @DrawableRes
+        val idRes: Int,
+        @StringRes
+        val contentDescription: Int? = null,
 
-    /** If it is an icon that should be tinted to match the text the value should be true */
-    val isIcon: Boolean
-)
+        /** If it is an icon that should be tinted to match the text the value should be true */
+        val isTintable: Boolean
+    ) : TextFieldIcon()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class MultiTrailing(
+        val staticIcons: List<Trailing>,
+        val animatedIcons: List<Trailing>
+    ) : TextFieldIcon()
+}
 
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's
@@ -108,11 +122,18 @@ class SimpleTextFieldController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    override fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String): TextFieldState? {
+        val originalTextStateValue = _fieldState.value
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
+
+        return if (_fieldState.value != originalTextStateValue) {
+            _fieldState.value
+        } else {
+            null
+        }
     }
 
     /**
@@ -124,5 +145,17 @@ class SimpleTextFieldController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    companion object {
+        fun createEmailSectionController(initialValue: String?) = SimpleTextFieldController(
+            EmailConfig(),
+            initialValue = initialValue
+        )
+
+        fun createNameSectionController(initialValue: String?) = SimpleTextFieldController(
+            NameConfig(),
+            initialValue = initialValue
+        )
     }
 }

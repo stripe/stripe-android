@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
@@ -39,13 +39,15 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
-import com.stripe.android.link.ui.signup.PhoneCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
+import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.menu.Checkbox
+import com.stripe.android.ui.core.getBorderStroke
+import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Preview
@@ -55,12 +57,12 @@ private fun Preview() {
         Surface {
             LinkInlineSignup(
                 merchantName = "Example, Inc.",
-                emailElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email@me.co")),
+                emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
                 toggleExpanded = {},
-                onPhoneInput = {},
                 onUserInteracted = {}
             )
         }
@@ -73,7 +75,7 @@ private fun LinkInlineSignup(
     enabled: Boolean,
     onUserInteracted: () -> Unit,
     onSelected: (Boolean) -> Unit,
-    onReady: (Boolean) -> Unit
+    onUserInput: (UserInput?) -> Unit
 ) {
     val viewModel: InlineSignupViewModel = viewModel(
         factory = InlineSignupViewModel.Factory(injector)
@@ -81,28 +83,28 @@ private fun LinkInlineSignup(
 
     val signUpState by viewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
     val isExpanded by viewModel.isExpanded.collectAsState(false)
-    val isReady by viewModel.isReady.collectAsState()
+    val userInput by viewModel.userInput.collectAsState()
 
     onSelected(isExpanded)
-    onReady(isReady)
+    onUserInput(userInput)
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(isReady) {
-        if (isReady) {
-            focusManager.clearFocus()
+    LaunchedEffect(signUpState) {
+        if (signUpState == SignUpState.InputtingEmail && userInput != null) {
+            focusManager.clearFocus(true)
             keyboardController?.hide()
         }
     }
 
     LinkInlineSignup(
         merchantName = viewModel.merchantName,
-        emailElement = viewModel.emailElement,
+        emailController = viewModel.emailController,
+        phoneNumberController = viewModel.phoneController,
         signUpState = signUpState,
         enabled = enabled,
         expanded = isExpanded,
         toggleExpanded = viewModel::toggleExpanded,
-        onPhoneInput = viewModel::onPhoneInput,
         onUserInteracted = onUserInteracted
     )
 }
@@ -110,32 +112,28 @@ private fun LinkInlineSignup(
 @Composable
 internal fun LinkInlineSignup(
     merchantName: String,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
+    phoneNumberController: PhoneNumberController,
     signUpState: SignUpState,
     enabled: Boolean,
     expanded: Boolean,
     toggleExpanded: () -> Unit,
-    onPhoneInput: (String?) -> Unit,
     onUserInteracted: () -> Unit
 ) {
-    var phoneNumber by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
     ) {
-        DefaultLinkTheme {
+        PaymentsTheme {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
-                        width = 1.dp,
-                        color = PaymentsTheme.colors.colorComponentBorder,
-                        shape = PaymentsTheme.shapes.material.medium
+                        border = MaterialTheme.getBorderStroke(isSelected = false),
+                        shape = MaterialTheme.shapes.medium
                     )
                     .background(
-                        color = PaymentsTheme.colors.component,
-                        shape = PaymentsTheme.shapes.material.medium
+                        color = MaterialTheme.paymentsColors.component,
+                        shape = MaterialTheme.shapes.medium
                     )
             ) {
                 Row(
@@ -155,8 +153,8 @@ internal fun LinkInlineSignup(
                     Column {
                         Text(
                             text = stringResource(id = R.string.inline_sign_up_header),
-                            style = PaymentsTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                            color = PaymentsTheme.colors.material.onSurface
+                            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colors.onSurface
                                 .copy(alpha = LocalContentAlpha.current)
                         )
                         Text(
@@ -164,12 +162,13 @@ internal fun LinkInlineSignup(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 4.dp),
-                            style = PaymentsTheme.typography.body1,
-                            color = PaymentsTheme.colors.material.onSurface
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onSurface
                                 .copy(alpha = LocalContentAlpha.current)
                         )
                     }
                 }
+
                 AnimatedVisibility(
                     visible = expanded,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -181,7 +180,7 @@ internal fun LinkInlineSignup(
                     ) {
                         EmailCollectionSection(
                             enabled = enabled,
-                            emailElement = emailElement,
+                            emailController = emailController,
                             signUpState = signUpState
                         )
 
@@ -189,23 +188,13 @@ internal fun LinkInlineSignup(
                             visible = signUpState == SignUpState.InputtingPhone
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
-                                // TODO(brnunes-stripe): Migrate to phone number collection element
-                                PhoneCollectionSection(
-                                    phoneNumber = phoneNumber,
-                                    onPhoneNumberChanged = {
-                                        phoneNumber = it
-                                        if (phoneNumber.length == 10) {
-                                            onPhoneInput(phoneNumber)
-                                            keyboardController?.hide()
-                                        } else {
-                                            onPhoneInput(null)
-                                        }
-                                    }
+                                PhoneNumberCollectionSection(
+                                    enabled = enabled,
+                                    phoneNumberController = phoneNumberController,
+                                    requestFocusWhenShown = true
                                 )
                                 LinkTerms(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 16.dp),
+                                    modifier = Modifier.padding(top = 8.dp),
                                     textAlign = TextAlign.Left
                                 )
                             }
@@ -236,11 +225,12 @@ class LinkInlineSignupView @JvmOverloads constructor(
     var hasUserInteracted = false
 
     /**
-     * Whether enough information has been collected to proceed with the payment flow.
-     * This will be true when the user has entered an email that already has a link account and just
-     * needs verification, or when they entered a new email and phone number.
+     * The collected input from the user, always valid unless null.
+     * When not null, enough information has been collected to proceed with the payment flow.
+     * This means that the user has entered an email that already has a link account and just
+     * needs verification, or entered a new email and phone number.
      */
-    val isReady = MutableStateFlow(true)
+    val userInput = MutableStateFlow<UserInput?>(null)
 
     val isSelected = MutableStateFlow(false)
 
@@ -260,7 +250,7 @@ class LinkInlineSignupView @JvmOverloads constructor(
                     enabled = enabledState,
                     onUserInteracted = { hasUserInteracted = true },
                     onSelected = { isSelected.value = it },
-                    onReady = { isReady.value = it }
+                    onUserInput = { userInput.value = it }
                 )
             }
         }

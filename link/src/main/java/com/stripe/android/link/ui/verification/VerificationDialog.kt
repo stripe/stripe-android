@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.verification
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,13 +14,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.LinkAppBar
 
 /**
@@ -40,7 +39,10 @@ fun LinkVerificationDialog(
     // dialog is dismissed, and when called again a new scope is created.
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "dialog") {
+    NavHost(
+        navController = navController,
+        startDestination = "dialog"
+    ) {
         composable("dialog") {
             var openDialog by remember { mutableStateOf(true) }
 
@@ -53,23 +55,21 @@ fun LinkVerificationDialog(
                         onDismissRequest = {
                             openDialog = false
                             verificationCallback(false)
-                        }
+                        },
+                        properties = DialogProperties(usePlatformDefaultWidth = false),
                     ) {
                         DefaultLinkTheme {
                             Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .border(
-                                        width = 1.dp,
-                                        color = MaterialTheme.linkColors.disabledText,
-                                        shape = MaterialTheme.shapes.medium
-                                    ),
+                                    .padding(16.dp),
                                 shape = MaterialTheme.shapes.medium
                             ) {
-                                Column(Modifier.padding(horizontal = 20.dp)) {
+                                Column {
                                     LinkAppBar(
                                         email = account.email,
-                                        onCloseButtonClick = {
+                                        isRootScreen = true,
+                                        onButtonClick = {
                                             openDialog = false
                                             verificationCallback(false)
                                         }

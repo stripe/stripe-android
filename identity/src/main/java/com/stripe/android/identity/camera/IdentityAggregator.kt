@@ -7,9 +7,17 @@ import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.IdentityScanStateTransitioner
 
+/**
+ * [ResultAggregator] for Identity.
+ *
+ * Initialize the [IdentityScanState.Initial] state with corresponding
+ * [IdentityScanStateTransitioner] based on [IdentityScanState.ScanType].
+ */
 internal class IdentityAggregator(
     identityScanType: IdentityScanState.ScanType,
     aggregateResultListener: AggregateResultListener<InterimResult, FinalResult>,
@@ -24,11 +32,17 @@ internal class IdentityAggregator(
     aggregateResultListener,
     IdentityScanState.Initial(
         type = identityScanType,
-        transitioner = IDDetectorTransitioner(
-            timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
-            iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
-            timeRequired = verificationPage.documentCapture.motionBlurMinDuration
-        )
+        transitioner =
+        if (identityScanType == IdentityScanState.ScanType.SELFIE) {
+            FaceDetectorTransitioner(
+                requireNotNull(verificationPage.selfieCapture)
+            )
+        } else
+            IDDetectorTransitioner(
+                timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
+                iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
+                timeRequired = verificationPage.documentCapture.motionBlurMinDuration
+            )
     ),
     statsName = null
 ) {
@@ -50,13 +64,18 @@ internal class IdentityAggregator(
     ): Pair<InterimResult, FinalResult?> {
         if (isFirstResultReceived) {
             val previousState = state
-            state = previousState.consumeTransition(result)
+            state = previousState.consumeTransition(frame, result)
             val interimResult = InterimResult(state)
-            return if (state.isFinal) {
-                interimResult to FinalResult(frame, result, state)
-            } else {
-                interimResult to null
-            }
+            return interimResult to
+                if (state.isFinal) {
+                    FinalResult(
+                        frame,
+                        result,
+                        state
+                    )
+                } else {
+                    null
+                }
         } else {
             // If this is the very first result, don't transition state and post InterimResult with
             // current state(IdentityScanState.Initial).

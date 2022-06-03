@@ -6,27 +6,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,19 +28,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkTextFieldColors
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.SectionCard
-import com.stripe.android.ui.core.elements.SectionController
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionElementUI
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
+import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.elements.TextFieldSection
 
 @Preview
 @Composable
@@ -55,12 +50,11 @@ private fun SignUpBodyPreview() {
         Surface {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailElement = EmailSpec.transform(
-                    mapOf(
-                        IdentifierSpec.Email to "email"
-                    )
-                ),
+                emailController = SimpleTextFieldController.createEmailSectionController("email"),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 signUpState = SignUpState.InputtingPhone,
+                isReadyToSignUp = false,
+                errorMessage = null,
                 onSignUpClick = {}
             )
         }
@@ -79,12 +73,17 @@ internal fun SignUpBody(
         )
     )
 
-    val signUpStatus by signUpViewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
+    val signUpState by signUpViewModel.signUpState.collectAsState()
+    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState(false)
+    val errorMessage by signUpViewModel.errorMessage.collectAsState()
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
-        emailElement = signUpViewModel.emailElement,
-        signUpState = signUpStatus,
+        emailController = signUpViewModel.emailController,
+        phoneNumberController = signUpViewModel.phoneController,
+        signUpState = signUpState,
+        isReadyToSignUp = isReadyToSignUp,
+        errorMessage = errorMessage,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
 }
@@ -92,25 +91,24 @@ internal fun SignUpBody(
 @Composable
 internal fun SignUpBody(
     merchantName: String,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
+    phoneNumberController: PhoneNumberController,
     signUpState: SignUpState,
-    onSignUpClick: (String) -> Unit
+    isReadyToSignUp: Boolean,
+    errorMessage: ErrorMessage?,
+    onSignUpClick: () -> Unit
 ) {
-    if (signUpState == SignUpState.VerifyingEmail) {
-        LocalFocusManager.current.clearFocus()
-    }
-
-    var phoneNumber by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    ScrollableTopLevelColumn {
         Text(
-            text = stringResource(R.string.sign_up_header),
+            text = stringResource(
+                if (signUpState == SignUpState.InputtingPhone) {
+                    R.string.sign_up_header_new_user
+                } else {
+                    R.string.sign_up_header
+                }
+            ),
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
@@ -126,37 +124,42 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        EmailCollectionSection(
-            enabled = true,
-            emailElement = emailElement,
-            signUpState = signUpState
-        )
+        PaymentsThemeForLink {
+            EmailCollectionSection(
+                enabled = true,
+                emailController = emailController,
+                signUpState = signUpState
+            )
+        }
         AnimatedVisibility(
             visible = signUpState == SignUpState.InputtingPhone
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // TODO(brnunes-stripe): Migrate to phone number collection element
-                PhoneCollectionSection(
-                    phoneNumber = phoneNumber,
-                    onPhoneNumberChanged = {
-                        phoneNumber = it
-                    }
-                )
-                LinkTerms(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
-                    textAlign = TextAlign.Center
-                )
+                PaymentsThemeForLink {
+                    PhoneNumberCollectionSection(
+                        enabled = true,
+                        phoneNumberController = phoneNumberController,
+                        requestFocusWhenShown = true
+                    )
+                    LinkTerms(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                errorMessage?.let {
+                    ErrorText(text = it.getMessage(LocalContext.current.resources))
+                }
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),
-                    state = if (phoneNumber.length == 10) {
+                    state = if (isReadyToSignUp) {
                         PrimaryButtonState.Enabled
                     } else {
                         PrimaryButtonState.Disabled
                     }
                 ) {
-                    onSignUpClick(phoneNumber)
+                    onSignUpClick()
                     keyboardController?.hide()
                 }
             }
@@ -167,7 +170,7 @@ internal fun SignUpBody(
 @Composable
 internal fun EmailCollectionSection(
     enabled: Boolean,
-    emailElement: SectionFieldElement,
+    emailController: TextFieldController,
     signUpState: SignUpState
 ) {
     Box(
@@ -176,18 +179,14 @@ internal fun EmailCollectionSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        SectionElementUI(
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
-            element = SectionElement(
-                identifier = IdentifierSpec.Email,
-                fields = listOf(emailElement),
-                controller = SectionController(
-                    null,
-                    listOf(emailElement.sectionFieldErrorController())
-                )
-            ),
-            emptyList(),
-            emailElement.identifier
+        TextFieldSection(
+            textFieldController = emailController,
+            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+                ImeAction.Next
+            } else {
+                ImeAction.Done
+            },
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail
         )
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
@@ -204,36 +203,6 @@ internal fun EmailCollectionSection(
                     },
                 color = MaterialTheme.linkColors.buttonLabel,
                 strokeWidth = 2.dp
-            )
-        }
-    }
-}
-
-@Composable
-internal fun PhoneCollectionSection(
-    phoneNumber: String,
-    onPhoneNumberChanged: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SectionCard {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = phoneNumber,
-                onValueChange = onPhoneNumberChanged,
-                label = {
-                    Text(text = "Mobile Number")
-                },
-                shape = MaterialTheme.shapes.medium,
-                colors = linkTextFieldColors(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone,
-                    imeAction = ImeAction.Go
-                ),
-                singleLine = true
             )
         }
     }

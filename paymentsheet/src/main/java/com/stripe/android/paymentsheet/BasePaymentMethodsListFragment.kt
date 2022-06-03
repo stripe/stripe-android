@@ -6,6 +6,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -78,19 +79,19 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     private fun setEditMenuText() {
+        val context = context ?: return
+        val appearance = sheetViewModel.config?.appearance ?: return
         editMenuItem?.apply {
-            context?.let {
-                title = createTextSpanFromTextStyle(
-                    text = getString(if (isEditing) R.string.done else R.string.edit),
-                    context = it,
-                    fontSizeDp = (
-                        PaymentsThemeDefaults.typography.fontSizeMultiplier
-                            * PaymentsThemeDefaults.typography.smallFontSize.value
-                        ).dp,
-                    color = PaymentsThemeDefaults.colors(it.isSystemDarkTheme()).appBarIcon,
-                    fontFamily = PaymentsThemeDefaults.typography.fontFamily
-                )
-            }
+            title = createTextSpanFromTextStyle(
+                text = getString(if (isEditing) R.string.done else R.string.edit),
+                context = context,
+                fontSizeDp = (
+                    appearance.typography.sizeScaleFactor
+                        * PaymentsThemeDefaults.typography.smallFontSize.value
+                    ).dp,
+                color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
+                fontFamily = appearance.typography.fontResId
+            )
         }
     }
 
@@ -125,12 +126,12 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter = PaymentOptionsAdapter(
+            sheetViewModel.resourceRepository.getLpmRepository(),
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,
-            addCardClickListener = {
-                transitionToAddPaymentMethod()
-            }
+            addCardClickListener = ::transitionToAddPaymentMethod,
+            linkClickListener = sheetViewModel::launchLink
         ).also {
             viewBinding.recycler.adapter = it
         }
@@ -139,6 +140,7 @@ internal abstract class BasePaymentMethodsListFragment(
             config,
             sheetViewModel.paymentMethods.value.orEmpty(),
             sheetViewModel is PaymentOptionsViewModel,
+            sheetViewModel is PaymentOptionsViewModel && sheetViewModel.isLinkEnabled.value == true,
             sheetViewModel.selection.value
         )
 

@@ -5,9 +5,9 @@ import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import org.mockito.kotlin.mock
 
@@ -35,7 +35,30 @@ internal object PaymentSheetFixtures {
         googlePay = ConfigFixtures.GOOGLE_PAY,
         primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
-        allowsDelayedPaymentMethods = true
+        allowsDelayedPaymentMethods = true,
+        appearance = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.defaultLight.copy(primary = 0),
+            colorsDark = PaymentSheet.Colors.defaultDark.copy(primary = 0),
+            shapes = PaymentSheet.Shapes(
+                cornerRadiusDp = 0.0f,
+                borderStrokeWidthDp = 0.0f
+            ),
+            typography = PaymentSheet.Typography.default.copy(
+                sizeScaleFactor = 1.1f,
+                fontResId = 0,
+            ),
+            primaryButton = PaymentSheet.PrimaryButton(
+                colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
+                colorsDark = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
+                shape = PaymentSheet.PrimaryButtonShape(
+                    cornerRadiusDp = 0.0f,
+                    borderStrokeWidthDp = 20.0f,
+                ),
+                typography = PaymentSheet.PrimaryButtonTypography(
+                    fontResId = 0
+                )
+            )
+        )
     )
 
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
@@ -106,7 +129,7 @@ internal object PaymentSheetFixtures {
 
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormFragmentArguments(
-            SupportedPaymentMethod.Bancontact,
+            PaymentMethod.Type.Bancontact.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",

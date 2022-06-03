@@ -153,6 +153,7 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 
 public final class com/stripe/android/model/CardBrand$Companion {
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
+	public final fun getOrderedBrands ()Ljava/util/List;
 }
 
 public final class com/stripe/android/model/CardFunding : java/lang/Enum {

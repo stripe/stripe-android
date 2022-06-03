@@ -245,6 +245,7 @@ class PlaygroundTestDriver(
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
+        selectors.automatic.click()
         selectors.currency.click()
         selectors.checkout.click()
         selectors.delayed.click()
@@ -372,6 +373,10 @@ class PlaygroundTestDriver(
         intent.putExtra(
             PaymentSheetPlaygroundActivity.FORCE_DARK_MODE_EXTRA,
             testParameters.forceDarkMode
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
+            testParameters.appearance
         )
         intent.putExtra(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,

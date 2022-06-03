@@ -15,9 +15,8 @@ import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -81,23 +80,25 @@ internal class LinkInlineSignupViewTest {
 
     private fun setContent(
         merchantName: String = "Example, Inc.",
-        emailElement: SectionFieldElement = EmailSpec.transform(mapOf(IdentifierSpec.Email to "email@me.co")),
+        emailElement: SimpleTextFieldController = SimpleTextFieldController.createEmailSectionController(
+            "email@me.co"
+        ),
+        phoneController: PhoneNumberController = PhoneNumberController.createPhoneNumberController(),
         signUpState: SignUpState = SignUpState.InputtingEmail,
         enabled: Boolean = true,
         expanded: Boolean = true,
         toggleExpanded: () -> Unit = {},
-        onPhoneInput: (String?) -> Unit = {},
         onUserInteracted: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             LinkInlineSignup(
                 merchantName,
                 emailElement,
+                phoneController,
                 signUpState,
                 enabled,
                 expanded,
                 toggleExpanded,
-                onPhoneInput,
                 onUserInteracted
             )
         }
@@ -105,6 +106,6 @@ internal class LinkInlineSignupViewTest {
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
-    private fun onPhoneField() = composeTestRule.onNodeWithText("Mobile Number")
+    private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
 }

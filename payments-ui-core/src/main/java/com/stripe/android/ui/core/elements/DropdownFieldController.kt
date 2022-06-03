@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
@@ -17,9 +18,9 @@ class DropdownFieldController(
     private val config: DropdownConfig,
     initialValue: String? = null
 ) : InputController, SectionFieldErrorController {
-    val displayItems: List<String> = config.getDisplayItems()
+    val displayItems: List<String> = config.displayItems
     private val _selectedIndex = MutableStateFlow(0)
-    val selectedIndex: Flow<Int> = _selectedIndex
+    val selectedIndex: StateFlow<Int> = _selectedIndex
     override val label: Flow<Int> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.map { displayItems[it] }
     override val rawFieldValue = fieldValue.map { config.convertToRaw(it) }
@@ -31,9 +32,16 @@ class DropdownFieldController(
             FormFieldEntry(value, complete)
         }
 
+    val tinyMode = config.tinyMode
+
     init {
         initialValue?.let { onRawValueChange(it) }
     }
+
+    /**
+     * Get the label for the selected item, shown when the dropdown list is collapsed.
+     */
+    fun getSelectedItemLabel(index: Int) = config.getSelectedItemLabel(index)
 
     /**
      * This is called when the value changed to is a display value.
