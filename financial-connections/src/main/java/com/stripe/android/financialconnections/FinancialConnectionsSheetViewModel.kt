@@ -36,8 +36,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         // avoid re-fetching manifest if already exists (this will happen on process recreations)
         if (initialState.manifest == null) {
             fetchManifest()
-        } else {
-            onActivityRecreated()
         }
     }
 
@@ -98,7 +96,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @see onResume (we rely on this on regular flows)
      * @see onActivityResult (we rely on this on config changes)
      */
-    private fun onActivityRecreated() {
+    fun onActivityRecreated() {
         setState {
             copy(
                 activityRecreated = true

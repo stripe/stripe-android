@@ -25,6 +25,7 @@ internal class FinancialConnectionsSheetActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.onEach { postInvalidate() }
+        if (savedInstanceState != null) viewModel.onActivityRecreated()
     }
 
     override fun onResume() {
@@ -50,15 +51,17 @@ internal class FinancialConnectionsSheetActivity :
      */
     override fun invalidate() {
         withState(viewModel) { state ->
-            state.viewEffect?.let {
-                when (it) {
+            state.viewEffect?.let { viewEffect ->
+                when (viewEffect) {
                     is OpenAuthFlowWithUrl -> startForResult.launch(
                         CreateBrowserIntentForUrl(
                             context = this,
-                            uri = Uri.parse(it.url),
+                            uri = Uri.parse(viewEffect.url),
                         )
                     )
-                    is FinishWithResult -> finishWithResult(it.result)
+                    is FinishWithResult -> finishWithResult(
+                        viewEffect.result
+                    )
                 }
                 viewModel.onViewEffectLaunched()
             }
