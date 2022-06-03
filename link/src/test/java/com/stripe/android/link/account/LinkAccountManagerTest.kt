@@ -117,6 +117,16 @@ class LinkAccountManagerTest {
     }
 
     @Test
+    fun `When cookie is invalid it is deleted after consumer lookup`() = runSuspendTest {
+        mockNonexistentAccountLookup()
+        val accountManager = accountManager()
+
+        accountManager.lookupConsumer(null)
+
+        verify(cookieStore).updateAuthSessionCookie("")
+    }
+
+    @Test
     fun `signInWithUserInput sends correct parameters and starts session`() = runSuspendTest {
         val accountManager = accountManager()
 
@@ -295,6 +305,14 @@ class LinkAccountManagerTest {
         }
         val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
             whenever(consumerSession).thenReturn(mockConsumerSession)
+        }
+        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(consumerSessionLookup))
+    }
+
+    private suspend fun mockNonexistentAccountLookup() {
+        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
+            whenever(exists).thenReturn(false)
         }
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(consumerSessionLookup))

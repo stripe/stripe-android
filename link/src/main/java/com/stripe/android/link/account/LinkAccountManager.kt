@@ -80,6 +80,11 @@ internal class LinkAccountManager @Inject constructor(
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
             .map { consumerSessionLookup ->
+                if (email == null && !consumerSessionLookup.exists) {
+                    // Lookup with cookie-only failed, so cookie is invalid
+                    cookieStore.updateAuthSessionCookie("")
+                }
+
                 consumerSessionLookup.consumerSession?.let { consumerSession ->
                     LinkAccount(consumerSession)
                 }
