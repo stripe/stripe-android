@@ -13,6 +13,7 @@ import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -58,7 +59,7 @@ internal enum class FieldType(
     AdministrativeArea(
         "administrativeArea",
         IdentifierSpec.State,
-        NameType.state.stringResId,
+        NameType.State.stringResId,
         KeyboardCapitalization.Words
     ),
     Name(
@@ -75,52 +76,85 @@ internal enum class FieldType(
     }
 }
 
+@Serializable
 internal enum class NameType(@StringRes val stringResId: Int) {
-    area(R.string.address_label_hk_area),
-    cedex(R.string.address_label_cedex),
-    city(R.string.address_label_city),
-    country(R.string.address_label_country),
-    county(R.string.address_label_county),
-    department(R.string.address_label_department),
-    district(R.string.address_label_district),
-    do_si(R.string.address_label_kr_do_si),
-    eircode(R.string.address_label_ie_eircode),
-    emirate(R.string.address_label_ae_emirate),
-    island(R.string.address_label_island),
-    neighborhood(R.string.address_label_neighborhood),
-    oblast(R.string.address_label_oblast),
-    parish(R.string.address_label_bb_jm_parish),
-    pin(R.string.address_label_in_pin),
-    post_town(R.string.address_label_post_town),
-    postal(R.string.address_label_postal_code),
-    prefecture(R.string.address_label_jp_prefecture),
-    province(R.string.address_label_province),
-    state(R.string.address_label_state),
-    suburb(R.string.address_label_suburb),
-    suburb_or_city(R.string.address_label_au_suburb_or_city),
-    townland(R.string.address_label_ie_townland),
-    village_township(R.string.address_label_village_township),
-    zip(R.string.address_label_zip_code)
+    @SerialName("area")
+    Area(R.string.address_label_hk_area),
+    @SerialName("cedex")
+    Cedex(R.string.address_label_cedex),
+    @SerialName("city")
+    City(R.string.address_label_city),
+    @SerialName("country")
+    Country(R.string.address_label_country),
+    @SerialName("county")
+    County(R.string.address_label_county),
+    @SerialName("department")
+    Department(R.string.address_label_department),
+    @SerialName("district")
+    District(R.string.address_label_district),
+    @SerialName("do_si")
+    DoSi(R.string.address_label_kr_do_si),
+    @SerialName("eircode")
+    Eircode(R.string.address_label_ie_eircode),
+    @SerialName("emirate")
+    Emirate(R.string.address_label_ae_emirate),
+    @SerialName("island")
+    Island(R.string.address_label_island),
+    @SerialName("neighborhood")
+    Neighborhood(R.string.address_label_neighborhood),
+    @SerialName("oblast")
+    Oblast(R.string.address_label_oblast),
+    @SerialName("parish")
+    Parish(R.string.address_label_bb_jm_parish),
+    @SerialName("pin")
+    Pin(R.string.address_label_in_pin),
+    @SerialName("post_town")
+    PostTown(R.string.address_label_post_town),
+    @SerialName("postal")
+    Postal(R.string.address_label_postal_code),
+    @SerialName("prefecture")
+    Perfecture(R.string.address_label_jp_prefecture),
+    @SerialName("province")
+    Province(R.string.address_label_province),
+    @SerialName("state")
+    State(R.string.address_label_state),
+    @SerialName("suburb")
+    Suburb(R.string.address_label_suburb),
+    @SerialName("suburb_or_city")
+    SuburbOrCity(R.string.address_label_au_suburb_or_city),
+    @SerialName("townland")
+    Townload(R.string.address_label_ie_townland),
+    @SerialName("village_township")
+    VillageTownship(R.string.address_label_village_township),
+    @SerialName("zip")
+    Zip(R.string.address_label_zip_code)
 }
 
 @Serializable
 internal class StateSchema(
-    val isoID: String, // sometimes empty string (i.e. Armed Forces (AP))
-    val key: String, // abbreviation: TODO: How is it used?
+    @SerialName("key")
+    val key: String, // abbreviation
+    @SerialName("name")
     val name: String, // display name
 )
 
 @Serializable
 internal class FieldSchema(
+    @SerialName("isNumeric")
     val isNumeric: Boolean = false,
+    @SerialName("examples")
     val examples: List<String> = emptyList(),
+    @SerialName("nameType")
     val nameType: NameType, // label,
 )
 
 @Serializable
 internal class CountryAddressSchema(
+    @SerialName("type")
     val type: FieldType?,
+    @SerialName("required")
     val required: Boolean,
+    @SerialName("schema")
     val schema: FieldSchema? = null
 )
 
