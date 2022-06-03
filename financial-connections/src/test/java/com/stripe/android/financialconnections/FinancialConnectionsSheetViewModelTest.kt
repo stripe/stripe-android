@@ -239,7 +239,6 @@ class FinancialConnectionsSheetViewModelTest {
     fun `onActivityResult - when flow is still active and config changed, finish with Result#Cancelled`() {
         runTest {
             // Given
-            // simulate a config change (initial state has a persisted manifest and ongoing authFlow)
             val viewModel = createViewModel(
                 defaultInitialState.copy(
                     manifest = manifest,
@@ -248,6 +247,8 @@ class FinancialConnectionsSheetViewModelTest {
             )
 
             // When
+            // simulate a config change
+            viewModel.onActivityRecreated()
             // auth flow ends (activity received result without new intent received)
             viewModel.onActivityResult()
 
