@@ -1,19 +1,15 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,10 +21,15 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.primaryButtonLabel
-import com.stripe.android.ui.core.DefaultPaymentsTheme
 
 @Preview
 @Composable
@@ -39,8 +40,10 @@ private fun PaymentMethodBodyPreview() {
                 isProcessing = false,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonEnabled = true,
+                secondaryButtonLabel = "Cancel",
+                errorMessage = null,
                 onPrimaryButtonClick = {},
-                onPayAnotherWayClick = {},
+                onSecondaryButtonClick = {},
             ) {}
         }
     }
@@ -55,26 +58,25 @@ internal fun PaymentMethodBody(
         factory = PaymentMethodViewModel.Factory(linkAccount, injector)
     )
 
-    val formViewModel: FormViewModel = viewModel(
-        factory = FormViewModel.Factory(viewModel.paymentMethod.formSpec, injector)
-    )
-
-    val formValues by formViewModel.completeFormValues.collectAsState(null)
-    val isProcessing by viewModel.isProcessing.collectAsState(false)
+    val formValues by viewModel.formController.completeFormValues.collectAsState(null)
+    val isProcessing by viewModel.isProcessing.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     PaymentMethodBody(
         isProcessing = isProcessing,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         primaryButtonEnabled = formValues != null,
+        secondaryButtonLabel = stringResource(id = viewModel.secondaryButtonLabel),
+        errorMessage = errorMessage,
         onPrimaryButtonClick = {
             formValues?.let {
                 viewModel.startPayment(it)
             }
         },
-        onPayAnotherWayClick = viewModel::payAnotherWay
+        onSecondaryButtonClick = viewModel::onSecondaryButtonClick
     ) {
         Form(
-            formViewModel,
+            viewModel.formController,
             viewModel.isEnabled
         )
     }
@@ -85,17 +87,13 @@ internal fun PaymentMethodBody(
     isProcessing: Boolean,
     primaryButtonLabel: String,
     primaryButtonEnabled: Boolean,
+    secondaryButtonLabel: String,
+    errorMessage: ErrorMessage?,
     onPrimaryButtonClick: () -> Unit,
-    onPayAnotherWayClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    ScrollableTopLevelColumn {
         Text(
             text = stringResource(R.string.pm_add_new_card),
             modifier = Modifier
@@ -104,8 +102,12 @@ internal fun PaymentMethodBody(
             style = MaterialTheme.typography.h2,
             color = MaterialTheme.colors.onPrimary
         )
-        DefaultPaymentsTheme {
+        PaymentsThemeForLink {
             formContent()
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        errorMessage?.let {
+            ErrorText(text = it.getMessage(LocalContext.current.resources))
         }
         PrimaryButton(
             label = primaryButtonLabel,
@@ -117,21 +119,10 @@ internal fun PaymentMethodBody(
             icon = R.drawable.stripe_ic_lock,
             onButtonClick = onPrimaryButtonClick
         )
-        TextButton(
-            onClick = onPayAnotherWayClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+        SecondaryButton(
             enabled = !isProcessing,
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.secondary
-            )
-        ) {
-            Text(
-                text = stringResource(id = R.string.wallet_pay_another_way),
-                color = MaterialTheme.colors.onSecondary
-            )
-        }
+            label = secondaryButtonLabel,
+            onClick = onSecondaryButtonClick
+        )
     }
 }

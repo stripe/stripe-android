@@ -29,21 +29,35 @@ interface TextFieldController : InputController {
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
     val loading: Flow<Boolean>
+
+    // Whether the TextField should be enabled or not
+    val enabled: Boolean
+        get() = true
+
     // This dictates how the accessibility reader reads the text in the field.
     // Default this to _fieldValue to read the field normally
     val contentDescription: Flow<String>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-data class TextFieldIcon(
-    @DrawableRes
-    val idRes: Int,
-    @StringRes
-    val contentDescription: Int? = null,
+sealed class TextFieldIcon {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Trailing(
+        @DrawableRes
+        val idRes: Int,
+        @StringRes
+        val contentDescription: Int? = null,
 
-    /** If it is an icon that should be tinted to match the text the value should be true */
-    val isIcon: Boolean
-)
+        /** If it is an icon that should be tinted to match the text the value should be true */
+        val isTintable: Boolean
+    ) : TextFieldIcon()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class MultiTrailing(
+        val staticIcons: List<Trailing>,
+        val animatedIcons: List<Trailing>
+    ) : TextFieldIcon()
+}
 
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's

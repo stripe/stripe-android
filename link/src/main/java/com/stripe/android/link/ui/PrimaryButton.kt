@@ -118,3 +118,27 @@ internal fun PrimaryButton(
         }
     }
 }
+
+@Composable
+internal fun SecondaryButton(
+    enabled: Boolean,
+    label: String,
+    onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = enabled,
+        shape = MaterialTheme.shapes.medium,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary
+        )
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.linkColors.secondaryButtonLabel
+        )
+    }
+}

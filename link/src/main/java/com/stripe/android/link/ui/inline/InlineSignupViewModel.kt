@@ -11,6 +11,7 @@ import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,13 +35,22 @@ internal class InlineSignupViewModel @Inject constructor(
         prefilledEmail
     )
 
+    val phoneController: PhoneNumberController =
+        PhoneNumberController.createPhoneNumberController()
+
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> =
-        emailController.formFieldValue.map {
-            it.takeIf { it.isComplete }?.value
-        }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
+        emailController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
+
+    /**
+     * Emits the phone number entered in the form if valid, null otherwise.
+     */
+    private val consumerPhoneNumber: StateFlow<String?> =
+        phoneController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
@@ -48,60 +58,72 @@ internal class InlineSignupViewModel @Inject constructor(
     val isExpanded = MutableStateFlow(false)
 
     /**
-     * Whether we have enough information to proceed with the payment flow.
-     * This will be true when the user has entered an email that already has a link account and just
-     * needs verification, or when they entered a new email and phone number.
+     * The collected input from the user, always valid unless null.
+     * When not null, enough information has been collected to proceed with the payment flow.
+     * This means that the user has entered an email that already has a link account and just
+     * needs verification, or entered a new email and phone number.
      */
-    val isReady = MutableStateFlow(false)
+    val userInput = MutableStateFlow<UserInput?>(null)
     private var hasExpanded = false
 
     private var debouncer = SignUpViewModel.Debouncer(prefilledEmail)
 
     fun toggleExpanded() {
         isExpanded.value = !isExpanded.value
-        // First time user checks the box, start listening to email input
+        // First time user checks the box, start listening to inputs
         if (isExpanded.value && !hasExpanded) {
             hasExpanded = true
-            debouncer.startWatching(
-                coroutineScope = viewModelScope,
-                emailFlow = consumerEmail,
-                onStateChanged = {
-                    _signUpStatus.value = it
-                    if (it == SignUpState.InputtingEmail || it == SignUpState.InputtingPhone) {
-                        isReady.value = false
-                    }
-                },
-                onValidEmailEntered = {
-                    viewModelScope.launch {
-                        lookupConsumerEmail(it)
-                    }
-                }
-            )
+            watchUserInput()
         }
     }
 
-    fun onPhoneInput(phoneNumber: String?) {
-        // Email must be valid otherwise phone number collection UI would not be visible
-        val email = requireNotNull(consumerEmail.value)
+    private fun watchUserInput() {
+        debouncer.startWatching(
+            coroutineScope = viewModelScope,
+            emailFlow = consumerEmail,
+            onStateChanged = {
+                _signUpStatus.value = it
+                if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
+                    userInput.value = null
+                } else if (it == SignUpState.InputtingPhone) {
+                    onPhoneInput(consumerPhoneNumber.value)
+                }
+            },
+            onValidEmailEntered = {
+                viewModelScope.launch {
+                    lookupConsumerEmail(it)
+                }
+            }
+        )
+
+        viewModelScope.launch {
+            consumerPhoneNumber.collect {
+                onPhoneInput(it)
+            }
+        }
+    }
+
+    private fun onPhoneInput(phoneNumber: String?) {
         if (phoneNumber != null) {
-            // TODO(brnunes-stripe): Use actual formatted value from phone number collection UI.
-            linkAccountManager.userSignUpInput =
-                LinkAccountManager.UserSignUpInput(email, "+1$phoneNumber", "US")
-            isReady.value = true
+            // Email must be valid otherwise phone number collection UI would not be visible
+            val email = requireNotNull(consumerEmail.value)
+            val phone = phoneController.getE164PhoneNumber(phoneNumber)
+            val country = phoneController.getCountryCode()
+
+            userInput.value = UserInput.SignUp(email, phone, country)
         } else {
-            linkAccountManager.userSignUpInput = null
-            isReady.value = false
+            userInput.value = null
         }
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
-        linkAccountManager.lookupConsumer(email, startVerification = false).fold(
+        linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
-                    isReady.value = true
+                    userInput.value = UserInput.SignIn(email)
                     _signUpStatus.value = SignUpState.InputtingEmail
                 } else {
-                    isReady.value = false
+                    userInput.value = null
                     _signUpStatus.value = SignUpState.InputtingPhone
                 }
             },

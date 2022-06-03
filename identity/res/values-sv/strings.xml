@@ -62,7 +62,7 @@
   <!-- Label of the passport option for document type selection -->
   <string name="passport">Pass</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
-  <string name="passport_selected">Passet är markerat</string>
+  <string name="passport_selected">Pass är markerat</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="position_dl_back">Vänd på körkortet</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -70,7 +70,7 @@
   <!-- Instructional text for scanning back of a identity card -->
   <string name="position_id_back">Vänd på id-handlingen</string>
   <!-- Instructional text for scanning front of a identity card -->
-  <string name="position_id_front">Placera id-handlingen i mitten av ramen</string>
+  <string name="position_id_front">Placera id-kortet i mitten av ramen</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Placera passet i mitten av ramen</string>
   <!-- State when identity document has been successfully scanned -->

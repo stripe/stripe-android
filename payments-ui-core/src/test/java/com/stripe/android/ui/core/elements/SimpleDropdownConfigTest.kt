@@ -8,24 +8,24 @@ class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         R.string.ideal_bank,
         listOf(
-            DropdownItemSpec(display_text = "ABN AMRO", api_value = "abn_amro"),
-            DropdownItemSpec(display_text = "ASN Bank", api_value = "asn_bank"),
-            DropdownItemSpec(display_text = "Bunq", api_value = "bunq"),
-            DropdownItemSpec(display_text = "Handelsbanken", api_value = "handelsbanken"),
-            DropdownItemSpec(display_text = "ING", api_value = "ing"),
-            DropdownItemSpec(display_text = "Knab", api_value = "knab"),
-            DropdownItemSpec(display_text = "Rabobank", api_value = "rabobank"),
-            DropdownItemSpec(display_text = "Revolut", api_value = "revolut"),
-            DropdownItemSpec(display_text = "RegioBank", api_value = "regiobank"),
-            DropdownItemSpec(display_text = "SNS Bank (De Volksbank)", api_value = "sns_bank"),
-            DropdownItemSpec(display_text = "Triodos Bank", api_value = "triodos_bank"),
-            DropdownItemSpec(display_text = "Van Lanschot", api_value = "van_lanschot"),
+            DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
+            DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),
+            DropdownItemSpec(displayText = "Bunq", apiValue = "bunq"),
+            DropdownItemSpec(displayText = "Handelsbanken", apiValue = "handelsbanken"),
+            DropdownItemSpec(displayText = "ING", apiValue = "ing"),
+            DropdownItemSpec(displayText = "Knab", apiValue = "knab"),
+            DropdownItemSpec(displayText = "Rabobank", apiValue = "rabobank"),
+            DropdownItemSpec(displayText = "Revolut", apiValue = "revolut"),
+            DropdownItemSpec(displayText = "RegioBank", apiValue = "regiobank"),
+            DropdownItemSpec(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
+            DropdownItemSpec(displayText = "Triodos Bank", apiValue = "triodos_bank"),
+            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot"),
         )
     )
 
     @Test
     fun `Verify getDisplayItems gets list of display strings`() {
-        assertThat(config.getDisplayItems())
+        assertThat(config.displayItems)
             .isEqualTo(
                 listOf(
                     "ABN AMRO",

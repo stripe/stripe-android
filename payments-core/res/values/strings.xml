@@ -108,6 +108,8 @@
   <string name="becs_widget_name">Name</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Your name is required.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Cancel</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s ending in %2$s</string>
   <!-- Text for close button -->
@@ -115,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Delete Payment Method</string>
   <string name="delete_payment_method_prompt_title">Delete payment method?</string>
+  <!-- Done button title -->
+  <string name="done">Done</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Edit</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/YY</string>
   <string name="expiry_label_short">Expiry</string>
@@ -137,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Select Bank Account (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Free</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Remove</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Removed %s</string>
   <string name="secure_checkout">Secure Checkout</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method -- try again</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">An internal error occurred.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

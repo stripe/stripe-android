@@ -388,6 +388,7 @@ class PaymentOptionsAdapterTest {
 
     private fun createAdapter(): PaymentOptionsAdapter {
         return PaymentOptionsAdapter(
+            mock(),
             canClickSelectedItem = false,
             paymentOptionSelectedListener = { paymentSelection, _ ->
                 paymentSelections.add(paymentSelection)

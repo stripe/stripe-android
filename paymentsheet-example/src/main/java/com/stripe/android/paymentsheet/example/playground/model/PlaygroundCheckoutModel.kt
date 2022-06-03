@@ -12,7 +12,8 @@ enum class CheckoutMode(val value: String) {
 enum class CheckoutCurrency(val value: String) {
     USD("usd"),
     EUR("eur"),
-    AUD("aud")
+    AUD("aud"),
+    GBP("gbp"),
 }
 
 enum class Toggle(val key: String, val default: Any) {
@@ -42,7 +43,12 @@ data class CheckoutRequest(
     val mode: String,
     val set_shipping_address: Boolean,
     val automatic_payment_methods: Boolean,
-    val use_link: Boolean
+    val use_link: Boolean,
+    val merchant_country_code: String? = when (currency.uppercase()) {
+        "AUD" -> "AU"
+        "EUR" -> "GB"
+        else -> null
+    }
 )
 
 @Serializable

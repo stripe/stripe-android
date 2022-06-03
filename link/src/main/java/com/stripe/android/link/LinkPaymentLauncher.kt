@@ -20,8 +20,9 @@ import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
-import com.stripe.android.link.ui.paymentmethod.FormViewModel
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -132,9 +133,11 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     }
 
     /**
-     * Trigger Link sign up with the input collected from the user.
+     * Trigger Link sign in with the input collected from the user, whether it's a new or existing
+     * account.
      */
-    suspend fun signUpWithUserInput() = linkAccountManager.signUpWithUserInput().map { true }
+    suspend fun signInWithUserInput(userInput: UserInput) =
+        linkAccountManager.signInWithUserInput(userInput).map { true }
 
     /**
      * Attach a new Card to the currently signed in Link account.
@@ -181,7 +184,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
                     is WalletViewModel.Factory -> component.inject(injectable)
                     is InlineSignupViewModel.Factory -> component.inject(injectable)
                     is PaymentMethodViewModel.Factory -> component.inject(injectable)
-                    is FormViewModel.Factory -> component.inject(injectable)
+                    is CardEditViewModel.Factory -> component.inject(injectable)
                     else -> {
                         throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                     }

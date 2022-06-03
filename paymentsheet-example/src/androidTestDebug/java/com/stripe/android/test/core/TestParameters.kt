@@ -1,7 +1,7 @@
 package com.stripe.android.test.core
 
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
  * This is the data class that represents the parameters used to run the test.
@@ -92,11 +92,13 @@ enum class IntentType {
 }
 
 /**
- * Indicates the currency to use on teh PaymentIntent
+ * Indicates the currency to use on the PaymentIntent
  */
 enum class Currency {
     USD,
-    EUR
+    EUR,
+    AUD,
+    GBP
 }
 
 /**

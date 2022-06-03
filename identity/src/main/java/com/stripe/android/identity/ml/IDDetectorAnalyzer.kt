@@ -16,7 +16,7 @@ import java.io.File
 import kotlin.math.roundToInt
 
 /**
- * Analyzer to run a model input.
+ * Analyzer to run IDDetector.
  *
  * TODO(ccen): reimplement with ImageClassifier
  */

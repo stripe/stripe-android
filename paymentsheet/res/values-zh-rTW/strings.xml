@@ -4,19 +4,6 @@
   <string name="add_new_payment_method">添加新支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">移除尾號為 %s 的銀行帳戶</string>
-  <!-- Button title to cancel action in an alert -->
-  <string name="cancel">取消</string>
-  <!-- Done button title -->
-  <string name="done">完成</string>
-  <!-- Button title to enter editing mode -->
-  <string name="edit">編輯</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">移除</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">發生了內部錯誤。</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[繼續操作即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -38,14 +25,6 @@
   <string name="stripe_paymentsheet_or_pay_with_card">或用金融卡支付</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">支付</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
-  <!-- Payment Method type brand name. -->
-  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 直接借記 </string>
-  <!-- Title for credit card number entry field -->
-  <string name="stripe_paymentsheet_payment_method_card">卡</string>
-  <!-- Payment method brand name -->
-  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">正在處理...</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

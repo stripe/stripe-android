@@ -289,17 +289,17 @@ val LocalTypography = staticCompositionLocalOf { PaymentsTheme.typographyMutable
 
 /**
  * Base Theme for Payments Composables.
- * CAUTION: This theme is mutable by merchant configurations.
+ * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
+ * shapes, typography to this theme outside of tests.
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
+    colors: PaymentsColors = PaymentsTheme.getColors(isSystemInDarkTheme()),
+    shapes: PaymentsShapes = PaymentsTheme.shapesMutable,
+    typography: PaymentsTypography = PaymentsTheme.typographyMutable,
     content: @Composable () -> Unit
 ) {
-    val colors = PaymentsTheme.getColors(isSystemInDarkTheme())
-    val shapes = PaymentsTheme.shapesMutable
-    val typography = PaymentsTheme.typographyMutable
-
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,

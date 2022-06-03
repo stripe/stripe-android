@@ -61,12 +61,11 @@ internal fun DropDown(
     controller: DropdownFieldController,
     enabled: Boolean,
 ) {
-    val label by controller.label.collectAsState(
-        null
-    )
+    val label by controller.label.collectAsState(null)
     val selectedIndex by controller.selectedIndex.collectAsState(0)
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
+    val selectedItemLabel = controller.getSelectedItemLabel(selectedIndex)
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
         MaterialTheme.paymentsColors.onComponent
@@ -96,31 +95,45 @@ internal fun DropDown(
                     expanded = true
                 }
         ) {
-            Column(
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    top = 4.dp,
-                    bottom = 8.dp
-                )
-            ) {
-                label?.let {
-                    FormLabel(stringResource(it), enabled)
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom
-                ) {
+            if (controller.tinyMode) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        items[selectedIndex],
-                        modifier = Modifier.fillMaxWidth(.9f),
+                        selectedItemLabel,
                         color = currentTextColor
                     )
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null,
-                        modifier = Modifier.height(24.dp),
                         tint = currentTextColor
                     )
+                }
+            } else {
+                Column(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        top = 4.dp,
+                        bottom = 8.dp
+                    )
+                ) {
+                    label?.let {
+                        FormLabel(stringResource(it), enabled = enabled)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            selectedItemLabel,
+                            modifier = Modifier.fillMaxWidth(.9f),
+                            color = currentTextColor
+                        )
+                        Icon(
+                            Icons.Filled.ArrowDropDown,
+                            contentDescription = null,
+                            modifier = Modifier.height(24.dp),
+                            tint = currentTextColor
+                        )
+                    }
                 }
             }
         }

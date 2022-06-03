@@ -11,6 +11,9 @@ if [ ! -d "$ANDROID_HOME/cmdline-tools" ]; then
   exit
 fi
 
+echo "download system image, if not already downloaded"
+"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "--install" "system-images;android-28;google_apis;x86_64"
+
 echo "creating emulator"
 "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" "--verbose" "create" "avd" "--force" "--name" "screenshot_test_local" "--device" "Nexus 6" "--package" "system-images;android-28;google_apis;x86_64" "--tag" "google_apis" "--abi" "x86_64" "--sdcard" "512M"
 

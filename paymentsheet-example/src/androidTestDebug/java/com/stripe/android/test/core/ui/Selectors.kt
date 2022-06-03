@@ -1,6 +1,7 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
+import androidx.annotation.StringRes
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -59,6 +60,8 @@ class Selectors(
     val currency = when (testParameters.currency) {
         Currency.EUR -> EspressoLabelIdButton(R.string.currency_eur)
         Currency.USD -> EspressoLabelIdButton(R.string.currency_usd)
+        Currency.AUD -> EspressoLabelIdButton(R.string.currency_aud)
+        Currency.GBP -> EspressoLabelIdButton(R.string.currency_gbp)
     }
 
     val checkout = when (testParameters.intentType) {
@@ -221,8 +224,8 @@ class Selectors(
         getResourceString(R.string.email)
     )
 
-    fun getName() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_name)
+    fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
+        getResourceString(resourceId)
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(
@@ -239,6 +242,14 @@ class Selectors(
 
     fun getZip() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_zip_code)
+    )
+
+    fun getAuBsb() = composeTestRule.onNodeWithText(
+        getResourceString(com.stripe.android.ui.core.R.string.becs_widget_bsb)
+    )
+
+    fun getAuAccountNumber() = composeTestRule.onNodeWithText(
+        getResourceString(R.string.becs_widget_account_number)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(

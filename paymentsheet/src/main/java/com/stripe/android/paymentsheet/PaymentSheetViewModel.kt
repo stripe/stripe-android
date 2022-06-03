@@ -49,7 +49,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -130,7 +130,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkoutIdentifier: CheckoutIdentifier
     ): MediatorLiveData<PaymentSheetViewState?> {
         val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
-        outputLiveData.addSource(_viewState) { currentValue ->
+        outputLiveData.addSource(viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue
             }
@@ -261,9 +261,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                    getSupportedSavedCustomerPMs(
                         stripeIntent,
-                        config
+                        config,
+                        resourceRepository.getLpmRepository()
                     ).map {
                         it.type
                     }.let {
@@ -283,19 +284,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
-                    savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
+                    savedStateHandle[SAVE_PAYMENT_METHODS] = it
                     setStripeIntent(stripeIntent)
                     resetViewState()
                 },
                 onFailure = ::onFatal
             )
         }
-    }
-
-    private fun resetViewState(@IntegerRes stringResId: Int?) {
-        resetViewState(
-            stringResId?.let { getApplication<Application>().resources.getString(it) }
-        )
     }
 
     private fun resetViewState(userErrorMessage: String? = null) {
@@ -354,8 +349,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
-
-        updatePrimaryButtonUIState(null)
 
         when (selection) {
             is PaymentSelection.Saved -> {
@@ -467,7 +460,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     onSuccess = {
                         resetViewState(
                             when (paymentResult) {
-                                is PaymentResult.Failed -> paymentResult.throwable.message
+                                is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
                                 else -> null // indicates canceled payment
                             }
                         )
@@ -486,11 +479,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                resetViewState(
+                onError(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
                             R.string.stripe_failure_connection_error
-                        else -> R.string.stripe_google_pay_error_internal
+                        else -> R.string.stripe_internal_error
                     }
                 )
             }
@@ -512,9 +505,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.value = PaymentSheetResult.Completed
     }
 
-    override fun onError(@IntegerRes error: Int?) {
-        resetViewState(error)
-    }
+    override fun onError(@IntegerRes error: Int?) =
+        onError(error?.let { getApplication<Application>().resources.getString(it) })
+
+    override fun onError(error: String?) = resetViewState(error)
 
     private fun LinkActivityResult.convertToPaymentResult() =
         when (this) {

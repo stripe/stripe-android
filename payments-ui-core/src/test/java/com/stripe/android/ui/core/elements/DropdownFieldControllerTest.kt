@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import java.util.Locale
 
@@ -14,18 +13,18 @@ class DropdownFieldControllerTest {
     @Test
     fun `Verify that when the selected index changes the paymentMethod param value updates`() =
         runBlocking {
-            assertThat(controller.fieldValue.first()).isEqualTo("United States")
+            assertThat(controller.fieldValue.first()).isEqualTo("🇺🇸 United States")
             controller.onValueChange(1)
-            assertThat(controller.fieldValue.first()).isEqualTo("Afghanistan")
+            assertThat(controller.fieldValue.first()).isEqualTo("🇦🇫 Afghanistan")
         }
 
     @Test
     fun `Verify display items gets the display items form the config`() {
-        assertThat(controller.displayItems).isEqualTo(countryConfig.getDisplayItems())
+        assertThat(controller.displayItems).isEqualTo(countryConfig.displayItems)
     }
 
     @Test
-    fun `Verify label gets the label from the config`() = runBlockingTest {
+    fun `Verify label gets the label from the config`() = runBlocking {
         assertThat(controller.label.first()).isEqualTo(countryConfig.label)
     }
 

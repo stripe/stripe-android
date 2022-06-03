@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.OTPController
 import com.stripe.android.ui.core.elements.OTPElement
@@ -165,11 +166,19 @@ internal class VerificationScreenTest {
         onOtpField(0).assertIsFocused()
     }
 
+    @Test
+    fun when_error_message_is_not_null_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(errorMessage = ErrorMessage.Raw(errorMessage))
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
     private fun setContent(
         redactedPhoneNumber: String = "+1********23",
         email: String = "test@stripe.com",
         otpElement: OTPElement = OTPSpec.transform(),
         isProcessing: Boolean = false,
+        errorMessage: ErrorMessage? = null,
         onBack: () -> Unit = { },
         onChangeEmailClick: () -> Unit = { },
         onResendCodeClick: () -> Unit = { }
@@ -183,6 +192,7 @@ internal class VerificationScreenTest {
                 email = email,
                 otpElement = otpElement,
                 isProcessing = isProcessing,
+                errorMessage = errorMessage,
                 onBack = onBack,
                 onChangeEmailClick = onChangeEmailClick,
                 onResendCodeClick = onResendCodeClick

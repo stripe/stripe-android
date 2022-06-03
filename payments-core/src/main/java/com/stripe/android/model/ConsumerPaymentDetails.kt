@@ -27,6 +27,27 @@ data class ConsumerPaymentDetails internal constructor(
     ) : PaymentDetails(id, isDefault) {
         companion object {
             const val type = "card"
+
+            /**
+             * Reads the address from the [PaymentMethodCreateParams] mapping format to the format
+             * used by [ConsumerPaymentDetails].
+             */
+            fun getAddressFromMap(
+                cardPaymentMethodCreateParamsMap: Map<String, Any>
+            ): Pair<String, Any>? {
+                val billingDetails =
+                    cardPaymentMethodCreateParamsMap["billing_details"] as? Map<*, *>
+                val address = billingDetails?.get("address") as? Map<*, *>
+                return address?.let {
+                    // card["billing_details"]["address"] becomes card["billing_address"]
+                    "billing_address" to mapOf(
+                        // card["billing_details"]["address"]["country"]
+                        // becomes card["billing_address"]["country_code"]
+                        "country_code" to it["country"],
+                        "postal_code" to it["postal_code"]
+                    )
+                }
+            }
         }
     }
 }

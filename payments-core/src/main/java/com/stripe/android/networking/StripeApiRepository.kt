@@ -47,6 +47,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -1170,13 +1171,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 consumerSessionLookupUrl,
                 requestOptions,
-                (
+                mapOf(
+                    "request_surface" to "android_payment_element"
+                ).plus(
                     email?.let {
                         mapOf(
                             "email_address" to it.lowercase()
                         )
                     } ?: emptyMap()
-                    ).plus(
+                ).plus(
                     authSessionCookie?.let {
                         mapOf(
                             "cookies" to
@@ -1206,6 +1209,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 consumerSignUpUrl,
                 requestOptions,
                 mapOf(
+                    "request_surface" to "android_payment_element",
                     "email_address" to email.lowercase(),
                     "phone_number" to phoneNumber,
                     "country" to country
@@ -1238,6 +1242,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 startConsumerVerificationUrl,
                 requestOptions,
                 mapOf(
+                    "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1272,12 +1277,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 confirmConsumerVerificationUrl,
                 requestOptions,
                 mapOf(
+                    "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "type" to "SMS",
                     "code" to verificationCode,
-                    "client_type" to "MOBILE_SDK"
                 ).plus(
                     authSessionCookie?.let {
                         mapOf(
@@ -1306,6 +1311,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 logoutConsumerUrl,
                 requestOptions,
                 mapOf(
+                    "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1334,6 +1340,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 consumerPaymentDetailsUrl,
                 requestOptions,
                 mapOf(
+                    "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1357,14 +1364,66 @@ class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails? {
         return fetchStripeModel(
-            apiRequestFactory.createGet(
-                consumerPaymentDetailsUrl,
+            apiRequestFactory.createPost(
+                listConsumerPaymentDetailsUrl,
                 requestOptions,
                 mapOf(
+                    "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "types" to paymentMethodTypes.toList()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Deletes the consumer payment details with the given id.
+     */
+    override suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ) {
+        makeApiRequest(
+            apiRequestFactory.createDelete(
+                getConsumerPaymentDetailsUrl(paymentDetailsId),
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    )
+                )
+            )
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Updates the consumer payment details with the given id.
+     */
+    override suspend fun updatePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    )
+                ).plus(
+                    paymentDetailsUpdateParams.toParamMap()
                 )
             ),
             ConsumerPaymentDetailsJsonParser()
@@ -1462,7 +1521,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachFinancialConnectionsSessionToSetupIntentUrl(setupIntentId, financialConnectionsSessionId),
+                getAttachFinancialConnectionsSessionToSetupIntentUrl(
+                    setupIntentId,
+                    financialConnectionsSessionId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
@@ -1902,6 +1964,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/list`
+         */
+        internal val listConsumerPaymentDetailsUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/payment_details/list")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/:id`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getConsumerPaymentDetailsUrl(paymentDetailsId: String): String {
+            return getApiUrl("consumers/payment_details/$paymentDetailsId")
+        }
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

@@ -25,7 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -68,14 +69,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            sheetViewModel.getAddFragmentSelectedLpm().value
+            sheetViewModel.addFragmentSelectedLPM
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
             setupRecyclerView(
                 viewBinding,
                 paymentMethods,
-                sheetViewModel.getAddFragmentSelectedLpmValue()
+                sheetViewModel.addFragmentSelectedLPM
             )
         }
 
@@ -91,20 +92,32 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(
                     viewBinding.linkInlineSignup.isSelected,
-                    viewBinding.linkInlineSignup.isReady
-                ) { isSelected, isReady ->
+                    viewBinding.linkInlineSignup.userInput,
+                    sheetViewModel.selection.asFlow()
+                ) { isSelected, userInput, selection ->
                     if (isSelected) {
-                        PrimaryButton.UIState(
-                            label = null,
-                            onClick = sheetViewModel::payWithLink,
-                            enabled = isReady,
-                            visible = true
-                        )
+                        if (userInput != null && selection != null) {
+                            PrimaryButton.UIState(
+                                label = null,
+                                onClick = { sheetViewModel.payWithLink(userInput) },
+                                enabled = true,
+                                visible = true
+                            )
+                        } else {
+                            PrimaryButton.UIState(
+                                label = null,
+                                onClick = null,
+                                enabled = false,
+                                visible = true
+                            )
+                        }
                     } else {
                         null
                     }
                 }.collect {
-                    sheetViewModel.updatePrimaryButtonUIState(it)
+                    if (showLinkInlineSignup) {
+                        sheetViewModel.updatePrimaryButtonUIState(it)
+                    }
                 }
             }
         }
@@ -141,7 +154,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = !processing,
                     paymentMethods = paymentMethods,
                     onItemSelectedListener = { selectedLpm ->
-                        if (sheetViewModel.getAddFragmentSelectedLpmValue() != selectedLpm) {
+                        if (sheetViewModel.addFragmentSelectedLPM != selectedLpm) {
                             onPaymentMethodSelected(selectedLpm)
                         }
                     }
@@ -156,12 +169,13 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         ViewCompat.getWindowInsetsController(requireView())
             ?.hide(WindowInsetsCompat.Type.ime())
 
+        sheetViewModel.updatePrimaryButtonUIState(null)
         updateLinkInlineSignupVisibility(paymentMethod)
         replacePaymentMethodFragment(paymentMethod)
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
+        sheetViewModel.addFragmentSelectedLPM = paymentMethod
 
         val args = requireArguments()
         args.putParcelable(
@@ -224,7 +238,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
-                paymentMethod = showPaymentMethod,
+                paymentMethodCode = showPaymentMethod.type.code,
                 showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
                 showCheckboxControlledFields = newLpm?.let {
                     newLpm.customerRequestedSave ==

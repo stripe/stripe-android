@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.StripeIntent
@@ -228,6 +229,56 @@ internal class LinkApiRepository @Inject constructor(
             },
             onFailure = {
                 logger.error("Error creating consumer payment method", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
+        runCatching {
+            stripeRepository.updatePaymentDetails(
+                consumerSessionClientSecret,
+                updateParams,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error updating consumer payment method"))
+            },
+            onFailure = {
+                logger.error("Error updating consumer payment method", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String
+    ): Result<Unit> = withContext(workContext) {
+        runCatching {
+            stripeRepository.deletePaymentDetails(
+                consumerSessionClientSecret,
+                paymentDetailsId,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                Result.success(Unit)
+            },
+            onFailure = {
+                logger.error("Error deleting consumer payment method", it)
                 Result.failure(it)
             }
         )

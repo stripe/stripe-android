@@ -2,10 +2,12 @@ package com.stripe.android.ui.core.forms
 
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.Capitalization
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardNumberViewOnlyController
 import com.stripe.android.ui.core.elements.CountryConfig
 import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -15,6 +17,7 @@ import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionElement
@@ -23,6 +26,8 @@ import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
+import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -31,7 +36,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
@@ -52,6 +56,7 @@ internal class TransformSpecToElementTest {
         transformSpecToElements =
             TransformSpecToElements(
                 resourceRepository = StaticResourceRepository(
+                    mock(),
                     mock()
                 ),
                 initialValues = mapOf(),
@@ -65,7 +70,7 @@ internal class TransformSpecToElementTest {
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() =
         runBlocking {
-            val countrySection = CountrySpec(onlyShowCountryCodes = setOf("AT"))
+            val countrySection = CountrySpec(allowCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
                 listOf(countrySection)
             )
@@ -74,7 +79,7 @@ internal class TransformSpecToElementTest {
             val countryElement = countrySectionElement.fields[0] as CountryElement
 
             assertThat(countryElement.controller.displayItems).hasSize(1)
-            assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
+            assertThat(countryElement.controller.displayItems[0]).isEqualTo("🇦🇹 Austria")
 
             // Verify the correct config is setup for the controller
             assertThat(countryElement.controller.label.first()).isEqualTo(CountryConfig().label)
@@ -116,8 +121,12 @@ internal class TransformSpecToElementTest {
         assertThat(nameElement.controller.label.first()).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
-        assertThat(nameElement.controller.capitalization).isEqualTo(KeyboardCapitalization.Words)
-        assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
+        assertThat(nameElement.controller.capitalization).isEqualTo(
+            KeyboardCapitalization.Words
+        )
+        assertThat(nameElement.controller.keyboardType).isEqualTo(
+            androidx.compose.ui.text.input.KeyboardType.Text
+        )
     }
 
     @Test
@@ -126,10 +135,10 @@ internal class TransformSpecToElementTest {
             listOf(
                 SimpleTextSpec(
                     IdentifierSpec.Generic("simple"),
-                    R.string.address_label_name,
+                    TranslationId.AddressName.resourceId,
                     showOptionalLabel = true,
                     keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Words
+                    capitalization = Capitalization.Words
                 )
             )
         )
@@ -171,73 +180,94 @@ internal class TransformSpecToElementTest {
 
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
-        assertThat(staticTextElement.identifier).isEqualTo(staticText.api_path)
+        assertThat(staticTextElement.identifier).isEqualTo(staticText.apiPath)
+    }
+
+    @Test
+    fun `Setting card number to view only returns the correct elements`() {
+        transformSpecToElements =
+            TransformSpecToElements(
+                resourceRepository = StaticResourceRepository(
+                    mock(),
+                    mock()
+                ),
+                initialValues = mapOf(),
+                amount = null,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Merchant, Inc.",
+                context,
+                viewOnlyFields = setOf(IdentifierSpec.CardNumber)
+            )
+
+        val formElements = transformSpecToElements.transform(
+            LpmRepository.HardcodedCard.formSpec.items
+        )
+        val cardDetailsSection = formElements.first() as CardDetailsSectionElement
+        val cardNumberElement =
+            cardDetailsSection.controller.cardDetailsElement.controller.numberElement
+
+        assertThat(cardNumberElement.controller)
+            .isInstanceOf(CardNumberViewOnlyController::class.java)
     }
 
     companion object {
         val IDEAL_BANK_CONFIG = DropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
-            R.string.ideal_bank,
+            TranslationId.IdealBank,
             listOf(
                 DropdownItemSpec(
-                    api_value = "abn_amro",
-                    display_text = "ABN Amro"
+                    apiValue = "abn_amro",
+                    displayText = "ABN Amro"
                 ),
                 DropdownItemSpec(
-                    api_value = "asn_bank",
-                    display_text = "ASN Bank"
+                    apiValue = "asn_bank",
+                    displayText = "ASN Bank"
                 ),
                 DropdownItemSpec(
-                    api_value = "bunq",
-                    display_text = "bunq B.V.‎"
+                    apiValue = "bunq",
+                    displayText = "bunq B.V.‎"
                 ),
                 DropdownItemSpec(
-                    api_value = "handelsbanken",
-                    display_text = "Handelsbanken"
+                    apiValue = "handelsbanken",
+                    displayText = "Handelsbanken"
                 ),
                 DropdownItemSpec(
-                    api_value = "ing",
-                    display_text = "ING Bank"
+                    apiValue = "ing",
+                    displayText = "ING Bank"
                 ),
                 DropdownItemSpec(
-                    api_value = "knab",
-                    display_text = "Knab"
+                    apiValue = "knab",
+                    displayText = "Knab"
                 ),
                 DropdownItemSpec(
-                    api_value = "rabobank",
-                    display_text = "Rabobank"
+                    apiValue = "rabobank",
+                    displayText = "Rabobank"
                 ),
                 DropdownItemSpec(
-                    api_value = "regiobank",
-                    display_text = "RegioBank"
+                    apiValue = "regiobank",
+                    displayText = "RegioBank"
                 ),
                 DropdownItemSpec(
-                    api_value = "revolut",
-                    display_text = "Revolut"
+                    apiValue = "revolut",
+                    displayText = "Revolut"
                 ),
                 DropdownItemSpec(
-                    api_value = "sns_bank",
-                    display_text = "SNS Bank"
+                    apiValue = "sns_bank",
+                    displayText = "SNS Bank"
                 ),
                 DropdownItemSpec(
-                    api_value = "triodos_bank",
-                    display_text = "Triodos Bank"
+                    apiValue = "triodos_bank",
+                    displayText = "Triodos Bank"
                 ),
                 DropdownItemSpec(
-                    api_value = "van_lanschot",
-                    display_text = "Van Lanschot"
+                    apiValue = "van_lanschot",
+                    displayText = "Van Lanschot"
                 ),
                 DropdownItemSpec(
-                    api_value = null, // HIGHLIGHT
-                    display_text = "Other"
+                    apiValue = null, // HIGHLIGHT
+                    displayText = "Other"
                 )
             )
         )
-
-        val IDEAL_BANKS_JSON =
-            File("src/main/assets/idealBanks.json")
-                .inputStream()
-                .bufferedReader()
-                .use { it.readText() }
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -26,11 +27,12 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -177,6 +179,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.startConfirm.observe(this) { event ->
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
                 lifecycleScope.launch {
                     viewModel.confirmStripeIntent(confirmParams)
                 }
@@ -276,7 +279,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupGooglePayButton()
         val dividerText = resources.getString(
             if (viewModel.supportedPaymentMethods.size == 1 &&
-                viewModel.supportedPaymentMethods.contains(SupportedPaymentMethod.Card)
+                viewModel.supportedPaymentMethods.map { it.type.code }.contains(
+                        LpmRepository.HardcodedCard.type.code
+                    )
             ) {
                 R.string.stripe_paymentsheet_or_pay_with_card
             } else {
@@ -295,7 +300,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        GooglePayDividerUi(dividerText)
+                        PaymentsTheme {
+                            GooglePayDividerUi(dividerText)
+                        }
                     }
                 }
             }

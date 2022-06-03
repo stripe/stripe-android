@@ -281,12 +281,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
-                    Html(
-                        html = text,
-                        imageGetter = mapOf(),
-                        color = MaterialTheme.paymentsColors.subtitle,
-                        style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center)
-                    )
+                    PaymentsTheme {
+                        Html(
+                            html = text,
+                            imageGetter = mapOf(),
+                            color = MaterialTheme.paymentsColors.subtitle,
+                            style = MaterialTheme.typography.body1.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
                 }
             }
             notesView.isVisible = showNotes

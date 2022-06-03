@@ -39,6 +39,8 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -56,6 +58,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -587,7 +590,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `shows add card fragment when no payment methods available`() {
+    fun `shows add card fragment when no saved payment methods available`() {
         val scenario = activityScenario(
             createViewModel(
                 paymentMethods = emptyList()
@@ -927,7 +930,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
-            viewModel.updateSelection(mock())
+            viewModel.updatePrimaryButtonUIState(null)
             assertThat(activity.viewBinding.buyButton.externalLabel)
                 .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
@@ -979,6 +982,9 @@ internal class PaymentSheetActivityTest {
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
     ): PaymentSheetViewModel = runBlocking {
+        val lpmRepository = mock<LpmRepository>()
+        whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -988,7 +994,7 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
-            mock(),
+            StaticResourceRepository(mock(), lpmRepository),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),

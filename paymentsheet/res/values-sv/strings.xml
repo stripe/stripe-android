@@ -4,19 +4,6 @@
   <string name="add_new_payment_method">Lägg till en ny betalningsmetod</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">Ta bort bankkonto som slutar på %s</string>
-  <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Avbryt</string>
-  <!-- Done button title -->
-  <string name="done">Klar</string>
-  <!-- Button title to enter editing mode -->
-  <string name="edit">Redigera</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Ta bort</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betalningstjänster. Kontrollera internetanslutningen och försök igen.</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Ett internt fel uppstod.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Genom att fortsätta samtycker du till att godkänna betalningar i enlighet med dessa <terms>villkor</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -38,14 +25,6 @@
   <string name="stripe_paymentsheet_or_pay_with_card">Eller betala med ett kort</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Betala</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
-  <!-- Payment Method type brand name. -->
-  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS autogiro</string>
-  <!-- Title for credit card number entry field -->
-  <string name="stripe_paymentsheet_payment_method_card">Kort</string>
-  <!-- Payment method brand name -->
-  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Bearbetar ...</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
@@ -53,7 +32,7 @@
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Spara för framtida betalningar</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spara detta kort för framtiden %s betalningar</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spara detta kort för framtida betalningar hos %s</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Välj din betalningsmetod</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->

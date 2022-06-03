@@ -17,6 +17,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -446,6 +447,20 @@ abstract class StripeRepository {
     abstract suspend fun listPaymentDetails(
         consumerSessionClientSecret: String,
         paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun deletePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun updatePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails?
 

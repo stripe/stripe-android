@@ -23,7 +23,9 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_P
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
@@ -66,10 +68,10 @@ class PassportUploadFragmentTest {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
     }
 
-    private val uploadState =
-        MutableStateFlow(IdentityViewModel.UploadState())
+    private val documentUploadState =
+        MutableStateFlow(DocumentUploadState())
 
-    private val errorUploadState = mock<IdentityViewModel.UploadState> {
+    private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
     }
 
@@ -78,7 +80,7 @@ class PassportUploadFragmentTest {
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
-        whenever(it.uploadState).thenReturn(uploadState)
+        whenever(it.documentUploadState).thenReturn(documentUploadState)
     }
 
     private val navController = TestNavHostController(
@@ -144,8 +146,8 @@ class PassportUploadFragmentTest {
     @Test
     fun `verify upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            uploadState.update {
-                errorUploadState
+            documentUploadState.update {
+                errorDocumentUploadState
             }
 
             assertThat(navController.currentDestination?.id)
@@ -157,8 +159,8 @@ class PassportUploadFragmentTest {
     fun `verify when kontinue is clicked navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
-                uploadState.update {
-                    IdentityViewModel.UploadState(
+                documentUploadState.update {
+                    DocumentUploadState(
                         frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT)
                     )
                 }
@@ -255,8 +257,8 @@ class PassportUploadFragmentTest {
             assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.GONE)
 
             // mock file uploaded
-            uploadState.update {
-                IdentityViewModel.UploadState(
+            documentUploadState.update {
+                DocumentUploadState(
                     frontHighResResult = Resource.success(FRONT_HIGH_RES_RESULT)
                 )
             }
@@ -334,7 +336,7 @@ class PassportUploadFragmentTest {
 
         private const val FILE_ID = "file_id"
 
-        val FRONT_HIGH_RES_RESULT = IdentityViewModel.UploadedResult(
+        val FRONT_HIGH_RES_RESULT = UploadedResult(
             uploadedStripeFile = StripeFile(id = FILE_ID),
             scores = null,
             uploadMethod = UploadMethod.FILEUPLOAD

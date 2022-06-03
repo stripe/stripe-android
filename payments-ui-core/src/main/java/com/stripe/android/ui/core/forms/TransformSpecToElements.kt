@@ -20,11 +20,13 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
+import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -33,6 +35,9 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
  * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
+ *
+ * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
+ * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 class TransformSpecToElements(
     private val resourceRepository: ResourceRepository,
@@ -40,7 +45,8 @@ class TransformSpecToElements(
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
-    private val context: Context
+    private val context: Context,
+    private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
 ) {
     fun transform(
         list: List<FormItemSpec>
@@ -52,42 +58,33 @@ class TransformSpecToElements(
                     merchantName
                 )
                 is StaticTextSpec -> it.transform()
-                is MandateTextSpec -> it.transform(merchantName)
-                is AfterpayClearpayTextSpec ->
-                    it.transform(requireNotNull(amount))
-                is AffirmTextSpec ->
-                    it.transform()
+                is AfterpayClearpayTextSpec -> it.transform(requireNotNull(amount))
+                is AffirmTextSpec -> it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
+                is MandateTextSpec -> it.transform(merchantName)
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is CardDetailsSectionSpec -> it.transform(context, initialValues)
+                is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
-                is EmailSpec -> it.transform(initialValues)
                 is NameSpec -> it.transform(initialValues)
+                is EmailSpec -> it.transform(initialValues)
+                is SimpleTextSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
-                is KlarnaCountrySpec -> it.transform(
-                    amount?.currencyCode,
-                    initialValues
-                )
+                is KlarnaHeaderStaticTextSpec -> it.transform()
+                is KlarnaCountrySpec -> it.transform(amount?.currencyCode, initialValues)
                 is DropdownSpec -> it.transform(initialValues)
-                is SimpleTextSpec -> it.transform(initialValues)
+                is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
                     resourceRepository.getAddressRepository()
-                )
-                is CountrySpec -> it.transform(
-                    initialValues
                 )
                 is CardBillingSpec -> it.transform(
                     resourceRepository.getAddressRepository(),
                     initialValues
                 )
-                is AddressSpec -> it.transform(
-                    initialValues,
-                    resourceRepository.getAddressRepository()
-                )
-                is SimpleTextSpec -> it.transform(initialValues)
+                is SepaMandateTextSpec -> it.transform(merchantName)
+                else -> EmptyFormElement()
             }
         }
 }

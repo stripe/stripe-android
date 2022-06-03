@@ -6,6 +6,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.AccountRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -24,7 +25,7 @@ internal class CardNumberControllerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val cardNumberController = CardNumberController(
+    private val cardNumberController = CardNumberEditableController(
         CardNumberConfig(), FakeCardAccountRangeRepository(), testDispatcher, initialValue = null
     )
 
@@ -100,7 +101,7 @@ internal class CardNumberControllerTest {
     @Test
     fun `Entering VISA BIN does not call accountRangeRepository`() {
         var repositoryCalls = 0
-        val cardNumberController = CardNumberController(
+        val cardNumberController = CardNumberEditableController(
             CardNumberConfig(),
             object : CardAccountRangeRepository {
                 private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
@@ -128,6 +129,55 @@ internal class CardNumberControllerTest {
         cardNumberController.onValueChange("6216828050000000000")
         idleLooper()
         assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(19)
+    }
+
+    @Test
+    fun `trailingIcon should have multi trailing icons when field is empty`() {
+        val trailingIcons = mutableListOf<TextFieldIcon?>()
+        cardNumberController.trailingIcon.asLiveData().observeForever {
+            trailingIcons.add(it)
+        }
+        cardNumberController.onValueChange("")
+        idleLooper()
+        assertThat(trailingIcons.first() as TextFieldIcon.MultiTrailing)
+            .isEqualTo(
+                TextFieldIcon.MultiTrailing(
+                    staticIcons = listOf(
+                        TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false),
+                    ),
+                    animatedIcons = listOf(
+                        TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false),
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `trailingIcon should have trailing icon when field matches bin`() {
+        val trailingIcons = mutableListOf<TextFieldIcon?>()
+        cardNumberController.trailingIcon.asLiveData().observeForever {
+            trailingIcons.add(it)
+        }
+        cardNumberController.onValueChange("4")
+        idleLooper()
+        cardNumberController.onValueChange("")
+        idleLooper()
+        assertThat(trailingIcons[0])
+            .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+        assertThat(trailingIcons[1] as TextFieldIcon.MultiTrailing)
+            .isEqualTo(
+                TextFieldIcon.MultiTrailing(
+                    staticIcons = listOf(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false)),
+                    animatedIcons = listOf()
+                )
+            )
+        assertThat(trailingIcons[2])
+            .isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {

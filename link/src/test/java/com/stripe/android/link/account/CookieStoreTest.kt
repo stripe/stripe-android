@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.CookieStore.Companion.AUTH_SESSION_COOKIE
 import com.stripe.android.link.account.CookieStore.Companion.LOGGED_OUT_EMAIL_HASH
+import com.stripe.android.link.account.CookieStore.Companion.SIGNED_UP_EMAIL
 import org.junit.Test
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
@@ -62,6 +63,24 @@ class CookieStoreTest {
         whenever(store.read(eq(LOGGED_OUT_EMAIL_HASH)))
             .thenReturn("49644df5404ea8ee8f0ec46cdb1dd7756c5661d6387fd1705a072f2fbf020f48")
         assertThat(cookieStore.isEmailLoggedOut(email)).isTrue()
+    }
+
+    @Test
+    fun `storeNewUserEmail stores email`() {
+        val cookieStore = createCookieStore()
+        val email = "test@stripe.com"
+        cookieStore.storeNewUserEmail(email)
+
+        verify(store).write(eq(SIGNED_UP_EMAIL), eq(email))
+    }
+
+    @Test
+    fun `getNewUserEmail returns saved email and deletes it`() {
+        val cookieStore = createCookieStore()
+        cookieStore.getNewUserEmail()
+
+        verify(store).read(eq(SIGNED_UP_EMAIL))
+        verify(store).delete(eq(SIGNED_UP_EMAIL))
     }
 
     private fun createCookieStore() = CookieStore(store)

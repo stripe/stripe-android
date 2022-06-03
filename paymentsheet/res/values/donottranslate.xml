@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
-    <string name="stripe_paymentsheet_payment_method_eps">EPS</string>
-    <string name="stripe_paymentsheet_payment_method_p24">Przelewy24</string>
-    <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
-    <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
-    <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
-    <string name="stripe_paymentsheet_payment_method_us_bank_account">US Bank Account</string>
 
     <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>
 
