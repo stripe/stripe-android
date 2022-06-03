@@ -13,8 +13,8 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Companion {
 	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
-	public final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
-	public final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
+	public final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration : android/os/Parcelable {
@@ -117,6 +117,10 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 
 public abstract interface class com/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback {
 	public abstract fun onFinancialConnectionsSheetResult (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult;)V
+}
+
+public abstract interface class com/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback {
+	public abstract fun onFinancialConnectionsSheetResult (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult;)V
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheetViewModel_Factory : dagger/internal/Factory {
