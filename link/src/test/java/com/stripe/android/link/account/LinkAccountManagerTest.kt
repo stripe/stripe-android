@@ -45,6 +45,8 @@ class LinkAccountManagerTest {
         val cookie = "cookie"
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(cookie)
 
+        whenever(cookieStore.getNewUserEmail()).thenReturn("email")
+
         args.apply {
             whenever(customerEmail).thenReturn(EMAIL)
         }
@@ -52,6 +54,20 @@ class LinkAccountManagerTest {
         assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(isNull(), eq(cookie))
+    }
+
+    @Test
+    fun `When new user email exists then it is used at start`() = runSuspendTest {
+        val email = "email"
+        whenever(cookieStore.getNewUserEmail()).thenReturn(email)
+
+        args.apply {
+            whenever(customerEmail).thenReturn(EMAIL)
+        }
+
+        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+
+        verify(linkRepository).lookupConsumer(eq(email), isNull())
     }
 
     @Test
@@ -101,6 +117,16 @@ class LinkAccountManagerTest {
     }
 
     @Test
+    fun `When cookie is invalid it is deleted after consumer lookup`() = runSuspendTest {
+        mockNonexistentAccountLookup()
+        val accountManager = accountManager()
+
+        accountManager.lookupConsumer(null)
+
+        verify(cookieStore).updateAuthSessionCookie("")
+    }
+
+    @Test
     fun `signInWithUserInput sends correct parameters and starts session`() = runSuspendTest {
         val accountManager = accountManager()
 
@@ -118,6 +144,15 @@ class LinkAccountManagerTest {
 
         verify(linkRepository).lookupConsumer(eq(EMAIL), anyOrNull())
         assertThat(accountManager.linkAccount.value).isNotNull()
+    }
+
+    @Test
+    fun `signUp stores email when successfully signed up`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        accountManager.signUp(EMAIL, "phone", "US")
+
+        verify(cookieStore).storeNewUserEmail(EMAIL)
     }
 
     @Test
@@ -260,6 +295,8 @@ class LinkAccountManagerTest {
             .thenReturn(Result.success(consumerSessionLookup))
         whenever(linkRepository.startVerification(anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(mockConsumerSession))
+        whenever(linkRepository.consumerSignUp(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(mockConsumerSession))
     }
 
     private suspend fun mockUnverifiedAccountLookup() {
@@ -268,6 +305,14 @@ class LinkAccountManagerTest {
         }
         val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
             whenever(consumerSession).thenReturn(mockConsumerSession)
+        }
+        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(consumerSessionLookup))
+    }
+
+    private suspend fun mockNonexistentAccountLookup() {
+        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
+            whenever(exists).thenReturn(false)
         }
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(consumerSessionLookup))

@@ -29,10 +29,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+    implementation libs.mavericks
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    testImplementation 'app.cash.turbine:turbine:0.8.0'
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
@@ -47,6 +47,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation testLibs.mavericks
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
@@ -55,13 +56,6 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
-
-android {
-    buildFeatures {
-        viewBinding true
-    }
-}
-
 
 ext {
     artifactId = "financial-connections"

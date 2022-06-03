@@ -29,6 +29,12 @@
             android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
             android:exported="false"
             android:theme="@style/StripeDefaultTheme" />
+
+        <provider
+            android:name=".appinitializer.FinancialConnectionsInitializer"
+            android:authorities="${applicationId}.financialconnections-init"
+            android:exported="false"
+            android:multiprocess="true" />
     </application>
 
     <!--
