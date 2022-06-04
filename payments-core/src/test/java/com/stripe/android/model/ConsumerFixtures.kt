@@ -42,6 +42,7 @@ object ConsumerFixtures {
         """
             {
               "auth_session_client_secret": "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1",
+              "publishable_key": "asdfg123",
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1MjA5LTM1YjctND",
                 "email_address": "test@stripe.com",
