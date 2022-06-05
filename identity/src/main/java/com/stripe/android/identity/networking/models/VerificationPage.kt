@@ -64,6 +64,5 @@ internal data class VerificationPage(
             requirements.missing.contains(VerificationPageRequirements.Missing.BIOMETRICCONSENT)
 
         fun VerificationPage.isUnsupportedClient() = unsupportedClient
-
     }
 }

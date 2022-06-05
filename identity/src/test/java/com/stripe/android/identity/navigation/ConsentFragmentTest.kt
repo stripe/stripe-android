@@ -172,7 +172,6 @@ internal class ConsentFragmentTest {
         }
     }
 
-
     @Test
     fun `when not unsupported_client navigate to errorFragment with failed reason`() {
         whenever(verificationPageWithTimeAndPolicy.unsupportedClient).thenReturn(true)
