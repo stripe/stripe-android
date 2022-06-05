@@ -59,8 +59,7 @@ internal class IdentityFragmentFactory @Inject constructor(
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory,
-                consentFragmentViewModelFactory,
-                verificationFlowFinishable
+                consentFragmentViewModelFactory
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(
                 identityViewModelFactory,

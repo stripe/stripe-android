@@ -17,6 +17,7 @@ import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -31,8 +32,7 @@ import kotlinx.coroutines.launch
  */
 internal class ConsentFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory,
-    private val consentViewModelFactory: ViewModelProvider.Factory,
-    private val verificationFlowFinishable: VerificationFlowFinishable,
+    private val consentViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
     private lateinit var binding: ConsentFragmentBinding
 
@@ -85,7 +85,10 @@ internal class ConsentFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
-                if (verificationPage.isMissingBiometricConsent()) {
+                if (verificationPage.isUnsupportedClient()) {
+                    Log.e(TAG, "Unsupported client")
+                    navigateToErrorFragmentWithFailedReason(IllegalStateException("Unsupported client"))
+                } else if (verificationPage.isMissingBiometricConsent()) {
                     setLoadingFinishedUI()
                     bindViewData(verificationPage.biometricConsent)
                 } else {
