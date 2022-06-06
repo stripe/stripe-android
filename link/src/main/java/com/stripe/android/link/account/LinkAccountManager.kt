@@ -11,6 +11,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.GlobalScope
@@ -33,6 +34,12 @@ internal class LinkAccountManager @Inject constructor(
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
+    /**
+     * The publishable key for the signed in Link account.
+     */
+    @VisibleForTesting
+    var consumerPublishableKey: String? = null
+
     val accountStatus = linkAccount.transform { value ->
         emit(
             // If we already fetched an account, return its status
@@ -42,7 +49,7 @@ internal class LinkAccountManager @Inject constructor(
                     cookieStore.getAuthSessionCookie()?.let {
                         lookupConsumer(null).getOrNull()?.accountStatus
                     }
-                        // If the user recently signed up on this device, use their email
+                    // If the user recently signed up on this device, use their email
                         ?: cookieStore.getNewUserEmail()?.let {
                             lookupConsumer(it).getOrNull()?.accountStatus
                         }
@@ -86,23 +93,21 @@ internal class LinkAccountManager @Inject constructor(
                 }
 
                 consumerSessionLookup.consumerSession?.let { consumerSession ->
-                    LinkAccount(consumerSession)
-                }
-            }.map { account ->
-                if (startSession) {
-                    setAndReturnNullable(account)
-                } else {
-                    account
+                    if (startSession) {
+                        setAccountNullable(consumerSession)
+                    } else {
+                        LinkAccount(consumerSession)
+                    }
                 }
             }.mapCatching {
                 it?.let { account ->
                     if (startSession && !account.isVerified) {
-                        setAndReturn(
-                            LinkAccount(
-                                linkRepository
-                                    .startVerification(account.clientSecret, cookie())
-                                    .getOrThrow()
-                            )
+                        setAccount(
+                            linkRepository.startVerification(
+                                account.clientSecret,
+                                consumerPublishableKey,
+                                cookie()
+                            ).getOrThrow()
                         )
                     } else {
                         account
@@ -133,16 +138,17 @@ internal class LinkAccountManager @Inject constructor(
         linkRepository.consumerSignUp(email, phone, country, cookie())
             .map { consumerSession ->
                 cookieStore.storeNewUserEmail(email)
-                setAndReturn(LinkAccount(consumerSession))
+                setAccount(consumerSession)
             }.mapCatching { account ->
                 if (account.isVerified) {
                     account
                 } else {
-                    setAndReturn(
-                        LinkAccount(
-                            linkRepository.startVerification(account.clientSecret, cookie())
-                                .getOrThrow()
-                        )
+                    setAccount(
+                        linkRepository.startVerification(
+                            account.clientSecret,
+                            consumerPublishableKey,
+                            cookie()
+                        ).getOrThrow()
                     )
                 }
             }
@@ -150,28 +156,29 @@ internal class LinkAccountManager @Inject constructor(
     /**
      * Triggers sending a verification code to the user.
      */
-    suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError {
-        linkRepository.startVerification(it, cookie())
+    suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError { clientSecret ->
+        linkRepository.startVerification(clientSecret, consumerPublishableKey, cookie())
             .map { consumerSession ->
-                setAndReturn(LinkAccount(consumerSession))
+                setAccount(consumerSession)
             }
     }
 
     /**
      * Confirms a verification code sent to the user.
      */
-    suspend fun confirmVerification(code: String): Result<LinkAccount> = retryingOnAuthError {
-        linkRepository.confirmVerification(it, code, cookie())
-            .map { consumerSession ->
-                setAndReturn(LinkAccount(consumerSession))
-            }
-    }
+    suspend fun confirmVerification(code: String): Result<LinkAccount> =
+        retryingOnAuthError { clientSecret ->
+            linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey, cookie())
+                .map { consumerSession ->
+                    setAccount(consumerSession)
+                }
+        }
 
     /**
      * Fetch all saved payment methods for the signed in consumer.
      */
-    suspend fun listPaymentDetails() = retryingOnAuthError {
-        linkRepository.listPaymentDetails(it)
+    suspend fun listPaymentDetails() = retryingOnAuthError { clientSecret ->
+        linkRepository.listPaymentDetails(clientSecret, consumerPublishableKey)
     }
 
     /**
@@ -201,12 +208,13 @@ internal class LinkAccountManager @Inject constructor(
         paymentDetails: ConsumerPaymentDetailsCreateParams,
         stripeIntent: StripeIntent,
         extraConfirmationParams: Map<String, Any>?
-    ) = retryingOnAuthError {
+    ) = retryingOnAuthError { clientSecret ->
         linkRepository.createPaymentDetails(
             paymentDetails,
-            it,
             stripeIntent,
-            extraConfirmationParams
+            extraConfirmationParams,
+            clientSecret,
+            consumerPublishableKey
         )
     }
 
@@ -214,16 +222,21 @@ internal class LinkAccountManager @Inject constructor(
      * Update an existing payment method in the signed in consumer account.
      */
     suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams) =
-        retryingOnAuthError {
-            linkRepository.updatePaymentDetails(updateParams, it)
+        retryingOnAuthError { clientSecret ->
+            linkRepository.updatePaymentDetails(updateParams, clientSecret, consumerPublishableKey)
         }
 
     /**
      * Delete the payment method from the signed in consumer account.
      */
-    suspend fun deletePaymentDetails(paymentDetailsId: String) = retryingOnAuthError {
-        linkRepository.deletePaymentDetails(it, paymentDetailsId)
-    }
+    suspend fun deletePaymentDetails(paymentDetailsId: String) =
+        retryingOnAuthError { clientSecret ->
+            linkRepository.deletePaymentDetails(
+                paymentDetailsId,
+                clientSecret,
+                consumerPublishableKey
+            )
+        }
 
     /**
      * Make an API call with the client_secret for the currently signed in account, retrying once
@@ -236,7 +249,7 @@ internal class LinkAccountManager @Inject constructor(
                     Result.success(it)
                 },
                 onFailure = {
-                    if (it is AuthenticationException) {
+                    if (it is AuthenticationException && cookie() != null) {
                         // Try fetching the user account with the stored cookie, then retry API call
                         lookupConsumer(null).fold(
                             onSuccess = {
@@ -270,8 +283,10 @@ internal class LinkAccountManager @Inject constructor(
             cookieStore.logout(account.email)
             userHasLoggedOut = true
             _linkAccount.value = null
+            val publishableKey = consumerPublishableKey
+            consumerPublishableKey = null
             GlobalScope.launch {
-                linkRepository.logout(account.clientSecret, cookie)
+                linkRepository.logout(account.clientSecret, publishableKey, cookie)
             }
         }
 
@@ -282,23 +297,44 @@ internal class LinkAccountManager @Inject constructor(
     fun hasUserLoggedOut(email: String?) = userHasLoggedOut ||
         (email?.let { cookieStore.isEmailLoggedOut(it) } ?: false)
 
-    private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {
-        _linkAccount.value = linkAccount
-        cookieStore.updateAuthSessionCookie(linkAccount.getAuthSessionCookie())
-        if (cookieStore.isEmailLoggedOut(linkAccount.email)) {
+    private fun setAccount(consumerSession: ConsumerSession): LinkAccount {
+        maybeUpdateConsumerPublishableKey(consumerSession)
+        val newAccount = LinkAccount(consumerSession)
+        _linkAccount.value = newAccount
+        cookieStore.updateAuthSessionCookie(newAccount.getAuthSessionCookie())
+        if (cookieStore.isEmailLoggedOut(newAccount.email)) {
             cookieStore.storeLoggedOutEmail("")
         }
-        return linkAccount
+        return newAccount
     }
 
     @VisibleForTesting
-    fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? =
-        linkAccount?.let {
-            setAndReturn(it)
+    fun setAccountNullable(consumerSession: ConsumerSession?): LinkAccount? =
+        consumerSession?.let {
+            setAccount(it)
         } ?: run {
             _linkAccount.value = null
+            consumerPublishableKey = null
             null
         }
+
+    /**
+     * Update the [consumerPublishableKey] value if needed.
+     *
+     * Only calls to [lookupConsumer] and [signUp] return the publishable key. For other calls, we
+     * want to keep using the current key unless the user signed out.
+     */
+    private fun maybeUpdateConsumerPublishableKey(newSession: ConsumerSession) {
+        newSession.publishableKey?.let {
+            // If the session has a key, start using it
+            consumerPublishableKey = it
+        } ?: run {
+            // Keep the current key if it's the same user, reset it if the user changed
+            if (_linkAccount.value?.email != newSession.emailAddress) {
+                consumerPublishableKey = null
+            }
+        }
+    }
 
     private fun cookie() = cookieStore.getAuthSessionCookie()
 }
