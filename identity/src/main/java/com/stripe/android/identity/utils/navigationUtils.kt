@@ -25,25 +25,23 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * * If the initial post fails, navigate to [ErrorFragment] with default values.
  * * If the initial post succeeds, check if the response [VerificationPageData] has error.
  *    * If it has error, then navigate to [ErrorFragment] with the error data.
- *    * Otherwise, check [shouldNotSubmit].
- *      * If it's true invoke [notSubmitBlock]
- *      * If it's false, post submit
+ *    * Otherwise, check [notSubmitBlock].
+ *      * If it's not null invoke it
+ *      * Otherwise, post submit
  *        * If submit succeeds, navigate to [ConfirmationFragment]
  *        * If submit fails, navigate to [ErrorFragment]
  *
  *
  * @param identityViewModel: [IdentityViewModel] to fire requests.
  * @param collectedDataParam: parameter collected from UI response, posted to [IdentityViewModel.postVerificationPageData].
- * @param shouldNotSubmit: A condition check block to decide when [VerificationPageData]
- * is returned without error, whether to continue submit by [IdentityViewModel.postVerificationPageSubmit].
- * @param notSubmitBlock: A block to execute when [shouldNotSubmit] returns true.
+ * @param notSubmitBlock: If not null, execute this block instead of submit by
+ * [IdentityViewModel.postVerificationPageSubmit] after [IdentityViewModel.postVerificationPageData] returns.
  */
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
     clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
-    shouldNotSubmit: (verificationPageData: VerificationPageData) -> Boolean = { true },
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     runCatching {
@@ -56,9 +54,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                     postedVerificationPageData.requirements.errors[0]
                 )
             } else {
-                if (shouldNotSubmit(postedVerificationPageData)) {
-                    notSubmitBlock?.invoke(postedVerificationPageData)
-                } else {
+                notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
                     runCatching {
                         identityViewModel.postVerificationPageSubmit()
                     }.fold(
@@ -86,6 +82,36 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                         }
                     )
                 }
+//                if (shouldNotSubmit(postedVerificationPageData)) {
+//                    notSubmitBlock?.invoke(postedVerificationPageData)
+//                } else {
+//                    runCatching {
+//                        identityViewModel.postVerificationPageSubmit()
+//                    }.fold(
+//                        onSuccess = { submittedVerificationPageData ->
+//                            when {
+//                                submittedVerificationPageData.hasError() -> {
+//                                    navigateToRequirementErrorFragment(
+//                                        fromFragment,
+//                                        submittedVerificationPageData.requirements.errors[0]
+//                                    )
+//                                }
+//                                submittedVerificationPageData.submitted -> {
+//                                    findNavController()
+//                                        .navigate(R.id.action_global_confirmationFragment)
+//                                }
+//                                else -> {
+//                                    Log.e(TAG, "VerificationPage submit failed")
+//                                    navigateToDefaultErrorFragment()
+//                                }
+//                            }
+//                        },
+//                        onFailure = {
+//                            Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
+//                            navigateToDefaultErrorFragment()
+//                        }
+//                    )
+//                }
             }
         },
         onFailure = {

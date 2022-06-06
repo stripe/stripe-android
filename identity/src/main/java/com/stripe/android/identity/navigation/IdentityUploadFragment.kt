@@ -389,7 +389,6 @@ internal abstract class IdentityUploadFragment(
             collectedDataParam = collectedDataParam,
             clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
             fromFragment = fragmentId,
-            shouldNotSubmit = { false }
         )
     }
 

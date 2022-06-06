@@ -69,7 +69,6 @@ internal class PassportScanFragment(
                                         ),
                                         clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
                                         fromFragment = R.id.passportScanFragment,
-                                        shouldNotSubmit = { false }
                                     )
                                 }.onFailure { throwable ->
                                     Log.e(
