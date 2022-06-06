@@ -31,7 +31,8 @@ class ConsumerSessionLookupJsonParserTest {
                     emailAddress = "email@example.com",
                     redactedPhoneNumber = "+1********68",
                     verificationSessions = emptyList(),
-                    authSessionClientSecret = null
+                    authSessionClientSecret = null,
+                    publishableKey = null
                 ),
                 errorMessage = null
             )
