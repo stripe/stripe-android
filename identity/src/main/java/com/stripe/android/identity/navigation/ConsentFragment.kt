@@ -114,7 +114,6 @@ internal class ConsentFragment(
                 collectedDataParam,
                 ClearDataParam.CONSENT_TO_DOC_SELECT,
                 fromFragment = R.id.consentFragment,
-                shouldNotSubmit = { true },
                 notSubmitBlock = {
                     navigateToDocSelection()
                 }

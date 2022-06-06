@@ -191,7 +191,6 @@ internal class SelfieFragment(
                                     ),
                                     fromFragment = fragmentId,
                                     clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM,
-                                    shouldNotSubmit = { false }
                                 )
                             }.onFailure { throwable ->
                                 Log.e(

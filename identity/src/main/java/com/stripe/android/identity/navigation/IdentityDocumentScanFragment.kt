@@ -147,7 +147,6 @@ internal abstract class IdentityDocumentScanFragment(
                                         ),
                                         fromFragment = fragmentId,
                                         clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                        shouldNotSubmit = { false }
                                     )
                                 }.onFailure { throwable ->
                                     Log.e(

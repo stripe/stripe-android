@@ -186,8 +186,6 @@ internal class NavigationUtilsTest {
                 mock(),
                 mock(),
                 fromFragment,
-                { true },
-                {}
             )
 
             requireNotNull(navController.backStack.last().arguments).let { arguments ->
@@ -220,8 +218,6 @@ internal class NavigationUtilsTest {
                     mock(),
                     mock(),
                     R.id.consentFragment,
-                    { true },
-                    {}
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -245,12 +241,10 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
-                    { true },
-                    {
-                        blockExecuted = true
-                    }
-                )
+                    R.id.consentFragment
+                ) {
+                    blockExecuted = true
+                }
 
                 assertThat(blockExecuted).isEqualTo(true)
             }
@@ -275,8 +269,6 @@ internal class NavigationUtilsTest {
                     mock(),
                     mock(),
                     R.id.consentFragment,
-                    { false },
-                    {}
                 )
 
                 verify(mockIdentityViewModel).postVerificationPageSubmit()
@@ -303,8 +295,6 @@ internal class NavigationUtilsTest {
                     mock(),
                     mock(),
                     R.id.consentFragment,
-                    { false },
-                    {}
                 )
 
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
@@ -342,8 +332,6 @@ internal class NavigationUtilsTest {
                     mock(),
                     mock(),
                     R.id.consentFragment,
-                    { false },
-                    {}
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -371,8 +359,6 @@ internal class NavigationUtilsTest {
                     mock(),
                     mock(),
                     R.id.consentFragment,
-                    { false },
-                    {}
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -400,8 +386,6 @@ internal class NavigationUtilsTest {
                     mock(),
                     mock(),
                     R.id.consentFragment,
-                    { false },
-                    {}
                 )
 
                 assertThat(navController.currentDestination?.id)
