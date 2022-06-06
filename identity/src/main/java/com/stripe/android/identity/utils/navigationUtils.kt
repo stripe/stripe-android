@@ -82,36 +82,6 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                         }
                     )
                 }
-//                if (shouldNotSubmit(postedVerificationPageData)) {
-//                    notSubmitBlock?.invoke(postedVerificationPageData)
-//                } else {
-//                    runCatching {
-//                        identityViewModel.postVerificationPageSubmit()
-//                    }.fold(
-//                        onSuccess = { submittedVerificationPageData ->
-//                            when {
-//                                submittedVerificationPageData.hasError() -> {
-//                                    navigateToRequirementErrorFragment(
-//                                        fromFragment,
-//                                        submittedVerificationPageData.requirements.errors[0]
-//                                    )
-//                                }
-//                                submittedVerificationPageData.submitted -> {
-//                                    findNavController()
-//                                        .navigate(R.id.action_global_confirmationFragment)
-//                                }
-//                                else -> {
-//                                    Log.e(TAG, "VerificationPage submit failed")
-//                                    navigateToDefaultErrorFragment()
-//                                }
-//                            }
-//                        },
-//                        onFailure = {
-//                            Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
-//                            navigateToDefaultErrorFragment()
-//                        }
-//                    )
-//                }
             }
         },
         onFailure = {
