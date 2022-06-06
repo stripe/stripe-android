@@ -37,6 +37,11 @@ internal data class FinancialConnectionsSheetState(
 internal sealed class FinancialConnectionsSheetViewEffect {
 
     /**
+     * Open the AuthFlow native activity.
+     */
+    object OpenNativeAuthFlow : FinancialConnectionsSheetViewEffect()
+
+    /**
      * Open the AuthFlow.
      */
     data class OpenAuthFlowWithUrl(

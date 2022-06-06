@@ -1,15 +1,11 @@
 package com.stripe.android.financialconnections
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.Modifier
-
+import androidx.compose.material.Text
 import com.airbnb.mvrx.viewModel
-
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
@@ -20,17 +16,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             setContent {
                 Column {
-                    Box(modifier = Modifier.weight(1f)) {
-                    }
+                    Text("FinancialConnectionsSheetNativeActivity")
                 }
             }
         }
-    }
-    /**
-     * Handles new intents in the form of the redirect from the custom tab hosted auth flow
-     */
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        viewModel.handleOnNewIntent(intent)
     }
 }
