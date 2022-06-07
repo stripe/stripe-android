@@ -49,73 +49,107 @@ import kotlinx.serialization.Serializable
 @Parcelize
 internal data class FinancialConnectionsSessionManifest(
 
-    @SerialName(value = "allow_manual_entry") val allowManualEntry: Boolean,
+    @SerialName(value = "allow_manual_entry")
+    val allowManualEntry: Boolean,
 
-    @SerialName(value = "consent_required") val consentRequired: Boolean,
+    @SerialName(value = "consent_required")
+    val consentRequired: Boolean,
 
-    @SerialName(value = "custom_manual_entry_handling") val customManualEntryHandling: Boolean,
+    @SerialName(value = "custom_manual_entry_handling")
+    val customManualEntryHandling: Boolean,
 
-    @SerialName(value = "disable_link_more_accounts") val disableLinkMoreAccounts: Boolean,
+    @SerialName(value = "disable_link_more_accounts")
+    val disableLinkMoreAccounts: Boolean,
 
-    @SerialName(value = "id") val id: String,
+    @SerialName(value = "id")
+    val id: String,
 
-    @SerialName(value = "instant_verification_disabled") val instantVerificationDisabled: Boolean,
+    @SerialName(value = "instant_verification_disabled")
+    val instantVerificationDisabled: Boolean,
 
-    @SerialName(value = "institution_search_disabled") val institutionSearchDisabled: Boolean,
+    @SerialName(value = "institution_search_disabled")
+    val institutionSearchDisabled: Boolean,
 
-    @SerialName(value = "livemode") val livemode: Boolean,
+    @SerialName(value = "livemode")
+    val livemode: Boolean,
 
-    @SerialName(value = "manual_entry_uses_microdeposits") val manualEntryUsesMicrodeposits: Boolean,
+    @SerialName(value = "manual_entry_uses_microdeposits")
+    val manualEntryUsesMicrodeposits: Boolean,
 
-    @SerialName(value = "mobile_handoff_enabled") val mobileHandoffEnabled: Boolean,
+    @SerialName(value = "mobile_handoff_enabled")
+    val mobileHandoffEnabled: Boolean,
 
-    @SerialName(value = "next_pane") val nextPane: NextPane,
+    @SerialName(value = "next_pane")
+    val nextPane: NextPane,
 
-    @SerialName(value = "permissions") val permissions: List<FinancialConnectionsAccount.Permissions>,
+    @SerialName(value = "permissions")
+    val permissions: List<FinancialConnectionsAccount.Permissions>,
 
-    @SerialName(value = "product") val product: Product,
+    @SerialName(value = "product")
+    val product: Product,
 
-    @SerialName(value = "single_account") val singleAccount: Boolean,
+    @SerialName(value = "single_account")
+    val singleAccount: Boolean,
 
-    @SerialName(value = "use_single_sort_search") val useSingleSortSearch: Boolean,
+    @SerialName(value = "use_single_sort_search")
+    val useSingleSortSearch: Boolean,
 
-    @SerialName(value = "account_disconnection_method") val accountDisconnectionMethod: AccountDisconnectionMethod? = null,
+    @SerialName(value = "account_disconnection_method")
+    val accountDisconnectionMethod: AccountDisconnectionMethod? = null,
 
-    @SerialName(value = "accountholder_customer_email_address") val accountholderCustomerEmailAddress: String? = null,
+    @SerialName(value = "accountholder_customer_email_address")
+    val accountholderCustomerEmailAddress: String? = null,
 
-    @SerialName(value = "accountholder_is_link_consumer") val accountholderIsLinkConsumer: Boolean? = null,
+    @SerialName(value = "accountholder_is_link_consumer")
+    val accountholderIsLinkConsumer: Boolean? = null,
 
-    @SerialName(value = "active_auth_session") val activeAuthSession: FinancialConnectionsAuthorizationSession? = null,
+    @SerialName(value = "active_auth_session")
+    val activeAuthSession: FinancialConnectionsAuthorizationSession? = null,
 
-    @SerialName(value = "active_institution") val activeInstitution: FinancialConnectionsInstitution? = null,
+    @SerialName(value = "active_institution")
+    val activeInstitution: FinancialConnectionsInstitution? = null,
 
-    @SerialName(value = "business_name") val businessName: String? = null,
+    @SerialName(value = "business_name")
+    val businessName: String? = null,
 
-    @SerialName(value = "cancel_url") val cancelUrl: String,
+    @SerialName(value = "cancel_url")
+    val cancelUrl: String,
 
-    @SerialName(value = "connect_platform_name") val connectPlatformName: String? = null,
+    @SerialName(value = "connect_platform_name")
+    val connectPlatformName: String? = null,
 
-    @SerialName(value = "connected_account_name") val connectedAccountName: String? = null,
+    @SerialName(value = "connected_account_name")
+    val connectedAccountName: String? = null,
 
-    @SerialName(value = "hosted_auth_url") val hostedAuthUrl: String,
+    @SerialName(value = "hosted_auth_url")
+    val hostedAuthUrl: String,
 
-    @SerialName(value = "initial_institution") val initialInstitution: FinancialConnectionsInstitution? = null,
+    @SerialName(value = "initial_institution")
+    val initialInstitution: FinancialConnectionsInstitution? = null,
 
-    @SerialName(value = "is_end_user_facing") val isEndUserFacing: Boolean? = null,
+    @SerialName(value = "is_end_user_facing")
+    val isEndUserFacing: Boolean? = null,
 
-    @SerialName(value = "is_link_with_stripe") val isLinkWithStripe: Boolean? = null,
+    @SerialName(value = "is_link_with_stripe")
+    val isLinkWithStripe: Boolean? = null,
 
-    @SerialName(value = "is_networking_user_flow") val isNetworkingUserFlow: Boolean? = null,
+    @SerialName(value = "is_networking_user_flow")
+    val isNetworkingUserFlow: Boolean? = null,
 
-    @SerialName(value = "is_stripe_direct") val isStripeDirect: Boolean? = null,
+    @SerialName(value = "is_stripe_direct")
+    val isStripeDirect: Boolean? = null,
 
-    @SerialName(value = "modal_customization") val modalCustomization: Map<String, Boolean>? = null,
+    @SerialName(value = "modal_customization")
+    val modalCustomization: Map<String, Boolean>? = null,
 
-    @SerialName(value = "payment_method_type") val paymentMethodType: SupportedPaymentMethodTypes? = null,
+    @SerialName(value = "payment_method_type")
+    val paymentMethodType: SupportedPaymentMethodTypes? = null,
 
-    @SerialName(value = "success_url") val successUrl: String,
+    @SerialName(value = "success_url")
+    val successUrl: String,
 
-    @SerialName(value = "theme") val theme: Theme? = null
+    @SerialName(value = "theme")
+    val theme: Theme? = null
 
 ) : Parcelable {
 
@@ -291,21 +325,29 @@ internal data class FinancialConnectionsSessionManifest(
     @Parcelize
     data class FinancialConnectionsAuthorizationSession(
 
-        @SerialName(value = "id") val id: String,
+        @SerialName(value = "id")
+        val id: String,
 
-        @SerialName(value = "next_pane") val nextPane: NextPane,
+        @SerialName(value = "next_pane")
+        val nextPane: NextPane,
 
-        @SerialName(value = "flow") val flow: Flow? = null,
+        @SerialName(value = "flow")
+        val flow: Flow? = null,
 
-        @SerialName(value = "institution_skip_account_selection") val institutionSkipAccountSelection: Boolean? = null,
+        @SerialName(value = "institution_skip_account_selection")
+        val institutionSkipAccountSelection: Boolean? = null,
 
-        @SerialName(value = "show_partner_disclosure") val showPartnerDisclosure: Boolean? = null,
+        @SerialName(value = "show_partner_disclosure")
+        val showPartnerDisclosure: Boolean? = null,
 
-        @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
+        @SerialName(value = "skip_account_selection")
+        val skipAccountSelection: Boolean? = null,
 
-        @SerialName(value = "url") val url: String? = null,
+        @SerialName(value = "url")
+        val url: String? = null,
 
-        @SerialName(value = "url_qr_code") val urlQrCode: String? = null
+        @SerialName(value = "url_qr_code")
+        val urlQrCode: String? = null
 
     ) : Parcelable {
 
