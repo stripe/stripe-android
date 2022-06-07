@@ -148,9 +148,6 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "success_url")
     val successUrl: String,
 
-    @SerialName(value = "theme")
-    val theme: Theme? = null
-
 ) : Parcelable {
 
     /**
@@ -290,23 +287,6 @@ internal data class FinancialConnectionsSessionManifest(
 
         @SerialName(value = "support")
         SUPPORT("support");
-    }
-
-    /**
-     *
-     *
-     * Values: DASHBOARD_LIGHT,LIGHT,LINK_LIGHT
-     */
-    @Serializable
-    enum class Theme(val value: String) {
-        @SerialName(value = "dashboard_light")
-        DASHBOARD_LIGHT("dashboard_light"),
-
-        @SerialName(value = "light")
-        LIGHT("light"),
-
-        @SerialName(value = "link_light")
-        LINK_LIGHT("link_light");
     }
 
     /**
