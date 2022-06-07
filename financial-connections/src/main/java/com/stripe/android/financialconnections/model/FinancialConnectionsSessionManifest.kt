@@ -44,6 +44,7 @@ import kotlinx.serialization.Serializable
  * @param successUrl
  * @param theme
  */
+@Suppress("MaxLineLength")
 @Serializable
 @Parcelize
 data class FinancialConnectionsSessionManifest(
@@ -121,7 +122,9 @@ data class FinancialConnectionsSessionManifest(
     /**
      *
      *
-     * Values: ACCOUNT_PICKER,ATTACH_LINKED_PAYMENT_ACCOUNT,AUTH_OPTIONS,CONSENT,INSTITUTION_PICKER,LINK_CONSENT,LINK_LOGIN,MANUAL_ENTRY,MANUAL_ENTRY_SUCCESS,NETWORKING_LINK_LOGIN_WARMUP,NETWORKING_LINK_SIGNUP_PANE,NETWORKING_LINK_VERIFICATION,PARTNER_AUTH,SUCCESS,UNEXPECTED_ERROR
+     * Values: ACCOUNT_PICKER,ATTACH_LINKED_PAYMENT_ACCOUNT,AUTH_OPTIONS,CONSENT,INSTITUTION_PICKER,
+     * LINK_CONSENT,LINK_LOGIN,MANUAL_ENTRY,MANUAL_ENTRY_SUCCESS,NETWORKING_LINK_LOGIN_WARMUP,
+     * NETWORKING_LINK_SIGNUP_PANE,NETWORKING_LINK_VERIFICATION,PARTNER_AUTH,SUCCESS,UNEXPECTED_ERROR
      */
     @Serializable
     enum class NextPane(val value: String) {
@@ -174,7 +177,9 @@ data class FinancialConnectionsSessionManifest(
     /**
      *
      *
-     * Values: BILLPAY,CANARY,CAPITAL,CAPITAL_HOSTED,DASHBOARD,DIRECT_ONBOARDING,DIRECT_SETTINGS,EMERALD,EXPRESS_ONBOARDING,EXTERNAL_API,ISSUING,LCPM,LINK_WITH_NETWORKING,OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
+     * Values: BILLPAY,CANARY,CAPITAL,CAPITAL_HOSTED,DASHBOARD,DIRECT_ONBOARDING,DIRECT_SETTINGS,
+     * EMERALD,EXPRESS_ONBOARDING,EXTERNAL_API,ISSUING,LCPM,LINK_WITH_NETWORKING,
+     * OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
      */
     @Serializable
     enum class Product(val value: String) {
@@ -307,60 +312,11 @@ data class FinancialConnectionsSessionManifest(
         /**
          *
          *
-         * Values: ACCOUNT_PICKER,ATTACH_LINKED_PAYMENT_ACCOUNT,AUTH_OPTIONS,CONSENT,INSTITUTION_PICKER,LINK_CONSENT,LINK_LOGIN,MANUAL_ENTRY,MANUAL_ENTRY_SUCCESS,NETWORKING_LINK_LOGIN_WARMUP,NETWORKING_LINK_SIGNUP_PANE,NETWORKING_LINK_VERIFICATION,PARTNER_AUTH,SUCCESS,UNEXPECTED_ERROR
-         */
-        @Serializable
-        enum class NextPane(val value: String) {
-            @SerialName(value = "account_picker")
-            ACCOUNT_PICKER("account_picker"),
-
-            @SerialName(value = "attach_linked_payment_account")
-            ATTACH_LINKED_PAYMENT_ACCOUNT("attach_linked_payment_account"),
-
-            @SerialName(value = "auth_options")
-            AUTH_OPTIONS("auth_options"),
-
-            @SerialName(value = "consent")
-            CONSENT("consent"),
-
-            @SerialName(value = "institution_picker")
-            INSTITUTION_PICKER("institution_picker"),
-
-            @SerialName(value = "link_consent")
-            LINK_CONSENT("link_consent"),
-
-            @SerialName(value = "link_login")
-            LINK_LOGIN("link_login"),
-
-            @SerialName(value = "manual_entry")
-            MANUAL_ENTRY("manual_entry"),
-
-            @SerialName(value = "manual_entry_success")
-            MANUAL_ENTRY_SUCCESS("manual_entry_success"),
-
-            @SerialName(value = "networking_link_login_warmup")
-            NETWORKING_LINK_LOGIN_WARMUP("networking_link_login_warmup"),
-
-            @SerialName(value = "networking_link_signup_pane")
-            NETWORKING_LINK_SIGNUP_PANE("networking_link_signup_pane"),
-
-            @SerialName(value = "networking_link_verification")
-            NETWORKING_LINK_VERIFICATION("networking_link_verification"),
-
-            @SerialName(value = "partner_auth")
-            PARTNER_AUTH("partner_auth"),
-
-            @SerialName(value = "success")
-            SUCCESS("success"),
-
-            @SerialName(value = "unexpected_error")
-            UNEXPECTED_ERROR("unexpected_error");
-        }
-
-        /**
-         *
-         *
-         * Values: FINICITY_CONNECT_V2_FIX,FINICITY_CONNECT_V2_LITE,FINICITY_CONNECT_V2_OAUTH,FINICITY_CONNECT_V2_OAUTH_REDIRECT,FINICITY_CONNECT_V2_OAUTH_WEBVIEW,MX_CONNECT,MX_OAUTH,MX_OAUTH_REDIRECT,MX_OAUTH_WEBVIEW,TESTMODE,TESTMODE_OAUTH,TESTMODE_OAUTH_WEBVIEW,TRUELAYER_OAUTH,TRUELAYER_OAUTH_HANDOFF,TRUELAYER_OAUTH_WEBVIEW,WELLS_FARGO,WELLS_FARGO_WEBVIEW
+         * Values: FINICITY_CONNECT_V2_FIX,FINICITY_CONNECT_V2_LITE,FINICITY_CONNECT_V2_OAUTH,
+         * FINICITY_CONNECT_V2_OAUTH_REDIRECT,FINICITY_CONNECT_V2_OAUTH_WEBVIEW,MX_CONNECT,
+         * MX_OAUTH,MX_OAUTH_REDIRECT,MX_OAUTH_WEBVIEW,TESTMODE,TESTMODE_OAUTH,
+         * TESTMODE_OAUTH_WEBVIEW,TRUELAYER_OAUTH,TRUELAYER_OAUTH_HANDOFF,
+         * TRUELAYER_OAUTH_WEBVIEW,WELLS_FARGO,WELLS_FARGO_WEBVIEW
          */
         @Serializable
         enum class Flow(val value: String) {
