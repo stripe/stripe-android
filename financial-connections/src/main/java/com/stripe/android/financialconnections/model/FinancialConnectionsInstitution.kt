@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-data class FinancialConnectionsInstitution(
+internal data class FinancialConnectionsInstitution(
 
     @SerialName(value = "featured") val featured: Boolean,
 

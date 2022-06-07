@@ -47,7 +47,7 @@ import kotlinx.serialization.Serializable
 @Suppress("MaxLineLength")
 @Serializable
 @Parcelize
-data class FinancialConnectionsSessionManifest(
+internal data class FinancialConnectionsSessionManifest(
 
     @SerialName(value = "allow_manual_entry") val allowManualEntry: Boolean,
 
