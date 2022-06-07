@@ -13,6 +13,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFile
+import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.camera.IdentityAggregator
@@ -44,10 +45,10 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 class PassportScanFragmentTest {
@@ -64,13 +65,13 @@ class PassportScanFragmentTest {
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
-    private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
+    private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
 
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { pageAndModel } doReturn mockPageAndModel
+        on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
     }
 
@@ -91,8 +92,9 @@ class PassportScanFragmentTest {
     fun simulateModelDownloaded() {
         mockPageAndModel.postValue(
             Resource.success(
-                Pair(
+                IdentityViewModel.PageAndModelFiles(
                     SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE,
+                    mock(),
                     mock()
                 )
             )
@@ -100,12 +102,25 @@ class PassportScanFragmentTest {
     }
 
     @Test
-    fun `when scanned and file is uploaded, clicking button triggers navigation`() {
+    fun `when scanned and file is uploaded and no selfie required, clicking button triggers post`() {
         simulateFrontScanned { _, _ ->
             runBlocking {
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
+                )
+
                 documentUploadState.update {
                     frontUploadedDocumentUploadState
                 }
+
+                // mock identityViewModel.observeForVerificationPage - already called 1 time
+                val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                    any(),
+                    successCaptor.capture(),
+                    any()
+                )
+                successCaptor.lastValue.invoke(mock())
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
@@ -120,6 +135,53 @@ class PassportScanFragmentTest {
                         ClearDataParam.UPLOAD_TO_CONFIRM
                     )
                 )
+
+                // no selfie required, send postVerificationPageSubmit
+                verify(mockIdentityViewModel).postVerificationPageSubmit()
+            }
+        }
+    }
+
+    @Test
+    fun `when scanned and file is uploaded and selfie is required, clicking button navigates to selfie`() {
+        simulateFrontScanned { navController, _ ->
+            runBlocking {
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
+                )
+
+                documentUploadState.update {
+                    frontUploadedDocumentUploadState
+                }
+
+                // mock identityViewModel.observeForVerificationPage - already called 1 time
+                val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                    any(),
+                    successCaptor.capture(),
+                    any()
+                )
+                val mockVerificationPage = mock<VerificationPage> {
+                    on { selfieCapture } doReturn mock() // return non null selfieCapture
+                }
+                successCaptor.lastValue.invoke(mockVerificationPage)
+
+                // verify navigation attempts
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                            type = CollectedDataParam.Type.PASSPORT,
+                            frontHighResResult = FRONT_HIGH_RES_RESULT,
+                            frontLowResResult = FRONT_LOW_RES_RESULT
+                        )
+                    ),
+                    eq(
+                        ClearDataParam.UPLOAD_TO_CONFIRM
+                    )
+                )
+
+                // selfie required, navigates to selfie
+                assertThat(navController.currentDestination?.id).isEqualTo(R.id.selfieFragment)
             }
         }
     }

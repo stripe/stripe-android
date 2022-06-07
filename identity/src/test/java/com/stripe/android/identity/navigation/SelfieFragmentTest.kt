@@ -26,6 +26,7 @@ import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
@@ -39,12 +40,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class SelfieFragmentTest {
@@ -61,7 +65,7 @@ internal class SelfieFragmentTest {
         on { it.displayStateChanged } doReturn displayStateChanged
     }
 
-    private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
+    private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
 
@@ -89,18 +93,37 @@ internal class SelfieFragmentTest {
     )
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { pageAndModel } doReturn mockPageAndModel
+        on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
         on { selfieUploadState } doReturn selfieUploadState
     }
 
     @Test
-    fun `when initialized UI is reset`() {
+    fun `when initialized UI is reset and bound`() {
         launchSelfieFragment { binding, _, _ ->
+            val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+            verify(
+                mockIdentityViewModel,
+                times(1)
+            ).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            val mockSelfieCapture = mock<VerificationPageStaticContentSelfieCapturePage> {
+                on { consentText } doReturn CONSENT_TEXT
+            }
+            successCaptor.lastValue(
+                mock {
+                    on { selfieCapture } doReturn mockSelfieCapture
+                }
+            )
+
             verify(mockIdentityViewModel).resetSelfieUploadedState()
             assertThat(binding.scanningView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.resultView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
+            assertThat(binding.allowImageCollection.text.toString()).isEqualTo(CONSENT_TEXT)
         }
     }
 
@@ -200,7 +223,7 @@ internal class SelfieFragmentTest {
 
     @Test
     fun `when selfieUploadState isLoading, clicking continue triggers toggles loading state`() {
-        launchSelfieFragment { binding, navController, _ ->
+        launchSelfieFragment { binding, _, _ ->
             runBlocking {
                 displayStateChanged.postValue((FINISHED to mock()))
                 assertThat(binding.kontinue.isEnabled).isEqualTo(true)
@@ -281,6 +304,7 @@ internal class SelfieFragmentTest {
 
         const val SCORE_VARIANCE = 0.1f
         const val NUM_FRAMES = 8
+        const val CONSENT_TEXT = "TEST CONSENT TEXT"
 
         val FINISHED = IdentityScanState.Finished(
             type = IdentityScanState.ScanType.SELFIE,
