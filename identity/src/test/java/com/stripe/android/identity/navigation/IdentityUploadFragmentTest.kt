@@ -69,6 +69,11 @@ class IdentityUploadFragmentTest {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
     }
 
+    private val verificationPageWithSelfie = mock<VerificationPage>().also {
+        whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
+        whenever(it.selfieCapture).thenReturn(mock())
+    }
+
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
 
@@ -80,6 +85,14 @@ class IdentityUploadFragmentTest {
         val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
+        }
+        whenever(it.documentUploadState).thenReturn(documentUploadState)
+    }
+
+    private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
+        val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+        whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
+            successCaptor.firstValue(verificationPageWithSelfie)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
     }
@@ -259,7 +272,7 @@ class IdentityUploadFragmentTest {
     }
 
     @Test
-    fun `verify when kontinue is clicked and post succeeds navigates to confirmation`() {
+    fun `verify when selfie not required, kontinue is clicked and post succeeds navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
                 documentUploadState.update {
@@ -308,6 +321,57 @@ class IdentityUploadFragmentTest {
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.confirmationFragment)
+            }
+        }
+    }
+
+    @Test
+    fun `verify when selfie is required, clicking kontinue navigates to selfie`() {
+        launchFragment(requireSelfie = true) { binding, navController, _ ->
+            runBlocking {
+                documentUploadState.update {
+                    DocumentUploadState(
+                        frontHighResResult = Resource.success(
+                            FRONT_HIGH_RES_RESULT_FILEUPLOAD
+                        ),
+                        backHighResResult = Resource.success(
+                            BACK_HIGH_RES_RESULT_FILEUPLOAD
+                        )
+                    )
+                }
+
+                val collectedDataParamCaptor: KArgumentCaptor<CollectedDataParam> = argumentCaptor()
+                val clearDataParamCaptor: KArgumentCaptor<ClearDataParam> = argumentCaptor()
+                whenever(
+                    mockIdentityViewModelWithSelfie.postVerificationPageData(
+                        collectedDataParamCaptor.capture(),
+                        clearDataParamCaptor.capture()
+                    )
+                ).thenReturn(
+                    CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
+                )
+
+                binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
+                    CollectedDataParam(
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = FRONT_UPLOADED_ID,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentBack = DocumentUploadParam(
+                            highResImage = BACK_UPLOADED_ID,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentType = CollectedDataParam.Type.IDCARD
+                    )
+                )
+                assertThat(clearDataParamCaptor.firstValue).isEqualTo(
+                    ClearDataParam.UPLOAD_TO_CONFIRM
+                )
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.selfieFragment)
             }
         }
     }
@@ -505,6 +569,7 @@ class IdentityUploadFragmentTest {
     private fun launchFragment(
         shouldShowTakePhoto: Boolean = true,
         shouldShowChoosePhoto: Boolean = true,
+        requireSelfie: Boolean = false,
         testBlock: (
             binding: IdentityUploadFragmentBinding,
             navController: TestNavHostController,
@@ -519,7 +584,7 @@ class IdentityUploadFragmentTest {
     ) {
         TestFragment(
             viewModelFactoryFor(mockFrontBackUploadViewModel),
-            viewModelFactoryFor(mockIdentityViewModel),
+            viewModelFactoryFor(if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel),
             navController
         )
     }.onFragment {

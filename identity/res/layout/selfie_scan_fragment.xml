@@ -91,8 +91,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/page_horizontal_margin"
             android:layout_marginEnd="@dimen/page_horizontal_margin"
-            android:layout_marginTop="20dp"
-            android:text="@string/allow_image_collection" />
+            android:layout_marginTop="20dp" />
     </LinearLayout>
 
     <View

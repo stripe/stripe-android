@@ -10,8 +10,6 @@
     <string name="selfie_captures">Selfie captures</string>
     <!-- Content description of selfie flash animation mask -->
     <string name="flash_mask">Mask color to flash selfie</string>
-    <!-- Consent message to allow stripe uses the image to improve biometric verification technology -->
-    <string name="allow_image_collection">Allow Stripe to use your image to improve our biometric verification technology. You can remove Stripe\'s permissions at any time by contacting Stripe. Learn how Stripe uses data</string>
     <!-- Content description of a captured selfie -->
     <string name="selfie_item_description">one selfie captured</string>
 </resources>

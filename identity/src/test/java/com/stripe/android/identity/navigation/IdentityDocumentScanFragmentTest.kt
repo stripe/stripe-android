@@ -43,7 +43,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper.idleMainLooper
-import java.io.File
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
@@ -65,9 +64,9 @@ class IdentityDocumentScanFragmentTest {
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
-    private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
+    private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.pageAndModel).thenReturn(mockPageAndModel)
+        whenever(it.pageAndModelFiles).thenReturn(mockPageAndModel)
     }
 
     internal class TestFragment(
@@ -120,8 +119,9 @@ class IdentityDocumentScanFragmentTest {
         launchTestFragment().onFragment {
             mockPageAndModel.postValue(
                 Resource.success(
-                    Pair(
+                    IdentityViewModel.PageAndModelFiles(
                         SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE,
+                        mock(),
                         mock()
                     )
                 )
@@ -201,11 +201,11 @@ class IdentityDocumentScanFragmentTest {
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
+                    [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
+                    [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
             ).isEqualTo(false)
         }
     }
@@ -247,11 +247,11 @@ class IdentityDocumentScanFragmentTest {
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
+                    [CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
+                    [CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE]
             ).isEqualTo(true)
         }
     }

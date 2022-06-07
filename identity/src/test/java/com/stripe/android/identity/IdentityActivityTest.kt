@@ -298,7 +298,7 @@ internal class IdentityActivityTest {
     ) {
         val injectableActivityScenario = injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                viewModelFactory = mockIdentityViewModelFactory as ViewModelProvider.Factory
+                viewModelFactory = mockIdentityViewModelFactory
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(
