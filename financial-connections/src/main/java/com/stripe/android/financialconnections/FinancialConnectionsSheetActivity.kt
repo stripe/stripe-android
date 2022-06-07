@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
 internal class FinancialConnectionsSheetActivity :
     AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
