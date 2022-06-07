@@ -95,7 +95,7 @@ internal class CardEditViewModel @Inject constructor(
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
                 PaymentMethod.Type.Card.code,
-                false
+                requiresMandate = false
             )
 
         viewModelScope.launch {
