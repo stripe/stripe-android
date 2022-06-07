@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
+import android.os.Looper
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -30,6 +31,7 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
+import java.lang.RuntimeException
 import javax.inject.Inject
 import javax.inject.Singleton
 
