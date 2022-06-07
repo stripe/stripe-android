@@ -124,7 +124,6 @@ internal class SelfieFragmentTest {
             assertThat(binding.resultView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
             assertThat(binding.allowImageCollection.text.toString()).isEqualTo(CONSENT_TEXT)
-
         }
     }
 

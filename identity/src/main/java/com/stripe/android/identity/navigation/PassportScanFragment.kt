@@ -94,7 +94,6 @@ internal class PassportScanFragment(
                                     navigateToDefaultErrorFragment()
                                 }
                             )
-
                         }
                         else -> {
                             Log.d(

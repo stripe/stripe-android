@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat

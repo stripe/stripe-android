@@ -68,7 +68,6 @@ class PassportUploadFragmentTest {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
     }
 
-
     private val verificationPageWithSelfie = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
         whenever(it.selfieCapture).thenReturn(mock())

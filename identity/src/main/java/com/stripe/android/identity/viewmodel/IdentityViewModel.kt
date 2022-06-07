@@ -97,7 +97,6 @@ internal class IdentityViewModel @Inject constructor(
     private val _faceDetectorModelFile = MutableLiveData<Resource<File>>()
     val faceDetectorModelFile: LiveData<Resource<File>> = _faceDetectorModelFile
 
-
     data class PageAndModelFiles(
         val page: VerificationPage,
         val idDetectorFile: File,
