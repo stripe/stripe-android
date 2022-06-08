@@ -84,13 +84,6 @@ class FieldValuesToParamsMapConverter {
 
             formFieldKeyValues.entries
                 .forEach {
-                    // Sofort is the only known LPM that requires the country in the
-                    // billing_details[address][country] and the sofort[country] fields.
-                    if (type == PaymentMethod.Type.Sofort &&
-                        it.key == "billing_details[address][country]"
-                    ) {
-                        addPath(dest, listOf("sofort", "country"), it.value)
-                    }
                     addPath(dest, getKeys(it.key), it.value)
                 }
         }
