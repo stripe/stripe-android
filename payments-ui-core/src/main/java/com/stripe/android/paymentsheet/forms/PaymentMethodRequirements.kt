@@ -295,3 +295,12 @@ internal val USBankAccountRequirement = PaymentMethodRequirements(
     siRequirements = setOf(Delayed),
     confirmPMFromCustomer = true
 )
+
+/**
+ * This defines the requirements for usage as a Payment Method.
+ */
+internal val KonbiniRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
+    siRequirements = null,
+    confirmPMFromCustomer = false
+)

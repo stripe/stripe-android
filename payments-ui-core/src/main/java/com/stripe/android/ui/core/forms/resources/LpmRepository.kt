@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
+import com.stripe.android.paymentsheet.forms.KonbiniRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.forms.PaypalRequirement
@@ -211,6 +212,15 @@ class LpmRepository @Inject constructor(
                 USBankAccountRequirement,
                 LayoutSpec(sharedDataSpec.fields)
             )
+            "konbini" -> SupportedPaymentMethod(
+                "konbini",
+                false,
+                R.string.stripe_paymentsheet_payment_method_konbini,
+                R.drawable.stripe_ic_paymentsheet_pm_konbini,
+                true,
+                KonbiniRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
             else -> null
         }
 
@@ -294,7 +304,8 @@ class LpmRepository @Inject constructor(
                 PaymentMethod.Type.AfterpayClearpay.code,
                 PaymentMethod.Type.USBankAccount.code,
                 PaymentMethod.Type.Affirm.code,
-                PaymentMethod.Type.AuBecsDebit.code
+                PaymentMethod.Type.AuBecsDebit.code,
+                "konbini"
             )
         }
     }

@@ -41,6 +41,7 @@
     <string name="currency_eur">EUR</string>
     <string name="currency_gbp">GBP</string>
     <string name="currency_aud">AUD</string>
+    <string name="currency_jpy">JPY</string>
     <string name="show_sheet">Show Sheet</string>
     <string name="appearance_playground">"Appearance Customization"</string>
 </resources>
