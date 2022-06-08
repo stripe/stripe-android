@@ -6,12 +6,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-interface NavigationCommand {
+internal interface NavigationCommand {
     val arguments: List<NamedNavArgument>
     val destination: String
 }
 
-object NavigationDirections {
+internal object NavigationDirections {
 
     val bankPicker = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
@@ -29,7 +29,7 @@ object NavigationDirections {
     }
 }
 
-class NavigationManager(private val externalScope: CoroutineScope) {
+internal class NavigationManager(private val externalScope: CoroutineScope) {
     var commands = MutableSharedFlow<NavigationCommand>()
     fun navigate(
         directions: NavigationCommand

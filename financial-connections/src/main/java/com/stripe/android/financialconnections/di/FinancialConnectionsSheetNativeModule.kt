@@ -8,4 +8,4 @@ import dagger.Module
         ConsentSubcomponent::class
     ]
 )
-class FinancialConnectionsSheetNativeModule
+internal class FinancialConnectionsSheetNativeModule

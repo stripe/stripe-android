@@ -32,6 +32,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 }
 
-data class FinancialConnectionsSheetNativeState(
+internal data class FinancialConnectionsSheetNativeState(
     val test: String = ""
 ) : MavericksState

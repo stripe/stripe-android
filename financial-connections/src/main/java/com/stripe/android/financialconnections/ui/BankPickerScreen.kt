@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BankPickerScreen() {
+internal fun BankPickerScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -9,7 +9,7 @@ import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 @Module
-class NavigationModule {
+internal class NavigationModule {
 
     @Singleton
     @Provides
