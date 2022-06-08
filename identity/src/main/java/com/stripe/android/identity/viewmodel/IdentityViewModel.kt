@@ -20,6 +20,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.camera.IdentityAggregator
@@ -64,7 +65,7 @@ internal class IdentityViewModel @Inject constructor(
     private val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
-    val identityFragmentFactory: IdentityFragmentFactory
+    val identityFragmentFactory: IdentityFragmentFactory,
 ) : ViewModel() {
 
     /**
@@ -522,9 +523,9 @@ internal class IdentityViewModel @Inject constructor(
      * Retrieve the VerificationPage data and post its value to [verificationPage]
      */
     fun retrieveAndBufferVerificationPage(shouldRetrieveModel: Boolean = true) {
+        _verificationPage.postValue(Resource.loading())
         viewModelScope.launch {
             runCatching {
-                _verificationPage.postValue(Resource.loading())
                 identityRepository.retrieveVerificationPage(
                     verificationArgs.verificationSessionId,
                     verificationArgs.ephemeralKeySecret
@@ -622,6 +623,7 @@ internal class IdentityViewModel @Inject constructor(
         private val cameraPermissionEnsureable: CameraPermissionEnsureable,
         private val appSettingsOpenable: AppSettingsOpenable,
         private val verificationFlowFinishable: VerificationFlowFinishable,
+        private val fallbackUrlLauncher: FallbackUrlLauncher,
     ) : ViewModelProvider.Factory, Injectable<Context> {
         @Inject
         lateinit var subComponentBuilderProvider: Provider<IdentityViewModelSubcomponent.Builder>
@@ -640,6 +642,7 @@ internal class IdentityViewModel @Inject constructor(
                 .appSettingsOpenable(appSettingsOpenable)
                 .verificationFlowFinishable(verificationFlowFinishable)
                 .identityViewModelFactory(this)
+                .fallbackUrlLauncher(fallbackUrlLauncher)
                 .build().viewModel as T
         }
 

@@ -246,11 +246,11 @@ public final class com/stripe/android/identity/injection/IdentityCommonModule_Co
 }
 
 public final class com/stripe/android/identity/navigation/IdentityFragmentFactory_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory_Factory;
 	public fun get ()Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/camera/CameraPermissionEnsureable;Lcom/stripe/android/camera/AppSettingsOpenable;Lcom/stripe/android/identity/VerificationFlowFinishable;Lcom/stripe/android/identity/viewmodel/IdentityScanViewModel$IdentityScanViewModelFactory;Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;Lcom/stripe/android/identity/viewmodel/ConsentFragmentViewModel$ConsentFragmentViewModelFactory;Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;
+	public static fun newInstance (Lcom/stripe/android/camera/CameraPermissionEnsureable;Lcom/stripe/android/camera/AppSettingsOpenable;Lcom/stripe/android/identity/VerificationFlowFinishable;Lcom/stripe/android/identity/viewmodel/IdentityScanViewModel$IdentityScanViewModelFactory;Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;Lcom/stripe/android/identity/viewmodel/ConsentFragmentViewModel$ConsentFragmentViewModelFactory;Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;Lcom/stripe/android/identity/FallbackUrlLauncher;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;
 }
 
 public final class com/stripe/android/identity/networking/DefaultIdentityModelFetcher_Factory : dagger/internal/Factory {

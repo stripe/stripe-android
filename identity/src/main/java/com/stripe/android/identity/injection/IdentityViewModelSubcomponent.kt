@@ -2,6 +2,7 @@ package com.stripe.android.identity.injection
 
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -29,6 +30,9 @@ internal interface IdentityViewModelSubcomponent {
 
         @BindsInstance
         fun identityViewModelFactory(identityViewModelFactory: IdentityViewModel.IdentityViewModelFactory): Builder
+
+        @BindsInstance
+        fun fallbackUrlLauncher(fallbackUrlLauncher: FallbackUrlLauncher): Builder
 
         fun build(): IdentityViewModelSubcomponent
     }

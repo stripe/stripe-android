@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -31,7 +32,8 @@ import kotlinx.coroutines.launch
  */
 internal class ConsentFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory,
-    private val consentViewModelFactory: ViewModelProvider.Factory
+    private val consentViewModelFactory: ViewModelProvider.Factory,
+    private val fallbackUrlLauncher: FallbackUrlLauncher
 ) : Fragment() {
     private lateinit var binding: ConsentFragmentBinding
 
@@ -85,8 +87,8 @@ internal class ConsentFragment(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 if (verificationPage.isUnsupportedClient()) {
-                    Log.e(TAG, "Unsupported client")
-                    navigateToErrorFragmentWithFailedReason(IllegalStateException("Unsupported client"))
+                    Log.e(TAG, "Unsupported client, launching fallback url")
+                    fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
                 } else if (verificationPage.isMissingBiometricConsent()) {
                     setLoadingFinishedUI()
                     bindViewData(verificationPage.biometricConsent)
