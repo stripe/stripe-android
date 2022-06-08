@@ -5,6 +5,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
@@ -14,11 +15,14 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,7 +38,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     private val publishableKeyProvider: Provider<String>,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
-    private val workContext: CoroutineContext
+    private val workContext: CoroutineContext,
+    private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier()
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -56,10 +61,27 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             )
         ).let { stripeIntent ->
             when {
+                stripeIntent.status == StripeIntent.Status.Succeeded -> {
+                    createStripeIntentResult(
+                        stripeIntent,
+                        SUCCEEDED,
+                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                    )
+                }
                 shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
-                    refreshStripeIntentUntilTerminalState(
+                    val intent = refreshStripeIntentUntilTerminalState(
                         result.clientSecret,
                         requestOptions
+                    )
+                    val flowOutcome = if (intent.status == StripeIntent.Status.Succeeded) {
+                        SUCCEEDED
+                    } else {
+                        result.flowOutcome
+                    }
+                    createStripeIntentResult(
+                        intent,
+                        flowOutcome,
+                        failureMessageFactory.create(intent, result.flowOutcome)
                     )
                 }
                 shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
@@ -73,7 +95,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     val threeDS2Data =
                         stripeIntent.nextActionData as? StripeIntent.NextActionData.SdkData.Use3DS2
 
-                    requireNotNull(
+                    val intent = requireNotNull(
                         cancelStripeIntentSource(
                             threeDS2Data?.threeDS2IntentId ?: stripeIntent.id.orEmpty(),
                             threeDS2Data?.publishableKey?.let { ApiRequest.Options(it) }
@@ -81,17 +103,20 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                             sourceId
                         )
                     )
+                    createStripeIntentResult(
+                        intent,
+                        result.flowOutcome,
+                        failureMessageFactory.create(intent, result.flowOutcome)
+                    )
                 }
                 else -> {
-                    stripeIntent
+                    createStripeIntentResult(
+                        stripeIntent,
+                        result.flowOutcome,
+                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                    )
                 }
             }
-        }.let { stripeIntent ->
-            createStripeIntentResult(
-                stripeIntent,
-                result.flowOutcome,
-                failureMessageFactory.create(stripeIntent, result.flowOutcome)
-            )
         }
     }
 
@@ -114,10 +139,25 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // there is a delay when Stripe backend transfers its state out of "requires_action".
         // For a PaymentIntent with such payment method, we will need to poll the refresh endpoint
         // until the PaymentIntent reaches a deterministic state.
-        return flowOutcome == SUCCEEDED && stripeIntent.shouldRefresh()
+        val succeededMaybeRefresh = flowOutcome == SUCCEEDED && stripeIntent.shouldRefresh()
+
+        // For 3DS flow, if the transaction is still unexpectedly processing, refresh the
+        // PaymentIntent. This could happen if, for example, a payment is approved in a WebView,
+        // user closes the sheet, and the approval races with this fetch
+        val cancelledMaybeRefresh = flowOutcome == CANCELED &&
+            stripeIntent.status == StripeIntent.Status.Processing &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
+
+        return succeededMaybeRefresh || cancelledMaybeRefresh
     }
 
     protected abstract suspend fun retrieveStripeIntent(
+        clientSecret: String,
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
+    ): T?
+
+    protected abstract suspend fun refreshStripeIntent(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
@@ -134,17 +174,48 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      *
      * @throws MaxRetryReachedException when max retry is reached and the status is still
      * "requires_action".
-     * @throws InvalidRequestException if the intent is a [SetupIntent], refresh endpoint is only
-     * available for [PaymentIntent].
      */
     @Throws(
         MaxRetryReachedException::class,
         InvalidRequestException::class
     )
-    protected abstract suspend fun refreshStripeIntentUntilTerminalState(
+    private suspend fun refreshStripeIntentUntilTerminalState(
         clientSecret: String,
-        requestOptions: ApiRequest.Options
-    ): T
+        requestOptions: ApiRequest.Options,
+    ): T {
+        var remainingRetries = MAX_RETRIES
+
+        var stripeIntent = requireNotNull(
+            refreshStripeIntent(
+                clientSecret = clientSecret,
+                requestOptions = requestOptions,
+                expandFields = listOf()
+            )
+        )
+        while (shouldRetry(stripeIntent) && remainingRetries > 1) {
+            val delayMs = retryDelaySupplier.getDelayMillis(
+                MAX_RETRIES,
+                remainingRetries
+            )
+            CoroutineScope(workContext).launch {
+                delay(delayMs)
+            }
+            stripeIntent = requireNotNull(
+                refreshStripeIntent(
+                    clientSecret = clientSecret,
+                    requestOptions = requestOptions,
+                    expandFields = listOf()
+                )
+            )
+            remainingRetries--
+        }
+
+        if (shouldRetry(stripeIntent)) {
+            throw MaxRetryReachedException()
+        } else {
+            return stripeIntent
+        }
+    }
 
     /**
      * Cancels the source of this intent so that the payment method attached to it is cleared,
@@ -162,8 +233,16 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         failureMessage: String?
     ): S
 
+    private fun shouldRetry(stripeIntent: StripeIntent): Boolean {
+        val requiresAction = stripeIntent.requiresAction()
+        val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
+        return requiresAction || isCardPaymentProcessing
+    }
+
     internal companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
+        const val MAX_RETRIES = 3
     }
 }
 
@@ -176,8 +255,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext,
-    val retryDelaySupplier: RetryDelaySupplier
+    @IOContext workContext: CoroutineContext
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
     publishableKeyProvider,
@@ -196,8 +274,15 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             expandFields
         )
 
-    override suspend fun refreshStripeIntentUntilTerminalState(
+    override suspend fun refreshStripeIntent(
         clientSecret: String,
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
+    ): PaymentIntent? =
+        stripeRepository.refreshPaymentIntent(
+            clientSecret,
+            requestOptions
+        )
         requestOptions: ApiRequest.Options
     ): PaymentIntent {
         var remainingRetries = MAX_RETRIES
@@ -251,10 +336,6 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             outcomeFromFlow,
             failureMessage
         )
-
-    internal companion object {
-        const val MAX_RETRIES = 3
-    }
 }
 
 /**
@@ -285,15 +366,16 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
             expandFields
         )
 
-    override suspend fun refreshStripeIntentUntilTerminalState(
+    override suspend fun refreshStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options
-    ): SetupIntent {
-        throw InvalidRequestException(
-            message = "refresh endpoint is not available for SetupIntent. " +
-                "client_secret: $clientSecret"
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
+    ): SetupIntent? =
+        stripeRepository.retrieveSetupIntent(
+            clientSecret,
+            requestOptions,
+            expandFields
         )
-    }
 
     override suspend fun cancelStripeIntentSource(
         stripeIntentId: String,

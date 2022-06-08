@@ -43,6 +43,220 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
     }
 
+    val PI_PROCESSING_VISA_3DS2_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "id": "pi_3L8WOsLu5o3P18Zp191FpRSy",
+            "object": "payment_intent",
+            "client_secret": "pi_3L8WnkLu5o3P18Zp1cmTleAA_secret_7HJRZaBCOo6GPjmSITT6fxqPV",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": null,
+            "status": "processing",
+            "amount": 5099,
+            "amount_details": {
+                "tip": {}
+            },
+            "automatic_payment_methods": {
+                "enabled": true
+            },
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "confirmation_method": "automatic",
+            "created": 1654723610,
+            "currency": "usd",
+            "description": null,
+            "payment_method": {
+                "id": "pm_1F7J1bCRMbs6FrXfQKsYwO3U",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": null,
+                    "name": null,
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": null,
+                    "exp_month": 8,
+                    "exp_year": 2020,
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "3220",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": null
+                },
+                "created": 1565775851,
+                "customer": null,
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            },
+            "payment_method_options": {
+                "us_bank_account": {
+                    "verification_method": "automatic"
+                }
+            },
+            "payment_method_types": [
+                "card",
+                "acss_debit",
+                "afterpay_clearpay",
+                "alipay",
+                "klarna",
+                "us_bank_account",
+                "wechat_pay",
+                "affirm"
+            ],
+            "processing": null,
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "line2": null,
+                    "postal_code": "94102",
+                    "state": "California"
+                },
+                "carrier": null,
+                "name": "John Doe",
+                "phone": null,
+                "tracking_number": null
+            },
+            "source": null
+        }
+        """.trimIndent()
+        )
+    }
+
+    val PI_PROCESSING_VISA_3DS2 by lazy {
+        requireNotNull(PARSER.parse(PI_PROCESSING_VISA_3DS2_JSON))
+    }
+
+    val PI_VISA_3DS2_SUCCEEDED_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "id": "pi_3L8WnkLu5o3P18Zp1cmTleAA",
+            "object": "payment_intent",
+            "client_secret": "pi_3L8WnkLu5o3P18Zp1cmTleAA_secret_7HJRZaBCOo6GPjmSITT6fxqPV",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": null,
+            "status": "succeeded",
+            "amount": 5099,
+            "amount_details": {
+                "tip": {}
+            },
+            "automatic_payment_methods": {
+                "enabled": true
+            },
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "confirmation_method": "automatic",
+            "created": 1654725152,
+            "currency": "usd",
+            "description": null,
+            "payment_method": {
+                "id": "pm_1F7J1bCRMbs6FrXfQKsYwO3U",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": null,
+                    "name": null,
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": null,
+                    "exp_month": 8,
+                    "exp_year": 2020,
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "3220",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": null
+                },
+                "created": 1565775851,
+                "customer": null,
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            },
+            "payment_method_options": {
+                "us_bank_account": {
+                    "verification_method": "automatic"
+                }
+            },
+            "payment_method_types": [
+                "card",
+                "acss_debit",
+                "afterpay_clearpay",
+                "alipay",
+                "klarna",
+                "us_bank_account",
+                "wechat_pay",
+                "affirm"
+            ],
+            "processing": null,
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "line2": null,
+                    "postal_code": "94102",
+                    "state": "California"
+                },
+                "carrier": null,
+                "name": "John Doe",
+                "phone": null,
+                "tracking_number": null
+            },
+            "source": null
+        }
+        """.trimIndent()
+        )
+    }
+
+    val PI_VISA_3DS2_SUCCEEDED by lazy {
+        requireNotNull(PARSER.parse(PI_VISA_3DS2_SUCCEEDED_JSON))
+    }
+
     val PI_REQUIRES_MASTERCARD_3DS2_JSON by lazy {
         JSONObject(
 

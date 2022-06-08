@@ -38,7 +38,6 @@ internal class PaymentIntentFlowResultProcessorTest {
         mockStripeRepository,
         Logger.noop(),
         testDispatcher,
-        mock()
     )
 
     @Test
@@ -210,7 +209,129 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                times(PaymentIntentFlowResultProcessor.MAX_RETRIES)
+                times(PaymentFlowResultProcessor.MAX_RETRIES)
+            ).refreshPaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions)
+            )
+        }
+
+    @Test
+    fun `3ds2 canceled with processing intent should succeed`() =
+        runTest {
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2
+            )
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
+                PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED
+            )
+
+            val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                )
+            )
+
+            verify(mockStripeRepository).retrievePaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions),
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+            )
+
+            verify(
+                mockStripeRepository,
+                times(1)
+            ).refreshPaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions)
+            )
+
+            assertThat(result)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED,
+                        StripeIntentResult.Outcome.SUCCEEDED,
+                        null
+                    )
+                )
+        }
+
+    @Test
+    fun `3ds2 canceled with succeeded intent should succeed`() =
+        runTest {
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED
+            )
+
+            val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                )
+            )
+
+            verify(mockStripeRepository).retrievePaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions),
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+            )
+
+            verify(
+                mockStripeRepository,
+                times(0)
+            ).refreshPaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions)
+            )
+
+            assertThat(result)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED,
+                        StripeIntentResult.Outcome.SUCCEEDED,
+                        null
+                    )
+                )
+        }
+
+    @Test
+    fun `3ds2 canceled reaches max retry with processing intent should fail`() =
+        runTest {
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2
+            )
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
+                PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2
+            )
+
+            val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+            assertFailsWith<MaxRetryReachedException> {
+                processor.processResult(
+                    PaymentFlowResult.Unvalidated(
+                        clientSecret = clientSecret,
+                        flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    )
+                )
+            }
+
+            verify(mockStripeRepository).retrievePaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions),
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+            )
+
+            verify(
+                mockStripeRepository,
+                times(PaymentFlowResultProcessor.MAX_RETRIES)
             ).refreshPaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions)
