@@ -5,11 +5,13 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
-class FinancialConnectionsSheetNativeViewModel @Inject constructor(
+internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationManager: NavigationManager,
+    val subcomponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
