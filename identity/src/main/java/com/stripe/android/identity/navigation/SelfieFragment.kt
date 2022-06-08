@@ -30,7 +30,9 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.ui.SelfieResultAdapter
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
+import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -100,6 +102,20 @@ internal class SelfieFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         identityViewModel.resetSelfieUploadedState()
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = {
+                binding.allowImageCollection.setHtmlString(
+                    requireNotNull(it.selfieCapture) { "VerificationPage.selfieCapture is null" }.consentText
+                )
+            },
+            onFailure = {
+                Log.e(TAG, "Failed to get verificationPage: $it")
+                navigateToErrorFragmentWithFailedReason(
+                    it ?: IllegalStateException("Failed to get verificationPage")
+                )
+            }
+        )
     }
 
     override fun createCameraAdapter(): Camera1Adapter {
@@ -191,7 +207,6 @@ internal class SelfieFragment(
                                     ),
                                     fromFragment = fragmentId,
                                     clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM,
-                                    shouldNotSubmit = { false }
                                 )
                             }.onFailure { throwable ->
                                 Log.e(

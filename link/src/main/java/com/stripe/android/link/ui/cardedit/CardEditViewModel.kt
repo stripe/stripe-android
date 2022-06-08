@@ -6,13 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.forms.FormController
 import com.stripe.android.link.ui.getErrorMessage
@@ -34,7 +34,7 @@ import javax.inject.Provider
 
 internal class CardEditViewModel @Inject constructor(
     val linkAccount: LinkAccount,
-    private val linkRepository: LinkRepository,
+    private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger,
     private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>
@@ -58,7 +58,7 @@ internal class CardEditViewModel @Inject constructor(
     @VisibleForTesting
     fun initWithPaymentDetailsId(paymentDetailsId: String) {
         viewModelScope.launch {
-            linkRepository.listPaymentDetails(linkAccount.clientSecret).fold(
+            linkAccountManager.listPaymentDetails().fold(
                 onSuccess = { response ->
                     response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
                         .firstOrNull { it.id == paymentDetailsId }?.let {
@@ -105,7 +105,7 @@ internal class CardEditViewModel @Inject constructor(
                 paymentMethodCreateParams
             )
 
-            linkRepository.updatePaymentDetails(updateParams, linkAccount.clientSecret).fold(
+            linkAccountManager.updatePaymentDetails(updateParams).fold(
                 onSuccess = {
                     _isProcessing.value = false
                     dismiss(Result.Success)

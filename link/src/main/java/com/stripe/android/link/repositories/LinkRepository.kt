@@ -36,6 +36,7 @@ internal interface LinkRepository {
      */
     suspend fun startVerification(
         consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 
@@ -43,8 +44,9 @@ internal interface LinkRepository {
      * Confirm an SMS verification code.
      */
     suspend fun confirmVerification(
-        consumerSessionClientSecret: String,
         verificationCode: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 
@@ -53,6 +55,7 @@ internal interface LinkRepository {
      */
     suspend fun logout(
         consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 
@@ -60,7 +63,8 @@ internal interface LinkRepository {
      * Fetch all saved payment methods for the consumer.
      */
     suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
 
     /**
@@ -68,9 +72,10 @@ internal interface LinkRepository {
      */
     suspend fun createPaymentDetails(
         paymentDetails: ConsumerPaymentDetailsCreateParams,
-        consumerSessionClientSecret: String,
         stripeIntent: StripeIntent,
-        extraConfirmationParams: Map<String, Any>? = null
+        extraConfirmationParams: Map<String, Any>? = null,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
     ): Result<LinkPaymentDetails>
 
     /**
@@ -78,14 +83,16 @@ internal interface LinkRepository {
      */
     suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
 
     /**
      * Delete the payment method from the consumer account.
      */
     suspend fun deletePaymentDetails(
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
-        paymentDetailsId: String
+        consumerPublishableKey: String?
     ): Result<Unit>
 }

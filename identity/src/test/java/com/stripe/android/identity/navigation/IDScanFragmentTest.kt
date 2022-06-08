@@ -15,6 +15,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFile
+import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.camera.IdentityAggregator
@@ -51,7 +52,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class IDScanFragmentTest {
@@ -68,13 +68,13 @@ internal class IDScanFragmentTest {
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
-    private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
+    private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
 
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { pageAndModel } doReturn mockPageAndModel
+        on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
     }
 
@@ -97,8 +97,9 @@ internal class IDScanFragmentTest {
     fun simulateModelDownloaded() {
         mockPageAndModel.postValue(
             Resource.success(
-                Pair(
+                IdentityViewModel.PageAndModelFiles(
                     SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE,
+                    mock(),
                     mock()
                 )
             )
@@ -172,13 +173,26 @@ internal class IDScanFragmentTest {
     }
 
     @Test
-    fun `when both sides are scanned and files uploaded succeeded, clicking button triggers navigation`() {
+    fun `when both sides are scanned and files uploaded succeeded and no selfie, clicking button triggers post`() {
         simulateBothSidesScanned { _, _ ->
             runBlocking {
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
+                )
+
                 // mock bothUploaded success
                 documentUploadState.update {
                     bothUploadedDocumentUploadState
                 }
+
+                // mock identityViewModel.observeForVerificationPage - already called 2 times
+                val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
+                    any(),
+                    successCaptor.capture(),
+                    any()
+                )
+                successCaptor.lastValue.invoke(mock())
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
@@ -195,6 +209,56 @@ internal class IDScanFragmentTest {
                         ClearDataParam.UPLOAD_TO_CONFIRM
                     )
                 )
+
+                // no selfie required, send postVerificationPageSubmit
+                verify(mockIdentityViewModel).postVerificationPageSubmit()
+            }
+        }
+    }
+
+    @Test
+    fun `when both sides are scanned and files uploaded succeeded and selfie is required, clicking button navigates to selfie`() {
+        simulateBothSidesScanned { navController, _ ->
+            runBlocking {
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
+                )
+
+                // mock bothUploaded success
+                documentUploadState.update {
+                    bothUploadedDocumentUploadState
+                }
+
+                // mock identityViewModel.observeForVerificationPage - already called 2 times
+                val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
+                    any(),
+                    successCaptor.capture(),
+                    any()
+                )
+                val mockVerificationPage = mock<VerificationPage> {
+                    on { selfieCapture } doReturn mock() // return non null selfieCapture
+                }
+                successCaptor.lastValue.invoke(mockVerificationPage)
+
+                // verify navigation attempts
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                            type = CollectedDataParam.Type.IDCARD,
+                            frontHighResResult = FRONT_HIGH_RES_RESULT,
+                            frontLowResResult = FRONT_LOW_RES_RESULT,
+                            backHighResResult = BACK_HIGH_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT,
+                        )
+                    ),
+                    eq(
+                        ClearDataParam.UPLOAD_TO_CONFIRM
+                    )
+                )
+
+                // selfie required, navigates to selfie
+                assertThat(navController.currentDestination?.id).isEqualTo(R.id.selfieFragment)
             }
         }
     }

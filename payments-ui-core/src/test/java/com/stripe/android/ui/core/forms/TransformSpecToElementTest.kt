@@ -70,7 +70,7 @@ internal class TransformSpecToElementTest {
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() =
         runBlocking {
-            val countrySection = CountrySpec(allowCountryCodes = setOf("AT"))
+            val countrySection = CountrySpec(allowedCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
                 listOf(countrySection)
             )

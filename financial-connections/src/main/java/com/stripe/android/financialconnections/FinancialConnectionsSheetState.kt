@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections
 
-import androidx.lifecycle.SavedStateHandle
+import com.airbnb.mvrx.MavericksState
+import com.airbnb.mvrx.PersistState
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -9,38 +11,22 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
+    val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
-    val manifest: FinancialConnectionsSessionManifest? = null,
-    val authFlowActive: Boolean = false
-) {
+    @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
+    @PersistState val authFlowActive: Boolean = false,
+    val viewEffect: FinancialConnectionsSheetViewEffect? = null
+) : MavericksState {
+
+    val sessionSecret: String
+        get() = initialArgs.configuration.financialConnectionsSessionClientSecret
 
     /**
-     * Restores existing persisted fields into the current [FinancialConnectionsSheetState]
+     * Constructor used by Mavericks to build the initial state.
      */
-    internal fun from(savedStateHandle: SavedStateHandle): FinancialConnectionsSheetState {
-        return copy(
-            manifest = savedStateHandle.get(KEY_MANIFEST) ?: manifest,
-            authFlowActive = savedStateHandle.get(KEY_AUTHFLOW_ACTIVE) ?: authFlowActive,
-        )
-    }
-
-    /**
-     * Saves the persistable fields of this state that changed to the given [SavedStateHandle]
-     */
-    internal fun to(
-        savedStateHandle: SavedStateHandle,
-        previousValue: FinancialConnectionsSheetState
-    ) {
-        if (previousValue.manifest != manifest)
-            savedStateHandle.set(KEY_MANIFEST, manifest)
-        if (previousValue.authFlowActive != authFlowActive)
-            savedStateHandle.set(KEY_AUTHFLOW_ACTIVE, authFlowActive)
-    }
-
-    companion object {
-        private const val KEY_MANIFEST = "key_manifest"
-        private const val KEY_AUTHFLOW_ACTIVE = "key_authflow_active"
-    }
+    constructor(args: FinancialConnectionsSheetActivityArgs) : this(
+        initialArgs = args
+    )
 }
 
 /**

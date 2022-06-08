@@ -16,7 +16,6 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.getErrorMessage
@@ -31,7 +30,6 @@ import javax.inject.Provider
 internal class WalletViewModel @Inject constructor(
     val args: LinkActivityContract.Args,
     val linkAccount: LinkAccount,
-    private val linkRepository: LinkRepository,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
@@ -125,8 +123,7 @@ internal class WalletViewModel @Inject constructor(
         clearError()
 
         viewModelScope.launch {
-            linkRepository.deletePaymentDetails(
-                linkAccount.clientSecret,
+            linkAccountManager.deletePaymentDetails(
                 paymentDetails.id
             ).fold(
                 onSuccess = {
@@ -140,7 +137,7 @@ internal class WalletViewModel @Inject constructor(
     private fun loadPaymentDetails() {
         _isProcessing.value = true
         viewModelScope.launch {
-            linkRepository.listPaymentDetails(linkAccount.clientSecret).fold(
+            linkAccountManager.listPaymentDetails().fold(
                 onSuccess = { response ->
                     response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
                         .takeIf { it.isNotEmpty() }?.let {
@@ -148,7 +145,8 @@ internal class WalletViewModel @Inject constructor(
                             _isProcessing.value = false
                         } ?: addNewPaymentMethod(clearBackStack = true)
                 },
-                onFailure = ::onError
+                // If we can't load the payment details there's nothing to see here
+                onFailure = ::onFatal
             )
         }
     }
@@ -165,6 +163,11 @@ internal class WalletViewModel @Inject constructor(
     private fun onError(error: ErrorMessage) {
         _isProcessing.value = false
         _errorMessage.value = error
+    }
+
+    private fun onFatal(fatalError: Throwable) {
+        logger.error("Fatal error: ", fatalError)
+        navigator.dismiss(LinkActivityResult.Failed(fatalError))
     }
 
     internal class Factory(

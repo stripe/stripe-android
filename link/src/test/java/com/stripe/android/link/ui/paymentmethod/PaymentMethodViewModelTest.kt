@@ -21,7 +21,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
@@ -53,8 +52,7 @@ class PaymentMethodViewModelTest {
         whenever(clientSecret).thenReturn(CLIENT_SECRET)
     }
     private val args = mock<LinkActivityContract.Args>()
-    private lateinit var linkRepository: LinkRepository
-    private val linkAccountManager = mock<LinkAccountManager>()
+    private lateinit var linkAccountManager: LinkAccountManager
     private val navigator = mock<Navigator>()
     private val confirmationManager = mock<ConfirmationManager>()
     private val logger = Logger.noop()
@@ -81,23 +79,21 @@ class PaymentMethodViewModelTest {
 
     @Before
     fun before() {
-        linkRepository = mock()
+        linkAccountManager = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
     }
 
     @Test
     fun `startPayment creates PaymentDetails`() = runTest {
-        whenever(
-            linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
-        ).thenReturn(Result.success(createLinkPaymentDetails()))
+        whenever(linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(createLinkPaymentDetails()))
 
         createViewModel().startPayment(cardFormFieldValues)
 
         val paramsCaptor = argumentCaptor<ConsumerPaymentDetailsCreateParams>()
-        verify(linkRepository).createPaymentDetails(
+        verify(linkAccountManager).createPaymentDetails(
             paramsCaptor.capture(),
-            any(),
             any(),
             anyOrNull()
         )
@@ -124,14 +120,8 @@ class PaymentMethodViewModelTest {
         runTest {
             val value = createLinkPaymentDetails()
             whenever(
-                linkRepository.createPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull()
-                )
-            )
-                .thenReturn(Result.success(value))
+                linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            ).thenReturn(Result.success(value))
 
             createViewModel().startPayment(cardFormFieldValues)
 
@@ -173,14 +163,8 @@ class PaymentMethodViewModelTest {
 
             val linkPaymentDetails = createLinkPaymentDetails()
             whenever(
-                linkRepository.createPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull()
-                )
-            )
-                .thenReturn(Result.success(linkPaymentDetails))
+                linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            ).thenReturn(Result.success(linkPaymentDetails))
 
             createViewModel().startPayment(cardFormFieldValues)
 
@@ -195,14 +179,8 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment dismisses Link on success`() = runTest {
         whenever(
-            linkRepository.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        )
-            .thenReturn(Result.success(createLinkPaymentDetails()))
+            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
         whenever(
@@ -225,14 +203,8 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment starts processing`() = runTest {
         whenever(
-            linkRepository.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        )
-            .thenReturn(Result.success(createLinkPaymentDetails()))
+            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         val viewModel = createViewModel()
 
@@ -249,14 +221,8 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment stops processing on error`() = runTest {
         whenever(
-            linkRepository.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        )
-            .thenReturn(Result.success(createLinkPaymentDetails()))
+            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
         whenever(
@@ -287,7 +253,7 @@ class PaymentMethodViewModelTest {
     fun `when startPayment fails then an error message is shown`() = runTest {
         val errorMessage = "Error message"
         whenever(
-            linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.failure(RuntimeException(errorMessage)))
 
         val viewModel = createViewModel()
@@ -368,7 +334,6 @@ class PaymentMethodViewModelTest {
         PaymentMethodViewModel(
             args,
             linkAccount,
-            linkRepository,
             linkAccountManager,
             navigator,
             confirmationManager,

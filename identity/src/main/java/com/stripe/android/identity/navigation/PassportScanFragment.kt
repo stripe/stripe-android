@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -57,28 +58,42 @@ internal class PassportScanFragment(
                             continueButton.toggleToLoading()
                         }
                         it.isFrontUploaded() -> {
-                            lifecycleScope.launch {
-                                runCatching {
-                                    postVerificationPageDataAndMaybeSubmit(
-                                        identityViewModel = identityViewModel,
-                                        collectedDataParam =
-                                        CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                            type = CollectedDataParam.Type.PASSPORT,
-                                            frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                            frontLowResResult = requireNotNull(it.frontLowResResult.data)
-                                        ),
-                                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                        fromFragment = R.id.passportScanFragment,
-                                        shouldNotSubmit = { false }
-                                    )
-                                }.onFailure { throwable ->
-                                    Log.e(
-                                        TAG,
-                                        "fail to submit uploaded files: $throwable"
-                                    )
+                            identityViewModel.observeForVerificationPage(
+                                viewLifecycleOwner,
+                                onSuccess = { verificationPage ->
+                                    lifecycleScope.launch {
+                                        runCatching {
+                                            postVerificationPageDataAndMaybeSubmit(
+                                                identityViewModel = identityViewModel,
+                                                collectedDataParam =
+                                                CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                                    type = CollectedDataParam.Type.PASSPORT,
+                                                    frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                                    frontLowResResult = requireNotNull(it.frontLowResResult.data)
+                                                ),
+                                                clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                                fromFragment = R.id.passportScanFragment,
+                                                notSubmitBlock =
+                                                verificationPage.selfieCapture?.let {
+                                                    {
+                                                        findNavController().navigate(R.id.action_global_selfieFragment)
+                                                    }
+                                                }
+                                            )
+                                        }.onFailure { throwable ->
+                                            Log.e(
+                                                TAG,
+                                                "fail to submit uploaded files: $throwable"
+                                            )
+                                            navigateToDefaultErrorFragment()
+                                        }
+                                    }
+                                },
+                                onFailure = { throwable ->
+                                    Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
                                     navigateToDefaultErrorFragment()
                                 }
-                            }
+                            )
                         }
                         else -> {
                             Log.d(

@@ -374,7 +374,7 @@ internal class FormViewModelTest {
                 LayoutSpec.create(
                     NameSpec(),
                     EmailSpec(),
-                    CountrySpec(allowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
+                    CountrySpec(allowedCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                     SaveForFutureUseSpec()
                 )
             ),
@@ -427,7 +427,7 @@ internal class FormViewModelTest {
                     IbanSpec(),
                     AddressSpec(
                         IdentifierSpec.Generic("address"),
-                        allowCountryCodes = setOf("US", "JP")
+                        allowedCountryCodes = setOf("US", "JP")
                     ),
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
@@ -513,7 +513,7 @@ internal class FormViewModelTest {
                     IbanSpec(),
                     AddressSpec(
                         IdentifierSpec.Generic("address"),
-                        allowCountryCodes = setOf("US", "JP")
+                        allowedCountryCodes = setOf("US", "JP")
                     ),
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),

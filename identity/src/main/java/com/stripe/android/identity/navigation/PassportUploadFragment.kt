@@ -2,14 +2,12 @@ package com.stripe.android.identity.navigation
 
 import android.util.Log
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import kotlinx.coroutines.launch
 
 /**
  * Fragment to upload passport.
@@ -30,24 +28,22 @@ internal open class PassportUploadFragment(
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
             binding.kontinue.toggleToLoading()
-            lifecycleScope.launch {
-                runCatching {
-                    val frontResult = requireNotNull(latestState.frontHighResResult.data)
-                    trySubmit(
-                        CollectedDataParam(
-                            idDocumentFront = DocumentUploadParam(
-                                highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
-                                    "front uploaded file id is null"
-                                },
-                                uploadMethod = requireNotNull(frontResult.uploadMethod)
-                            ),
-                            idDocumentType = CollectedDataParam.Type.PASSPORT
-                        )
+            runCatching {
+                val frontResult = requireNotNull(latestState.frontHighResResult.data)
+                trySubmit(
+                    CollectedDataParam(
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
+                                "front uploaded file id is null"
+                            },
+                            uploadMethod = requireNotNull(frontResult.uploadMethod)
+                        ),
+                        idDocumentType = CollectedDataParam.Type.PASSPORT
                     )
-                }.onFailure {
-                    Log.d(TAG, "fail to submit uploaded files: $it")
-                    navigateToDefaultErrorFragment()
-                }
+                )
+            }.onFailure {
+                Log.d(TAG, "fail to submit uploaded files: $it")
+                navigateToDefaultErrorFragment()
             }
         }
     }

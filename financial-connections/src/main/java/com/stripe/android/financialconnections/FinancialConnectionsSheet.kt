@@ -15,8 +15,9 @@ import kotlinx.parcelize.Parcelize
  * typically as a field initializer of an Activity or Fragment.
  */
 class FinancialConnectionsSheet internal constructor(
-    private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher
+    private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher,
 ) {
+
     /**
      * Configuration for a [FinancialConnectionsSheet]
      *
@@ -79,7 +80,7 @@ class FinancialConnectionsSheet internal constructor(
          */
         fun createForBankAccountToken(
             activity: ComponentActivity,
-            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+            callback: FinancialConnectionsSheetResultForTokenCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForTokenLauncher(activity, callback)
@@ -94,7 +95,7 @@ class FinancialConnectionsSheet internal constructor(
          */
         fun createForBankAccountToken(
             fragment: Fragment,
-            callback: (FinancialConnectionsSheetForTokenResult) -> Unit
+            callback: FinancialConnectionsSheetResultForTokenCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForTokenLauncher(fragment, callback)
