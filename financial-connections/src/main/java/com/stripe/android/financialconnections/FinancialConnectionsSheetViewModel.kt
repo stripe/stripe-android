@@ -76,7 +76,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 authFlowActive = true,
                 // TODO@carlosmuvi implement manifest-based logic to open the corresponding flow.
                 viewEffect = if (true) {
-                    OpenNativeAuthFlow(initialArgs)
+                    OpenNativeAuthFlow(initialArgs.configuration, manifest)
                 } else {
                     OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
                 }
@@ -245,7 +245,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 .builder()
                 .application(viewModelContext.app())
                 .initialState(state)
-                .internalArgs(state.initialArgs)
+                .configuration(state.initialArgs.configuration)
                 .build().viewModel
         }
 

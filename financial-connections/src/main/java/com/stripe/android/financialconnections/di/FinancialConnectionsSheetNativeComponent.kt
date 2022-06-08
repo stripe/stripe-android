@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import dagger.BindsInstance
@@ -32,7 +32,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
         fun initialState(initialState: FinancialConnectionsSheetNativeState): Builder
 
         @BindsInstance
-        fun internalArgs(financialConnectionsSheetActivityArgs: FinancialConnectionsSheetActivityArgs): Builder
+        fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
 
         fun build(): FinancialConnectionsSheetNativeComponent
     }

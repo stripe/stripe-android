@@ -4,7 +4,6 @@ import android.app.Application
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -12,12 +11,6 @@ import javax.inject.Singleton
 
 @Module
 internal object FinancialConnectionsSheetConfigurationModule {
-
-    @Provides
-    @Singleton
-    fun providesConfiguration(
-        args: FinancialConnectionsSheetActivityArgs
-    ): FinancialConnectionsSheet.Configuration = args.configuration
 
     @Provides
     @Named(PUBLISHABLE_KEY)

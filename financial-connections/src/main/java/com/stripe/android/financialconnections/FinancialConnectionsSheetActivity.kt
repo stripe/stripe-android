@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
@@ -70,8 +71,17 @@ internal class FinancialConnectionsSheetActivity :
                         viewEffect.result
                     )
                     is OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
-                        Intent(this, FinancialConnectionsSheetNativeActivity::class.java).also {
-                            it.putExtra(Mavericks.KEY_ARG, viewEffect.initialArgs)
+                        Intent(
+                            this,
+                            FinancialConnectionsSheetNativeActivity::class.java
+                        ).also {
+                            it.putExtra(
+                                Mavericks.KEY_ARG,
+                                FinancialConnectionsSheetNativeActivityArgs(
+                                    manifest = viewEffect.manifest,
+                                    configuration = viewEffect.configuration
+                                )
+                            )
                         }
                     )
                 }
