@@ -37,7 +37,8 @@ class FormFragmentArgumentsTest {
     )
 
     private val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-        PaymentMethod.Type.Card,
+        PaymentMethod.Type.Card.code,
+        PaymentMethod.Type.Card.requiresMandate,
         mapOf(
             "type" to "card",
             parameterMapBillingDetails,

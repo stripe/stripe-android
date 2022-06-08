@@ -21,7 +21,8 @@ import org.json.JSONObject
  */
 @Parcelize
 data class PaymentMethodCreateParams internal constructor(
-    internal val type: PaymentMethod.Type,
+    internal val code: PaymentMethodCode,
+    internal val requiresMandate: Boolean,
     val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
@@ -50,14 +51,51 @@ data class PaymentMethodCreateParams internal constructor(
     private val overrideParamMap: Map<String, @RawValue Any>? = null,
 ) : StripeParamsModel, Parcelable {
 
+    internal constructor(
+        type: PaymentMethod.Type,
+        card: Card? = null,
+        ideal: Ideal? = null,
+        fpx: Fpx? = null,
+        sepaDebit: SepaDebit? = null,
+        auBecsDebit: AuBecsDebit? = null,
+        bacsDebit: BacsDebit? = null,
+        sofort: Sofort? = null,
+        upi: Upi? = null,
+        netbanking: Netbanking? = null,
+        usBankAccount: USBankAccount? = null,
+        link: Link? = null,
+        billingDetails: PaymentMethod.BillingDetails? = null,
+        metadata: Map<String, String>? = null,
+        productUsage: Set<String> = emptySet(),
+        overrideParamMap: Map<String, @RawValue Any>? = null,
+    ) : this(
+        type.code,
+        type.requiresMandate,
+        card,
+        ideal,
+        fpx,
+        sepaDebit,
+        auBecsDebit,
+        bacsDebit,
+        sofort,
+        upi,
+        netbanking,
+        usBankAccount,
+        link,
+        billingDetails,
+        metadata,
+        productUsage,
+        overrideParamMap
+    )
+
     val typeCode: String
-        get() = type.code
+        get() = code
 
     internal val attribution: Set<String>
         @JvmSynthetic
         get() {
-            return when (type) {
-                PaymentMethod.Type.Card -> (card?.attribution ?: emptySet()).plus(productUsage)
+            return when (code) {
+                PaymentMethod.Type.Card.code -> (card?.attribution ?: emptySet()).plus(productUsage)
                 else -> productUsage
             }
         }
@@ -175,7 +213,7 @@ data class PaymentMethodCreateParams internal constructor(
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap
             ?: mapOf(
-                PARAM_TYPE to type.code
+                PARAM_TYPE to code
             ).plus(
                 billingDetails?.let {
                     mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
@@ -189,21 +227,21 @@ data class PaymentMethodCreateParams internal constructor(
 
     private val typeParams: Map<String, Any>
         get() {
-            return when (type) {
-                PaymentMethod.Type.Card -> card?.toParamMap()
-                PaymentMethod.Type.Ideal -> ideal?.toParamMap()
-                PaymentMethod.Type.Fpx -> fpx?.toParamMap()
-                PaymentMethod.Type.SepaDebit -> sepaDebit?.toParamMap()
-                PaymentMethod.Type.AuBecsDebit -> auBecsDebit?.toParamMap()
-                PaymentMethod.Type.BacsDebit -> bacsDebit?.toParamMap()
-                PaymentMethod.Type.Sofort -> sofort?.toParamMap()
-                PaymentMethod.Type.Upi -> upi?.toParamMap()
-                PaymentMethod.Type.Netbanking -> netbanking?.toParamMap()
-                PaymentMethod.Type.USBankAccount -> usBankAccount?.toParamMap()
-                PaymentMethod.Type.Link -> link?.toParamMap()
+            return when (code) {
+                PaymentMethod.Type.Card.code -> card?.toParamMap()
+                PaymentMethod.Type.Ideal.code -> ideal?.toParamMap()
+                PaymentMethod.Type.Fpx.code -> fpx?.toParamMap()
+                PaymentMethod.Type.SepaDebit.code -> sepaDebit?.toParamMap()
+                PaymentMethod.Type.AuBecsDebit.code -> auBecsDebit?.toParamMap()
+                PaymentMethod.Type.BacsDebit.code -> bacsDebit?.toParamMap()
+                PaymentMethod.Type.Sofort.code -> sofort?.toParamMap()
+                PaymentMethod.Type.Upi.code -> upi?.toParamMap()
+                PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
+                PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
+                PaymentMethod.Type.Link.code -> link?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
-                mapOf(type.code to it)
+                mapOf(code to it)
             }.orEmpty()
         }
 
@@ -446,6 +484,7 @@ data class PaymentMethodCreateParams internal constructor(
             null,
             null
         )
+
         constructor(
             accountNumber: String,
             routingNumber: String,
@@ -458,6 +497,7 @@ data class PaymentMethodCreateParams internal constructor(
             accountType = accountType,
             accountHolderType = accountHolderType
         )
+
         override fun toParamMap(): Map<String, Any> {
             return if (linkAccountSessionId != null) {
                 mapOf(
@@ -895,12 +935,14 @@ data class PaymentMethodCreateParams internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
-            type: PaymentMethod.Type,
+            code: PaymentMethodCode,
+            requiresMandate: Boolean,
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
-                type = type,
+                code = code,
+                requiresMandate = requiresMandate,
                 overrideParamMap = overrideParamMap,
                 productUsage = productUsage
             )
