@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 /**
- * Wrapper that exposes [FinancialConnectionsSheetComponent]'s registered
+ * Wrapper that exposes [FinancialConnectionsSheetNativeComponent]'s registered
  * subcomponent builders.
  *
  * This will be injected and exposed in
@@ -20,8 +20,14 @@ internal class FinancialConnectionsSubcomponentBuilderProvider @Inject construct
 )
 
 /**
- * helper to retrieve [FinancialConnectionsSubcomponentBuilderProvider] when building
- * a [com.airbnb.mvrx.MavericksViewModelFactory].
+ * Mavericks uses [com.airbnb.mvrx.MavericksViewModelFactory] to create ViewModel instances.
+ *
+ * Since these factories are static objects, we can't inject the subcomponent builder as usual.
+ *
+ * Instead, these factories offer access to a [ViewModelContext] instance.
+ *
+ * This helps to retrieve [FinancialConnectionsSubcomponentBuilderProvider] when from the
+ * [ViewModelContext] instance by transparently accessing the viewModel property.
  */
 internal val ViewModelContext.subComponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider
     get() = this
