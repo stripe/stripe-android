@@ -75,6 +75,7 @@ sealed interface StripeIntent : StripeModel {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
         DisplayOxxoDetails("oxxo_display_details"),
+        DisplayKonbiniDetails("konbini_display_details"),
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),

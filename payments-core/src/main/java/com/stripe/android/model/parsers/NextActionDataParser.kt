@@ -18,6 +18,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         )
         val parser = when (nextActionType) {
             StripeIntent.NextActionType.DisplayOxxoDetails -> DisplayOxxoDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayKonbiniDetails -> DisplayOxxoDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
