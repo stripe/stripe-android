@@ -6,6 +6,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
@@ -25,6 +26,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             return DaggerFinancialConnectionsSheetNativeComponent
                 .builder()
                 .application(viewModelContext.app())
+                .internalArgs(state.initialArgs)
                 .initialState(state)
                 .build()
                 .viewModel
@@ -32,6 +34,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 }
 
+/**
+ * Constructor used by Mavericks to build the initial state.
+ */
 internal data class FinancialConnectionsSheetNativeState(
-    val test: String = ""
+    val initialArgs: FinancialConnectionsSheetActivityArgs,
 ) : MavericksState

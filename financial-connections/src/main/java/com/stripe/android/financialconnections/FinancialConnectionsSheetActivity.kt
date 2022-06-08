@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
+import com.airbnb.mvrx.Mavericks
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
@@ -68,8 +69,10 @@ internal class FinancialConnectionsSheetActivity :
                     is FinishWithResult -> finishWithResult(
                         viewEffect.result
                     )
-                    OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
-                        Intent(this, FinancialConnectionsSheetNativeActivity::class.java)
+                    is OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
+                        Intent(this, FinancialConnectionsSheetNativeActivity::class.java).also {
+                            it.putExtra(Mavericks.KEY_ARG, viewEffect.initialArgs)
+                        }
                     )
                 }
                 viewModel.onViewEffectLaunched()
