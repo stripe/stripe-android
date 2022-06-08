@@ -29,7 +29,7 @@ internal class FinancialConnectionsSubcomponentBuilderProvider @Inject construct
  * This helps to retrieve [FinancialConnectionsSubcomponentBuilderProvider] when from the
  * [ViewModelContext] instance by transparently accessing the viewModel property.
  */
-internal val ViewModelContext.subComponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider
+internal val ViewModelContext.financialConnectionsSubComponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider
     get() = this
         .activity<FinancialConnectionsSheetNativeActivity>()
         .viewModel.subcomponentBuilderProvider
