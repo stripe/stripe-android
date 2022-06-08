@@ -21,7 +21,6 @@ import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -81,20 +80,13 @@ internal class IdentityActivity :
             identityViewModel.observeForVerificationPage(
                 this,
                 onSuccess = {
-                    when (it.status) {
-                        VerificationPage.Status.CANCELLED -> {
-                            finishWithResult(VerificationFlowResult.Canceled)
+                    finishWithResult(
+                        if (it.submitted) {
+                            VerificationFlowResult.Completed
+                        } else {
+                            VerificationFlowResult.Canceled
                         }
-                        VerificationPage.Status.REQUIRESINPUT -> {
-                            finishWithResult(VerificationFlowResult.Canceled)
-                        }
-                        VerificationPage.Status.PROCESSING -> {
-                            finishWithResult(VerificationFlowResult.Completed)
-                        }
-                        VerificationPage.Status.VERIFIED -> {
-                            finishWithResult(VerificationFlowResult.Completed)
-                        }
-                    }
+                    )
                 }, onFailure = {
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
