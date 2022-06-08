@@ -34,6 +34,6 @@ internal class ConsentViewModel @Inject constructor(
     }
 }
 
-data class ConsentState(
-    val test: String = ""
+internal data class ConsentState(
+    val test: Unit
 ) : MavericksState
