@@ -14,6 +14,7 @@ enum class CheckoutCurrency(val value: String) {
     EUR("eur"),
     AUD("aud"),
     GBP("gbp"),
+    JPY("jpy"),
 }
 
 enum class Toggle(val key: String, val default: Any) {
@@ -47,6 +48,7 @@ data class CheckoutRequest(
     val merchant_country_code: String? = when (currency.uppercase()) {
         "AUD" -> "AU"
         "EUR" -> "GB"
+        "JPY" -> "JP"
         else -> null
     }
 )

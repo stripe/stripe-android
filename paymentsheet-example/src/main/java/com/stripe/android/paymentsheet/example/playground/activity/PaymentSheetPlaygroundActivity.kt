@@ -72,6 +72,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             R.id.currency_usd_button -> CheckoutCurrency.USD
             R.id.currency_aud_button -> CheckoutCurrency.AUD
             R.id.currency_gbp_button -> CheckoutCurrency.GBP
+            R.id.currency_jpy_button -> CheckoutCurrency.JPY
             else -> CheckoutCurrency.EUR
         }
 

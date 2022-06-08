@@ -178,6 +178,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:ignore="HardcodedText" />
+
+            <RadioButton
+                android:id="@+id/currency_jpy_button"
+                android:text="@string/currency_jpy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
         </RadioGroup>
 
         <TextView
