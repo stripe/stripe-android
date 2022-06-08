@@ -200,15 +200,18 @@ class LpmSerializerTest {
                 "fields": [
                   {
                     "type": "billing_address",
-                    "allowed_country_codes": {
+                    "allowed_country_codes": [
                       "AT", "BE"
-                    },
+                    ]
                   }
                 ]
               }
         """.trimIndent()
 
         val result = lpmSerializer.deserialize(serializedString)
+        result.onFailure {
+            println(it.message)
+        }
         assertThat(result.isSuccess).isTrue()
         result.onSuccess {
             val addressSpec = it.fields[0] as AddressSpec
@@ -287,7 +290,7 @@ class LpmSerializerTest {
                   }
                 ]
               }
-        """.trimIndent()
+            """.trimIndent()
 
             val result = lpmSerializer.deserialize(serializedString)
             assertThat(result.isSuccess).isTrue()
@@ -295,10 +298,8 @@ class LpmSerializerTest {
                 val fieldSpec = it.fields[0]
                 assertThat(fieldSpec.apiPath.v1).isEqualTo(value)
             }
-
         }
     }
-
 
     @Test
     fun `Verify that unknown field in Json spec deserializes - ignoring the field`() {
