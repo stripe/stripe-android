@@ -31,7 +31,7 @@ class LpmSerializerTest {
             .fields
             .first() as CountrySpec
 
-        assertThat(countrySpec.apiPath).isEqualTo("sofort[country]")
+        assertThat(countrySpec.apiPath.v1).isEqualTo("sofort[country]")
         assertThat(countrySpec.allowedCountryCodes).isEqualTo(
             setOf(
                 "AT",
