@@ -29,7 +29,8 @@ class LinkActivityContract :
      * @param completePayment Whether the payment should be completed, or the selected payment
      *                          method should be returned as a result.
      * @param merchantName The customer-facing business name.
-     * @param customerEmail Email of the customer used to pre-fill the form.
+     * @param customerEmail Email of the customer, used to pre-fill the form.
+     * @param customerPhone Phone number of the customer, used to pre-fill the form.
      * @param injectionParams Parameters needed to perform dependency injection.
      *                        If null, a new dependency graph will be created.
      */
@@ -39,6 +40,7 @@ class LinkActivityContract :
         internal val completePayment: Boolean,
         internal val merchantName: String,
         internal val customerEmail: String? = null,
+        internal val customerPhone: String? = null,
         internal val injectionParams: InjectionParams? = null
     ) : ActivityStarter.Args {
 

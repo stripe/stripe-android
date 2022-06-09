@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.injection.MERCHANT_NAME
@@ -49,6 +50,7 @@ import kotlin.coroutines.CoroutineContext
 class LinkPaymentLauncher @AssistedInject internal constructor(
     @Assisted(MERCHANT_NAME) private val merchantName: String,
     @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
+    @Assisted(CUSTOMER_PHONE) private val customerPhone: String?,
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -65,6 +67,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .merchantName(merchantName)
         .customerEmail(customerEmail)
+        .customerPhone(customerPhone)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -162,6 +165,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             completePayment,
             merchantName,
             customerEmail,
+            customerPhone,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
                 productUsage,

@@ -13,3 +13,9 @@ const val MERCHANT_NAME = "merchantName"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CUSTOMER_EMAIL = "customerEmail"
+
+/**
+ * Identifies the phone number of the customer using the app, used to pre-fill the form.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val CUSTOMER_PHONE = "customerPhone"

@@ -181,8 +181,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
-    val linkLauncher =
-        linkPaymentLauncherFactory.create(merchantName, config?.defaultBillingDetails?.email)
+    val linkLauncher = linkPaymentLauncherFactory.create(
+        merchantName = merchantName,
+        customerEmail = config?.defaultBillingDetails?.email,
+        customerPhone = config?.defaultBillingDetails?.phone
+    )
 
     private val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
