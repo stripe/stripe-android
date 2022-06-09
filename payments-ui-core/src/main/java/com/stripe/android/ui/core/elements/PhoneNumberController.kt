@@ -85,7 +85,7 @@ class PhoneNumberController internal constructor(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null
         ): PhoneNumberController {
-            // Try to find the best initial country based on the phone number prefix and the
+            // Find the regions that match the phone number prefix, then pick the top match from the
             // device's locales
             if (initiallySelectedCountryCode == null && initialValue.startsWith("+")) {
                 var charIndex = 1

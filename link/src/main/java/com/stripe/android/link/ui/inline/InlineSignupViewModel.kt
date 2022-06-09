@@ -33,14 +33,10 @@ internal class InlineSignupViewModel @Inject constructor(
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
     private val prefilledPhone =
-        if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerPhone
+        customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
 
-    val emailController = SimpleTextFieldController.createEmailSectionController(
-        prefilledEmail
-    )
-
-    val phoneController: PhoneNumberController =
-        PhoneNumberController.createPhoneNumberController(prefilledPhone ?: "")
+    val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
+    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
