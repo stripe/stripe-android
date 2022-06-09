@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
@@ -133,29 +134,44 @@ internal abstract class IdentityDocumentScanFragment(
                             continueButton.toggleToLoading()
                         }
                         it.isBothUploaded() -> {
-                            lifecycleScope.launch {
-                                runCatching {
-                                    postVerificationPageDataAndMaybeSubmit(
-                                        identityViewModel = identityViewModel,
-                                        collectedDataParam =
-                                        CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                            type = type,
-                                            frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                            frontLowResResult = requireNotNull(it.frontLowResResult.data),
-                                            backHighResResult = requireNotNull(it.backHighResResult.data),
-                                            backLowResResult = requireNotNull(it.backLowResResult.data)
-                                        ),
-                                        fromFragment = fragmentId,
-                                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                    )
-                                }.onFailure { throwable ->
-                                    Log.e(
-                                        TAG,
-                                        "fail to submit uploaded files: $throwable"
-                                    )
+                            identityViewModel.observeForVerificationPage(
+                                viewLifecycleOwner,
+                                onSuccess = { verificationPage ->
+                                    lifecycleScope.launch {
+                                        runCatching {
+                                            postVerificationPageDataAndMaybeSubmit(
+                                                identityViewModel = identityViewModel,
+                                                collectedDataParam =
+                                                CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                                    type = type,
+                                                    frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                                    frontLowResResult = requireNotNull(it.frontLowResResult.data),
+                                                    backHighResResult = requireNotNull(it.backHighResResult.data),
+                                                    backLowResResult = requireNotNull(it.backLowResResult.data)
+                                                ),
+                                                clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                                fromFragment = fragmentId,
+                                                notSubmitBlock =
+                                                verificationPage.selfieCapture?.let {
+                                                    {
+                                                        findNavController().navigate(R.id.action_global_selfieFragment)
+                                                    }
+                                                }
+                                            )
+                                        }.onFailure { throwable ->
+                                            Log.e(
+                                                TAG,
+                                                "fail to submit uploaded files: $throwable"
+                                            )
+                                            navigateToDefaultErrorFragment()
+                                        }
+                                    }
+                                },
+                                onFailure = { throwable ->
+                                    Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
                                     navigateToDefaultErrorFragment()
                                 }
-                            }
+                            )
                         }
                         else -> {
                             Log.e(

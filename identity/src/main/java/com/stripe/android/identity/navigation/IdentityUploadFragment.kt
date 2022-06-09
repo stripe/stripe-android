@@ -352,43 +352,56 @@ internal abstract class IdentityUploadFragment(
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
             binding.kontinue.toggleToLoading()
-            lifecycleScope.launch {
-                runCatching {
-                    val front =
-                        requireNotNull(latestState.frontHighResResult.data)
-                    val back =
-                        requireNotNull(latestState.backHighResResult.data)
-                    trySubmit(
-                        CollectedDataParam(
-                            idDocumentFront = DocumentUploadParam(
-                                highResImage = requireNotNull(front.uploadedStripeFile.id) {
-                                    "front uploaded file id is null"
-                                },
-                                uploadMethod = requireNotNull(front.uploadMethod)
-                            ),
-                            idDocumentBack = DocumentUploadParam(
-                                highResImage = requireNotNull(back.uploadedStripeFile.id) {
-                                    "back uploaded file id is null"
-                                },
-                                uploadMethod = requireNotNull(back.uploadMethod)
-                            ),
-                            idDocumentType = frontScanType.toType()
-                        )
+            runCatching {
+                val front =
+                    requireNotNull(latestState.frontHighResResult.data)
+                val back =
+                    requireNotNull(latestState.backHighResResult.data)
+                trySubmit(
+                    CollectedDataParam(
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                "front uploaded file id is null"
+                            },
+                            uploadMethod = requireNotNull(front.uploadMethod)
+                        ),
+                        idDocumentBack = DocumentUploadParam(
+                            highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                "back uploaded file id is null"
+                            },
+                            uploadMethod = requireNotNull(back.uploadMethod)
+                        ),
+                        idDocumentType = frontScanType.toType()
                     )
-                }.onFailure {
-                    Log.d(TAG, "fail to submit uploaded files: $it")
-                    navigateToDefaultErrorFragment()
-                }
+                )
+            }.onFailure {
+                Log.d(TAG, "fail to submit uploaded files: $it")
+                navigateToDefaultErrorFragment()
             }
         }
     }
 
-    protected suspend fun trySubmit(collectedDataParam: CollectedDataParam) {
-        postVerificationPageDataAndMaybeSubmit(
-            identityViewModel = identityViewModel,
-            collectedDataParam = collectedDataParam,
-            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-            fromFragment = fragmentId,
+    protected fun trySubmit(collectedDataParam: CollectedDataParam) {
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                lifecycleScope.launch {
+                    postVerificationPageDataAndMaybeSubmit(
+                        identityViewModel = identityViewModel,
+                        collectedDataParam = collectedDataParam,
+                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                        fromFragment = fragmentId,
+                        verificationPage.selfieCapture?.let {
+                            {
+                                findNavController().navigate(R.id.action_global_selfieFragment)
+                            }
+                        }
+                    )
+                }
+            }, onFailure = {
+                Log.e(TAG, "Fail to observeForVerificationPage: $it")
+                navigateToDefaultErrorFragment()
+            }
         )
     }
 

@@ -227,7 +227,7 @@ internal class NavigationUtilsTest {
     }
 
     @Test
-    fun `postVerificationPageDataAndMaybeSubmit executes notSubmitBlock when shouldNotSubmit`() {
+    fun `postVerificationPageDataAndMaybeSubmit executes notSubmitBlock when it's not null`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
                 whenever(it.postVerificationPageData(any(), any())).thenReturn(
@@ -252,7 +252,7 @@ internal class NavigationUtilsTest {
     }
 
     @Test
-    fun `postVerificationPageDataAndMaybeSubmit submits when shouldNotSubmit is false`() {
+    fun `postVerificationPageDataAndMaybeSubmit submits when notSubmitBlock is null`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
                 whenever(it.postVerificationPageData(any(), any())).thenReturn(
