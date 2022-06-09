@@ -131,7 +131,8 @@ internal class FormViewModelTest {
 
         whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
             LpmRepository.SupportedPaymentMethod(
-                paymentMethodType,
+                paymentMethodType.code,
+                false,
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
                 true,
