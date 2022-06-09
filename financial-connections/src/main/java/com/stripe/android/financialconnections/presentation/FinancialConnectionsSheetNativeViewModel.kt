@@ -7,7 +7,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
-import com.stripe.android.financialconnections.domain.UpdateManifest
+import com.stripe.android.financialconnections.domain.ObserveManifestUpdates
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -16,12 +16,12 @@ import javax.inject.Inject
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationManager: NavigationManager,
     val subcomponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider,
-    updateManifest: UpdateManifest,
+    observeManifestUpdates: ObserveManifestUpdates,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
-        updateManifest.flow.setOnEach { copy(manifest = it) }
+        observeManifestUpdates().setOnEach { copy(manifest = it) }
     }
 
     companion object :

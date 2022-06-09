@@ -17,7 +17,6 @@ import javax.inject.Singleton
         FinancialConnectionsSheetModule::class,
         LoggingModule::class,
         CoroutineContextModule::class,
-        NavigationModule::class
     ]
 )
 internal interface FinancialConnectionsSheetNativeComponent {
