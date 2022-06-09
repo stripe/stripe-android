@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.widget.RadioGroup
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
@@ -41,7 +43,16 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     CheckoutCustomer.WithId(it)
                 } ?: CheckoutCustomer.New
             }
-            else -> CheckoutCustomer.Returning
+            else -> {
+                val useSnapshotCustomer = intent.extras?.get(
+                    USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA
+                ) as Boolean?
+                if (useSnapshotCustomer != null && useSnapshotCustomer) {
+                    CheckoutCustomer.Snapshot
+                } else {
+                    CheckoutCustomer.Returning
+                }
+            }
         }
 
     private val googlePayConfig: PaymentSheet.GooglePayConfiguration?
@@ -60,6 +71,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
             R.id.currency_usd_button -> CheckoutCurrency.USD
             R.id.currency_aud_button -> CheckoutCurrency.AUD
+            R.id.currency_gbp_button -> CheckoutCurrency.GBP
             else -> CheckoutCurrency.EUR
         }
 
@@ -70,22 +82,41 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> CheckoutMode.Setup
         }
 
+    private val linkEnabled: Boolean
+        get() = viewBinding.linkRadioGroup.checkedRadioButtonId == R.id.link_on_button
+
     private val setShippingAddress: Boolean
         get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
 
+    private val setDefaultBillingAddress: Boolean
+        get() = viewBinding.defaultBillingRadioGroup.checkedRadioButtonId == R.id.default_billing_on_button
+
     private val setAutomaticPaymentMethods: Boolean
         get() = viewBinding.automaticPmGroup.checkedRadioButtonId == R.id.automatic_pm_on_button
+
+    private val setDelayedPaymentMethods: Boolean
+        get() = viewBinding.allowsDelayedPaymentMethodsRadioGroup.checkedRadioButtonId == R.id.allowsDelayedPaymentMethods_on_button
 
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
     @Nullable
-    private var multiStepUIIdlingResource: CountingIdlingResource? = null
+    private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     @Nullable
-    private var singleStepUIIdlingResource: CountingIdlingResource? = null
+    private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
+        if (shouldUseDarkMode != null) {
+            val mode =
+                if (shouldUseDarkMode) {
+                    AppCompatDelegate.MODE_NIGHT_YES
+                } else {
+                    AppCompatDelegate.MODE_NIGHT_NO
+                }
+            AppCompatDelegate.setDefaultNightMode(mode)
+        }
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
@@ -100,11 +131,14 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.resetDefaultsButton.setOnClickListener {
             setToggles(
                 Toggle.Customer.default.toString(),
+                Toggle.Link.default as Boolean,
                 Toggle.GooglePay.default as Boolean,
                 Toggle.Currency.default.toString(),
                 Toggle.Mode.default.toString(),
                 Toggle.SetShippingAddress.default as Boolean,
-                Toggle.SetAutomaticPaymentMethods.default as Boolean
+                Toggle.SetDefaultBillingAddress.default as Boolean,
+                Toggle.SetAutomaticPaymentMethods.default as Boolean,
+                Toggle.SetDelayedPaymentMethods.default as Boolean,
             )
         }
 
@@ -114,6 +148,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     customer,
                     currency,
                     mode,
+                    linkEnabled,
                     setShippingAddress,
                     setAutomaticPaymentMethods,
                     backendUrl
@@ -145,11 +180,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
             if (it) {
-                singleStepUIIdlingResource?.increment()
-                multiStepUIIdlingResource?.increment()
+                singleStepUIReadyIdlingResource?.increment()
+                multiStepUIReadyIdlingResource?.increment()
             } else {
-                singleStepUIIdlingResource?.decrement()
-                multiStepUIIdlingResource?.decrement()
+                singleStepUIReadyIdlingResource?.decrement()
             }
         }
 
@@ -162,46 +196,50 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
         }
 
-        disableViews()
-    }
+        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
+            // when the currency changes the merchant may change, so the new customer id
+            // created might not match the previous new customer
+            viewModel.temporaryCustomerId = null
+        }
 
-    override fun onResume() {
-        super.onResume()
-        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
-        setToggles(
-            customer,
-            googlePay,
-            currency,
-            mode,
-            setShippingAddress,
-            setAutomaticPaymentMethods
-        )
+        disableViews()
     }
 
     override fun onPause() {
         super.onPause()
         viewModel.storeToggleState(
             customer.value,
+            linkEnabled,
             googlePayConfig != null,
             currency.value,
             mode.value,
             setShippingAddress,
-            setAutomaticPaymentMethods
+            setDefaultBillingAddress,
+            setAutomaticPaymentMethods,
+            setDelayedPaymentMethods
         )
     }
 
     private fun setToggles(
         customer: String?,
+        link: Boolean,
         googlePay: Boolean,
         currency: String?,
         mode: String?,
         setShippingAddress: Boolean,
-        setAutomaticPaymentMethods: Boolean
+        setDefaultBillingAddress: Boolean,
+        setAutomaticPaymentMethods: Boolean,
+        setDelayedPaymentMethods: Boolean,
     ) {
         when (customer) {
             CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
             CheckoutCustomer.New.value -> viewBinding.customerRadioGroup.check(R.id.new_customer_button)
             else -> viewBinding.customerRadioGroup.check(R.id.returning_customer_button)
+        }
+
+        when (link) {
+            true -> viewBinding.linkRadioGroup.check(R.id.link_on_button)
+            false -> viewBinding.linkRadioGroup.check(R.id.link_off_button)
         }
 
         when (googlePay) {
@@ -226,9 +264,19 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             false -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
         }
 
+        when (setDefaultBillingAddress) {
+            true -> viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_on_button)
+            false -> viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_off_button)
+        }
+
         when (setAutomaticPaymentMethods) {
             true -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_on_button)
             false -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_off_button)
+        }
+
+        when (setDelayedPaymentMethods) {
+            true -> viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_on_button)
+            false -> viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_off_button)
         }
     }
 
@@ -287,12 +335,19 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
 
+        val appearance: PaymentSheet.Appearance = intent.extras?.get(APPEARANCE_EXTRA)?.let {
+            it as PaymentSheet.Appearance
+        } ?: run {
+            PaymentSheet.Appearance()
+        }
+
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
-            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
+            appearance = appearance
         )
     }
 
@@ -300,6 +355,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (success) {
             viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
+            multiStepUIReadyIdlingResource?.decrement()
         } else {
             viewModel.status.value =
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"
@@ -332,28 +388,33 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     /**
-     * Only called from test, creates and returns a new [SimpleIdlingResource].
+     * Only called from test, creates and returns a [IdlingResource].
      */
-
     @VisibleForTesting
     @NonNull
-    fun getMultiStepIdlingResource(): IdlingResource? {
-        if (multiStepUIIdlingResource == null) {
-            multiStepUIIdlingResource = CountingIdlingResource("multiStepUIIdlingResource")
+    fun getMultiStepReadyIdlingResource(): IdlingResource? {
+        if (multiStepUIReadyIdlingResource == null) {
+            multiStepUIReadyIdlingResource =
+                CountingIdlingResource("multiStepUIReadyIdlingResource")
         }
-        return multiStepUIIdlingResource
+        return multiStepUIReadyIdlingResource
     }
 
     @VisibleForTesting
     @NonNull
-    fun getSingleStepIdlingResource(): IdlingResource? {
-        if (singleStepUIIdlingResource == null) {
-            singleStepUIIdlingResource = CountingIdlingResource("singleStepUIIdlingResource")
+    fun getSingleStepReadyIdlingResource(): IdlingResource? {
+        if (singleStepUIReadyIdlingResource == null) {
+            singleStepUIReadyIdlingResource =
+                CountingIdlingResource("singleStepUIReadyIdlingResource")
         }
-        return singleStepUIIdlingResource
+        return singleStepUIReadyIdlingResource
     }
+
 
     companion object {
+        const val FORCE_DARK_MODE_EXTRA = "ForceDark"
+        const val APPEARANCE_EXTRA = "Appearance"
+        const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
     }

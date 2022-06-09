@@ -3,11 +3,13 @@ package com.stripe.android.paymentsheet
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +19,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,29 +48,34 @@ import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTION
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
+    val lpmRepository: LpmRepository,
     private val canClickSelectedItem: Boolean,
     val paymentOptionSelectedListener:
         (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
     val paymentMethodDeleteListener:
         (paymentMethod: Item.SavedPaymentMethod) -> Unit,
-    val addCardClickListener: () -> Unit
+    val addCardClickListener: () -> Unit,
+    val linkClickListener: () -> Unit
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
     @VisibleForTesting
     internal var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
     private var isEditing = false
+    private var savedSelection: SavedSelection? = null
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
 
@@ -88,11 +99,16 @@ internal class PaymentOptionsAdapter(
     fun setItems(
         config: FragmentConfig,
         paymentMethods: List<PaymentMethod>,
+        showGooglePay: Boolean,
+        showLink: Boolean,
         paymentSelection: PaymentSelection? = null
     ) {
+        savedSelection = config.savedSelection
+
         val items = listOfNotNull(
             Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady }
+            Item.GooglePay.takeIf { config.isGooglePayReady && showGooglePay },
+            Item.Link.takeIf { showLink }
         ) + sortedPaymentMethods(paymentMethods, config.savedSelection).map {
             Item.SavedPaymentMethod(it)
         }
@@ -122,7 +138,7 @@ internal class PaymentOptionsAdapter(
      * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
-        savedSelection: SavedSelection
+        savedSelection: SavedSelection?
     ): Int {
         return listOfNotNull(
             // saved selection
@@ -138,12 +154,16 @@ internal class PaymentOptionsAdapter(
                         }
                     }
                     SavedSelection.None -> false
+                    else -> false
                 }
                 b
             }.takeIf { it != -1 },
 
             // Google Pay
             items.indexOfFirst { it is Item.GooglePay }.takeIf { it != -1 },
+
+            // Link
+            items.indexOfFirst { it is Item.Link }.takeIf { it != -1 },
 
             // the first payment method
             items.indexOfFirst { it is Item.SavedPaymentMethod }.takeIf { it != -1 }
@@ -197,9 +217,10 @@ internal class PaymentOptionsAdapter(
     @VisibleForTesting
     internal fun onItemSelected(
         position: Int,
-        isClick: Boolean
+        isClick: Boolean,
+        force: Boolean = false
     ) {
-        if (position != NO_POSITION &&
+        if (force || position != NO_POSITION &&
             (canClickSelectedItem || position != selectedItemPosition) &&
             !isEditing
         ) {
@@ -212,7 +233,7 @@ internal class PaymentOptionsAdapter(
             val newSelectedItem = items[position]
 
             when (newSelectedItem) {
-                Item.AddCard -> null
+                Item.AddCard, Item.Link -> null
                 Item.GooglePay -> PaymentSelection.GooglePay
                 is Item.SavedPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
             }?.let { paymentSelection ->
@@ -238,9 +259,22 @@ internal class PaymentOptionsAdapter(
                 AddNewPaymentMethodViewHolder(parent, width, addCardClickListener)
             ViewType.GooglePay ->
                 GooglePayViewHolder(parent, width, ::onItemSelected)
+            ViewType.Link ->
+                LinkViewHolder(parent, width, linkClickListener)
             ViewType.SavedPaymentMethod ->
-                SavedPaymentMethodViewHolder(parent, width, ::onItemSelected) { position ->
+                SavedPaymentMethodViewHolder(
+                    parent,
+                    width,
+                    lpmRepository,
+                    ::onItemSelected
+                ) { position ->
+                    onItemSelected(
+                        position = findInitialSelectedPosition(savedSelection),
+                        isClick = false,
+                        force = true
+                    )
                     paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
+                    notifyItemRemoved(position)
                 }
         }
     }
@@ -274,6 +308,7 @@ internal class PaymentOptionsAdapter(
     internal class SavedPaymentMethodViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
+        private val lpmRepository: LpmRepository,
         private val onRemoveListener: (Int) -> Unit,
         private val onItemSelectedListener: ((Int, Boolean) -> Unit)
     ) : PaymentOptionViewHolder(
@@ -282,11 +317,13 @@ internal class PaymentOptionsAdapter(
         constructor(
             parent: ViewGroup,
             width: Dp,
+            lpmRepository: LpmRepository,
             onItemSelectedListener: ((Int, Boolean) -> Unit),
             onRemoveListener: (Int) -> Unit
-        ) : this (
+        ) : this(
             composeView = ComposeView(parent.context),
             width = width,
+            lpmRepository = lpmRepository,
             onRemoveListener = onRemoveListener,
             onItemSelectedListener = onItemSelectedListener
         )
@@ -299,10 +336,11 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             val savedPaymentMethod = item as Item.SavedPaymentMethod
+            val labelIcon = savedPaymentMethod.paymentMethod.getLabelIcon()
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
             val removeTitle = itemView.resources.getString(
                 R.string.stripe_paymentsheet_remove_pm,
-                SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
+                lpmRepository.fromCode(item.paymentMethod.type?.code)
                     ?.run {
                         itemView.resources.getString(
                             displayNameResource
@@ -311,20 +349,23 @@ internal class PaymentOptionsAdapter(
             )
 
             composeView.setContent {
-                PaymentOptionUi(
-                    viewWidth = width,
-                    isEditing = isEditing,
-                    isSelected = isSelected,
-                    isEnabled = isEnabled,
-                    iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
-                    labelText = labelText,
-                    removePmDialogTitle = removeTitle,
-                    description = item.getDescription(itemView.resources),
-                    onRemoveListener = { onRemoveListener(position) },
-                    onRemoveAccessibilityDescription =
-                    savedPaymentMethod.getRemoveDescription(itemView.resources),
-                    onItemSelectedListener = { onItemSelectedListener(position, true) },
-                )
+                PaymentsTheme {
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = isEditing,
+                        isSelected = isSelected,
+                        isEnabled = isEnabled,
+                        iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+                        labelIcon = labelIcon,
+                        labelText = labelText,
+                        removePmDialogTitle = removeTitle,
+                        description = item.getDescription(itemView.resources),
+                        onRemoveListener = { onRemoveListener(position) },
+                        onRemoveAccessibilityDescription =
+                        savedPaymentMethod.getRemoveDescription(itemView.resources),
+                        onItemSelectedListener = { onItemSelectedListener(position, true) },
+                    )
+                }
             }
         }
     }
@@ -351,20 +392,28 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                PaymentOptionUi(
-                    viewWidth = width,
-                    isEditing = false,
-                    isSelected = false,
-                    isEnabled = isEnabled,
-                    labelText =
-                    itemView.resources.getString(
-                        R.string.stripe_paymentsheet_add_payment_method_button_label
-                    ),
-                    iconRes = R.drawable.stripe_ic_paymentsheet_add,
-                    onItemSelectedListener = { onItemSelectedListener() },
-                    description =
-                    itemView.resources.getString(R.string.add_new_payment_method),
-                )
+                PaymentsTheme {
+                    val iconRes = if (
+                        MaterialTheme.paymentsColors.component.shouldUseDarkDynamicColor()
+                    ) {
+                        R.drawable.stripe_ic_paymentsheet_add_dark
+                    } else {
+                        R.drawable.stripe_ic_paymentsheet_add_light
+                    }
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = false,
+                        isSelected = false,
+                        isEnabled = isEnabled,
+                        labelText = itemView.resources.getString(
+                            R.string.stripe_paymentsheet_add_payment_method_button_label
+                        ),
+                        iconRes = iconRes,
+                        onItemSelectedListener = onItemSelectedListener,
+                        description =
+                        itemView.resources.getString(R.string.add_new_payment_method),
+                    )
+                }
             }
         }
     }
@@ -395,15 +444,53 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
+                PaymentsTheme {
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = false,
+                        isSelected = isSelected,
+                        isEnabled = isEnabled,
+                        iconRes = R.drawable.stripe_google_pay_mark,
+                        labelText = itemView.resources.getString(R.string.google_pay),
+                        description = itemView.resources.getString(R.string.google_pay),
+                        onItemSelectedListener = { onItemSelectedListener(position, true) },
+                    )
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal class LinkViewHolder(
+        private val composeView: ComposeView,
+        private val width: Dp,
+        private val onItemSelectedListener: () -> Unit
+    ) : PaymentOptionViewHolder(
+        composeView
+    ) {
+        constructor(parent: ViewGroup, width: Dp, onItemSelectedListener: () -> Unit) : this(
+            composeView = ComposeView(parent.context),
+            width = width,
+            onItemSelectedListener = onItemSelectedListener
+        )
+
+        override fun bind(
+            isSelected: Boolean,
+            isEnabled: Boolean,
+            isEditing: Boolean,
+            item: Item,
+            position: Int
+        ) {
+            composeView.setContent {
                 PaymentOptionUi(
                     viewWidth = width,
                     isEditing = false,
                     isSelected = isSelected,
                     isEnabled = isEnabled,
-                    iconRes = R.drawable.stripe_google_pay_mark,
-                    labelText = itemView.resources.getString(R.string.google_pay),
-                    description = itemView.resources.getString(R.string.google_pay),
-                    onItemSelectedListener = { onItemSelectedListener(position, true) },
+                    iconRes = R.drawable.stripe_link_mark,
+                    labelText = itemView.resources.getString(R.string.link),
+                    description = itemView.resources.getString(R.string.link),
+                    onItemSelectedListener = onItemSelectedListener,
                 )
             }
         }
@@ -436,7 +523,8 @@ internal class PaymentOptionsAdapter(
     internal enum class ViewType {
         SavedPaymentMethod,
         AddCard,
-        GooglePay
+        GooglePay,
+        Link
     }
 
     internal sealed class Item {
@@ -448,6 +536,10 @@ internal class PaymentOptionsAdapter(
 
         object GooglePay : Item() {
             override val viewType: ViewType = ViewType.GooglePay
+        }
+
+        object Link : Item() {
+            override val viewType: ViewType = ViewType.Link
         }
 
         /**
@@ -468,6 +560,10 @@ internal class PaymentOptionsAdapter(
                     R.string.bank_account_ending_in,
                     paymentMethod.sepaDebit?.last4
                 )
+                PaymentMethod.Type.USBankAccount -> resources.getString(
+                    R.string.bank_account_ending_in,
+                    paymentMethod.usBankAccount?.last4
+                )
                 else -> ""
             }
 
@@ -477,6 +573,7 @@ internal class PaymentOptionsAdapter(
             )
         }
     }
+
     internal companion object {
         private fun calculateViewWidth(parent: ViewGroup): Dp {
             val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
@@ -501,6 +598,7 @@ internal fun PaymentOptionUi(
     isEditing: Boolean,
     isEnabled: Boolean,
     iconRes: Int,
+    @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
     removePmDialogTitle: String = "",
     description: String,
@@ -547,19 +645,31 @@ internal fun PaymentOptionUi(
             }
         }
         if (isSelected) {
-            Image(
-                painter = painterResource(R.drawable.stripe_ic_check_circle),
-                contentDescription = null,
-
+            val iconColor = MaterialTheme.colors.primary
+            val checkSymbolColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(20.dp)
                     .clip(CircleShape)
-                    .background(color = PaymentsTheme.colors.material.primary)
+                    .size(24.dp)
+                    .background(MaterialTheme.colors.primary)
                     .constrainAs(checkIcon) {
-                        top.linkTo(card.bottom, (-12).dp)
+                        top.linkTo(card.bottom, (-18).dp)
                         end.linkTo(card.end)
                     }
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = checkSymbolColor,
+                    modifier = Modifier
+                        .size(12.dp)
+                )
+            }
         }
         if (isEditing && onRemoveListener != null) {
             val openDialog = remember { mutableStateOf(false) }
@@ -574,7 +684,7 @@ internal fun PaymentOptionUi(
             )
 
             // tint the delete symbol so it contrasts well with the error color around it.
-            val iconColor = PaymentsTheme.colors.material.error
+            val iconColor = MaterialTheme.colors.error
             val deleteIconColor = if (iconColor.shouldUseDarkDynamicColor()) {
                 Color.Black
             } else {
@@ -601,8 +711,9 @@ internal fun PaymentOptionUi(
         }
 
         LpmSelectorText(
+            icon = labelIcon,
             text = labelText,
-            textColor = PaymentsTheme.colors.material.onSurface,
+            textColor = MaterialTheme.colors.onSurface,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {

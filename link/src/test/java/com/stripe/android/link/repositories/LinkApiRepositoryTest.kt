@@ -3,9 +3,14 @@ package com.stripe.android.link.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.confirmation.ConfirmPaymentIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +28,10 @@ import java.util.Locale
 @ExperimentalCoroutinesApi
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
+
+    private val paymentIntent = mock<PaymentIntent>().apply {
+        whenever(clientSecret).thenReturn("secret")
+    }
 
     private val linkRepository = LinkApiRepository(
         publishableKeyProvider = { PUBLISHABLE_KEY },
@@ -111,7 +120,22 @@ class LinkApiRepositoryTest {
     fun `startVerification sends correct parameters`() = runTest {
         val secret = "secret"
         val cookie = "cookie1"
-        linkRepository.startVerification(secret, cookie)
+        val consumerKey = "key"
+        linkRepository.startVerification(secret, consumerKey, cookie)
+
+        verify(stripeRepository).startConsumerVerification(
+            eq(secret),
+            eq(Locale.US),
+            eq(cookie),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `startVerification without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val cookie = "cookie1"
+        linkRepository.startVerification(secret, null, cookie)
 
         verify(stripeRepository).startConsumerVerification(
             eq(secret),
@@ -127,7 +151,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val result = linkRepository.startVerification("secret", "cookie")
+        val result = linkRepository.startVerification("secret", "key", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -138,7 +162,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.startVerification("secret", "cookie")
+        val result = linkRepository.startVerification("secret", "key", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -148,7 +172,23 @@ class LinkApiRepositoryTest {
         val secret = "secret"
         val code = "code"
         val cookie = "cookie2"
-        linkRepository.confirmVerification(secret, code, cookie)
+        val consumerKey = "key2"
+        linkRepository.confirmVerification(code, secret, consumerKey, cookie)
+
+        verify(stripeRepository).confirmConsumerVerification(
+            eq(secret),
+            eq(code),
+            eq(cookie),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `confirmVerification without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val code = "code"
+        val cookie = "cookie2"
+        linkRepository.confirmVerification(code, secret, null, cookie)
 
         verify(stripeRepository).confirmConsumerVerification(
             eq(secret),
@@ -164,7 +204,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val result = linkRepository.confirmVerification("secret", "code", "cookie")
+        val result = linkRepository.confirmVerification("code", "secret", "key", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -175,7 +215,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.confirmVerification("secret", "code", "cookie")
+        val result = linkRepository.confirmVerification("code", "secret", "key", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -184,7 +224,21 @@ class LinkApiRepositoryTest {
     fun `logout sends correct parameters`() = runTest {
         val secret = "secret"
         val cookie = "cookie2"
-        linkRepository.logout(secret, cookie)
+        val consumerKey = "key2"
+        linkRepository.logout(secret, consumerKey, cookie)
+
+        verify(stripeRepository).logoutConsumer(
+            eq(secret),
+            eq(cookie),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `logout without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val cookie = "cookie2"
+        linkRepository.logout(secret, null, cookie)
 
         verify(stripeRepository).logoutConsumer(
             eq(secret),
@@ -199,7 +253,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.logoutConsumer(any(), any(), any()))
             .thenReturn(consumerSession)
 
-        val result = linkRepository.logout("secret", "cookie")
+        val result = linkRepository.logout("secret", "key", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -210,7 +264,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.logoutConsumer(any(), any(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.logout("secret", "cookie")
+        val result = linkRepository.logout("secret", "key", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -218,7 +272,20 @@ class LinkApiRepositoryTest {
     @Test
     fun `listPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
-        linkRepository.listPaymentDetails(secret)
+        val consumerKey = "key"
+        linkRepository.listPaymentDetails(secret, consumerKey)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            argThat { contains("card") && size == 1 },
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        linkRepository.listPaymentDetails(secret, null)
 
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
@@ -233,7 +300,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.listPaymentDetails(any(), any(), any()))
             .thenReturn(paymentDetails)
 
-        val result = linkRepository.listPaymentDetails("secret")
+        val result = linkRepository.listPaymentDetails("secret", "key")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(paymentDetails)
@@ -244,7 +311,219 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.listPaymentDetails(any(), any(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.listPaymentDetails("secret")
+        val result = linkRepository.listPaymentDetails("secret", "key")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val id = "payment_details_id"
+        val consumerKey = "key"
+        linkRepository.deletePaymentDetails(id, secret, consumerKey)
+
+        verify(stripeRepository).deletePaymentDetails(
+            eq(secret),
+            eq(id),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val id = "payment_details_id"
+        linkRepository.deletePaymentDetails(id, secret, null)
+
+        verify(stripeRepository).deletePaymentDetails(
+            eq(secret),
+            eq(id),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Unit)
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `createPaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerPaymentDetailsCreateParams =
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com")
+        val consumerKey = "key"
+
+        linkRepository.createPaymentDetails(
+            paymentDetails = consumerPaymentDetailsCreateParams,
+            stripeIntent = paymentIntent,
+            extraConfirmationParams = null,
+            consumerSessionClientSecret = secret,
+            consumerPublishableKey = consumerKey
+        )
+
+        verify(stripeRepository).createPaymentDetails(
+            eq(secret),
+            eq(consumerPaymentDetailsCreateParams),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `createPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerPaymentDetailsCreateParams =
+            ConsumerPaymentDetailsCreateParams.Card(emptyMap(), "email@stripe.com")
+
+        linkRepository.createPaymentDetails(
+            paymentDetails = consumerPaymentDetailsCreateParams,
+            stripeIntent = paymentIntent,
+            extraConfirmationParams = null,
+            consumerSessionClientSecret = secret,
+            consumerPublishableKey = null
+        )
+
+        verify(stripeRepository).createPaymentDetails(
+            eq(secret),
+            eq(consumerPaymentDetailsCreateParams),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `createPaymentDetails returns successful result`() = runTest {
+        val secret = "secret"
+        val paymentDetails = mock<ConsumerPaymentDetails.PaymentDetails>().apply {
+            whenever(id).thenReturn("id")
+        }
+        val consumerPaymentDetails = mock<ConsumerPaymentDetails>().apply {
+            whenever(this.paymentDetails).thenReturn(listOf(paymentDetails))
+        }
+        whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
+            .thenReturn(consumerPaymentDetails)
+
+        val result = linkRepository.createPaymentDetails(
+            paymentDetails = ConsumerPaymentDetailsCreateParams.Card(
+                emptyMap(),
+                "email@stripe.com"
+            ),
+            stripeIntent = paymentIntent,
+            extraConfirmationParams = null,
+            consumerSessionClientSecret = secret,
+            consumerPublishableKey = null
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(
+            LinkPaymentDetails(
+                paymentDetails,
+                ConfirmPaymentIntentParamsFactory(paymentIntent)
+                    .createPaymentMethodCreateParams(
+                        secret,
+                        paymentDetails
+                    )
+            )
+        )
+    }
+
+    @Test
+    fun `createPaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.createPaymentDetails(
+            paymentDetails = ConsumerPaymentDetailsCreateParams.Card(
+                emptyMap(),
+                "email@stripe.com"
+            ),
+            stripeIntent = paymentIntent,
+            extraConfirmationParams = null,
+            consumerSessionClientSecret = "secret",
+            consumerPublishableKey = null
+        )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `updatePaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val params = ConsumerPaymentDetailsUpdateParams.Card("id")
+        val consumerKey = "key"
+
+        linkRepository.updatePaymentDetails(
+            params,
+            secret,
+            consumerKey
+        )
+
+        verify(stripeRepository).updatePaymentDetails(
+            eq(secret),
+            eq(params),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `updatePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val params = ConsumerPaymentDetailsUpdateParams.Card("id")
+
+        linkRepository.updatePaymentDetails(
+            params,
+            secret,
+            null
+        )
+
+        verify(stripeRepository).updatePaymentDetails(
+            eq(secret),
+            eq(params),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `updatePaymentDetails returns successful result`() = runTest {
+        val consumerPaymentDetails = mock<ConsumerPaymentDetails>()
+
+        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+            .thenReturn(consumerPaymentDetails)
+
+        val result = linkRepository.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams.Card("id"),
+            "secret",
+            "key"
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerPaymentDetails)
+    }
+
+    @Test
+    fun `updatePaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams.Card("id"),
+            "secret",
+            "key"
+        )
 
         assertThat(result.isFailure).isTrue()
     }

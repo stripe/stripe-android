@@ -8,24 +8,24 @@ class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         R.string.ideal_bank,
         listOf(
-            DropdownItemSpec(text = "ABN AMRO", value = "abn_amro"),
-            DropdownItemSpec(text = "ASN Bank", value = "asn_bank"),
-            DropdownItemSpec(text = "Bunq", value = "bunq"),
-            DropdownItemSpec(text = "Handelsbanken", value = "handelsbanken"),
-            DropdownItemSpec(text = "ING", value = "ing"),
-            DropdownItemSpec(text = "Knab", value = "knab"),
-            DropdownItemSpec(text = "Rabobank", value = "rabobank"),
-            DropdownItemSpec(text = "Revolut", value = "revolut"),
-            DropdownItemSpec(text = "RegioBank", value = "regiobank"),
-            DropdownItemSpec(text = "SNS Bank (De Volksbank)", value = "sns_bank"),
-            DropdownItemSpec(text = "Triodos Bank", value = "triodos_bank"),
-            DropdownItemSpec(text = "Van Lanschot", value = "van_lanschot"),
+            DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
+            DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),
+            DropdownItemSpec(displayText = "Bunq", apiValue = "bunq"),
+            DropdownItemSpec(displayText = "Handelsbanken", apiValue = "handelsbanken"),
+            DropdownItemSpec(displayText = "ING", apiValue = "ing"),
+            DropdownItemSpec(displayText = "Knab", apiValue = "knab"),
+            DropdownItemSpec(displayText = "Rabobank", apiValue = "rabobank"),
+            DropdownItemSpec(displayText = "Revolut", apiValue = "revolut"),
+            DropdownItemSpec(displayText = "RegioBank", apiValue = "regiobank"),
+            DropdownItemSpec(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
+            DropdownItemSpec(displayText = "Triodos Bank", apiValue = "triodos_bank"),
+            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot"),
         )
     )
 
     @Test
     fun `Verify getDisplayItems gets list of display strings`() {
-        assertThat(config.getDisplayItems())
+        assertThat(config.displayItems)
             .isEqualTo(
                 listOf(
                     "ABN AMRO",

@@ -70,10 +70,24 @@
   <string name="p24_bank">Przelewy24 银行</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">保存以用于未来的 %s 付款</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">扫描卡</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">提供您的支付方式并确认该付款即表示您授权 (A) %s 与我们的支付服务商 Stripe 向您的银行发送对您的账户进行借记的指令以及 (B) 您的银行按照这些指令对您的账户进行借记。根据您与您的银行协议的条款和条件，您有权从您的银行得到退款。退款必须在 8 周内提出，从您的帐户被扣款之日起算。您的权利在对账单上有解释，可从您的银行获取。您同意提前 2 天接收后续借记的通知。</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">继续</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">支付%s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 直接借记</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">银行卡</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">设置</string>
 </resources>

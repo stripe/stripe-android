@@ -1,20 +1,31 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * This is the specification for a country field.
- * @property onlyShowCountryCodes: a list of country code that should be shown.  If empty all
+ * @property allowedCountryCodes: a list of country code that should be shown.  If empty all
  * countries will be shown.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
-data class CountrySpec(val onlyShowCountryCodes: Set<String> = emptySet()) :
-    SectionFieldSpec(IdentifierSpec.Country) {
-    fun transform(country: String?): SectionFieldElement =
+@Serializable
+data class CountrySpec(
+    override val apiPath: IdentifierSpec = IdentifierSpec.Country,
+
+    @SerialName("allowed_country_codes")
+    val allowedCountryCodes: Set<String> = supportedBillingCountries
+) : FormItemSpec() {
+    fun transform(
+        initialValues: Map<IdentifierSpec, String?>
+    ) = createSectionElement(
         CountryElement(
-            this.identifier,
-            DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
+            this.apiPath,
+            DropdownFieldController(
+                CountryConfig(this.allowedCountryCodes),
+                initialValue = initialValues[this.apiPath]
+            )
         )
+    )
 }

@@ -16,7 +16,7 @@ import java.io.File
 import kotlin.math.roundToInt
 
 /**
- * Analyzer to run a model input.
+ * Analyzer to run IDDetector.
  *
  * TODO(ccen): reimplement with ImageClassifier
  */
@@ -75,7 +75,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             resultScore = 0f
         }
 
-        return AnalyzerOutput(
+        return IDDetectorOutput(
             BoundingBox(
                 left = boundingBoxes[0][0],
                 top = boundingBoxes[0][1],

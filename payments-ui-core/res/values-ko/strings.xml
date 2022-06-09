@@ -70,10 +70,24 @@
   <string name="p24_bank">Przelewy24 은행</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">향후 %s 결제에 사용하도록 저장</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">카드 스캔</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) %s 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">계속</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s 결제</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 자동 이체</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">카드</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">설정</string>
 </resources>

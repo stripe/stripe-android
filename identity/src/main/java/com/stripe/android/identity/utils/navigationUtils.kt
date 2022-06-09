@@ -4,12 +4,14 @@ import android.util.Log
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavArgument
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
+import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementError
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -23,24 +25,23 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * * If the initial post fails, navigate to [ErrorFragment] with default values.
  * * If the initial post succeeds, check if the response [VerificationPageData] has error.
  *    * If it has error, then navigate to [ErrorFragment] with the error data.
- *    * Otherwise, check [shouldNotSubmit].
- *      * If it's true invoke [notSubmitBlock]
- *      * If it's false, post submit
+ *    * Otherwise, check [notSubmitBlock].
+ *      * If it's not null invoke it
+ *      * Otherwise, post submit
  *        * If submit succeeds, navigate to [ConfirmationFragment]
  *        * If submit fails, navigate to [ErrorFragment]
  *
  *
  * @param identityViewModel: [IdentityViewModel] to fire requests.
  * @param collectedDataParam: parameter collected from UI response, posted to [IdentityViewModel.postVerificationPageData].
- * @param shouldNotSubmit: A condition check block to decide when [VerificationPageData]
- * is returned without error, whether to continue submit by [IdentityViewModel.postVerificationPageSubmit].
- * @param notSubmitBlock: A block to execute when [shouldNotSubmit] returns true.
+ * @param notSubmitBlock: If not null, execute this block instead of submit by
+ * [IdentityViewModel.postVerificationPageSubmit] after [IdentityViewModel.postVerificationPageData] returns.
  */
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
     clearDataParam: ClearDataParam,
-    shouldNotSubmit: (verificationPageData: VerificationPageData) -> Boolean = { true },
+    @IdRes fromFragment: Int,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     runCatching {
@@ -48,18 +49,22 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     }.fold(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {
-                navigateToRequirementErrorFragment(postedVerificationPageData.requirements.errors[0])
+                navigateToRequirementErrorFragment(
+                    fromFragment,
+                    postedVerificationPageData.requirements.errors[0]
+                )
             } else {
-                if (shouldNotSubmit(postedVerificationPageData)) {
-                    notSubmitBlock?.invoke(postedVerificationPageData)
-                } else {
+                notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
                     runCatching {
                         identityViewModel.postVerificationPageSubmit()
                     }.fold(
                         onSuccess = { submittedVerificationPageData ->
                             when {
                                 submittedVerificationPageData.hasError() -> {
-                                    navigateToRequirementErrorFragment(submittedVerificationPageData.requirements.errors[0])
+                                    navigateToRequirementErrorFragment(
+                                        fromFragment,
+                                        submittedVerificationPageData.requirements.errors[0]
+                                    )
                                 }
                                 submittedVerificationPageData.submitted -> {
                                     findNavController()
@@ -90,13 +95,13 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
  * Navigate to [ErrorFragment] with [VerificationPageDataRequirementError].
  */
 private fun Fragment.navigateToRequirementErrorFragment(
-    requirementError: VerificationPageDataRequirementError
+    @IdRes fromFragment: Int,
+    requirementError: VerificationPageDataRequirementError,
 ) {
     findNavController()
-        .navigateToErrorFragmentWithRequirementErrorAndDestination(
+        .navigateToErrorFragmentWithRequirementError(
+            fromFragment,
             requirementError,
-            // TODO(ccen) Determine the if the destination of the back button is always ConsentFragment
-            R.id.action_errorFragment_to_consentFragment
         )
 }
 
@@ -132,6 +137,35 @@ internal fun Fragment.navigateToUploadFragment(
 }
 
 /**
+ * Navigates up with this NavController, if the previousBackStackEntry is upload fragment,
+ * sets [ARG_IS_NAVIGATED_UP_TO] to true as its NavArgument.
+ *
+ * This makes it possible to tell in upload fragment whether it is reached through
+ * [NavController.navigateUp] or [NavController.navigate].
+ */
+internal fun NavController.navigateUpAndSetArgForUploadFragment(): Boolean {
+    if (isBackingToUploadFragment()) {
+        previousBackStackEntry?.destination?.addArgument(
+            ARG_IS_NAVIGATED_UP_TO,
+            NavArgument.Builder()
+                .setDefaultValue(true)
+                .build()
+        )
+    }
+    return navigateUp()
+}
+
+internal fun NavController.isNavigatedUpTo(): Boolean {
+    return this.currentDestination?.arguments?.get(ARG_IS_NAVIGATED_UP_TO)?.defaultValue
+        as? Boolean == true
+}
+
+private fun NavController.isBackingToUploadFragment() =
+    previousBackStackEntry?.destination?.id == R.id.IDUploadFragment ||
+        previousBackStackEntry?.destination?.id == R.id.passportUploadFragment ||
+        previousBackStackEntry?.destination?.id == R.id.driverLicenseUploadFragment
+
+/**
  * Argument to indicate if take photo option should be shown when picking an image.
  */
 internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
@@ -140,5 +174,10 @@ internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
  * Argument to indicate if choose photo option should be shown when picking an image.
  */
 internal const val ARG_SHOULD_SHOW_CHOOSE_PHOTO = "shouldShowChoosePhoto"
+
+/**
+ * Navigation Argument to indicate if the current Fragment is reached through navigateUp.
+ */
+internal const val ARG_IS_NAVIGATED_UP_TO = "isNavigatedUpTo"
 
 private const val TAG = "NAVIGATION_UTIL"

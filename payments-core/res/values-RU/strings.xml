@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Введенный почтовый индекс неверен.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Введенный почтовый индекс неверен</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Оплатить в рассрочку с помощью &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Владелец счета</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Номер BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Указывая свои банковские реквизиты и подтверждая платеж, вы принимаете данный запрос прямого списания средств и &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Сервисное соглашение о запросе прямого списания средств&lt;/a&gt;, а также уполномочиваете компанию Stripe Payments Australia Pty Ltd ACN 160 180 343, идентификационный номер пользователя системы прямого списания средств 507156, (“Stripe”), снимать средства с вашего счета через систему Bulk Electronic Clearing System (BECS) от имени %s (далее \"Продавец\") на суммы, отдельно указанные вам Продавцом. Вы подтверждаете, что являетесь либо владельцем указанного выше счета, либо его уполномоченным представителем.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Предоставляя данные банковского счета и подтверждая платеж, вы принимаете данный запрос прямого списания средств и сервисное\n    соглашение на запрос прямого списания средств, а также уполномочиваете компанию\n    Stripe Payments Australia Pty Ltd, ACN 160 180 343, идентификационный номер пользователя службы прямого списания средств: 507156,\n    (“Stripe”) на списание средств с вашего счета через систему BECS от\n    имени %1$s (\"Продавец\") на суммы, отдельно указанные вам Продавцом.\n    Вы подтверждаете, что являетесь владельцем указанного ниже счета или\n    его уполномоченным представителем\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Имя</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Необходимо указать ваше имя.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Отмена</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s, оканч. на %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Удалить способ оплаты?</string>
   <string name="delete_payment_method_prompt_title">Удалить метод оплаты?</string>
+  <!-- Done button title -->
+  <string name="done">Готово</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Редактировать</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">ММ/ГГ</string>
   <string name="expiry_label_short">Истечение срока действия</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Выберите банковский счет (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Бесплатно</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Удалить</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Удалено: %s</string>
   <string name="secure_checkout">Безопасное оформление и оплата заказа</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Возникли проблемы с подключением к системе обработки платежей. Проверьте подключение к Интернету и попробуйте еще раз.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Не удалось верифицировать метод оплаты. Выберите другой метод оплаты и повторите попытку.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Лимит времени для аутентификации метода оплаты истек. Попробуйте еще раз</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Произошла внутренняя ошибка.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

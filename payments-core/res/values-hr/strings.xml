@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Vaš ZIP broj nije valjan.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Vaš poštanski broj nije valjan</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Platite u ratama koristeći &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Ime na računu</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB broj</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s ovim Zahtjevom za izravno terećenje i &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Ugovorom o usluzi za izravno terećenje&lt;/a&gt;, te ovlašćujete Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje 507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %s (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno navedenom računu.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s \n    ovim Zahtjevom za izravno terećenje i Ugovorom o usluzi za izravno terećenje te ovlašćujete\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje\n    507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %1$s \n    (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. \n    Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno \n    navedenom računu.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Naziv</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Vaše ime je obavezno.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Otkaži</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s završava na %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Izbriši način plaćanja</string>
   <string name="delete_payment_method_prompt_title">Izbrisati način plaćanja?</string>
+  <!-- Done button title -->
+  <string name="done">Gotovo</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Uredi</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/GG</string>
   <string name="expiry_label_short">Istek</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Odaberite bankovni račun (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Besplatno</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Ukloni</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s je uklonjeno</string>
   <string name="secure_checkout">Sigurna naplata</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Imamo problema u povezivanju s našim pružateljem platnih usluga. Provjerite vašu internet vezu i pokušajte ponovo.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nismo mogli potvrditi vaš način plaćanja. Odaberite drugi način plaćanja i pokušajte ponovno.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Istek vremena pri provjeri načina plaćanja -- pokušajte ponovno</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Došlo je do pogreške sustava.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / GG</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

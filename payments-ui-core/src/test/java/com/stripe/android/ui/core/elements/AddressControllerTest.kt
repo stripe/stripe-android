@@ -24,10 +24,10 @@ class AddressControllerTest {
         listOf(
             EmailElement(
                 IdentifierSpec.Email,
-                emailController
+                controller = emailController
             ),
             IbanElement(
-                IdentifierSpec.Generic("iban"),
+                IdentifierSpec.Generic("sepa_debit[iban]"),
                 ibanController
             )
         )

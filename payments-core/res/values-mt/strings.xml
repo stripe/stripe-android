@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Il-Kodiċi postali tiegħek mhux validu</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Ħallas bin-nifs grazzi għal &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Isem sid il-kont</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Numru BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Meta tagħti d-dettalji tal-kont tal-bank tiegħek u tikkonferma dal-pagament tkun qed taqbel mat-Talba tad-Debitu Dirett u mal-&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ftehim tas-servizz tat-Talba tad-Debitu Dirett&lt;/a&gt; u tkun qed tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343 bin-numru tal-identità tal-Utent tad-Debitu Dirett 507156 (\"Stripe\") biex, f\'isem %s (\"in-Negozjant\"), tiġbor mill-kont tiegħek permezz tal-Bulk Electronic Clearing System (BECS) il-flus kollha li talbek in-Negozjant permezz ta\' messaġġ ieħor. Int tagħti kelmtek li int jew sid il-kont jew firmatarju awtorizzat tal-kont muri hawn fuq.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Meta tipprovdi d-dettalji tal-kont bankarju tiegħek u tikkonferma dan il-ħlas, inti\n    taqbel ma\' din it-Talba ta\' Debitu Dirett u l-ftehim ta\' servizz tat-Talba ta\'\n    Debitu Dirett, u tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Utent ta\' Debitu Dirett bin-numru tal-ID 507156 (“Stripe”) biex tiddebita l-kont tiegħek\n    permezz tas-Sistema tal-Ikklirjar Elettroniku bl-Ingrossa (BECS) f\'isem %1$s\n    (in-“Negozjant”) għal kwalunkwe ammonti kkomunikati b\'mod separat lilek min-Negozjant.\n    Inti tiċċertifika li inti detentur ta\' kont jew li inti firmatarju awtorizzat fil-kont elenkat hawn fuq.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Isem</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Ismek huwa meħtieġ.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Ikkanċella</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s li jispiċċa %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Ħassar il-Metodu tal-Ħlas</string>
   <string name="delete_payment_method_prompt_title">Tħassar il-metodu tal-ħlas?</string>
+  <!-- Done button title -->
+  <string name="done">Bil-lest</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Editja</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">XX/SS</string>
   <string name="expiry_label_short">Skadenza</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Agħżel Kont Bankarju (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Bla ħlas</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Neħħi</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Imneħħi %s</string>
   <string name="secure_checkout">Checkout Sigur</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Qed nesperjenzaw problemi fil-konnessjoni mal-fornitur tal-pagamenti tagħna. Jekk jogħġbok iċċekkja l-konnessjoni tal-internet tiegħek u erġa\' pprova.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Ma nistgħux nawtentikaw il-metodu tal-ħlas tiegħek. Jekk jogħġbok agħżel metodu tal-ħlas differenti u erġa\' pprova.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Skada l-ħin tal-awtentikazzjoni tal-metodu tal-ħlas tiegħek -- erġa\' pprova</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Seħħ żball intern.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">XX / SS</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

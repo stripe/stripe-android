@@ -3,11 +3,14 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.PaymentsTheme
+import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.ui.core.paymentsShapes
 
 @Composable
 internal fun AddressElementUI(
@@ -33,10 +36,10 @@ internal fun AddressElementUI(
                 )
                 if (index != fieldList.lastIndex) {
                     Divider(
-                        color = PaymentsTheme.colors.colorComponentDivider,
-                        thickness = PaymentsTheme.shapes.borderStrokeWidth,
+                        color = MaterialTheme.paymentsColors.componentDivider,
+                        thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,
                         modifier = Modifier.padding(
-                            horizontal = PaymentsTheme.shapes.borderStrokeWidth
+                            horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
                         )
                     )
                 }

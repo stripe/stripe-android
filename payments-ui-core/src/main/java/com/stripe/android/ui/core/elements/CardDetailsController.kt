@@ -4,22 +4,45 @@ import android.content.Context
 import kotlinx.coroutines.flow.combine
 import java.util.UUID
 
-internal class CardDetailsController constructor(context: Context) : SectionFieldErrorController {
+internal class CardDetailsController constructor(
+    context: Context,
+    initialValues: Map<IdentifierSpec, String?>,
+    cardNumberReadOnly: Boolean = false
+) : SectionFieldErrorController {
 
     val label: Int? = null
     val numberElement = CardNumberElement(
-        IdentifierSpec.Generic("number"),
-        CardNumberController(CardNumberConfig(), context)
+        IdentifierSpec.CardNumber,
+        if (cardNumberReadOnly) {
+            CardNumberViewOnlyController(
+                CardNumberConfig(),
+                initialValues
+            )
+        } else {
+            CardNumberEditableController(
+                CardNumberConfig(),
+                context,
+                initialValues[IdentifierSpec.CardNumber]
+            )
+        }
     )
 
     val cvcElement = CvcElement(
-        IdentifierSpec.Generic("cvc"),
-        CvcController(CvcConfig(), numberElement.controller.cardBrandFlow)
+        IdentifierSpec.CardCvc,
+        CvcController(
+            CvcConfig(),
+            numberElement.controller.cardBrandFlow,
+            initialValue = initialValues[IdentifierSpec.CardCvc]
+        )
     )
 
     val expirationDateElement = SimpleTextElement(
         IdentifierSpec.Generic("date"),
-        SimpleTextFieldController(DateConfig())
+        SimpleTextFieldController(
+            DateConfig(),
+            initialValue = initialValues[IdentifierSpec.CardExpMonth] +
+                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2)
+        ),
     )
 
     private val rowFields = listOf(expirationDateElement, cvcElement)

@@ -10,6 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.view.ActivityScenarioFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,8 +37,7 @@ class PrimaryButtonTest {
 
     @Test
     fun `onFinishingState() should clear any tint and restore onReadyState()`() {
-        primaryButton.setDefaultBackGroundColor(ColorStateList.valueOf(Color.BLACK))
-
+        primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
         primaryButton.updateState(
             PrimaryButton.State.FinishProcessing({})
         )
@@ -47,6 +47,30 @@ class PrimaryButtonTest {
             PrimaryButton.State.Ready
         )
         assertThat((primaryButton.background as GradientDrawable).color).isEqualTo(ColorStateList.valueOf(Color.BLACK))
+    }
+
+    @Test
+    fun `onStartProcessing() and onFinishingState() should make button not clickable`() {
+        primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.updateState(
+            PrimaryButton.State.StartProcessing
+        )
+        assertThat(primaryButton.isClickable).isFalse()
+
+        primaryButton.updateState(
+            PrimaryButton.State.Ready
+        )
+        assertThat(primaryButton.isClickable).isTrue()
+
+        primaryButton.updateState(
+            PrimaryButton.State.FinishProcessing({})
+        )
+        assertThat(primaryButton.isClickable).isFalse()
+
+        primaryButton.updateState(
+            PrimaryButton.State.Ready
+        )
+        assertThat(primaryButton.isClickable).isTrue()
     }
 
     @Test

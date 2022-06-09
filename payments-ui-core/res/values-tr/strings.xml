@@ -70,10 +70,24 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Gelecekteki %s ödemeleri için kaydedilsin</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Kartı tara</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Ödeme bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, (A) %s ve ödeme hizmeti sağlayıcımız Stripe\'a hesabınızdan ödeme tahsilatı yapması için bankanıza talimatlar göndermesi ve (B) bankanıza bu talimatlara uygun olarak hesabınızdan ödeme tahsilatı yapması için yetki verirsiniz. Haklarınızın bir parçası olarak, bankanızla yaptığınız sözleşmenin hüküm ve koşulları uyarınca bankanızdan geri ödeme alma hakkına sahipsiniz. Geri ödeme, hesabınızdan ödeme tahsilatı yapıldığı tarihten itibaren 8 hafta içinde talep edilmelidir. Haklarınız, bankanızdan alabileceğiniz bir hesap özetinde açıklanmaktadır. Tahakkuk etmeden 2 gün öncesine kadar gelecekteki ödeme tahsilatları için bildirim almayı da kabul edersiniz.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Devam et</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s öde</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Otomatik Ödeme</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kart</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Bankamatik</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Ayarla</string>
 </resources>

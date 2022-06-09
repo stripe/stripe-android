@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Ang iyong ZIP code ay di balido.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Ang iyong ZIP/Postal code ay di balido</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Magbayad ng over time gamit ang &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Pangalan sa account</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Numero ng BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Sa pagbibigay ng mga detalye ng iyong account sa bangko at pagkumpirma sa pagbabayad na ito, sumasang-ayon ka sa Kahilingan sa Direktang Debit na ito at sa &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;kasunduan sa serbisyo ng Kahilingan sa Direktang Debit&lt;/a&gt;, at pinahihintulutan ang Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (ang “Stripe”) para i-debit ang iyong account gamit ang Bulk Electronic Clearing System (BECS) sa ngalan ng %s (ang \"Mangangalakal\") para sa anumang halagang hiwalay na ipinaalam sa iyo ng Mangangalakal. Pinapatunayan mong isa kang may hawak ng account o isang awtorisadong tagalagda sa account na nakalista sa itaas.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Sa pagbibigay ng mga detalye ng iyong account sa bangko at pagkumpirma sa pagbabayad na ito, sumasang-ayon ka sa \n    kasunduan sa serbisyo ng Direct Debit Request at Direct Debit Request, at pinahihintulutan ang\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (“Stripe”) na magbawas sa iyong account gamit ang Bulk Electronic Clearing System (BECS)\n    sa ngalan ng %1$s (the \"Merchant\") para sa anumang mga halaga na hiwalay na ipinaalam sa iyo\n    ng Merchant. Pinatutunayan mo na ikaw ay alinman sa may-ari ng account o isang pinahihintulutan \n    na pumirma sa account na nakalista sa itaas.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Pangalan</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Kailangan ang iyong pangalan.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Kanselahin</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s nagtatapos sa %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Tanggalin ang Paraan ng Pagbabayad</string>
   <string name="delete_payment_method_prompt_title">Tanggalin ang paraan ng pagbabayad?</string>
+  <!-- Done button title -->
+  <string name="done">Tapos Na</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">I-edit</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">BB / TT</string>
   <string name="expiry_label_short">Pagkapaso</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Piliin ang Account sa Bangko (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Libre</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Alisin</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Tinanggal %s</string>
   <string name="secure_checkout">Ligtas na Pag-checkout</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Nakararanas kami ng mga problema na magkonekta sa aming tagapagbigay ng mga bayad. Mangyaring tingnan ang iyong koneksyon sa internet at subukan muli.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Hindi namin mapatunayan ang paraan ng iyong pagbabayad. Mangyaring pumili ng ibang paraan ng pagbabayad at subukin muli.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Nag- time out sa pagpapatunay ng iyong paraan ng pagbabayad --- subukin muli</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">May nangyaring internal na error.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">BB / TT</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_marginTop="@dimen/page_vertical_margin"
+    android:layout_marginBottom="@dimen/page_vertical_margin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_marginStart="@dimen/page_horizontal_margin"
+        android:layout_marginEnd="@dimen/page_horizontal_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="@dimen/scan_title_text_size"
+            android:text="@string/selfie_captures"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintBottom_toTopOf="@id/message"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Front of driver's license" />
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="0dp"
+            android:lines="3"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/page_vertical_margin"
+            app:layout_constraintBottom_toTopOf="@id/scanning_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header_title"
+            tools:text="Position your driver's license in the center of the frame" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/scanning_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            app:cardCornerRadius="@dimen/view_finder_corner_radius"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/message">
+
+            <com.stripe.android.camera.scanui.CameraView
+                android:id="@+id/camera_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:viewFinderType="fill" />
+
+            <View
+                android:id="@+id/flash_mask"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0"
+                android:background="@color/flash_mask_color"
+                android:contentDescription="@string/flash_mask" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <LinearLayout
+        android:id="@+id/result_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/captured_images"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <CheckBox
+            android:id="@+id/allow_image_collection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/page_horizontal_margin"
+            android:layout_marginEnd="@dimen/page_horizontal_margin"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.stripe.android.identity.ui.LoadingButton
+        android:id="@+id/kontinue"
+        android:layout_marginStart="@dimen/page_horizontal_margin"
+        android:layout_marginEnd="@dimen/page_horizontal_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
+</LinearLayout>

@@ -87,10 +87,14 @@ internal class DefaultEventReporter @Inject internal constructor(
             val deviceId = deviceIdRepository.get()
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    event.toString(),
-                    deviceId.value
+                    event,
+                    event.additionalParams.plus(FIELD_DEVICE_ID to deviceId.value)
                 )
             )
         }
+    }
+
+    internal companion object {
+        internal const val FIELD_DEVICE_ID = "device_id"
     }
 }

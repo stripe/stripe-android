@@ -2,15 +2,18 @@ package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -26,9 +29,10 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
-import com.stripe.android.ui.core.createTextSpanFromTextStyle
+import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
+import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
@@ -62,26 +66,30 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
-    override val messageView: TextView by lazy { viewBinding.message }
-    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
+    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
+    override val header: ComposeView by lazy { viewBinding.header }
+    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    override val messageView: TextView by lazy { viewBinding.message }
+    override val notesView: ComposeView by lazy { viewBinding.notes }
+    override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
+    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
+
     private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
+    private val topContainer by lazy { viewBinding.topContainer }
+    private val googlePayButton by lazy { viewBinding.googlePayButton }
+    private val linkButton by lazy { viewBinding.linkButton }
+    private val topMessage by lazy { viewBinding.topMessage }
+    private val googlePayDivider by lazy { viewBinding.googlePayDivider }
 
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
-        updateErrorMessage(viewState?.errorMessage)
+        updateErrorMessage(messageView, viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
     }
 
-    private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
-        updateErrorMessage(viewState?.errorMessage)
-        viewBinding.googlePayButton.updateState(viewState?.convert())
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setActivityResult(
@@ -95,14 +103,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             try {
                 starterArgs.config?.validate()
                 starterArgs.clientSecret.validate()
+                starterArgs.config?.appearance?.parseAppearance()
             } catch (e: InvalidParameterException) {
                 setActivityResult(PaymentSheetResult.Failed(e))
                 finish()
                 return
             }
         }
+        super.onCreate(savedInstanceState)
 
-        viewModel.registerFromActivity(this)
         viewModel.setupGooglePay(
             lifecycleScope,
             registerForActivityResult(
@@ -127,11 +136,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             bottomSheetController.expand()
         }
 
-        setupBuyButton()
+        setupTopContainer()
+
+        linkButton.apply {
+            onClick = viewModel::launchLink
+            linkPaymentLauncher = viewModel.linkLauncher
+        }
 
         viewModel.transition.observe(this) { transitionEvent ->
             transitionEvent?.let {
-                updateErrorMessage()
+                clearErrorMessages()
                 it.getContentIfNotHandled()?.let { transitionTarget ->
                     onTransitionTarget(
                         transitionTarget,
@@ -165,6 +179,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.startConfirm.observe(this) { event ->
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
                 lifecycleScope.launch {
                     viewModel.confirmStripeIntent(confirmParams)
                 }
@@ -175,35 +190,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             closeSheet(it)
         }
 
-        viewModel.contentVisible.observe(this) {
-            viewBinding.scrollView.isVisible = it
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.unregisterFromActivity()
-    }
-
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            updateErrorMessage()
-        }
-        super.onBackPressed()
-    }
-
-    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
-        userMessage?.message.let { message ->
-            messageView.text = createTextSpanFromTextStyle(
-                text = message,
-                context = this,
-                textStyle = PaymentsThemeConfig.Typography.h6,
-                color = PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).error,
-                fontFamily = PaymentsThemeConfig.Typography.fontFamily
-            )
+        viewModel.buttonsEnabled.observe(this) { enabled ->
+            linkButton.isEnabled = enabled
+            googlePayButton.isEnabled = enabled
         }
 
-        messageView.isVisible = userMessage != null
+        viewModel.selection.observe(this) {
+            clearErrorMessages()
+            resetPrimaryButtonState()
+        }
+
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .observe(this, buyButtonStateObserver)
     }
 
     private fun onTransitionTarget(
@@ -258,68 +256,92 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         buttonContainer.isVisible = true
     }
 
-    private fun setupBuyButton() {
+    override fun resetPrimaryButtonState() {
+        viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
+
         if (viewModel.isProcessingPaymentIntent) {
-            viewModel.amount.observe(this) {
-                viewBinding.buyButton.setLabel(requireNotNull(it).buildPayButtonLabel(resources))
-            }
+            viewBinding.buyButton.setLabel(
+                viewModel.amount.value?.buildPayButtonLabel(resources)
+            )
         } else {
             viewBinding.buyButton.setLabel(
                 resources.getString(R.string.stripe_setup_button_label)
             )
         }
 
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyButtonStateObserver)
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
-            .observe(this, googlePayButtonStateObserver)
-        val isDark = baseContext.isSystemDarkTheme()
-        viewModel.selection.observe(this) { paymentSelection ->
-            updateErrorMessage()
+        viewBinding.buyButton.setOnClickListener {
+            clearErrorMessages()
+            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+        }
+    }
 
-            val shouldShowGooglePay =
-                paymentSelection ==
-                    PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
-                    fragmentContainerId
-                ) is PaymentSheetListFragment
-
-            if (shouldShowGooglePay) {
-                val surfaceColor = PaymentsThemeConfig.colors(isDark).surface
-                viewBinding.googlePayButton.apply {
-                    bringToFront()
-                    isVisible = true
-                    setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
-                }
-                viewBinding.buyButton.isVisible = false
+    private fun setupTopContainer() {
+        setupGooglePayButton()
+        val dividerText = resources.getString(
+            if (viewModel.supportedPaymentMethods.size == 1 &&
+                viewModel.supportedPaymentMethods.map { it.type.code }.contains(
+                        LpmRepository.HardcodedCard.type.code
+                    )
+            ) {
+                R.string.stripe_paymentsheet_or_pay_with_card
             } else {
-                viewBinding.buyButton.bringToFront()
-                viewBinding.buyButton.isVisible = true
+                R.string.stripe_paymentsheet_or_pay_using
+            }
+        )
+        viewModel.showTopContainer.observe(this) { visible ->
+            linkButton.isVisible = viewModel.isLinkEnabled.value == true
+            googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
+            topContainer.isVisible = visible
+            // We have to set the UI after we know it's visible. Setting UI on a GONE or INVISIBLE
+            // view will cause tests to hang indefinitely.
+            if (visible) {
+                googlePayDivider.apply {
+                    setViewCompositionStrategy(
+                        ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                    )
+                    setContent {
+                        PaymentsTheme {
+                            GooglePayDividerUi(dividerText)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-                viewBinding.googlePayButton.isVisible = false
+    private fun setupGooglePayButton() {
+        viewModel.config?.appearance?.getColors(isSystemDarkTheme())?.surface?.let {
+            googlePayButton.setBackgroundColor(Color(it).shouldUseDarkDynamicColor())
+        }
+
+        googlePayButton.setOnClickListener {
+            // The scroll will be made visible onResume of the activity
+            viewModel.setContentVisible(false)
+            viewModel.lastSelectedPaymentMethod = viewModel.selection.value
+            viewModel.updateSelection(PaymentSelection.GooglePay)
+        }
+
+        viewModel.selection.observe(this) { paymentSelection ->
+            if (paymentSelection == PaymentSelection.GooglePay) {
+                viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
             }
         }
 
-        viewBinding.googlePayButton.setOnClickListener {
-            viewModel.setContentVisible(false)
-            updateErrorMessage()
-            viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
-        }
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
+            .observe(this) { viewState ->
+                if (viewState is PaymentSheetViewState.Reset) {
+                    // If Google Pay was cancelled or failed, re-select the form payment method
+                    viewModel.updateSelection(viewModel.lastSelectedPaymentMethod)
+                }
 
-        viewBinding.buyButton.setDefaultBackGroundColor(
-            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(isDark).primary.toArgb()
-            )
-        )
+                updateErrorMessage(topMessage, viewState?.errorMessage)
+                googlePayButton.updateState(viewState?.convert())
+            }
+    }
 
-        viewBinding.buyButton.setOnClickListener {
-            updateErrorMessage()
-            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
-        }
-
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            viewBinding.buyButton.isEnabled = isEnabled
-            viewBinding.googlePayButton.isEnabled = isEnabled
-        }
+    override fun clearErrorMessages() {
+        super.clearErrorMessages()
+        updateErrorMessage(topMessage)
     }
 
     override fun setActivityResult(result: PaymentSheetResult) {

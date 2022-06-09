@@ -31,7 +31,7 @@
   <!-- Used to describe a field of an address -->
   <string name="address_label_neighborhood">ย่าน</string>
   <!-- Label of an address field -->
-  <string name="address_label_oblast">จังหวัด</string>
+  <string name="address_label_oblast">ภูมิภาค</string>
   <!-- Used to describe a field of an address -->
   <string name="address_label_post_town">ท้องที่ของรหัสไปรษณีย์หรือเมือง</string>
   <!-- Label of an address field -->
@@ -70,10 +70,24 @@
   <string name="p24_bank">ธนาคาร Przelewy24</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">บันทึกไว้เพื่อชำระเงินด้วย %s ในอนาคต</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">สแกนบัตร</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">เมื่อให้ข้อมูลการชำระเงินและยืนยันการชำระเงินนี้ หมายความว่าคุณ (ก) อนุญาตให้ %s และ Stripe ซึ่งเป็นผู้ให้บริการชำระเงินส่งคำสั่งให้ธนาคารหักเงินจากบัญชีของคุณ และ (ข) อนุญาตให้ธนาคารหักเงินจากบัญชีตามคำสั่งดังกล่าว คุณมีสิทธิ์รับเงินคืนจากธนาคารภายใต้เงื่อนไขและข้อกำหนดซึ่งระบุไว้ในข้อตกลงที่คุณทำไว้กับธนาคาร โดยจะต้องทำการขอเงินคืนภายใน 8 สัปดาห์นับจากวันที่มีการหักเงินจากบัญชี คุณสามารถดูสิทธิ์ของตัวเองได้ในใบแจ้งยอดบัญชีที่ขอได้จากธนาคาร คุณตกลงที่จะรับการแจ้งเตือนเกี่ยวกับการหักเงินในบัญชีในอนาคตสูงสุดไม่เกิน 2 วันก่อนที่จะถึงวันหักจริง</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">ดำเนินการต่อ</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">ชำระ %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">ข้อมูลบัตร</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">การหักบัญชีอัตโนมัติแบบ BECS ในออสเตรเลีย</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">บัตร</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">การหักบัญชีอัตโนมัติแบบ SEPA</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">ตั้งค่า</string>
 </resources>

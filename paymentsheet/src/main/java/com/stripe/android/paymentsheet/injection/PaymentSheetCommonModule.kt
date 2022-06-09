@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -12,8 +11,6 @@ import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.ui.core.forms.resources.AsyncResourceRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -38,10 +35,6 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     @Binds
-    abstract fun bindsResourceRepository(asyncResourceRepository: AsyncResourceRepository):
-        ResourceRepository
-
-    @Binds
     abstract fun bindsStripeIntentRepository(
         repository: StripeIntentRepository.Api
     ): StripeIntentRepository
@@ -62,19 +55,14 @@ internal abstract class PaymentSheetCommonModule {
         }
 
         @Provides
-        @Singleton
-        fun provideResources(context: Context): Resources {
-            return context.resources
-        }
-
-        @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>): () -> String =
-            { paymentConfiguration.get().publishableKey }
+        fun providePublishableKey(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> String = { paymentConfiguration.get().publishableKey }
 
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountId(paymentConfiguration: Lazy<PaymentConfiguration>):
+        fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>):
             () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides

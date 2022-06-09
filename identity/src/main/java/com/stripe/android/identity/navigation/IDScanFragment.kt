@@ -15,10 +15,12 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 internal class IDScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(
+) : IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val fragmentId = R.id.IDScanFragment
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (shouldStartFromBack()) {
@@ -35,7 +37,8 @@ internal class IDScanFragment(
                     startScanning(ID_BACK)
                 }
                 ID_BACK -> {
-                    observeAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
+                    continueButton.toggleToLoading()
+                    collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
                 }
                 else -> {
                     Log.e(

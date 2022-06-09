@@ -9,7 +9,7 @@ import androidx.annotation.RestrictTo
  *
  * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
  */
-enum class StripeFilePurpose(@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val code: String) {
+enum class StripeFilePurpose(@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val code: String) {
     BusinessIcon("business_icon"),
     BusinessLogo("business_logo"),
     CustomerSignature("customer_signature"),
@@ -22,7 +22,7 @@ enum class StripeFilePurpose(@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val cod
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): StripeFilePurpose? {
-            return values().first { it.code == code }
+            return values().firstOrNull { it.code == code }
         }
     }
 }

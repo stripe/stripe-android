@@ -96,6 +96,40 @@
         </RadioGroup>
 
         <TextView
+            android:id="@+id/link_text_view"
+            android:text="@string/link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toBottomOf="@+id/customer_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/link_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/link_text_view">
+
+            <RadioButton
+                android:id="@+id/link_on_button"
+                android:text="@string/on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/link_off_button"
+                android:text="@string/off"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RadioGroup>
+
+        <TextView
             android:id="@+id/currency_text_view"
             android:text="@string/currency"
             android:layout_width="wrap_content"
@@ -125,7 +159,7 @@
 
             <RadioButton
                 android:id="@+id/currency_aud_button"
-                android:text="AUD"
+                android:text="@string/currency_aud"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"
@@ -134,6 +168,13 @@
             <RadioButton
                 android:id="@+id/currency_eur_button"
                 android:text="@string/currency_eur"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
+
+            <RadioButton
+                android:id="@+id/currency_gbp_button"
+                android:text="@string/currency_gbp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:ignore="HardcodedText" />
@@ -148,7 +189,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintTop_toBottomOf="@+id/mode_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/link_radio_group" />
 
         <RadioGroup
             android:id="@+id/google_pay_radio_group"

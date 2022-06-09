@@ -14,6 +14,8 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,6 +48,9 @@ internal open class PaymentOptionsViewModelTestInjection {
         @InjectorKey injectorKey: String,
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
+        val lpmRepository = mock<LpmRepository>()
+        whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+
         PaymentOptionsViewModel(
             args,
             prefsRepositoryFactory = {
@@ -57,17 +62,18 @@ internal open class PaymentOptionsViewModelTestInjection {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = injectorKey,
-            resourceRepository = mock(),
+            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            }
+            },
+            linkPaymentLauncherFactory = mock()
         )
     }
 
     @ExperimentalCoroutinesApi
     fun createFormViewModel(): FormViewModel = runBlocking {
         FormViewModel(
-            layout = mock(),
+            paymentMethodCode = "",
             config = mock(),
             resourceRepository = mock(),
             transformSpecToElement = mock()
@@ -94,7 +100,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.layout(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.paymentMethodCode(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

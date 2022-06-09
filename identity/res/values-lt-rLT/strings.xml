@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Programos nustatymai</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Vairuotojo pažymėjimo galinė pusė</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Pasirinkta vairuotojo pažymėjimo galinė pusė</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Asmens tapatybės kortelės galinė pusė</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Pasirinkta asmens tapatybės dokumento galinė pusė</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Fotoaparato leidimas</string>
+  <string name="camera_permission_rationale">Ši programa, naudodama fotoaparatą, nuskaito jūsų tapatybės dokumentus ir daro nuotraukas, kad patvirtintų jūsų tapatybę.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Varnelė, nurodanti, kad dokumentas sėkmingai užfiksuotas</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Pasirinkti nuotrauką</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Nepavyko užfiksuoti aukštos kokybės vaizdo.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Galite bandyti dar kartą arba įkelti vaizdą iš savo įrenginio.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Nepavyko užfiksuoti vaizdo</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Laikrodžio piktograma</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Vairuotojo pažymėjimas</string>
+  <!-- Text for error labels -->
+  <string name="error">Klaida</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Failo įkėlimas</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Įkelkite vairuotojo pažymėjimo priekinės ir galinės pusės vaizdus</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Įkelkite asmens tapatybės kortelės priekinės ir galinės pusės vaizdus</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Įkelkite paso vaizdą</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Vairuotojo pažymėjimo priekinė pusė</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Pasirinkta vairuotojo pažymėjimo priekinė pusė</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Asmens tapatybės kortelės priekinė pusė</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Pasirinkta asmens tapatybės dokumento priekinė pusė</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Atgal</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Mums reikia leidimo naudoti jūsų fotoaparatą. Suteikite priegą prie fotoaparato programos nustatymuose.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Išlaikyti nejudinant, nuskaitoma</string>
+  <!-- display name for ID -->
+  <string name="id_card">Asmens tapatybės dokumentas</string>
+  <!-- Continue button text -->
+  <string name="kontinue">tęsti</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Įkeliama</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">GERAI</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Pasas</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Pasirinktas pasas</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Apverskite vairuotojo pažymėjimą kita puse</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Vairuotojo pažymėjimas turi būti rėmelio centre</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Apverskite asmens tapatybės kortelę kita puse</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Asmens tapatybės kortelė turi būti rėmelio centre</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Pasas turi būti rėmelio centre</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Nuskaityta</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Pasirinkti</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Fotografuoti</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Bandyti dar kartą</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Įvyko netikėta klaida, po kelių sekundžių bandykite dar kartą</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Įkelkite vairuotojo pažymėjimo galinę pusę</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Įkelkite vairuotojo pažymėjimo priekinę pusę</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Įkelkite asmens tapatybės dokumento galinę pusę</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Įkelkite asmens tapatybės dokumento priekinę pusę</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Įkelkite pasą</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Arba galite patys įkelti %1$s nuotrauką</string>
+</resources>

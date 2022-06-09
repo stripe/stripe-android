@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.animation.LayoutTransition
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -37,9 +36,13 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -55,6 +58,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -85,6 +89,13 @@ internal class PaymentSheetActivityTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
         )
+    )
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
     )
 
     @BeforeTest
@@ -129,29 +140,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `updates buy button state on payment methods list`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            // Google Pay initially selected as there's no saved selection
-            assertThat(activity.viewBinding.buyButton.isVisible).isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isTrue()
-            assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
-
-            viewModel.updateSelection(
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-            assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
-
-            viewModel.updateSelection(null)
-            assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
-        }
-    }
-
-    @Test
     fun `disables primary button when editing`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -160,14 +148,10 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isTrue()
-            assertThat(activity.viewBinding.googlePayButton.isEnabled)
-                .isTrue()
 
             viewModel.setEditing(true)
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isEnabled)
                 .isFalse()
         }
     }
@@ -187,7 +171,6 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // Initially empty card
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
@@ -195,7 +178,6 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(PaymentSelection.GooglePay)
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
             // Update to saved card
@@ -220,6 +202,41 @@ internal class PaymentSheetActivityTest {
             )
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `when back to Ready state should update PaymentSelection`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            // New valid card
+            val initialSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+            viewModel.updateSelection(initialSelection)
+
+            viewModel.transitionTo(
+                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                    FragmentConfigFixtures.DEFAULT
+                )
+            )
+
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
+
+            activity.viewBinding.googlePayButton.callOnClick()
+
+            // Updates PaymentSelection to Google Pay
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(PaymentSelection.GooglePay)
+
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+            // Back to Ready state, should return to initial PaymentSelection
+            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
         }
     }
 
@@ -337,24 +354,50 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify animation is enabled for layout transition changes`() {
+    fun `google pay button state updated on start processing`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
 
-            assertThat(
-                activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
-                    LayoutTransition.CHANGING
-                )
-            ).isTrue()
+            activity.viewBinding.googlePayButton.callOnClick()
 
-            assertThat(
-                activity.viewBinding.fragmentContainerParent.layoutTransition
-                    .isTransitionTypeEnabled(
-                        LayoutTransition.CHANGING
-                    )
-            ).isTrue()
+            idleLooper()
+
+            val googlePayButton =
+                StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
+            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
+            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.primaryButton.externalLabel)
+                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
+        }
+    }
+
+    @Test
+    fun `google pay button state updated on finish processing`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            activity.viewBinding.googlePayButton.callOnClick()
+
+            idleLooper()
+
+            var finishProcessingCalled = false
+            viewModel._viewState.value = PaymentSheetViewState.FinishProcessing {
+                finishProcessingCalled = true
+            }
+
+            idleLooper()
+
+            val googlePayButton =
+                StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
+            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
+            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(finishProcessingCalled).isTrue()
         }
     }
 
@@ -381,7 +424,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify processing state disables toolbar`() {
+    fun `Verify processing state disables toolbar and buttons`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -392,6 +435,8 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             assertThat(activity.toolbar.isEnabled).isFalse()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
     }
 
@@ -446,7 +491,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
             viewModel._viewState.value = PaymentSheetViewState.StartProcessing
 
             idleLooper()
@@ -463,7 +508,7 @@ internal class PaymentSheetActivityTest {
         Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
             // wait for bottom sheet to animate in
             idleLooper()
@@ -488,7 +533,7 @@ internal class PaymentSheetActivityTest {
     fun `google pay flow updates the scroll view before and after`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
             activity.viewBinding.googlePayButton.performClick()
 
@@ -545,7 +590,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `shows add card fragment when no payment methods available`() {
+    fun `shows add card fragment when no saved payment methods available`() {
         val scenario = activityScenario(
             createViewModel(
                 paymentMethods = emptyList()
@@ -579,21 +624,29 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, transition target, and a selection has been made`() {
+    fun `buyButton and googlePayButton are enabled when not processing, transition target, and a selection has been made`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
                 .isTrue()
             // wait for bottom sheet to animate in
             idleLooper()
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
+                .isTrue()
 
-            viewModel.updateSelection(PaymentSelection.GooglePay)
+            viewModel.updateSelection(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
             idleLooper()
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
                 .isTrue()
         }
     }
@@ -676,6 +729,26 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `GPay button error message is displayed`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            val errorMessage = "Error message"
+            viewModel._viewState.value =
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
+            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+        }
+    }
+
+    @Test
     fun `when new payment method is selected then error message is cleared`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -684,6 +757,8 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
 
             val errorMessage = "Error message"
             viewModel._viewState.value =
@@ -691,11 +766,31 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel._viewState.value =
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
+            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+
+            viewModel.updateSelection(PaymentSelection.GooglePay)
+
+            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
         }
     }
 
@@ -708,6 +803,8 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
 
             val errorMessage = "Error message"
             viewModel._viewState.value =
@@ -715,11 +812,31 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
 
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel._viewState.value =
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
+            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+
+            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+
+            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
+            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
         }
     }
 
@@ -747,6 +864,107 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Buy button should be enabled when primaryButtonEnabled is true`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    enabled = true
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Buy button should be disabled when primaryButtonEnabled is false`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    enabled = false
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `Buy button text should update when primaryButtonText updates`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    label = "Some text"
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+        }
+    }
+
+    @Test
+    fun `Buy button should go back to initial state after resetPrimaryButton called`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._viewState.value = PaymentSheetViewState.Reset(null)
+
+            viewModel.updatePrimaryButtonUIState(
+                primaryButtonUIState.copy(
+                    label = "Some text",
+                    enabled = false
+                )
+            )
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+            viewModel.updatePrimaryButtonUIState(null)
+            assertThat(activity.viewBinding.buyButton.externalLabel)
+                .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is visible`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateBelowButtonText(
+                context.getString(
+                    R.string.stripe_paymentsheet_payment_method_us_bank_account
+                )
+            )
+            assertThat(activity.viewBinding.notes.isVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `notes visibility is gone`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel.updateBelowButtonText(null)
+            assertThat(activity.viewBinding.notes.isVisible).isFalse()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -764,6 +982,9 @@ internal class PaymentSheetActivityTest {
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
     ): PaymentSheetViewModel = runBlocking {
+        val lpmRepository = mock<LpmRepository>()
+        whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -773,13 +994,14 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
-            mock(),
+            StaticResourceRepository(mock(), lpmRepository),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            mock()
         )
     }
 

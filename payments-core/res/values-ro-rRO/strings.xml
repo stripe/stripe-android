@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Codul dvs. poștal nu este valid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Codul dvs. poștal nu este valid</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Folosiți ca metodă de plată de-a lungul timpului &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Numele contului</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Număr BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Prin furnizarea detaliilor contului dvs. bancar și confirmarea acestei plăți, sunteți de acord cu această Solicitare Direct Debit și cu &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;acordul de serviciu privind Solicitarea Direct Debit&lt;/a&gt; și autorizați Plățile Stripe Australia Pty Ltd ACN 160 180 343 număr ID utilizator Direct Debit 507156 („Stripe”) să vă debiteze contul prin intermediul Sistemului electronic de compensare colectivă (BECS) în numele %s („Comerciantul”) pentru orice sume comunicate separat către dvs. de către Comerciant. Certificați faptul că sunteți fie un titular de cont, fie un semnatar autorizat în contul enumerat mai sus.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Prin furnizarea detaliilor contului dvs. bancar și confirmarea acestei plăți, sunteți de acord cu această\n    Solicitare Direct Debit și cu acordul de serviciu privind Solicitarea Direct Debit și autorizați\n    Plățile Stripe Australia Pty Ltd ACN 160 180 343 număr ID utilizator Direct Debit 507156\n    („Stripe”) trebuie să vă debiteze contul prin intermediul Sistemului electronic de compensare colectivă (BECS)\n    în numele %1$s („Comerciantul”) pentru orice sume comunicate separat către dvs.\n    de către Comerciant. Certificați faptul că sunteți fie un titular de cont, fie un semnatar\n    autorizat în contul enumerat mai sus.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Nume</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Este necesar numele dvs.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Anulare</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s se termină în %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Ștergeți metoda de plată</string>
   <string name="delete_payment_method_prompt_title">Ștergeți metoda de plată?</string>
+  <!-- Done button title -->
+  <string name="done">Efectuat</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Editare</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">LL/AA</string>
   <string name="expiry_label_short">Data de expirare</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Selectare cont bancar (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Expediere gratuită</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Eliminare</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s a fost eliminat</string>
   <string name="secure_checkout">Validare securizată</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Întâmpinăm probleme de conectare cu furnizorul nostru de plăți. Verificați conexiunea la internet și încercați din nou.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nu vă putem autentifica metoda de plată. Alegeți o altă metodă de plată și încercați din nou.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Timpul de autentificare a metodei dvs. de plată a expirat -- încercați din nou</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">A apărut o eroare internă.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">LL/AA</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

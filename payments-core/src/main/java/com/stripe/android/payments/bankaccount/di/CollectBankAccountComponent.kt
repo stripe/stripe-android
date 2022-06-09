@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.di
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
@@ -33,6 +34,9 @@ internal interface CollectBankAccountComponent {
 
         @BindsInstance
         fun viewEffect(application: MutableSharedFlow<CollectBankAccountViewEffect>): Builder
+
+        @BindsInstance
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
         fun configuration(configuration: CollectBankAccountContract.Args): Builder

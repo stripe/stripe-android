@@ -119,7 +119,7 @@ def executeTests(appUrl, testUrl):
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     response = requests.post(url, json={
          "app": appUrl,
-         "devices": ["Google Pixel 3-10.0"],
+         "devices": ["Google Pixel 3-9.0"],
          "testSuite": testUrl,
          "networkLogs": True,
          "deviceLogs": True,
@@ -157,6 +157,11 @@ def waitForBuildComplete(buildId):
            response = requests.get(url, auth=(user, authKey))
            responseStatus = response.json()["status"]
        print("DONE.\nRESULT is: " + responseStatus)
+       if(responseStatus == "passed"):
+          return 0
+       else:
+          return 1
+
 
 def confirm(message):
     """
@@ -219,8 +224,7 @@ if __name__ == "__main__":
            buildId = executeTests(appUrl, testUrl)
            exitStatus = 1
            if(buildId != None):
-               waitForBuildComplete(buildId)
-               exitStatus = 0
+               exitStatus = waitForBuildComplete(buildId)
            else:
                deleteTestSuite(testUrl.replace("bs://", ""))
            sys.exit(exitStatus)

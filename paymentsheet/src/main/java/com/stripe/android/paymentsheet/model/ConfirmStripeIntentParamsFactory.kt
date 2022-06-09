@@ -32,9 +32,23 @@ internal class ConfirmPaymentIntentParamsFactory(
         ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
             clientSecret = clientSecret.value,
-            paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-            ).takeIf { paymentSelection.paymentMethod.type == PaymentMethod.Type.Card }
+            paymentMethodOptions = when (paymentSelection.paymentMethod.type) {
+                PaymentMethod.Type.Card -> {
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
+                }
+                PaymentMethod.Type.USBankAccount -> {
+                    PaymentMethodOptionsParams.USBankAccount(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    )
+                }
+                else -> {
+                    null
+                }
+            },
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+                .takeIf { paymentSelection.paymentMethod.type?.requiresMandate == true }
         )
 
     override fun create(paymentSelection: PaymentSelection.New) =
@@ -48,20 +62,39 @@ internal class ConfirmPaymentIntentParamsFactory(
              We read the top-level SFU to know the merchant’s desired save behavior
              We write payment method options SFU to set the customer’s desired save behavior
              */
-            // At this time, paymentMethodOptions card is the only PM that supports setup future usage
-            paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = when (paymentSelection.customerRequestedSave) {
-                    PaymentSelection.CustomerRequestedSave.RequestReuse ->
-                        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                    PaymentSelection.CustomerRequestedSave.RequestNoReuse ->
-                        ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                    PaymentSelection.CustomerRequestedSave.NoRequest ->
-                        null
-                }.takeIf {
-                    paymentSelection.paymentMethodCreateParams.typeCode ==
-                        PaymentMethod.Type.Card.code
+            // At this time, paymentMethodOptions card and us_bank_account is the only PM that
+            // supports setup future usage
+            paymentMethodOptions = when (paymentSelection.paymentMethodCreateParams.typeCode) {
+                PaymentMethod.Type.Card.code -> {
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = when (paymentSelection.customerRequestedSave) {
+                            PaymentSelection.CustomerRequestedSave.RequestReuse ->
+                                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                            PaymentSelection.CustomerRequestedSave.RequestNoReuse ->
+                                ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                            PaymentSelection.CustomerRequestedSave.NoRequest ->
+                                null
+                        }
+                    )
                 }
-            )
+                PaymentMethod.Type.USBankAccount.code -> {
+                    PaymentMethodOptionsParams.USBankAccount(
+                        setupFutureUsage = when (paymentSelection.customerRequestedSave) {
+                            PaymentSelection.CustomerRequestedSave.RequestReuse ->
+                                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                            PaymentSelection.CustomerRequestedSave.RequestNoReuse ->
+                                ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                            PaymentSelection.CustomerRequestedSave.NoRequest ->
+                                null
+                        }
+                    )
+                }
+                else -> {
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = null
+                    )
+                }
+            }
         )
 }
 

@@ -3,6 +3,8 @@
     <!--
     Items here need to be entered in our translation tool
     -->
-    <!-- Card details section title for card form entry -->
-    <string name="card_information" tools:ignore="ExtraTranslation">Card information</string>
+    <!-- ACHv2 -->
+    <string name="stripe_paymentsheet_ach_something_went_wrong">Something went wrong when linking your account.\nPlease try again later.</string>
+    <string name="stripe_paymentsheet_pay_with_bank_title">Pay with your bank account in just a few steps.</string>
+    <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
 </resources>

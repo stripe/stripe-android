@@ -15,10 +15,12 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_FRONT
 internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(
+) : IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val fragmentId = R.id.driverLicenseScanFragment
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (shouldStartFromBack()) {
@@ -35,7 +37,8 @@ internal class DriverLicenseScanFragment(
                     startScanning(DL_BACK)
                 }
                 DL_BACK -> {
-                    observeAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
+                    continueButton.toggleToLoading()
+                    collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
                 }
                 else -> {
                     Log.e(

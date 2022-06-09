@@ -1,5 +1,15 @@
 name: paymentsheet-example size diff
-on: [pull_request]
+on:
+  pull_request:
+    paths:
+      - 'payments/**'
+      - 'payments-core/**'
+      - 'payments-model/**'
+      - 'stripe-core/**'
+      - 'payments-model/**'
+      - 'payments-ui-core/**'
+      - 'link/**'
+      - 'dependencies.gradle'
 jobs:
   # Checkout master branch and build the APK
   build-master:

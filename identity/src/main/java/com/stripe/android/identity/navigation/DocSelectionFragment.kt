@@ -186,7 +186,7 @@ internal class DocSelectionFragment(
                 identityViewModel = identityViewModel,
                 collectedDataParam = CollectedDataParam(idDocumentType = type),
                 clearDataParam = ClearDataParam.DOC_SELECT_TO_UPLOAD,
-                shouldNotSubmit = { true },
+                fromFragment = R.id.docSelectionFragment,
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
                         onCameraReady = {

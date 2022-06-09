@@ -12,6 +12,7 @@ import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
+import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
@@ -25,17 +26,16 @@ import java.io.File
 /**
  * Identity's [ScanFlow] implementation, uses a pool of [IDDetectorAnalyzer] to within a
  * [ProcessBoundAnalyzerLoop] to analyze a [Flow] of [CameraPreviewImage]s.
- * The results are handled in [IDDetectorAggregator].
- *
- * TODO(ccen): merge with [CardScanFlow].
+ * The results are handled in [IdentityAggregator].
  */
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
+    private val aggregateResultListener: AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
+    private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
-    private var aggregator: IDDetectorAggregator? = null
+    private var aggregator: IdentityAggregator? = null
 
     /**
      * If this is true, do not start the flow.
@@ -79,7 +79,7 @@ internal class IdentityScanFlow(
             if (canceled) {
                 return@launch
             }
-            aggregator = IDDetectorAggregator(
+            aggregator = IdentityAggregator(
                 parameters,
                 aggregateResultListener,
                 verificationPage
@@ -87,12 +87,22 @@ internal class IdentityScanFlow(
 
             requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)
 
-            analyzerPool = AnalyzerPool.of(
-                IDDetectorAnalyzer.Factory(
-                    idDetectorModelFile,
-                    verificationPage.documentCapture.models.idDetectorMinScore
+            analyzerPool =
+                AnalyzerPool.of(
+                    if (parameters == IdentityScanState.ScanType.SELFIE) {
+                        FaceDetectorAnalyzer.Factory(
+                            requireNotNull(faceDetectorModelFile) {
+                                "Failed to initialize FaceDetectorAnalyzer, " +
+                                    "faceDetectorModelFile is null"
+                            }
+                        )
+                    } else {
+                        IDDetectorAnalyzer.Factory(
+                            idDetectorModelFile,
+                            verificationPage.documentCapture.models.idDetectorMinScore
+                        )
+                    }
                 )
-            )
 
             loop = ProcessBoundAnalyzerLoop(
                 analyzerPool = requireNotNull(analyzerPool),

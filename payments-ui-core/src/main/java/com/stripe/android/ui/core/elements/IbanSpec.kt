@@ -1,14 +1,20 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-object IbanSpec : SectionFieldSpec(IdentifierSpec.Generic("iban")) {
-    fun transform(): SectionFieldElement =
+@Serializable
+data class IbanSpec(
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_debit[iban]")
+) : FormItemSpec() {
+    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         IbanElement(
-            this.identifier,
-            SimpleTextFieldController(IbanConfig())
+            this.apiPath,
+            SimpleTextFieldController(
+                IbanConfig(),
+                initialValue = initialValues[this.apiPath]
+            )
         )
+    )
 }

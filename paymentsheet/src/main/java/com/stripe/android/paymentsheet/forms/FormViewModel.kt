@@ -8,17 +8,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
-import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +44,7 @@ import javax.inject.Provider
  */
 @FlowPreview
 internal class FormViewModel @Inject internal constructor(
-    layout: LayoutSpec,
+    paymentMethodCode: PaymentMethodCode,
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElement
@@ -51,7 +52,7 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormFragmentArguments,
         val resource: Resources,
-        var layout: LayoutSpec,
+        var paymentMethodCode: PaymentMethodCode,
         private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
@@ -68,7 +69,7 @@ internal class FormViewModel @Inject internal constructor(
             injectWithFallback(config.injectorKey, FallbackInitializeParam(resource, context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
-                .layout(layout)
+                .paymentMethodCode(paymentMethodCode)
                 .build().viewModel as T
         }
 
@@ -86,15 +87,30 @@ internal class FormViewModel @Inject internal constructor(
 
     init {
         if (resourceRepository.isLoaded()) {
-            elements = MutableStateFlow(transformSpecToElement.transform(layout.items))
+            elements = MutableStateFlow(
+                transformSpecToElement.transform(
+                    getLpmItems(paymentMethodCode)
+                )
+            )
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
                 resourceRepository.waitUntilLoaded()
-                delayedElements.value = transformSpecToElement.transform(layout.items)
+                delayedElements.value = transformSpecToElement.transform(
+                    getLpmItems(paymentMethodCode)
+                )
             }
             this.elements = delayedElements
         }
+    }
+
+    private fun getLpmItems(paymentMethodCode: PaymentMethodCode): List<FormItemSpec> {
+        require(resourceRepository.isLoaded())
+        return requireNotNull(
+            resourceRepository.getLpmRepository().fromCode(
+                paymentMethodCode
+            )
+        ).formSpec.items
     }
 
     internal val enabled = MutableStateFlow(true)
@@ -116,14 +132,6 @@ internal class FormViewModel @Inject internal constructor(
         it?.controller?.saveForFutureUse ?: flowOf(false)
     }.flattenConcat()
 
-    private val sectionToFieldIdentifierMap = layout.items
-        .filterIsInstance<SectionSpec>()
-        .associate { sectionSpec ->
-            sectionSpec.identifier to sectionSpec.fields.map {
-                it.identifier
-            }
-        }
-
     private val cardBillingElement = elements
         .map { elementsList ->
             elementsList
@@ -132,37 +140,30 @@ internal class FormViewModel @Inject internal constructor(
                 ?.filterIsInstance<CardBillingAddressElement>()
                 ?.firstOrNull()
         }
+    private var externalHiddenIdentifiers = MutableStateFlow(emptyList<IdentifierSpec>())
 
-    internal val hiddenIdentifiers =
-        combine(
-            saveForFutureUseVisible,
-            saveForFutureUseElement.map {
-                it?.controller?.hiddenIdentifiers ?: flowOf(emptyList())
-            }.flattenConcat(),
-            cardBillingElement.map {
-                it?.hiddenIdentifiers ?: flowOf(emptyList())
-            }.flattenConcat()
-        ) { showFutureUse, saveFutureUseIdentifiers, cardBillingIdentifiers ->
-            val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
-            // For hidden *section* identifiers, list of identifiers of elements in the section
-            val identifiers = sectionToFieldIdentifierMap
-                .filter { idControllerPair ->
-                    hiddenIdentifiers.contains(idControllerPair.key)
-                }
-                .flatMap { sectionToSectionFieldEntry ->
-                    sectionToSectionFieldEntry.value
-                }
+    @VisibleForTesting
+    internal fun addHiddenIdentifiers(identifierSpecs: List<IdentifierSpec>) {
+        externalHiddenIdentifiers.value = identifierSpecs
+    }
 
-            val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
-            if (!showFutureUse && saveForFutureUseElement != null) {
-                hiddenIdentifiers
-                    .plus(identifiers)
-                    .plus(saveForFutureUseElement.identifier)
-            } else {
-                hiddenIdentifiers
-                    .plus(identifiers)
-            }
+    internal val hiddenIdentifiers = combine(
+        saveForFutureUseVisible,
+        cardBillingElement.map {
+            it?.hiddenIdentifiers ?: flowOf(emptyList())
+        }.flattenConcat(),
+        externalHiddenIdentifiers
+    ) { showFutureUse, cardBillingIdentifiers, saveFutureUseIdentifiers ->
+        val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
+
+        val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
+        if (!showFutureUse && saveForFutureUseElement != null) {
+            hiddenIdentifiers
+                .plus(saveForFutureUseElement.identifier)
+        } else {
+            hiddenIdentifiers
         }
+    }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
     private val showingMandate =
@@ -177,20 +178,26 @@ internal class FormViewModel @Inject internal constructor(
             } ?: false
         }
 
-    private val userRequestedReuse =
-        saveForFutureUseElement.map {
-            it?.controller?.saveForFutureUse?.map { saveForFutureUse ->
-                if (config.showCheckbox) {
-                    if (saveForFutureUse) {
-                        PaymentSelection.CustomerRequestedSave.RequestReuse
+    // This will convert the save for future use value into a CustomerRequestedSave operation
+    private val userRequestedReuse = elements.filterNotNull().map { elementsList ->
+        combine(elementsList.map { it.getFormFieldValueFlow() }) { formFieldValues ->
+            formFieldValues.toList().flatten()
+                .filter { it.first == IdentifierSpec.SaveForFutureUse }
+                .map { it.second.value.toBoolean() }
+                .map { saveForFutureUse ->
+                    if (config.showCheckbox) {
+                        if (saveForFutureUse) {
+                            PaymentSelection.CustomerRequestedSave.RequestReuse
+                        } else {
+                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        }
                     } else {
-                        PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                        PaymentSelection.CustomerRequestedSave.NoRequest
                     }
-                } else {
-                    PaymentSelection.CustomerRequestedSave.NoRequest
                 }
-            }?.firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
+                .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
         }
+    }.flattenConcat()
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
@@ -213,6 +220,7 @@ internal class FormViewModel @Inject internal constructor(
             it.toList().flatten()
         }
     }.flattenConcat()
+
     val lastTextFieldIdentifier = combine(
         hiddenIdentifiers,
         textFieldControllerIdsFlow

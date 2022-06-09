@@ -52,12 +52,27 @@ internal class CookieStore @Inject constructor(
     fun isEmailLoggedOut(email: String) =
         store.read(LOGGED_OUT_EMAIL_HASH) == email.sha256()
 
-    private fun storeLoggedOutEmail(email: String) =
+    fun storeLoggedOutEmail(email: String) =
         store.write(LOGGED_OUT_EMAIL_HASH, email.sha256())
+
+    /**
+     * Store the email that has recently signed up on this device so that the user is remembered.
+     */
+    fun storeNewUserEmail(email: String) =
+        store.write(SIGNED_UP_EMAIL, email)
+
+    /**
+     * Retrieve the email that has recently signed up on this device.
+     */
+    fun getNewUserEmail() =
+        store.read(SIGNED_UP_EMAIL).also {
+            store.delete(SIGNED_UP_EMAIL)
+        }
 
     companion object {
         const val AUTH_SESSION_COOKIE = "auth_session_cookie"
         const val LOGGED_OUT_EMAIL_HASH = "logged_out_email_hash"
+        const val SIGNED_UP_EMAIL = "signed_up_email"
     }
 
     private fun String.sha256(): String =

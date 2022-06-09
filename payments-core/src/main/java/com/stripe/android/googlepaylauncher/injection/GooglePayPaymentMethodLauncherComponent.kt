@@ -27,6 +27,7 @@ import kotlin.coroutines.CoroutineContext
         LoggingModule::class
     ]
 )
+@SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class GooglePayPaymentMethodLauncherComponent {
     abstract fun inject(factory: GooglePayPaymentMethodLauncherViewModel.Factory)
 

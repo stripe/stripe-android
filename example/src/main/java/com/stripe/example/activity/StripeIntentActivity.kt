@@ -108,7 +108,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         country: String,
         params: PaymentMethodCreateParams,
         stripeAccountId: String? = null,
-        onPaymentIntentCreated: (String) -> Unit = {}
+        onSetupIntentCreated: (String) -> Unit = {}
     ) {
         keyboardController.hide()
 
@@ -120,7 +120,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     it,
                     params,
                     stripeAccountId,
-                    onPaymentIntentCreated
+                    onSetupIntentCreated
                 )
             }
         }

@@ -113,7 +113,7 @@ open class BecsDebitBsbEditText @JvmOverloads constructor(
             if (isError) {
                 R.drawable.stripe_ic_bank_error
             } else {
-                R.drawable.stripe_ic_bank
+                R.drawable.stripe_ic_bank_becs
             },
             0,
             0,

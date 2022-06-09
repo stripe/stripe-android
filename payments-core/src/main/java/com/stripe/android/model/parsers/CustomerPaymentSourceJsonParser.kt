@@ -8,7 +8,7 @@ import com.stripe.android.model.CustomerPaymentSource
 import com.stripe.android.model.CustomerSource
 import org.json.JSONObject
 
-internal class CustomerPaymentSourceJsonParser : ModelJsonParser<CustomerPaymentSource> {
+class CustomerPaymentSourceJsonParser : ModelJsonParser<CustomerPaymentSource> {
     override fun parse(json: JSONObject): CustomerPaymentSource? {
         return when (optString(json, "object")) {
             "card" -> {

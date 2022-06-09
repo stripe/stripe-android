@@ -42,6 +42,7 @@ object ConsumerFixtures {
         """
             {
               "auth_session_client_secret": "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1",
+              "publishable_key": "asdfg123",
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1MjA5LTM1YjctND",
                 "email_address": "test@stripe.com",
@@ -130,6 +131,44 @@ object ConsumerFixtures {
         """.trimIndent()
     )
     val CONSUMER_LOGGED_OUT = ConsumerSessionJsonParser().parse(CONSUMER_LOGGED_OUT_JSON)
+
+    val CONSUMER_SINGLE_PAYMENT_DETAILS_JSON = JSONObject(
+        """
+            {
+              "redacted_payment_details": {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": "US",
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": "12312",
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "MASTERCARD",
+                    "checks": {
+                      "address_line1_check": "STATE_INVALID",
+                      "address_postal_code_check": "PASS",
+                      "cvc_check": "PASS"
+                    },
+                    "exp_month": 12,
+                    "exp_year": 2023,
+                    "last4": "4444"
+                  },
+                  "is_default": true,
+                  "type": "CARD"
+              }
+            }
+        """.trimIndent()
+    )
+    val CONSUMER_SINGLE_PAYMENT_DETAILS =
+        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
 
     val CONSUMER_PAYMENT_DETAILS_JSON = JSONObject(
         """

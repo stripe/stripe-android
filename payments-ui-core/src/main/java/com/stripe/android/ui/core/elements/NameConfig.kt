@@ -24,7 +24,7 @@ class NameConfig : TextFieldConfig {
 
     override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Error.Blank
+            input.isBlank() -> Error.Blank
             else -> Valid.Limitless
         }
     }

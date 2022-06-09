@@ -10,23 +10,22 @@ import androidx.core.content.FileProvider
 import com.stripe.android.camera.framework.image.constrainToSize
 import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.cropWithFill
-import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.image.toJpeg
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.ml.BoundingBox
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
 /**
  * Default implementation of [IdentityIO].
  */
-internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
+internal class DefaultIdentityIO @Inject constructor(private val context: Context) : IdentityIO {
     override fun createInternalFileUri(): ContentUriResult {
         createImageFile().also { file ->
             return ContentUriResult(
@@ -82,23 +81,13 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
     override fun resizeBitmapAndCreateFileToUpload(
         bitmap: Bitmap,
         verificationId: String,
-        isFullFrame: Boolean,
-        side: String?,
+        fileName: String,
         maxDimension: Int,
         compressionQuality: Float,
     ): File {
         File(
             context.filesDir,
-            StringBuilder().also { nameBuilder ->
-                nameBuilder.append(verificationId)
-                side?.let {
-                    nameBuilder.append("_$side")
-                }
-                if (isFullFrame) {
-                    nameBuilder.append("_full_frame")
-                }
-                nameBuilder.append(".jpeg")
-            }.toString()
+            fileName
         ).let { fileToSave ->
             FileOutputStream(fileToSave, false).use { fileOutputStream ->
                 fileOutputStream.write(
@@ -117,7 +106,7 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
     override fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
-        docCapturePage: VerificationPageStaticContentDocumentCapturePage
+        paddingSize: Float
     ): Bitmap {
         val modelInput = original.cropCenter(
             maxAspectRatioInSize(
@@ -126,7 +115,6 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
             )
         )
 
-        val paddingSize = original.longerEdge() * docCapturePage.highResImageCropPadding
         return modelInput.cropWithFill(
             Rect(
                 (modelInput.width * boundingBox.left - paddingSize).toInt(),

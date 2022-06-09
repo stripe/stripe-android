@@ -1,4 +1,16 @@
 # Migration Guide
+
+## Migrating from versions < 20.5.0
+- Changes to `PaymentSheet.Configuration`
+  * `primaryButtonColor` is now deprecated. Please use the new `Appearance` parameter instead:
+    * `Appearance.colorsLight/colorsDark.primary`
+    * `PrimaryButton.colorsLight/colorsDark.backgroundColor`
+
+## Migrating from versions < 20.2.0
+
+- Changes to `CollectBankAccountLauncher`
+  * Required, dependent artifact `com.stripe.connections` has been renamed to `com.stripe.financial-connections`.
+  
 ## Migrating from versions < 20.0.0
 - The following classes' packages are changed
   * `com.stripe.android.AppInfo` -> `com.stripe.android.core.AppInfo`

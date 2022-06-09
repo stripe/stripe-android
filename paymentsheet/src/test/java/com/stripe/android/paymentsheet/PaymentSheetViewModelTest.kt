@@ -17,15 +17,16 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -34,12 +35,16 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,10 +81,19 @@ internal class PaymentSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
+    private val lpmRepository = LpmRepository(application.resources)
+    private val prefsRepository = FakePrefsRepository()
+    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
+
+    private val primaryButtonUIState = PrimaryButton.UIState(
+        label = "Test",
+        onClick = {},
+        enabled = true,
+        visible = true
+    )
 
     @Captor
     private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
@@ -242,7 +256,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm saved payment methods`() = runTest {
+    fun `checkout() should confirm saved card payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -260,6 +274,33 @@ internal class PaymentSheetViewModelTest {
                     CLIENT_SECRET,
                     paymentMethodOptions = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `checkout() should confirm saved us_bank_account payment methods`() = runTest {
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
+        viewModel.startConfirm.observeForever {
+            confirmParams.add(it)
+        }
+
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout(CheckoutIdentifier.None)
+
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    mandateData = MandateDataParams(
+                        type = MandateDataParams.Type.Online.DEFAULT
                     )
                 )
             )
@@ -319,10 +360,10 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout cancelled returns to Ready state`() {
         viewModel.maybeFetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
 
         val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observeForever {
                 viewState.add(it)
             }
@@ -351,8 +392,8 @@ internal class PaymentSheetViewModelTest {
     fun `On checkout clear the previous view state error`() {
 
         val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observeForever {
                 googleViewState.add(it)
             }
@@ -379,10 +420,10 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout failed returns to Ready state and shows error`() {
         viewModel.maybeFetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
 
         val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observeForever {
                 viewState.add(it)
             }
@@ -676,7 +717,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.AfterpayClearpay
+            lpmRepository.fromCode("afterpay_clearpay")!!
         )
     }
 
@@ -700,7 +741,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.SepaDebit
+            lpmRepository.fromCode("sepa_debit")!!
         )
     }
 
@@ -721,7 +762,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
         assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            SupportedPaymentMethod.SepaDebit
+            lpmRepository.fromCode("sepa_debit")!!
         )
     }
 
@@ -780,9 +821,9 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
+    fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() {
         var isEnabled = false
-        viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
+        viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
@@ -800,6 +841,27 @@ internal class PaymentSheetViewModelTest {
             .isTrue()
 
         viewModel.setEditing(true)
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = true
+            )
+        )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
+        assertThat(isEnabled)
+            .isTrue()
+
+        viewModel.updatePrimaryButtonUIState(
+            primaryButtonUIState.copy(
+                enabled = false
+            )
+        )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.setEditing(false)
         assertThat(isEnabled)
             .isFalse()
     }
@@ -850,8 +912,8 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal
+            lpmRepository.fromCode("card")!!,
+            lpmRepository.fromCode("ideal")!!
         )
     }
 
@@ -879,11 +941,47 @@ internal class PaymentSheetViewModelTest {
         assertThat(
             viewModel.supportedPaymentMethods
         ).containsExactly(
-            SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal,
-            SupportedPaymentMethod.SepaDebit,
-            SupportedPaymentMethod.Sofort
+            lpmRepository.fromCode("card")!!,
+            lpmRepository.fromCode("ideal")!!,
+            lpmRepository.fromCode("sepa_debit")!!,
+            lpmRepository.fromCode("sofort")!!
         )
+    }
+
+    @Test
+    fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
+        val viewModel = createViewModel()
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.US_BANK_ACCOUNT
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(
+                ACHText.getContinueMandateText(ApplicationProvider.getApplicationContext())
+            )
+
+        viewModel.updateSelection(
+            PaymentSelection.New.GenericPaymentMethod(
+                iconResource = 0,
+                labelResource = "",
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(null)
+
+        viewModel.updateSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        assertThat(viewModel.notesText.value)
+            .isEqualTo(null)
     }
 
     private fun createViewModel(
@@ -905,13 +1003,14 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
-            mock(),
+            resourceRepository,
             mock(),
             mock(),
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            mock()
         )
     }
 

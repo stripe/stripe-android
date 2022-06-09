@@ -38,7 +38,7 @@ open class CardNumberEditText internal constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
-    @VisibleForTesting
+    @get:VisibleForTesting
     var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,

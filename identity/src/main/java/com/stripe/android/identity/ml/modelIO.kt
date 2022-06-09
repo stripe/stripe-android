@@ -28,11 +28,24 @@ internal data class AnalyzerInput(
 )
 
 /**
- * Output the category with highest score and the bounding box
+ * Output interface of ML models
  */
-internal data class AnalyzerOutput(
+internal sealed interface AnalyzerOutput
+
+/**
+ * Output of IDDetector
+ */
+internal data class IDDetectorOutput(
     val boundingBox: BoundingBox,
     val category: Category,
     val resultScore: Float,
     val allScores: List<Float>
-)
+) : AnalyzerOutput
+
+/**
+ * Output of FaceDetector
+ */
+internal data class FaceDetectorOutput(
+    val boundingBox: BoundingBox,
+    val resultScore: Float
+) : AnalyzerOutput

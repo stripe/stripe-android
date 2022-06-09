@@ -288,11 +288,17 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeTextInputLayout.visibility = View.VISIBLE
 
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+
+            // First remove if it's already added, to make sure it's not added multiple times.
+            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
+
+            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
         }
         updatePostalRequired()
     }
@@ -333,16 +339,8 @@ class CardInputWidget @JvmOverloads constructor(
     private fun updatePostalRequired() {
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
-            cardValidCallback?.let {
-                // First remove if it's already added, to make sure it's not added multiple times.
-                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
-                postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
-            }
         } else {
             requiredFields.remove(postalCodeEditText)
-            cardValidCallback?.let {
-                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
-            }
         }
     }
 
@@ -756,7 +754,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         postalCodeEditText.setAfterTextChangedListener {
-            if (isPostalRequired() && postalCodeEditText.hasValidPostal()) {
+            if (postalCodeEditText.isEnabled && postalCodeEditText.hasValidPostal()) {
                 cardInputListener?.onPostalCodeComplete()
             }
         }
@@ -1037,6 +1035,7 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    @SuppressWarnings("UnnecessaryAbstractClass")
     private abstract class CardFieldAnimation : Animation() {
         init {
             duration = ANIMATION_LENGTH

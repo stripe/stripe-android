@@ -13,4 +13,5 @@
     https://developers.google.com/pay/api/android/guides/brand-guidelines#using-pay-in-text
     -->
     <string name="google_pay" translatable="false">Google Pay</string>
+    <string name="link" translatable="false">Link</string>
 </resources>

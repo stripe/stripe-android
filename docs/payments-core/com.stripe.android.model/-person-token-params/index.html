@@ -1,472 +1,517 @@
+<!doctype html>
 <html>
-  <head>
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>PersonTokenParams</title>
-</head><body><link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
-    <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><link href="../../../styles/prism.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script><script type="text/javascript" src="../../../scripts/main.js" defer></script><script type="text/javascript" src="../../../scripts/prism.js" async></script><script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
 const savedDarkMode = storage ? JSON.parse(storage) : false
 if(savedDarkMode === true){
     document.getElementsByTagName("html")[0].classList.add("theme-dark")
 }</script>
-
-  
-    <div class="navigation-wrapper" id="navigation-wrapper">
-      <div id="leftToggler"><span class="icon-toggler"></span></div>
-      <div class="library-name"><a href="../../../index.html"><span>stripe-android</span></a></div>
-      <div></div>
-      <div class="pull-right d-flex"><button id="theme-toggle-button"><span id="theme-toggle"></span></button>
-        <div id="searchBar"></div>
-      </div>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>stripe-android</span>            </a>    </div>
+    <div>
     </div>
-    <div id="container">
-      <div id="leftColumn">
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
         <div id="sideMenu"></div>
-      </div>
-      <div id="main">
-        <div class="main-content" id="content" pageids="payments-core::com.stripe.android.model/PersonTokenParams///PointingToDeclaration//-1622557690">
-          <div class="breadcrumbs"><a href="../../index.html">payments-core</a>/<a href="../index.html">com.stripe.android.model</a>/<a href="index.html">PersonTokenParams</a></div>
-          <div class="cover ">
-            <h1 class="cover"><span>Person</span><wbr><span>Token</span><wbr><span><span>Params</span></span></h1>
-            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">PersonTokenParams</a><span class="token punctuation">(</span>address<span class="token operator">: </span><a href="../-address/index.html">Address</a><span class="token operator">?</span><span class="token punctuation">, </span>addressKana<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token punctuation">, </span>addressKanji<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token punctuation">, </span>dateOfBirth<span class="token operator">: </span><a href="../-date-of-birth/index.html">DateOfBirth</a><span class="token operator">?</span><span class="token punctuation">, </span>email<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>firstName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>firstNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>firstNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>gender<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>idNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>lastName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>lastNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>lastNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>maidenName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>metadata<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token punctuation">, </span>phone<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>relationship<span class="token operator">: </span><a href="-relationship/index.html">PersonTokenParams.Relationship</a><span class="token operator">?</span><span class="token punctuation">, </span>ssnLast4<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>verification<span class="token operator">: </span><a href="-verification/index.html">PersonTokenParams.Verification</a><span class="token operator">?</span><span class="token punctuation">)</span> : <a href="../-token-params/index.html">TokenParams</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Creates a single-use token that represents the details for a person. Use this when creating or updating persons associated with a Connect account. See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p><p class="paragraph">See <a href="https://stripe.com/docs/api/tokens/create_person">Create a person token</a></p></div></div>
-          </div>
-          <div class="tabbedcontent">
-            <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
-            <div class="tabs-section-body">
-              <h2 class="tabbedcontent">Constructors</h2>
-              <div class="table" data-togglable="Constructors"><a data-name="-1332649043%2FConstructors%2F-1622557690" anchor-label="PersonTokenParams" id="-1332649043%2FConstructors%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue TabbedContent">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="-person-token-params.html"><span>Person</span><wbr><span>Token</span><wbr><span><span>Params</span></span></a></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="payments-core::com.stripe.android.model/PersonTokenParams///PointingToDeclaration//-1622557690">
+  <div class="breadcrumbs"><a href="../../index.html">payments-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.model</a><span class="delimiter">/</span><a href="index.html">PersonTokenParams</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Person</span><wbr><span>Token</span><wbr><span><span>Params</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">PersonTokenParams</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>address<span class="token operator">: </span><a href="../-address/index.html">Address</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>addressKana<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>addressKanji<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>dateOfBirth<span class="token operator">: </span><a href="../-date-of-birth/index.html">DateOfBirth</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>email<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>firstName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>firstNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>firstNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>gender<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>idNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>lastName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>lastNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>lastNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>maidenName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>metadata<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>phone<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>relationship<span class="token operator">: </span><a href="-relationship/index.html">PersonTokenParams.Relationship</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>ssnLast4<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>verification<span class="token operator">: </span><a href="-verification/index.html">PersonTokenParams.Verification</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../../../payments-core/com.stripe.android.model/-token-params/index.html">TokenParams</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Creates a single-use token that represents the details for a person. Use this when creating or updating persons associated with a Connect account. See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p><p class="paragraph">See <a href="https://stripe.com/docs/api/tokens/create_person">Create a person token</a></p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-1332649043%2FConstructors%2F-1622557690" anchor-label="PersonTokenParams" id="-1332649043%2FConstructors%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-person-token-params.html"><span>Person</span><wbr><span>Token</span><wbr><span><span>Params</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1332649043%2FConstructors%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-person-token-params.html"><span class="token function">PersonTokenParams</span></a><span class="token punctuation">(</span>address<span class="token operator">: </span><a href="../-address/index.html">Address</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>addressKana<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>addressKanji<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>dateOfBirth<span class="token operator">: </span><a href="../-date-of-birth/index.html">DateOfBirth</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>email<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>firstName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>firstNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>firstNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>gender<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>idNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>lastName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>lastNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>lastNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>maidenName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>metadata<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>phone<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>relationship<span class="token operator">: </span><a href="-relationship/index.html">PersonTokenParams.Relationship</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>ssnLast4<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>verification<span class="token operator">: </span><a href="-verification/index.html">PersonTokenParams.Verification</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h2 class="">Types</h2>
-              <div class="table" data-togglable="Types"><a data-name="1718455219%2FClasslikes%2F-1622557690" anchor-label="Builder" id="1718455219%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1718455219%2FClasslikes%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a> : <a href="../../../payments-core/com.stripe.android/-object-builder/index.html">ObjectBuilder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">PersonTokenParams</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="1174245465%2FClasslikes%2F-1622557690" anchor-label="Document" id="1174245465%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="-document/index.html"><span><span>Document</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1174245465%2FClasslikes%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-document/index.html">Document</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span>front<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>back<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span> : <a href="../-stripe-params-model/index.html">StripeParamsModel</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-276575140%2FClasslikes%2F-1622557690" anchor-label="Relationship" id="-276575140%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="-relationship/index.html"><span><span>Relationship</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-276575140%2FClasslikes%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-relationship/index.html">Relationship</a><span class="token punctuation">(</span>director<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token punctuation">, </span>executive<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token punctuation">, </span>owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token punctuation">, </span>percentOwnership<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token punctuation">, </span>representative<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token punctuation">, </span>title<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span> : <a href="../-stripe-params-model/index.html">StripeParamsModel</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">The relationship that this person has with the account’s legal entity.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="420479449%2FClasslikes%2F-1622557690" anchor-label="Verification" id="420479449%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="-verification/index.html"><span><span>Verification</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="420479449%2FClasslikes%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-verification/index.html">Verification</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span>document<span class="token operator">: </span><a href="-document/index.html">PersonTokenParams.Document</a><span class="token operator">?</span><span class="token punctuation">, </span>additionalDocument<span class="token operator">: </span><a href="-document/index.html">PersonTokenParams.Document</a><span class="token operator">?</span><span class="token punctuation">)</span> : <a href="../-stripe-params-model/index.html">StripeParamsModel</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">The person’s verification status.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h2 class="">Functions</h2>
-              <div class="table" data-togglable="Functions"><a data-name="-1578325224%2FFunctions%2F-1622557690" anchor-label="describeContents" id="-1578325224%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1578325224%2FFunctions%2F-1622557690"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1578325224%2FFunctions%2F-1622557690"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-2119640630%2FFunctions%2F-1622557690" anchor-label="toParamMap" id="-2119640630%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../-token-params/to-param-map.html"><span>to</span><wbr><span>Param</span><wbr><span><span>Map</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2119640630%2FFunctions%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../-token-params/to-param-map.html"><span class="token function">toParamMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1754457655%2FFunctions%2F-1622557690" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1754457655%2FFunctions%2F-1622557690"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1754457655%2FFunctions%2F-1622557690"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span>p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h2 class="">Properties</h2>
-              <div class="table" data-togglable="Properties"><a data-name="942557927%2FProperties%2F-1622557690" anchor-label="address" id="942557927%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="address.html">address</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="942557927%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="942557927%2FProperties%2F-1622557690" anchor-label="address" id="942557927%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="address.html">address</a><span class="token operator">: </span><a href="../-address/index.html">Address</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="942557927%2FProperties%2F-1622557690" anchor-label="address" id="942557927%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s address.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-23325602%2FProperties%2F-1622557690" anchor-label="addressKana" id="-23325602%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="address-kana.html">addressKana</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-23325602%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-23325602%2FProperties%2F-1622557690" anchor-label="addressKana" id="-23325602%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="address-kana.html">addressKana</a><span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-23325602%2FProperties%2F-1622557690" anchor-label="addressKana" id="-23325602%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kana variation of the person’s address (Japan only).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="597554620%2FProperties%2F-1622557690" anchor-label="addressKanji" id="597554620%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="address-kanji.html">addressKanji</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="597554620%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="597554620%2FProperties%2F-1622557690" anchor-label="addressKanji" id="597554620%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="address-kanji.html">addressKanji</a><span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="597554620%2FProperties%2F-1622557690" anchor-label="addressKanji" id="597554620%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kanji variation of the person’s address (Japan only).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-370630399%2FProperties%2F-1622557690" anchor-label="dateOfBirth" id="-370630399%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="date-of-birth.html">dateOfBirth</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-370630399%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-370630399%2FProperties%2F-1622557690" anchor-label="dateOfBirth" id="-370630399%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="date-of-birth.html">dateOfBirth</a><span class="token operator">: </span><a href="../-date-of-birth/index.html">DateOfBirth</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-370630399%2FProperties%2F-1622557690" anchor-label="dateOfBirth" id="-370630399%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s date of birth.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-136144961%2FProperties%2F-1622557690" anchor-label="email" id="-136144961%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="email.html">email</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-136144961%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-136144961%2FProperties%2F-1622557690" anchor-label="email" id="-136144961%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="email.html">email</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-136144961%2FProperties%2F-1622557690" anchor-label="email" id="-136144961%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s email address.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="1889820640%2FProperties%2F-1622557690" anchor-label="firstName" id="1889820640%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="first-name.html">firstName</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1889820640%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1889820640%2FProperties%2F-1622557690" anchor-label="firstName" id="1889820640%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="first-name.html">firstName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1889820640%2FProperties%2F-1622557690" anchor-label="firstName" id="1889820640%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s first name.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="865928407%2FProperties%2F-1622557690" anchor-label="firstNameKana" id="865928407%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="first-name-kana.html">firstNameKana</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="865928407%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="865928407%2FProperties%2F-1622557690" anchor-label="firstNameKana" id="865928407%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="first-name-kana.html">firstNameKana</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="865928407%2FProperties%2F-1622557690" anchor-label="firstNameKana" id="865928407%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kana variation of the person’s first name (Japan only).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1900342173%2FProperties%2F-1622557690" anchor-label="firstNameKanji" id="-1900342173%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="first-name-kanji.html">firstNameKanji</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1900342173%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1900342173%2FProperties%2F-1622557690" anchor-label="firstNameKanji" id="-1900342173%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="first-name-kanji.html">firstNameKanji</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1900342173%2FProperties%2F-1622557690" anchor-label="firstNameKanji" id="-1900342173%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kanji variation of the person’s first name (Japan only).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="1478518718%2FProperties%2F-1622557690" anchor-label="gender" id="1478518718%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="gender.html">gender</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1478518718%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1478518718%2FProperties%2F-1622557690" anchor-label="gender" id="1478518718%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="gender.html">gender</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1478518718%2FProperties%2F-1622557690" anchor-label="gender" id="1478518718%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s gender (International regulations require either “male” or “female”).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="2014203675%2FProperties%2F-1622557690" anchor-label="idNumber" id="2014203675%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="id-number.html">idNumber</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2014203675%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="2014203675%2FProperties%2F-1622557690" anchor-label="idNumber" id="2014203675%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="id-number.html">idNumber</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="2014203675%2FProperties%2F-1622557690" anchor-label="idNumber" id="2014203675%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s ID number, as appropriate for their country. For example, a social security number in the U.S., social insurance number in Canada, etc. Instead of the number itself, you can also provide a PII token.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="520004542%2FProperties%2F-1622557690" anchor-label="lastName" id="520004542%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="last-name.html">lastName</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="520004542%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="520004542%2FProperties%2F-1622557690" anchor-label="lastName" id="520004542%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-name.html">lastName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="520004542%2FProperties%2F-1622557690" anchor-label="lastName" id="520004542%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s last name.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-514446923%2FProperties%2F-1622557690" anchor-label="lastNameKana" id="-514446923%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="last-name-kana.html">lastNameKana</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-514446923%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-514446923%2FProperties%2F-1622557690" anchor-label="lastNameKana" id="-514446923%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-name-kana.html">lastNameKana</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-514446923%2FProperties%2F-1622557690" anchor-label="lastNameKana" id="-514446923%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kana variation of the person’s last name (Japan only).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1742304443%2FProperties%2F-1622557690" anchor-label="lastNameKanji" id="-1742304443%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="last-name-kanji.html">lastNameKanji</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1742304443%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1742304443%2FProperties%2F-1622557690" anchor-label="lastNameKanji" id="-1742304443%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-name-kanji.html">lastNameKanji</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1742304443%2FProperties%2F-1622557690" anchor-label="lastNameKanji" id="-1742304443%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kanji variation of the person’s last name (Japan only).</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-1297749380%2FProperties%2F-1622557690" anchor-label="maidenName" id="-1297749380%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="maiden-name.html">maidenName</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1297749380%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1297749380%2FProperties%2F-1622557690" anchor-label="maidenName" id="-1297749380%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="maiden-name.html">maidenName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1297749380%2FProperties%2F-1622557690" anchor-label="maidenName" id="-1297749380%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s maiden name.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-597739888%2FProperties%2F-1622557690" anchor-label="metadata" id="-597739888%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="metadata.html">metadata</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-597739888%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-597739888%2FProperties%2F-1622557690" anchor-label="metadata" id="-597739888%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="metadata.html">metadata</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-597739888%2FProperties%2F-1622557690" anchor-label="metadata" id="-597739888%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to <code class="lang-kotlin">metadata</code>.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="1842411053%2FProperties%2F-1622557690" anchor-label="phone" id="1842411053%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="phone.html">phone</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1842411053%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1842411053%2FProperties%2F-1622557690" anchor-label="phone" id="1842411053%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="phone.html">phone</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1842411053%2FProperties%2F-1622557690" anchor-label="phone" id="1842411053%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s phone number.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-172087641%2FProperties%2F-1622557690" anchor-label="relationship" id="-172087641%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="relationship.html">relationship</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-172087641%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-172087641%2FProperties%2F-1622557690" anchor-label="relationship" id="-172087641%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="relationship.html">relationship</a><span class="token operator">: </span><a href="-relationship/index.html">PersonTokenParams.Relationship</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-172087641%2FProperties%2F-1622557690" anchor-label="relationship" id="-172087641%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The relationship that this person has with the account’s legal entity.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-704540177%2FProperties%2F-1622557690" anchor-label="ssnLast4" id="-704540177%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="ssn-last4.html">ssnLast4</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-704540177%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-704540177%2FProperties%2F-1622557690" anchor-label="ssnLast4" id="-704540177%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="ssn-last4.html">ssnLast4</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-704540177%2FProperties%2F-1622557690" anchor-label="ssnLast4" id="-704540177%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The last 4 digits of the person’s social security number.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="-293287947%2FProperties%2F-1622557690" anchor-label="typeDataParams" id="-293287947%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="type-data-params.html">typeDataParams</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-293287947%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-293287947%2FProperties%2F-1622557690" anchor-label="typeDataParams" id="-293287947%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="type-data-params.html">typeDataParams</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-<a data-name="524966948%2FProperties%2F-1622557690" anchor-label="verification" id="524966948%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-                <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
-                  <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex">
-                        <div><a href="verification.html">verification</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="524966948%2FProperties%2F-1622557690"></span>
-                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                        </span></span></div>
-                    <div>
-                      <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="524966948%2FProperties%2F-1622557690" anchor-label="verification" id="524966948%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="verification.html">verification</a><span class="token operator">: </span><a href="-verification/index.html">PersonTokenParams.Verification</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="524966948%2FProperties%2F-1622557690" anchor-label="verification" id="524966948%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s verification status.</p></div></div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-person-token-params.html"><span class="token function">PersonTokenParams</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;address<span class="token operator">: </span><a href="../-address/index.html">Address</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;addressKana<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;addressKanji<span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;dateOfBirth<span class="token operator">: </span><a href="../-date-of-birth/index.html">DateOfBirth</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;email<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;firstName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;firstNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;firstNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;gender<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;idNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;lastName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;lastNameKana<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;lastNameKanji<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;maidenName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;metadata<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;phone<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;relationship<span class="token operator">: </span><a href="-relationship/index.html">PersonTokenParams.Relationship</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;ssnLast4<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;verification<span class="token operator">: </span><a href="-verification/index.html">PersonTokenParams.Verification</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
               </div>
             </div>
           </div>
         </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="1718455219%2FClasslikes%2F-1622557690" anchor-label="Builder" id="1718455219%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1718455219%2FClasslikes%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a> : <a href="../../../payments-core/com.stripe.android/-object-builder/index.html">ObjectBuilder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">PersonTokenParams</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1174245465%2FClasslikes%2F-1622557690" anchor-label="Document" id="1174245465%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-document/index.html"><span><span>Document</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1174245465%2FClasslikes%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-document/index.html">Document</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>front<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>back<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../../../payments-core/com.stripe.android.model/-stripe-params-model/index.html">StripeParamsModel</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-276575140%2FClasslikes%2F-1622557690" anchor-label="Relationship" id="-276575140%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-relationship/index.html"><span><span>Relationship</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-276575140%2FClasslikes%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-relationship/index.html">Relationship</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>director<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>executive<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>percentOwnership<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>representative<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>title<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../../../payments-core/com.stripe.android.model/-stripe-params-model/index.html">StripeParamsModel</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">The relationship that this person has with the account’s legal entity.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="420479449%2FClasslikes%2F-1622557690" anchor-label="Verification" id="420479449%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-verification/index.html"><span><span>Verification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="420479449%2FClasslikes%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-verification/index.html">Verification</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>document<span class="token operator">: </span><a href="-document/index.html">PersonTokenParams.Document</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>additionalDocument<span class="token operator">: </span><a href="-document/index.html">PersonTokenParams.Document</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../../../payments-core/com.stripe.android.model/-stripe-params-model/index.html">StripeParamsModel</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">The person’s verification status.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1578325224%2FFunctions%2F-1622557690" anchor-label="describeContents" id="-1578325224%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1578325224%2FFunctions%2F-1622557690"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1578325224%2FFunctions%2F-1622557690"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2119640630%2FFunctions%2F-1622557690" anchor-label="toParamMap" id="-2119640630%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-2119640630%2FFunctions%2F-1622557690"><span>to</span><wbr><span>Param</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2119640630%2FFunctions%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-2119640630%2FFunctions%2F-1622557690"><span class="token function">toParamMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1754457655%2FFunctions%2F-1622557690" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1754457655%2FFunctions%2F-1622557690"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#-1754457655%2FFunctions%2F-1622557690"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="942557927%2FProperties%2F-1622557690" anchor-label="address" id="942557927%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="address.html">address</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="942557927%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="942557927%2FProperties%2F-1622557690" anchor-label="address" id="942557927%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="address.html">address</a><span class="token operator">: </span><a href="../-address/index.html">Address</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="942557927%2FProperties%2F-1622557690" anchor-label="address" id="942557927%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s address.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-23325602%2FProperties%2F-1622557690" anchor-label="addressKana" id="-23325602%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="address-kana.html">addressKana</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-23325602%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-23325602%2FProperties%2F-1622557690" anchor-label="addressKana" id="-23325602%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="address-kana.html">addressKana</a><span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-23325602%2FProperties%2F-1622557690" anchor-label="addressKana" id="-23325602%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kana variation of the person’s address (Japan only).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="597554620%2FProperties%2F-1622557690" anchor-label="addressKanji" id="597554620%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="address-kanji.html">addressKanji</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="597554620%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="597554620%2FProperties%2F-1622557690" anchor-label="addressKanji" id="597554620%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="address-kanji.html">addressKanji</a><span class="token operator">: </span><a href="../-address-japan-params/index.html">AddressJapanParams</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="597554620%2FProperties%2F-1622557690" anchor-label="addressKanji" id="597554620%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kanji variation of the person’s address (Japan only).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1172530951%2FProperties%2F-1622557690" anchor-label="attribution" id="1172530951%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1172530951%2FProperties%2F-1622557690">attribution</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1172530951%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1172530951%2FProperties%2F-1622557690" anchor-label="attribution" id="1172530951%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="index.html#1172530951%2FProperties%2F-1622557690">attribution</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-370630399%2FProperties%2F-1622557690" anchor-label="dateOfBirth" id="-370630399%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="date-of-birth.html">dateOfBirth</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-370630399%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-370630399%2FProperties%2F-1622557690" anchor-label="dateOfBirth" id="-370630399%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="date-of-birth.html">dateOfBirth</a><span class="token operator">: </span><a href="../-date-of-birth/index.html">DateOfBirth</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-370630399%2FProperties%2F-1622557690" anchor-label="dateOfBirth" id="-370630399%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s date of birth.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-136144961%2FProperties%2F-1622557690" anchor-label="email" id="-136144961%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="email.html">email</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-136144961%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-136144961%2FProperties%2F-1622557690" anchor-label="email" id="-136144961%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="email.html">email</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-136144961%2FProperties%2F-1622557690" anchor-label="email" id="-136144961%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s email address.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1889820640%2FProperties%2F-1622557690" anchor-label="firstName" id="1889820640%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="first-name.html">firstName</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1889820640%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1889820640%2FProperties%2F-1622557690" anchor-label="firstName" id="1889820640%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="first-name.html">firstName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1889820640%2FProperties%2F-1622557690" anchor-label="firstName" id="1889820640%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s first name.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="865928407%2FProperties%2F-1622557690" anchor-label="firstNameKana" id="865928407%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="first-name-kana.html">firstNameKana</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="865928407%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="865928407%2FProperties%2F-1622557690" anchor-label="firstNameKana" id="865928407%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="first-name-kana.html">firstNameKana</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="865928407%2FProperties%2F-1622557690" anchor-label="firstNameKana" id="865928407%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kana variation of the person’s first name (Japan only).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1900342173%2FProperties%2F-1622557690" anchor-label="firstNameKanji" id="-1900342173%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="first-name-kanji.html">firstNameKanji</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1900342173%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1900342173%2FProperties%2F-1622557690" anchor-label="firstNameKanji" id="-1900342173%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="first-name-kanji.html">firstNameKanji</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1900342173%2FProperties%2F-1622557690" anchor-label="firstNameKanji" id="-1900342173%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kanji variation of the person’s first name (Japan only).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1478518718%2FProperties%2F-1622557690" anchor-label="gender" id="1478518718%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="gender.html">gender</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1478518718%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1478518718%2FProperties%2F-1622557690" anchor-label="gender" id="1478518718%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="gender.html">gender</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1478518718%2FProperties%2F-1622557690" anchor-label="gender" id="1478518718%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s gender (International regulations require either “male” or “female”).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2014203675%2FProperties%2F-1622557690" anchor-label="idNumber" id="2014203675%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="id-number.html">idNumber</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2014203675%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="2014203675%2FProperties%2F-1622557690" anchor-label="idNumber" id="2014203675%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="id-number.html">idNumber</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="2014203675%2FProperties%2F-1622557690" anchor-label="idNumber" id="2014203675%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s ID number, as appropriate for their country. For example, a social security number in the U.S., social insurance number in Canada, etc. Instead of the number itself, you can also provide a PII token.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="520004542%2FProperties%2F-1622557690" anchor-label="lastName" id="520004542%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="last-name.html">lastName</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="520004542%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="520004542%2FProperties%2F-1622557690" anchor-label="lastName" id="520004542%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-name.html">lastName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="520004542%2FProperties%2F-1622557690" anchor-label="lastName" id="520004542%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s last name.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-514446923%2FProperties%2F-1622557690" anchor-label="lastNameKana" id="-514446923%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="last-name-kana.html">lastNameKana</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-514446923%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-514446923%2FProperties%2F-1622557690" anchor-label="lastNameKana" id="-514446923%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-name-kana.html">lastNameKana</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-514446923%2FProperties%2F-1622557690" anchor-label="lastNameKana" id="-514446923%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kana variation of the person’s last name (Japan only).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1742304443%2FProperties%2F-1622557690" anchor-label="lastNameKanji" id="-1742304443%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="last-name-kanji.html">lastNameKanji</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1742304443%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1742304443%2FProperties%2F-1622557690" anchor-label="lastNameKanji" id="-1742304443%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-name-kanji.html">lastNameKanji</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1742304443%2FProperties%2F-1622557690" anchor-label="lastNameKanji" id="-1742304443%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The Kanji variation of the person’s last name (Japan only).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1297749380%2FProperties%2F-1622557690" anchor-label="maidenName" id="-1297749380%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="maiden-name.html">maidenName</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1297749380%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1297749380%2FProperties%2F-1622557690" anchor-label="maidenName" id="-1297749380%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="maiden-name.html">maidenName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1297749380%2FProperties%2F-1622557690" anchor-label="maidenName" id="-1297749380%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s maiden name.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-597739888%2FProperties%2F-1622557690" anchor-label="metadata" id="-597739888%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="metadata.html">metadata</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-597739888%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-597739888%2FProperties%2F-1622557690" anchor-label="metadata" id="-597739888%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="metadata.html">metadata</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-597739888%2FProperties%2F-1622557690" anchor-label="metadata" id="-597739888%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to <code class="lang-kotlin">metadata</code>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1842411053%2FProperties%2F-1622557690" anchor-label="phone" id="1842411053%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="phone.html">phone</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1842411053%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="1842411053%2FProperties%2F-1622557690" anchor-label="phone" id="1842411053%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="phone.html">phone</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1842411053%2FProperties%2F-1622557690" anchor-label="phone" id="1842411053%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s phone number.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-172087641%2FProperties%2F-1622557690" anchor-label="relationship" id="-172087641%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="relationship.html">relationship</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-172087641%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-172087641%2FProperties%2F-1622557690" anchor-label="relationship" id="-172087641%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="relationship.html">relationship</a><span class="token operator">: </span><a href="-relationship/index.html">PersonTokenParams.Relationship</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-172087641%2FProperties%2F-1622557690" anchor-label="relationship" id="-172087641%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The relationship that this person has with the account’s legal entity.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-704540177%2FProperties%2F-1622557690" anchor-label="ssnLast4" id="-704540177%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="ssn-last4.html">ssnLast4</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-704540177%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-704540177%2FProperties%2F-1622557690" anchor-label="ssnLast4" id="-704540177%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="ssn-last4.html">ssnLast4</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-704540177%2FProperties%2F-1622557690" anchor-label="ssnLast4" id="-704540177%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The last 4 digits of the person’s social security number.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1806775437%2FProperties%2F-1622557690" anchor-label="tokenType" id="-1806775437%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1806775437%2FProperties%2F-1622557690">tokenType</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1806775437%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-1806775437%2FProperties%2F-1622557690" anchor-label="tokenType" id="-1806775437%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="index.html#-1806775437%2FProperties%2F-1622557690">tokenType</a><span class="token operator">: </span><a href="../../../payments-core/com.stripe.android.model/-token/-type/index.html">Token.Type</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-293287947%2FProperties%2F-1622557690" anchor-label="typeDataParams" id="-293287947%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="type-data-params.html">typeDataParams</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-293287947%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="-293287947%2FProperties%2F-1622557690" anchor-label="typeDataParams" id="-293287947%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="type-data-params.html">typeDataParams</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="524966948%2FProperties%2F-1622557690" anchor-label="verification" id="524966948%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="verification.html">verification</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="524966948%2FProperties%2F-1622557690"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><a data-name="524966948%2FProperties%2F-1622557690" anchor-label="verification" id="524966948%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="verification.html">verification</a><span class="token operator">: </span><a href="-verification/index.html">PersonTokenParams.Verification</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="524966948%2FProperties%2F-1622557690" anchor-label="verification" id="524966948%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a><p class="paragraph">The person’s verification status.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  
-</body></html>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
 
+</body></html>
 

@@ -1,10 +1,11 @@
 package com.stripe.android.identity.navigation
 
+import android.view.View
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
-import com.stripe.android.identity.navigation.IdentityCameraScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
+import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToUploadFragment
 
@@ -18,19 +19,23 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
             "Argument to CouldNotCaptureFragment is null"
         }
         val scanType = args[ARG_COULD_NOT_CAPTURE_SCAN_TYPE] as IdentityScanState.ScanType
-        val requireLiveCapture = args[ARG_REQUIRE_LIVE_CAPTURE] as Boolean
 
         title.text = getString(R.string.could_not_capture_title)
         message1.text = getString(R.string.could_not_capture_body1)
-        message2.text = getString(R.string.could_not_capture_body2)
 
-        topButton.text = getString(R.string.file_upload)
-        topButton.setOnClickListener {
-            navigateToUploadFragment(
-                scanType.toUploadDestinationId(),
-                shouldShowTakePhoto = true,
-                shouldShowChoosePhoto = !requireLiveCapture
-            )
+        if (scanType == IdentityScanState.ScanType.SELFIE) {
+            topButton.visibility = View.GONE
+            message2.visibility = View.GONE
+        } else {
+            message2.text = getString(R.string.could_not_capture_body2)
+            topButton.text = getString(R.string.file_upload)
+            topButton.setOnClickListener {
+                navigateToUploadFragment(
+                    scanType.toUploadDestinationId(),
+                    shouldShowTakePhoto = true,
+                    shouldShowChoosePhoto = !(args[ARG_REQUIRE_LIVE_CAPTURE] as Boolean)
+                )
+            }
         }
 
         bottomButton.text = getString(R.string.try_again)
@@ -56,8 +61,8 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
                 IdentityScanState.ScanType.DL_FRONT -> R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
                 IdentityScanState.ScanType.DL_BACK -> R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
                 IdentityScanState.ScanType.PASSPORT -> R.id.action_couldNotCaptureFragment_to_passportUploadFragment
-                else -> {
-                    throw IllegalArgumentException("Unknown scan type: $this")
+                IdentityScanState.ScanType.SELFIE -> {
+                    throw IllegalArgumentException("SELFIE doesn't support upload")
                 }
             }
 
@@ -69,9 +74,7 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
                 IdentityScanState.ScanType.DL_FRONT -> R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
                 IdentityScanState.ScanType.DL_BACK -> R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
                 IdentityScanState.ScanType.PASSPORT -> R.id.action_couldNotCaptureFragment_to_passportScanFragment
-                else -> {
-                    throw IllegalArgumentException("Unknown scan type: $this")
-                }
+                IdentityScanState.ScanType.SELFIE -> R.id.action_couldNotCaptureFragment_to_selfieFragment
             }
 
         private fun IdentityScanState.ScanType.toShouldStartFromBack() =
@@ -81,9 +84,7 @@ internal class CouldNotCaptureFragment : BaseErrorFragment() {
                 IdentityScanState.ScanType.DL_FRONT -> false
                 IdentityScanState.ScanType.DL_BACK -> true
                 IdentityScanState.ScanType.PASSPORT -> false
-                else -> {
-                    throw IllegalArgumentException("Unknown scan type: $this")
-                }
+                IdentityScanState.ScanType.SELFIE -> false
             }
     }
 }

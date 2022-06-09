@@ -70,10 +70,24 @@
   <string name="p24_bank">Przelewy24 Bank</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Lagre for framtidige %s betalingar</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Skann kort</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i samsvar med dei instruksjonane. Som ein del av rettane dine har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Fortsett</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Betal %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformasjon</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kort</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-betaling</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Opprett</string>
 </resources>

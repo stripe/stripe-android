@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Nieprawidłowy kod pocztowy</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Nieprawidłowy kod pocztowy</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Zapłać później, korzystając z &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Imię i nazwisko na rachunku</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Numer BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Podając dane swojego konta bankowego i potwierdzając tę płatność, wyrażasz zgodę na niniejsze żądanie polecenia zapłaty oraz &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;umowę dotyczącą usługi polecenia zapłaty&lt;/a&gt;, a także upoważniasz podmiot Stripe Payments Australia Pty Ltd ACN 160 180 343 o identyfikatorze użytkownika polecenia zapłaty 507156 („Stripe”) do obciążenia Twojego konta przez system Bulk Electronic Clearing System (BECS) w imieniu podmiotu %s („Sprzedawca”) na każdą kwotę osobno zakomunikowaną Ci przez Sprzedawcę. Potwierdzasz, że jesteś właścicielem konta lub upoważnionym sygnatariuszem wyżej wymienionego konta.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Podając dane konta bankowego i zatwierdzając tę płatność, wyrażasz zgodę na\n    niniejsze żądanie polecenia zapłaty i warunki umowy oraz upoważniasz podmiot\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 o numerze użytkownika Direct Debit 507156\n    („Stripe”) do obciążenia Twojego konta poprzez Bulk Electronic Clearing System (BECS) w\n    imieniu podmiotu %1$s („Partner handlowy”) na dowolną kwotę osobno zakomunikowaną Ci\n    przez Partnera handlowego. Zaświadczasz, że jesteś właścicielem konta lub upoważnioną\n    osobą podpisującą, reprezentującą wyżej wymienione konto.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Imię i nazwisko</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Wymagane jest imię i nazwisko.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Anuluj</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s kończy się %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Usuń metodę płatności</string>
   <string name="delete_payment_method_prompt_title">Czy usunąć metodę płatności?</string>
+  <!-- Done button title -->
+  <string name="done">Gotowe</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Edytuj</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/RR</string>
   <string name="expiry_label_short">Data ważności</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Wybierz konto bankowe (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Bezpłatnie</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Usuń</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Usunięto: %s</string>
   <string name="secure_checkout">Bezpieczna płatność</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Wystąpiły trudności z nawiązaniem połączenia z dostawcą usług płatniczych. Sprawdź połączenie z Internetem i spróbuj ponownie.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nie możemy wykonać uwierzytelnienia Twojej metody płatności. Wybierz inną metodę i spróbuj ponownie.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Przekroczono czas uwierzytelnienia metody płatności – spróbuj ponownie</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Wystąpił wewnętrzny błąd.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

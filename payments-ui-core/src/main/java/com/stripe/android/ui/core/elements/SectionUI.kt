@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,7 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.getBorderStroke
+import com.stripe.android.ui.core.paymentsColors
 
 /**
  * This is a simple section that holds content in a card view.  It has a label, content specified
@@ -22,14 +24,16 @@ import com.stripe.android.ui.core.PaymentsTheme
 internal fun Section(
     @StringRes title: Int?,
     error: String?,
-    content: @Composable () -> Unit
+    contentOutsideCard: @Composable () -> Unit = {},
+    contentInCard: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
-        SectionCard(content = content)
+        SectionCard(content = contentInCard)
         if (error != null) {
             SectionError(error)
         }
+        contentOutsideCard()
     }
 }
 
@@ -42,7 +46,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
         H6Text(
             text = stringResource(titleText),
             modifier = Modifier
-                .padding(vertical = 4.dp)
+                .padding(bottom = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
                 }
@@ -61,11 +65,11 @@ fun SectionCard(
     content: @Composable () -> Unit
 ) {
     Card(
-        border = PaymentsTheme.getBorderStroke(isSelected),
+        border = MaterialTheme.getBorderStroke(isSelected),
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = PaymentsTheme.colors.component,
-        shape = PaymentsTheme.shapes.material.medium,
+        backgroundColor = MaterialTheme.paymentsColors.component,
+        shape = MaterialTheme.shapes.medium,
         modifier = modifier
     ) {
         Column {
@@ -81,8 +85,8 @@ fun SectionCard(
 internal fun SectionError(error: String) {
     Text(
         text = error,
-        color = PaymentsTheme.colors.material.error,
-        style = PaymentsTheme.typography.h6,
+        color = MaterialTheme.colors.error,
+        style = MaterialTheme.typography.h6,
         modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }

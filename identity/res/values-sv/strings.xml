@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Appinställningar</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Baksida av körkort</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Körkortets baksida är markerad</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Baksida av id-kort</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">Id-handlingens baksida är markerad</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Kamerabehörighet</string>
+  <string name="camera_permission_rationale">Den här appen använder kameran för att skanna dina id-handlingar och tar bilder för att verifiera din identitet.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Bocken anger att handlingen har fotograferats</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Välj foto</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Det gick inte att ta en bild av hög kvalitet.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Du kan antingen försöka igen eller ladda upp en bild från din enhet.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Det gick inte att ta bilden</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Klockikon</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Körkort</string>
+  <!-- Text for error labels -->
+  <string name="error">Fel</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Ladda upp fil</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Ladda upp bilderna på fram- och baksidan av ditt körkort</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Ladda upp bilderna på fram- och baksidan av ditt id-kort</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Ladda upp en bild på ditt pass</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Framsida av körkort</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Körkortets framsida är markerad</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Framsida av id-kort</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">Id-handlingens framsida är markerad</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Gå tillbaka</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Vi behöver behörighet att använda din kamera. Tillåt kameraåtkomst i appens inställningar.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Rör dig inte, dokumentet skannas in</string>
+  <!-- display name for ID -->
+  <string name="id_card">Id-handling</string>
+  <!-- Continue button text -->
+  <string name="kontinue">fortsätt</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Laddar</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Pass</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Pass är markerat</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Vänd på körkortet</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Placera körkortet i mitten av ramen</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Vänd på id-handlingen</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Placera id-kortet i mitten av ramen</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Placera passet i mitten av ramen</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Dokumentet har skannats</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Välj</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Ta bild</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Försök igen</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Ett oväntat fel uppstod - försök igen om ett par sekunder</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Ladda upp körkortets baksida</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Ladda upp körkortets framsida</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Ladda upp id-handlingens baksida</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Ladda upp id-handlingens framsida</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Ladda upp pass</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Du kan även manuellt ladda upp ett foto av din/ditt %1$s</string>
+</resources>

@@ -1,18 +1,28 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@Parcelize
-internal data class CardBillingSpec(
-    override val identifier: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
-    val countryCodes: Set<String>
-) : SectionFieldSpec(identifier) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Serializable
+data class CardBillingSpec(
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
+    @SerialName("allowed_country_codes")
+    val allowedCountryCodes: Set<String> = supportedBillingCountries
+) : FormItemSpec() {
     fun transform(
-        addressRepository: AddressFieldElementRepository
-    ) = CardBillingAddressElement(
-        IdentifierSpec.Generic("credit_billing"),
-        addressRepository,
-        countryCodes = countryCodes
+        addressRepository: AddressFieldElementRepository,
+        initialValues: Map<IdentifierSpec, String?>
+    ) = createSectionElement(
+        CardBillingAddressElement(
+            IdentifierSpec.Generic("credit_billing"),
+            addressFieldRepository = addressRepository,
+            countryCodes = allowedCountryCodes,
+            rawValuesMap = initialValues
+        ),
+        label = R.string.billing_details
     )
 }

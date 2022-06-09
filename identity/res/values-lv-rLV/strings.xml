@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="app_settings">Lietotnes iestatījumi</string>
+  <!-- Description of back of driver's license image -->
+  <string name="back_of_dl">Autovadītāja apliecības aizmugure</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="back_of_dl_selected">Autovadītāja apliecības aizmugure ir atlasīta</string>
+  <!-- Description of back of identity card image -->
+  <string name="back_of_id">Identifikācijas kartes aizmugure</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="back_of_id_selected">ID dokumenta aizmugure ir atlasīta</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="camera_permission">Kameras atļauja</string>
+  <string name="camera_permission_rationale">Šī lietotne izmanto kameru, lai skenētu jūsu identifikācijas dokumentus, un uzņem fotoattēlus, lai pārbaudītu jūsu identitāti.</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="check_mark">Atzīme, lai norādītu dokumenta uzņemšanas izdošanos</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="choose_file">Izvēlēties fotoattēlu</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body1">Neizdevās uzņemt augstas kvalitātes attēlu.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="could_not_capture_body2">Varat mēģināt vēlreiz vai augšupielādēt attēlu no jūsu ierīces.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="could_not_capture_title">Neizdevās uzņemt attēlu</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="description_clock">Pulksteņa ikona</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="driver_license">Autovadītāja apliecība</string>
+  <!-- Text for error labels -->
+  <string name="error">Kļūda</string>
+  <!-- Button that opens file upload screen -->
+  <string name="file_upload">Faila augšupielāde</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="file_upload_content_dl">Lūdzu, augšupielādējiet attēlus no jūsu autovadītāja apliecības priekšpuses un aizmugures</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="file_upload_content_id">Lūdzu, augšupielādējiet attēlus no jūsu identifikācijas kartes priekšpuses un aizmugures</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="file_upload_content_passport">Lūdzu, augšupielādējiet savas pases attēlu.</string>
+  <!-- Description of front of driver's license image -->
+  <string name="front_of_dl">Autovadītāja apliecības priekšpuse</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="front_of_dl_selected">Autovadītāja apliecības priekšpuse ir atlasīta</string>
+  <!-- Description of front of identity card image -->
+  <string name="front_of_id">Identifikācijas kartes priekšpuse</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="front_of_id_selected">ID dokumenta priekšpuse ir atlasīta</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="go_back">Doties atpakaļ</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="grant_camera_permission_text">Lai izmantotu jūsu kameru, mums ir nepieciešama jūsu atļauja. Lūdzu, savos lietotnes iestatījumos iespējojiet kameras piekļuvi.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="hold_still">Nekustiniet, notiek skenēšana</string>
+  <!-- display name for ID -->
+  <string name="id_card">ID</string>
+  <!-- Continue button text -->
+  <string name="kontinue">turpināt</string>
+  <!-- Status while screen is loading -->
+  <string name="loading">Ielādē</string>
+  <!-- No comment provided by engineer. -->
+  <string name="ok">Labi</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="passport">Pase</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="passport_selected">Pase ir atlasīta</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="position_dl_back">Apgrieziet autovadītāja apliecību uz otru pusi</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="position_dl_front">Gādājiet, lai autovadītāja apliecība būtu kadra centrā</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="position_id_back">Apgrieziet identifikācijas karti uz otru pusi</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="position_id_front">Gādājiet, lai identifikācijas karte būtu kadra centrā</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="position_passport">Gādājiet, lai pase būtu kadra centrā</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="scanned">Skenēts</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="select">Atlasīt</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="take_photo">Uzņemt attēlu</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="try_again">Mēģināt vēlreiz</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="unexpected_error_try_again">Radusies negaidīta kļūda — mēģiniet vēlreiz pēc dažām sekundēm</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="upload_dialog_title_dl_back">Augšupielādējiet vadītāja apliecības aizmuguri</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="upload_dialog_title_dl_front">Augšupielādējiet vadītāja apliecības priekšpusi</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="upload_dialog_title_id_back">Augšupielādējiet ID dokumenta aizmuguri</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="upload_dialog_title_id_front">Augšupielādējiet ID dokumenta priekšpusi</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="upload_dialog_title_passport">Augšupielādēt pasi</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="upload_file_text">Vai arī varat manuāli augšupielādēt %1$s</string>
+</resources>

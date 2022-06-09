@@ -61,6 +61,7 @@ import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -87,7 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
      */
-    private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
+    private val lazyPaymentConfiguration: Provider<PaymentConfiguration>,
     @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
@@ -230,7 +231,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentMethods = initData.paymentMethods,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
-                newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
+                newLpm = viewModel.paymentSelection as? PaymentSelection.New,
                 statusBarColor = statusBarColor(),
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,
@@ -375,6 +376,9 @@ internal class DefaultFlowController @Inject internal constructor(
     internal fun onPaymentOptionResult(
         paymentOptionResult: PaymentOptionResult?
     ) {
+        paymentOptionResult?.paymentMethods?.let {
+            viewModel.initData = viewModel.initData.copy(paymentMethods = it)
+        }
         when (paymentOptionResult) {
             is PaymentOptionResult.Succeeded -> {
                 val paymentSelection = paymentOptionResult.paymentSelection

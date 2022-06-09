@@ -12,13 +12,18 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -32,70 +37,71 @@ import javax.inject.Provider
  */
 internal class SignUpViewModel @Inject constructor(
     args: LinkActivityContract.Args,
-    @Named(PREFILLED_EMAIL) private val prefilledEmail: String?,
+    @Named(PREFILLED_EMAIL) private val customerEmail: String?,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
+    private val prefilledEmail =
+        if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
+
     val merchantName: String = args.merchantName
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(prefilledEmail)
+    val emailController: TextFieldController = SimpleTextFieldController
+        .createEmailSectionController(prefilledEmail)
+
+    val phoneController: PhoneNumberController =
+        PhoneNumberController.createPhoneNumberController()
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> =
-        emailElement.getFormFieldValueFlow().map { formFieldsList ->
-            // formFieldsList contains only one element, for the email. Take the second value of
-            // the pair, which is the FormFieldEntry containing the value entered by the user.
-            formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
-        }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
+        emailController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, prefilledEmail)
+
+    /**
+     * Emits the phone number entered in the form if valid, null otherwise.
+     */
+    private val consumerPhoneNumber: StateFlow<String?> =
+        phoneController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val isReadyToSignUp = combine(consumerEmail, consumerPhoneNumber) { email, phone ->
+        email != null && phone != null
+    }
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
-    /**
-     * Holds a Job that looks up the email after a delay, so that we can cancel it if the user
-     * continues typing.
-     */
-    private var lookupJob: Job? = null
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
+
+    private val debouncer = Debouncer(prefilledEmail)
 
     init {
-        viewModelScope.launch {
-            consumerEmail.collect { email ->
-                // The first emitted value is the one provided in the constructor arguments, and
-                // shouldn't trigger a lookup.
-                if (email == prefilledEmail && lookupJob == null) {
-                    // If it's a valid email, collect phone number
-                    if (email != null) {
-                        _signUpStatus.value = SignUpState.InputtingPhone
-                    }
-                    return@collect
-                }
-
-                lookupJob?.cancel()
-
-                if (email != null) {
-                    lookupJob = launch {
-                        delay(LOOKUP_DEBOUNCE_MS)
-                        if (isActive) {
-                            _signUpStatus.value = SignUpState.VerifyingEmail
-                            lookupConsumerEmail(email)
-                        }
-                    }
-                } else {
-                    _signUpStatus.value = SignUpState.InputtingEmail
+        debouncer.startWatching(
+            coroutineScope = viewModelScope,
+            emailFlow = consumerEmail,
+            onStateChanged = {
+                _signUpStatus.value = it
+            },
+            onValidEmailEntered = {
+                viewModelScope.launch {
+                    lookupConsumerEmail(it)
                 }
             }
-        }
+        )
     }
 
-    fun onSignUpClick(phone: String) {
-        // Email must be valid otherwise sign up button would not be displayed
+    fun onSignUpClick() {
+        clearError()
+        // All inputs must be valid otherwise sign up button would not be displayed
         val email = requireNotNull(consumerEmail.value)
+        val phone = phoneController.getE164PhoneNumber(requireNotNull(consumerPhoneNumber.value))
+        val country = phoneController.getCountryCode()
         viewModelScope.launch {
-            // TODO(brnunes-stripe): Read formatted phone and country code from phone number element
-            linkAccountManager.signUp(email, "+1$phone", "US").fold(
+            linkAccountManager.signUp(email, phone, country).fold(
                 onSuccess = {
                     onAccountFetched(it)
                 },
@@ -105,6 +111,7 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
+        clearError()
         linkAccountManager.lookupConsumer(email).fold(
             onSuccess = {
                 if (it != null) {
@@ -124,13 +131,62 @@ internal class SignUpViewModel @Inject constructor(
             navigator.navigateTo(LinkScreen.Verification)
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
-            emailElement.setRawValue(mapOf(EmailSpec.identifier to ""))
+            emailController.onRawValueChange("")
         }
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+    private fun clearError() {
+        _errorMessage.value = null
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
+        _errorMessage.value = it
+    }
+
+    internal class Debouncer(
+        private val initialEmail: String?
+    ) {
+        /**
+         * Holds a Job that looks up the email after a delay, so that we can cancel it if the user
+         * continues typing.
+         */
+        private var lookupJob: Job? = null
+
+        fun startWatching(
+            coroutineScope: CoroutineScope,
+            emailFlow: StateFlow<String?>,
+            onStateChanged: (SignUpState) -> Unit,
+            onValidEmailEntered: (String) -> Unit
+        ) {
+            coroutineScope.launch {
+                emailFlow.collect { email ->
+                    // The first emitted value is the one provided in the constructor arguments, and
+                    // shouldn't trigger a lookup.
+                    if (email == initialEmail && lookupJob == null) {
+                        // If it's a valid email, collect phone number
+                        if (email != null) {
+                            onStateChanged(SignUpState.InputtingPhone)
+                        }
+                        return@collect
+                    }
+
+                    lookupJob?.cancel()
+
+                    if (email != null) {
+                        lookupJob = launch {
+                            delay(LOOKUP_DEBOUNCE_MS)
+                            if (isActive) {
+                                onStateChanged(SignUpState.VerifyingEmail)
+                                onValidEmailEntered(email)
+                            }
+                        }
+                    } else {
+                        onStateChanged(SignUpState.InputtingEmail)
+                    }
+                }
+            }
+        }
     }
 
     internal class Factory(

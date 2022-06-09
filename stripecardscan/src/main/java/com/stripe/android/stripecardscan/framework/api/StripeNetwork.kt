@@ -4,7 +4,6 @@ import android.util.Log
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
@@ -201,5 +200,7 @@ internal class StripeNetwork internal constructor(
 
     internal companion object {
         const val RESPONSE_CODE_UNSET = -1
+
+        private val LOG_TAG = StripeNetwork::class.java.simpleName
     }
 }

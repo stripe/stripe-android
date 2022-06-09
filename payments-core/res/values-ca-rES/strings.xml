@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">El teu codi ZIP no és vàlid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">El teu ZIP / codi postal no és vàlid</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Pagueu a terminis amb &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Nom al compte</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">Número BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">En facilitar-nos les dades bancàries i confirmar aquest pagament, esteu d\'acord amb aquesta Sol·licitud de Domiciliació Bancària i amb el &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Servei de Sol·licitud de Domiciliació Bancària&lt;/a&gt;, i autoritzeu Stripe Payments Australia Pty Ltd ACN 160 180 343, amb número d\'identificador d\'usuari de domiciliació bancària 507156 («Stripe») a carregar el vostre compte mitjançant el Sistema de Compensació Electrònica a gran escala (BECS per les seves sigles en anglès) en nom de %s (el «Venedor») per qualsevol import que se us hagi comunicat de manera separada per part del Venedor. Certifiqueu que sou el titular del compte o un signatari autoritzat del compte indicat anteriorment.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Facilitant-nos les teves dades bancàries i confirmant aquest pagament, estàs d\'acord amb aquesta Sol·licitud de Domiciliació Bancària i amb el Servei de Sol·licitud de Domiciliació Bancària, i autoritzes Stripe Payments Australia Pty Ltd ACN 160 180 343, amb número d\'identificador d\'usuari de domiciliació bancària 507156 («Stripe») a carregar en el teu compte mitjançant el Sistema de Compensació Electrònica a gran escala (BECS per les seves sigles en anglès) en nom de %1$s (el «Venedor») per qualsevol import que se t\'hagi comunicat de manera separada per part del Venedor. Certifiques que ets el titular del compte o un signatari autoritzat del compte indicat anteriorment.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,13 +108,19 @@
   <string name="becs_widget_name">Nom</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">El teu nom és obligatori.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Cancel·la</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s que acaba en %2$s</string>
   <!-- Text for close button -->
-  <string name="close">Tancar</string>
+  <string name="close">Tanca</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Eliminar mètode de pagament</string>
   <string name="delete_payment_method_prompt_title">Vols eliminar mètode de pagament?</string>
+  <!-- Done button title -->
+  <string name="done">Fet</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Editar</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM / AA</string>
   <string name="expiry_label_short">Caducitat</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Seleccionar Compte Bancari (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Sense cost</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Eliminar</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Eliminat %s</string>
   <string name="secure_checkout">Compra Segura</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Estem tenint problemes connectant-nos al nostre proveïdor de serveis de pagament. Comprova la teva connexió a internet i torna-ho a provar.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">No podem autenticar el teu mètode de pagament. Si us plau, escull un mètode de pagament diferent.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">S\'ha esgotat el temps d\'autenticació del teu mètode de pagament - intenta-ho un altre cop</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">S\'ha produït un error intern.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

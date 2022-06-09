@@ -1,7 +1,9 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
+import androidx.annotation.StringRes
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
@@ -27,6 +29,7 @@ import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
@@ -37,11 +40,18 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
-    val saveForFutureCheckbox =
-        EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+    val testMode = EspressoIdButton(R.id.testmode)
+    val continueButton = EspressoIdButton(R.id.continue_button)
+    val complete = EspressoLabelIdButton(R.string.checkout_complete)
+    val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
+    val multiStepSelect = EspressoIdButton(R.id.payment_method)
+    val saveForFutureCheckbox = composeTestRule
+        .onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+
     val customer = when (testParameters.customer) {
         Customer.Guest -> EspressoLabelIdButton(R.string.customer_guest)
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
+        Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
     }
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
@@ -50,6 +60,8 @@ class Selectors(
     val currency = when (testParameters.currency) {
         Currency.EUR -> EspressoLabelIdButton(R.string.currency_eur)
         Currency.USD -> EspressoLabelIdButton(R.string.currency_usd)
+        Currency.AUD -> EspressoLabelIdButton(R.string.currency_aud)
+        Currency.GBP -> EspressoLabelIdButton(R.string.currency_gbp)
     }
 
     val checkout = when (testParameters.intentType) {
@@ -88,6 +100,8 @@ class Selectors(
         testParameters.intentType.name
 
     val buyButton = BuyButton(device)
+
+    val editButton = EditButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 
@@ -210,8 +224,8 @@ class Selectors(
         getResourceString(R.string.email)
     )
 
-    fun getName() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_name)
+    fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
+        getResourceString(resourceId)
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(
@@ -230,10 +244,36 @@ class Selectors(
         getResourceString(R.string.address_label_zip_code)
     )
 
+    fun getAuBsb() = composeTestRule.onNodeWithText(
+        getResourceString(com.stripe.android.ui.core.R.string.becs_widget_bsb)
+    )
+
+    fun getAuAccountNumber() = composeTestRule.onNodeWithText(
+        getResourceString(R.string.becs_widget_account_number)
+    )
+
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(
         "Or pay",
         substring = true,
         useUnmergedTree = true
+    )
+
+    fun getCardNumber() = composeTestRule.onNodeWithText(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            com.stripe.android.R.string.acc_label_card_number
+        )
+    )
+
+    fun getCardExpiration() = composeTestRule.onNodeWithText(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            R.string.stripe_paymentsheet_expiration_date_hint
+        )
+    )
+
+    fun getCardCvc() = composeTestRule.onNodeWithText(
+        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
+            com.stripe.android.ui.core.R.string.cvc_number_hint
+        )
     )
 
     companion object {

@@ -77,12 +77,9 @@ dependencies {
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+    implementation "androidx.browser:browser:$androidxBrowserVersion"
 
     testImplementation "junit:junit:$junitVersion"
-
-    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

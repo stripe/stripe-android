@@ -1,9 +1,9 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
-import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
-import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.seconds
+import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
+import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.CardMatchResult

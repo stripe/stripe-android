@@ -1,9 +1,104 @@
 # CHANGELOG
+
+## X.X.X
+
+### Financial Connections
+* [ADDED][5117](https://github.com/stripe/stripe-android/pull/5117) Adds rememberFinancialConnectionsSheet and rememberFinancialConnectionsSheetForToken.
+
+## 20.5.0 - 2022-06-01
+This release contains several bug fixes for Payments and PaymentSheet, deprecates the PaymentSheet's `primaryButtonColor` api in favor of the new [appearance api](https://stripe.com/docs/elements/appearance-api?platform=android), and adds card brand icons to the card details form. 
+
+### PaymentSheet
+* [DEPRECATED][5061](https://github.com/stripe/stripe-android/pull/5061) Add Deprecated annotation to old primaryButtonColor api.
+* [FIXED][5068](https://github.com/stripe/stripe-android/pull/5068) Fix missing theming for add lpm button and notes text.
+* [ADDED][5069](https://github.com/stripe/stripe-android/pull/5069) Add card brand icons to card details form.
+
+### Payments
+* [FIXED][5079](https://github.com/stripe/stripe-android/pull/5079) Add 3ds2 url to list of completion URLs so callbacks work correctly.
+* [FIXED][5094](https://github.com/stripe/stripe-android/pull/5094) Use correct cvc icon in card form view.
+
+## 20.4.0 - 2022-05-23
+This release adds [appearance customization APIs](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L186) to payment sheet and enables Affirm and AU BECS direct debit as payment methods within Payment Sheet.
+
+### Payments
+* [CHANGED][5038](https://github.com/stripe/stripe-android/pull/5038) Remove force portrait mode in Google Pay.
+* [ADDED][5011](https://github.com/stripe/stripe-android/pull/5011) Add `allowCreditCards` to `GooglePayLauncher`
+
+### PaymentSheet
+* [FIXED][5039](https://github.com/stripe/stripe-android/pull/5039) Fixed the format of the country dropdown in PaymentSheet for all languages.
+* [ADDED][5042](https://github.com/stripe/stripe-android/pull/5042) Added Affirm and AU BECS Direct Debit.
+* [ADDED][5020](https://github.com/stripe/stripe-android/pull/5020) Merge Appearance APIs to master. 
+* [FIXED][5022](https://github.com/stripe/stripe-android/pull/5022) Add missing translation for card information.
+* [FIXED][5048](https://github.com/stripe/stripe-android/pull/5048) Fixed a crash when removing the last payment method in the custom flow editor.
+
+## 20.3.0 - 2022-05-16
+This release adds `us_bank_account` PaymentMethod to PaymentSheet.
+
+### PaymentSheet
+* [FIXED][5011](https://github.com/stripe/stripe-android/pull/5011) fix flying payment sheet by downgrading material from 1.6 to 1.5
+* [ADDED][4964](https://github.com/stripe/stripe-android/pull/4964) `us_bank_account` PaymentMethod is now available in PaymentSheet
+
+### camera-core
+* [FIXED][5004](https://github.com/stripe/stripe-android/pull/5004) Fix front camera callback to return an upside down image
+
+## 20.2.2 - 2022-05-09
+This release contains bug fixes in PaymentSheet.
+
+### PaymentSheet
+* [FIXED][4966](https://github.com/stripe/stripe-android/pull/4966) Replaced alpha androidx.lifecycle dependencies with stable versions
+* [FIXED][4961](https://github.com/stripe/stripe-android/pull/4961) Fix issue entering text with small forms.
+
+## 20.2.1 - 2022-05-03
+This release contains bug fixes in PaymentSheet and Payments.
+
+### Payments
+* [CHANGED] [4910](https://github.com/stripe/stripe-android/pull/4910) Some changes affecting CollectBankAccountLauncher (ACH)
+  * `CollectBankAccountResponse#LinkAccountSession` to `FinancialConnectionsSession`
+  * `LinkedAccount` to `FinancialConnectionsAccount`.
+
+### PaymentSheet
+* [FIXED] [4918](https://github.com/stripe/stripe-android/pull/4918) Fix a problem introduced in 20.0.0 where save for future use was defaulted to true.
+* [FIXED] [4921](https://github.com/stripe/stripe-android/pull/4921) Fixed a crash that could happen when switching between LPMs.
+
+## 20.2.0 - 2022-04-25
+This release adds card scanning to PaymentSheet.
+
+### PaymentSheet
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Card-scanning in PaymentSheet
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+* [FIXED] [4909](https://github.com/stripe/stripe-android/pull/4909) In the multi-step flow when re-opening to a new card the form will pre-populate.  Also the default billing address will pre-populate in the form.
+
+### Financial Connections
+* [CHANGED] [4887](https://github.com/stripe/stripe-android/pull/4887) Renamed Connections to Financial Connections.
+
+## 20.1.0 - 2022-04-18
+This release includes several Payments and PaymentSheet bug fixes.
+
+### Payments (`com.stripe:stripe-android`)
+* [ADDED] [4874](https://github.com/stripe/stripe-android/pull/4874) `us_bank_account` PaymentMethod is now available for ACH Direct Debit payments, including APIs to collect customer bank information (requires Connections SDK) and verify microdeposits.
+* [FIXED] [4875](https://github.com/stripe/stripe-android/pull/4875) fix postal code callback not firing when enabled
+
+### PaymentSheet
+* [FIXED] [4861](https://github.com/stripe/stripe-android/pull/4861) Remove font resource to save space and default to system default
+* [CHANGED] [4855](https://github.com/stripe/stripe-android/pull/4855) Remove force portrait mode in PaymentLauncher.
+
+### CardScan
+* [FIXED] [5075](https://github.com/stripe/stripe-android/pull/5075) Prevent a crash when the fragment is detached.
+
+## 20.0.1 - 2022-04-11
+This release includes several PaymentSheet bug fixes.
+
+### PaymentSheet
+* [FIXED] [4840](https://github.com/stripe/stripe-android/pull/4840) Multi-step now shows the last 4 of the card number instead of 'card'.
+* [FIXED] [4847](https://github.com/stripe/stripe-android/pull/4847) Fix the width of the PaymentSheet payment method selector.
+* [FIXED] [4851](https://github.com/stripe/stripe-android/pull/4851) Add support for http logoUri.
+
 ## 20.0.0 - 2022-04-04
 This release patches on a crash on PaymentLauncher, updates the package name of some public classes,
 changes the public API for CardImageVerificationSheet and releases Identity SDK.
 
 ### Payments (`com.stripe:stripe-android`)
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Added card-scanning feature to PaymentSheet
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
 * [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on
   PaymentSheet to use Compose.
@@ -11,7 +106,7 @@ changes the public API for CardImageVerificationSheet and releases Identity SDK.
 ### Identity (`com.stripe:identity`)
 * [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
 
-### Connections (`com.stripe:connection`)
+### Financial Connections (`com.stripe:financial-connections`)
 * [ADDED] [4818](https://github.com/stripe/stripe-mandroid/pull/4818) Connections SDK can be optionally included to support ACH Direct Debit payments.
 
 ### CardScan (`com.stripe:stripecardscan`)

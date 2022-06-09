@@ -11,6 +11,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
@@ -107,11 +108,12 @@ internal class ConsentFragmentTest {
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.args).thenReturn(
+        whenever(it.verificationArgs).thenReturn(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId = VERIFICATION_SESSION_ID,
                 ephemeralKeySecret = EPHEMERAL_KEY,
-                brandLogo = BRAND_LOGO
+                brandLogo = BRAND_LOGO,
+                injectorKey = DUMMY_INJECTOR_KEY
             )
         )
     }
@@ -148,7 +150,7 @@ internal class ConsentFragmentTest {
 
     @Test
     fun `when waiting verificationPage UI shows progress circular`() {
-        launchConsentFragment { binding, _ ->
+        launchConsentFragment { binding, _, _ ->
             assertThat(binding.loadings.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.texts.visibility).isEqualTo(View.GONE)
             assertThat(binding.buttons.visibility).isEqualTo(View.GONE)
@@ -162,7 +164,7 @@ internal class ConsentFragmentTest {
                 missing = emptyList()
             )
         )
-        launchConsentFragment { _, navController ->
+        launchConsentFragment { _, navController, _ ->
             setUpSuccessVerificationPage()
 
             assertThat(navController.currentDestination?.id)
@@ -171,8 +173,40 @@ internal class ConsentFragmentTest {
     }
 
     @Test
+    fun `when not unsupported_client navigate to errorFragment with failed reason`() {
+        whenever(verificationPageWithTimeAndPolicy.unsupportedClient).thenReturn(true)
+        launchConsentFragment { _, navController, fragment ->
+            setUpSuccessVerificationPage()
+
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.errorFragment)
+
+            requireNotNull(navController.backStack.last().arguments).let { args ->
+                assertThat(
+                    args[ErrorFragment.ARG_ERROR_TITLE]
+                ).isEqualTo(fragment.getString(R.string.error))
+
+                assertThat(
+                    args[ErrorFragment.ARG_ERROR_CONTENT]
+                ).isEqualTo(fragment.getString(R.string.unexpected_error_try_again))
+
+                assertThat(
+                    args[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT]
+                ).isEqualTo(fragment.getString(R.string.go_back))
+
+                assertThat(
+                    args[ErrorFragment.ARG_FAILED_REASON]
+                ).isInstanceOf(IllegalStateException::class.java)
+                assertThat(
+                    (args[ErrorFragment.ARG_FAILED_REASON] as IllegalStateException).message
+                ).isEqualTo("Unsupported client")
+            }
+        }
+    }
+
+    @Test
     fun `when verificationPage is ready UI is bound correctly`() {
-        launchConsentFragment { binding, _ ->
+        launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
 
             verify(
@@ -200,7 +234,7 @@ internal class ConsentFragmentTest {
 
     @Test
     fun `when verificationPage without time and policy is ready UI is bound correctly`() {
-        launchConsentFragment { binding, _ ->
+        launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage(verificationPageWithOutTimeAndPolicy)
 
             assertThat(binding.loadings.visibility).isEqualTo(View.GONE)
@@ -225,7 +259,7 @@ internal class ConsentFragmentTest {
 
     @Test
     fun `when verificationApiErrorLiveData is ready transitions to errorFragment`() {
-        launchConsentFragment { _, navController ->
+        launchConsentFragment { _, navController, _ ->
             setUpErrorVerificationPage()
 
             assertThat(navController.currentDestination?.id)
@@ -240,7 +274,7 @@ internal class ConsentFragmentTest {
                 mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenReturn(correctVerificationData)
 
-            launchConsentFragment { binding, navController ->
+            launchConsentFragment { binding, navController, _ ->
                 setUpSuccessVerificationPage()
 
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
@@ -263,7 +297,7 @@ internal class ConsentFragmentTest {
                 mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenThrow(APIException())
 
-            launchConsentFragment { binding, navController ->
+            launchConsentFragment { binding, navController, _ ->
                 setUpSuccessVerificationPage()
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
@@ -280,7 +314,7 @@ internal class ConsentFragmentTest {
                 mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenReturn(incorrectVerificationData)
 
-            launchConsentFragment { binding, navController ->
+            launchConsentFragment { binding, navController, _ ->
                 setUpSuccessVerificationPage()
                 binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
@@ -295,7 +329,7 @@ internal class ConsentFragmentTest {
                     assertThat(arguments[ErrorFragment.ARG_ERROR_CONTENT])
                         .isEqualTo(ERROR_BODY)
                     assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION])
-                        .isEqualTo(R.id.action_errorFragment_to_consentFragment)
+                        .isEqualTo(R.id.consentFragment)
                     assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT])
                         .isEqualTo(ERROR_BUTTON_TEXT)
                 }
@@ -313,7 +347,7 @@ internal class ConsentFragmentTest {
                 mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenThrow(APIException())
 
-            launchConsentFragment { binding, navController ->
+            launchConsentFragment { binding, navController, _ ->
                 setUpSuccessVerificationPage()
                 binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
@@ -324,14 +358,13 @@ internal class ConsentFragmentTest {
     }
 
     private fun launchConsentFragment(
-        testBlock: (binding: ConsentFragmentBinding, navController: TestNavHostController) -> Unit
+        testBlock: (binding: ConsentFragmentBinding, navController: TestNavHostController, fragment: ConsentFragment) -> Unit
     ) = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
         ConsentFragment(
             viewModelFactoryFor(mockIdentityViewModel),
             viewModelFactoryFor(mockConsentFragmentViewModel),
-            mock()
         )
     }.onFragment {
         val navController = TestNavHostController(
@@ -345,7 +378,7 @@ internal class ConsentFragmentTest {
             it.requireView(),
             navController
         )
-        testBlock(ConsentFragmentBinding.bind(it.requireView()), navController)
+        testBlock(ConsentFragmentBinding.bind(it.requireView()), navController, it)
     }
 
     private companion object {

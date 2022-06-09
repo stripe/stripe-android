@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">Postnummeret ditt er ugyldig.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Postnummeret ditt er ugyldig</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">Betal over tid med &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">Navn på kontoen</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB-nummer</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">Ved å angi detaljer for bankkonto og bekrefte betalingen godtar du denne forespørselen om direktedebitering og &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt; tjenesteavtalen for forespørsel om direktedebitering&lt;/a&gt;, og godkjenner at Stripe Payments Australia Pty Ltd ACN 160 180 343 bruker-ID-nummer for direktedebitering 507156 (“Stripe”) debiterer kontoen din gjennom Bulk Electronic Clearing System (BECS) på vegne av %s (\"Forhandleren\") for alle beløp separat kommunisert deg av Forhandleren. Du attesterer at du enten er kontoholder eller er autorisert til å signere for kontoen vist ovenfor.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    Ved å angi detaljer for bankkonto og bekrefte betalingen godtar du denne\n    forespørselen om direktedebitering og tjenesteavtalen for forespørsel om direktedebitering, og godkjenner at\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 bruker-ID-nummer for direktedebitering 507156\n    (“Stripe”) debiterer kontoen din gjennom Bulk Electronic Clearing System (BECS) på\n    vegne av %1$s (\"Forhandleren\") for alle beløp separat kommunisert deg\n    av Forhandleren. Du attesterer at du enten er kontoholder eller er autorisert til å\n    signere for kontoen vist ovenfor.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">Navn</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">Navn er påkrevd.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Avbryt</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s som slutter på %2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">Slett betalingsmetode</string>
   <string name="delete_payment_method_prompt_title">Slette betalingsmåte?</string>
+  <!-- Done button title -->
+  <string name="done">Ferdig</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Rediger</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/ÅÅ</string>
   <string name="expiry_label_short">Utløp</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">Velg bankkonto (FPX) …</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Gratis</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Fjern</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Fjernet %s</string>
   <string name="secure_checkout">Sikker utsjekking</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Det har oppstått et problem under tilkoblingen til betalingstjenesten. Kontroller Internett-forbindelsen og prøv igjen.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Vi kan ikke godkjenne betalingsmåten din. Vennligst velg en annen betalingsmetode og prøv igjen.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Tidsavbrudd ved godkjennelse av betalingsmåten din - prøv igjen</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Det oppstod en intern feil.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

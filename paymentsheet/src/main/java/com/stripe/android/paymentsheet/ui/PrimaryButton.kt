@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -21,8 +20,12 @@ import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.PrimaryButtonStyle
 import com.stripe.android.ui.core.convertDpToPx
+import com.stripe.android.ui.core.getBorderStrokeColor
+import com.stripe.android.ui.core.getComposeTextStyle
+import com.stripe.android.ui.core.getOnBackgroundColor
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -53,6 +56,15 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
+    private var cornerRadius = context.convertDpToPx(
+        PaymentsThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
+    )
+    private var borderStrokeWidth = context.convertDpToPx(
+        PaymentsThemeDefaults.primaryButtonStyle.shape.borderStrokeWidth.dp
+    )
+    private var borderStrokeColor =
+        PaymentsThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
+
     init {
         // This is only needed if the button is inside a fragment
         viewBinding.label.setViewCompositionStrategy(
@@ -66,18 +78,26 @@ internal class PrimaryButton @JvmOverloads constructor(
         isEnabled = false
     }
 
-    fun setDefaultBackGroundColor(tintList: ColorStateList?) {
+    fun setAppearanceConfiguration(
+        primaryButtonStyle: PrimaryButtonStyle,
+        tintList: ColorStateList?
+    ) {
+        cornerRadius = context.convertDpToPx(primaryButtonStyle.shape.cornerRadius.dp)
+        borderStrokeWidth = context.convertDpToPx(primaryButtonStyle.shape.borderStrokeWidth.dp)
+        borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(context)
+        viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
+            primaryButtonStyle.getOnBackgroundColor(context)
+        )
         backgroundTintList = tintList
         defaultTintList = tintList
     }
 
     override fun setBackgroundTintList(tintList: ColorStateList?) {
-        val cornerRadius = context.convertDpToPx(PaymentsThemeConfig.Shapes.cornerRadius)
-
         val shape = GradientDrawable()
         shape.shape = GradientDrawable.RECTANGLE
         shape.cornerRadius = cornerRadius
         shape.color = tintList
+        shape.setStroke(borderStrokeWidth.toInt(), borderStrokeColor)
 
         background = shape
         setPadding(
@@ -100,10 +120,10 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     fun setLabel(text: String?) {
         externalLabel = text
-        if (state !is State.StartProcessing) {
-            originalLabel = text
-        }
         text?.let {
+            if (state !is State.StartProcessing) {
+                originalLabel = text
+            }
             viewBinding.label.setContent {
                 LabelUI(label = text)
             }
@@ -111,6 +131,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
+        isClickable = true
         originalLabel?.let {
             setLabel(it)
         }
@@ -124,13 +145,14 @@ internal class PrimaryButton @JvmOverloads constructor(
     private fun onStartProcessing() {
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
-
+        isClickable = false
         setLabel(
             resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
         )
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+        isClickable = false
         backgroundTintList = ColorStateList.valueOf(
             resources.getColor(R.color.stripe_paymentsheet_primary_button_success_background)
         )
@@ -186,15 +208,27 @@ internal class PrimaryButton @JvmOverloads constructor(
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
+
+    /**
+     * Used to override the current UI state of the Primary Button
+     */
+    internal data class UIState(
+        val label: String?,
+        val onClick: (() -> Unit)?,
+        val enabled: Boolean,
+        val visible: Boolean
+    )
 }
 
 @Composable
 private fun LabelUI(label: String) {
-    Text(
-        text = label,
-        textAlign = TextAlign.Center,
-        color = colorResource(R.color.stripe_paymentsheet_primary_button_text),
-        style = PaymentsTheme.typography.h5,
-        modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
-    )
+    PaymentsTheme {
+        Text(
+            text = label,
+            textAlign = TextAlign.Center,
+            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
+            modifier = Modifier
+                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+        )
+    }
 }

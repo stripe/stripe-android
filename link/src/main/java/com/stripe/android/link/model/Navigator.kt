@@ -1,5 +1,6 @@
 package com.stripe.android.link.model
 
+import androidx.lifecycle.asFlow
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
@@ -23,10 +24,18 @@ internal class Navigator @Inject constructor() {
     ) = navigationController?.let { navController ->
         navController.navigate(target.route) {
             if (clearBackStack) {
-                popUpTo(navController.backQueue.first().destination.id)
+                popUpTo(navController.backQueue.first().destination.id) {
+                    inclusive = true
+                }
             }
         }
     }
+
+    fun setResult(key: String, value: Any) =
+        navigationController?.previousBackStackEntry?.savedStateHandle?.set(key, value)
+
+    fun <T> getResultFlow(key: String) =
+        navigationController?.currentBackStackEntry?.savedStateHandle?.getLiveData<T>(key)?.asFlow()
 
     /**
      * Behaves like a back button, popping the back stack and dismissing the Activity if this was
@@ -46,4 +55,10 @@ internal class Navigator @Inject constructor() {
         onDismiss?.let {
             it(result)
         }
+
+    fun isOnRootScreen() = navigationController?.isOnRootScreen()
 }
+
+// The Loading screen is always at the bottom of the stack, so a size of 2 means the current
+// screen is at the bottom of the navigation stack.
+fun NavHostController.isOnRootScreen() = backQueue.size <= 2

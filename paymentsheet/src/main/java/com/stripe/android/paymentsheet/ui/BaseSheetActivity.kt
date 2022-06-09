@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Insets
@@ -18,15 +17,32 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
+import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.Html
+import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
@@ -43,11 +59,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
+    abstract val linkAuthView: ComposeView
     abstract val scrollView: ScrollView
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
+    abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
     abstract val testModeIndicator: TextView
+    abstract val notesView: ComposeView
+    abstract val primaryButton: PrimaryButton
+    abstract val bottomSpacer: View
 
     abstract fun setActivityResult(result: ResultType)
 
@@ -57,6 +78,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.registerFromActivity(this)
 
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
@@ -75,9 +97,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 0f
             }
         }
-
-        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.setup()
 
@@ -107,6 +126,26 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
+        setupHeader()
+        setupPrimaryButton()
+        setupNotes()
+
+        viewModel.showLinkVerificationDialog.observe(this) { show ->
+            linkAuthView.setContent {
+                if (show) {
+                    viewModel.linkVerificationCallback?.let { callback ->
+                        LinkVerificationDialog(
+                            linkLauncher = viewModel.linkLauncher,
+                            verificationCallback = callback
+                        )
+                    }
+                }
+            }
+        }
+
+        viewModel.contentVisible.observe(this) {
+            scrollView.isVisible = it
+        }
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
@@ -117,12 +156,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         val isDark = baseContext.isSystemDarkTheme()
-        bottomSheet.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
-        toolbar.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
+        viewModel.config?.let {
+            bottomSheet.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+            toolbar.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+        }
 
         setSheetWidthForTablets()
     }
@@ -134,10 +175,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
+            clearErrorMessages()
             super.onBackPressed()
         } else {
             viewModel.onUserCancel()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
     }
 
     protected fun closeSheet(
@@ -146,6 +193,108 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
+    }
+
+    open fun clearErrorMessages() {
+        updateErrorMessage(messageView)
+    }
+
+    protected fun updateErrorMessage(
+        messageView: TextView,
+        userMessage: BaseSheetViewModel.UserErrorMessage? = null
+    ) {
+        userMessage?.message.let { message ->
+            viewModel.config?.appearance?.let {
+                messageView.text = createTextSpanFromTextStyle(
+                    text = message,
+                    context = this,
+                    fontSizeDp = (
+                        it.typography.sizeScaleFactor
+                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                        ).dp,
+                    color = Color(it.getColors(this.isSystemDarkTheme()).error),
+                    fontFamily = it.typography.fontResId
+                )
+            }
+        }
+
+        messageView.isVisible = userMessage != null
+    }
+
+    private fun setupHeader() {
+        header.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val text = viewModel.headerText.observeAsState()
+
+                text.value?.let {
+                    PaymentsTheme {
+                        H4Text(
+                            text = it,
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Perform the initial setup for the primary button.
+     */
+    private fun setupPrimaryButton() {
+        viewModel.primaryButtonUIState.observe(this) { state ->
+            state?.let {
+                primaryButton.setOnClickListener {
+                    state.onClick?.invoke()
+                }
+                primaryButton.setLabel(state.label)
+                primaryButton.isVisible = state.visible
+                bottomSpacer.isVisible = state.visible
+            } ?: run {
+                resetPrimaryButtonState()
+            }
+        }
+        viewModel.primaryButtonState.observe(this) { state ->
+            primaryButton.updateState(state)
+        }
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            primaryButton.isEnabled = isEnabled
+        }
+
+        primaryButton.setAppearanceConfiguration(
+            PaymentsTheme.primaryButtonStyle,
+            tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
+            )
+        )
+        bottomSpacer.isVisible = true
+    }
+
+    /**
+     * Reset the primary button to its default state.
+     */
+    abstract fun resetPrimaryButtonState()
+
+    private fun setupNotes() {
+        viewModel.notesText.observe(this) { text ->
+            val showNotes = text != null
+            text?.let {
+                notesView.setContent {
+                    PaymentsTheme {
+                        Html(
+                            html = text,
+                            imageGetter = mapOf(),
+                            color = MaterialTheme.paymentsColors.subtitle,
+                            style = MaterialTheme.typography.body1.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                }
+            }
+            notesView.isVisible = showNotes
+        }
     }
 
     private fun updateToolbarButton(isStackEmpty: Boolean) {
@@ -162,11 +311,13 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
-        navigationIconDrawable?.setTintList(
-            ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
+        viewModel.config?.appearance?.let {
+            navigationIconDrawable?.setTintList(
+                ColorStateList.valueOf(
+                    it.getColors(baseContext.isSystemDarkTheme()).appBarIcon
+                )
             )
-        )
+        }
 
         toolbar.navigationIcon = navigationIconDrawable
         toolbar.navigationContentDescription = resources.getString(toolbarResources.description)

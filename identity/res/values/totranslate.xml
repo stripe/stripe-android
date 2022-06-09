@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <!-- Instructional text for capturing selfie -->
+    <string name="position_selfie">Position your face in the center of the frame</string>
+    <!-- Instructional text during selfie is being captured -->
+    <string name="capturing">Capturing…</string>
+    <!-- Instructional text when selfie is captured -->
+    <string name="selfie_capture_complete">Selfie captures are complete</string>
+    <!-- Title of selfie capture -->
+    <string name="selfie_captures">Selfie captures</string>
+    <!-- Content description of selfie flash animation mask -->
+    <string name="flash_mask">Mask color to flash selfie</string>
+    <!-- Content description of a captured selfie -->
+    <string name="selfie_item_description">one selfie captured</string>
+</resources>

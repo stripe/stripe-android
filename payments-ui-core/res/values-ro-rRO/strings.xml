@@ -70,10 +70,24 @@
   <string name="p24_bank">Banca Przelewy24</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Salvați pentru plăți viitoare %s</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="scan_card">Scanare card</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Prin furnizarea informațiilor dvs. privind plata și confirmarea acestei plăți, autorizați (A) %s și Stripe, furnizorul nostru de servicii de plată, să trimită instrucțiuni băncii dvs. pentru a vă debita contul și pentru ca (B) banca dvs. să facă acest lucru în conformitate cu instrucțiunile respective. Conform drepturilor dvs., aveți dreptul la o rambursare din partea băncii dvs. în conformitate cu termenii și condițiile acordului dvs. cu aceasta. O rambursare trebuie revendicată în termen de opt săptămâni de la data debitării contului. Drepturile dvs. sunt explicate într-o declarație pe care o puteți obține de la bancă. Sunteți de acord să primiți notificări pentru debitări viitoare cu până la două zile înainte de efectuarea acestora.</string>
+  <!-- Text for continue button -->
+  <string name="stripe_continue_button_label">Continuare</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Plătiți %s</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Informații privind cardul</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Payment Method type brand name. -->
+  <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Număr card</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurare</string>
 </resources>

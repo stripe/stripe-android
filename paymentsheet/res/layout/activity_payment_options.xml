@@ -12,9 +12,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:animateLayoutChanges="true"
-        android:background="?colorSurface"
         android:orientation="vertical"
+        android:background="?colorSurface"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <!-- This empty ComposeView is used to open a LinkVerificationDialog when needed -->
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/link_auth"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
@@ -28,9 +34,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?colorSurface"
+                android:paddingEnd="12dp"
                 app:contentInsetStart="0dp"
                 app:contentInsetStartWithNavigation="0dp"
-                android:paddingEnd="12dp"
                 tools:ignore="RtlSymmetry">
 
                 <TextView
@@ -63,6 +69,12 @@
                 android:orientation="vertical"
                 android:animateLayoutChanges="true">
 
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"/>
+
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/fragment_container"
                     android:name="com.stripe.android.paymentsheet.PaymentSheetLoadingFragment"
@@ -87,13 +99,25 @@
                         android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
                         android:layout_marginStart="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                         android:layout_marginEnd="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
-                        android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/stripe_paymentsheet_continue_button_label"
                         android:visibility="gone" />
 
                 </FrameLayout>
+
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/notes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginVertical="2dp"
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal" />
+
+                <View
+                    android:id="@+id/bottom_spacer"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/stripe_paymentsheet_button_container_spacing_bottom" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

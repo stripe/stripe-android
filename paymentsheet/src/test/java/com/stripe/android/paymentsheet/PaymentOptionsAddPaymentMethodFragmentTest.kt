@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -39,14 +38,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
     @After
     fun cleanUp() {
         super.after()
-    }
-
-    @Test
-    fun `when isGooglePayEnabled=true should still not display the Google Pay button`() {
-        createFragment { _, viewBinding, _ ->
-            assertThat(viewBinding.googlePayButton.isVisible)
-                .isFalse()
-        }
     }
 
     @Test
@@ -108,7 +99,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
-            newCard = null,
+            newLpm = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,

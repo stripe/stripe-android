@@ -1,83 +1,25 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Intent
-import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.paymentsColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AuBecsDebitMandateElementUI(
     element: AuBecsDebitMandateTextElement
 ) {
-
-    val annotatedText = buildAnnotatedString {
-        val nonLinkTextStyle = SpanStyle(
-            color = PaymentsTheme.colors.subtitle,
-            fontSize = PaymentsTheme.typography.body2.fontSize,
-            letterSpacing = PaymentsTheme.typography.body2.letterSpacing,
-        )
-
-        withStyle(style = nonLinkTextStyle) {
-            append(stringResource(R.string.au_becs_mandate_pre_link))
-        }
-
-        // We attach this *URL* annotation to the following content
-        // until `pop()` is called
-        pushStringAnnotation(
-            tag = "URL",
-            annotation = "https://stripe.com/au-becs-dd-service-agreement/legal"
-        )
-        withStyle(
-            style = SpanStyle(
-                color = PaymentsTheme.colors.subtitle,
-                fontWeight = FontWeight.Bold,
-                fontSize = PaymentsTheme.typography.body2.fontSize,
-                letterSpacing = PaymentsTheme.typography.body2.letterSpacing,
-                textDecoration = TextDecoration.Underline
-            )
-        ) {
-            append(" ")
-            append(stringResource(R.string.au_becs_mandate_link))
-        }
-        pop()
-
-        withStyle(style = nonLinkTextStyle) {
-            append(stringResource(R.string.au_becs_mandate_post_link, element.merchantName ?: ""))
-        }
-    }
-
-    val context = LocalContext.current
-    ClickableText(
-        text = annotatedText,
-        onClick = { offset ->
-            annotatedText.getStringAnnotations(
-                tag = "URL", start = offset,
-                end = offset
-            )
-                .firstOrNull()?.let { annotation ->
-                    val openURL = Intent(Intent.ACTION_VIEW)
-                    openURL.data = Uri.parse(annotation.item)
-                    context.startActivity(openURL)
-                }
-        },
-
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item
+    Html(
+        html = stringResource(id = R.string.au_becs_mandate, element.merchantName ?: ""),
+        imageGetter = emptyMap(),
+        color = MaterialTheme.paymentsColors.subtitle,
+        style = MaterialTheme.typography.body2,
+        modifier = Modifier.padding(vertical = 8.dp)
     )
 }

@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.os.Looper.getMainLooper
 import androidx.core.os.bundleOf
-import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -107,7 +108,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
             assertThat(adapter.itemCount)
-                .isEqualTo(4)
+                .isEqualTo(3)
         }
     }
 
@@ -189,22 +190,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `click on GooglePay item should update selection`() {
-        createScenario().onFragment { fragment ->
-            val activityViewModel = activityViewModel(fragment)
-            idleLooper()
-
-            val recycler = recyclerView(fragment)
-
-            val googlePayView = recycler.children.toList()[1]
-            googlePayView.performClick()
-
-            assertThat(activityViewModel.selection.value)
-                .isEqualTo(PaymentSelection.GooglePay)
-        }
-    }
-
-    @Test
     fun `started fragment should report onShowExistingPaymentOptions() event`() {
         createScenario().onFragment {
             verify(eventReporter).onShowExistingPaymentOptions()
@@ -278,14 +263,14 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             idleLooper()
 
             val adapter = recyclerView(fragment).adapter as PaymentOptionsAdapter
-            assertThat(adapter.itemCount).isEqualTo(4)
+            assertThat(adapter.itemCount).isEqualTo(3)
 
             fragment.isEditing = true
             adapter.paymentMethodDeleteListener(
-                adapter.items[3] as PaymentOptionsAdapter.Item.SavedPaymentMethod
+                adapter.items[2] as PaymentOptionsAdapter.Item.SavedPaymentMethod
             )
 
-            assertThat(adapter.itemCount).isEqualTo(3)
+            assertThat(adapter.itemCount).isEqualTo(2)
         }
     }
 
@@ -323,7 +308,13 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 updatePaymentMethods(fragmentConfig.stripeIntent)
                 setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
-                registerViewModel(starterArgs.injectorKey, this)
+                registerViewModel(
+                    starterArgs.injectorKey,
+                    this,
+                    LpmRepository(
+                        ApplicationProvider.getApplicationContext<Application>().resources
+                    )
+                )
             }
         }
         return launchFragmentInContainer(

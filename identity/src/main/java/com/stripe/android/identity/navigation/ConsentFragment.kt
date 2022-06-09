@@ -5,20 +5,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
-import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -33,8 +31,7 @@ import kotlinx.coroutines.launch
  */
 internal class ConsentFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory,
-    private val consentViewModelFactory: ViewModelProvider.Factory,
-    private val verificationFlowFinishable: VerificationFlowFinishable,
+    private val consentViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
     private lateinit var binding: ConsentFragmentBinding
 
@@ -46,20 +43,6 @@ internal class ConsentFragment(
         consentViewModelFactory
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(
-            this,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    verificationFlowFinishable.finishWithResult(
-                        IdentityVerificationSheet.VerificationFlowResult.Canceled
-                    )
-                }
-            }
-        )
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -68,7 +51,7 @@ internal class ConsentFragment(
         binding = ConsentFragmentBinding.inflate(inflater, container, false)
 
         consentViewModel.loadUriIntoImageView(
-            identityViewModel.args.brandLogo,
+            identityViewModel.verificationArgs.brandLogo,
             binding.merchantLogo
         )
 
@@ -101,7 +84,10 @@ internal class ConsentFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
-                if (verificationPage.isMissingBiometricConsent()) {
+                if (verificationPage.isUnsupportedClient()) {
+                    Log.e(TAG, "Unsupported client")
+                    navigateToErrorFragmentWithFailedReason(IllegalStateException("Unsupported client"))
+                } else if (verificationPage.isMissingBiometricConsent()) {
                     setLoadingFinishedUI()
                     bindViewData(verificationPage.biometricConsent)
                 } else {
@@ -127,7 +113,7 @@ internal class ConsentFragment(
                 identityViewModel,
                 collectedDataParam,
                 ClearDataParam.CONSENT_TO_DOC_SELECT,
-                shouldNotSubmit = { true },
+                fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
                     navigateToDocSelection()
                 }

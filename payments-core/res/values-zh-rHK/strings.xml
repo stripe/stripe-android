@@ -76,6 +76,14 @@
   <string name="address_zip_invalid">您的郵區編號無效。</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">您的郵區編號無效</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="affirm_buy_now_pay_later">用 &lt;img src=\"affirm\"&gt; 慢慢支付。</string>
+  <!-- Label for Name on account field on form -->
+  <string name="au_becs_account_name">帳戶戶主名</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="au_becs_bsb_number">BSB 號碼</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="au_becs_mandate">提供您的銀行帳戶詳情並確認這筆付款即表示您同意該「直接借記請求」以及&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;「直接借記請求」服務協議&lt;/a&gt;，並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343，直接借記用戶 ID 507156 (「Stripe」)透過「批量電子清算系統」(BECS) 代 %s（「商家」）向您收取「商家」單獨與您議定的金額。您確認您是上述所列帳戶的帳戶持有人或授權簽字者。</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="becs_mandate_acceptance">\n    透過提供您的銀行帳戶資訊並確認該筆付款，\n    表示您同意本「直接扣帳請求」及其服務條款，\n    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    number 507156 (「Stripe」) 透過批量電子清算系統 (BECS)\n    代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。\n    您確認您是帳戶持有人或上述帳戶的授權簽署人。\n    \n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -100,6 +108,8 @@
   <string name="becs_widget_name">姓名</string>
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">您需要填寫姓名。</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">取消</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s - 尾號：%2$s</string>
   <!-- Text for close button -->
@@ -107,6 +117,10 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">刪除支付方式</string>
   <string name="delete_payment_method_prompt_title">刪除支付方式</string>
+  <!-- Done button title -->
+  <string name="done">完成</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">編輯</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">月份/年份</string>
   <string name="expiry_label_short">有效期</string>
@@ -129,13 +143,20 @@
   <string name="payment_method_add_new_fpx">選擇銀行帳戶 (FPX)… </string>
   <!-- Label for free shipping method -->
   <string name="price_free">免費</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">移除</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">已移除 %s</string>
   <string name="secure_checkout">安全結帳</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇另一付款方式並重試。</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">驗證您的付款方式時超時 -- 請重試</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">發生了內部錯誤。</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">月份/年份</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->

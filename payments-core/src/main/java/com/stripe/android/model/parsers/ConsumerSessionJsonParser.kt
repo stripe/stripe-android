@@ -22,7 +22,8 @@ internal class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
             verificationSession,
-            optString(json, FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET)
+            optString(json, FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET),
+            optString(json, FIELD_PUBLISHABLE_KEY)
         )
     }
 
@@ -38,6 +39,7 @@ internal class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
 
     private companion object {
         private const val FIELD_CONSUMER_SESSION = "consumer_session"
+        private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
 
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"

@@ -1,8 +1,12 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.StripeIntent
 
 /**
  * Interface for a repository that interacts with Link services.
@@ -13,7 +17,7 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
         authSessionCookie: String?
     ): Result<ConsumerSessionLookup>
 
@@ -32,6 +36,7 @@ internal interface LinkRepository {
      */
     suspend fun startVerification(
         consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 
@@ -39,8 +44,9 @@ internal interface LinkRepository {
      * Confirm an SMS verification code.
      */
     suspend fun confirmVerification(
-        consumerSessionClientSecret: String,
         verificationCode: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 
@@ -49,6 +55,7 @@ internal interface LinkRepository {
      */
     suspend fun logout(
         consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 
@@ -56,6 +63,36 @@ internal interface LinkRepository {
      * Fetch all saved payment methods for the consumer.
      */
     suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Create a new payment method in the consumer account.
+     */
+    suspend fun createPaymentDetails(
+        paymentDetails: ConsumerPaymentDetailsCreateParams,
+        stripeIntent: StripeIntent,
+        extraConfirmationParams: Map<String, Any>? = null,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<LinkPaymentDetails>
+
+    /**
+     * Update an existing payment method in the consumer account.
+     */
+    suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Delete the payment method from the consumer account.
+     */
+    suspend fun deletePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<Unit>
 }

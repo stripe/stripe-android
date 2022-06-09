@@ -8,11 +8,14 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
+import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -29,7 +32,8 @@ import javax.inject.Singleton
         LinkPaymentLauncherModule::class,
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
-        LoggingModule::class
+        LoggingModule::class,
+        ResourceRepositoryModule::class
     ]
 )
 internal interface LinkViewModelFactoryComponent {
@@ -37,6 +41,8 @@ internal interface LinkViewModelFactoryComponent {
     fun inject(factory: SignUpViewModel.Factory)
     fun inject(factory: VerificationViewModel.Factory)
     fun inject(factory: WalletViewModel.Factory)
+    fun inject(factory: PaymentMethodViewModel.Factory)
+    fun inject(factory: CardEditViewModel.Factory)
 
     @Component.Builder
     interface Builder {

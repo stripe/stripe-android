@@ -2,15 +2,17 @@ package com.stripe.android.identity.navigation
 
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialog
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavArgument
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
@@ -22,20 +24,23 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_P
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
+import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
-import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -44,9 +49,11 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -57,12 +64,21 @@ class IdentityUploadFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val frontHighResUploaded = MutableLiveData<Resource<UploadedResult>>()
-    private val backHighResUploaded = MutableLiveData<Resource<UploadedResult>>()
-    private val highResUploaded = PairMediatorLiveData(frontHighResUploaded, backHighResUploaded)
     private val mockUri = mock<Uri>()
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
+    }
+
+    private val verificationPageWithSelfie = mock<VerificationPage>().also {
+        whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
+        whenever(it.selfieCapture).thenReturn(mock())
+    }
+
+    private val documentUploadState =
+        MutableStateFlow(DocumentUploadState())
+
+    private val errorDocumentUploadState = mock<DocumentUploadState> {
+        on { hasError() } doReturn true
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
@@ -70,12 +86,27 @@ class IdentityUploadFragmentTest {
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
-        whenever(it.frontHighResUploaded).thenReturn(frontHighResUploaded)
-        whenever(it.backHighResUploaded).thenReturn(backHighResUploaded)
-        whenever(it.highResUploaded).thenReturn(highResUploaded)
+        whenever(it.documentUploadState).thenReturn(documentUploadState)
+    }
+
+    private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
+        val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+        whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
+            successCaptor.firstValue(verificationPageWithSelfie)
+        }
+        whenever(it.documentUploadState).thenReturn(documentUploadState)
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
+
+    private val navController = TestNavHostController(
+        ApplicationProvider.getApplicationContext()
+    ).also {
+        it.setGraph(
+            R.navigation.identity_nav_graph
+        )
+        it.setCurrentDestination(R.id.IDUploadFragment)
+    }
 
     @Test
     fun `when initialized viewmodel registers activityResultCaller and UI is correct`() {
@@ -194,7 +225,9 @@ class IdentityUploadFragmentTest {
     @Test
     fun `verify front upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            frontHighResUploaded.postValue(Resource.error())
+            documentUploadState.update {
+                errorDocumentUploadState
+            }
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -204,7 +237,9 @@ class IdentityUploadFragmentTest {
     @Test
     fun `verify back upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            backHighResUploaded.postValue(Resource.error())
+            documentUploadState.update {
+                errorDocumentUploadState
+            }
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -214,24 +249,16 @@ class IdentityUploadFragmentTest {
     @Test
     fun `verify uploadFinished updates UI`() {
         launchFragment { binding, _, _ ->
-            frontHighResUploaded.postValue(
-                Resource.success(
-                    UploadedResult(
-                        uploadedStripeFile = StripeFile(id = FRONT_UPLOADED_ID),
-                        scores = null,
-                        uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+            documentUploadState.update {
+                DocumentUploadState(
+                    frontHighResResult = Resource.success(
+                        FRONT_HIGH_RES_RESULT_FILEUPLOAD
+                    ),
+                    backHighResResult = Resource.success(
+                        BACK_HIGH_RES_RESULT_FILEUPLOAD
                     )
                 )
-            )
-            backHighResUploaded.postValue(
-                Resource.success(
-                    UploadedResult(
-                        uploadedStripeFile = StripeFile(id = BACK_UPLOADED_ID),
-                        scores = null,
-                        uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
-                    )
-                )
-            )
+            }
 
             assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
@@ -245,27 +272,19 @@ class IdentityUploadFragmentTest {
     }
 
     @Test
-    fun `verify when kontinue is clicked and post succeeds navigates to confirmation`() {
+    fun `verify when selfie not required, kontinue is clicked and post succeeds navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
-                frontHighResUploaded.postValue(
-                    Resource.success(
-                        UploadedResult(
-                            uploadedStripeFile = StripeFile(id = FRONT_UPLOADED_ID),
-                            scores = null,
-                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                documentUploadState.update {
+                    DocumentUploadState(
+                        frontHighResResult = Resource.success(
+                            FRONT_HIGH_RES_RESULT_FILEUPLOAD
+                        ),
+                        backHighResResult = Resource.success(
+                            BACK_HIGH_RES_RESULT_FILEUPLOAD
                         )
                     )
-                )
-                backHighResUploaded.postValue(
-                    Resource.success(
-                        UploadedResult(
-                            uploadedStripeFile = StripeFile(id = BACK_UPLOADED_ID),
-                            scores = null,
-                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
-                        )
-                    )
-                )
+                }
 
                 val collectedDataParamCaptor: KArgumentCaptor<CollectedDataParam> = argumentCaptor()
                 val clearDataParamCaptor: KArgumentCaptor<ClearDataParam> = argumentCaptor()
@@ -307,15 +326,92 @@ class IdentityUploadFragmentTest {
     }
 
     @Test
-    fun `verify when kontinue is clicked and data is null navigates to error`() {
-        launchFragment { binding, navController, _ ->
-            // leave frontBackPair.data null
-            highResUploaded.postValue(Resource.success(mock()))
+    fun `verify when selfie is required, clicking kontinue navigates to selfie`() {
+        launchFragment(requireSelfie = true) { binding, navController, _ ->
+            runBlocking {
+                documentUploadState.update {
+                    DocumentUploadState(
+                        frontHighResResult = Resource.success(
+                            FRONT_HIGH_RES_RESULT_FILEUPLOAD
+                        ),
+                        backHighResResult = Resource.success(
+                            BACK_HIGH_RES_RESULT_FILEUPLOAD
+                        )
+                    )
+                }
 
-            binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+                val collectedDataParamCaptor: KArgumentCaptor<CollectedDataParam> = argumentCaptor()
+                val clearDataParamCaptor: KArgumentCaptor<ClearDataParam> = argumentCaptor()
+                whenever(
+                    mockIdentityViewModelWithSelfie.postVerificationPageData(
+                        collectedDataParamCaptor.capture(),
+                        clearDataParamCaptor.capture()
+                    )
+                ).thenReturn(
+                    CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
+                )
 
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.errorFragment)
+                binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
+                    CollectedDataParam(
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = FRONT_UPLOADED_ID,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentBack = DocumentUploadParam(
+                            highResImage = BACK_UPLOADED_ID,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentType = CollectedDataParam.Type.IDCARD
+                    )
+                )
+                assertThat(clearDataParamCaptor.firstValue).isEqualTo(
+                    ClearDataParam.UPLOAD_TO_CONFIRM
+                )
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.selfieFragment)
+            }
+        }
+    }
+
+    @Test
+    fun `when not navigatedUp and previous backstack entry is couldNotCapture don't reset uploadState`() {
+        navController.setCurrentDestination(R.id.couldNotCaptureFragment)
+        navController.navigate(R.id.IDUploadFragment)
+        launchFragment { _, _, _ ->
+            verify(mockIdentityViewModel, times(0)).resetDocumentUploadedState()
+        }
+    }
+
+    @Test
+    fun `when is navigateUp and previous backstack entry is couldNotCapture reset uploadState`() {
+        navController.setCurrentDestination(R.id.couldNotCaptureFragment)
+        navController.navigate(R.id.IDUploadFragment)
+        navController.navigate(R.id.confirmationFragment)
+
+        // Simulate the behavior set in IdentityActivity.onBackPressedCallback
+        navController.previousBackStackEntry?.destination?.addArgument(
+            ARG_IS_NAVIGATED_UP_TO,
+            NavArgument.Builder()
+                .setDefaultValue(true)
+                .build()
+        )
+
+        navController.navigateUp()
+        launchFragment { _, _, _ ->
+            verify(mockIdentityViewModel).resetDocumentUploadedState()
+        }
+    }
+
+    @Test
+    fun `when previous backstack entry is not couldNotCapture reset uploadState`() {
+        navController.setCurrentDestination(R.id.confirmationFragment)
+        navController.navigate(R.id.IDUploadFragment)
+
+        launchFragment { _, _, _ ->
+            verify(mockIdentityViewModel).resetDocumentUploadedState()
         }
     }
 
@@ -391,21 +487,17 @@ class IdentityUploadFragmentTest {
                         same(fragment.requireContext()),
                         callbackCaptor.capture()
                     )
-                    frontHighResUploaded.postValue(Resource.loading())
                 } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                     verify(mockFrontBackUploadViewModel).takePhotoBack(
                         same(fragment.requireContext()),
                         callbackCaptor.capture()
                     )
-                    backHighResUploaded.postValue(Resource.loading())
                 }
             } else {
                 if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                     verify(mockFrontBackUploadViewModel).chooseImageFront(callbackCaptor.capture())
-                    frontHighResUploaded.postValue(Resource.loading())
                 } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                     verify(mockFrontBackUploadViewModel).chooseImageBack(callbackCaptor.capture())
-                    backHighResUploaded.postValue(Resource.loading())
                 }
             }
 
@@ -445,13 +537,27 @@ class IdentityUploadFragmentTest {
 
             // mock file uploaded
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
-                frontHighResUploaded.postValue(Resource.success(mock()))
+                documentUploadState.update {
+                    DocumentUploadState(
+                        frontHighResResult =
+                        Resource.success(
+                            if (isTakePhoto) FRONT_HIGH_RES_RESULT_MANUALCAPTURE else FRONT_HIGH_RES_RESULT_FILEUPLOAD
+                        )
+                    )
+                }
 
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.VISIBLE)
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
-                backHighResUploaded.postValue(Resource.success(mock()))
+                documentUploadState.update {
+                    DocumentUploadState(
+                        backHighResResult =
+                        Resource.success(
+                            if (isTakePhoto) BACK_HIGH_RES_RESULT_MANUALCAPTURE else BACK_HIGH_RES_RESULT_FILEUPLOAD
+                        )
+                    )
+                }
 
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.GONE)
@@ -463,6 +569,7 @@ class IdentityUploadFragmentTest {
     private fun launchFragment(
         shouldShowTakePhoto: Boolean = true,
         shouldShowChoosePhoto: Boolean = true,
+        requireSelfie: Boolean = false,
         testBlock: (
             binding: IdentityUploadFragmentBinding,
             navController: TestNavHostController,
@@ -477,26 +584,17 @@ class IdentityUploadFragmentTest {
     ) {
         TestFragment(
             viewModelFactoryFor(mockFrontBackUploadViewModel),
-            viewModelFactoryFor(mockIdentityViewModel)
-        )
-    }.onFragment {
-        val navController = TestNavHostController(
-            ApplicationProvider.getApplicationContext()
-        )
-        navController.setGraph(
-            R.navigation.identity_nav_graph
-        )
-        navController.setCurrentDestination(R.id.IDUploadFragment)
-        Navigation.setViewNavController(
-            it.requireView(),
+            viewModelFactoryFor(if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel),
             navController
         )
+    }.onFragment {
         testBlock(IdentityUploadFragmentBinding.bind(it.requireView()), navController, it)
     }
 
     internal class TestFragment(
         identityUploadViewModelFactory: ViewModelProvider.Factory,
-        identityViewModelFactory: ViewModelProvider.Factory
+        identityViewModelFactory: ViewModelProvider.Factory,
+        val navController: TestNavHostController
     ) :
         IdentityUploadFragment(identityUploadViewModelFactory, identityViewModelFactory) {
         override val titleRes = R.string.file_upload
@@ -507,12 +605,19 @@ class IdentityUploadFragmentTest {
         override var backCheckMarkContentDescription: Int? = R.string.back_of_id_selected
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
+        override val fragmentId = R.id.IDUploadFragment
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-            super.onViewCreated(view, savedInstanceState)
-            observeForFrontUploaded()
-            observeForBackUploaded()
-            enableKontinueWhenBothUploaded()
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View {
+            val view = super.onCreateView(inflater, container, savedInstanceState)
+            Navigation.setViewNavController(
+                view,
+                navController
+            )
+            return view
         }
     }
 
@@ -534,5 +639,29 @@ class IdentityUploadFragmentTest {
 
         const val FRONT_UPLOADED_ID = "id_front"
         const val BACK_UPLOADED_ID = "id_back"
+
+        val FRONT_HIGH_RES_RESULT_FILEUPLOAD = UploadedResult(
+            uploadedStripeFile = StripeFile(id = FRONT_UPLOADED_ID),
+            scores = null,
+            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+        )
+
+        val BACK_HIGH_RES_RESULT_FILEUPLOAD = UploadedResult(
+            uploadedStripeFile = StripeFile(id = BACK_UPLOADED_ID),
+            scores = null,
+            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+        )
+
+        val FRONT_HIGH_RES_RESULT_MANUALCAPTURE = UploadedResult(
+            uploadedStripeFile = StripeFile(id = FRONT_UPLOADED_ID),
+            scores = null,
+            uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE
+        )
+
+        val BACK_HIGH_RES_RESULT_MANUALCAPTURE = UploadedResult(
+            uploadedStripeFile = StripeFile(id = BACK_UPLOADED_ID),
+            scores = null,
+            uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE
+        )
     }
 }

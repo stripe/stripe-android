@@ -34,7 +34,7 @@ internal class PaymentOptionContract :
         val paymentMethods: List<PaymentMethod>,
         val config: PaymentSheet.Configuration?,
         val isGooglePayReady: Boolean,
-        val newCard: PaymentSelection.New.Card?,
+        val newLpm: PaymentSelection.New?,
         @ColorInt val statusBarColor: Int?,
         @InjectorKey val injectorKey: String,
         val enableLogging: Boolean,
