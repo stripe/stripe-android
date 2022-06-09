@@ -139,7 +139,7 @@ internal fun SignUpBody(
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,
-                        requestFocusWhenShown = true
+                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty()
                     )
                     LinkTerms(
                         modifier = Modifier

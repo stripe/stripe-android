@@ -49,7 +49,7 @@ internal class LinkAccountManager @Inject constructor(
                     cookieStore.getAuthSessionCookie()?.let {
                         lookupConsumer(null).getOrNull()?.accountStatus
                     }
-                    // If the user recently signed up on this device, use their email
+                        // If the user recently signed up on this device, use their email
                         ?: cookieStore.getNewUserEmail()?.let {
                             lookupConsumer(it).getOrNull()?.accountStatus
                         }
