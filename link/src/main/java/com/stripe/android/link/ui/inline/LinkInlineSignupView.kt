@@ -191,7 +191,8 @@ internal fun LinkInlineSignup(
                                 PhoneNumberCollectionSection(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
-                                    requestFocusWhenShown = true
+                                    requestFocusWhenShown =
+                                        phoneNumberController.initialPhoneNumber.isEmpty()
                                 )
                                 LinkTerms(
                                     modifier = Modifier.padding(top = 8.dp),
