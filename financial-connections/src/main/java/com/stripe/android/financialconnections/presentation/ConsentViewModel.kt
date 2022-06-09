@@ -4,7 +4,7 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
-import com.stripe.android.financialconnections.di.subComponentBuilderProvider
+import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.UpdateManifest
@@ -41,7 +41,7 @@ internal class ConsentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ConsentState
         ): ConsentViewModel {
-            return viewModelContext.subComponentBuilderProvider
+            return viewModelContext.financialConnectionsSubComponentBuilderProvider
                 .consentSubComponentBuilder.get()
                 .initialState(state)
                 .build()
