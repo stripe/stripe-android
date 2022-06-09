@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.screens
+package com.stripe.android.financialconnections.di
 
 import com.stripe.android.financialconnections.presentation.ConsentState
 import com.stripe.android.financialconnections.presentation.ConsentViewModel

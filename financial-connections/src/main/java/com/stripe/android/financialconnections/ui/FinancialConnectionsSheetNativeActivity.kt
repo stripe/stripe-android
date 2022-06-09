@@ -38,7 +38,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                 ConsentScreen()
             }
             composable(NavigationDirections.bankPicker.destination) {
-                BankPickerScreen()
+                InstitutionPickerScreen()
             }
         }
     }
