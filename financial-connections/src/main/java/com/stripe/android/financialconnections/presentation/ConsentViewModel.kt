@@ -6,9 +6,10 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
-import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.RequestNextStep
 import com.stripe.android.financialconnections.domain.UpdateManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,14 +17,14 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val updateManifest: UpdateManifest,
-    private val goNext: GoNext
+    private val requestNextStep: RequestNextStep
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     fun onContinueClick() {
         viewModelScope.launch {
             val manifest: FinancialConnectionsSessionManifest = acceptConsent()
             updateManifest(manifest)
-            goNext(manifest)
+            requestNextStep(currentStep = NavigationDirections.consent)
         }
     }
 

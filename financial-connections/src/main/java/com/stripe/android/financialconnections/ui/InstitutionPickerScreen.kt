@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 
 package com.stripe.android.financialconnections.ui
 
@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -44,7 +45,8 @@ internal fun InstitutionPickerScreen() {
     InstitutionPickerContent(
         institutionsAsync = state.institutions,
         query = state.query,
-        onQueryChanged = { viewModel.onQueryChanged(it) }
+        onQueryChanged = { viewModel.onQueryChanged(it) },
+        onInstitutionSelected = { viewModel.onInstitutionSelected(it) }
     )
 }
 
@@ -52,7 +54,8 @@ internal fun InstitutionPickerScreen() {
 private fun InstitutionPickerContent(
     institutionsAsync: Async<InstitutionResponse>,
     query: String,
-    onQueryChanged: (String) -> Unit
+    onQueryChanged: (String) -> Unit,
+    onInstitutionSelected: (Institution) -> Unit
 ) {
     Column {
         if (institutionsAsync.complete.not()) {
@@ -79,12 +82,18 @@ private fun InstitutionPickerContent(
         if (institutionsAsync is Fail) {
             Text(text = "Something failed: " + institutionsAsync.error.toString())
         }
-        InstitutionGrid(institutions = institutionsAsync()?.data ?: emptyList())
+        InstitutionGrid(
+            institutions = institutionsAsync()?.data ?: emptyList(),
+            onInstitutionSelected = onInstitutionSelected
+        )
     }
 }
 
 @Composable
-private fun InstitutionGrid(institutions: List<Institution>) {
+private fun InstitutionGrid(
+    institutions: List<Institution>,
+    onInstitutionSelected: (Institution) -> Unit
+) {
     LazyVerticalGrid(
         cells = GridCells.Fixed(2),
         contentPadding = PaddingValues(
@@ -94,7 +103,7 @@ private fun InstitutionGrid(institutions: List<Institution>) {
             bottom = 16.dp
         ),
         content = {
-            items(institutions) { index ->
+            items(institutions) { institution ->
                 Card(
                     backgroundColor = Color(0xFF1CC6FF),
                     modifier = Modifier
@@ -102,13 +111,14 @@ private fun InstitutionGrid(institutions: List<Institution>) {
                         .fillMaxWidth()
                         .height(100.dp),
                     elevation = 8.dp,
+                    onClick = { onInstitutionSelected(institution) }
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Text(
-                            text = index.name,
+                            text = institution.name,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
                             color = Color(0xFFFFFFFF),
@@ -136,6 +146,7 @@ fun PreviewScreen() {
             )
         ),
         query = "hola",
-        onQueryChanged = {}
+        onQueryChanged = {},
+        onInstitutionSelected = {}
     )
 }

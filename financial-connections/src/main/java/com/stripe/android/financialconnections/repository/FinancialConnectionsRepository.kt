@@ -48,6 +48,16 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
+    suspend fun getFinancialConnectionsSessionManifest(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
     suspend fun markConsentAcquired(
         clientSecret: String,
     ): FinancialConnectionsSessionManifest
@@ -72,4 +82,15 @@ internal interface FinancialConnectionsRepository {
     suspend fun featuredInstitutions(
         clientSecret: String,
     ): InstitutionResponse
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun postAuthorizationSession(
+        clientSecret: String,
+        institutionId: String
+    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 }

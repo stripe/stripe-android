@@ -8,15 +8,24 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
+import com.stripe.android.financialconnections.domain.RequestNextStep
 import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.domain.UpdateAuthorizationSession
+import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class InstitutionPickerViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
     val searchInstitutions: SearchInstitutions,
+    val postAuthorizationSession: PostAuthorizationSession,
+    val updateAuthSession: UpdateAuthorizationSession,
+    val requestNextStep: RequestNextStep,
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
 
@@ -40,6 +49,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 query = query
             )
         }.execute(retainValue = InstitutionPickerState::institutions) { copy(institutions = it) }
+    }
+
+    fun onInstitutionSelected(institution: Institution) {
+        viewModelScope.launch {
+            val session = postAuthorizationSession(institution.id)
+            updateAuthSession(session)
+            requestNextStep(currentStep = NavigationDirections.institutionPicker)
+        }
     }
 
     companion object : MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
