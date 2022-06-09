@@ -50,6 +50,7 @@ class SignUpViewModelTest {
         true,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
+        CUSTOMER_PHONE,
         LinkActivityContract.Args.InjectionParams(
             INJECTOR_KEY,
             setOf(PRODUCT_USAGE),
@@ -280,5 +281,6 @@ class SignUpViewModelTest {
 
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
+        const val CUSTOMER_PHONE = "1234567890"
     }
 }
