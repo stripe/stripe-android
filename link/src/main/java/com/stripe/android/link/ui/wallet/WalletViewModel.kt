@@ -29,7 +29,6 @@ import javax.inject.Provider
 
 internal class WalletViewModel @Inject constructor(
     val args: LinkActivityContract.Args,
-    val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
@@ -65,43 +64,51 @@ internal class WalletViewModel @Inject constructor(
     fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
         clearError()
         _isProcessing.value = true
+        
+        runCatching { requireNotNull(linkAccountManager.linkAccount.value) }.fold(
+            onSuccess = { linkAccount ->
+                if (args.completePayment) {
+                    val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                    val params = paramsFactory.createPaymentMethodCreateParams(
+                        linkAccount.clientSecret,
+                        selectedPaymentDetails
+                    )
+                    confirmationManager.confirmStripeIntent(
+                        paramsFactory.createConfirmStripeIntentParams(params)
+                    ) { result ->
+                        result.fold(
+                            onSuccess = { paymentResult ->
+                                when (paymentResult) {
+                                    is PaymentResult.Canceled -> {
+                                        // no-op, let the user continue their flow
+                                    }
+                                    is PaymentResult.Failed -> {
+                                        onError(paymentResult.throwable)
+                                    }
+                                    is PaymentResult.Completed ->
+                                        navigator.dismiss(LinkActivityResult.Success.Completed)
+                                }
+                            },
+                            onFailure = ::onError
+                        )
 
-        if (args.completePayment) {
-            val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-            val params = paramsFactory.createPaymentMethodCreateParams(
-                linkAccount.clientSecret,
-                selectedPaymentDetails
-            )
-            confirmationManager.confirmStripeIntent(
-                paramsFactory.createConfirmStripeIntentParams(params)
-            ) { result ->
-                result.fold(
-                    onSuccess = { paymentResult ->
-                        when (paymentResult) {
-                            is PaymentResult.Canceled -> {
-                                // no-op, let the user continue their flow
-                            }
-                            is PaymentResult.Failed -> {
-                                onError(paymentResult.throwable)
-                            }
-                            is PaymentResult.Completed ->
-                                navigator.dismiss(LinkActivityResult.Success.Completed)
-                        }
-                    },
-                    onFailure = ::onError
-                )
-
-                _isProcessing.value = false
-            }
-        } else {
-            val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-                .createPaymentMethodCreateParams(linkAccount.clientSecret, selectedPaymentDetails)
-            navigator.dismiss(
-                LinkActivityResult.Success.Selected(
-                    LinkPaymentDetails(selectedPaymentDetails, params)
-                )
-            )
-        }
+                        _isProcessing.value = false
+                    }
+                } else {
+                    val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                        .createPaymentMethodCreateParams(
+                            linkAccount.clientSecret,
+                            selectedPaymentDetails
+                        )
+                    navigator.dismiss(
+                        LinkActivityResult.Success.Selected(
+                            LinkPaymentDetails(selectedPaymentDetails, params)
+                        )
+                    )
+                }
+            },
+            onFailure = ::onError
+        )
     }
 
     fun payAnotherWay() {

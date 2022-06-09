@@ -106,15 +106,13 @@ class CardEditViewModelTest {
         verify(linkAccountManager).updatePaymentDetails(
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
-                    it.toParamMap().equals(
-                        mapOf(
-                            "is_default" to true,
-                            "exp_month" to "12",
-                            "exp_year" to "2040",
-                            "billing_address" to mapOf(
-                                "country_code" to "US",
-                                "postal_code" to "12345"
-                            )
+                    it.toParamMap() == mapOf(
+                        "is_default" to true,
+                        "exp_month" to "12",
+                        "exp_year" to "2040",
+                        "billing_address" to mapOf(
+                            "country_code" to "US",
+                            "postal_code" to "12345"
                         )
                     )
             }
@@ -132,15 +130,12 @@ class CardEditViewModelTest {
             verify(linkAccountManager).updatePaymentDetails(
                 argWhere {
                     it is ConsumerPaymentDetailsUpdateParams.Card &&
-                        it.toParamMap().equals(
-                            mapOf(
-                                "is_default" to false,
-                                "exp_month" to "12",
-                                "exp_year" to "2040",
-                                "billing_address" to mapOf(
-                                    "country_code" to "US",
-                                    "postal_code" to "12345"
-                                )
+                        it.toParamMap() == mapOf(
+                            "exp_month" to "12",
+                            "exp_year" to "2040",
+                            "billing_address" to mapOf(
+                                "country_code" to "US",
+                                "postal_code" to "12345"
                             )
                         )
                 }
@@ -157,14 +152,12 @@ class CardEditViewModelTest {
         verify(linkAccountManager).updatePaymentDetails(
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
-                    it.toParamMap().equals(
-                        mapOf(
-                            "exp_month" to "12",
-                            "exp_year" to "2040",
-                            "billing_address" to mapOf(
-                                "country_code" to "US",
-                                "postal_code" to "12345"
-                            )
+                    it.toParamMap() == mapOf(
+                        "exp_month" to "12",
+                        "exp_year" to "2040",
+                        "billing_address" to mapOf(
+                            "country_code" to "US",
+                            "postal_code" to "12345"
                         )
                     )
             }

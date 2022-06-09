@@ -311,7 +311,6 @@ class WalletViewModelTest {
     private fun createViewModel() =
         WalletViewModel(
             args,
-            linkAccount,
             linkAccountManager,
             navigator,
             confirmationManager,

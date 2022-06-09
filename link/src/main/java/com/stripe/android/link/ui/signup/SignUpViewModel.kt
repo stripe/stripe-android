@@ -208,7 +208,7 @@ internal class SignUpViewModel @Inject constructor(
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
-        const val LOOKUP_DEBOUNCE_MS = 700L
+        const val LOOKUP_DEBOUNCE_MS = 1000L
 
         const val PREFILLED_EMAIL = "prefilled_email"
     }
