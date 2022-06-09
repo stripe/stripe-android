@@ -29,7 +29,7 @@ class LpmSerializerTest {
 
         val countrySpec = result.first { it.type == "sofort" }
             .fields
-            .first() as AddressSpec
+            .first() as CountrySpec
 
         assertThat(countrySpec.apiPath).isEqualTo("sofort[country]")
         assertThat(countrySpec.allowedCountryCodes).isEqualTo(
@@ -329,7 +329,6 @@ class LpmSerializerTest {
 
     @Test
     fun `Verify that async defaults to false and fields to empty`() {
-        // TODO: Test this with LPM Repository too
         val serializedString =
             """
                 {
