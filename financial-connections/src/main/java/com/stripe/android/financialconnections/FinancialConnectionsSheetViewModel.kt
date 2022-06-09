@@ -6,6 +6,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
@@ -73,7 +74,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             copy(
                 manifest = manifest,
                 authFlowActive = true,
-                viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
+                // TODO@carlosmuvi implement manifest-based logic to open the corresponding flow.
+                viewEffect = if (true) {
+                    OpenNativeAuthFlow
+                } else {
+                    OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
+                }
             )
         }
     }
@@ -222,6 +228,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
+    }
+
+    fun onNativeAuthFlowResult() {
+        TODO("Not yet implemented")
     }
 
     companion object :

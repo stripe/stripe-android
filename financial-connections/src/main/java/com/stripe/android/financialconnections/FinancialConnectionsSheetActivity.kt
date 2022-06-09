@@ -10,8 +10,10 @@ import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
 internal class FinancialConnectionsSheetActivity :
     AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
@@ -20,6 +22,10 @@ internal class FinancialConnectionsSheetActivity :
 
     private val startForResult = registerForActivityResult(StartActivityForResult()) {
         viewModel.onActivityResult()
+    }
+
+    private val startNativeAuthFlowForResult = registerForActivityResult(StartActivityForResult()) {
+        viewModel.onNativeAuthFlowResult()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +67,9 @@ internal class FinancialConnectionsSheetActivity :
                     )
                     is FinishWithResult -> finishWithResult(
                         viewEffect.result
+                    )
+                    OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
+                        Intent(this, FinancialConnectionsSheetNativeActivity::class.java)
                     )
                 }
                 viewModel.onViewEffectLaunched()

@@ -30,6 +30,11 @@
             android:exported="false"
             android:theme="@style/StripeDefaultTheme" />
 
+        <activity
+            android:name="com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
+            android:exported="false"
+            android:theme="@style/StripeDefaultTheme" />
+
         <provider
             android:name=".appinitializer.FinancialConnectionsInitializer"
             android:authorities="${applicationId}.financialconnections-init"
