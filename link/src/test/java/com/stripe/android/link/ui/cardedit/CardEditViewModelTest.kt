@@ -107,14 +107,14 @@ class CardEditViewModelTest {
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
                     it.toParamMap() == mapOf(
-                        "is_default" to true,
-                        "exp_month" to "12",
-                        "exp_year" to "2040",
-                        "billing_address" to mapOf(
-                            "country_code" to "US",
-                            "postal_code" to "12345"
-                        )
+                    "is_default" to true,
+                    "exp_month" to "12",
+                    "exp_year" to "2040",
+                    "billing_address" to mapOf(
+                        "country_code" to "US",
+                        "postal_code" to "12345"
                     )
+                )
             }
         )
     }
@@ -131,13 +131,13 @@ class CardEditViewModelTest {
                 argWhere {
                     it is ConsumerPaymentDetailsUpdateParams.Card &&
                         it.toParamMap() == mapOf(
-                            "exp_month" to "12",
-                            "exp_year" to "2040",
-                            "billing_address" to mapOf(
-                                "country_code" to "US",
-                                "postal_code" to "12345"
-                            )
+                        "exp_month" to "12",
+                        "exp_year" to "2040",
+                        "billing_address" to mapOf(
+                            "country_code" to "US",
+                            "postal_code" to "12345"
                         )
+                    )
                 }
             )
         }
@@ -153,13 +153,13 @@ class CardEditViewModelTest {
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
                     it.toParamMap() == mapOf(
-                        "exp_month" to "12",
-                        "exp_year" to "2040",
-                        "billing_address" to mapOf(
-                            "country_code" to "US",
-                            "postal_code" to "12345"
-                        )
+                    "exp_month" to "12",
+                    "exp_year" to "2040",
+                    "billing_address" to mapOf(
+                        "country_code" to "US",
+                        "postal_code" to "12345"
                     )
+                )
             }
         )
     }

@@ -64,7 +64,7 @@ internal class WalletViewModel @Inject constructor(
     fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
         clearError()
         _isProcessing.value = true
-        
+
         runCatching { requireNotNull(linkAccountManager.linkAccount.value) }.fold(
             onSuccess = { linkAccount ->
                 if (args.completePayment) {
