@@ -35,7 +35,10 @@ internal class IdentityAggregator(
         transitioner =
         if (identityScanType == IdentityScanState.ScanType.SELFIE) {
             FaceDetectorTransitioner(
-                requireNotNull(verificationPage.selfieCapture)
+                requireNotNull(verificationPage.selfieCapture) {
+                    "Failed to initialize FaceDetectorTransitioner - " +
+                        "verificationPage.selfieCapture is null."
+                }
             )
         } else
             IDDetectorTransitioner(

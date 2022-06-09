@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -298,7 +297,7 @@ internal class IdentityActivityTest {
     ) {
         val injectableActivityScenario = injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                viewModelFactory = mockIdentityViewModelFactory as ViewModelProvider.Factory
+                viewModelFactory = mockIdentityViewModelFactory
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(

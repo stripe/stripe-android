@@ -56,7 +56,7 @@ class FormControllerTest {
             LayoutSpec.create(
                 NameSpec(),
                 EmailSpec(),
-                CountrySpec(allowCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
+                CountrySpec(allowedCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                 SaveForFutureUseSpec()
             ),
             resourceRepository = resourceRepository,

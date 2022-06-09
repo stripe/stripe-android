@@ -22,10 +22,10 @@ internal data class VerificationPageRequirements(
         @SerialName("id_document_type")
         IDDOCUMENTTYPE,
 
-        // TODO(IDPROD-3944) - verify with server change
         @SerialName("face")
         FACE,
 
+        // TODO(IDPROD-3944) - verify with server change
         @SerialName("training_consent")
         TRAININGCONSENT
     }

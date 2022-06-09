@@ -32,7 +32,7 @@ internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val aggregateResultListener: AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
-    private val faceDetectorModelFile: File,
+    private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
@@ -91,7 +91,10 @@ internal class IdentityScanFlow(
                 AnalyzerPool.of(
                     if (parameters == IdentityScanState.ScanType.SELFIE) {
                         FaceDetectorAnalyzer.Factory(
-                            faceDetectorModelFile
+                            requireNotNull(faceDetectorModelFile) {
+                                "Failed to initialize FaceDetectorAnalyzer, " +
+                                    "faceDetectorModelFile is null"
+                            }
                         )
                     } else {
                         IDDetectorAnalyzer.Factory(
@@ -99,7 +102,6 @@ internal class IdentityScanFlow(
                             verificationPage.documentCapture.models.idDetectorMinScore
                         )
                     }
-
                 )
 
             loop = ProcessBoundAnalyzerLoop(

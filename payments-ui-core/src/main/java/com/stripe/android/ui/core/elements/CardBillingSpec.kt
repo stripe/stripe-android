@@ -10,8 +10,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CardBillingSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
-    @SerialName("valid_country_codes")
-    val validCountryCodes: Set<String> = supportedBillingCountries
+    @SerialName("allowed_country_codes")
+    val allowedCountryCodes: Set<String> = supportedBillingCountries
 ) : FormItemSpec() {
     fun transform(
         addressRepository: AddressFieldElementRepository,
@@ -20,7 +20,7 @@ data class CardBillingSpec(
         CardBillingAddressElement(
             IdentifierSpec.Generic("credit_billing"),
             addressFieldRepository = addressRepository,
-            countryCodes = validCountryCodes,
+            countryCodes = allowedCountryCodes,
             rawValuesMap = initialValues
         ),
         label = R.string.billing_details

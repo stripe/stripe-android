@@ -3,7 +3,6 @@ package com.stripe.android.identity.networking.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// TODO(IDPROD-3944) - verify with server change
 @Serializable
 internal data class VerificationPageStaticContentSelfieCapturePage(
     @SerialName("autocapture_timeout")
@@ -36,6 +35,6 @@ internal data class VerificationPageStaticContentSelfieCapturePage(
     val highResImageCompressionQuality: Float,
     @SerialName("high_res_image_crop_padding")
     val highResImageCropPadding: Float,
-    @SerialName("consent_text")
+    @SerialName("training_consent_text")
     val consentText: String
 )

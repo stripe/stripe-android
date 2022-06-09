@@ -97,12 +97,20 @@ internal class IdentityViewModel @Inject constructor(
     private val _faceDetectorModelFile = MutableLiveData<Resource<File>>()
     val faceDetectorModelFile: LiveData<Resource<File>> = _faceDetectorModelFile
 
+    data class PageAndModelFiles(
+        val page: VerificationPage,
+        val idDetectorFile: File,
+        val faceDetectorFile: File?
+    )
+
     /**
      * Wrapper for both page and model
      */
-    val pageAndModel = object : MediatorLiveData<Resource<Pair<VerificationPage, File>>>() {
+    val pageAndModelFiles = object : MediatorLiveData<Resource<PageAndModelFiles>>() {
         private var page: VerificationPage? = null
         private var idDetectorModel: File? = null
+        private var faceDetectorModel: File? = null
+        private var faceDetectorModelValueSet = false
 
         init {
             postValue(Resource.loading())
@@ -130,12 +138,35 @@ internal class IdentityViewModel @Inject constructor(
                     Status.LOADING -> {} // no-op
                 }
             }
+            addSource(faceDetectorModelFile) {
+                when (it.status) {
+                    Status.SUCCESS -> {
+                        faceDetectorModelValueSet = true
+                        faceDetectorModel = it.data
+                        maybePostSuccess()
+                    }
+                    Status.ERROR -> {
+                        postValue(Resource.error("$faceDetectorModelFile posts error"))
+                    }
+                    Status.LOADING -> {} // no-op
+                }
+            }
         }
 
         private fun maybePostSuccess() {
             page?.let { page ->
-                idDetectorModel?.let { model ->
-                    postValue(Resource.success(Pair(page, model)))
+                idDetectorModel?.let { idDetectorModel ->
+                    if (faceDetectorModelValueSet) {
+                        postValue(
+                            Resource.success(
+                                PageAndModelFiles(
+                                    page,
+                                    idDetectorModel,
+                                    faceDetectorModel
+                                )
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -506,12 +537,14 @@ internal class IdentityViewModel @Inject constructor(
                             it.documentCapture.models.idDetectorUrl,
                             _idDetectorModelFile
                         )
-                        // TODO(IDPROD-3944): download FaceDetectorModel
                         it.selfieCapture?.let { selfieCapture ->
                             downloadModelAndPost(
                                 selfieCapture.models.faceDetectorUrl,
                                 _faceDetectorModelFile
                             )
+                        } ?: run {
+                            // Selfie not required, post null
+                            _faceDetectorModelFile.postValue(Resource.success(null))
                         }
                     }
                 },

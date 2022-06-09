@@ -114,7 +114,7 @@ class LpmSerializerTest {
                       },
                       {
                         "type": "billing_address",
-                        "valid_country_codes": [
+                        "allowed_country_codes": [
                           "AT",
                           "BE",
                           "DE",
