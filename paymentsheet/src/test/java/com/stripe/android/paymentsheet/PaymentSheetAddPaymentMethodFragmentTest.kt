@@ -111,7 +111,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            PaymentMethod.Type.Bancontact,
+            "bancontact",
+            true,
             mapOf(
                 "type" to "bancontact",
                 "billing_details" to mapOf(
@@ -168,7 +169,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            PaymentMethod.Type.Card,
+            "card",
+            false,
             mapOf(
                 "type" to "card",
                 "card" to mapOf(
@@ -243,7 +245,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 FormFragmentArguments(
-                    lpmRepository.fromCode("bancontact")!!.type.code,
+                    lpmRepository.fromCode("bancontact")!!.code,
                     showCheckbox = false,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
@@ -265,7 +267,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 FormFragmentArguments(
-                    lpmRepository.fromCode("bancontact")!!.type.code,
+                    lpmRepository.fromCode("bancontact")!!.code,
                     showCheckbox = false,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
@@ -305,7 +307,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethodCode = LpmRepository.HardcodedCard.type.code,
+                    paymentMethodCode = LpmRepository.HardcodedCard.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -339,7 +341,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 )
             ).isEqualTo(
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethodCode = LpmRepository.HardcodedCard.type.code,
+                    paymentMethodCode = LpmRepository.HardcodedCard.code,
                     amount = createAmount(),
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
@@ -438,7 +440,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        paymentMethodCode = LpmRepository.HardcodedCard.type.code,
+                        paymentMethodCode = LpmRepository.HardcodedCard.code,
                         amount = createAmount(PI_OFF_SESSION),
                         showCheckbox = false,
                         showCheckboxControlledFields = true,

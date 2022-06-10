@@ -209,15 +209,15 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
         showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
-            selectedPaymentMethod.type == PaymentMethod.Type.Card &&
+            selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
             sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
 
         viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup
     }
 
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-        when (paymentMethod.type) {
-            PaymentMethod.Type.USBankAccount -> USBankAccountFormFragment::class.java
+        when (paymentMethod.code) {
+            PaymentMethod.Type.USBankAccount.code -> USBankAccountFormFragment::class.java
             else -> ComposeFormDataCollectionFragment::class.java
         }
 
@@ -238,7 +238,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
-                paymentMethodCode = showPaymentMethod.type.code,
+                paymentMethodCode = showPaymentMethod.code,
                 showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
                 showCheckboxControlledFields = newLpm?.let {
                     newLpm.customerRequestedSave ==
@@ -250,7 +250,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                    it == showPaymentMethod.type.code
+                    it == showPaymentMethod.code
                 }?.let {
                     when (newLpm) {
                         is PaymentSelection.New.GenericPaymentMethod ->

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -18,16 +19,18 @@ class FieldValuesToParamsMapConverter {
          */
         fun transformToPaymentMethodCreateParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-            type: PaymentMethod.Type
+            code: PaymentMethodCode,
+            requiresMandate: Boolean
         ) = transformToParamsMap(
             fieldValuePairs,
-            type
+            code
         )
             .filterOutNullValues()
             .toMap()
             .run {
                 PaymentMethodCreateParams.createWithOverride(
-                    type,
+                    code,
+                    requiresMandate = requiresMandate,
                     overrideParamMap = this,
                     productUsage = setOf("PaymentSheet")
                 )
@@ -42,7 +45,7 @@ class FieldValuesToParamsMapConverter {
          */
         private fun transformToParamsMap(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-            type: PaymentMethod.Type,
+            code: PaymentMethodCode,
         ): MutableMap<String, Any?> {
             val destMap = mutableMapOf<String, Any?>()
 
@@ -50,7 +53,7 @@ class FieldValuesToParamsMapConverter {
                 .mapValues { entry -> entry.value.value }
                 .mapKeys { it.key.v1 }
 
-            createMap(type, destMap, formKeyValueMap)
+            createMap(code, destMap, formKeyValueMap)
             return destMap
         }
 
@@ -76,11 +79,11 @@ class FieldValuesToParamsMapConverter {
          */
         @Suppress("UNCHECKED_CAST")
         private fun createMap(
-            type: PaymentMethod.Type,
+            code: PaymentMethodCode,
             dest: MutableMap<String, Any?>,
             formFieldKeyValues: Map<String, String?>
         ) {
-            addPath(dest, listOf("type"), type.code)
+            addPath(dest, listOf("type"), code)
 
             formFieldKeyValues.entries
                 .forEach {
