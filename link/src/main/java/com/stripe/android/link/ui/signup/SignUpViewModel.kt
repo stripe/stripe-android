@@ -16,7 +16,6 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -208,7 +207,7 @@ internal class SignUpViewModel @Inject constructor(
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
-        const val LOOKUP_DEBOUNCE_MS = 700L
+        const val LOOKUP_DEBOUNCE_MS = 1000L
 
         const val PREFILLED_EMAIL = "prefilled_email"
     }
