@@ -47,6 +47,11 @@ internal sealed class FlowCoordinatorMessage {
     data class RequestNextStep(
         val currentStep: NavigationCommand
     ) : FlowCoordinatorMessage()
+
+    /**
+     * Request navigation to Next available Pane
+     */
+    object FinishWithSelectedInstitution : FlowCoordinatorMessage()
 }
 
 /**

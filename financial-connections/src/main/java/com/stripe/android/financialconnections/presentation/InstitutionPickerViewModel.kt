@@ -8,13 +8,12 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
+import com.stripe.android.financialconnections.domain.FlowCoordinator
+import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage.FinishWithSelectedInstitution
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
-import com.stripe.android.financialconnections.domain.RequestNextStep
 import com.stripe.android.financialconnections.domain.SearchInstitutions
-import com.stripe.android.financialconnections.domain.UpdateAuthorizationSession
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
-import com.stripe.android.financialconnections.navigation.NavigationDirections
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,8 +23,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
     val searchInstitutions: SearchInstitutions,
     val postAuthorizationSession: PostAuthorizationSession,
-    val updateAuthSession: UpdateAuthorizationSession,
-    val requestNextStep: RequestNextStep,
+    private val flowCoordinator: FlowCoordinator,
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
 
@@ -54,8 +52,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: Institution) {
         viewModelScope.launch {
             val session = postAuthorizationSession(institution.id)
-            updateAuthSession(session)
-            requestNextStep(currentStep = NavigationDirections.institutionPicker)
+            //TODO use this when next steps available in native.
+            flowCoordinator.flow.emit(FinishWithSelectedInstitution)
+//            updateAuthSession(session)
+//            requestNextStep(currentStep = NavigationDirections.institutionPicker)
         }
     }
 

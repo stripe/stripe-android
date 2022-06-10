@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.FinishWithSelectedInstitution
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,9 +47,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     is FlowCoordinatorMessage.UpdateManifest -> setState {
                         copy(manifest = message.manifest)
                     }
+                    FlowCoordinatorMessage.FinishWithSelectedInstitution -> setState {
+                        copy(viewEffect = FinishWithSelectedInstitution)
+                    }
                 }
             }
         }
+    }
+
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
     }
 
     companion object :
@@ -75,7 +83,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 internal data class FinancialConnectionsSheetNativeState(
     val manifest: FinancialConnectionsSessionManifest,
     val authorizationSession: FinancialConnectionsAuthorizationSession?,
-    val configuration: FinancialConnectionsSheet.Configuration
+    val configuration: FinancialConnectionsSheet.Configuration,
+    val viewEffect: FinancialConnectionsSheetNativeViewEffect? = null
 ) : MavericksState {
 
     @Suppress("Unused")
@@ -87,4 +96,8 @@ internal data class FinancialConnectionsSheetNativeState(
         configuration = args.configuration,
         authorizationSession = null,
     )
+}
+
+internal sealed interface FinancialConnectionsSheetNativeViewEffect {
+    object FinishWithSelectedInstitution : FinancialConnectionsSheetNativeViewEffect
 }
