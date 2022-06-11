@@ -11,10 +11,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * After step completion, an updated [FinancialConnectionsSessionManifest] is received from
- * the API. This usecase can be triggered to update the manifest instance across the flow.
+ * Communication channel used by steps to send messages to parent
+ * [com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel]
  *
- * Each step is responsible for consuming manifest updates as needed.
  */
 @Singleton
 internal class FlowCoordinator @Inject constructor() : ObserveFlowUpdates {
