@@ -20,7 +20,7 @@ import kotlin.test.assertFailsWith
 @RunWith(AndroidJUnit4::class)
 class FetchFinancialConnectionsSessionTest {
 
-    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
+    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.sessionManifest())
     private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(repository)
 
     @Test

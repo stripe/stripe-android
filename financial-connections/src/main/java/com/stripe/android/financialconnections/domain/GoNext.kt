@@ -19,7 +19,7 @@ internal class GoNext @Inject constructor(
         manifest: FinancialConnectionsSessionManifest,
         authorizationSession: FinancialConnectionsAuthorizationSession?
     ): NavigationCommand {
-        val nextPane = when(currentPane.destination) {
+        val nextPane = when (currentPane.destination) {
             /**
              * institution picker step receives a fresh [FinancialConnectionsAuthorizationSession]
              * after picking a bank, source of truth for navigation.

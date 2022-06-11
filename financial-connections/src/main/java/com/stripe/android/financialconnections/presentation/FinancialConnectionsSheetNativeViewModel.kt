@@ -87,9 +87,9 @@ internal data class FinancialConnectionsSheetNativeState(
 ) : MavericksState {
 
     @Suppress("Unused")
-        /**
-         * Used by Mavericks to build initial state based on args.
-         */
+    /**
+     * Used by Mavericks to build initial state based on args.
+     */
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         manifest = args.manifest,
         configuration = args.configuration,

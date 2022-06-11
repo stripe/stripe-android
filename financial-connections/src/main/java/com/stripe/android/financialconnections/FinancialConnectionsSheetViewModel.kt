@@ -30,7 +30,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val eventReporter: FinancialConnectionsEventReporter,
-    private val logger: Logger,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
@@ -119,7 +118,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *  canceled.
      */
     internal fun onResume() {
-        logger.debug("onResume")
         setState {
             if (authFlowActive && activityRecreated.not()) {
                 copy(viewEffect = FinishWithResult(Canceled))
@@ -133,7 +131,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * the back button or closed the custom tabs UI, so return result as canceled.
      */
     internal fun onBrowserActivityResult() {
-        logger.debug("onBrowserActivityResult")
         setState {
             if (authFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))
@@ -215,7 +212,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        logger.debug("handleOnNewIntent")
         setState { copy(authFlowActive = false) }
         withState { state ->
             when (intent?.data.toString()) {
@@ -237,7 +233,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     fun onNativeAuthFlowResult() {
-        logger.debug("onNativeAuthFlowResult")
         setState {
             if (authFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))

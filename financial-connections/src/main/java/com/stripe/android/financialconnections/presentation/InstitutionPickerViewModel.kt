@@ -41,7 +41,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         setState { copy(query = query) }
         searchJob?.cancel()
         searchJob = suspend {
-            delay(300)
+            delay(SEARCH_DEBOUNCE_MS)
             searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
@@ -51,15 +51,18 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
     fun onInstitutionSelected(institution: Institution) {
         viewModelScope.launch {
-            val session = postAuthorizationSession(institution.id)
-            //TODO use this when next steps available in native.
+            postAuthorizationSession(institution.id)
             flowCoordinator.flow.emit(FlowCoordinatorMessage.OpenWebAuthFlow)
+            // TODO@carlosmuvi use this when next steps available in native.
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)
         }
     }
 
-    companion object : MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
+    companion object :
+        MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
+
+        private const val SEARCH_DEBOUNCE_MS = 300L
         override fun create(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState

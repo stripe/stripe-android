@@ -105,7 +105,7 @@ private fun InstitutionGrid(
         content = {
             items(institutions) { institution ->
                 Card(
-                    backgroundColor = Color(0xFF1CC6FF),
+                    backgroundColor = Color.Magenta,
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth()
@@ -121,7 +121,7 @@ private fun InstitutionGrid(
                             text = institution.name,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color(0xFFFFFFFF),
+                            color = Color.White,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(16.dp)
                         )

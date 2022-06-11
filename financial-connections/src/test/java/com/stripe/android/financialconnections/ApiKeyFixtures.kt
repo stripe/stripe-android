@@ -9,5 +9,26 @@ internal object ApiKeyFixtures {
     const val HOSTED_AUTH_URL = "https://stripe.com/auth/flow/start"
     const val SUCCESS_URL = "stripe-auth://link-accounts/success"
     const val CANCEL_URL = "stripe-auth://link-accounts/cancel"
-    val MANIFEST = FinancialConnectionsSessionManifest(HOSTED_AUTH_URL, SUCCESS_URL, CANCEL_URL)
+
+    fun sessionManifest() = FinancialConnectionsSessionManifest(
+        allowManualEntry = true,
+        consentRequired = true,
+        customManualEntryHandling = true,
+        disableLinkMoreAccounts = true,
+        id = "1234",
+        instantVerificationDisabled = true,
+        institutionSearchDisabled = true,
+        livemode = true,
+        manualEntryUsesMicrodeposits = true,
+        mobileHandoffEnabled = true,
+        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        permissions = emptyList(),
+        product = FinancialConnectionsSessionManifest.Product.STRIPE_CARD,
+        singleAccount = true,
+        useSingleSortSearch = true,
+        successUrl = SUCCESS_URL,
+        cancelUrl = CANCEL_URL,
+        hostedAuthUrl = HOSTED_AUTH_URL
+    )
+
 }

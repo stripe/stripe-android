@@ -92,7 +92,9 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         )
     }
 
-    override suspend fun getFinancialConnectionsSessionManifest(clientSecret: String): FinancialConnectionsSessionManifest {
+    override suspend fun getFinancialConnectionsSessionManifest(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = getManifestUrl,
             options = options,
@@ -106,7 +108,9 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         )
     }
 
-    override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
+    override suspend fun markConsentAcquired(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = consentAcquiredUrl,
             options = options,
@@ -144,7 +148,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "query" to query,
-                "limit" to 8
+                "limit" to SEARCH_INSTITUTIONS_LIMIT
             ),
         )
         return executeRequest(
@@ -223,6 +227,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
     internal companion object {
         private const val API_HOST = "https://api.stripe.com"
+
+        private const val SEARCH_INSTITUTIONS_LIMIT = 8
 
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
         internal const val PARAMS_APPLICATION_ID = "application_id"
