@@ -16,6 +16,7 @@ import com.stripe.android.core.version.StripeSdkVersion
  *   app_name - the host application name
  *   app_version - the host app version
  *   plugin_type - whether SDK is integrated natively or through other wrappers(e.g react native)
+ *   platform_info - information about current platform
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsRequestV2Factory(
@@ -46,6 +47,7 @@ class AnalyticsRequestV2Factory(
         }
     )
 
+    // Common SDK related parameters, need dedicated ingestion logic on server side.
     private fun sdkParams() = mapOf(
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
         PARAM_SDK_PLATFORM to "android",
@@ -53,7 +55,10 @@ class AnalyticsRequestV2Factory(
         AnalyticsFields.DEVICE_TYPE to "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}",
         AnalyticsFields.APP_NAME to getAppName(),
         AnalyticsFields.APP_VERSION to appContext.packageInfo?.versionCode,
-        PARAM_PLUGIN_TYPE to pluginType
+        PARAM_PLUGIN_TYPE to pluginType,
+        PARAM_PLATFORM_INFO to mapOf(
+            PARAM_PACKAGE_NAME to appContext.packageName
+        )
     )
 
     private fun getAppName(): CharSequence {
@@ -71,5 +76,7 @@ class AnalyticsRequestV2Factory(
         internal const val PARAM_SDK_PLATFORM = "sdk_platform"
         internal const val PARAM_SDK_VERSION = "sdk_version"
         internal const val PARAM_PLUGIN_TYPE = "plugin_type"
+        internal const val PARAM_PLATFORM_INFO = "platform_info"
+        internal const val PARAM_PACKAGE_NAME = "package_name"
     }
 }

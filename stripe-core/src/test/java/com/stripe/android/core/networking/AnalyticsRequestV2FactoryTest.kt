@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CLIENT_ID
+import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PACKAGE_NAME
+import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PLATFORM_INFO
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PLUGIN_TYPE
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_PLATFORM
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_VERSION
@@ -28,7 +30,8 @@ class AnalyticsRequestV2FactoryTest {
         AnalyticsFields.DEVICE_TYPE,
         AnalyticsFields.APP_NAME,
         AnalyticsFields.APP_VERSION,
-        PARAM_PLUGIN_TYPE
+        PARAM_PLUGIN_TYPE,
+        "$PARAM_PLATFORM_INFO%5B$PARAM_PACKAGE_NAME%5D"
     )
 
     @Test
