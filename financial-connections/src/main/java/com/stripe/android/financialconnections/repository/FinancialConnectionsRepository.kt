@@ -40,4 +40,14 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String,
         applicationId: String
     ): FinancialConnectionsSessionManifest
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun markConsentAcquired(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest
 }

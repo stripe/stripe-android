@@ -87,6 +87,20 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         )
     }
 
+    override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
+        val financialConnectionsRequest = apiRequestFactory.createPost(
+            url = consentAcquiredUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+            ),
+        )
+        return executeRequest(
+            financialConnectionsRequest,
+            FinancialConnectionsSessionManifest.serializer()
+        )
+    }
+
     private suspend fun <Response> executeRequest(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>
@@ -146,6 +160,9 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
         internal const val listAccountsUrl: String =
             "$API_HOST/v1/link_account_sessions/list_accounts"
+
+        internal const val consentAcquiredUrl: String =
+            "$API_HOST/v1/link_account_sessions/consent_acquired"
 
         internal const val sessionReceiptUrl: String =
             "$API_HOST/v1/link_account_sessions/session_receipt"

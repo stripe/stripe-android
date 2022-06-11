@@ -1,7 +1,9 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import dagger.BindsInstance
@@ -12,8 +14,9 @@ import javax.inject.Singleton
 @Component(
     modules = [
         FinancialConnectionsSheetNativeModule::class,
+        FinancialConnectionsSheetModule::class,
         LoggingModule::class,
-        NavigationModule::class
+        CoroutineContextModule::class,
     ]
 )
 internal interface FinancialConnectionsSheetNativeComponent {
@@ -26,6 +29,9 @@ internal interface FinancialConnectionsSheetNativeComponent {
 
         @BindsInstance
         fun initialState(initialState: FinancialConnectionsSheetNativeState): Builder
+
+        @BindsInstance
+        fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
 
         fun build(): FinancialConnectionsSheetNativeComponent
     }

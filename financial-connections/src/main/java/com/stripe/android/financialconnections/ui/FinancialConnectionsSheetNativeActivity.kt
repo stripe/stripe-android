@@ -22,11 +22,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
-            setContent {
-                Column {
-                    Box(modifier = Modifier.weight(1f)) { NavHost() }
-                }
+        setContent {
+            Column {
+                Box(modifier = Modifier.weight(1f)) { NavHost() }
             }
         }
     }
