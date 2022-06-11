@@ -1,11 +1,10 @@
 package com.stripe.android.financialconnections
 
-import android.app.Activity
 import android.content.Intent
-import androidx.activity.result.ActivityResult
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
@@ -31,6 +30,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val eventReporter: FinancialConnectionsEventReporter,
+    private val logger: Logger,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
@@ -77,7 +77,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             val nativeAuthFlow = true
             copy(
                 manifest = manifest,
-                webAuthFlowActive = nativeAuthFlow.not(),
+                authFlowActive = true,
                 viewEffect = if (nativeAuthFlow) {
                     OpenNativeAuthFlow(initialArgs.configuration, manifest)
                 } else {
@@ -119,8 +119,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *  canceled.
      */
     internal fun onResume() {
+        logger.debug("onResume")
         setState {
-            if (webAuthFlowActive && activityRecreated.not()) {
+            if (authFlowActive && activityRecreated.not()) {
                 copy(viewEffect = FinishWithResult(Canceled))
             } else this
         }
@@ -132,8 +133,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * the back button or closed the custom tabs UI, so return result as canceled.
      */
     internal fun onBrowserActivityResult() {
+        logger.debug("onBrowserActivityResult")
         setState {
-            if (webAuthFlowActive && activityRecreated) {
+            if (authFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))
             } else this
         }
@@ -213,7 +215,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        setState { copy(webAuthFlowActive = false) }
+        logger.debug("handleOnNewIntent")
+        setState { copy(authFlowActive = false) }
         withState { state ->
             when (intent?.data.toString()) {
                 state.manifest?.successUrl -> when (state.initialArgs) {
@@ -233,14 +236,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onNativeAuthFlowResult(activityResult: ActivityResult) {
-        if (activityResult.resultCode == Activity.RESULT_OK) {
-            setState {
-                copy(
-                    // TODO@carlosmuvi implement manifest-based logic to open the corresponding flow.
-                    viewEffect = OpenAuthFlowWithUrl(manifest!!.hostedAuthUrl)
-                )
-            }
+    fun onNativeAuthFlowResult() {
+        logger.debug("onNativeAuthFlowResult")
+        setState {
+            if (authFlowActive && activityRecreated) {
+                copy(viewEffect = FinishWithResult(Canceled))
+            } else this
         }
     }
 

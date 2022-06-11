@@ -25,33 +25,30 @@ internal class FlowCoordinator @Inject constructor() : ObserveFlowUpdates {
     }
 }
 
-internal sealed class FlowCoordinatorMessage {
+internal sealed interface FlowCoordinatorMessage {
 
     /**
      * Updates global [FinancialConnectionsSessionManifest] instance.
      */
     data class UpdateManifest(
         val manifest: FinancialConnectionsSessionManifest
-    ) : FlowCoordinatorMessage()
+    ) : FlowCoordinatorMessage
 
     /**
      * Updates global [FinancialConnectionsAuthorizationSession] instance.
      */
     data class UpdateAuthorizationSession(
         val authorizationSession: FinancialConnectionsAuthorizationSession
-    ) : FlowCoordinatorMessage()
+    ) : FlowCoordinatorMessage
 
     /**
      * Request navigation to Next available Pane
      */
     data class RequestNextStep(
         val currentStep: NavigationCommand
-    ) : FlowCoordinatorMessage()
+    ) : FlowCoordinatorMessage
 
-    /**
-     * Request navigation to Next available Pane
-     */
-    object FinishWithSelectedInstitution : FlowCoordinatorMessage()
+    object OpenWebAuthFlow : FlowCoordinatorMessage
 }
 
 /**

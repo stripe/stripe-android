@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.FinishWithSelectedInstitution
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,7 +30,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
-        logger.debug("Viewmodel init $this")
         viewModelScope.launch {
             observeFlowUpdates().collectLatest { message ->
                 when (message) {
@@ -47,8 +46,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     is FlowCoordinatorMessage.UpdateManifest -> setState {
                         copy(manifest = message.manifest)
                     }
-                    FlowCoordinatorMessage.FinishWithSelectedInstitution -> setState {
-                        copy(viewEffect = FinishWithSelectedInstitution)
+                    FlowCoordinatorMessage.OpenWebAuthFlow -> setState {
+                        copy(viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
                     }
                 }
             }
@@ -84,7 +83,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val manifest: FinancialConnectionsSessionManifest,
     val authorizationSession: FinancialConnectionsAuthorizationSession?,
     val configuration: FinancialConnectionsSheet.Configuration,
-    val viewEffect: FinancialConnectionsSheetNativeViewEffect? = null
+    val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
 
     @Suppress("Unused")
@@ -95,9 +94,15 @@ internal data class FinancialConnectionsSheetNativeState(
         manifest = args.manifest,
         configuration = args.configuration,
         authorizationSession = null,
+        viewEffect = null
     )
 }
 
 internal sealed interface FinancialConnectionsSheetNativeViewEffect {
-    object FinishWithSelectedInstitution : FinancialConnectionsSheetNativeViewEffect
+    /**
+     * Open the Web AuthFlow.
+     */
+    data class OpenAuthFlowWithUrl(
+        val url: String
+    ) : FinancialConnectionsSheetNativeViewEffect
 }

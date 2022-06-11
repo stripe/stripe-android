@@ -9,7 +9,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.FlowCoordinator
-import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage.FinishWithSelectedInstitution
+import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.Institution
@@ -53,7 +53,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         viewModelScope.launch {
             val session = postAuthorizationSession(institution.id)
             //TODO use this when next steps available in native.
-            flowCoordinator.flow.emit(FinishWithSelectedInstitution)
+            flowCoordinator.flow.emit(FlowCoordinatorMessage.OpenWebAuthFlow)
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)
         }
