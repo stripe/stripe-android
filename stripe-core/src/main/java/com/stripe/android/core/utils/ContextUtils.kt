@@ -1,10 +1,12 @@
-package com.stripe.android.utils
+package com.stripe.android.core.utils
 
 import android.content.Context
 import android.content.pm.PackageInfo
+import androidx.annotation.RestrictTo
 
-internal object ContextUtils {
-    internal val Context.packageInfo: PackageInfo?
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object ContextUtils {
+    val Context.packageInfo: PackageInfo?
         @JvmSynthetic
         get() = runCatching {
             packageManager.getPackageInfo(packageName, 0)
