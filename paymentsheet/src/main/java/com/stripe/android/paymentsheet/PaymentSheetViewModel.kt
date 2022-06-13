@@ -265,8 +265,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         stripeIntent,
                         config,
                         resourceRepository.getLpmRepository()
-                    ).map {
-                        it.type
+                    ).mapNotNull {
+                        // The SDK is only able to parse customer LPMs
+                        // that are hard coded in the SDK.
+                        PaymentMethod.Type.fromCode(it.code)
                     }.let {
                         customerRepository.getPaymentMethods(
                             customerConfig,

@@ -9,6 +9,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
@@ -78,8 +80,17 @@ internal class WalletScreenTest {
             11,
             CardBrand.MasterCard,
             "4444"
+        ),
+        ConsumerPaymentDetails.Card(
+            "id3",
+            false,
+            2023,
+            11,
+            CardBrand.AmericanExpress,
+            "0005"
         )
     )
+    private val paymentDetailsFlow = MutableStateFlow(paymentDetails)
 
     @Test
     fun default_payment_method_is_initially_selected() {
@@ -256,6 +267,26 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
+    @Test
+    fun when_selected_item_is_removed_then_default_is_selected() {
+        setContent()
+
+        val secondPaymentMethod = paymentDetails[1]
+
+        toggleListExpanded()
+        onPaymentDetailsItem(secondPaymentMethod).performClick()
+        toggleListExpanded()
+
+        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+            .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
+
+        val defaultPaymentDetails = paymentDetails.first()
+        paymentDetailsFlow.tryEmit(listOf(paymentDetails[2], defaultPaymentDetails))
+
+        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+            .filter(hasText(defaultPaymentDetails.last4, substring = true)).assertCountEquals(1)
+    }
+
     private fun setContent(
         isProcessing: Boolean = false,
         errorMessage: ErrorMessage? = null,
@@ -269,6 +300,7 @@ internal class WalletScreenTest {
         var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val coroutineScope = rememberCoroutineScope()
+        val paymentDetails by paymentDetailsFlow.collectAsState()
 
         if (bottomSheetContent != null) {
             DisposableEffect(bottomSheetContent) {

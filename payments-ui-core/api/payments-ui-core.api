@@ -23,7 +23,7 @@ public final class com/stripe/android/ui/core/BuildConfig {
 }
 
 public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion {
-	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Type;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Ljava/lang/String;Z)Lcom/stripe/android/model/PaymentMethodCreateParams;
 }
 
 public final class com/stripe/android/ui/core/FormUIKt {

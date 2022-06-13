@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
@@ -25,18 +26,17 @@ import javax.inject.Named
 internal class InlineSignupViewModel @Inject constructor(
     @Named(MERCHANT_NAME) val merchantName: String,
     @Named(CUSTOMER_EMAIL) customerEmail: String?,
+    @Named(CUSTOMER_PHONE) customerPhone: String?,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger
 ) : ViewModel() {
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
+    private val prefilledPhone =
+        customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
 
-    val emailController = SimpleTextFieldController.createEmailSectionController(
-        prefilledEmail
-    )
-
-    val phoneController: PhoneNumberController =
-        PhoneNumberController.createPhoneNumberController()
+    val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
+    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

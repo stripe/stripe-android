@@ -19,7 +19,8 @@ class FieldValuesToParamsMapConverterTest {
                         true
                     )
                 ),
-                PaymentMethod.Type.Ideal,
+                PaymentMethod.Type.Ideal.code,
+                PaymentMethod.Type.Ideal.requiresMandate
             )
 
         assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
@@ -85,7 +86,8 @@ class FieldValuesToParamsMapConverterTest {
                         true
                     ),
                 ),
-                PaymentMethod.Type.Sofort,
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Sofort.requiresMandate
             )
 
         assertThat(

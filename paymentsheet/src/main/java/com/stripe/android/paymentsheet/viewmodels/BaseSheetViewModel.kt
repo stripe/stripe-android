@@ -99,7 +99,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         )?.mapNotNull {
             resourceRepository.getLpmRepository().fromCode(it)
         } ?: emptyList()
-        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.type.code })
+        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _paymentMethods =
@@ -126,7 +126,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 ) ?: newLpm?.paymentMethodCreateParams?.typeCode
             ) ?: supportedPaymentMethods.first()
         )
-        set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.type.code)
+        set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.code)
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -181,8 +181,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
-    val linkLauncher =
-        linkPaymentLauncherFactory.create(merchantName, config?.defaultBillingDetails?.email)
+    val linkLauncher = linkPaymentLauncherFactory.create(
+        merchantName = merchantName,
+        customerEmail = config?.defaultBillingDetails?.email,
+        customerPhone = config?.defaultBillingDetails?.phone
+    )
 
     private val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
@@ -319,7 +322,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " match the supported payment types" +
                         " (${
                         resourceRepository.getLpmRepository().values()
-                            .map { it.type.code }.toList()
+                            .map { it.code }.toList()
                         })"
                 )
             )
