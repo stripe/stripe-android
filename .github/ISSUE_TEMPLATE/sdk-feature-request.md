@@ -18,3 +18,4 @@ A clear and concise description of any alternative solutions or features you've 
 
 ## Additional context
 Add any other context or screenshots about the feature request here.
+implementation "com.stripe:stripe-java:{VERSION}"<dependency><groupId>com.stripe</groupId><artifactId>stripe-java</artifactId><version>{VERSION}</version></dependency><dependency><groupId>com.stripe</groupId><artifactId>stripe-java</artifactId><version>{VERSION}</version></dependency>implementation "com.stripe:stripeterminal:2.10.0"
