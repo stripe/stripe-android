@@ -53,6 +53,7 @@ enum class KeyboardType {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 data class SimpleTextSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec,
 
     @SerialName("label")

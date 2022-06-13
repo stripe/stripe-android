@@ -2,7 +2,6 @@ package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -87,13 +86,6 @@ class FieldValuesToParamsMapConverter {
 
             formFieldKeyValues.entries
                 .forEach {
-                    // Sofort is the only known LPM that requires the country in the
-                    // billing_details[address][country] and the sofort[country] fields.
-                    if (code == PaymentMethod.Type.Sofort.code &&
-                        it.key == "billing_details[address][country]"
-                    ) {
-                        addPath(dest, listOf("sofort", "country"), it.value)
-                    }
                     addPath(dest, getKeys(it.key), it.value)
                 }
         }
