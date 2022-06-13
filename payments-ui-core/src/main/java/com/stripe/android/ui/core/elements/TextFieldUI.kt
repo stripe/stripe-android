@@ -20,6 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * This is focused on converting an [TextFieldController] into what is displayed in a section
@@ -216,11 +218,15 @@ fun AnimatedIcons(
 ) {
     if (icons.isEmpty()) return
 
+    val composableScope = rememberCoroutineScope()
+
     val target by produceState(initialValue = icons.first()) {
-        while (true) {
-            icons.forEach {
-                delay(1000)
-                value = it
+        composableScope.launch {
+            while (true) {
+                icons.forEach {
+                    delay(1000)
+                    value = it
+                }
             }
         }
     }
