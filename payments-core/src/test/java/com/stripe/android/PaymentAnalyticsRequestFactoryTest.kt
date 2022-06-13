@@ -102,7 +102,7 @@ class PaymentAnalyticsRequestFactoryTest {
         assertThat(
             analyticsRequestFactory
                 .createPaymentMethodCreation(
-                    PaymentMethod.Type.Card,
+                    PaymentMethod.Type.Card.code,
                     ATTRIBUTION
                 ).params
         ).isEqualTo(
@@ -282,7 +282,7 @@ class PaymentAnalyticsRequestFactoryTest {
     fun `create should create object with expected url and headers`() {
         val sdkVersion = StripeSdkVersion.VERSION_NAME
         val analyticsRequest = analyticsRequestFactory.createPaymentMethodCreation(
-            PaymentMethod.Type.Card,
+            PaymentMethod.Type.Card.code,
             emptySet()
         )
         assertThat(analyticsRequest.headers)

@@ -94,13 +94,14 @@ internal class CardEditViewModel @Inject constructor(
         val paymentMethodCreateParams =
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
-                PaymentMethod.Type.Card
+                PaymentMethod.Type.Card.code,
+                requiresMandate = false
             )
 
         viewModelScope.launch {
             val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
                 paymentDetails.id,
-                setAsDefault.value.takeUnless { isDefault },
+                setAsDefault.value.takeUnless { isDefault || it == isDefault },
                 paymentMethodCreateParams
             )
 

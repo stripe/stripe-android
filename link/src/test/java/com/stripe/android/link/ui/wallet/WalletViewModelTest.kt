@@ -47,9 +47,6 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
-    private val linkAccount = mock<LinkAccount>().apply {
-        whenever(clientSecret).thenReturn(CLIENT_SECRET)
-    }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkAccountManager: LinkAccountManager
     private val navigator = mock<Navigator>()
@@ -60,7 +57,12 @@ class WalletViewModelTest {
     fun before() {
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
-        linkAccountManager = mock()
+        val mockLinkAccount = mock<LinkAccount>().apply {
+            whenever(clientSecret).thenReturn(CLIENT_SECRET)
+        }
+        linkAccountManager = mock<LinkAccountManager>().apply {
+            whenever(linkAccount).thenReturn(MutableStateFlow(mockLinkAccount))
+        }
     }
 
     @Test
@@ -311,7 +313,6 @@ class WalletViewModelTest {
     private fun createViewModel() =
         WalletViewModel(
             args,
-            linkAccount,
             linkAccountManager,
             navigator,
             confirmationManager,
