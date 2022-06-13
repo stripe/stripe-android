@@ -30,5 +30,4 @@ internal object ApiKeyFixtures {
         cancelUrl = CANCEL_URL,
         hostedAuthUrl = HOSTED_AUTH_URL
     )
-
 }

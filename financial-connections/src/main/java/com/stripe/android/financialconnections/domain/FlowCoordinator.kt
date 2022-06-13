@@ -11,7 +11,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Communication channel used by steps to send messages to parent
+ * The AuthFlow state is centralized in the parent viewModel.
+ *
+ * This component acts as a communication channel used by steps to send messages to parent
  * [com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel]
  *
  */
