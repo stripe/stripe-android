@@ -50,7 +50,7 @@ class AnalyticsRequestV2(
      */
     private fun analyticParams() = mapOf(
         PARAM_CLIENT_ID to clientId,
-        PARAM_CREATED to System.currentTimeMillis() * 1000,
+        PARAM_CREATED to System.currentTimeMillis() * MILLIS_IN_SECOND,
         PARAM_EVENT_NAME to eventName,
         PARAM_EVENT_ID to UUID.randomUUID().toString(),
     )
@@ -78,6 +78,7 @@ class AnalyticsRequestV2(
     internal companion object {
         internal const val ANALYTICS_HOST = "https://r.stripe.com/0"
         internal const val HEADER_ORIGIN = "origin"
+        internal const val MILLIS_IN_SECOND = 1000
 
         internal const val PARAM_CLIENT_ID = "client_id"
         internal const val PARAM_CREATED = "created"
