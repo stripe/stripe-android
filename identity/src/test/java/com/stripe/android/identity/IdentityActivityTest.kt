@@ -28,6 +28,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
@@ -40,6 +41,7 @@ internal class IdentityActivityTest {
     private val mockAppSettingsOpenable = mock<AppSettingsOpenable>()
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
     private val mockIdentityViewModelFactory = mock<IdentityViewModel.IdentityViewModelFactory>()
+    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
     private val testIdentityFragmentFactory = IdentityFragmentFactory(
         mockCameraPermissionEnsureable,
@@ -48,7 +50,8 @@ internal class IdentityActivityTest {
         IdentityScanViewModel.IdentityScanViewModelFactory(),
         IdentityUploadViewModel.FrontBackUploadViewModelFactory(mock()),
         ConsentFragmentViewModel.ConsentFragmentViewModelFactory(mock(), mock()),
-        mockIdentityViewModelFactory
+        mockIdentityViewModelFactory,
+        mockFallbackUrlLauncher
     )
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
@@ -288,6 +291,25 @@ internal class IdentityActivityTest {
 
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.IDScanFragment)
             assertThat(navController.isNavigatedUpTo()).isEqualTo(false)
+        }
+    }
+
+    @Test
+    fun `when activity is recreated finishes with result`() {
+        injectableActivityScenario<IdentityActivity> {
+            injectActivity {
+                viewModelFactory = mockIdentityViewModelFactory
+            }
+        }.launch(
+            IdentityVerificationSheetContract().createIntent(
+                context = ApplicationProvider.getApplicationContext(),
+                input = ARGS
+            )
+        ).onActivity {
+            verify(mockIdentityViewModel).retrieveAndBufferVerificationPage()
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
+        }.recreate().onActivity {
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(0)
         }
     }
 
