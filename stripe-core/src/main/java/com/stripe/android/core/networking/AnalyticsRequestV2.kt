@@ -13,7 +13,7 @@ import java.io.UnsupportedEncodingException
 import java.util.UUID
 
 /**
- * Analytics request sent to r.stripe.com.
+ * Analytics request sent to r.stripe.com, which is the preferred service for analytics.
  * This is a POST request with [MimeType.Form] ContentType.
  *
  * It sets two headers required by r.stripe.com -
