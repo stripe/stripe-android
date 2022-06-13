@@ -10,9 +10,8 @@ import androidx.annotation.IntDef
 import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.onClosed
@@ -35,7 +34,7 @@ import kotlinx.coroutines.runBlocking
 internal annotation class RotationValue
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
+abstract class CameraAdapter<CameraOutput> : LifecycleEventObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
@@ -81,8 +80,19 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         Log.e(logTag, "Unable to send image to channel", t)
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun onDestroyed() {
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_DESTROY -> onDestroyed()
+            Lifecycle.Event.ON_PAUSE -> onPause()
+            Lifecycle.Event.ON_CREATE -> Unit // do nothing
+            Lifecycle.Event.ON_START -> Unit // do nothing
+            Lifecycle.Event.ON_RESUME -> Unit // do nothing
+            Lifecycle.Event.ON_STOP -> Unit // do nothing
+            Lifecycle.Event.ON_ANY -> Unit // do nothing
+        }
+    }
+
+    open fun onDestroyed() {
         runBlocking { imageChannel.close() }
     }
 
@@ -114,7 +124,6 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
      */
     open fun isBoundToLifecycle() = lifecyclesBound > 0
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     open fun onPause() {
         // support OnPause events.
     }
