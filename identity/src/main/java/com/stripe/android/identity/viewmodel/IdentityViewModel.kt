@@ -20,9 +20,11 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
 import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
@@ -62,10 +64,11 @@ import javax.inject.Provider
 
 internal class IdentityViewModel @Inject constructor(
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
-    private val identityRepository: IdentityRepository,
+    val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
     val identityFragmentFactory: IdentityFragmentFactory,
+    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) : ViewModel() {
 
     /**
@@ -650,6 +653,14 @@ internal class IdentityViewModel @Inject constructor(
             DaggerIdentityViewModelFactoryComponent.builder()
                 .context(context)
                 .build().inject(this)
+        }
+    }
+
+    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
+        viewModelScope.launch {
+            identityRepository.sendAnalyticsRequest(
+                request
+            )
         }
     }
 

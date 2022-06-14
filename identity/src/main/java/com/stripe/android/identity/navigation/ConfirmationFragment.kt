@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.setHtmlString
@@ -36,6 +37,7 @@ internal class ConfirmationFragment(
     ): View {
         binding = ConfirmationFragmentBinding.inflate(inflater, container, false)
         binding.kontinue.setOnClickListener {
+            // TODO: Send verificationSucceed analytics event
             verificationFlowFinishable.finishWithResult(
                 IdentityVerificationSheet.VerificationFlowResult.Completed
             )
@@ -57,6 +59,12 @@ internal class ConfirmationFragment(
                 Log.e(TAG, "Failed to get VerificationPage")
                 navigateToDefaultErrorFragment()
             }
+        )
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_CONFIRMATION
+            )
         )
     }
 

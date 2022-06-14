@@ -45,7 +45,8 @@ internal class IdentityFragmentFactory @Inject constructor(
                 identityViewModelFactory
             )
             CameraPermissionDeniedFragment::class.java.name -> CameraPermissionDeniedFragment(
-                appSettingsOpenable
+                appSettingsOpenable,
+                identityViewModelFactory
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
                 identityUploadViewModelFactory,
@@ -73,7 +74,11 @@ internal class IdentityFragmentFactory @Inject constructor(
                 verificationFlowFinishable
             )
             ErrorFragment::class.java.name -> ErrorFragment(
-                verificationFlowFinishable
+                verificationFlowFinishable,
+                identityViewModelFactory
+            )
+            CouldNotCaptureFragment::class.java.name -> CouldNotCaptureFragment(
+                identityViewModelFactory
             )
             else -> super.instantiate(classLoader, className)
         }

@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.Camera1Adapter
-import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
@@ -124,15 +123,7 @@ internal abstract class IdentityCameraScanFragment(
         }
     }
 
-    protected open fun createCameraAdapter() =
-        Camera1Adapter(
-            requireNotNull(activity),
-            cameraView.previewFrame,
-            MINIMUM_RESOLUTION,
-            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-                Log.e(TAG, "scan fails with exception: $cause")
-            }
-        )
+    protected abstract fun createCameraAdapter(): Camera1Adapter
 
     /**
      * Called back each time when [CameraViewModel.displayStateChanged] is changed.

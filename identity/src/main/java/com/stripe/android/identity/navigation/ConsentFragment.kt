@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -103,6 +104,12 @@ internal class ConsentFragment(
                     it ?: IllegalStateException("Failed to get verificationPage")
                 )
             }
+        )
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                screenName = SCREEN_NAME_CONSENT
+            )
         )
     }
 

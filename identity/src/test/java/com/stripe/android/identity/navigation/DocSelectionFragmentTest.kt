@@ -11,6 +11,12 @@ import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_DENIED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_GRANTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRIVING_LICENSE_KEY
@@ -32,6 +38,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -45,7 +52,14 @@ internal class DocSelectionFragmentTest {
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val verificationPage = mock<VerificationPage>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>()
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { identityAnalyticsRequestFactory }.thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
+    }
     private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
     private val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
     private val onUserDeniedCameraPermissionCaptor = argumentCaptor<() -> Unit>()
@@ -93,6 +107,12 @@ internal class DocSelectionFragmentTest {
             )
             setUpSuccessVerificationPage()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_DOC_SELECT
+                }
+            )
             assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
             assertThat(binding.multiSelectionContent.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.GONE)
@@ -216,6 +236,12 @@ internal class DocSelectionFragmentTest {
             // trigger permission granted
             onCameraReadyCaptor.firstValue()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_CAMERA_PERMISSION_GRANTED
+                }
+            )
+
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
@@ -256,6 +282,12 @@ internal class DocSelectionFragmentTest {
             // trigger permission granted
             onCameraReadyCaptor.firstValue()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_CAMERA_PERMISSION_GRANTED
+                }
+            )
+
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
@@ -295,6 +327,12 @@ internal class DocSelectionFragmentTest {
 
             // trigger permission denied
             onUserDeniedCameraPermissionCaptor.firstValue()
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_CAMERA_PERMISSION_DENIED
+                }
+            )
 
             setUpSuccessVerificationPage(2)
 
@@ -340,6 +378,12 @@ internal class DocSelectionFragmentTest {
 
             // trigger permission denied
             onUserDeniedCameraPermissionCaptor.firstValue()
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_CAMERA_PERMISSION_DENIED
+                }
+            )
 
             setUpSuccessVerificationPage(2)
 

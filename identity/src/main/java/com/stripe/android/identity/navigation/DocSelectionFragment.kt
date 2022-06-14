@@ -15,11 +15,13 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
+import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -76,6 +78,12 @@ internal class DocSelectionFragment(
             onFailure = {
                 navigateToDefaultErrorFragment()
             }
+        )
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
+            )
         )
     }
 
@@ -190,6 +198,11 @@ internal class DocSelectionFragment(
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
                         onCameraReady = {
+                            identityViewModel.sendAnalyticsRequest(
+                                identityViewModel.identityAnalyticsRequestFactory.cameraPermissionGranted(
+                                    type.toAnalyticsScanType()
+                                )
+                            )
                             identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
                                 when (modelResource.status) {
                                     // model ready, camera permission is granted -> navigate to scan
@@ -205,6 +218,11 @@ internal class DocSelectionFragment(
                             }
                         },
                         onUserDeniedCameraPermission = {
+                            identityViewModel.sendAnalyticsRequest(
+                                identityViewModel.identityAnalyticsRequestFactory.cameraPermissionDenied(
+                                    type.toAnalyticsScanType()
+                                )
+                            )
                             tryNavigateToCameraPermissionDeniedFragment(type)
                         }
                     )
@@ -284,5 +302,11 @@ internal class DocSelectionFragment(
                 Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportUploadFragment
                 Type.DRIVINGLICENSE -> R.id.action_docSelectionFragment_to_driverLicenseUploadFragment
             }
+
+        private fun Type.toAnalyticsScanType() = when (this) {
+            Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DL_FRONT
+            Type.IDCARD -> IdentityScanState.ScanType.ID_FRONT
+            Type.PASSPORT -> IdentityScanState.ScanType.PASSPORT
+        }
     }
 }

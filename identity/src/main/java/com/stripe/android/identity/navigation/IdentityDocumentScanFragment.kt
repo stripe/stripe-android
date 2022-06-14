@@ -12,9 +12,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -36,6 +39,8 @@ internal abstract class IdentityDocumentScanFragment(
 ) : IdentityCameraScanFragment(
     identityCameraScanViewModelFactory, identityViewModelFactory
 ) {
+    abstract val frontScanType: IdentityScanState.ScanType
+
     protected lateinit var binding: IdentityDocumentScanFragmentBinding
     protected lateinit var headerTitle: TextView
     protected lateinit var messageView: TextView
@@ -67,6 +72,13 @@ internal abstract class IdentityDocumentScanFragment(
             identityViewModel.resetDocumentUploadedState()
         }
         super.onViewCreated(view, savedInstanceState)
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                scanType = frontScanType,
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+            )
+        )
     }
 
     /**
@@ -114,6 +126,21 @@ internal abstract class IdentityDocumentScanFragment(
             }
         }
     }
+
+    override fun createCameraAdapter() = Camera1Adapter(
+        requireNotNull(activity),
+        cameraView.previewFrame,
+        MINIMUM_RESOLUTION,
+        DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
+            Log.e(TAG, "scan fails with exception: $cause")
+            identityViewModel.sendAnalyticsRequest(
+                identityViewModel.identityAnalyticsRequestFactory.cameraError(
+                    scanType = frontScanType,
+                    throwable = IllegalStateException(cause)
+                )
+            )
+        }
+    )
 
     /**
      * Collect the [IdentityViewModel.documentUploadState] and update UI accordingly.
