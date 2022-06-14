@@ -84,16 +84,40 @@ abstract class CameraAdapter<CameraOutput> : LifecycleEventObserver {
         when (event) {
             Lifecycle.Event.ON_DESTROY -> onDestroyed()
             Lifecycle.Event.ON_PAUSE -> onPause()
-            Lifecycle.Event.ON_CREATE -> Unit // do nothing
-            Lifecycle.Event.ON_START -> Unit // do nothing
-            Lifecycle.Event.ON_RESUME -> Unit // do nothing
-            Lifecycle.Event.ON_STOP -> Unit // do nothing
-            Lifecycle.Event.ON_ANY -> Unit // do nothing
+            Lifecycle.Event.ON_CREATE -> onCreate()
+            Lifecycle.Event.ON_START -> onStart()
+            Lifecycle.Event.ON_RESUME -> onResume()
+            Lifecycle.Event.ON_STOP -> onStop()
+            Lifecycle.Event.ON_ANY -> onAny()
         }
     }
 
-    open fun onDestroyed() {
+    protected open fun onDestroyed() {
         runBlocking { imageChannel.close() }
+    }
+
+    protected open fun onPause() {
+        // support onPause events.
+    }
+
+    protected open fun onCreate() {
+        // support onCreate events.
+    }
+
+    protected open fun onStart() {
+        // support onStart events.
+    }
+
+    protected open fun onResume() {
+        // support onResume events.
+    }
+
+    protected open fun onStop() {
+        // support onStop events.
+    }
+
+    protected open fun onAny() {
+        // support onAny events.
     }
 
     /**
@@ -123,10 +147,6 @@ abstract class CameraAdapter<CameraOutput> : LifecycleEventObserver {
      * Determine if the adapter is currently bound.
      */
     open fun isBoundToLifecycle() = lifecyclesBound > 0
-
-    open fun onPause() {
-        // support OnPause events.
-    }
 
     /**
      * Execute a task with flash support.
