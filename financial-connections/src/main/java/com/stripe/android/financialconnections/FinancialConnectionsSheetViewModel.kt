@@ -138,6 +138,19 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     /**
+     * The native auth flow activity result is equivalent to the browser flow.
+     *
+     * @see [onBrowserActivityResult]
+     */
+    fun onNativeAuthFlowResult() {
+        setState {
+            if (authFlowActive && activityRecreated) {
+                copy(viewEffect = FinishWithResult(Canceled))
+            } else this
+        }
+    }
+
+    /**
      * For regular connections flows requesting a session:
      *
      * On successfully completing the hosted auth flow and receiving the success callback intent,
@@ -229,14 +242,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
-    }
-
-    fun onNativeAuthFlowResult() {
-        setState {
-            if (authFlowActive && activityRecreated) {
-                copy(viewEffect = FinishWithResult(Canceled))
-            } else this
-        }
     }
 
     companion object :

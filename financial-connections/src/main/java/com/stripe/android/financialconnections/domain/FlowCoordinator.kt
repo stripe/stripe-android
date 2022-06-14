@@ -6,7 +6,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,10 +17,10 @@ import javax.inject.Singleton
  *
  */
 @Singleton
-internal class FlowCoordinator @Inject constructor() : ObserveFlowUpdates {
-    val flow = MutableSharedFlow<FlowCoordinatorMessage>()
+internal class FlowCoordinator @Inject constructor() {
+    private val flow = MutableSharedFlow<FlowCoordinatorMessage>()
 
-    override fun invoke(): SharedFlow<FlowCoordinatorMessage> {
+    operator fun invoke(): MutableSharedFlow<FlowCoordinatorMessage> {
         return flow
     }
 }
@@ -52,20 +51,13 @@ internal sealed interface FlowCoordinatorMessage {
     object OpenWebAuthFlow : FlowCoordinatorMessage
 }
 
-/**
- * Only-read interface for [FlowCoordinator]
- */
-internal interface ObserveFlowUpdates {
-    operator fun invoke(): SharedFlow<FlowCoordinatorMessage>
-}
-
 internal class UpdateManifest @Inject constructor(
     private val logger: Logger,
     private val flowCoordinator: FlowCoordinator
 ) {
     suspend operator fun invoke(manifest: FinancialConnectionsSessionManifest) {
         logger.debug("Updating manifest")
-        flowCoordinator.flow.emit(FlowCoordinatorMessage.UpdateManifest(manifest))
+        flowCoordinator().emit(FlowCoordinatorMessage.UpdateManifest(manifest))
     }
 }
 
@@ -75,7 +67,7 @@ internal class UpdateAuthorizationSession @Inject constructor(
 ) {
     suspend operator fun invoke(manifest: FinancialConnectionsAuthorizationSession) {
         logger.debug("Updating Auth session")
-        flowCoordinator.flow.emit(FlowCoordinatorMessage.UpdateAuthorizationSession(manifest))
+        flowCoordinator().emit(FlowCoordinatorMessage.UpdateAuthorizationSession(manifest))
     }
 }
 
@@ -85,6 +77,6 @@ internal class RequestNextStep @Inject constructor(
 ) {
     suspend operator fun invoke(currentStep: NavigationCommand) {
         logger.debug("Requesting next step")
-        flowCoordinator.flow.emit(RequestNextStep(currentStep))
+        flowCoordinator().emit(RequestNextStep(currentStep))
     }
 }

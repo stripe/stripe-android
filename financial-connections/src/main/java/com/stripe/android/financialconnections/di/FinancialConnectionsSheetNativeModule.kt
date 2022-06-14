@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.di
 
-import com.stripe.android.financialconnections.domain.FlowCoordinator
-import com.stripe.android.financialconnections.domain.ObserveFlowUpdates
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import dagger.Module
 import dagger.Provides
@@ -23,10 +21,4 @@ internal class FinancialConnectionsSheetNativeModule {
     fun providesNavigationManager() = NavigationManager(
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
     )
-
-    @Singleton
-    @Provides
-    fun providesUpdateManifest(flowCoordinator: FlowCoordinator): ObserveFlowUpdates {
-        return flowCoordinator
-    }
 }

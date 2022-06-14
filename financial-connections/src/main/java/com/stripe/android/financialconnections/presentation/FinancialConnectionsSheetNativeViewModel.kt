@@ -8,9 +8,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
+import com.stripe.android.financialconnections.domain.FlowCoordinator
 import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.ObserveFlowUpdates
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
@@ -25,19 +25,19 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val subcomponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider,
     val goNext: GoNext,
     val logger: Logger,
-    observeFlowUpdates: ObserveFlowUpdates,
+    val flowCoordinator: FlowCoordinator,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
         viewModelScope.launch {
-            observeFlowUpdates().collectLatest { message ->
+            flowCoordinator().collectLatest { message ->
                 when (message) {
-                    is FlowCoordinatorMessage.RequestNextStep -> withState {
+                    is FlowCoordinatorMessage.RequestNextStep -> withState { state ->
                         goNext(
                             currentPane = message.currentStep,
-                            manifest = it.manifest,
-                            authorizationSession = it.authorizationSession
+                            manifest = state.manifest,
+                            authorizationSession = state.authorizationSession
                         )
                     }
                     is FlowCoordinatorMessage.UpdateAuthorizationSession -> setState {
@@ -76,9 +76,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 }
 
-/**
- * Constructor used by Mavericks to build the initial state.
- */
 internal data class FinancialConnectionsSheetNativeState(
     val manifest: FinancialConnectionsSessionManifest,
     val authorizationSession: FinancialConnectionsAuthorizationSession?,
@@ -86,10 +83,10 @@ internal data class FinancialConnectionsSheetNativeState(
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
 
-    @Suppress("Unused")
     /**
      * Used by Mavericks to build initial state based on args.
      */
+    @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         manifest = args.manifest,
         configuration = args.configuration,

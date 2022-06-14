@@ -52,7 +52,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: Institution) {
         viewModelScope.launch {
             postAuthorizationSession(institution.id)
-            flowCoordinator.flow.emit(FlowCoordinatorMessage.OpenWebAuthFlow)
+            flowCoordinator().emit(FlowCoordinatorMessage.OpenWebAuthFlow)
             // TODO@carlosmuvi use this when next steps available in native.
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)

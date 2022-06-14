@@ -9,6 +9,13 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
+/**
+ * Usecase that determines the next step to navigate based on the received input.
+ *
+ * @see [FinancialConnectionsSessionManifest.nextPane]
+ * @see [FinancialConnectionsAuthorizationSession.nextPane]
+ *
+ */
 internal class GoNext @Inject constructor(
     private val navigationManager: NavigationManager,
     private val logger: Logger
@@ -40,21 +47,23 @@ internal class GoNext @Inject constructor(
     }
 
     @Suppress("ComplexMethod")
-    private fun NextPane.toNavigationCommand() = when (this) {
+    private fun NextPane.toNavigationCommand(): NavigationCommand = when (this) {
         NextPane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
         NextPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
-        NextPane.ACCOUNT_PICKER -> TODO()
-        NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> TODO()
-        NextPane.AUTH_OPTIONS -> TODO()
+        NextPane.ACCOUNT_PICKER,
+        NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+        NextPane.AUTH_OPTIONS,
         NextPane.CONSENT -> NavigationDirections.consent
-        NextPane.LINK_CONSENT -> TODO()
-        NextPane.LINK_LOGIN -> TODO()
-        NextPane.MANUAL_ENTRY -> TODO()
-        NextPane.MANUAL_ENTRY_SUCCESS -> TODO()
-        NextPane.NETWORKING_LINK_LOGIN_WARMUP -> TODO()
-        NextPane.NETWORKING_LINK_SIGNUP_PANE -> TODO()
-        NextPane.NETWORKING_LINK_VERIFICATION -> TODO()
-        NextPane.SUCCESS -> TODO()
-        NextPane.UNEXPECTED_ERROR -> TODO()
+        NextPane.LINK_CONSENT,
+        NextPane.LINK_LOGIN,
+        NextPane.MANUAL_ENTRY,
+        NextPane.MANUAL_ENTRY_SUCCESS,
+        NextPane.NETWORKING_LINK_LOGIN_WARMUP,
+        NextPane.NETWORKING_LINK_SIGNUP_PANE,
+        NextPane.NETWORKING_LINK_VERIFICATION,
+        NextPane.SUCCESS,
+        NextPane.UNEXPECTED_ERROR -> {
+            TODO("Unimplemented navigation command: ${this.value}")
+        }
     }
 }

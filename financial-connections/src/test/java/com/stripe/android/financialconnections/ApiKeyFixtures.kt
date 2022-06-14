@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections
 
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 
 internal object ApiKeyFixtures {
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
@@ -29,5 +30,16 @@ internal object ApiKeyFixtures {
         successUrl = SUCCESS_URL,
         cancelUrl = CANCEL_URL,
         hostedAuthUrl = HOSTED_AUTH_URL
+    )
+
+    fun authorizationSession() = FinancialConnectionsAuthorizationSession(
+        id = "id",
+        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH,
+        institutionSkipAccountSelection = null,
+        showPartnerDisclosure = null,
+        skipAccountSelection = null,
+        url = null,
+        urlQrCode = null
     )
 }
