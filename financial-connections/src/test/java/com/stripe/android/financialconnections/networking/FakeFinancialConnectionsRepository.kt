@@ -30,13 +30,13 @@ internal class FakeFinancialConnectionsRepository(
         applicationId: String
     ): FinancialConnectionsSessionManifest = manifest
 
-    override suspend fun getFinancialConnectionsSessionManifest(clientSecret: String): FinancialConnectionsSessionManifest {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getFinancialConnectionsSessionManifest(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest = manifest
 
-    override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
-        TODO("Not yet implemented")
-    }
+    override suspend fun markConsentAcquired(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest = manifest
 
     override suspend fun searchInstitutions(
         clientSecret: String,
