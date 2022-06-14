@@ -34,7 +34,7 @@ class AnalyticsRequestV2Factory(
      */
     fun createRequestR(
         eventName: String,
-        additionalParams: Map<String, Any> = mapOf(),
+        additionalParams: Map<String, Any?> = mapOf(),
         includeSDKParams: Boolean = true
     ) = AnalyticsRequestV2(
         eventName = eventName,

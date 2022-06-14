@@ -22,6 +22,7 @@ import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
@@ -86,6 +87,12 @@ class PassportUploadFragmentTest {
             successCaptor.firstValue(verificationPage)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -94,6 +101,12 @@ class PassportUploadFragmentTest {
             successCaptor.firstValue(verificationPageWithSelfie)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     private val navController = TestNavHostController(

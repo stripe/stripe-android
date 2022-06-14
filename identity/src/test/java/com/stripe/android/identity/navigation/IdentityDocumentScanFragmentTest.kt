@@ -20,6 +20,7 @@ import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.networking.Resource
@@ -67,6 +68,12 @@ class IdentityDocumentScanFragmentTest {
     private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         whenever(it.pageAndModelFiles).thenReturn(mockPageAndModel)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     internal class TestFragment(
@@ -79,6 +86,7 @@ class IdentityDocumentScanFragmentTest {
         override val fragmentId = R.id.IDScanFragment
         var currentState: IdentityScanState? = null
         var onCameraReadyIsCalled = false
+        override val frontScanType = IdentityScanState.ScanType.ID_FRONT
 
         override fun onCreateView(
             inflater: LayoutInflater,

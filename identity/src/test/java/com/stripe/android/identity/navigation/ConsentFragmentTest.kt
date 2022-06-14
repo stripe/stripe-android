@@ -15,6 +15,10 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -32,6 +36,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -109,13 +114,13 @@ internal class ConsentFragmentTest {
         )
     }
 
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.verificationArgs).thenReturn(
-            IdentityVerificationSheetContract.Args(
-                verificationSessionId = VERIFICATION_SESSION_ID,
-                ephemeralKeySecret = EPHEMERAL_KEY,
-                brandLogo = BRAND_LOGO,
-                injectorKey = DUMMY_INJECTOR_KEY
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { verificationArgs }.thenReturn(ARGS)
+
+        on { identityAnalyticsRequestFactory }.thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = ARGS
             )
         )
     }
@@ -191,6 +196,12 @@ internal class ConsentFragmentTest {
         launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
+                }
+            )
             verify(
                 mockConsentFragmentViewModel
             ).loadUriIntoImageView(
@@ -382,5 +393,12 @@ internal class ConsentFragmentTest {
 
         const val FALLBACK_URL = "https://link/to/fallback"
         val BRAND_LOGO = mock<Uri>()
+
+        val ARGS = IdentityVerificationSheetContract.Args(
+            verificationSessionId = VERIFICATION_SESSION_ID,
+            ephemeralKeySecret = EPHEMERAL_KEY,
+            brandLogo = BRAND_LOGO,
+            injectorKey = DUMMY_INJECTOR_KEY
+        )
     }
 }

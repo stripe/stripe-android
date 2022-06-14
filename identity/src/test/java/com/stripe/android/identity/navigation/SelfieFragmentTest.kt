@@ -14,6 +14,10 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
@@ -42,6 +46,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -96,11 +101,23 @@ internal class SelfieFragmentTest {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
         on { selfieUploadState } doReturn selfieUploadState
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
     }
 
     @Test
     fun `when initialized UI is reset and bound`() {
         launchSelfieFragment { binding, _, _ ->
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_SELFIE
+                }
+            )
+
             val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
             verify(
                 mockIdentityViewModel,

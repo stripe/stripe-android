@@ -19,8 +19,10 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -60,7 +62,8 @@ internal class IdentityActivity :
     private val onBackPressedCallback by lazy {
         IdentityActivityOnBackPressedCallback(
             this,
-            navController
+            navController,
+            identityViewModel
         )
     }
     private lateinit var fallbackUrlLauncher: ActivityResultLauncher<Intent>
@@ -68,6 +71,7 @@ internal class IdentityActivity :
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(KEY_LAUNCHED, true)
+        outState.putBoolean(KEY_PRESENTED, true)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,16 +86,39 @@ internal class IdentityActivity :
                 onSuccess = {
                     finishWithResult(
                         if (it.submitted) {
+                            identityViewModel.sendAnalyticsRequest(
+                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceed(
+                                    isFromFallbackUrl = true
+                                )
+                            )
                             VerificationFlowResult.Completed
                         } else {
+                            identityViewModel.sendAnalyticsRequest(
+                                identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                                    isFromFallbackUrl = true
+                                )
+                            )
                             VerificationFlowResult.Canceled
                         }
                     )
                 }, onFailure = {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = true,
+                            throwable = IllegalStateException(it)
+                        )
+                    )
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
             )
         }
+
+        if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
+            identityViewModel.sendAnalyticsRequest(
+                identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
+            )
+        }
+
         if (savedInstanceState == null || !savedInstanceState.getBoolean(KEY_LAUNCHED, false)) {
             // The Activity is newly created, set up navigation flow normally
             setContentView(binding.root)
@@ -131,6 +158,11 @@ internal class IdentityActivity :
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
+                result.toString()
+            )
+        )
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())
@@ -171,6 +203,13 @@ internal class IdentityActivity :
                         R.drawable.ic_baseline_close_24
                     )
                 this.setNavigationOnClickListener {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                            isFromFallbackUrl = false,
+                            lastScreenName = SCREEN_NAME_CONSENT,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                        )
+                    )
                     finishWithResult(
                         VerificationFlowResult.Canceled
                     )
@@ -183,20 +222,27 @@ internal class IdentityActivity :
                     R.drawable.ic_baseline_close_24
                 )
                 this.setNavigationOnClickListener {
-                    finishWithResult(
-                        VerificationFlowResult.Failed(
-                            requireNotNull(
-                                args?.getSerializable(
-                                    ErrorFragment.ARG_FAILED_REASON
-                                ) as? Throwable
-                            ) {
-                                "Failed to get failedReason from $args"
-                            }
+                    val failedReason = requireNotNull(
+                        args?.getSerializable(
+                            ErrorFragment.ARG_FAILED_REASON
+                        ) as? Throwable
+                    ) {
+                        "Failed to get failedReason from $args"
+                    }
+
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = false,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            throwable = failedReason
                         )
+                    )
+                    finishWithResult(
+                        VerificationFlowResult.Failed(failedReason)
                     )
                 }
             }
-            // Otherwise display back arrow icon, cliking it navigates up
+            // Otherwise display back arrow icon, clicking it navigates up
             else -> {
                 this.navigationIcon =
                     AppCompatResources.getDrawable(
@@ -215,7 +261,8 @@ internal class IdentityActivity :
      */
     private class IdentityActivityOnBackPressedCallback(
         private val verificationFlowFinishable: VerificationFlowFinishable,
-        private val navController: NavController
+        private val navController: NavController,
+        private val identityViewModel: IdentityViewModel
     ) : OnBackPressedCallback(true) {
         private var destination: NavDestination? = null
         private var args: Bundle? = null
@@ -229,22 +276,35 @@ internal class IdentityActivity :
             when {
                 // On consent fragment, clicking back finishes the flow with Canceled
                 isConsentFragment(destination) -> {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                            isFromFallbackUrl = false,
+                            lastScreenName = SCREEN_NAME_CONSENT,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                        )
+                    )
                     verificationFlowFinishable.finishWithResult(
                         VerificationFlowResult.Canceled
                     )
                 }
                 // On error fragment with failed reason, clicking back finishes the flow with Failed
                 isErrorFragmentWithFailedReason(destination, args) -> {
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Failed(
-                            requireNotNull(
-                                args?.getSerializable(
-                                    ErrorFragment.ARG_FAILED_REASON
-                                ) as? Throwable
-                            ) {
-                                "Failed to get failedReason from $args"
-                            }
+                    val failedReason = requireNotNull(
+                        args?.getSerializable(
+                            ErrorFragment.ARG_FAILED_REASON
+                        ) as? Throwable
+                    ) {
+                        "Failed to get failedReason from $args"
+                    }
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = false,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            throwable = failedReason
                         )
+                    )
+                    verificationFlowFinishable.finishWithResult(
+                        VerificationFlowResult.Failed(failedReason)
                     )
                 }
                 // On other fragments, clicking back navigates up
@@ -267,6 +327,8 @@ internal class IdentityActivity :
             "IdentityActivity was started without arguments"
 
         const val KEY_LAUNCHED = "launched"
+
+        const val KEY_PRESENTED = "presented"
 
         private fun isConsentFragment(destination: NavDestination?) =
             destination?.id == R.id.consentFragment

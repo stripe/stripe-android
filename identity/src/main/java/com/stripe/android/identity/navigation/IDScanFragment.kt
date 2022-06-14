@@ -6,6 +6,7 @@ import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 
@@ -19,6 +20,8 @@ internal class IDScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val frontScanType: IdentityScanState.ScanType = ID_FRONT
+
     override val fragmentId = R.id.IDScanFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

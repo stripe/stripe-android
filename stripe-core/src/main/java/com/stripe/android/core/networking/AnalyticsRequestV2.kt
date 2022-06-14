@@ -30,10 +30,12 @@ import java.util.UUID
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsRequestV2(
-    private val eventName: String,
+    @get:VisibleForTesting
+    val eventName: String,
     private val clientId: String,
     origin: String,
-    params: Map<String, *>
+    @get:VisibleForTesting
+    val params: Map<String, *>
 ) : StripeRequest() {
     @VisibleForTesting
     internal val postParameters: String =

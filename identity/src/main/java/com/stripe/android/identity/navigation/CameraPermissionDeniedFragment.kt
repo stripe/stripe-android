@@ -2,6 +2,7 @@ package com.stripe.android.identity.navigation
 
 import android.view.View
 import androidx.annotation.IdRes
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
@@ -12,8 +13,9 @@ import com.stripe.android.identity.utils.navigateToUploadFragment
  * Fragment to show user denies camera permission.
  */
 internal class CameraPermissionDeniedFragment(
-    private val appSettingsOpenable: AppSettingsOpenable
-) : BaseErrorFragment() {
+    private val appSettingsOpenable: AppSettingsOpenable,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : BaseErrorFragment(identityViewModelFactory) {
     override fun onCustomizingViews() {
 
         title.text = getString(R.string.camera_permission)
