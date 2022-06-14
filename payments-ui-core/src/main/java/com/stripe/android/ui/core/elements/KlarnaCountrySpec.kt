@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 class KlarnaCountrySpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Country
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(
         currencyCode: String?,
@@ -23,4 +23,8 @@ class KlarnaCountrySpec(
             )
         )
     )
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Country
+    }
 }

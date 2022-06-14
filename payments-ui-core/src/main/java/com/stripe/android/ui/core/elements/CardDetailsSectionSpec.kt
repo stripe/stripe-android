@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 data class CardDetailsSectionSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details")
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(
         context: Context,
@@ -23,4 +23,8 @@ data class CardDetailsSectionSpec(
             viewOnlyFields = viewOnlyFields,
             identifier = apiPath
         )
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Generic("card_details")
+    }
 }

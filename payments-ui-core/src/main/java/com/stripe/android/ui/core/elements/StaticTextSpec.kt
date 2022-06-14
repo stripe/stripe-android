@@ -8,14 +8,18 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class StaticTextSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("static_text"),
+    override val apiPath: IdentifierSpec = DEFAULT_IDENTIFIER_SPEC,
     @StringRes val stringResId: Int
 ) : FormItemSpec() {
     fun transform(): FormElement =
-        // It could be argued that the static text should have a controller, but
+    // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.apiPath,
             this.stringResId
         )
+
+    companion object {
+        val DEFAULT_IDENTIFIER_SPEC = IdentifierSpec.Generic("static_text")
+    }
 }

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class KlarnaHeaderStaticTextSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("klarna_header_text")
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(): FormElement =
         // It could be argued that the static text should have a controller, but
@@ -16,4 +16,8 @@ internal data class KlarnaHeaderStaticTextSpec(
             this.apiPath,
             stringResId = KlarnaHelper.getKlarnaHeader(),
         )
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Generic("klarna_header_text")
+    }
 }

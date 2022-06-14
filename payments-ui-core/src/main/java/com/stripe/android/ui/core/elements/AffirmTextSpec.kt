@@ -7,8 +7,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class AffirmTextSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("affirm_header")
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(): FormElement =
         AffirmHeaderElement(this.apiPath)
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Generic("affirm_header")
+    }
 }

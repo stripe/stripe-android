@@ -178,7 +178,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         clientSecret: ClientSecret
     ): StripeIntent {
         return stripeIntentValidator.requireValid(
-            stripeIntentRepository.get(clientSecret)
+            stripeIntentRepository.get(clientSecret).intent
         )
     }
 }

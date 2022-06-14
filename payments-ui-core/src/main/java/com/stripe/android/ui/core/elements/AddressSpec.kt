@@ -15,10 +15,10 @@ enum class DisplayField {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 data class AddressSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
 
     @SerialName("allowed_country_codes")
-    val allowedCountryCodes: Set<String> = supportedBillingCountries,
+    val allowedCountryCodes: Set<String> = DEFAULT_ALLOWED_COUNTRY_CODES,
 
     @SerialName("display_fields")
     val displayFields: Set<DisplayField> = emptySet()
@@ -45,4 +45,9 @@ data class AddressSpec(
         },
         label = R.string.billing_details
     )
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Generic("billing_details[address]")
+        val DEFAULT_ALLOWED_COUNTRY_CODES = supportedBillingCountries
+    }
 }

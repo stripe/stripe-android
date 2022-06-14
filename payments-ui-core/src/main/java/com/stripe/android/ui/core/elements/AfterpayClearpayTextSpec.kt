@@ -8,8 +8,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class AfterpayClearpayTextSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("afterpay_text")
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(amount: Amount): FormElement =
         AfterpayClearpayHeaderElement(this.apiPath, amount)
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Generic("afterpay_text")
+    }
 }

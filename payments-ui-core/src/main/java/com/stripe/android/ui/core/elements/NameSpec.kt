@@ -8,10 +8,10 @@ import kotlinx.serialization.Transient
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 data class NameSpec(
-    override val apiPath: IdentifierSpec = IdentifierSpec.Name,
+    override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
 
     @SerialName("label_translation_id")
-    val labelTranslationId: TranslationId = TranslationId.AddressName
+    val labelTranslationId: TranslationId = DEFAULT_LABEL_TRANSLATION_ID
 ) : FormItemSpec() {
     @Transient
     private val simpleTextSpec =
@@ -24,4 +24,9 @@ data class NameSpec(
 
     fun transform(initialValues: Map<IdentifierSpec, String?>) =
         simpleTextSpec.transform(initialValues)
+
+    companion object {
+        val DEFAULT_API_PATH = IdentifierSpec.Name
+        val DEFAULT_LABEL_TRANSLATION_ID = TranslationId.AddressName
+    }
 }
