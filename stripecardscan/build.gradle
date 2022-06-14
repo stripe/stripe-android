@@ -22,9 +22,9 @@ dependencies {
     api project(":stripe-core")
     implementation project(":camera-core")
 
-    // Allow the user to specify their own version of Tensorflow Lite to include
-    runtimeOnly project(":stripecardscan-tflite")
-    compileOnly "org.tensorflow:tensorflow-lite:2.8.0"
+    // If a user wants to use their own TFLite implementation, they can exclude this dependency
+    // explicitly in their gradle dependency.
+    implementation project(":stripecardscan-tflite")
 
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
