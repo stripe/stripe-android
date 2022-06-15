@@ -4,6 +4,11 @@ import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
+/**
+ * Searches for institutions based on a given query.
+ *
+ * If no input provided, this usecase returns featured institutions.
+ */
 internal class SearchInstitutions @Inject constructor(
     private val repository: FinancialConnectionsRepository
 ) {
