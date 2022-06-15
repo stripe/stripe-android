@@ -54,5 +54,6 @@ internal class ConsentViewModel @Inject constructor(
 }
 
 internal data class ConsentState(
-    val title: String = ""
+    val title: String = "",
+    val content: List<String> = emptyList()
 ) : MavericksState
