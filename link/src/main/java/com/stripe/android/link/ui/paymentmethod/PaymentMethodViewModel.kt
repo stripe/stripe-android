@@ -69,18 +69,14 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     fun init(loadFromArgs: Boolean) {
         formController.value =
-            (args.selectedPaymentDetails as? LinkPaymentDetails.New)?.takeIf { loadFromArgs }?.let {
-                formControllerProvider.get()
-                    .formSpec(LayoutSpec(paymentMethod.formSpec))
-                    .initialValues(it.buildFormValues())
-                    .viewOnlyFields(emptySet())
-                    .viewModelScope(viewModelScope)
-                    .build().formController
-            } ?: formControllerProvider.get()
+            formControllerProvider.get()
                 .formSpec(LayoutSpec(paymentMethod.formSpec))
-                .initialValues(emptyMap())
                 .viewOnlyFields(emptySet())
                 .viewModelScope(viewModelScope)
+                .initialValues(
+                    (args.selectedPaymentDetails as? LinkPaymentDetails.New)
+                        ?.takeIf { loadFromArgs }?.buildFormValues() ?: emptyMap()
+                )
                 .build().formController
     }
 

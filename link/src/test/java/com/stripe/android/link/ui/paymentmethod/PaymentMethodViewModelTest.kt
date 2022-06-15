@@ -304,7 +304,7 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `when loading from arguments fails then form is prefilled`() = runTest {
+    fun `when loading from arguments then form is prefilled`() = runTest {
         whenever(args.selectedPaymentDetails).thenReturn(createLinkPaymentDetails())
         createViewModel(true)
 
