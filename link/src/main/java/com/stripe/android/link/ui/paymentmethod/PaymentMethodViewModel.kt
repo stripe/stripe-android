@@ -18,6 +18,7 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.forms.FormController
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -43,7 +44,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
     private val logger: Logger,
-    formControllerProvider: Provider<FormControllerSubcomponent.Builder>
+    private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
@@ -62,13 +63,26 @@ internal class PaymentMethodViewModel @Inject constructor(
         R.string.cancel
     }
 
-    val paymentMethod = SupportedPaymentMethod.Card()
-    val formController = formControllerProvider.get()
-        .formSpec(LayoutSpec(paymentMethod.formSpec))
-        .initialValues(emptyMap())
-        .viewOnlyFields(emptySet())
-        .viewModelScope(viewModelScope)
-        .build().formController
+    val paymentMethod = SupportedPaymentMethod.Card
+
+    val formController = MutableStateFlow<FormController?>(null)
+
+    fun init(loadFromArgs: Boolean) {
+        formController.value =
+            (args.selectedPaymentDetails as? LinkPaymentDetails.New)?.takeIf { loadFromArgs }?.let {
+                formControllerProvider.get()
+                    .formSpec(LayoutSpec(paymentMethod.formSpec))
+                    .initialValues(it.buildFormValues())
+                    .viewOnlyFields(emptySet())
+                    .viewModelScope(viewModelScope)
+                    .build().formController
+            } ?: formControllerProvider.get()
+                .formSpec(LayoutSpec(paymentMethod.formSpec))
+                .initialValues(emptyMap())
+                .viewOnlyFields(emptySet())
+                .viewModelScope(viewModelScope)
+                .build().formController
+    }
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
         clearError()
@@ -83,9 +97,10 @@ internal class PaymentMethodViewModel @Inject constructor(
             _isProcessing.value = true
 
             linkAccountManager.createPaymentDetails(
-                paymentMethod.createParams(paymentMethodCreateParams, linkAccount.email),
-                args.stripeIntent,
-                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+                paymentMethod,
+                paymentMethodCreateParams,
+                linkAccount.email,
+                args.stripeIntent
             ).fold(
                 onSuccess = { paymentDetails ->
                     if (args.completePayment) {
@@ -150,7 +165,8 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     internal class Factory(
         private val linkAccount: LinkAccount,
-        private val injector: NonFallbackInjector
+        private val injector: NonFallbackInjector,
+        private val loadFromArgs: Boolean
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
@@ -162,7 +178,9 @@ internal class PaymentMethodViewModel @Inject constructor(
             injector.inject(this)
             return subComponentBuilderProvider.get()
                 .linkAccount(linkAccount)
-                .build().paymentMethodViewModel as T
+                .build().paymentMethodViewModel.apply {
+                    init(loadFromArgs)
+                } as T
         }
     }
 }

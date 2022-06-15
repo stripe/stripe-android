@@ -35,7 +35,7 @@ internal sealed class SupportedPaymentMethod(
         Map<String, Any>? = null
 
     @Parcelize
-    class Card : SupportedPaymentMethod(
+    object Card : SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         LinkCardForm.items
     ) {

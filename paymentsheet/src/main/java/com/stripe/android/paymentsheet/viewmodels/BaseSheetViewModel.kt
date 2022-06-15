@@ -123,7 +123,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             resourceRepository.getLpmRepository().fromCode(
                 savedStateHandle.get<PaymentMethodCode>(
                     SAVE_SELECTED_ADD_LPM
-                ) ?: newLpm?.paymentMethodCreateParams?.typeCode
+                ) ?: newPaymentSelection?.paymentMethodCreateParams?.typeCode
             ) ?: supportedPaymentMethods.first()
         )
         set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.code)
@@ -196,14 +196,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     var linkVerificationCallback: LinkVerificationCallback? = null
 
     /**
-     * This should be initialized from the starter args, and then from that
-     * point forward it will be the last valid card seen or entered in the add card view.
-     * In contrast to selection, this field will not be updated by the list fragment. On the
-     * Payment Sheet it is used to save a new card that is added for when you go back to the list
-     * and reopen the card view. It is used on the Payment Options sheet similar to what is
-     * described above, and when you have an unsaved card.
+     * This should be initialized from the starter args, and then from that point forward it will be
+     * the last valid new payment method entered by the user.
+     * In contrast to selection, this field will not be updated by the list fragment. It is used to
+     * save a new payment method that is added so that the payment data entered is recovered when
+     * the user returns to that payment method type.
      */
-    abstract var newLpm: PaymentSelection.New?
+    abstract var newPaymentSelection: PaymentSelection.New?
 
     abstract fun onFatal(throwable: Throwable)
 
@@ -378,7 +377,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
-            newLpm = selection
+            newPaymentSelection = selection
         }
 
         savedStateHandle[SAVE_SELECTION] = selection
@@ -389,7 +388,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun getAddFragmentSelectedLpm() =
         savedStateHandle.getLiveData(
             SAVE_SELECTED_ADD_LPM,
-            newLpm?.paymentMethodCreateParams?.typeCode
+            newPaymentSelection?.paymentMethodCreateParams?.typeCode
         ).map {
             resourceRepository.getLpmRepository().fromCode(it)
                 ?: supportedPaymentMethods.first()
@@ -440,7 +439,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)) {
             viewModelScope.launch {
-                when (linkLauncher.setup(stripeIntent, completePayment, this)) {
+                when (
+                    linkLauncher.setup(
+                        stripeIntent,
+                        completePayment,
+                        (newPaymentSelection as? PaymentSelection.New.Link)?.linkPaymentDetails,
+                        this
+                    )
+                ) {
                     AccountStatus.Verified -> launchLink()
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
@@ -569,9 +575,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     open fun unregisterFromActivity() {
         linkActivityResultLauncher = null
     }
-
-    protected fun LinkPaymentDetails.convertToPaymentSelection() =
-        PaymentSelection.New.Link(paymentDetails, paymentMethodCreateParams)
 
     data class UserErrorMessage(val message: String)
 
