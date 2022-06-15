@@ -16,13 +16,29 @@ class LpmRepositoryTest {
     )
 
     @Test
-    fun `Verify field not found in schema is read from disk`() {
+    fun `Verify failing to read server schema reads from disk`() {
         lpmRepository.update(
-            listOf("card", "llama"),
+            listOf("affirm"),
             """
           [
             {
-                "type": "llama",
+                "type": "affirm",
+                invalid schema
+              }
+         ]
+            """.trimIndent()
+        )
+        assertThat(lpmRepository.fromCode("affirm")).isNotNull()
+    }
+
+    @Test
+    fun `Verify field not found in schema is read from disk`() {
+        lpmRepository.update(
+            listOf("card", "afterpay_clearpay"),
+            """
+          [
+            {
+                "type": "afterpay_clearpay",
                 "async": false,
                 "fields": [
                   {
@@ -33,14 +49,14 @@ class LpmRepositoryTest {
          ]
             """.trimIndent()
         )
-        assertThat(lpmRepository.fromCode("llama")).isNotNull()
+        assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
         assertThat(lpmRepository.fromCode("card")).isNotNull()
     }
 
     @Test
-    fun `Verify only expected LPMs are found in the repository`() {
+    fun `Repository will contain LPMs in ordered and schema`() {
         lpmRepository.update(
-            listOf("llama"),
+            listOf("afterpay_clearpay"),
             """
           [
             {
@@ -53,7 +69,7 @@ class LpmRepositoryTest {
                 ]
             },
             {
-                "type": "llama",
+                "type": "afterpay_clearpay",
                 "async": false,
                 "fields": [
                   {
@@ -64,17 +80,13 @@ class LpmRepositoryTest {
          ]
             """.trimIndent()
         )
-        assertThat(lpmRepository.fromCode("llama")).isNotNull()
-        assertThat(lpmRepository.fromCode("affirm")).isNull()
-    }
-
-    @Test
-    fun `Verify field not found in schema or disk is not in repo`() {
-        //...
+        assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
+        assertThat(lpmRepository.fromCode("affirm")).isNotNull()
     }
 
     @Test
     fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
+        lpmRepository.updateFromDisk()
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
@@ -97,7 +109,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
-        assertThat(lpmRepository.fromCode("card")).isNotNull()
+        assertThat(lpmRepository.fromCode("card")).isNull()
         lpmRepository.update(
             emptyList(),
             """
@@ -151,6 +163,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
+        lpmRepository.updateFromDisk()
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)

@@ -53,9 +53,6 @@ class LpmRepository @Inject constructor(
     fun values() = codeToSupportedPaymentMethod.values
 
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
-        if (!codeToSupportedPaymentMethod.containsKey(paymentMethodCode)) {
-            throw RuntimeException("The payment method code should be found!")
-        }
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
@@ -72,7 +69,9 @@ class LpmRepository @Inject constructor(
             .filter { !codeToSupportedPaymentMethod.containsKey(it) }
         if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
             val mapFromDisk: Map<String, SharedDataSpec>? =
-                readFromDisk()?.filterKeys { expectedLpms.contains(it) }
+                readFromDisk()
+                    ?.associateBy { it.type }
+                    ?.filterKeys { expectedLpms.contains(it) }
             codeToSupportedPaymentMethod.putAll(
                 lpmsNotParsedFromServerSpec
                     .mapNotNull { mapFromDisk?.get(it) }
@@ -80,12 +79,18 @@ class LpmRepository @Inject constructor(
                     .associateBy { it.code }
             )
         }
+
         serverInitializedLatch.countDown()
     }
 
-    private fun readFromDisk(): Map<String, SharedDataSpec>? =
+    @VisibleForTesting
+    internal fun updateFromDisk() {
+        update(readFromDisk())
+    }
+
+    private fun readFromDisk() =
         parseLpms(resources?.assets?.open("lpms.json"))
-            ?.associateBy { it.type }
+
 
     private fun update(lpms: List<SharedDataSpec>?) {
         // By mapNotNull we will not accept any LPMs that are not known by the platform.

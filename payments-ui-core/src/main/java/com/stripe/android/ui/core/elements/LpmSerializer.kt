@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
@@ -19,6 +20,12 @@ internal class LpmSerializer {
     fun deserializeList(str: String) = if (str.isEmpty()) {
         emptyList()
     } else {
-        format.decodeFromString<List<SharedDataSpec>>(serializer(), str)
+        try {
+            format.decodeFromString<List<SharedDataSpec>>(serializer(), str)
+        }
+        catch(e: Exception){
+            Log.w("STRIPE", "Error parsing LPMs", e)
+            emptyList()
+        }
     }
 }
