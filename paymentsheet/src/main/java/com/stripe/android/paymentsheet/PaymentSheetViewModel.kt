@@ -53,12 +53,15 @@ import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -222,15 +225,27 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      */
     internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
         viewModelScope.launch {
-            runCatching {
-                stripeIntentRepository.get(args.clientSecret)
-            }.fold(
-                onSuccess = ::onStripeIntentFetchResponse,
-                onFailure = {
-                    setStripeIntent(null)
-                    onFatal(it)
-                }
-            )
+            CoroutineScope(workContext).launch {
+                runCatching {
+                    initializeRepositoryAndGetStripeIntent(
+                        resourceRepository,
+                        stripeIntentRepository,
+                        args.clientSecret
+                    )
+                }.fold(
+                    onSuccess = {
+                        withContext(Dispatchers.Main) {
+                            onStripeIntentFetchResponse(it)
+                        }
+                    },
+                    onFailure = {
+                        withContext(Dispatchers.Main) {
+                            setStripeIntent(null)
+                            onFatal(it)
+                        }
+                    }
+                )
+            }
         }
         true
     } else {
@@ -425,7 +440,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 stripeIntentRepository.get(args.clientSecret)
             }.fold(
                 onSuccess = {
-                    processPayment(it, paymentResult)
+                    processPayment(it.intent, paymentResult)
                 },
                 onFailure = ::onFatal
             )

@@ -3,15 +3,16 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 
-internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : StripeIntent> :
-    ModelJsonParser<StripeIntentType> {
+internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : StripeIntent> :
+    ModelJsonParser<PaymentMethodPreference> {
     abstract val stripeIntentFieldName: String
 
-    override fun parse(json: JSONObject): StripeIntentType? {
+    override fun parse(json: JSONObject): PaymentMethodPreference? {
         val paymentMethodPreference =
             StripeJsonUtils.mapToJsonObject(StripeJsonUtils.optMap(json, OBJECT_TYPE))
 
@@ -26,10 +27,16 @@ internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : S
         val unactivatedPaymentMethods =
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
 
+        // TODO: I don't htink this is doing what I expect
         return paymentMethodPreference.optJSONObject(stripeIntentFieldName)?.let {
             it.put(FIELD_PAYMENT_METHOD_TYPES, orderedPaymentMethodTypes)
             it.put(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES, unactivatedPaymentMethods)
             parseStripeIntent(it)
+        }?.let{
+            PaymentMethodPreference(
+                it,
+                paymentMethodPreference.optString(FIELD_PAYMENT_METHOD_SCHEMA)// formUI string
+            )
         }
     }
 
@@ -41,7 +48,10 @@ internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : S
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
-        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
+        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
+            "unactivated_payment_method_types"
+        private const val FIELD_PAYMENT_METHOD_SCHEMA =
+            "payment_method_specs"
     }
 }
 

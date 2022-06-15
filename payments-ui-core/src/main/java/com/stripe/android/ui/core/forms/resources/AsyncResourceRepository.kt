@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -52,6 +53,10 @@ class AsyncResourceRepository @Inject constructor(
     override suspend fun waitUntilLoaded() {
         loadingJobs.joinAll()
         loadingJobs.clear()
+
+        if (!lpmRepository.serverInitializedLatch.await(20, TimeUnit.SECONDS)) {
+            throw RuntimeException("Server did not finish loading")
+        }
     }
 
     override fun isLoaded() = loadingJobs.isEmpty()
