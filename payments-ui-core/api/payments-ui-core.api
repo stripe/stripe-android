@@ -583,7 +583,6 @@ public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 }
 
 public final class com/stripe/android/ui/core/forms/UtilsKt {
-	public static final fun convertToFormValuesMap (Ljava/util/Map;)Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory : dagger/internal/Factory {
