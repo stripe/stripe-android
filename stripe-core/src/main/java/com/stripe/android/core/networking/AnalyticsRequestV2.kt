@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.StripeRequest.MimeType
 import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
 import java.util.UUID
 
 /**
@@ -37,9 +38,18 @@ class AnalyticsRequestV2(
     @get:VisibleForTesting
     val params: Map<String, *>
 ) : StripeRequest() {
+    // Note: nested params are calculated as a json string, which is different from other requests that uses form encoding.
+    // There are at most two levels of nest params for AnalyticsRequestV2.
+    // E.g for a nested map with value {"key", {"nestedKey1" -> "value1", "nestedKey2" -> "value2"}}
+    // The params are encoded as a prettified json format sorted by key as follows
+    // key="{
+    //    "nestedKey1": "value1",
+    //    "nestedKey2": "value2"
+    // }"
+    // As opposed to
+    // key[nestedKey1]="value1"&key[nestedKey2]="value2"
     @VisibleForTesting
-    internal val postParameters: String =
-        QueryStringFactory.createFromParamsWithEmptyValues(params + analyticParams())
+    internal val postParameters: String = createParams(params + analyticParams())
 
     private val postBodyBytes: ByteArray
         @Throws(UnsupportedEncodingException::class)
@@ -47,12 +57,66 @@ class AnalyticsRequestV2(
             return postParameters.toByteArray(Charsets.UTF_8)
         }
 
+    private data class Parameter(
+        private val key: String,
+        private val value: String
+    ) {
+        override fun toString(): String {
+            val encodedKey = urlEncode(key)
+            val encodedValue = urlEncode(value)
+            return "$encodedKey=$encodedValue"
+        }
+
+        @Throws(UnsupportedEncodingException::class)
+        private fun urlEncode(str: String): String {
+            // Preserve original behavior that passing null for an object id will lead
+            // to us actually making a request to /v1/foo/null
+            return URLEncoder.encode(str, Charsets.UTF_8.name())
+        }
+    }
+
+    private fun createParams(map: Map<String, *>): String {
+        val paramList = mutableListOf<Parameter>()
+        QueryStringFactory.compactParams(map).forEach { (key, value) ->
+            when (value) {
+                is Map<*, *> -> {
+                    paramList.add(Parameter(key, encodeMapParam(value)))
+                }
+                else -> {
+                    paramList.add(Parameter(key, value.toString()))
+                }
+            }
+        }
+        return paramList.joinToString("&") {
+            it.toString()
+        }
+    }
+
+    private fun encodeMapParam(map: Map<*, *>): String {
+        val stringBuilder = StringBuilder()
+        var first = true
+        stringBuilder.appendLine("{")
+        map.toSortedMap { key1, key2 ->
+            key1.toString().compareTo(key2.toString())
+        }.forEach { (key, value) ->
+            if (first) {
+                stringBuilder.append("  \"$key\": \"$value\"")
+                first = false
+            } else {
+                stringBuilder.appendLine(",").append("  \"$key\": \"$value\"")
+            }
+        }
+        stringBuilder.appendLine()
+        stringBuilder.append("}")
+        return stringBuilder.toString()
+    }
+
     /**
      * Parameters required by r.stripe.com
      */
     private fun analyticParams() = mapOf(
         PARAM_CLIENT_ID to clientId,
-        PARAM_CREATED to System.currentTimeMillis() * MILLIS_IN_SECOND,
+        PARAM_CREATED to System.currentTimeMillis() / MILLIS_IN_SECOND,
         PARAM_EVENT_NAME to eventName,
         PARAM_EVENT_ID to UUID.randomUUID().toString(),
     )

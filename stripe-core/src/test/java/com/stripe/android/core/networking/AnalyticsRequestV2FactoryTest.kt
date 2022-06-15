@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CLIENT_ID
-import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PACKAGE_NAME
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PLATFORM_INFO
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PLUGIN_TYPE
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_PLATFORM
@@ -12,6 +11,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PA
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.net.URLEncoder
 
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestV2FactoryTest {
@@ -31,7 +31,7 @@ class AnalyticsRequestV2FactoryTest {
         AnalyticsFields.APP_NAME,
         AnalyticsFields.APP_VERSION,
         PARAM_PLUGIN_TYPE,
-        "$PARAM_PLATFORM_INFO%5B$PARAM_PACKAGE_NAME%5D"
+        PARAM_PLATFORM_INFO
     )
 
     @Test
@@ -80,7 +80,10 @@ class AnalyticsRequestV2FactoryTest {
         val additionalParam2 = "param2"
         val additionalValue2 = "value2"
         val additionalParam3 = "param3"
-        val additionalValue3 = "value3"
+        val additionalValue3 = mapOf(
+            "nestedParam1" to "nestedValue1",
+            "nestedParam2" to "nestedValue2"
+        )
 
         val requestR = factory.createRequestR(
             "EVENT_NAME",
@@ -95,7 +98,17 @@ class AnalyticsRequestV2FactoryTest {
         requestR.postParameters.toMap().let { paramsMap ->
             assertThat(paramsMap[additionalParam1]).isEqualTo(additionalValue1)
             assertThat(paramsMap[additionalParam2]).isEqualTo(additionalValue2)
-            assertThat(paramsMap[additionalParam3]).isEqualTo(additionalValue3)
+            assertThat(paramsMap[additionalParam3]).isEqualTo(
+                URLEncoder.encode(
+                    """
+                    {
+                      "nestedParam1": "nestedValue1",
+                      "nestedParam2": "nestedValue2"
+                    }
+                    """.trimIndent(),
+                    Charsets.UTF_8.name()
+                )
+            )
         }
     }
 
