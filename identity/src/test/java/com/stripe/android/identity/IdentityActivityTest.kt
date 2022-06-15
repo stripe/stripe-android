@@ -340,7 +340,27 @@ internal class IdentityActivityTest {
     }
 
     @Test
-    fun `when activity is recreated finishes with result`() {
+    fun `when activity is recreated after launchFallbackUrl no fragment is recreated`() {
+        injectableActivityScenario<IdentityActivity> {
+            injectActivity {
+                viewModelFactory = mockIdentityViewModelFactory
+            }
+        }.launch(
+            IdentityVerificationSheetContract().createIntent(
+                context = ApplicationProvider.getApplicationContext(),
+                input = ARGS
+            )
+        ).onActivity {
+            verify(mockIdentityViewModel).retrieveAndBufferVerificationPage()
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
+            it.launchFallbackUrl("fallback")
+        }.recreate().onActivity {
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun `when activity is recreated without launchFallbackUrl fragment is recreated`() {
         injectableActivityScenario<IdentityActivity> {
             injectActivity {
                 viewModelFactory = mockIdentityViewModelFactory
@@ -354,7 +374,7 @@ internal class IdentityActivityTest {
             verify(mockIdentityViewModel).retrieveAndBufferVerificationPage()
             assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
         }.recreate().onActivity {
-            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(0)
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
         }
     }
 

@@ -68,9 +68,11 @@ internal class IdentityActivity :
     }
     private lateinit var fallbackUrlLauncher: ActivityResultLauncher<Intent>
 
+    private var launchedFallbackUrl: Boolean = false
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(KEY_LAUNCHED, true)
+        outState.putBoolean(KEY_LAUNCHED_FALLBACK_URL, launchedFallbackUrl)
         outState.putBoolean(KEY_PRESENTED, true)
     }
 
@@ -119,7 +121,11 @@ internal class IdentityActivity :
             )
         }
 
-        if (savedInstanceState == null || !savedInstanceState.getBoolean(KEY_LAUNCHED, false)) {
+        if (savedInstanceState == null || !savedInstanceState.getBoolean(
+                KEY_LAUNCHED_FALLBACK_URL,
+                false
+            )
+        ) {
             // The Activity is newly created, set up navigation flow normally
             setContentView(binding.root)
             setUpNavigationController()
@@ -316,6 +322,7 @@ internal class IdentityActivity :
     }
 
     override fun launchFallbackUrl(fallbackUrl: String) {
+        launchedFallbackUrl = true
         val customTabsIntent = CustomTabsIntent.Builder()
             .build()
         customTabsIntent.intent.data = Uri.parse(fallbackUrl)
@@ -326,7 +333,7 @@ internal class IdentityActivity :
         const val EMPTY_ARG_ERROR =
             "IdentityActivity was started without arguments"
 
-        const val KEY_LAUNCHED = "launched"
+        const val KEY_LAUNCHED_FALLBACK_URL = "launched_fallback_url"
 
         const val KEY_PRESENTED = "presented"
 
