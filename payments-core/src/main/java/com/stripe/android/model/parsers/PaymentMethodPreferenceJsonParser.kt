@@ -27,17 +27,25 @@ internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : Strip
         val unactivatedPaymentMethods =
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
 
-        // TODO: I don't htink this is doing what I expect
-        return paymentMethodPreference.optJSONObject(stripeIntentFieldName)?.let {
-            it.put(FIELD_PAYMENT_METHOD_TYPES, orderedPaymentMethodTypes)
-            it.put(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES, unactivatedPaymentMethods)
-            parseStripeIntent(it)
-        }?.let{
-            PaymentMethodPreference(
-                it,
-                paymentMethodPreference.optString(FIELD_PAYMENT_METHOD_SCHEMA)// formUI string
-            )
-        }
+        return paymentMethodPreference.optJSONObject(stripeIntentFieldName)
+            ?.let { stripeIntentJsonObject ->
+                orderedPaymentMethodTypes?.let {
+                    stripeIntentJsonObject.put(
+                        FIELD_PAYMENT_METHOD_TYPES,
+                        orderedPaymentMethodTypes
+                    )
+                }
+                stripeIntentJsonObject.put(
+                    FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES,
+                    unactivatedPaymentMethods
+                )
+                parseStripeIntent(stripeIntentJsonObject)
+            }?.let {
+                PaymentMethodPreference(
+                    it,
+                    paymentMethodPreference.optString(FIELD_PAYMENT_METHOD_SCHEMA)// formUI string
+                )
+            }
     }
 
     abstract fun parseStripeIntent(stripeIntentJson: JSONObject): StripeIntentType?

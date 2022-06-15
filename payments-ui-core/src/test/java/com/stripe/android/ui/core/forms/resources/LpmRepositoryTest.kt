@@ -16,7 +16,65 @@ class LpmRepositoryTest {
     )
 
     @Test
-    fun `Verify no fields in the default json are ignored`() {
+    fun `Verify field not found in schema is read from disk`() {
+        lpmRepository.update(
+            listOf("card", "llama"),
+            """
+          [
+            {
+                "type": "llama",
+                "async": false,
+                "fields": [
+                  {
+                    "type": "affirm_header"
+                  }
+                ]
+              }
+         ]
+            """.trimIndent()
+        )
+        assertThat(lpmRepository.fromCode("llama")).isNotNull()
+        assertThat(lpmRepository.fromCode("card")).isNotNull()
+    }
+
+    @Test
+    fun `Verify only expected LPMs are found in the repository`() {
+        lpmRepository.update(
+            listOf("llama"),
+            """
+          [
+            {
+                "type": "affirm",
+                "async": false,
+                "fields": [
+                  {
+                    "type": "affirm_header"
+                  }
+                ]
+            },
+            {
+                "type": "llama",
+                "async": false,
+                "fields": [
+                  {
+                    "type": "affirm_header"
+                  }
+                ]
+              }
+         ]
+            """.trimIndent()
+        )
+        assertThat(lpmRepository.fromCode("llama")).isNotNull()
+        assertThat(lpmRepository.fromCode("affirm")).isNull()
+    }
+
+    @Test
+    fun `Verify field not found in schema or disk is not in repo`() {
+        //...
+    }
+
+    @Test
+    fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
@@ -40,7 +98,8 @@ class LpmRepositoryTest {
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
         assertThat(lpmRepository.fromCode("card")).isNotNull()
-        lpmRepository.initialize(
+        lpmRepository.update(
+            emptyList(),
             """
           [
             {
@@ -53,7 +112,7 @@ class LpmRepositoryTest {
                 ]
               }
          ]
-            """.trimIndent().byteInputStream()
+            """.trimIndent()
         )
         assertThat(lpmRepository.fromCode("card")).isNull()
     }
@@ -62,7 +121,8 @@ class LpmRepositoryTest {
     // of in code here.
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
-        lpmRepository.initialize(
+        lpmRepository.update(
+            emptyList(),
             """
               [
                 {
@@ -84,7 +144,7 @@ class LpmRepositoryTest {
                     ]
                   }
              ]
-            """.trimIndent().byteInputStream()
+            """.trimIndent()
         )
         assertThat(lpmRepository.fromCode("unknown_lpm")).isNull()
     }
@@ -95,7 +155,8 @@ class LpmRepositoryTest {
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
 
-        lpmRepository.initialize(
+        lpmRepository.update(
+            emptyList(),
             """
               [
                 {
@@ -104,7 +165,7 @@ class LpmRepositoryTest {
                     "fields": []
                   }
              ]
-            """.trimIndent().byteInputStream()
+            """.trimIndent()
         )
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
