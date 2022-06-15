@@ -14,7 +14,6 @@ import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.confirmation.PaymentConfirmationCallback
-import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -28,6 +27,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -73,6 +73,7 @@ class PaymentMethodViewModelTest {
             whenever(initialValues(anyOrNull())).thenReturn(this)
             whenever(viewOnlyFields(anyOrNull())).thenReturn(this)
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
+            whenever(baseFormArgs(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }

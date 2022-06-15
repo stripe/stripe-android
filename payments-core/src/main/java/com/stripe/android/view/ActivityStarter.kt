@@ -7,6 +7,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
+import com.stripe.android.model.StripeIntent
 
 /**
  * Superclass for starting Stripe activities.
@@ -70,6 +71,14 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
             @VisibleForTesting
             const val EXTRA: String = "extra_activity_args"
         }
+    }
+
+    // Activity Starter Args that are required to build a form controller
+    // see [FormControllerModule]
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    interface BaseFormArgs : Args {
+        val merchantName: String
+        val stripeIntent: StripeIntent
     }
 
     interface Result : Parcelable {

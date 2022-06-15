@@ -6,23 +6,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.forms.FormController
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
+import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.forms.LinkCardForm
+import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,7 @@ internal class CardEditViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger,
+    private val args: LinkActivityContract.Args,
     private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
 
@@ -69,6 +71,7 @@ internal class CardEditViewModel @Inject constructor(
                                 .initialValues(it.buildInitialFormValues())
                                 .viewOnlyFields(setOf(IdentifierSpec.CardNumber))
                                 .viewModelScope(viewModelScope)
+                                .baseFormArgs(args)
                                 .build().formController
                         } ?: dismiss(
                         Result.Failure(

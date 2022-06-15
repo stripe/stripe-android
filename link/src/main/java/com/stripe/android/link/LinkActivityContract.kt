@@ -36,13 +36,13 @@ class LinkActivityContract :
      */
     @Parcelize
     data class Args internal constructor(
-        internal val stripeIntent: StripeIntent,
+        override val stripeIntent: StripeIntent,
         internal val completePayment: Boolean,
-        internal val merchantName: String,
+        override val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
         internal val injectionParams: InjectionParams? = null
-    ) : ActivityStarter.Args {
+    ) : ActivityStarter.BaseFormArgs {
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {

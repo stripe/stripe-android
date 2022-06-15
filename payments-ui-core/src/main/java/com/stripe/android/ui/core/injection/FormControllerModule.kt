@@ -1,17 +1,19 @@
-package com.stripe.android.link.injection
+package com.stripe.android.ui.core.injection
 
 import android.content.Context
-import com.stripe.android.link.LinkActivityContract
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.view.ActivityStarter
 import dagger.Module
 import dagger.Provides
 
 @Module
-internal abstract class FormControllerModule {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class FormControllerModule {
 
     companion object {
 
@@ -19,13 +21,13 @@ internal abstract class FormControllerModule {
         fun provideTransformSpecToElements(
             resourceRepository: ResourceRepository,
             context: Context,
-            starterArgs: LinkActivityContract.Args,
+            baseFormArgs: ActivityStarter.BaseFormArgs,
             initialValues: Map<IdentifierSpec, String?>,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
             resourceRepository = resourceRepository,
             initialValues = initialValues,
-            amount = (starterArgs.stripeIntent as? PaymentIntent)?.let {
+            amount = (baseFormArgs.stripeIntent as? PaymentIntent)?.let {
                 val amount = it.amount
                 val currency = it.currency
                 if (amount != null && currency != null) {
@@ -34,7 +36,7 @@ internal abstract class FormControllerModule {
                 null
             },
             saveForFutureUseInitialValue = false,
-            merchantName = starterArgs.merchantName,
+            merchantName = baseFormArgs.merchantName,
             context = context,
             viewOnlyFields = viewOnlyFields
         )
