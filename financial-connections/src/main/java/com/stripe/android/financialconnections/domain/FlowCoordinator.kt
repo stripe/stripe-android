@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage.RequestNextStep
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.navigation.NavigationCommand
@@ -49,34 +47,4 @@ internal sealed interface FlowCoordinatorMessage {
     ) : FlowCoordinatorMessage
 
     object OpenWebAuthFlow : FlowCoordinatorMessage
-}
-
-internal class UpdateManifest @Inject constructor(
-    private val logger: Logger,
-    private val flowCoordinator: FlowCoordinator
-) {
-    suspend operator fun invoke(manifest: FinancialConnectionsSessionManifest) {
-        logger.debug("Updating manifest")
-        flowCoordinator().emit(FlowCoordinatorMessage.UpdateManifest(manifest))
-    }
-}
-
-internal class UpdateAuthorizationSession @Inject constructor(
-    private val logger: Logger,
-    private val flowCoordinator: FlowCoordinator
-) {
-    suspend operator fun invoke(manifest: FinancialConnectionsAuthorizationSession) {
-        logger.debug("Updating Auth session")
-        flowCoordinator().emit(FlowCoordinatorMessage.UpdateAuthorizationSession(manifest))
-    }
-}
-
-internal class RequestNextStep @Inject constructor(
-    private val logger: Logger,
-    private val flowCoordinator: FlowCoordinator
-) {
-    suspend operator fun invoke(currentStep: NavigationCommand) {
-        logger.debug("Requesting next step")
-        flowCoordinator().emit(RequestNextStep(currentStep))
-    }
 }
