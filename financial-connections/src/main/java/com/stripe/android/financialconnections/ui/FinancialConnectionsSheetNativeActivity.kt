@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
 
@@ -32,8 +33,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         super.onCreate(savedInstanceState)
         viewModel.onEach { postInvalidate() }
         setContent {
-            Column {
-                Box(modifier = Modifier.weight(1f)) { NavHost() }
+            FinancialConnectionsTheme {
+                Column {
+                    Box(modifier = Modifier.weight(1f)) { NavHost() }
+                }
             }
         }
     }

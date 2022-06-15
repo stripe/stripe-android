@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +36,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.InstitutionPickerViewModel
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun InstitutionPickerScreen() {
@@ -69,7 +69,7 @@ private fun InstitutionPickerContent(
                 .padding(8.dp)
                 .fillMaxWidth(),
             text = "Pick your bank",
-            style = MaterialTheme.typography.h4
+            style = FinancialConnectionsTheme.typography.subtitle
         )
         OutlinedTextField(
             modifier = Modifier
@@ -105,7 +105,7 @@ private fun InstitutionGrid(
         content = {
             items(institutions) { institution ->
                 Card(
-                    backgroundColor = Color.Magenta,
+                    backgroundColor = MaterialTheme.colors.primary,
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth()
@@ -121,7 +121,6 @@ private fun InstitutionGrid(
                             text = institution.name,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color.White,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -133,7 +132,9 @@ private fun InstitutionGrid(
 }
 
 @Composable
-@Preview
+@Preview(
+    showBackground = true
+)
 fun PreviewScreen() {
     InstitutionPickerContent(
         Success(
