@@ -325,6 +325,7 @@ internal class WalletScreenTest {
                 WalletBody(
                     isProcessing = isProcessing,
                     paymentDetails = paymentDetails,
+                    initiallySelectedId = null,
                     primaryButtonLabel = primaryButtonLabel,
                     errorMessage = errorMessage,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
