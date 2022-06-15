@@ -20,6 +20,9 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT_WITH_SELFIE
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -89,6 +92,27 @@ internal class ConsentFragmentTest {
                 )
             )
         )
+    }
+
+    private val verificationPageWithSelfie = mock<VerificationPage>().also {
+        whenever(it.biometricConsent).thenReturn(
+            VerificationPageStaticContentConsentPage(
+                acceptButtonText = CONSENT_ACCEPT_TEXT,
+                title = CONSENT_TITLE,
+                privacyPolicy = null,
+                timeEstimate = null,
+                body = CONSENT_BODY,
+                declineButtonText = CONSENT_DECLINE_TEXT,
+            )
+        )
+        whenever(it.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = listOf(
+                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
+                )
+            )
+        )
+        whenever(it.selfieCapture).thenReturn(mock())
     }
 
     private val correctVerificationData = mock<VerificationPageData>().also {
@@ -261,17 +285,48 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when accepted and postVerificationData success transitions to docSelectionFragment`() {
-        runBlocking {
-            whenever(
-                mockIdentityViewModel.postVerificationPageData(any(), any())
-            ).thenReturn(correctVerificationData)
-
-            launchConsentFragment { binding, navController, _ ->
+    fun `when accepted and postVerificationData success transitions to docSelectionFragment without selfie`() {
+        launchConsentFragment { binding, navController, _ ->
+            runBlocking {
+                whenever(
+                    mockIdentityViewModel.postVerificationPageData(any(), any())
+                ).thenReturn(correctVerificationData)
                 setUpSuccessVerificationPage()
-
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    collectedDataParam = eq(
+                        CollectedDataParam(biometricConsent = true)
+                    ),
+                    clearDataParam = eq(CONSENT_TO_DOC_SELECT)
+                )
+                assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
+                assertThat(binding.agree.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
+                    View.VISIBLE
+                )
+                assertThat(binding.decline.isEnabled).isFalse()
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.docSelectionFragment)
+            }
+        }
+    }
+
+    @Test
+    fun `when accepted and postVerificationData success transitions to docSelectionFragment with selfie`() {
+        launchConsentFragment { binding, navController, _ ->
+            runBlocking {
+                whenever(
+                    mockIdentityViewModel.postVerificationPageData(any(), any())
+                ).thenReturn(correctVerificationData)
+                setUpSuccessVerificationPage(verificationPageWithSelfie)
+                binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    collectedDataParam = eq(
+                        CollectedDataParam(biometricConsent = true)
+                    ),
+                    clearDataParam = eq(CONSENT_TO_DOC_SELECT_WITH_SELFIE)
+                )
                 assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
                 assertThat(binding.agree.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
                     View.VISIBLE
