@@ -103,7 +103,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @see onResume (we rely on this on regular flows)
      * @see onBrowserActivityResult (we rely on this on config changes)
      */
-    fun onActivityRecreated() {
+    internal fun onActivityRecreated() {
         setState {
             copy(
                 activityRecreated = true
@@ -142,7 +142,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      * @see [onBrowserActivityResult]
      */
-    fun onNativeAuthFlowResult() {
+    internal fun onNativeAuthFlowResult() {
         setState {
             if (authFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))
@@ -240,7 +240,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    fun onViewEffectLaunched() {
+    internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
     }
 
