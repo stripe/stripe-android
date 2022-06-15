@@ -56,6 +56,19 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
+    /**
+     * This method will read the expected LPMs and their specs as two separate parameters.
+     * Any spec now found from the server will be read from disk json file.
+     *
+     * It is still possible that an lpm that is expected cannot be read successfully from
+     * the json spec on disk or the server spec.
+     *
+     * It is also possible that an LPM is present in the repository that is not present
+     * in the expected LPM list.
+     *
+     * Reading the server spec is all or nothing, any error means none will be read
+     * so it is important that the json on disk is successful.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(
         expectedLpms: List<String>,

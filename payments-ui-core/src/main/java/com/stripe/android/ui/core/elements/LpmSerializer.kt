@@ -17,6 +17,10 @@ internal class LpmSerializer {
         format.decodeFromString<SharedDataSpec>(serializer(), str)
     }.onFailure { }
 
+    /**
+     * Any error in parsing an LPM (say a missing required field) will result in none of the
+     * LPMs being read.
+     */
     fun deserializeList(str: String) = if (str.isEmpty()) {
         emptyList()
     } else {
