@@ -38,7 +38,8 @@ class AnalyticsRequestV2(
     @get:VisibleForTesting
     val params: Map<String, *>
 ) : StripeRequest() {
-    // Note: nested params are calculated as a json string, which is different from other requests that uses form encoding.
+    // Note: nested params are calculated as a json string, which is different from other requests
+    // that uses form encoding.
     // There are at most two levels of nest params for AnalyticsRequestV2.
     // E.g for a nested map with value {"key", {"nestedKey1" -> "value1", "nestedKey2" -> "value2"}}
     // The params are encoded as a prettified json format sorted by key as follows
