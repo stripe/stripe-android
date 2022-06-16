@@ -1053,8 +1053,10 @@ public final class com/stripe/android/financialconnections/repository/FinancialC
 public final class com/stripe/android/financialconnections/ui/ComposableSingletons$ConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/ComposableSingletons$ConsentScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/ui/ComposableSingletons$FinancialConnectionsSheetNativeActivityKt {
@@ -1071,15 +1073,39 @@ public final class com/stripe/android/financialconnections/ui/ComposableSingleto
 public final class com/stripe/android/financialconnections/ui/ComposableSingletons$InstitutionPickerScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/ComposableSingletons$InstitutionPickerScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$ScaffoldKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$ScaffoldKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/ui/InstitutionPickerScreenKt {
-	public static final fun PreviewScreen (Landroidx/compose/runtime/Composer;I)V
+public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$TextFieldKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$TextFieldKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/ui/PartnerAuthScreenKt {
-	public static final fun PartnerAuthScreen (Landroidx/compose/runtime/Composer;I)V
+public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$TopAppBarKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$TopAppBarKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/financialconnections/ui/theme/ComposableSingletons$TypeKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/theme/ComposableSingletons$TypeKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
