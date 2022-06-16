@@ -6,9 +6,9 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
-import com.stripe.android.financialconnections.domain.FlowCoordinator
-import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage.RequestNextStep
-import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage.UpdateManifest
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import kotlinx.coroutines.launch
@@ -17,13 +17,13 @@ import javax.inject.Inject
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
-    private val flowCoordinator: FlowCoordinator,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     fun onContinueClick() {
         viewModelScope.launch {
             val manifest: FinancialConnectionsSessionManifest = acceptConsent()
-            with(flowCoordinator()) {
+            with(nativeAuthFlowCoordinator()) {
                 emit(UpdateManifest(manifest))
                 emit(RequestNextStep(currentStep = NavigationDirections.consent))
             }

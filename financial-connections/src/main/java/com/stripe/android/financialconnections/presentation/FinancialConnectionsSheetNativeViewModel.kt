@@ -8,9 +8,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
-import com.stripe.android.financialconnections.domain.FlowCoordinator
-import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
@@ -25,28 +25,28 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val subcomponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider,
     val goNext: GoNext,
     val logger: Logger,
-    val flowCoordinator: FlowCoordinator,
+    val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
         viewModelScope.launch {
-            flowCoordinator().collectLatest { message ->
+            nativeAuthFlowCoordinator().collectLatest { message ->
                 when (message) {
-                    is FlowCoordinatorMessage.RequestNextStep -> withState { state ->
+                    is Message.RequestNextStep -> withState { state ->
                         goNext(
                             currentPane = message.currentStep,
                             manifest = state.manifest,
                             authorizationSession = state.authorizationSession
                         )
                     }
-                    is FlowCoordinatorMessage.UpdateAuthorizationSession -> setState {
+                    is Message.UpdateAuthorizationSession -> setState {
                         copy(authorizationSession = message.authorizationSession)
                     }
-                    is FlowCoordinatorMessage.UpdateManifest -> setState {
+                    is Message.UpdateManifest -> setState {
                         copy(manifest = message.manifest)
                     }
-                    FlowCoordinatorMessage.OpenWebAuthFlow -> setState {
+                    Message.OpenWebAuthFlow -> setState {
                         copy(viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
                     }
                 }

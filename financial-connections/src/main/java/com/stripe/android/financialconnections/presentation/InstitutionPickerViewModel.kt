@@ -8,8 +8,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
-import com.stripe.android.financialconnections.domain.FlowCoordinator
-import com.stripe.android.financialconnections.domain.FlowCoordinatorMessage
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.Institution
@@ -23,7 +23,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
     val searchInstitutions: SearchInstitutions,
     val postAuthorizationSession: PostAuthorizationSession,
-    private val flowCoordinator: FlowCoordinator,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
 
@@ -52,7 +52,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: Institution) {
         viewModelScope.launch {
             postAuthorizationSession(institution.id)
-            flowCoordinator().emit(FlowCoordinatorMessage.OpenWebAuthFlow)
+            nativeAuthFlowCoordinator().emit(Message.OpenWebAuthFlow)
             // TODO@carlosmuvi use this when next steps available in native.
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)
