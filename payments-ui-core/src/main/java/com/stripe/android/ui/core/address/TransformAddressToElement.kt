@@ -85,7 +85,7 @@ internal enum class NameType(@StringRes val stringResId: Int) {
     @SerialName("city")
     City(R.string.address_label_city),
     @SerialName("country")
-    Country(R.string.address_label_country),
+    Country(R.string.address_label_country_or_region),
     @SerialName("county")
     County(R.string.address_label_county),
     @SerialName("department")

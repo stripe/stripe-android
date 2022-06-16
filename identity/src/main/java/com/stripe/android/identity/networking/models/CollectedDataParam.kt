@@ -17,9 +17,6 @@ internal data class CollectedDataParam(
     val idDocumentFront: DocumentUploadParam? = null,
     @SerialName("id_document_back")
     val idDocumentBack: DocumentUploadParam? = null,
-    // TODO(IDPROD-3944) - verify with server change
-    @SerialName("training_consent")
-    val trainingConsent: Boolean? = null,
     @SerialName("face")
     val face: FaceUploadParam? = null
 ) {
@@ -122,19 +119,21 @@ internal data class CollectedDataParam(
             bestHighResResult: UploadedResult,
             bestLowResResult: UploadedResult,
             trainingConsent: Boolean,
+            bestFaceScore: Float,
             faceScoreVariance: Float,
             numFrames: Int
         ) = CollectedDataParam(
-            trainingConsent = trainingConsent,
             face = FaceUploadParam(
-                bestHighResImage = bestHighResResult.uploadedStripeFile.id,
-                bestLowResImage = bestLowResResult.uploadedStripeFile.id,
-                firstHighResImage = firstHighResResult.uploadedStripeFile.id,
-                firstLowResImage = firstLowResResult.uploadedStripeFile.id,
-                lastHighResImage = lastHighResResult.uploadedStripeFile.id,
-                lastLowResImage = lastLowResResult.uploadedStripeFile.id,
+                bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
+                bestLowResImage = requireNotNull(bestLowResResult.uploadedStripeFile.id),
+                firstHighResImage = requireNotNull(firstHighResResult.uploadedStripeFile.id),
+                firstLowResImage = requireNotNull(firstLowResResult.uploadedStripeFile.id),
+                lastHighResImage = requireNotNull(lastHighResResult.uploadedStripeFile.id),
+                lastLowResImage = requireNotNull(lastLowResResult.uploadedStripeFile.id),
+                bestFaceScore = bestFaceScore,
                 faceScoreVariance = faceScoreVariance,
-                numFrames = numFrames
+                numFrames = numFrames,
+                trainingConsent = trainingConsent,
             )
         )
     }

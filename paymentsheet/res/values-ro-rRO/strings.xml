@@ -10,8 +10,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Prin salvarea contului dvs. bancar pentru %s sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adăugare</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Țară sau regiune</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Adăugați informațiile dvs. privind plata</string>
   <!-- Text for back button -->

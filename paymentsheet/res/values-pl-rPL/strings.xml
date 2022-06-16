@@ -10,8 +10,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Zapisując swoje konto bankowe dla %s, zgadzasz się na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Kraj lub region</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Dodaj informacje o płatności</string>
   <!-- Text for back button -->

@@ -25,9 +25,11 @@ def getRepositoryPassword() {
     return findProperty('NEXUS_PASSWORD') ?: ""
 }
 
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.srcDirs
+if (project.hasProperty('android')) {
+    task androidSourcesJar(type: Jar) {
+        archiveClassifier.set('sources')
+        from android.sourceSets.main.java.srcDirs
+    }
 }
 
 afterEvaluate { project ->
@@ -39,8 +41,12 @@ afterEvaluate { project ->
             // Creates a Maven publication called "release".
             release(MavenPublication) {
                 // Adds Javadocs and Sources as separate jars.
-                artifact androidSourcesJar
-                artifact bundleReleaseAar
+                if (project.hasProperty('android')) {
+                    artifact androidSourcesJar
+                    artifact bundleReleaseAar
+                } else if (project.hasProperty('artifactPath')) {
+                    artifact project.artifactPath
+                }
 
                 groupId = rootProject.group_name
                 artifactId = project.artifactId
@@ -121,6 +127,8 @@ afterEvaluate { project ->
     }
 
     artifacts {
-        archives androidSourcesJar
+        if (project.hasProperty('android')) {
+            archives androidSourcesJar
+        }
     }
 }

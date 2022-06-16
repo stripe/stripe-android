@@ -11,7 +11,6 @@ import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
-import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
@@ -25,6 +24,7 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -77,7 +77,9 @@ internal class PaymentMethodViewModel @Inject constructor(
                     (args.selectedPaymentDetails as? LinkPaymentDetails.New)
                         ?.takeIf { loadFromArgs }?.buildFormValues() ?: emptyMap()
                 )
-                .build().formController
+                .stripeIntent(args.stripeIntent)
+        .merchantName(args.merchantName)
+        .build().formController
     }
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {

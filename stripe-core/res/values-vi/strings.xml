@@ -6,6 +6,8 @@
   <string name="address_label_city">Thành phố</string>
   <!-- Caption for Country field on address form -->
   <string name="address_label_country">Quốc gia</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="address_label_country_or_region">Quốc gia hoặc khu vực</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Quận</string>
   <!-- Caption for Name field on address form -->

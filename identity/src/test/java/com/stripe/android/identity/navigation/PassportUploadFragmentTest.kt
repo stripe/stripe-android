@@ -261,7 +261,7 @@ class PassportUploadFragmentTest {
                     )
                 )
                 assertThat(clearDataParamCaptor.firstValue).isEqualTo(
-                    ClearDataParam.UPLOAD_TO_CONFIRM
+                    ClearDataParam.UPLOAD_TO_SELFIE
                 )
 
                 assertThat(navController.currentDestination?.id)

@@ -278,7 +278,7 @@ internal class IDScanFragmentTest {
                         )
                     ),
                     eq(
-                        ClearDataParam.UPLOAD_TO_CONFIRM
+                        ClearDataParam.UPLOAD_TO_SELFIE
                     )
                 )
 
