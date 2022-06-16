@@ -14,7 +14,7 @@ internal fun FinancialConnectionsTopAppBar() {
     TopAppBar(
         title = {
             Icon(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.logo__stripe),
                 contentDescription = null // decorative element
             )
         },

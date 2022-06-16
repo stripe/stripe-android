@@ -72,7 +72,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         // stores manifest in state for future references.
         setState {
             // TODO@carlosmuvi implement manifest-based logic to open the corresponding flow.
-            val nativeAuthFlow = true
+            val nativeAuthFlow = false
             copy(
                 manifest = manifest,
                 authFlowActive = true,

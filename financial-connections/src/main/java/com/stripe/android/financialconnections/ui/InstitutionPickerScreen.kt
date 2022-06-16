@@ -139,13 +139,13 @@ private fun InstitutionPickerPreview() {
             Success(
                 InstitutionResponse(
                     listOf(
-                        Institution("1", "Very long institution 1"),
+                        Institution("1", "Very Very long institution 1"),
                         Institution("2", "Institution 2"),
                         Institution("3", "Institution 3")
                     )
                 )
             ),
-            query = "hola",
+            query = "My random query",
             onQueryChanged = {},
             onInstitutionSelected = {}
         )

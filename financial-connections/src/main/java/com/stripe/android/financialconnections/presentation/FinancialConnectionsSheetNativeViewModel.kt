@@ -29,6 +29,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
+
     init {
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collectLatest { message ->
