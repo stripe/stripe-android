@@ -5,7 +5,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
-
 @Composable
 internal fun FinancialConnectionsScaffold(
     topBar: @Composable () -> Unit = { FinancialConnectionsTopAppBar() },

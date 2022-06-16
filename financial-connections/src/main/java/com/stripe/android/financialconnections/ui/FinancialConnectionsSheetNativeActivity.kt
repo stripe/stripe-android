@@ -37,7 +37,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                         Box(modifier = Modifier.weight(1f)) { NavHost() }
                     }
                 }
-
             }
         }
     }

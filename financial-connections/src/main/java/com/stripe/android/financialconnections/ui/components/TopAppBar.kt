@@ -26,7 +26,7 @@ internal fun FinancialConnectionsTopAppBar() {
 
 @Composable
 @Preview
-fun FinancialConnectionsTopAppBarPreview() {
+private fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsTopAppBar()
     }

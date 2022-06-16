@@ -38,7 +38,7 @@ private val Typography = FinancialConnectionsTypography(
     heading = TextStyle(
         fontSize = 18.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W700
     ),
     subheading = TextStyle(
         fontSize = 18.sp,
@@ -94,7 +94,7 @@ private val Typography = FinancialConnectionsTypography(
 )
 
 @Composable
-fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
+internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
         LocalFinancialConnectionsColors provides LightColorPalette,
@@ -106,15 +106,15 @@ fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     }
 }
 
-val LocalFinancialConnectionsTypography = staticCompositionLocalOf<FinancialConnectionsTypography> {
+private val LocalFinancialConnectionsTypography = staticCompositionLocalOf<FinancialConnectionsTypography> {
     error("no FinancialConnectionsTypography provided")
 }
 
-val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
+private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
     error("No FinancialConnectionsColors provided")
 }
 
-object FinancialConnectionsTheme {
+internal object FinancialConnectionsTheme {
     val colors: FinancialConnectionsColors
         @Composable
         get() = LocalFinancialConnectionsColors.current
@@ -127,7 +127,7 @@ object FinancialConnectionsTheme {
  * A Material [Colors] implementation which sets all colors to [debugColor] to discourage usage of
  * [MaterialTheme.colors] in preference to [FinancialConnectionsColors].
  */
-fun debugColors(
+private fun debugColors(
     debugColor: Color = Color.Magenta
 ) = Colors(
     primary = debugColor,

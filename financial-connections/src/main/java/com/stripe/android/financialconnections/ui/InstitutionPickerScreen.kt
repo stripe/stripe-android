@@ -88,7 +88,6 @@ private fun InstitutionPickerContent(
                 onInstitutionSelected = onInstitutionSelected
             )
         }
-
     }
 }
 
@@ -134,7 +133,7 @@ private fun InstitutionGrid(
 @Preview(
     showBackground = true
 )
-fun InstitutionPickerPreview() {
+private fun InstitutionPickerPreview() {
     FinancialConnectionsTheme {
         InstitutionPickerContent(
             Success(
@@ -151,5 +150,4 @@ fun InstitutionPickerPreview() {
             onInstitutionSelected = {}
         )
     }
-
 }

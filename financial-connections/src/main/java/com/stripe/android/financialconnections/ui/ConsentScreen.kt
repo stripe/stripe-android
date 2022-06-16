@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,8 +22,6 @@ import com.stripe.android.financialconnections.presentation.ConsentState
 import com.stripe.android.financialconnections.presentation.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -50,38 +46,38 @@ private fun ConsentContent(
     state: ConsentState,
     onContinueClick: () -> Unit
 ) {
-        // Screen content
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(16.dp)
+    // Screen content
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            Column(
-                modifier = Modifier.align(Alignment.TopCenter)
-            ) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    text = state.title,
-                    style = FinancialConnectionsTheme.typography.subtitle
-                )
-                Spacer(modifier = Modifier.size(75.dp))
-                state.content.forEach {
-                    BodyText(it)
-                    Spacer(modifier = Modifier.size(20.dp))
-                }
-            }
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                FinancialConnectionsButton(
-                    onClick = onContinueClick,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Agree")
-                }
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = state.title,
+                style = FinancialConnectionsTheme.typography.subtitle
+            )
+            Spacer(modifier = Modifier.size(75.dp))
+            state.content.forEach {
+                BodyText(it)
+                Spacer(modifier = Modifier.size(20.dp))
             }
         }
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            FinancialConnectionsButton(
+                onClick = onContinueClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Agree")
+            }
+        }
+    }
 }
 
 @Composable
@@ -99,7 +95,7 @@ private fun BodyText(text: String) {
 @Preview(
     showBackground = true
 )
-fun ContentPreview() {
+private fun ContentPreview() {
     FinancialConnectionsTheme {
         ConsentContent(
             state = ConsentState(

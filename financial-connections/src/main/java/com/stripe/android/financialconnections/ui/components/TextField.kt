@@ -35,7 +35,6 @@ internal fun FinancialConnectionsOutlinedTextField(
     )
 }
 
-
 @Composable
 @Preview(showBackground = true)
 private fun FinancialConnectionsOutlinedTextFieldPreview() {
@@ -45,5 +44,3 @@ private fun FinancialConnectionsOutlinedTextFieldPreview() {
         }
     }
 }
-
-
