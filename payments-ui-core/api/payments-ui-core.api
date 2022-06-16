@@ -630,22 +630,23 @@ public final class com/stripe/android/ui/core/forms/resources/injection/Resource
 }
 
 public final class com/stripe/android/ui/core/injection/FormControllerModule$Companion {
-	public final fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Lcom/stripe/android/view/ActivityStarter$BaseFormArgs;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
+	public final fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
 }
 
 public final class com/stripe/android/ui/core/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory;
 	public fun get ()Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Lcom/stripe/android/view/ActivityStarter$BaseFormArgs;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
+	public static fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
 }
 
 public abstract interface class com/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder {
-	public abstract fun baseFormArgs (Lcom/stripe/android/view/ActivityStarter$BaseFormArgs;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun build ()Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent;
 	public abstract fun formSpec (Lcom/stripe/android/ui/core/elements/LayoutSpec;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun initialValues (Ljava/util/Map;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
+	public abstract fun merchantName (Ljava/lang/String;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
+	public abstract fun stripeIntent (Lcom/stripe/android/model/StripeIntent;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun viewModelScope (Lkotlinx/coroutines/CoroutineScope;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun viewOnlyFields (Ljava/util/Set;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 }

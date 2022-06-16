@@ -45,7 +45,8 @@ class CardEditViewModelTest {
             whenever(initialValues(anyOrNull())).thenReturn(this)
             whenever(viewOnlyFields(anyOrNull())).thenReturn(this)
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
-            whenever(baseFormArgs(anyOrNull())).thenReturn(this)
+            whenever(merchantName(anyOrNull())).thenReturn(this)
+            whenever(stripeIntent(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }

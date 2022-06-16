@@ -14,18 +14,14 @@ public final class com/stripe/android/link/ComposableSingletons$LinkActivityKt {
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class com/stripe/android/link/LinkActivityContract$Args : com/stripe/android/view/ActivityStarter$BaseFormArgs {
+public final class com/stripe/android/link/LinkActivityContract$Args : com/stripe/android/view/ActivityStarter$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/link/LinkActivityContract$Args$Companion;
-	public final fun component1 ()Lcom/stripe/android/model/StripeIntent;
-	public final fun component3 ()Ljava/lang/String;
 	public final fun copy (Lcom/stripe/android/model/StripeIntent;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
 	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/model/StripeIntent;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getMerchantName ()Ljava/lang/String;
-	public fun getStripeIntent ()Lcom/stripe/android/model/StripeIntent;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V

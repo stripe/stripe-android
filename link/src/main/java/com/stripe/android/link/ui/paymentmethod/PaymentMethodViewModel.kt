@@ -68,7 +68,8 @@ internal class PaymentMethodViewModel @Inject constructor(
         .initialValues(emptyMap())
         .viewOnlyFields(emptySet())
         .viewModelScope(viewModelScope)
-        .baseFormArgs(args)
+        .stripeIntent(args.stripeIntent)
+        .merchantName(args.merchantName)
         .build().formController
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {

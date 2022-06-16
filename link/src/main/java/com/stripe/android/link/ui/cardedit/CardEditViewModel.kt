@@ -71,7 +71,8 @@ internal class CardEditViewModel @Inject constructor(
                                 .initialValues(it.buildInitialFormValues())
                                 .viewOnlyFields(setOf(IdentifierSpec.CardNumber))
                                 .viewModelScope(viewModelScope)
-                                .baseFormArgs(args)
+                                .stripeIntent(args.stripeIntent)
+                                .merchantName(args.merchantName)
                                 .build().formController
                         } ?: dismiss(
                         Result.Failure(
