@@ -41,10 +41,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     /**
      * handle state changes here.
      */
