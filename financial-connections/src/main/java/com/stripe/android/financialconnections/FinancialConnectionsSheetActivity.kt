@@ -22,8 +22,8 @@ internal class FinancialConnectionsSheetActivity :
 
     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
 
-    private val startForResult = registerForActivityResult(StartActivityForResult()) {
-        viewModel.onActivityResult()
+    private val startBrowserForResult = registerForActivityResult(StartActivityForResult()) {
+        viewModel.onBrowserActivityResult()
     }
 
     private val startNativeAuthFlowForResult = registerForActivityResult(StartActivityForResult()) {
@@ -61,7 +61,7 @@ internal class FinancialConnectionsSheetActivity :
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> startForResult.launch(
+                    is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
                         CreateBrowserIntentForUrl(
                             context = this,
                             uri = Uri.parse(viewEffect.url),

@@ -43,6 +43,7 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
+    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "com.google.truth:truth:$truthVersion"

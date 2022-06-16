@@ -13,7 +13,7 @@ internal interface NavigationCommand {
 
 internal object NavigationDirections {
 
-    val bankPicker = object : NavigationCommand {
+    val institutionPicker = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "bank-picker"
     }
@@ -21,6 +21,11 @@ internal object NavigationDirections {
     val consent = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "bank-intro"
+    }
+
+    val partnerAuth = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "partner-auth"
     }
 
     val Default = object : NavigationCommand {

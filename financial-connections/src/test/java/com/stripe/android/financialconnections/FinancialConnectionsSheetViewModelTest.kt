@@ -7,6 +7,7 @@ import com.airbnb.mvrx.test.MvRxTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
@@ -19,7 +20,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -45,11 +45,9 @@ class FinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val manifest = FinancialConnectionsSessionManifest(
-        ApiKeyFixtures.HOSTED_AUTH_URL,
-        ApiKeyFixtures.SUCCESS_URL,
-        ApiKeyFixtures.CANCEL_URL
-    )
+
+    private val manifest = sessionManifest()
+
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val fetchFinancialConnectionsSessionForToken =
         mock<FetchFinancialConnectionsSessionForToken>()
@@ -250,7 +248,7 @@ class FinancialConnectionsSheetViewModelTest {
             // simulate a config change
             viewModel.onActivityRecreated()
             // auth flow ends (activity received result without new intent received)
-            viewModel.onActivityResult()
+            viewModel.onBrowserActivityResult()
 
             // Then
             withState(viewModel) {

@@ -71,11 +71,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
         // stores manifest in state for future references.
         setState {
+            // TODO@carlosmuvi implement manifest-based logic to open the corresponding flow.
+            val nativeAuthFlow = true
             copy(
                 manifest = manifest,
                 authFlowActive = true,
-                // TODO@carlosmuvi implement manifest-based logic to open the corresponding flow.
-                viewEffect = if (true) {
+                viewEffect = if (nativeAuthFlow) {
                     OpenNativeAuthFlow(initialArgs.configuration, manifest)
                 } else {
                     OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
@@ -100,9 +101,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * figure which lifecycle callback happens after onNewIntent.
      *
      * @see onResume (we rely on this on regular flows)
-     * @see onActivityResult (we rely on this on config changes)
+     * @see onBrowserActivityResult (we rely on this on config changes)
      */
-    fun onActivityRecreated() {
+    internal fun onActivityRecreated() {
         setState {
             copy(
                 activityRecreated = true
@@ -128,7 +129,20 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * if activity got recreated and the auth flow is still active then the user hit
      * the back button or closed the custom tabs UI, so return result as canceled.
      */
-    internal fun onActivityResult() {
+    internal fun onBrowserActivityResult() {
+        setState {
+            if (authFlowActive && activityRecreated) {
+                copy(viewEffect = FinishWithResult(Canceled))
+            } else this
+        }
+    }
+
+    /**
+     * The native auth flow activity result is equivalent to the browser flow.
+     *
+     * @see [onBrowserActivityResult]
+     */
+    internal fun onNativeAuthFlowResult() {
         setState {
             if (authFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))
@@ -226,12 +240,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    fun onViewEffectLaunched() {
+    internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
-    }
-
-    fun onNativeAuthFlowResult() {
-        TODO("Not yet implemented")
     }
 
     companion object :

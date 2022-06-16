@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 @ExperimentalCoroutinesApi
 class FetchFinancialConnectionsSessionForTokenTest {
 
-    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
+    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.sessionManifest())
     private val fetchFinancialConnectionsSessionForToken = FetchFinancialConnectionsSessionForToken(repository)
     private val json = Json {
         ignoreUnknownKeys = true

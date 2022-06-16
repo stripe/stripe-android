@@ -18,7 +18,9 @@ import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.InstitutionResponse
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
@@ -51,7 +53,10 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             options = options,
             params = getFinancialConnectionsAcccountsParams.toParamMap()
         )
-        return executeRequest(financialConnectionsRequest, FinancialConnectionsAccountList.serializer())
+        return executeRequest(
+            financialConnectionsRequest,
+            FinancialConnectionsAccountList.serializer()
+        )
     }
 
     override suspend fun getFinancialConnectionsSession(
@@ -87,7 +92,25 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         )
     }
 
-    override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
+    override suspend fun getFinancialConnectionsSessionManifest(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
+        val financialConnectionsRequest = apiRequestFactory.createGet(
+            url = getManifestUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+            ),
+        )
+        return executeRequest(
+            financialConnectionsRequest,
+            FinancialConnectionsSessionManifest.serializer()
+        )
+    }
+
+    override suspend fun markConsentAcquired(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = consentAcquiredUrl,
             options = options,
@@ -98,6 +121,58 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         return executeRequest(
             financialConnectionsRequest,
             FinancialConnectionsSessionManifest.serializer()
+        )
+    }
+
+    override suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse {
+        val request = apiRequestFactory.createGet(
+            url = featuredInstitutionsUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+            ),
+        )
+        return executeRequest(
+            request,
+            InstitutionResponse.serializer()
+        )
+    }
+
+    override suspend fun searchInstitutions(
+        clientSecret: String,
+        query: String,
+    ): InstitutionResponse {
+        val request = apiRequestFactory.createGet(
+            url = institutionsUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "query" to query,
+                "limit" to SEARCH_INSTITUTIONS_LIMIT
+            ),
+        )
+        return executeRequest(
+            request,
+            InstitutionResponse.serializer()
+        )
+    }
+
+    override suspend fun postAuthorizationSession(
+        clientSecret: String,
+        institutionId: String,
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = authorizationSessionUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "use_mobile_handoff" to false,
+                "institution" to institutionId
+            ),
+        )
+        return executeRequest(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
         )
     }
 
@@ -153,6 +228,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
     internal companion object {
         private const val API_HOST = "https://api.stripe.com"
 
+        private const val SEARCH_INSTITUTIONS_LIMIT = 8
+
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
         internal const val PARAMS_APPLICATION_ID = "application_id"
         internal const val PARAMS_FULLSCREEN = "fullscreen"
@@ -169,5 +246,17 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
         internal const val generateHostedUrl: String =
             "$API_HOST/v1/link_account_sessions/generate_hosted_url"
+
+        internal const val getManifestUrl: String =
+            "$API_HOST/v1/link_account_sessions/manifest"
+
+        internal const val institutionsUrl: String =
+            "$API_HOST/v1/connections/institutions"
+
+        internal const val authorizationSessionUrl: String =
+            "$API_HOST/v1/connections/auth_sessions"
+
+        internal const val featuredInstitutionsUrl: String =
+            "$API_HOST/v1/connections/featured_institutions"
     }
 }

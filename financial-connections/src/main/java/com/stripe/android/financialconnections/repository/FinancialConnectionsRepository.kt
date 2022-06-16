@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.InstitutionResponse
 
 internal interface FinancialConnectionsRepository {
     @Throws(
@@ -47,7 +48,49 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
+    suspend fun getFinancialConnectionsSessionManifest(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
     suspend fun markConsentAcquired(
         clientSecret: String,
     ): FinancialConnectionsSessionManifest
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun searchInstitutions(
+        clientSecret: String,
+        query: String,
+    ): InstitutionResponse
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun featuredInstitutions(
+        clientSecret: String,
+    ): InstitutionResponse
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun postAuthorizationSession(
+        clientSecret: String,
+        institutionId: String
+    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.ui
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -12,19 +13,47 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
+import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 
-internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
+internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
 
     val viewModel: FinancialConnectionsSheetNativeViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.onEach { postInvalidate() }
         setContent {
             Column {
                 Box(modifier = Modifier.weight(1f)) { NavHost() }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    /**
+     * handle state changes here.
+     */
+    override fun invalidate() {
+        withState(viewModel) { state ->
+            state.viewEffect?.let { viewEffect ->
+                when (viewEffect) {
+                    is OpenAuthFlowWithUrl -> startActivity(
+                        CreateBrowserIntentForUrl(
+                            context = this,
+                            uri = Uri.parse(viewEffect.url),
+                        )
+                    )
+                }
+                viewModel.onViewEffectLaunched()
             }
         }
     }
@@ -37,8 +66,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
             composable(NavigationDirections.consent.destination) {
                 ConsentScreen()
             }
-            composable(NavigationDirections.bankPicker.destination) {
-                BankPickerScreen()
+            composable(NavigationDirections.institutionPicker.destination) {
+                InstitutionPickerScreen()
+            }
+            composable(NavigationDirections.partnerAuth.destination) {
+                PartnerAuthScreen()
             }
         }
     }
