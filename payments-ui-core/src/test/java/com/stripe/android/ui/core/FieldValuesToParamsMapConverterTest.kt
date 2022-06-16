@@ -98,12 +98,10 @@ class FieldValuesToParamsMapConverterTest {
                 "billing_details={" +
                 "name=joe, " +
                 "email=joe@gmail.com, " +
-                "address={country=US, " +
+                "address={" +
+                "country=US, " +
                 "line1=123 Main Street" +
                 "}" +
-                "}, " +
-                "sofort={" +
-                "country=US" +
                 "}" +
                 "}"
         )

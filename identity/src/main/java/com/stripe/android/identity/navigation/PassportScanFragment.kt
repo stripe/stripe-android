@@ -28,6 +28,8 @@ internal class PassportScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val frontScanType: IdentityScanState.ScanType = IdentityScanState.ScanType.PASSPORT
+
     override val fragmentId = R.id.passportScanFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

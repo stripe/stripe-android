@@ -3,6 +3,7 @@ package com.stripe.android.identity.navigation
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
@@ -12,7 +13,9 @@ import com.stripe.android.identity.utils.navigateToUploadFragment
 /**
  * Fragment to indicate live capture failure.
  */
-internal class CouldNotCaptureFragment : BaseErrorFragment() {
+internal class CouldNotCaptureFragment(
+    identityViewModelFactory: ViewModelProvider.Factory
+) : BaseErrorFragment(identityViewModelFactory) {
 
     override fun onCustomizingViews() {
         val args = requireNotNull(arguments) {

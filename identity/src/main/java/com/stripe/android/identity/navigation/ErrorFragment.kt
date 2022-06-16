@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -18,8 +19,9 @@ import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
  * Fragment to show generic error.
  */
 internal class ErrorFragment(
-    private val verificationFlowFinishable: VerificationFlowFinishable
-) : BaseErrorFragment() {
+    private val verificationFlowFinishable: VerificationFlowFinishable,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : BaseErrorFragment(identityViewModelFactory) {
     override fun onCustomizingViews() {
         val args = requireNotNull(arguments)
         title.text = args[ARG_ERROR_TITLE] as String

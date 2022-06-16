@@ -23,6 +23,10 @@ import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
@@ -48,6 +52,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -87,6 +92,13 @@ class IdentityUploadFragmentTest {
             successCaptor.firstValue(verificationPage)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -95,6 +107,12 @@ class IdentityUploadFragmentTest {
             successCaptor.firstValue(verificationPageWithSelfie)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
@@ -588,6 +606,15 @@ class IdentityUploadFragmentTest {
             navController
         )
     }.onFragment {
+        (if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel).let { identityViewModel ->
+            verify(identityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD &&
+                        params[PARAM_SCAN_TYPE] == IdentityAnalyticsRequestFactory.ID // from frontScanType = IdentityScanState.ScanType.ID_FRONT
+                }
+            )
+        }
         testBlock(IdentityUploadFragmentBinding.bind(it.requireView()), navController, it)
     }
 

@@ -10,8 +10,6 @@
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Сохраняя реквизиты своего банковского счета у %s, вы соглашаетесь авторизовать платежи в соответствии с <terms>этими условиями</terms>.]]></string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавить</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Страна или регион</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Укажите платежные данные</string>
   <!-- Text for back button -->

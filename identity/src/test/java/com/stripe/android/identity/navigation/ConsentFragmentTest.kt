@@ -12,8 +12,13 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -31,7 +36,9 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
@@ -107,18 +114,20 @@ internal class ConsentFragmentTest {
         )
     }
 
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.verificationArgs).thenReturn(
-            IdentityVerificationSheetContract.Args(
-                verificationSessionId = VERIFICATION_SESSION_ID,
-                ephemeralKeySecret = EPHEMERAL_KEY,
-                brandLogo = BRAND_LOGO,
-                injectorKey = DUMMY_INJECTOR_KEY
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { verificationArgs }.thenReturn(ARGS)
+
+        on { identityAnalyticsRequestFactory }.thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = ARGS
             )
         )
     }
 
     private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
+
+    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
     private fun setUpErrorVerificationPage() {
         val failureCaptor: KArgumentCaptor<(Throwable?) -> Unit> = argumentCaptor()
@@ -173,34 +182,12 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when not unsupported_client navigate to errorFragment with failed reason`() {
+    fun `when not unsupported_client launch fallbackUrl`() {
         whenever(verificationPageWithTimeAndPolicy.unsupportedClient).thenReturn(true)
-        launchConsentFragment { _, navController, fragment ->
+        whenever(verificationPageWithTimeAndPolicy.fallbackUrl).thenReturn(FALLBACK_URL)
+        launchConsentFragment { _, _, _ ->
             setUpSuccessVerificationPage()
-
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.errorFragment)
-
-            requireNotNull(navController.backStack.last().arguments).let { args ->
-                assertThat(
-                    args[ErrorFragment.ARG_ERROR_TITLE]
-                ).isEqualTo(fragment.getString(R.string.error))
-
-                assertThat(
-                    args[ErrorFragment.ARG_ERROR_CONTENT]
-                ).isEqualTo(fragment.getString(R.string.unexpected_error_try_again))
-
-                assertThat(
-                    args[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT]
-                ).isEqualTo(fragment.getString(R.string.go_back))
-
-                assertThat(
-                    args[ErrorFragment.ARG_FAILED_REASON]
-                ).isInstanceOf(IllegalStateException::class.java)
-                assertThat(
-                    (args[ErrorFragment.ARG_FAILED_REASON] as IllegalStateException).message
-                ).isEqualTo("Unsupported client")
-            }
+            verify(mockFallbackUrlLauncher).launchFallbackUrl(eq(FALLBACK_URL))
         }
     }
 
@@ -209,6 +196,12 @@ internal class ConsentFragmentTest {
         launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
+                }
+            )
             verify(
                 mockConsentFragmentViewModel
             ).loadUriIntoImageView(
@@ -365,6 +358,7 @@ internal class ConsentFragmentTest {
         ConsentFragment(
             viewModelFactoryFor(mockIdentityViewModel),
             viewModelFactoryFor(mockConsentFragmentViewModel),
+            mockFallbackUrlLauncher
         )
     }.onFragment {
         val navController = TestNavHostController(
@@ -396,6 +390,15 @@ internal class ConsentFragmentTest {
 
         const val VERIFICATION_SESSION_ID = "id_5678"
         const val EPHEMERAL_KEY = "eak_5678"
+
+        const val FALLBACK_URL = "https://link/to/fallback"
         val BRAND_LOGO = mock<Uri>()
+
+        val ARGS = IdentityVerificationSheetContract.Args(
+            verificationSessionId = VERIFICATION_SESSION_ID,
+            ephemeralKeySecret = EPHEMERAL_KEY,
+            brandLogo = BRAND_LOGO,
+            injectorKey = DUMMY_INJECTOR_KEY
+        )
     }
 }

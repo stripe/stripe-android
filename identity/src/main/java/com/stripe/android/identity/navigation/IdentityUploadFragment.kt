@@ -20,6 +20,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavArgument
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -159,6 +160,13 @@ internal abstract class IdentityUploadFragment(
         super.onViewCreated(view, savedInstanceState)
         maybeResetUploadedState()
         collectUploadedStateAndUpdateUI()
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                scanType = frontScanType,
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD
+            )
+        )
     }
 
     private fun checkBackFields(

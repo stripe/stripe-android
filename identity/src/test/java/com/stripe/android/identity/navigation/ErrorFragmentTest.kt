@@ -10,10 +10,18 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
+import com.stripe.android.identity.viewModelFactoryFor
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -22,10 +30,24 @@ import org.robolectric.RobolectricTestRunner
 class ErrorFragmentTest {
 
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+    }
 
     @Test
     fun `title and content are set correctly`() {
         launchErrorFragment().onFragment {
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
+                }
+            )
+
             val binding = BaseErrorFragmentBinding.bind(it.requireView())
 
             assertThat(binding.titleText.text).isEqualTo(TEST_ERROR_TITLE)
@@ -175,7 +197,7 @@ class ErrorFragmentTest {
         },
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        ErrorFragment(mock())
+        ErrorFragment(mock(), viewModelFactoryFor(mockIdentityViewModel))
     }
 
     private fun launchErrorFragmentWithFailedReason(
@@ -189,7 +211,7 @@ class ErrorFragmentTest {
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        ErrorFragment(mockVerificationFlowFinishable)
+        ErrorFragment(mockVerificationFlowFinishable, viewModelFactoryFor(mockIdentityViewModel))
     }
 
     private companion object {

@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 data class CardBillingSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = supportedBillingCountries
