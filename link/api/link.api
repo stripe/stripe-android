@@ -199,14 +199,6 @@ public final class com/stripe/android/link/injection/DaggerLinkViewModelFactoryC
 	public fun inject (Lcom/stripe/android/link/ui/wallet/WalletViewModel$Factory;)V
 }
 
-public final class com/stripe/android/link/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory;
-	public fun get ()Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Lcom/stripe/android/link/LinkActivityContract$Args;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
-}
-
 public final class com/stripe/android/link/injection/LinkPaymentLauncherFactory_Impl : com/stripe/android/link/injection/LinkPaymentLauncherFactory {
 	public static fun create (Lcom/stripe/android/link/LinkPaymentLauncher_Factory;)Ljavax/inject/Provider;
 	public fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/link/LinkPaymentLauncher;
@@ -266,11 +258,11 @@ public final class com/stripe/android/link/ui/LinkTermsKt {
 }
 
 public final class com/stripe/android/link/ui/cardedit/CardEditViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/cardedit/CardEditViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/cardedit/CardEditViewModel_Factory;
 	public fun get ()Lcom/stripe/android/link/ui/cardedit/CardEditViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/link/model/LinkAccount;Lcom/stripe/android/link/account/LinkAccountManager;Lcom/stripe/android/link/model/Navigator;Lcom/stripe/android/core/Logger;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/cardedit/CardEditViewModel;
+	public static fun newInstance (Lcom/stripe/android/link/model/LinkAccount;Lcom/stripe/android/link/account/LinkAccountManager;Lcom/stripe/android/link/model/Navigator;Lcom/stripe/android/core/Logger;Lcom/stripe/android/link/LinkActivityContract$Args;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/cardedit/CardEditViewModel;
 }
 
 public final class com/stripe/android/link/ui/cardedit/CardEditViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -297,14 +289,6 @@ public final class com/stripe/android/link/ui/forms/ComposableSingletons$FormUIK
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/link/ui/forms/FormController_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/forms/FormController_Factory;
-	public fun get ()Lcom/stripe/android/link/ui/forms/FormController;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/ui/core/elements/LayoutSpec;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/ui/core/forms/TransformSpecToElements;Lkotlinx/coroutines/CoroutineScope;)Lcom/stripe/android/link/ui/forms/FormController;
 }
 
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupViewKt {

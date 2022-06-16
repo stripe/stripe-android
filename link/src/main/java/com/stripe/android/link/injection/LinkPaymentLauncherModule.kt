@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
