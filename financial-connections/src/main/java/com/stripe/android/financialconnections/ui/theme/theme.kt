@@ -47,7 +47,7 @@ private val Typography = FinancialConnectionsTypography(
     ),
     kicker = TextStyle(
         // TODO caps.
-        fontSize = 24.sp,
+        fontSize = 12.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600,
     ),

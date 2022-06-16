@@ -2,16 +2,18 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
-fun FinancialConnectionsOutlinedTextField(
+internal fun FinancialConnectionsOutlinedTextField(
     value: String,
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
@@ -32,3 +34,16 @@ fun FinancialConnectionsOutlinedTextField(
         label = label
     )
 }
+
+
+@Composable
+@Preview(showBackground = true)
+private fun FinancialConnectionsOutlinedTextFieldPreview() {
+    FinancialConnectionsTheme {
+        Column {
+            FinancialConnectionsOutlinedTextField(value = "test", onValueChange = {})
+        }
+    }
+}
+
+
