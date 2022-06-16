@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
-import android.widget.RadioGroup
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -124,7 +123,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         flowController = PaymentSheet.FlowController.create(
             this,
             ::onPaymentOption,
-            ::onPaymentSheetResult
+            ::onPaymentSheetResult,
         )
         val backendUrl = Settings(this).playgroundBackendUrl
 
@@ -347,7 +346,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
-            appearance = appearance
+            appearance = appearance,
+            googlePlacesApiKey = ""
         )
     }
 

@@ -17,6 +17,7 @@ class CardBillingAddressElement(
     rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     addressFieldRepository: AddressFieldElementRepository,
     countryCodes: Set<String> = emptySet(),
+    googlePlacesApiKey: String?,
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
@@ -24,8 +25,9 @@ class CardBillingAddressElement(
 ) : AddressElement(
     identifier,
     addressFieldRepository,
-    rawValuesMap,
+    rawValuesMap.toMutableMap(),
     countryCodes,
+    googlePlacesApiKey,
     countryDropdownFieldController
 ) {
     // Save for future use puts this in the controller rather than element

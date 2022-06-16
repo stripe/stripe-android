@@ -33,6 +33,23 @@ class AddressFieldElementRepository @Inject constructor(
         )
     }
 
+    fun initializeWithAutocomplete(
+        googlePlacesApiKey: String
+    ) {
+        initialize(
+            supportedCountries.associateWith { countryCode ->
+                "addressinfo/$countryCode.json"
+            }.mapValues { (_, assetFileName) ->
+                requireNotNull(
+                    parseAddressesSchema(
+                        resources?.assets?.open(assetFileName)
+                    ),
+                )
+            },
+            googlePlacesApiKey
+        )
+    }
+
     @VisibleForTesting
     fun initialize(
         countryCode: String,
@@ -40,12 +57,16 @@ class AddressFieldElementRepository @Inject constructor(
     ) = initialize(mapOf(countryCode to parseAddressesSchema(schema)!!))
 
     private fun initialize(
-        countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>
+        countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>,
+        googlePlacesApiKey: String? = null,
     ) {
         countryAddressSchemaPair.map { (countryCode, schemaList) ->
             countryCode to requireNotNull(
                 schemaList
-                    .transformToElementList()
+                    .transformToElementList(
+                        countryCode,
+                        googlePlacesApiKey
+                    )
             )
         }.forEach { add(it.first, it.second) }
     }

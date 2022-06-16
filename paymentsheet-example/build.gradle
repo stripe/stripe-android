@@ -16,6 +16,8 @@ dependencies {
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
+    implementation 'com.google.android.libraries.places:places:2.6.0'
+
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
     implementation "androidx.preference:preference-ktx:$androidxPreferenceVersion"

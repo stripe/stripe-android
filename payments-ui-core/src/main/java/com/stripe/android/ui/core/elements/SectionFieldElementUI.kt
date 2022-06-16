@@ -62,6 +62,11 @@ internal fun SectionFieldElementUI(
                     controller
                 )
             }
+            is AutocompleteAddressTextFieldController -> {
+                AddressAutocompleteTextFieldUI(
+                    controller
+                )
+            }
             is SaveForFutureUseController -> {}
         }
     }

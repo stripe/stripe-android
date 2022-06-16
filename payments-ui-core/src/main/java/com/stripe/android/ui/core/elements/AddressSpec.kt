@@ -26,7 +26,8 @@ data class AddressSpec(
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressFieldElementRepository
+        addressRepository: AddressFieldElementRepository,
+        googlePlacesApiKey: String?
     ) = createSectionElement(
         if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
             CountryElement(
@@ -40,8 +41,9 @@ data class AddressSpec(
             AddressElement(
                 apiPath,
                 addressRepository,
-                initialValues,
-                countryCodes = allowedCountryCodes
+                initialValues.toMutableMap(),
+                countryCodes = allowedCountryCodes,
+                googlePlacesApiKey = googlePlacesApiKey
             )
         },
         label = R.string.billing_details

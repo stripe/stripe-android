@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AutocompleteAddressTextFieldElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.RowController
 import com.stripe.android.ui.core.elements.RowElement
@@ -183,20 +184,34 @@ private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
-internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
+internal fun List<CountryAddressSchema>.transformToElementList(
+    countryCode: String,
+    googlePlacesApiKey: String? = null,
+): List<SectionFieldElement> {
     val countryAddressElements = this.mapNotNull { addressField ->
         addressField.type?.let {
-            SimpleTextElement(
-                addressField.type.identifierSpec,
-                SimpleTextFieldController(
-                    SimpleTextFieldConfig(
-                        label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                        capitalization = it.capitalization,
-                        keyboard = getKeyboard(addressField.schema)
-                    ),
-                    showOptionalLabel = !addressField.required
-                )
-            )
+            when {
+                it == FieldType.AddressLine1 && googlePlacesApiKey != null -> {
+                    AutocompleteAddressTextFieldElement(
+                        addressField.type.identifierSpec,
+                        countryCode,
+                        googlePlacesApiKey
+                    )
+                }
+                else -> {
+                    SimpleTextElement(
+                        addressField.type.identifierSpec,
+                        SimpleTextFieldController(
+                            SimpleTextFieldConfig(
+                                label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                                capitalization = it.capitalization,
+                                keyboard = getKeyboard(addressField.schema)
+                            ),
+                            showOptionalLabel = !addressField.required
+                        )
+                    )
+                }
+            }
         }
     }
 

@@ -15,11 +15,18 @@ open class AddressElement constructor(
     private val addressFieldRepository: AddressFieldElementRepository,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     countryCodes: Set<String> = emptySet(),
+    googlePlacesApiKey: String?,
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
     ),
 ) : SectionMultiFieldElement(_identifier) {
+
+    init {
+        googlePlacesApiKey?.let {
+            addressFieldRepository.initializeWithAutocomplete(googlePlacesApiKey)
+        }
+    }
 
     @VisibleForTesting
     val countryElement = CountryElement(
@@ -40,7 +47,9 @@ open class AddressElement constructor(
             fields
         }
 
-    val fields = otherFields.map { listOf(countryElement).plus(it) }
+    val fields = otherFields.map {
+        listOf(countryElement).plus(it)
+    }
 
     val controller = AddressController(fields)
 
@@ -54,6 +63,19 @@ open class AddressElement constructor(
         combine(
             fieldElements
                 .map {
+                    if (it is AutocompleteAddressTextFieldElement) {
+                        it.controller.address.value?.let { address ->
+                            setRawValue(
+                                rawValuesMap.toMutableMap().apply {
+                                    this[IdentifierSpec.Country] = address.country
+                                    this[IdentifierSpec.Line1] = address.line1
+                                    this[IdentifierSpec.City] = address.city
+                                    this[IdentifierSpec.State] = address.state
+                                    this[IdentifierSpec.PostalCode] = address.postalCode
+                                }
+                            )
+                        }
+                    }
                     it.getFormFieldValueFlow()
                 }
         ) {

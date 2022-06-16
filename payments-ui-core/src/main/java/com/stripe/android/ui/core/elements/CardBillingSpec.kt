@@ -16,13 +16,15 @@ data class CardBillingSpec(
 ) : FormItemSpec() {
     fun transform(
         addressRepository: AddressFieldElementRepository,
-        initialValues: Map<IdentifierSpec, String?>
+        initialValues: Map<IdentifierSpec, String?>,
+        googlePlacesApiKey: String?
     ) = createSectionElement(
         CardBillingAddressElement(
             IdentifierSpec.Generic("credit_billing"),
             addressFieldRepository = addressRepository,
             countryCodes = allowedCountryCodes,
-            rawValuesMap = initialValues
+            rawValuesMap = initialValues,
+            googlePlacesApiKey = googlePlacesApiKey
         ),
         label = R.string.billing_details
     )

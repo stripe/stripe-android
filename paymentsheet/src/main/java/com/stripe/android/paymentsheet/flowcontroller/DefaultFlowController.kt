@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
@@ -31,8 +30,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.AddressOptionsActivityContract
-import com.stripe.android.paymentsheet.AddressOptionsResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -98,7 +95,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
-    private val addressOptionsActivityLauncher: ActivityResultLauncher<AddressOptionsActivityContract.Args>
     private var googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
 
@@ -155,11 +151,6 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultCaller.registerForActivityResult(
                 GooglePayPaymentMethodLauncherContract(),
                 ::onGooglePayResult
-            )
-        addressOptionsActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                AddressOptionsActivityContract(),
-                ::onAddressOptionsResult
             )
     }
 
@@ -245,34 +236,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,
                 productUsage = productUsage
-            )
-        )
-    }
-
-    override fun getAddressOption(): PaymentSheet.Address {
-        return PaymentSheet.Address()
-    }
-
-    override fun presentAddressOption() {
-        val initData = runCatching {
-            viewModel.initData
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling presentPaymentOptions()"
-            )
-        }
-
-        addressOptionsActivityLauncher.launch(
-            AddressOptionsActivityContract.Args(
-                stripeIntent = initData.stripeIntent,
-                config = initData.config,
-                injectionParams = AddressOptionsActivityContract.Args.InjectionParams(
-                    injectorKey = injectorKey,
-                    productUsage = productUsage,
-                    enableLogging = enableLogging
-                )
             )
         )
     }
@@ -420,6 +383,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentOptionResult.Succeeded -> {
                 val paymentSelection = paymentOptionResult.paymentSelection
                 viewModel.paymentSelection = paymentSelection
+
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
                         paymentSelection
@@ -438,13 +402,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentOptionCallback.onPaymentOption(null)
             }
         }
-    }
-
-    @JvmSynthetic
-    internal fun onAddressOptionsResult(
-        addressOptionsResult: AddressOptionsResult?
-    ) {
-        Log.d("SKYLER", "onAddressOptionsResult: ")
     }
 
     internal fun onPaymentResult(paymentResult: PaymentResult) {

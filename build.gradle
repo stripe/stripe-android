@@ -83,6 +83,7 @@ ext {
     materialVersion = '1.5.0'
     daggerVersion = '2.41'
     playServicesWalletVersion = '19.1.0'
+    placesVersion = '2.6.0'
 
     androidTestVersion = '1.4.0'
     androidTestJunitVersion = '1.1.3'

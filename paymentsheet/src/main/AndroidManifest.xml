@@ -11,9 +11,5 @@
             android:name=".PaymentOptionsActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
-        <activity
-            android:name=".AddressOptionsActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
     </application>
 </manifest>

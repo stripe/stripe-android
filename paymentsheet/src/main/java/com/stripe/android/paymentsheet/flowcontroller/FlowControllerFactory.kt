@@ -27,7 +27,7 @@ internal class FlowControllerFactory(
     constructor(
         activity: ComponentActivity,
         paymentOptionCallback: PaymentOptionCallback,
-        paymentResultCallback: PaymentSheetResultCallback
+        paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         activity,
         activity.lifecycleScope,

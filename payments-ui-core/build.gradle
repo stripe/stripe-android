@@ -22,6 +22,7 @@ dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
     compileOnly project(":stripecardscan")
+    compileOnly "com.google.android.libraries.places:places:$placesVersion"
 
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
     implementation "androidx.core:core-ktx:$androidxCoreVersion"

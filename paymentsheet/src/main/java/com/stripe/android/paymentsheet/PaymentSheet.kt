@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.getRawValueFromDimenResource
+import com.stripe.android.ui.core.address.autocomplete.AddressAutocompleteResultCallback
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -141,7 +142,12 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = Appearance()
+        val appearance: Appearance = Appearance(),
+
+        /**
+         * Google Places API Key required for shipping address element
+         */
+        val googlePlacesApiKey: String? = null
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -775,7 +781,8 @@ class PaymentSheet internal constructor(
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback
+                paymentResultCallback: PaymentSheetResultCallback,
+                addressAutocompleteResultCallback: AddressAutocompleteResultCallback? = null
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
