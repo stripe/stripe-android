@@ -26,8 +26,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     val viewModel: FinancialConnectionsSheetNativeViewModel by viewModel()
 
-    private val startBrowserForResult = registerForActivityResult(StartActivityForResult()) {}
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.onEach { postInvalidate() }
@@ -38,6 +36,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
     /**
      * handle state changes here.
      */
@@ -45,7 +47,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
+                    is OpenAuthFlowWithUrl -> startActivity(
                         CreateBrowserIntentForUrl(
                             context = this,
                             uri = Uri.parse(viewEffect.url),
