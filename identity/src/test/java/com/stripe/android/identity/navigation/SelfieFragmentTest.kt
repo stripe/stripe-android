@@ -13,6 +13,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
@@ -86,7 +87,7 @@ internal class SelfieFragmentTest {
     }
 
     private val mockUploadedResult = mock<UploadedResult> {
-        on { uploadedStripeFile }.thenReturn(mock())
+        on { uploadedStripeFile }.thenReturn(StripeFile(id = "testId"))
     }
     private val successUploadState = SelfieUploadState(
         firstHighResResult = Resource.success(mockUploadedResult),
@@ -211,6 +212,7 @@ internal class SelfieFragmentTest {
                             bestHighResResult = requireNotNull(successUploadState.bestHighResResult.data),
                             bestLowResResult = requireNotNull(successUploadState.bestLowResResult.data),
                             trainingConsent = binding.allowImageCollection.isChecked,
+                            bestFaceScore = BEST_FACE_SCORE,
                             faceScoreVariance = SCORE_VARIANCE,
                             numFrames = NUM_FRAMES
                         )
@@ -320,6 +322,7 @@ internal class SelfieFragmentTest {
         )
 
         const val SCORE_VARIANCE = 0.1f
+        const val BEST_FACE_SCORE = 0.91f
         const val NUM_FRAMES = 8
         const val CONSENT_TEXT = "TEST CONSENT TEXT"
 
@@ -328,6 +331,7 @@ internal class SelfieFragmentTest {
             transitioner = mock<FaceDetectorTransitioner> {
                 on { filteredFrames }.thenReturn(FILTERED_FRAMES)
                 on { scoreVariance }.thenReturn(SCORE_VARIANCE)
+                on { bestFaceScore }.thenReturn(BEST_FACE_SCORE)
                 on { numFrames }.thenReturn(NUM_FRAMES)
             }
         )

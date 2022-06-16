@@ -26,6 +26,7 @@ import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
@@ -394,17 +395,23 @@ internal abstract class IdentityUploadFragment(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 lifecycleScope.launch {
-                    postVerificationPageDataAndMaybeSubmit(
-                        identityViewModel = identityViewModel,
-                        collectedDataParam = collectedDataParam,
-                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                        fromFragment = fragmentId,
-                        verificationPage.selfieCapture?.let {
-                            {
-                                findNavController().navigate(R.id.action_global_selfieFragment)
-                            }
+                    if (verificationPage.requireSelfie()) {
+                        postVerificationPageDataAndMaybeSubmit(
+                            identityViewModel = identityViewModel,
+                            collectedDataParam = collectedDataParam,
+                            clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
+                            fromFragment = fragmentId
+                        ) {
+                            findNavController().navigate(R.id.action_global_selfieFragment)
                         }
-                    )
+                    } else {
+                        postVerificationPageDataAndMaybeSubmit(
+                            identityViewModel = identityViewModel,
+                            collectedDataParam = collectedDataParam,
+                            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                            fromFragment = fragmentId
+                        )
+                    }
                 }
             }, onFailure = {
                 Log.e(TAG, "Fail to observeForVerificationPage: $it")

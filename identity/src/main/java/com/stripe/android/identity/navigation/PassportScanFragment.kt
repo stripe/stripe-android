@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -65,23 +66,33 @@ internal class PassportScanFragment(
                                 onSuccess = { verificationPage ->
                                     lifecycleScope.launch {
                                         runCatching {
-                                            postVerificationPageDataAndMaybeSubmit(
-                                                identityViewModel = identityViewModel,
-                                                collectedDataParam =
-                                                CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                                    type = CollectedDataParam.Type.PASSPORT,
-                                                    frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                                    frontLowResResult = requireNotNull(it.frontLowResResult.data)
-                                                ),
-                                                clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                                fromFragment = R.id.passportScanFragment,
-                                                notSubmitBlock =
-                                                verificationPage.selfieCapture?.let {
-                                                    {
-                                                        findNavController().navigate(R.id.action_global_selfieFragment)
-                                                    }
+                                            if (verificationPage.requireSelfie()) {
+                                                postVerificationPageDataAndMaybeSubmit(
+                                                    identityViewModel = identityViewModel,
+                                                    collectedDataParam =
+                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                                        type = CollectedDataParam.Type.PASSPORT,
+                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data)
+                                                    ),
+                                                    clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
+                                                    fromFragment = R.id.passportScanFragment
+                                                ) {
+                                                    findNavController().navigate(R.id.action_global_selfieFragment)
                                                 }
-                                            )
+                                            } else {
+                                                postVerificationPageDataAndMaybeSubmit(
+                                                    identityViewModel = identityViewModel,
+                                                    collectedDataParam =
+                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                                        type = CollectedDataParam.Type.PASSPORT,
+                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data)
+                                                    ),
+                                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                                    fromFragment = R.id.passportScanFragment,
+                                                )
+                                            }
                                         }.onFailure { throwable ->
                                             Log.e(
                                                 TAG,

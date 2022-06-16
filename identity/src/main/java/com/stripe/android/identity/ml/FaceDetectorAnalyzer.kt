@@ -6,6 +6,7 @@ import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.roundToMaxDecimals
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -71,7 +72,7 @@ internal class FaceDetectorAnalyzer(
                 width = (boundingBoxes[0][2] - boundingBoxes[0][0]) / INPUT_WIDTH,
                 height = (boundingBoxes[0][3] - boundingBoxes[0][1]) / INPUT_HEIGHT,
             ),
-            resultScore = score[0]
+            resultScore = score[0].roundToMaxDecimals(2)
         )
     }
 

@@ -23,6 +23,8 @@ import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRI
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.ID_CARD_KEY
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.PASSPORT_KEY
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.DOC_SELECT_TO_UPLOAD
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.DOC_SELECT_TO_UPLOAD_WITH_SELFIE
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -40,6 +42,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -169,83 +172,198 @@ internal class DocSelectionFragmentTest {
     }
 
     @Test
-    fun `when scan is available, clicking continue navigates to scan`() {
+    fun `when scan is available, clicking continue navigates to scan without selfie`() {
         launchDocSelectionFragment { binding, navController, _ ->
-            whenever(verificationPage.documentSelect).thenReturn(
-                DOC_SELECT_SINGLE_CHOICE_DL
-            )
             runBlocking {
+                whenever(verificationPage.documentSelect).thenReturn(
+                    DOC_SELECT_SINGLE_CHOICE_DL
+                )
                 whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
-            }
-            // mock file is available
-            whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
-                MutableLiveData(
-                    Resource.success(
-                        mock()
+                // mock file is available
+                whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
+                    MutableLiveData(
+                        Resource.success(
+                            mock()
+                        )
                     )
                 )
-            )
-            setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+                setUpSuccessVerificationPage()
+                binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
+                    .callOnClick()
 
-            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
-                onCameraReadyCaptor.capture(),
-                onUserDeniedCameraPermissionCaptor.capture()
-            )
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
+                    ),
+                    eq(DOC_SELECT_TO_UPLOAD)
+                )
 
-            // trigger permission granted
-            onCameraReadyCaptor.firstValue()
+                verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                    onCameraReadyCaptor.capture(),
+                    onUserDeniedCameraPermissionCaptor.capture()
+                )
 
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.driverLicenseScanFragment)
+                // trigger permission granted
+                onCameraReadyCaptor.firstValue()
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.driverLicenseScanFragment)
+            }
         }
     }
 
     @Test
-    fun `when modelFile is unavailable and camera permission granted, clicking continue navigates to upload when requireLiveCapture is false`() {
+    fun `when scan is available, clicking continue navigates to scan with selfie`() {
         launchDocSelectionFragment { binding, navController, _ ->
-            whenever(verificationPage.documentSelect).thenReturn(
-                DOC_SELECT_SINGLE_CHOICE_DL
-            )
-            val mockDocumentCapture =
-                mock<VerificationPageStaticContentDocumentCapturePage>().also {
-                    whenever(it.requireLiveCapture).thenReturn(false)
-                }
-            whenever(verificationPage.documentCapture).thenReturn(
-                mockDocumentCapture
-            )
             runBlocking {
+                whenever(verificationPage.documentSelect).thenReturn(
+                    DOC_SELECT_SINGLE_CHOICE_DL
+                )
+                whenever(verificationPage.selfieCapture).thenReturn(mock())
                 whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
+                // mock file is available
+                whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
+                    MutableLiveData(
+                        Resource.success(
+                            mock()
+                        )
+                    )
+                )
+                setUpSuccessVerificationPage()
+                binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
+                    .callOnClick()
+
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
+                    ),
+                    eq(DOC_SELECT_TO_UPLOAD_WITH_SELFIE)
+                )
+
+                verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                    onCameraReadyCaptor.capture(),
+                    onUserDeniedCameraPermissionCaptor.capture()
+                )
+
+                // trigger permission granted
+                onCameraReadyCaptor.firstValue()
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.driverLicenseScanFragment)
             }
-            // mock file is not available
-            whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
-                MutableLiveData(Resource.error())
-            )
-            setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+        }
+    }
 
-            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
-                onCameraReadyCaptor.capture(),
-                onUserDeniedCameraPermissionCaptor.capture()
-            )
+    @Test
+    fun `when modelFile is unavailable and camera permission granted, clicking continue navigates to upload when requireLiveCapture is false without selfie`() {
+        launchDocSelectionFragment { binding, navController, _ ->
+            runBlocking {
+                whenever(verificationPage.documentSelect).thenReturn(
+                    DOC_SELECT_SINGLE_CHOICE_DL
+                )
+                val mockDocumentCapture =
+                    mock<VerificationPageStaticContentDocumentCapturePage>().also {
+                        whenever(it.requireLiveCapture).thenReturn(false)
+                    }
+                whenever(verificationPage.documentCapture).thenReturn(
+                    mockDocumentCapture
+                )
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    MISSING_BACK_VERIFICATION_PAGE_DATA
+                )
+                // mock file is not available
+                whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
+                    MutableLiveData(Resource.error())
+                )
+                setUpSuccessVerificationPage()
+                binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
+                    .callOnClick()
 
-            // trigger permission granted
-            onCameraReadyCaptor.firstValue()
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
+                    ),
+                    eq(DOC_SELECT_TO_UPLOAD)
+                )
 
-            verify(mockIdentityViewModel).sendAnalyticsRequest(
-                argThat {
-                    eventName == EVENT_CAMERA_PERMISSION_GRANTED
-                }
-            )
+                verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                    onCameraReadyCaptor.capture(),
+                    onUserDeniedCameraPermissionCaptor.capture()
+                )
 
-            setUpSuccessVerificationPage(2)
+                // trigger permission granted
+                onCameraReadyCaptor.firstValue()
 
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.driverLicenseUploadFragment)
+                verify(mockIdentityViewModel).sendAnalyticsRequest(
+                    argThat {
+                        eventName == EVENT_CAMERA_PERMISSION_GRANTED
+                    }
+                )
+
+                setUpSuccessVerificationPage(2)
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.driverLicenseUploadFragment)
+            }
+        }
+    }
+
+    @Test
+    fun `when modelFile is unavailable and camera permission granted, clicking continue navigates to upload when requireLiveCapture is false with selfie`() {
+        launchDocSelectionFragment { binding, navController, _ ->
+            runBlocking {
+                whenever(verificationPage.documentSelect).thenReturn(
+                    DOC_SELECT_SINGLE_CHOICE_DL
+                )
+                whenever(verificationPage.selfieCapture).thenReturn(mock())
+                val mockDocumentCapture =
+                    mock<VerificationPageStaticContentDocumentCapturePage>().also {
+                        whenever(it.requireLiveCapture).thenReturn(false)
+                    }
+                whenever(verificationPage.documentCapture).thenReturn(
+                    mockDocumentCapture
+                )
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    MISSING_BACK_VERIFICATION_PAGE_DATA
+                )
+                // mock file is not available
+                whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
+                    MutableLiveData(Resource.error())
+                )
+                setUpSuccessVerificationPage()
+                binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
+                    .callOnClick()
+
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
+                    ),
+                    eq(DOC_SELECT_TO_UPLOAD_WITH_SELFIE)
+                )
+
+                verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                    onCameraReadyCaptor.capture(),
+                    onUserDeniedCameraPermissionCaptor.capture()
+                )
+
+                // trigger permission granted
+                onCameraReadyCaptor.firstValue()
+
+                verify(mockIdentityViewModel).sendAnalyticsRequest(
+                    argThat {
+                        eventName == EVENT_CAMERA_PERMISSION_GRANTED
+                    }
+                )
+
+                setUpSuccessVerificationPage(2)
+
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.driverLicenseUploadFragment)
+            }
         }
     }
 
