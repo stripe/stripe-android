@@ -17,10 +17,10 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.forms.FormController
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
+import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -78,8 +78,8 @@ internal class PaymentMethodViewModel @Inject constructor(
                         ?.takeIf { loadFromArgs }?.buildFormValues() ?: emptyMap()
                 )
                 .stripeIntent(args.stripeIntent)
-        .merchantName(args.merchantName)
-        .build().formController
+                .merchantName(args.merchantName)
+                .build().formController
     }
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {

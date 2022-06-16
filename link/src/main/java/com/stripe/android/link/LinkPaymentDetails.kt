@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
-import com.stripe.android.link.ui.forms.FormController
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
@@ -43,7 +42,7 @@ sealed class LinkPaymentDetails(
 
         /**
          * Build a flat map of the values entered by the user when creating this payment method,
-         * in a format that can be used to set the initial values in the [FormController].
+         * in a format that can be used to set the initial values in the FormController.
          */
         fun buildFormValues() = convertToFormValuesMap(originalParams.toParamMap())
     }
