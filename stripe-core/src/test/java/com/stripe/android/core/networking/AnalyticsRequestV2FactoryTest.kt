@@ -74,7 +74,7 @@ class AnalyticsRequestV2FactoryTest {
     }
 
     @Test
-    fun `verify additionalParams are included`() {
+    fun `verify additionalParams`() {
         val additionalParam1 = "param1"
         val additionalValue1 = "value1"
         val additionalParam2 = "param2"
@@ -82,6 +82,7 @@ class AnalyticsRequestV2FactoryTest {
         val additionalParam3 = "param3"
         val additionalValue3 = mapOf(
             "nestedParam1" to "nestedValue1",
+            "nestedParam3" to "nestedValue3",
             "nestedParam2" to "nestedValue2"
         )
 
@@ -103,7 +104,8 @@ class AnalyticsRequestV2FactoryTest {
                     """
                     {
                       "nestedParam1": "nestedValue1",
-                      "nestedParam2": "nestedValue2"
+                      "nestedParam2": "nestedValue2",
+                      "nestedParam3": "nestedValue3"
                     }
                     """.trimIndent(),
                     Charsets.UTF_8.name()
