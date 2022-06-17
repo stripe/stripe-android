@@ -588,7 +588,6 @@ public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
 }
 
 public final class com/stripe/android/ui/core/forms/LinkCardFormKt {
-	public static final fun getLinkCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 }
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {

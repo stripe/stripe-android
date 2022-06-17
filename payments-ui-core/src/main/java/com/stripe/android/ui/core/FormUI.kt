@@ -73,9 +73,7 @@ fun FormUI(
                             enabled, element.controller, hiddenIdentifiers
                         )
                         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
-                        is OTPElement -> DefaultPaymentsTheme {
-                            OTPElementUI(enabled, element)
-                        }
+                        is OTPElement -> OTPElementUI(enabled, element)
                         is EmptyFormElement -> {}
                     }
                 }
