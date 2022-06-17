@@ -243,24 +243,10 @@ public final class com/stripe/android/link/confirmation/ConfirmationManager_Fact
 
 public final class com/stripe/android/link/injection/DaggerLinkPaymentLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/link/injection/LinkPaymentLauncherComponent$Builder;
-	public fun getLinkAccountManager ()Lcom/stripe/android/link/account/LinkAccountManager;
-	public fun inject (Lcom/stripe/android/link/LinkActivityViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/cardedit/CardEditViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/inline/InlineSignupViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/paymentmethod/PaymentMethodViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/verification/VerificationViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/wallet/WalletViewModel$Factory;)V
 }
 
-public final class com/stripe/android/link/injection/DaggerLinkViewModelFactoryComponent : com/stripe/android/link/injection/LinkViewModelFactoryComponent {
+public final class com/stripe/android/link/injection/DaggerLinkViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/link/injection/LinkViewModelFactoryComponent$Builder;
-	public fun inject (Lcom/stripe/android/link/LinkActivityViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/cardedit/CardEditViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/paymentmethod/PaymentMethodViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/verification/VerificationViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/link/ui/wallet/WalletViewModel$Factory;)V
 }
 
 public final class com/stripe/android/link/injection/LinkPaymentLauncherFactory_Impl : com/stripe/android/link/injection/LinkPaymentLauncherFactory {

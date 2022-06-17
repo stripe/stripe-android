@@ -1613,12 +1613,10 @@ public final class com/stripe/android/googlepaylauncher/StripeGooglePayContract$
 
 public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public fun inject (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel$Factory;)V
 }
 
-public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent : com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherViewModelFactoryComponent {
+public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherViewModelFactoryComponent$Builder;
-	public fun inject (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel$Factory;)V
 }
 
 public final class com/stripe/android/googlepaylauncher/injection/GooglePayLauncherModule_ProvideGooglePayRepositoryFactoryFactory : dagger/internal/Factory {
@@ -6476,10 +6474,8 @@ public final class com/stripe/android/payments/bankaccount/di/CollectBankAccount
 	public static fun providesProductUsage ()Ljava/util/Set;
 }
 
-public final class com/stripe/android/payments/bankaccount/di/DaggerCollectBankAccountComponent : com/stripe/android/payments/bankaccount/di/CollectBankAccountComponent {
+public final class com/stripe/android/payments/bankaccount/di/DaggerCollectBankAccountComponent {
 	public static fun builder ()Lcom/stripe/android/payments/bankaccount/di/CollectBankAccountComponent$Builder;
-	public fun getViewModel ()Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel;
-	public fun inject (Lcom/stripe/android/payments/bankaccount/ui/CollectBankAccountViewModel$Factory;)V
 }
 
 public final class com/stripe/android/payments/bankaccount/domain/AttachFinancialConnectionsSession_Factory : dagger/internal/Factory {
@@ -6763,25 +6759,20 @@ public final class com/stripe/android/payments/core/injection/AuthenticationModu
 	public static fun providePaymentRelayStarterFactory (Ldagger/Lazy;)Lkotlin/jvm/functions/Function1;
 }
 
-public final class com/stripe/android/payments/core/injection/DaggerAuthenticationComponent : com/stripe/android/payments/core/injection/AuthenticationComponent {
+public final class com/stripe/android/payments/core/injection/DaggerAuthenticationComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/AuthenticationComponent$Builder;
-	public fun getRegistry ()Lcom/stripe/android/payments/core/authentication/DefaultPaymentAuthenticatorRegistry;
-	public fun inject (Lcom/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionViewModelFactory;)V
 }
 
-public final class com/stripe/android/payments/core/injection/DaggerPaymentLauncherComponent : com/stripe/android/payments/core/injection/PaymentLauncherComponent {
+public final class com/stripe/android/payments/core/injection/DaggerPaymentLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/PaymentLauncherComponent$Builder;
-	public fun inject (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherViewModel$Factory;)V
 }
 
-public final class com/stripe/android/payments/core/injection/DaggerPaymentLauncherViewModelFactoryComponent : com/stripe/android/payments/core/injection/PaymentLauncherViewModelFactoryComponent {
+public final class com/stripe/android/payments/core/injection/DaggerPaymentLauncherViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/PaymentLauncherViewModelFactoryComponent$Builder;
-	public fun inject (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherViewModel$Factory;)V
 }
 
-public final class com/stripe/android/payments/core/injection/DaggerStripe3ds2TransactionViewModelFactoryComponent : com/stripe/android/payments/core/injection/Stripe3ds2TransactionViewModelFactoryComponent {
+public final class com/stripe/android/payments/core/injection/DaggerStripe3ds2TransactionViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/Stripe3ds2TransactionViewModelFactoryComponent$Builder;
-	public fun inject (Lcom/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionViewModelFactory;)V
 }
 
 public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorKey : java/lang/annotation/Annotation {

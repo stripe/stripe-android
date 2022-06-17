@@ -211,9 +211,8 @@ public final class com/stripe/android/financialconnections/analytics/DefaultFina
 	public static fun newInstance (Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/core/networking/AnalyticsRequestFactory;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/financialconnections/analytics/DefaultFinancialConnectionsEventReporter;
 }
 
-public final class com/stripe/android/financialconnections/di/DaggerFinancialConnectionsSheetComponent : com/stripe/android/financialconnections/di/FinancialConnectionsSheetComponent {
+public final class com/stripe/android/financialconnections/di/DaggerFinancialConnectionsSheetComponent {
 	public static fun builder ()Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetComponent$Builder;
-	public fun getViewModel ()Lcom/stripe/android/financialconnections/FinancialConnectionsSheetViewModel;
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetConfigurationModule_ProvidesApplicationIdFactory : dagger/internal/Factory {
