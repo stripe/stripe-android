@@ -24,7 +24,7 @@ dependencies {
     implementation project(":stripe-core")
 
     // vanilla tflite library
-    implementation "org.tensorflow:tensorflow-lite:2.8.0"
+    implementation "org.tensorflow:tensorflow-lite:2.9.0"
     // flex ops
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
     // support library to reshape image to the input model shape

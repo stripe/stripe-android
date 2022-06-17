@@ -577,7 +577,6 @@ public final class com/stripe/android/PaymentConfiguration : android/os/Parcelab
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/PaymentConfiguration$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/PaymentConfiguration;
@@ -612,7 +611,6 @@ public final class com/stripe/android/PaymentConfiguration$Creator : android/os/
 public final class com/stripe/android/PaymentIntentResult : com/stripe/android/StripeIntentResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/model/PaymentIntent;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun copy (Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;)Lcom/stripe/android/PaymentIntentResult;
@@ -3302,7 +3300,6 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/c
 	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
 	public final field upi Lcom/stripe/android/model/PaymentMethod$Upi;
 	public final field usBankAccount Lcom/stripe/android/model/PaymentMethod$USBankAccount;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;Lcom/stripe/android/model/PaymentMethod$USBankAccount;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Lcom/stripe/android/model/PaymentMethod$Ideal;
 	public final fun component11 ()Lcom/stripe/android/model/PaymentMethod$SepaDebit;
@@ -3469,7 +3466,6 @@ public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/andr
 	public final field last4 Ljava/lang/String;
 	public final field threeDSecureUsage Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;
 	public final field wallet Lcom/stripe/android/model/wallets/Wallet;
-	public synthetic fun <init> (Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/PaymentMethod$Card$Checks;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;Lcom/stripe/android/model/wallets/Wallet;Lcom/stripe/android/model/PaymentMethod$Card$Networks;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/model/CardBrand;
 	public final fun component10 ()Lcom/stripe/android/model/wallets/Wallet;
 	public final fun component2 ()Lcom/stripe/android/model/PaymentMethod$Card$Checks;
@@ -4069,7 +4065,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Card : and
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/PaymentMethodCreateParams$Card$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun copy (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Card;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public static final fun create (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
@@ -4176,7 +4171,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createKlarna$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static synthetic fun createLink$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createOxxo$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -7083,7 +7077,6 @@ public final class com/stripe/android/payments/paymentlauncher/StripePaymentLaun
 
 public abstract class com/stripe/android/view/ActivityStarter {
 	public static final field $stable I
-	public synthetic fun <init> (Landroid/app/Activity;Ljava/lang/Class;ILjava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun startForResult (Lcom/stripe/android/view/ActivityStarter$Args;)V
 }
 
@@ -7354,19 +7347,12 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IZ)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
-	public final fun getCardNumberEditText ()Lcom/stripe/android/view/CardNumberEditText;
-	public final fun getCardNumberTextInputLayout ()Lcom/stripe/android/view/CardNumberTextInputLayout;
 	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
-	public final fun getCvcEditText ()Lcom/stripe/android/view/CvcEditText;
-	public final fun getCvcInputLayout ()Lcom/google/android/material/textfield/TextInputLayout;
-	public final fun getExpiryDateEditText ()Lcom/stripe/android/view/ExpiryDateEditText;
-	public final fun getExpiryTextInputLayout ()Lcom/google/android/material/textfield/TextInputLayout;
 	public final fun getPaymentMethodBillingDetails ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun getPaymentMethodBillingDetailsBuilder ()Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
 	public fun getPaymentMethodCard ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun getPostalCodeRequired ()Z
-	public final fun getSecondRowLayout ()Landroid/widget/LinearLayout;
 	public final fun getUsZipCodeRequired ()Z
 	public fun isEnabled ()Z
 	public fun onWindowFocusChanged (Z)V
@@ -7669,7 +7655,6 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public fun addTextChangedListener (Landroid/text/TextWatcher;)V
 	protected fun getAccessibilityText ()Ljava/lang/String;
 	public final fun getDefaultErrorColorInt ()I
-	public final fun getInternalFocusChangeListeners ()Ljava/util/List;
 	public fun getOnFocusChangeListener ()Landroid/view/View$OnFocusChangeListener;
 	public final fun getShouldShowError ()Z
 	protected final fun isLastKeyDelete ()Z
