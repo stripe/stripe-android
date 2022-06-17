@@ -20,7 +20,7 @@ internal fun FinancialConnectionsTopAppBar() {
         },
         backgroundColor = FinancialConnectionsTheme.colors.textWhite,
         contentColor = FinancialConnectionsTheme.colors.textBrand,
-        elevation = 12.dp
+        elevation = 4.dp
     )
 }
 

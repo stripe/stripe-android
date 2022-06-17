@@ -33,7 +33,13 @@ internal class ConsentViewModel @Inject constructor(
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
-                title = manifest.businessName + " works with Stripe to link your accounts"
+                title = manifest.businessName + " works with Stripe to link your accounts",
+                content = listOf(
+                    "Random very long text that takes more than one line on the screen.",
+                    "Random very long text that takes more than one line on the screen.",
+                    "Random very long text that takes more than one line on the screen.",
+                    "Random very long text that takes more than one line on the screen.",
+                )
             )
         }
     }

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.ProvideTextStyle
@@ -19,6 +20,7 @@ internal fun FinancialConnectionsButton(
     Button(
         onClick = onClick,
         modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
         contentPadding = PaddingValues(
             start = 16.dp,
             top = 16.dp,

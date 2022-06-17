@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsState
@@ -21,7 +25,10 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.presentation.ConsentState
 import com.stripe.android.financialconnections.presentation.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.SpannedBody
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.SpanSection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -50,26 +57,32 @@ private fun ConsentContent(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(16.dp)
+            .padding(24.dp)
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = state.title,
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-            Spacer(modifier = Modifier.size(75.dp))
+            Subtitle(state)
+            Spacer(modifier = Modifier.size(24.dp))
             state.content.forEach {
-                BodyText(it)
-                Spacer(modifier = Modifier.size(20.dp))
+                BodyWithIcon(it)
+                Spacer(modifier = Modifier.size(16.dp))
             }
         }
         Column(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
+            SpannedBody(
+                listOf(
+                    SpanSection.Raw("You agree to Stripe’s "),
+                    SpanSection.Link("Terms", "Terms") {},
+                    SpanSection.Raw(" and "),
+                    SpanSection.Link("Privacy Policy", "PRIVACY") {},
+                    SpanSection.Raw(". "),
+                    SpanSection.Link("Learn more", "MORE") {},
+                )
+            )
+            Spacer(modifier = Modifier.size(24.dp))
             FinancialConnectionsButton(
                 onClick = onContinueClick,
                 modifier = Modifier.fillMaxWidth()
@@ -81,14 +94,41 @@ private fun ConsentContent(
 }
 
 @Composable
-private fun BodyText(text: String) {
+private fun Subtitle(state: ConsentState) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = state.title,
+        textAlign = TextAlign.Center,
+        color = FinancialConnectionsTheme.colors.textPrimary,
+        style = FinancialConnectionsTheme.typography.subtitle
+    )
+}
+
+@Composable
+private fun BodyWithIcon(text: String) {
     Row {
-        Text(
-            text = text,
-            color = FinancialConnectionsTheme.colors.textSecondary,
-            style = FinancialConnectionsTheme.typography.body
+        Icon(
+            Icons.Filled.AccountBox,
+            contentDescription = null,
+            tint = FinancialConnectionsTheme.colors.textSecondary,
+            modifier = Modifier.size(16.dp)
         )
+        Spacer(modifier = Modifier.size(8.dp))
+        Body(text)
     }
+}
+
+@Composable
+private fun Body(
+    text: String,
+    textAlign: TextAlign? = null,
+) {
+    Text(
+        text = text,
+        textAlign = textAlign,
+        color = FinancialConnectionsTheme.colors.textSecondary,
+        style = FinancialConnectionsTheme.typography.body
+    )
 }
 
 @Composable
@@ -97,17 +137,19 @@ private fun BodyText(text: String) {
 )
 private fun ContentPreview() {
     FinancialConnectionsTheme {
-        ConsentContent(
-            state = ConsentState(
-                title = "Random title",
-                content = listOf(
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                )
-            ),
-            onContinueClick = {}
-        )
+        FinancialConnectionsScaffold {
+            ConsentContent(
+                state = ConsentState(
+                    title = "Random title",
+                    content = listOf(
+                        "Random very long text that takes more than one line on the screen.",
+                        "Random very long text that takes more than one line on the screen.",
+                        "Random very long text that takes more than one line on the screen.",
+                        "Random very long text that takes more than one line on the screen.",
+                    )
+                ),
+                onContinueClick = {}
+            )
+        }
     }
 }
