@@ -717,6 +717,10 @@ class PaymentSheet internal constructor(
          */
         fun presentPaymentOptions()
 
+        fun getAddressOption(): Address
+
+        fun presentAddressOption()
+
         /**
          * Complete the payment or setup.
          */
