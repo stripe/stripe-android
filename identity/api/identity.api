@@ -267,14 +267,12 @@ public final class com/stripe/android/identity/databinding/SelfieScanFragmentBin
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/SelfieScanFragmentBinding;
 }
 
-public final class com/stripe/android/identity/injection/DaggerIdentityVerificationSheetComponent : com/stripe/android/identity/injection/IdentityVerificationSheetComponent {
+public final class com/stripe/android/identity/injection/DaggerIdentityVerificationSheetComponent {
 	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityVerificationSheetComponent$Builder;
-	public fun inject (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
 }
 
-public final class com/stripe/android/identity/injection/DaggerIdentityViewModelFactoryComponent : com/stripe/android/identity/injection/IdentityViewModelFactoryComponent {
+public final class com/stripe/android/identity/injection/DaggerIdentityViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityViewModelFactoryComponent$Builder;
-	public fun inject (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
 }
 
 public final class com/stripe/android/identity/injection/IdentityCommonModule_Companion_ProvideStripeNetworkClientFactory : dagger/internal/Factory {

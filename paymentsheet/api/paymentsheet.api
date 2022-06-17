@@ -943,27 +943,20 @@ public final class com/stripe/android/paymentsheet/forms/TransformSpecToElement_
 	public static fun newInstance (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Landroid/content/Context;)Lcom/stripe/android/paymentsheet/forms/TransformSpecToElement;
 }
 
-public final class com/stripe/android/paymentsheet/injection/DaggerFlowControllerComponent : com/stripe/android/paymentsheet/injection/FlowControllerComponent {
+public final class com/stripe/android/paymentsheet/injection/DaggerFlowControllerComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FlowControllerComponent$Builder;
-	public fun getFlowController ()Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
-	public fun inject (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
 }
 
-public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent : com/stripe/android/paymentsheet/injection/FormViewModelComponent {
+public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FormViewModelComponent$Builder;
-	public fun inject (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
 }
 
-public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOptionsViewModelFactoryComponent : com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelFactoryComponent {
+public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOptionsViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelFactoryComponent$Builder;
-	public fun inject (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;)V
 }
 
-public final class com/stripe/android/paymentsheet/injection/DaggerPaymentSheetLauncherComponent : com/stripe/android/paymentsheet/injection/PaymentSheetLauncherComponent {
+public final class com/stripe/android/paymentsheet/injection/DaggerPaymentSheetLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetLauncherComponent$Builder;
-	public fun inject (Lcom/stripe/android/paymentsheet/PaymentSheetViewModel$Factory;)V
-	public fun inject (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
 }
 
 public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideClientSecretFactory : dagger/internal/Factory {
@@ -1252,9 +1245,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USB
 	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;Ljavax/inject/Provider;)V
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/DaggerUSBankAccountFormComponent : com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormComponent {
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/DaggerUSBankAccountFormComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormComponent$Builder;
-	public fun inject (Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormViewModel$Factory;)V
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/di/USBankAccountFormViewModelModule_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
