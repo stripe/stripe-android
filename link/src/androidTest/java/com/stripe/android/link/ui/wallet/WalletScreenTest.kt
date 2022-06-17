@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
-import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,6 +21,7 @@ import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -29,11 +30,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.StripeIntentFixtures
-import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
@@ -49,19 +45,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class WalletScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidIntentComposeRule<LinkActivity> {
-        PaymentConfiguration.init(it, "publishable_key")
-        Intent(it, LinkActivity::class.java).apply {
-            putExtra(
-                LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    StripeIntentFixtures.PI_SUCCEEDED,
-                    true,
-                    "Merchant, Inc"
-                )
-            )
-        }
-    }
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val primaryButtonLabel = "Pay $10.99"
     private val paymentDetails = listOf(
