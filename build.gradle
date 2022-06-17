@@ -81,7 +81,7 @@ ext {
     // material 1.6 causes paymentsheet to not render correctly.
     // see here: https://github.com/material-components/material-components-android/issues/2702
     materialVersion = '1.5.0'
-    daggerVersion = '2.41'
+    daggerVersion = '2.42'
     playServicesWalletVersion = '19.1.0'
 
     androidTestVersion = '1.4.0'
