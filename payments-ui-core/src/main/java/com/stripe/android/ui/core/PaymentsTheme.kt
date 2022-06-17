@@ -353,11 +353,18 @@ val MaterialTheme.paymentsShapes: PaymentsShapes
 
 @Composable
 @ReadOnlyComposable
-fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke {
-    val width = if (isSelected) paymentsShapes.borderStrokeWidthSelected else paymentsShapes.borderStrokeWidth
-    val color = if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
-    return BorderStroke(width.dp, color)
-}
+internal fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
+    if (isSelected) paymentsShapes.borderStrokeWidthSelected.dp else paymentsShapes.borderStrokeWidth.dp
+
+@Composable
+@ReadOnlyComposable
+internal fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
+    if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
+
+@Composable
+@ReadOnlyComposable
+fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke =
+    BorderStroke(getBorderStrokeWidth(isSelected), getBorderStrokeColor(isSelected))
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
