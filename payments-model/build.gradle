@@ -5,7 +5,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     implementation project(":stripe-core")
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
