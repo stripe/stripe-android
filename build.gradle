@@ -60,7 +60,7 @@ ext {
 
     androidxActivityVersion = '1.4.0'
     androidxAnnotationVersion = '1.4.0'
-    androidxAppcompatVersion = '1.4.1'
+    androidxAppcompatVersion = '1.4.2'
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
     androidxComposeVersion = '1.2.0-rc01'
