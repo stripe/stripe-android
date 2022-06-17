@@ -22,6 +22,14 @@ public final class com/stripe/android/core/AppInfo$Companion {
 	public static synthetic fun create$default (Lcom/stripe/android/core/AppInfo$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/AppInfo;
 }
 
+public final class com/stripe/android/core/AppInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/AppInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/AppInfo;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -62,6 +70,14 @@ public final class com/stripe/android/core/StripeError : com/stripe/android/core
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/core/StripeError$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/StripeError;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/StripeError;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/exception/APIConnectionException : com/stripe/android/core/exception/StripeException {
@@ -149,6 +165,14 @@ public final class com/stripe/android/core/injection/LoggingModule_ProvideLogger
 public final class com/stripe/android/core/injection/NamedConstantsKt {
 }
 
+public final class com/stripe/android/core/model/CountryCode$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/CountryCode;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/model/CountryCode;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/model/CountryCodeKt {
 }
 
@@ -180,6 +204,14 @@ public final class com/stripe/android/core/model/StripeFile : com/stripe/android
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/core/model/StripeFile$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/StripeFile;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/model/StripeFile;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/model/StripeFileParams {
 	public fun <init> (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)V
 	public final fun copy (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)Lcom/stripe/android/core/model/StripeFileParams;
@@ -205,6 +237,14 @@ public final class com/stripe/android/core/model/StripeFileParams$FileLink : and
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/core/model/StripeFileParams$FileLink$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/StripeFileParams$FileLink;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/model/StripeFileParams$FileLink;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
 	public static final field BusinessIcon Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field BusinessLogo Lcom/stripe/android/core/model/StripeFilePurpose;
@@ -222,6 +262,14 @@ public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/E
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {
 	public abstract fun equals (Ljava/lang/Object;)Z
 	public abstract fun hashCode ()I
+}
+
+public final class com/stripe/android/core/networking/ApiRequest$Options$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/networking/ApiRequest$Options;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/networking/ApiRequest$Options;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/networking/ApiRequest_Options_Factory : dagger/internal/Factory {

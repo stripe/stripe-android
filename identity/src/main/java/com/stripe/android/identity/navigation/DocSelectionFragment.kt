@@ -21,6 +21,7 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.navigateToUploadFragment
@@ -59,7 +60,7 @@ internal class DocSelectionFragment(
                 binding.title.text = verificationPage.documentSelect.title
                 when (verificationPage.documentSelect.idDocumentTypeAllowlist.count()) {
                     0 -> {
-                        toggleMultiSelectionUI()
+                        toggleMultiSelectionUI(requireSelfie = verificationPage.requireSelfie())
                     }
                     1 -> {
                         verificationPage.documentSelect.let { documentSelect ->
@@ -67,11 +68,15 @@ internal class DocSelectionFragment(
                                 documentSelect.idDocumentTypeAllowlist.entries.first().key,
                                 documentSelect.buttonText,
                                 documentSelect.body,
+                                verificationPage.requireSelfie()
                             )
                         }
                     }
                     else -> {
-                        toggleMultiSelectionUI(verificationPage.documentSelect.idDocumentTypeAllowlist)
+                        toggleMultiSelectionUI(
+                            verificationPage.documentSelect.idDocumentTypeAllowlist,
+                            verificationPage.requireSelfie()
+                        )
                     }
                 }
             },
@@ -91,7 +96,10 @@ internal class DocSelectionFragment(
      * Toggle UI to show multiple selection types. If idDocumentTypeAllowlist from server is null,
      * show all three types with default values.
      */
-    private fun toggleMultiSelectionUI(idDocumentTypeAllowlist: Map<String, String>? = null) {
+    private fun toggleMultiSelectionUI(
+        idDocumentTypeAllowlist: Map<String, String>? = null,
+        requireSelfie: Boolean
+    ) {
         binding.multiSelectionContent.visibility = View.VISIBLE
         binding.singleSelectionContent.visibility = View.GONE
         idDocumentTypeAllowlist?.let {
@@ -105,7 +113,7 @@ internal class DocSelectionFragment(
                             binding.dl.isClickable = false
                             binding.id.isClickable = false
                             binding.passportIndicator.visibility = View.VISIBLE
-                            postVerificationPageDataAndNavigate(Type.PASSPORT)
+                            postVerificationPageDataAndNavigate(Type.PASSPORT, requireSelfie)
                         }
                         binding.passportSeparator.visibility = View.VISIBLE
                     }
@@ -117,7 +125,7 @@ internal class DocSelectionFragment(
                             binding.passport.isClickable = false
                             binding.id.isClickable = false
                             binding.dlIndicator.visibility = View.VISIBLE
-                            postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE)
+                            postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE, requireSelfie)
                         }
                         binding.dlSeparator.visibility = View.VISIBLE
                     }
@@ -129,7 +137,7 @@ internal class DocSelectionFragment(
                             binding.passport.isClickable = false
                             binding.dl.isClickable = false
                             binding.idIndicator.visibility = View.VISIBLE
-                            postVerificationPageDataAndNavigate(Type.IDCARD)
+                            postVerificationPageDataAndNavigate(Type.IDCARD, requireSelfie)
                         }
                         binding.idSeparator.visibility = View.VISIBLE
                     }
@@ -151,7 +159,8 @@ internal class DocSelectionFragment(
     private fun toggleSingleSelectionUI(
         allowedType: String,
         buttonText: String,
-        bodyText: String?
+        bodyText: String?,
+        requireSelfie: Boolean
     ) {
         binding.multiSelectionContent.visibility = View.GONE
         binding.singleSelectionContent.visibility = View.VISIBLE
@@ -162,21 +171,21 @@ internal class DocSelectionFragment(
                 binding.singleSelectionBody.text = bodyText
                 binding.singleSelectionContinue.setOnClickListener {
                     binding.singleSelectionContinue.toggleToLoading()
-                    postVerificationPageDataAndNavigate(Type.PASSPORT)
+                    postVerificationPageDataAndNavigate(Type.PASSPORT, requireSelfie)
                 }
             }
             DRIVING_LICENSE_KEY -> {
                 binding.singleSelectionBody.text = bodyText
                 binding.singleSelectionContinue.setOnClickListener {
                     binding.singleSelectionContinue.toggleToLoading()
-                    postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE)
+                    postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE, requireSelfie)
                 }
             }
             ID_CARD_KEY -> {
                 binding.singleSelectionBody.text = bodyText
                 binding.singleSelectionContinue.setOnClickListener {
                     binding.singleSelectionContinue.toggleToLoading()
-                    postVerificationPageDataAndNavigate(Type.IDCARD)
+                    postVerificationPageDataAndNavigate(Type.IDCARD, requireSelfie)
                 }
             }
             else -> {
@@ -188,12 +197,13 @@ internal class DocSelectionFragment(
     /**
      * Post VerificationPageData with the type and navigate base on its result.
      */
-    private fun postVerificationPageDataAndNavigate(type: Type) {
+    private fun postVerificationPageDataAndNavigate(type: Type, requireSelfie: Boolean) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel = identityViewModel,
                 collectedDataParam = CollectedDataParam(idDocumentType = type),
-                clearDataParam = ClearDataParam.DOC_SELECT_TO_UPLOAD,
+                clearDataParam =
+                if (requireSelfie) ClearDataParam.DOC_SELECT_TO_UPLOAD_WITH_SELFIE else ClearDataParam.DOC_SELECT_TO_UPLOAD,
                 fromFragment = R.id.docSelectionFragment,
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
