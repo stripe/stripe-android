@@ -22,12 +22,12 @@ private def readProperty(name) {
 }
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion rootProject.ext.compileSdkVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
