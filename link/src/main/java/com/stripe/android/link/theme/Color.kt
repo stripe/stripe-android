@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.ui.core.elements.OTPElementColors
 
 private val LinkTeal = Color(0xFF33DDB3)
 private val ActionGreen = Color(0xFF05A87F)
@@ -26,6 +27,7 @@ private val LightFill = Color(0xFFF6F8FA)
 private val LightCloseButton = Color(0xFF30313D)
 private val LightLinkLogo = Color(0xFF1D3944)
 private val LightSecondaryButtonLabel = Color(0xFF1D3944)
+private val LightOtpPlaceholder = Color(0xFFEBEEF1)
 
 private val DarkComponentBackground = Color(0x2E747480)
 private val DarkComponentBorder = Color(0x5C787880)
@@ -38,11 +40,13 @@ private val DarkFill = Color(0x33787880)
 private val DarkCloseButton = Color(0x99EBEBF5)
 private val DarkLinkLogo = Color.White
 private val DarkSecondaryButtonLabel = ActionGreen
+private val DarkOtpPlaceholder = Color(0x61FFFFFF)
 
 internal data class LinkColors(
     val componentBackground: Color,
     val componentBorder: Color,
     val componentDivider: Color,
+    val clickableHyperlink: Color,
     val buttonLabel: Color,
     val dialogButtonLabel: Color,
     val disabledText: Color,
@@ -51,6 +55,7 @@ internal data class LinkColors(
     val errorText: Color,
     val errorComponentBackground: Color,
     val secondaryButtonLabel: Color,
+    val otpElementColors: OTPElementColors,
     val materialColors: Colors
 )
 
@@ -82,6 +87,7 @@ internal object LinkThemeConfig {
         componentBackground = LightComponentBackground,
         componentBorder = LightComponentBorder,
         componentDivider = LightComponentDivider,
+        clickableHyperlink = ActionGreen,
         buttonLabel = ButtonLabel,
         dialogButtonLabel = ActionGreen,
         disabledText = LightTextDisabled,
@@ -90,6 +96,10 @@ internal object LinkThemeConfig {
         errorText = ErrorText,
         errorComponentBackground = ErrorBackground,
         secondaryButtonLabel = LightSecondaryButtonLabel,
+        otpElementColors = OTPElementColors(
+            selectedBorder = LinkTeal,
+            placeholder = LightOtpPlaceholder
+        ),
         materialColors = lightColors(
             primary = LinkTeal,
             secondary = LightFill,
@@ -104,6 +114,7 @@ internal object LinkThemeConfig {
         componentBackground = DarkComponentBackground,
         componentBorder = DarkComponentBorder,
         componentDivider = DarkComponentDivider,
+        clickableHyperlink = ActionGreen,
         buttonLabel = ButtonLabel,
         dialogButtonLabel = ActionGreen,
         disabledText = DarkTextDisabled,
@@ -112,6 +123,10 @@ internal object LinkThemeConfig {
         errorText = ErrorText,
         errorComponentBackground = ErrorBackground,
         secondaryButtonLabel = DarkSecondaryButtonLabel,
+        otpElementColors = OTPElementColors(
+            selectedBorder = LinkTeal,
+            placeholder = DarkOtpPlaceholder
+        ),
         materialColors = darkColors(
             primary = LinkTeal,
             secondary = DarkFill,

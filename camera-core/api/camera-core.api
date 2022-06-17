@@ -21,12 +21,6 @@ public final class com/stripe/android/camera/framework/StatTracker$DefaultImpls 
 }
 
 public final class com/stripe/android/camera/framework/image/BitmapExtensionsKt {
-	public static synthetic fun constrainToSize$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static synthetic fun scale$default (Landroid/graphics/Bitmap;FZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static synthetic fun scale$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static synthetic fun scaleAndCrop$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static synthetic fun toJpeg$default (Landroid/graphics/Bitmap;IILjava/lang/Object;)[B
-	public static synthetic fun toWebP$default (Landroid/graphics/Bitmap;IILjava/lang/Object;)[B
 }
 
 public final class com/stripe/android/camera/framework/image/ImageKt {

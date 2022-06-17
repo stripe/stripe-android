@@ -48,7 +48,6 @@ public final class com/stripe/android/core/Logger$DefaultImpls {
 
 public final class com/stripe/android/core/StripeError : com/stripe/android/core/model/StripeModel, java/io/Serializable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
@@ -88,7 +87,6 @@ public final class com/stripe/android/core/exception/APIConnectionException : co
 }
 
 public final class com/stripe/android/core/exception/APIConnectionException$Companion {
-	public static synthetic fun create$default (Lcom/stripe/android/core/exception/APIConnectionException$Companion;Ljava/io/IOException;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/exception/APIConnectionException;
 }
 
 public final class com/stripe/android/core/exception/APIException : com/stripe/android/core/exception/StripeException {
@@ -98,7 +96,6 @@ public final class com/stripe/android/core/exception/APIException : com/stripe/a
 }
 
 public final class com/stripe/android/core/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
-	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/InvalidRequestException : com/stripe/android/core/exception/StripeException {
@@ -128,7 +125,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public final fun getStatusCode ()I
 	public final fun getStripeError ()Lcom/stripe/android/core/StripeError;
 	public fun hashCode ()I
-	public final fun isClientError ()Z
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -178,7 +174,6 @@ public final class com/stripe/android/core/model/CountryCodeKt {
 
 public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/core/model/StripeFilePurpose;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()Ljava/lang/String;
@@ -298,7 +293,6 @@ public final class com/stripe/android/core/networking/JsonUtilsKt {
 }
 
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
-	public static final fun getDEFAULT_RETRY_CODES ()Ljava/lang/Iterable;
 }
 
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
