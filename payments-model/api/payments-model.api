@@ -3,6 +3,14 @@ public final class com/stripe/android/CardUtils {
 	public static final fun getPossibleCardBrand (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
 }
 
+public final class com/stripe/android/cards/Bin$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/cards/Bin;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/cards/Bin;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/cards/CardNumber$Companion {
 }
 
@@ -51,6 +59,14 @@ public final class com/stripe/android/model/BankAccount : com/stripe/android/cor
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/BankAccount$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/BankAccount;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/BankAccount;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/BankAccount$Status : java/lang/Enum {
@@ -125,6 +141,14 @@ public final class com/stripe/android/model/Card : com/stripe/android/core/model
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/Card$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Card;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/Card;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/CardBrand : java/lang/Enum {
@@ -204,6 +228,14 @@ public final class com/stripe/android/model/Token : com/stripe/android/core/mode
 
 public final class com/stripe/android/model/Token$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/Token;
+}
+
+public final class com/stripe/android/model/Token$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Token;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/Token;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/Token$Type : java/lang/Enum {
