@@ -59,7 +59,7 @@ ext {
     compileSdkVersion = 32
 
     androidxActivityVersion = '1.4.0'
-    androidxAnnotationVersion = '1.3.0'
+    androidxAnnotationVersion = '1.4.0'
     androidxAppcompatVersion = '1.4.1'
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
