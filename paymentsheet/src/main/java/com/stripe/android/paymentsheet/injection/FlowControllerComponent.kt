@@ -12,6 +12,7 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.ShippingAddressCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -64,6 +65,9 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun paymentOptionCallback(paymentOptionCallback: PaymentOptionCallback): Builder
+
+        @BindsInstance
+        fun shippingAddressCallback(shippingAddressCallback: ShippingAddressCallback): Builder
 
         @BindsInstance
         fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder

@@ -30,6 +30,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.AddressElementResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -37,6 +39,8 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.ShippingAddressCallback
+import com.stripe.android.paymentsheet.addresselement.ShippingAddress
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
@@ -74,6 +78,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
+    private val shippingAddressCallback: ShippingAddressCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
     @InjectorKey private val injectorKey: String,
@@ -95,6 +100,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
+    private val addressElementActivityLauncher:
+        ActivityResultLauncher<AddressElementActivityContract.Args>
     private var googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
 
@@ -151,6 +158,11 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultCaller.registerForActivityResult(
                 GooglePayPaymentMethodLauncherContract(),
                 ::onGooglePayResult
+            )
+        addressElementActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                AddressElementActivityContract(),
+                ::onAddressElementResult
             )
     }
 
@@ -236,6 +248,38 @@ internal class DefaultFlowController @Inject internal constructor(
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,
                 productUsage = productUsage
+            )
+        )
+    }
+
+    override fun getShippingAddress(): ShippingAddress? {
+        return viewModel.shippingAddress
+    }
+
+    @Suppress("UNREACHABLE_CODE")
+    override fun presentShippingAddress() {
+        // no-op until shipping element is ready
+        return
+
+        val initData = runCatching {
+            viewModel.initData
+        }.getOrElse {
+            error(
+                "FlowController must be successfully initialized using " +
+                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
+                    "before calling presentAddressOptions()"
+            )
+        }
+
+        addressElementActivityLauncher.launch(
+            AddressElementActivityContract.Args(
+                stripeIntent = initData.stripeIntent,
+                config = initData.config,
+                injectionParams = AddressElementActivityContract.Args.InjectionParams(
+                    injectorKey = injectorKey,
+                    productUsage = productUsage,
+                    enableLogging = enableLogging
+                )
             )
         )
     }
@@ -383,7 +427,6 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentOptionResult.Succeeded -> {
                 val paymentSelection = paymentOptionResult.paymentSelection
                 viewModel.paymentSelection = paymentSelection
-
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
                         paymentSelection
@@ -401,6 +444,19 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = null
                 paymentOptionCallback.onPaymentOption(null)
             }
+        }
+    }
+
+    @JvmSynthetic
+    internal fun onAddressElementResult(
+        addressElementResult: AddressElementResult?
+    ) {
+        // TODO subject to change based on api design changes.
+        if (addressElementResult is AddressElementResult.Succeeded) {
+            viewModel.shippingAddress = addressElementResult.address
+            shippingAddressCallback.onShippingAddressCollected(addressElementResult.address)
+        } else {
+            shippingAddressCallback.onShippingAddressCollected(null)
         }
     }
 
@@ -484,6 +540,7 @@ internal class DefaultFlowController @Inject internal constructor(
             statusBarColor: () -> Int?,
             paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
+            shippingAddressCallback: ShippingAddressCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
             val injectorKey =
@@ -499,6 +556,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .statusBarColor(statusBarColor)
                 .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
+                .shippingAddressCallback(shippingAddressCallback)
                 .paymentResultCallback(paymentResultCallback)
                 .injectorKey(injectorKey)
                 .build()
