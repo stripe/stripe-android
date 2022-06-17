@@ -11,8 +11,8 @@ import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
-import com.stripe.android.link.injection.NonFallbackInjectable
-import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator

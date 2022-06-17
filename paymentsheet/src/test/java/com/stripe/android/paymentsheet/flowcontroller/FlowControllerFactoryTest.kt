@@ -76,6 +76,7 @@ class FlowControllerFactoryTest {
         return FlowControllerFactory(
             activity,
             mock(),
+            mock(),
             mock()
         )
     }
@@ -85,6 +86,7 @@ class FlowControllerFactoryTest {
     ): FlowControllerFactory {
         return FlowControllerFactory(
             fragment,
+            mock(),
             mock(),
             mock()
         )
