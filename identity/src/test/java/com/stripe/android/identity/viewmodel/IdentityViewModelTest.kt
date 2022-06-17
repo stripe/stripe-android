@@ -220,6 +220,56 @@ internal class IdentityViewModelTest {
             )
         }
 
+    @Test
+    fun verifyAnalyticsState() {
+        // initialized with all null
+        assertThat(viewModel.analyticsState.value.scanType).isNull()
+        assertThat(viewModel.analyticsState.value.requireSelfie).isNull()
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isNull()
+
+        viewModel.updateAnalyticsState { oldState ->
+            oldState.copy(
+                scanType = IdentityScanState.ScanType.ID_FRONT
+            )
+        }
+
+        assertThat(viewModel.analyticsState.value.scanType).isEqualTo(
+            IdentityScanState.ScanType.ID_FRONT
+        )
+        assertThat(viewModel.analyticsState.value.requireSelfie).isNull()
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isNull()
+
+        viewModel.updateAnalyticsState { oldState ->
+            oldState.copy(
+                requireSelfie = false
+            )
+        }
+
+        assertThat(viewModel.analyticsState.value.scanType).isEqualTo(
+            IdentityScanState.ScanType.ID_FRONT
+        )
+        assertThat(viewModel.analyticsState.value.requireSelfie).isEqualTo(
+            false
+        )
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isNull()
+
+        viewModel.updateAnalyticsState { oldState ->
+            oldState.copy(
+                docFrontUploadType = DocumentUploadParam.UploadMethod.MANUALCAPTURE
+            )
+        }
+
+        assertThat(viewModel.analyticsState.value.scanType).isEqualTo(
+            IdentityScanState.ScanType.ID_FRONT
+        )
+        assertThat(viewModel.analyticsState.value.requireSelfie).isEqualTo(
+            false
+        )
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isEqualTo(
+            DocumentUploadParam.UploadMethod.MANUALCAPTURE
+        )
+    }
+
     private fun testUploadManualSuccessResult(isFront: Boolean) {
         mockUploadSuccess()
 

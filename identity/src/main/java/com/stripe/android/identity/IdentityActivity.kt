@@ -89,7 +89,7 @@ internal class IdentityActivity :
                     finishWithResult(
                         if (it.submitted) {
                             identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceed(
+                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
                                     isFromFallbackUrl = true
                                 )
                             )
