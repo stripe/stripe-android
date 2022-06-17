@@ -216,6 +216,7 @@ internal class SelfieFragment(
                                         bestLowResResult = requireNotNull(it.bestLowResResult.data),
                                         trainingConsent = allowImageCollection.isChecked,
                                         faceScoreVariance = faceDetectorTransitioner.scoreVariance,
+                                        bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                         numFrames = faceDetectorTransitioner.numFrames
                                     ),
                                     fromFragment = fragmentId,

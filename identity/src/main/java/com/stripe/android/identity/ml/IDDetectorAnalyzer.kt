@@ -6,6 +6,7 @@ import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.roundToMaxDecimals
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -13,7 +14,6 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import java.io.File
-import kotlin.math.roundToInt
 
 /**
  * Analyzer to run IDDetector.
@@ -86,19 +86,6 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             resultScore,
             categories[0].map { it.roundToMaxDecimals(2) }
         )
-    }
-
-    /**
-     * Round a float to max decimals. Backend requires scores uploaded with max 2 decimals.
-     *
-     * e.g -
-     * 3.123f.roundToMaxDecimals(2) = 3.12
-     * 3.499f.roundToMaxDecimals(2) = 3.5
-     */
-    private fun Float.roundToMaxDecimals(decimals: Int): Float {
-        var multiplier = 1.0f
-        repeat(decimals) { multiplier *= 10 }
-        return (this * multiplier).roundToInt() / multiplier
     }
 
     // TODO(ccen): check if we should enable this to track stats

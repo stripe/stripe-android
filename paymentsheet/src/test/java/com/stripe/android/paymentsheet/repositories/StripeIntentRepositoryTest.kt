@@ -19,6 +19,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.lang.RuntimeException
 import java.util.Locale
 import kotlin.test.Test
 
@@ -58,6 +59,26 @@ internal class StripeIntentRepositoryTest {
                 stripeRepository
                     .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
             ).thenReturn(null)
+
+            whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
+                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+
+            val paymentIntent =
+                createRepository(Locale.ITALY).get(PaymentIntentClientSecret("client_secret"))
+
+            verify(stripeRepository)
+                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+            verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
+            assertThat(paymentIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+        }
+
+    @Test
+    fun `get with locale when ordered payment methods fails with exception should fallback to retrievePaymentIntent()`() =
+        runTest {
+            whenever(
+                stripeRepository
+                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+            ).thenThrow(RuntimeException())
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
