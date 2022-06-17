@@ -4,6 +4,7 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -18,6 +19,7 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     fun onContinueClick() {
@@ -27,6 +29,14 @@ internal class ConsentViewModel @Inject constructor(
                 emit(UpdateManifest(manifest))
                 emit(RequestNextStep(currentStep = NavigationDirections.consent))
             }
+        }
+    }
+
+    fun onClickableTextClick(tag: String) {
+        when(tag) {
+            "terms" -> logger.debug("Terms clicked")
+            "privacy" -> logger.debug("Privacy Policy clicked")
+            "more" -> logger.debug("Learn more clicked")
         }
     }
 

@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.presentation.ConsentState
 import com.stripe.android.financialconnections.presentation.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
-import com.stripe.android.financialconnections.ui.components.SpannedBody
+import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.SpanSection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -44,14 +44,16 @@ internal fun ConsentScreen() {
     val state = viewModel.collectAsState()
     ConsentContent(
         state = state.value,
-        onContinueClick = viewModel::onContinueClick
+        onContinueClick = viewModel::onContinueClick,
+        onClickableTextClick = viewModel::onClickableTextClick
     )
 }
 
 @Composable
 private fun ConsentContent(
     state: ConsentState,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit
 ) {
     // Screen content
     Box(
@@ -72,14 +74,12 @@ private fun ConsentContent(
         Column(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            SpannedBody(
-                listOf(
-                    SpanSection.Raw("You agree to Stripe’s "),
-                    SpanSection.Link("Terms", "Terms") {},
-                    SpanSection.Raw(" and "),
-                    SpanSection.Link("Privacy Policy", "PRIVACY") {},
-                    SpanSection.Raw(". "),
-                    SpanSection.Link("Learn more", "MORE") {},
+            AnnotatedText(
+                annotatedTextResourceId = R.string.consent_pane_tc,
+                onClickableTextClick = { onClickableTextClick(it) },
+                textStyle = FinancialConnectionsTheme.typography.body.copy(
+                    textAlign = TextAlign.Center,
+                    color = FinancialConnectionsTheme.colors.textSecondary
                 )
             )
             Spacer(modifier = Modifier.size(24.dp))
@@ -92,6 +92,11 @@ private fun ConsentContent(
         }
     }
 }
+
+@Composable
+fun clickableTextSpanStyle() = FinancialConnectionsTheme.typography.bodyEmphasized
+    .toSpanStyle()
+    .copy(color = FinancialConnectionsTheme.colors.textBrand)
 
 @Composable
 private fun Subtitle(state: ConsentState) {
@@ -148,7 +153,8 @@ private fun ContentPreview() {
                         "Random very long text that takes more than one line on the screen.",
                     )
                 ),
-                onContinueClick = {}
+                onContinueClick = {},
+                onClickableTextClick = {}
             )
         }
     }

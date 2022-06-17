@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="more">Learn more</annotation></string>
+</resources>
