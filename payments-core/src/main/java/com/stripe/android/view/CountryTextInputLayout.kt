@@ -13,7 +13,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
-import androidx.core.os.ConfigurationCompat
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.doOnNextLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
@@ -134,9 +134,10 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
                 val countryEntered = countryAutocomplete.text.toString()
                 CountryUtils.getCountryCodeByName(countryEntered, getLocale())?.let {
                     updateUiForCountryEntered(it)
-                } ?: CountryUtils.getCountryByCode(CountryCode.create(countryEntered), getLocale())?.let {
-                    updateUiForCountryEntered(CountryCode.create(countryEntered))
-                }
+                } ?: CountryUtils.getCountryByCode(CountryCode.create(countryEntered), getLocale())
+                    ?.let {
+                        updateUiForCountryEntered(CountryCode.create(countryEntered))
+                    }
             }
         }
 
@@ -279,7 +280,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
     }
 
     private fun getLocale(): Locale {
-        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
+        return LocaleListCompat.getAdjustedDefault().get(0)!!
     }
 
     private companion object {
