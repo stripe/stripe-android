@@ -5,7 +5,7 @@ buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.6.21'
-    ext.dokkaVersion = '1.6.21'
+    ext.dokkaVersion = '1.7.0'
 
     repositories {
         mavenCentral()
