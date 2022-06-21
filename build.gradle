@@ -74,7 +74,7 @@ ext {
     androidxRecyclerviewVersion = '1.2.1'
     androidxSecurityVersion = '1.1.0-alpha03'
 
-    kotlinCoroutinesVersion = '1.6.2'
+    kotlinCoroutinesVersion = '1.6.3'
     kotlinSerializationVersion = '1.3.3'
     accompanistVersion = '0.24.11-rc'
     ktlintVersion = '0.45.2'
