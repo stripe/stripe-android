@@ -482,16 +482,18 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                PaymentOptionUi(
-                    viewWidth = width,
-                    isEditing = false,
-                    isSelected = isSelected,
-                    isEnabled = isEnabled,
-                    iconRes = R.drawable.stripe_link_mark,
-                    labelText = itemView.resources.getString(R.string.link),
-                    description = itemView.resources.getString(R.string.link),
-                    onItemSelectedListener = onItemSelectedListener
-                )
+                PaymentsTheme {
+                    PaymentOptionUi(
+                        viewWidth = width,
+                        isEditing = false,
+                        isSelected = isSelected,
+                        isEnabled = isEnabled,
+                        iconRes = R.drawable.stripe_link_mark,
+                        labelText = itemView.resources.getString(R.string.link),
+                        description = itemView.resources.getString(R.string.link),
+                        onItemSelectedListener = onItemSelectedListener
+                    )
+                }
             }
         }
     }
