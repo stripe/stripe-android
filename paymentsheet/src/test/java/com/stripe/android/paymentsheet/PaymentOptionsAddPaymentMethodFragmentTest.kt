@@ -125,7 +125,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
                 PaymentOptionsActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentOptionsActivity.EXTRA_STARTER_ARGS to args
             ),
-            R.style.StripePaymentSheetDefaultTheme,
+            R.style.StripePaymentSheetDefaultTheme
         ).onFragment { fragment ->
             onReady(
                 fragment,

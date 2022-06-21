@@ -148,7 +148,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         viewBinding.stateDivider,
         stateLayout,
-        stateView,
+        stateView
     )
 
     private val allFields = setOf(

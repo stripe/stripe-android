@@ -222,7 +222,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         listOf(
             primaryButtonUIState,
             buttonsEnabled,
-            selection,
+            selection
         ).forEach { source ->
             addSource(source) {
                 value = if (primaryButtonUIState.value != null) {

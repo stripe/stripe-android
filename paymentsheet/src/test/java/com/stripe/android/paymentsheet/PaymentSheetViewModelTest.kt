@@ -390,7 +390,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On checkout clear the previous view state error`() {
-
         val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
@@ -457,7 +456,7 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentResult() should update ViewState and save preferences`() =
         runTest {
             val viewModel = createViewModel(
-                stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT),
+                stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT)
             )
 
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -684,7 +683,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
-
         var result: PaymentSheetResult? = null
         viewModel.paymentSheetResult.observeForever {
             result = it
@@ -722,11 +720,10 @@ internal class PaymentSheetViewModelTest {
     }
 
     fun `Verify PI off_session excludes LPMs requiring mandate`() {
-
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -735,7 +732,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OneTime,
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -748,7 +745,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify SetupIntent excludes LPMs requiring mandate`() {
         viewModel.setStripeIntent(
             SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -756,7 +753,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 

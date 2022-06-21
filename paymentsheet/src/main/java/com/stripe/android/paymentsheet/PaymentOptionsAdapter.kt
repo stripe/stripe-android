@@ -363,7 +363,7 @@ internal class PaymentOptionsAdapter(
                         onRemoveListener = { onRemoveListener(position) },
                         onRemoveAccessibilityDescription =
                         savedPaymentMethod.getRemoveDescription(itemView.resources),
-                        onItemSelectedListener = { onItemSelectedListener(position, true) },
+                        onItemSelectedListener = { onItemSelectedListener(position, true) }
                     )
                 }
             }
@@ -411,7 +411,7 @@ internal class PaymentOptionsAdapter(
                         iconRes = iconRes,
                         onItemSelectedListener = onItemSelectedListener,
                         description =
-                        itemView.resources.getString(R.string.add_new_payment_method),
+                        itemView.resources.getString(R.string.add_new_payment_method)
                     )
                 }
             }
@@ -453,7 +453,7 @@ internal class PaymentOptionsAdapter(
                         iconRes = R.drawable.stripe_google_pay_mark,
                         labelText = itemView.resources.getString(R.string.google_pay),
                         description = itemView.resources.getString(R.string.google_pay),
-                        onItemSelectedListener = { onItemSelectedListener(position, true) },
+                        onItemSelectedListener = { onItemSelectedListener(position, true) }
                     )
                 }
             }
@@ -490,14 +490,14 @@ internal class PaymentOptionsAdapter(
                     iconRes = R.drawable.stripe_link_mark,
                     labelText = itemView.resources.getString(R.string.link),
                     description = itemView.resources.getString(R.string.link),
-                    onItemSelectedListener = onItemSelectedListener,
+                    onItemSelectedListener = onItemSelectedListener
                 )
             }
         }
     }
 
     internal abstract class PaymentOptionViewHolder(
-        private val composeView: ComposeView,
+        private val composeView: ComposeView
     ) : RecyclerView.ViewHolder(composeView) {
         abstract fun bind(
             isSelected: Boolean,
@@ -730,7 +730,7 @@ internal fun PaymentOptionUi(
                     // one one one one vs one thousand one hundred eleven
                     this.contentDescription =
                         description.replace("\\d".toRegex(), "$0 ")
-                },
+                }
         )
     }
 }

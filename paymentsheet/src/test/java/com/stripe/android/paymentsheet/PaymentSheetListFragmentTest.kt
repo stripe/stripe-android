@@ -225,7 +225,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `total amount label is hidden for SetupIntent`() {
         createScenario(
             FRAGMENT_CONFIG.copy(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         ).onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
 
@@ -284,7 +284,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             PaymentSheetViewModel.Factory(
                 { fragment.requireActivity().application },
                 { PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY },
-                mock(),
+                mock()
             )
         }.value
     }
@@ -317,14 +317,14 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
             ),
             R.style.StripePaymentSheetDefaultTheme,
-            initialState = initialState,
+            initialState = initialState
         )
     }
 
     private companion object {
         private val PAYMENT_METHODS = listOf(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT

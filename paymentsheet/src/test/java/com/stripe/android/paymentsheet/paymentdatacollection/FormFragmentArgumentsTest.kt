@@ -108,7 +108,7 @@ class FormFragmentArgumentsTest {
                 IdentifierSpec.City to "Dublin",
                 IdentifierSpec.State to "Co. Dublin",
                 IdentifierSpec.PostalCode to "T37 F8HK",
-                IdentifierSpec.Country to "IE",
+                IdentifierSpec.Country to "IE"
             )
         )
     }
