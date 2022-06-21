@@ -271,7 +271,8 @@ internal fun CollapsedPaymentDetails(
                 shape = MaterialTheme.shapes.large
             )
             .clickable(
-                enabled = enabled, onClick = onClick
+                enabled = enabled,
+                onClick = onClick
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
