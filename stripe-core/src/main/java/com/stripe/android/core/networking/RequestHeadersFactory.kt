@@ -98,9 +98,13 @@ sealed class RequestHeadersFactory {
         appInfo: AppInfo? = null,
         locale: Locale = Locale.getDefault(),
         apiVersion: String = ApiVersion.get().code,
-        sdkVersion: String = StripeSdkVersion.VERSION,
+        sdkVersion: String = StripeSdkVersion.VERSION
     ) : BaseApiHeadersFactory(
-        { options }, appInfo, locale, apiVersion, sdkVersion
+        { options },
+        appInfo,
+        locale,
+        apiVersion,
+        sdkVersion
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form}; charset=$CHARSET"
@@ -119,7 +123,11 @@ sealed class RequestHeadersFactory {
         sdkVersion: String = StripeSdkVersion.VERSION,
         boundary: String
     ) : BaseApiHeadersFactory(
-        { options }, appInfo, locale, apiVersion, sdkVersion
+        { options },
+        appInfo,
+        locale,
+        apiVersion,
+        sdkVersion
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.MultipartForm.code}; boundary=$boundary"

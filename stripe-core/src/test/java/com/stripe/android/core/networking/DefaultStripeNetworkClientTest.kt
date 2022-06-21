@@ -53,7 +53,7 @@ internal class DefaultStripeNetworkClientTest {
         runTest {
             val executor = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
-                connectionFactory = okConnectionFactory,
+                connectionFactory = okConnectionFactory
             )
             assertThat(executor.executeRequest(mock())).isSameInstanceAs(
                 okResponseWithString
@@ -65,7 +65,7 @@ internal class DefaultStripeNetworkClientTest {
         runTest {
             val executor = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
-                connectionFactory = okConnectionFactory,
+                connectionFactory = okConnectionFactory
             )
             assertThat(executor.executeRequestForFile(mock(), mock())).isSameInstanceAs(
                 okResponseWithFile
@@ -75,7 +75,6 @@ internal class DefaultStripeNetworkClientTest {
     @Test
     fun `executeRequest with IllegalStateException should throw the exception`() =
         runTest {
-
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = RetryCountConnectionFactory(
@@ -257,6 +256,7 @@ internal class DefaultStripeNetworkClientTest {
         private const val TEST_RETRY_CODES_END = 456
         private const val TEST_NON_RETRY_CODES_END = 457
         private const val TEST_HOST = "https://test.host.com"
+
         // [HTTP_TOO_MANY_REQUESTS] is included in this range
         private val TEST_RETRY_CODES: Iterable<Int> = TEST_RETRY_CODES_START..TEST_RETRY_CODES_END
     }
