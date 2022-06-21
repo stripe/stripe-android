@@ -79,7 +79,7 @@ class ImageTest {
         assertEquals(
             Size(
                 bitmap.width * 3 / 4 - bitmap.width / 4,
-                bitmap.height * 3 / 4 - bitmap.height / 4,
+                bitmap.height * 3 / 4 - bitmap.height / 4
             ),
             Size(croppedBitmap.width, croppedBitmap.height),
             "Cropped image is the wrong size"
