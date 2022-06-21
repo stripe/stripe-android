@@ -94,7 +94,7 @@ sealed class PaymentSelection : Parcelable {
             val labelResource: String,
             @DrawableRes val iconResource: Int,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val customerRequestedSave: CustomerRequestedSave,
+            override val customerRequestedSave: CustomerRequestedSave
         ) : New()
     }
 }

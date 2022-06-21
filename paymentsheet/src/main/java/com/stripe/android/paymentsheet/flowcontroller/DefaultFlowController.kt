@@ -92,7 +92,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher:

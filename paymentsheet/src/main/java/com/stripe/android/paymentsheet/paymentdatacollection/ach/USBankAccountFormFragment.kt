@@ -260,7 +260,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            enabled = viewModel.requiredFields.stateIn(coroutineScope).value,
+            enabled = viewModel.requiredFields.stateIn(coroutineScope).value
         )
         updateMandateText(null)
     }

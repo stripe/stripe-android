@@ -310,7 +310,7 @@ class PaymentSheet internal constructor(
          * A color used to indicate errors or destructive actions in PaymentSheet.
          */
         @ColorInt
-        val error: Int,
+        val error: Int
     ) : Parcelable {
         constructor(
             primary: Color,
@@ -323,7 +323,7 @@ class PaymentSheet internal constructor(
             placeholderText: Color,
             onSurface: Color,
             appBarIcon: Color,
-            error: Color,
+            error: Color
         ) : this(
             primary = primary.toArgb(),
             surface = surface.toArgb(),
@@ -350,7 +350,7 @@ class PaymentSheet internal constructor(
                 placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText,
                 onSurface = PaymentsThemeDefaults.colorsLight.materialColors.onSurface,
                 appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon,
-                error = PaymentsThemeDefaults.colorsLight.materialColors.error,
+                error = PaymentsThemeDefaults.colorsLight.materialColors.error
             )
 
             val defaultDark = Colors(
@@ -364,7 +364,7 @@ class PaymentSheet internal constructor(
                 placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText,
                 onSurface = PaymentsThemeDefaults.colorsDark.materialColors.onSurface,
                 appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon,
-                error = PaymentsThemeDefaults.colorsDark.materialColors.error,
+                error = PaymentsThemeDefaults.colorsDark.materialColors.error
             )
         }
     }
@@ -379,7 +379,7 @@ class PaymentSheet internal constructor(
         /**
          * The border used for inputs, tabs, and other components in PaymentSheet.
          */
-        val borderStrokeWidthDp: Float,
+        val borderStrokeWidthDp: Float
     ) : Parcelable {
         constructor(context: Context, cornerRadiusDp: Int, borderStrokeWidthDp: Int) : this(
             cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
@@ -389,7 +389,7 @@ class PaymentSheet internal constructor(
         companion object {
             val default = Shapes(
                 cornerRadiusDp = PaymentsThemeDefaults.shapes.cornerRadius,
-                borderStrokeWidthDp = PaymentsThemeDefaults.shapes.borderStrokeWidth,
+                borderStrokeWidthDp = PaymentsThemeDefaults.shapes.borderStrokeWidth
             )
         }
     }
@@ -406,7 +406,7 @@ class PaymentSheet internal constructor(
          * The font used in text. This should be a resource ID value.
          */
         @FontRes
-        val fontResId: Int?,
+        val fontResId: Int?
     ) : Parcelable {
         companion object {
             val default = Typography(
@@ -453,7 +453,7 @@ class PaymentSheet internal constructor(
          * The border color of the primary button.
          */
         @ColorInt
-        val border: Int,
+        val border: Int
     ) : Parcelable {
         constructor(
             background: Color?,
@@ -470,13 +470,13 @@ class PaymentSheet internal constructor(
                 background = null,
                 onBackground =
                 PaymentsThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                border = PaymentsThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
                 onBackground =
                 PaymentsThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                border = PaymentsThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
             )
         }
     }
