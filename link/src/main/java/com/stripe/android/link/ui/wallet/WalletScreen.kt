@@ -86,6 +86,7 @@ private fun WalletBodyPreview() {
                         "4444"
                     )
                 ),
+                initiallySelectedId = null,
                 primaryButtonLabel = "Pay $10.99",
                 errorMessage = null,
                 onAddNewPaymentMethodClick = {},
@@ -119,6 +120,7 @@ internal fun WalletBody(
     WalletBody(
         isProcessing = isProcessing,
         paymentDetails = paymentDetails,
+        initiallySelectedId = viewModel.initiallySelectedId,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         errorMessage = errorMessage,
         onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
@@ -134,6 +136,7 @@ internal fun WalletBody(
 internal fun WalletBody(
     isProcessing: Boolean,
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
+    initiallySelectedId: String?,
     primaryButtonLabel: String,
     errorMessage: ErrorMessage?,
     onAddNewPaymentMethodClick: () -> Unit,
@@ -177,7 +180,7 @@ internal fun WalletBody(
             Spacer(modifier = Modifier.height(12.dp))
 
             var selectedItemId by rememberSaveable {
-                mutableStateOf(getDefaultSelectedCard(paymentDetails))
+                mutableStateOf(initiallySelectedId ?: getDefaultSelectedCard(paymentDetails))
             }
 
             // Update selected item if it's not on the list anymore

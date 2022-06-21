@@ -112,14 +112,17 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      * @param stripeIntent the PaymentIntent or SetupIntent.
      * @param completePayment whether the payment should be completed, or the selected payment
      *  method should be returned as a result.
+     * @param selectedPaymentDetails the payment method previously selected by the user, if they are
+     *  returning to Link. It will be the initially selected value.
      * @param coroutineScope the coroutine scope used to collect the account status flow.
      */
     suspend fun setup(
         stripeIntent: StripeIntent,
         completePayment: Boolean,
+        selectedPaymentDetails: LinkPaymentDetails?,
         coroutineScope: CoroutineScope
     ): AccountStatus {
-        val component = setupDependencies(stripeIntent, completePayment)
+        val component = setupDependencies(stripeIntent, completePayment, selectedPaymentDetails)
         accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
         return accountStatus.value
@@ -152,13 +155,14 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> =
         linkAccountManager.createPaymentDetails(
-            SupportedPaymentMethod.Card(),
+            SupportedPaymentMethod.Card,
             paymentMethodCreateParams
         )
 
     private fun setupDependencies(
         stripeIntent: StripeIntent,
-        completePayment: Boolean
+        completePayment: Boolean,
+        selectedPaymentDetails: LinkPaymentDetails?
     ): LinkPaymentLauncherComponent {
         val args = LinkActivityContract.Args(
             stripeIntent,
@@ -166,6 +170,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             merchantName,
             customerEmail,
             customerPhone,
+            selectedPaymentDetails,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
                 productUsage,

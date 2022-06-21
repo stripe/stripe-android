@@ -71,7 +71,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
-    override var newLpm = args.newLpm
+    override var newPaymentSelection = args.newLpm
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
@@ -79,7 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private var hasTransitionToUnsavedCard = false
     private val shouldTransitionToUnsavedCard: Boolean
         get() =
-            !hasTransitionToUnsavedCard && newLpm != null
+            !hasTransitionToUnsavedCard && newPaymentSelection != null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
@@ -164,7 +164,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(it.convertToPaymentSelection())
+            updateSelection(PaymentSelection.New.Link(it))
             onUserSelection()
         } ?: run {
             // Creating Link PaymentDetails failed, fallback to regular checkout.

@@ -167,11 +167,21 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(LinkScreen.PaymentMethod.route) {
+                            composable(
+                                LinkScreen.PaymentMethod.route,
+                                arguments = listOf(
+                                    navArgument(LinkScreen.PaymentMethod.loadArg) {
+                                        type = NavType.BoolType
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val loadFromArgs = backStackEntry.arguments
+                                    ?.getBoolean(LinkScreen.PaymentMethod.loadArg) ?: false
                                 linkAccount?.let { account ->
                                     PaymentMethodBody(
                                         account,
-                                        viewModel.injector
+                                        viewModel.injector,
+                                        loadFromArgs
                                     )
                                 }
                             }

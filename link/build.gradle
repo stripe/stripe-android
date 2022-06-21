@@ -105,7 +105,8 @@ android {
     kotlinOptions {
         freeCompilerArgs = [
                 "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi",
-                "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
+                "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+                "-Xopt-in=kotlin.RequiresOptIn"
         ]
         jvmTarget = "1.8"
     }

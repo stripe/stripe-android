@@ -187,7 +187,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
-                newLpm = sheetViewModel.newLpm,
+                newLpm = sheetViewModel.newPaymentSelection,
                 isShowingLinkInlineSignup = showLinkInlineSignup
             )
         )

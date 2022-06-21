@@ -51,6 +51,7 @@ class SignUpViewModelTest {
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         CUSTOMER_PHONE,
+        null,
         LinkActivityContract.Args.InjectionParams(
             INJECTOR_KEY,
             setOf(PRODUCT_USAGE),

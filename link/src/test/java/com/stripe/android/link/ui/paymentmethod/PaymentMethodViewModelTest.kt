@@ -22,9 +22,9 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
@@ -67,7 +68,7 @@ class PaymentMethodViewModelTest {
     private val formControllerSubcomponent = mock<FormControllerSubcomponent>().apply {
         whenever(formController).thenReturn(mock())
     }
-    private val formControllerProvider = Provider {
+    private val formControllerSubcomponentBuilder =
         mock<FormControllerSubcomponent.Builder>().apply {
             whenever(formSpec(anyOrNull())).thenReturn(this)
             whenever(initialValues(anyOrNull())).thenReturn(this)
@@ -77,7 +78,7 @@ class PaymentMethodViewModelTest {
             whenever(stripeIntent(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
-    }
+    private val formControllerProvider = Provider { formControllerSubcomponentBuilder }
 
     @Before
     fun before() {
@@ -88,13 +89,20 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `startPayment creates PaymentDetails`() = runTest {
-        whenever(linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(createLinkPaymentDetails()))
+        whenever(
+            linkAccountManager.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         createViewModel().startPayment(cardFormFieldValues)
 
-        val paramsCaptor = argumentCaptor<ConsumerPaymentDetailsCreateParams>()
+        val paramsCaptor = argumentCaptor<PaymentMethodCreateParams>()
         verify(linkAccountManager).createPaymentDetails(
+            any(),
             paramsCaptor.capture(),
             any(),
             anyOrNull()
@@ -103,15 +111,17 @@ class PaymentMethodViewModelTest {
         assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
             mapOf(
                 "type" to "card",
-                "billing_email_address" to "email@stripe.com",
                 "card" to mapOf(
                     "number" to "5555555555554444",
                     "exp_month" to "12",
-                    "exp_year" to "2050"
+                    "exp_year" to "2050",
+                    "cvc" to "123"
                 ),
-                "billing_address" to mapOf(
-                    "country_code" to "US",
-                    "postal_code" to "12345"
+                "billing_details" to mapOf(
+                    "address" to mapOf(
+                        "country" to "US",
+                        "postal_code" to "12345"
+                    )
                 )
             )
         )
@@ -122,7 +132,12 @@ class PaymentMethodViewModelTest {
         runTest {
             val value = createLinkPaymentDetails()
             whenever(
-                linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+                linkAccountManager.createPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
             ).thenReturn(Result.success(value))
 
             createViewModel().startPayment(cardFormFieldValues)
@@ -165,7 +180,12 @@ class PaymentMethodViewModelTest {
 
             val linkPaymentDetails = createLinkPaymentDetails()
             whenever(
-                linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+                linkAccountManager.createPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
             ).thenReturn(Result.success(linkPaymentDetails))
 
             createViewModel().startPayment(cardFormFieldValues)
@@ -181,7 +201,12 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment dismisses Link on success`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            linkAccountManager.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
@@ -205,7 +230,12 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment starts processing`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            linkAccountManager.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         val viewModel = createViewModel()
@@ -223,7 +253,12 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment stops processing on error`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            linkAccountManager.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
@@ -255,7 +290,12 @@ class PaymentMethodViewModelTest {
     fun `when startPayment fails then an error message is shown`() = runTest {
         val errorMessage = "Error message"
         whenever(
-            linkAccountManager.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            linkAccountManager.createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         ).thenReturn(Result.failure(RuntimeException(errorMessage)))
 
         val viewModel = createViewModel()
@@ -263,6 +303,27 @@ class PaymentMethodViewModelTest {
         viewModel.startPayment(cardFormFieldValues)
 
         assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+    }
+
+    @Test
+    fun `when loading from arguments then form is prefilled`() = runTest {
+        whenever(args.selectedPaymentDetails).thenReturn(createLinkPaymentDetails())
+        createViewModel(true)
+
+        val initialValuesCaptor: KArgumentCaptor<Map<IdentifierSpec, String?>> = argumentCaptor()
+        verify(formControllerSubcomponentBuilder).initialValues(initialValuesCaptor.capture())
+
+        assertThat(initialValuesCaptor.firstValue).containsAtLeastEntriesIn(
+            mapOf(
+                IdentifierSpec.get("type") to "card",
+                IdentifierSpec.CardNumber to "5555555555554444",
+                IdentifierSpec.CardCvc to "123",
+                IdentifierSpec.CardExpMonth to "12",
+                IdentifierSpec.CardExpYear to "2050",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "12345"
+            )
+        )
     }
 
     @Test
@@ -325,14 +386,15 @@ class PaymentMethodViewModelTest {
 
         val factory = PaymentMethodViewModel.Factory(
             mock(),
-            injector
+            injector,
+            false
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(PaymentMethodViewModel::class.java)
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
     }
 
-    private fun createViewModel() =
+    private fun createViewModel(loadFromArgs: Boolean = false) =
         PaymentMethodViewModel(
             args,
             linkAccount,
@@ -341,16 +403,21 @@ class PaymentMethodViewModelTest {
             confirmationManager,
             logger,
             formControllerProvider
-        )
+        ).apply { init(loadFromArgs) }
 
     private fun createLinkPaymentDetails() =
         PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first().let {
-            LinkPaymentDetails(
+            LinkPaymentDetails.New(
                 it,
                 PaymentMethodCreateParams.createLink(
                     it.id,
                     CLIENT_SECRET,
                     mapOf("card" to mapOf("cvc" to "123"))
+                ),
+                FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+                    cardFormFieldValues,
+                    "card",
+                    false
                 )
             )
         }
