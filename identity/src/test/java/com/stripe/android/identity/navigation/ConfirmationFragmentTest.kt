@@ -102,6 +102,7 @@ class ConfirmationFragmentTest {
             setUpSuccessVerificationPage()
             binding.kontinue.callOnClick()
 
+            verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 eq(IdentityVerificationSheet.VerificationFlowResult.Completed)
             )

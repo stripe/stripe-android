@@ -36,7 +36,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun verificationSucceed(
+    fun verificationSucceeded(
         isFromFallbackUrl: Boolean,
         scanType: IdentityScanState.ScanType? = null,
         requireSelfie: Boolean? = null,
@@ -47,9 +47,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         docBackUploadType: DocumentUploadParam.UploadMethod? = null,
         docFrontModelScore: Float? = null,
         docBackModelScore: Float? = null,
-        selfieModelScore: Float? = null,
+        selfieModelScore: Float? = null
     ) = requestFactory.createRequestR(
-        eventName = EVENT_VERIFICATION_SUCCEED,
+        eventName = EVENT_VERIFICATION_SUCCEEDED,
         additionalParams =
         mapOf(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
@@ -157,26 +157,19 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     fun documentTimeout(
         scanType: IdentityScanState.ScanType,
-        count: Int
     ) = requestFactory.createRequestR(
         eventName = EVENT_DOCUMENT_TIMEOUT,
         additionalParams = mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
             PARAM_SCAN_TYPE to scanType.toParam(),
-            PARAM_SIDE to scanType.toSide(),
-            PARAM_COUNT to count
+            PARAM_SIDE to scanType.toSide()
         )
     )
 
-    fun selfieTimeout(
-        scanType: IdentityScanState.ScanType,
-        count: Int
-    ) = requestFactory.createRequestR(
+    fun selfieTimeout() = requestFactory.createRequestR(
         eventName = EVENT_SELFIE_TIMEOUT,
         additionalParams = mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
-            PARAM_SCAN_TYPE to scanType.toParam(),
-            PARAM_COUNT to count
         )
     )
 
@@ -215,7 +208,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
         const val EVENT_SHEET_PRESENTED = "sheet_presented"
         const val EVENT_SHEET_CLOSED = "sheet_closed"
-        const val EVENT_VERIFICATION_SUCCEED = "verification_succeed"
+        const val EVENT_VERIFICATION_SUCCEEDED = "verification_succeeded"
         const val EVENT_VERIFICATION_FAILED = "verification_failed"
         const val EVENT_VERIFICATION_CANCELED = "verification_canceled"
         const val EVENT_SCREEN_PRESENTED = "screen_presented"
@@ -243,7 +236,6 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_EXCEPTION = "exception"
         const val PARAM_STACKTRACE = "stacktrace"
         const val PARAM_SCREEN_NAME = "screen_name"
-        const val PARAM_COUNT = "count"
         const val PARAM_SIDE = "side"
 
         const val SCREEN_NAME_CONSENT = "consent"

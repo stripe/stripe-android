@@ -24,6 +24,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
@@ -52,6 +53,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -82,6 +84,12 @@ internal class IdentityViewModel @Inject constructor(
      */
     private val _selfieUploadedState = MutableStateFlow(SelfieUploadState())
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
+
+    /**
+     * StateFlow to track analytics status.
+     */
+    private val _analyticsState = MutableStateFlow(AnalyticsState())
+    val analyticsState: StateFlow<AnalyticsState> = _analyticsState
 
     /**
      * Response for initial VerificationPage, used for building UI.
@@ -353,6 +361,13 @@ internal class IdentityViewModel @Inject constructor(
     }
 
     /**
+     * Update the analytics state.
+     */
+    internal fun updateAnalyticsState(updateBlock: (AnalyticsState) -> AnalyticsState) {
+        _analyticsState.update(updateBlock)
+    }
+
+    /**
      * Uploads the imageFile and notifies corresponding result [LiveData].
      */
     private fun uploadDocumentImagesAndNotify(
@@ -373,6 +388,17 @@ internal class IdentityViewModel @Inject constructor(
                 )
             }.fold(
                 onSuccess = { uploadedStripeFile ->
+                    updateAnalyticsState { oldState ->
+                        if (isFront) {
+                            oldState.copy(
+                                docFrontUploadType = uploadMethod
+                            )
+                        } else {
+                            oldState.copy(
+                                docBackUploadType = uploadMethod
+                            )
+                        }
+                    }
                     _documentUploadedState.update { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
@@ -620,6 +646,40 @@ internal class IdentityViewModel @Inject constructor(
             verificationArgs.ephemeralKeySecret
         )
 
+    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
+        viewModelScope.launch {
+            identityRepository.sendAnalyticsRequest(
+                request
+            )
+        }
+    }
+
+    /**
+     * Send VerificationSucceeded analytics event with isFromFallbackUrl = false
+     * based on values in [analyticsState].
+     */
+    fun sendSucceededAnalyticsRequestForNative() {
+        viewModelScope.launch {
+            analyticsState.collectLatest { latestState ->
+                identityRepository.sendAnalyticsRequest(
+                    identityAnalyticsRequestFactory.verificationSucceeded(
+                        isFromFallbackUrl = false,
+                        scanType = latestState.scanType,
+                        requireSelfie = latestState.requireSelfie,
+                        docFrontRetryTimes = latestState.docFrontRetryTimes,
+                        docBackRetryTimes = latestState.docBackRetryTimes,
+                        selfieRetryTimes = latestState.selfieRetryTimes,
+                        docFrontUploadType = latestState.docFrontUploadType,
+                        docBackUploadType = latestState.docBackUploadType,
+                        docFrontModelScore = latestState.docFrontModelScore,
+                        docBackModelScore = latestState.docBackModelScore,
+                        selfieModelScore = latestState.selfieModelScore,
+                    )
+                )
+            }
+        }
+    }
+
     internal class IdentityViewModelFactory(
         val context: Context,
         private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
@@ -653,14 +713,6 @@ internal class IdentityViewModel @Inject constructor(
             DaggerIdentityViewModelFactoryComponent.builder()
                 .context(context)
                 .build().inject(this)
-        }
-    }
-
-    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
-        viewModelScope.launch {
-            identityRepository.sendAnalyticsRequest(
-                request
-            )
         }
     }
 

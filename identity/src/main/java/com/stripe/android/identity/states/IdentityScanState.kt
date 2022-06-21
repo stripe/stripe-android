@@ -125,4 +125,12 @@ internal sealed class IdentityScanState(
             analyzerOutput: AnalyzerOutput
         ) = this
     }
+
+    internal companion object {
+        fun ScanType.isFront() =
+            this == ScanType.ID_FRONT || this == ScanType.DL_FRONT || this == ScanType.PASSPORT
+
+        fun ScanType.isBack() =
+            this == ScanType.ID_BACK || this == ScanType.DL_BACK
+    }
 }
