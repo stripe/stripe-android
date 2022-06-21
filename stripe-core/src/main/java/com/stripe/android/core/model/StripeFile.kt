@@ -7,7 +7,9 @@ import kotlinx.parcelize.Parcelize
  * [The file object](https://stripe.com/docs/api/files/object)
  */
 @Parcelize
-data class StripeFile @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+data class StripeFile
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      *

@@ -119,7 +119,7 @@ class AnalyticsRequestV2(
         PARAM_CLIENT_ID to clientId,
         PARAM_CREATED to System.currentTimeMillis() / MILLIS_IN_SECOND,
         PARAM_EVENT_NAME to eventName,
-        PARAM_EVENT_ID to UUID.randomUUID().toString(),
+        PARAM_EVENT_ID to UUID.randomUUID().toString()
     )
 
     override fun writePostBody(outputStream: OutputStream) {
