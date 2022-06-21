@@ -92,7 +92,7 @@ internal sealed class IdentityScanState(
         val reason: String,
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        val reachedStateAt: ClockMark = Clock.markNow(),
+        val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,

@@ -92,11 +92,12 @@ internal class ErrorFragment(
                     ARG_ERROR_TITLE to requirementError.title,
                     ARG_ERROR_CONTENT to requirementError.body,
                     ARG_GO_BACK_BUTTON_DESTINATION to
-                        if (requirementError.requirement.matchesFromFragment(fromFragment))
+                        if (requirementError.requirement.matchesFromFragment(fromFragment)) {
                             fromFragment
-                        else
-                            UNEXPECTED_DESTINATION,
-                    ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText,
+                        } else {
+                            UNEXPECTED_DESTINATION
+                        },
+                    ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText
                     // TODO(ccen) build continue button after backend behavior is finalized
                     // ARG_CONTINUE_BUTTON_TEXT to requirementError.continueButtonText,
                 )

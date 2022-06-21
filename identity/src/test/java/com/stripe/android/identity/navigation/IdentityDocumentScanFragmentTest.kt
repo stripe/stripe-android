@@ -81,7 +81,8 @@ class IdentityDocumentScanFragmentTest {
         identityViewModelFactory: ViewModelProvider.Factory,
         private val cameraViewParam: CameraView
     ) : IdentityDocumentScanFragment(
-        identityScanViewModelFactory, identityViewModelFactory
+        identityScanViewModelFactory,
+        identityViewModelFactory
     ) {
         override val fragmentId = R.id.IDScanFragment
         var currentState: IdentityScanState? = null

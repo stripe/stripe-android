@@ -276,12 +276,13 @@ internal class DocSelectionFragment(
             onSuccess = { verificationPage ->
                 findNavController().navigate(
                     R.id.action_camera_permission_denied,
-                    if (verificationPage.documentCapture.requireLiveCapture)
+                    if (verificationPage.documentCapture.requireLiveCapture) {
                         null
-                    else
+                    } else {
                         bundleOf(
                             CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
                         )
+                    }
                 )
             },
             onFailure = {

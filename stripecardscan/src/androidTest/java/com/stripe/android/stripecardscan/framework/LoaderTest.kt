@@ -21,7 +21,7 @@ class LoaderTest {
             modelVersion = "sample_resource",
             modelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf",
             modelHashAlgorithm = "SHA-256",
-            assetFileName = "sample_resource.tflite",
+            assetFileName = "sample_resource.tflite"
         )
 
         val byteBuffer = Loader(testContext).loadData(fetchedData)
@@ -61,7 +61,7 @@ class LoaderTest {
             modelVersion = "sample_file",
             modelHash = "133351546614bfadfa68bb66c22a06265972b02791e4ac545ad900f20fe1a796",
             modelHashAlgorithm = "SHA-256",
-            file = sampleFile,
+            file = sampleFile
         )
 
         val byteBuffer = Loader(testContext).loadData(fetchedData)

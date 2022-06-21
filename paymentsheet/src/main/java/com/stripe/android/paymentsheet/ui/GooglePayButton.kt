@@ -46,7 +46,9 @@ internal class GooglePayButton @JvmOverloads constructor(
 
         viewBinding.googlePayButtonContent.setImageDrawable(
             ResourcesCompat.getDrawable(
-                resources, contentDrawable, null
+                resources,
+                contentDrawable,
+                null
             )
         )
 

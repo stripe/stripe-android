@@ -187,7 +187,7 @@ internal class IDDetectorTransitionerTest {
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
             assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(
-                "Type ${Category.ID_BACK} doesn't match ${ScanType.ID_FRONT}",
+                "Type ${Category.ID_BACK} doesn't match ${ScanType.ID_FRONT}"
             )
             assertThat(resultState.type).isEqualTo(ScanType.ID_FRONT)
         }
@@ -254,7 +254,7 @@ internal class IDDetectorTransitionerTest {
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
-            transitioner,
+            transitioner
         )
 
         assertThat(
@@ -274,7 +274,7 @@ internal class IDDetectorTransitionerTest {
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
-            transitioner,
+            transitioner
         )
 
         assertThat(
@@ -440,7 +440,7 @@ internal class IDDetectorTransitionerTest {
                 previousAnalyzerOutput.boundingBox.left + 1,
                 previousAnalyzerOutput.boundingBox.top + 1,
                 previousAnalyzerOutput.boundingBox.width + 1,
-                previousAnalyzerOutput.boundingBox.height + 1,
+                previousAnalyzerOutput.boundingBox.height + 1
             ),
             newCategory ?: previousAnalyzerOutput.category,
             previousAnalyzerOutput.resultScore,
@@ -453,7 +453,7 @@ internal class IDDetectorTransitionerTest {
                 previousAnalyzerOutput.boundingBox.left + 500f,
                 previousAnalyzerOutput.boundingBox.top + 500f,
                 previousAnalyzerOutput.boundingBox.width + 500f,
-                previousAnalyzerOutput.boundingBox.height + 500f,
+                previousAnalyzerOutput.boundingBox.height + 500f
             ),
             previousAnalyzerOutput.category,
             previousAnalyzerOutput.resultScore,

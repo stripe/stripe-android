@@ -108,7 +108,7 @@ private class MemoizeSuspend3<in Input1, in Input2, in Input3, out Result>(
  */
 private class MemoizeSuspendExpiring0<out Result>(
     private val validFor: Duration,
-    private val f: suspend () -> Result,
+    private val f: suspend () -> Result
 ) {
     private val initializeMutex = Mutex()
 
@@ -134,7 +134,7 @@ private class MemoizeSuspendExpiring0<out Result>(
  */
 private class MemoizeSuspendExpiring1<in Input, out Result>(
     private val validFor: Duration,
-    private val f: suspend (Input) -> Result,
+    private val f: suspend (Input) -> Result
 ) {
     private val lookupMutex = Mutex()
 
@@ -167,7 +167,7 @@ private class MemoizeSuspendExpiring1<in Input, out Result>(
  */
 private class MemoizeSuspendExpiring2<in Input1, in Input2, out Result>(
     private val validFor: Duration,
-    private val f: suspend (Input1, Input2) -> Result,
+    private val f: suspend (Input1, Input2) -> Result
 ) {
     private val lookupMutex = Mutex()
 
@@ -200,7 +200,7 @@ private class MemoizeSuspendExpiring2<in Input1, in Input2, out Result>(
  */
 private class MemoizeSuspendExpiring3<in Input1, in Input2, in Input3, out Result>(
     private val validFor: Duration,
-    private val f: suspend (Input1, Input2, Input3) -> Result,
+    private val f: suspend (Input1, Input2, Input3) -> Result
 ) {
     private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Pair<Result, ClockMark>>()
     private val mutexes = mutableMapOf<Triple<Input1, Input2, Input3>, Mutex>()
@@ -318,7 +318,7 @@ private class Memoize3<in Input1, in Input2, in Input3, out Result>(
  */
 private class MemoizeExpiring0<out Result>(
     private val validFor: Duration,
-    private val function: () -> Result,
+    private val function: () -> Result
 ) : () -> Result {
     @Volatile private var value: Any? = UninitializedValue
     private var expiration: ClockMark? = null
@@ -341,7 +341,7 @@ private class MemoizeExpiring0<out Result>(
  */
 private class MemoizeExpiring1<in Input, out Result>(
     private val validFor: Duration,
-    private val function: (Input) -> Result,
+    private val function: (Input) -> Result
 ) : (Input) -> Result {
     private val values = mutableMapOf<Input, Pair<Result, ClockMark>>()
     private val locks = mutableMapOf<Input, Any>()
@@ -372,7 +372,7 @@ private class MemoizeExpiring1<in Input, out Result>(
  */
 private class MemoizeExpiring2<in Input1, in Input2, out Result>(
     private val validFor: Duration,
-    private val function: (Input1, Input2) -> Result,
+    private val function: (Input1, Input2) -> Result
 ) : (Input1, Input2) -> Result {
     private val values = mutableMapOf<Pair<Input1, Input2>, Pair<Result, ClockMark>>()
     private val locks = mutableMapOf<Pair<Input1, Input2>, Any>()
@@ -404,7 +404,7 @@ private class MemoizeExpiring2<in Input1, in Input2, out Result>(
  */
 private class MemoizeExpiring3<in Input1, in Input2, in Input3, out Result>(
     private val validFor: Duration,
-    private val function: (Input1, Input2, Input3) -> Result,
+    private val function: (Input1, Input2, Input3) -> Result
 ) : (Input1, Input2, Input3) -> Result {
     private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Pair<Result, ClockMark>>()
     private val locks = mutableMapOf<Triple<Input1, Input2, Input3>, Any>()
@@ -443,6 +443,7 @@ private class CachedFirstResultSuspend1<in Input, out Result>(
     private val initializeMutex = Mutex()
 
     private object UNINITIALIZED_VALUE
+
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
     fun cacheFirstResult(): suspend (Input) -> Result = { input ->
@@ -468,6 +469,7 @@ private class CachedFirstResultSuspend2<in Input1, in Input2, out Result>(
     private val initializeMutex = Mutex()
 
     private object UNINITIALIZED_VALUE
+
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
     fun cacheFirstResult(): suspend (Input1, Input2) -> Result = { input1, input2 ->
@@ -493,6 +495,7 @@ private class CachedFirstResultSuspend3<in Input1, in Input2, in Input3, out Res
     private val initializeMutex = Mutex()
 
     private object UNINITIALIZED_VALUE
+
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
     fun cacheFirstResult(): suspend (Input1, Input2, Input3) -> Result = { input1, input2, input3 ->
@@ -516,6 +519,7 @@ private class CachedFirstResult1<in Input, out Result>(
 ) : (Input) -> Result {
     // contract { callsInPlace(f, EXACTLY_ONCE) }
     private object UNINITIALIZED_VALUE
+
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
     @Synchronized
@@ -538,6 +542,7 @@ private class CachedFirstResult2<in Input1, in Input2, out Result>(
 ) : (Input1, Input2) -> Result {
     // contract { callsInPlace(f, EXACTLY_ONCE) }
     private object UNINITIALIZED_VALUE
+
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
     @Synchronized
@@ -560,6 +565,7 @@ private class CachedFirstResult3<in Input1, in Input2, in Input3, out Result>(
 ) : (Input1, Input2, Input3) -> Result {
     // contract { callsInPlace(f, EXACTLY_ONCE) }
     private object UNINITIALIZED_VALUE
+
     @Volatile private var value: Any? = UNINITIALIZED_VALUE
 
     @Synchronized
@@ -617,66 +623,66 @@ fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result
 
 /* mark: memoize methods */
 fun <Result> memoize(
-    f: () -> Result,
+    f: () -> Result
 ): () -> Result = Memoize0(f)
 fun <Input, Result> memoize(
-    f: (Input) -> Result,
+    f: (Input) -> Result
 ): (Input) -> Result = Memoize1(f)
 fun <Input1, Input2, Result> memoize(
-    f: (Input1, Input2) -> Result,
+    f: (Input1, Input2) -> Result
 ): (Input1, Input2) -> Result = Memoize2(f)
 fun <Input1, Input2, Input3, Result> memoize(
-    f: (Input1, Input2, Input3) -> Result,
+    f: (Input1, Input2, Input3) -> Result
 ): (Input1, Input2, Input3) -> Result = Memoize3(f)
 
 /* mark: memoize with duration methods */
 fun <Result> memoize(
     validFor: Duration,
-    f: () -> Result,
+    f: () -> Result
 ): () -> Result = MemoizeExpiring0(validFor, f)
 fun <Input, Result> memoize(
     validFor: Duration,
-    f: (Input) -> Result,
+    f: (Input) -> Result
 ): (Input) -> Result = MemoizeExpiring1(validFor, f)
 fun <Input1, Input2, Result> memoize(
     validFor: Duration,
-    f: (Input1, Input2) -> Result,
+    f: (Input1, Input2) -> Result
 ): (Input1, Input2) -> Result = MemoizeExpiring2(validFor, f)
 fun <Input1, Input2, Input3, Result> memoize(
     validFor: Duration,
-    f: (Input1, Input2, Input3) -> Result,
+    f: (Input1, Input2, Input3) -> Result
 ): (Input1, Input2, Input3) -> Result = MemoizeExpiring3(validFor, f)
 
 /* mark: memoizeSuspend methods */
 fun <Result> memoizeSuspend(
-    f: suspend() -> Result,
+    f: suspend() -> Result
 ): suspend () -> Result = MemoizeSuspend0(f).memoize()
 fun <Input, Result> memoizeSuspend(
-    f: suspend(Input) -> Result,
+    f: suspend(Input) -> Result
 ): suspend (Input) -> Result = MemoizeSuspend1(f).memoize()
 fun <Input1, Input2, Result> memoizeSuspend(
-    f: suspend(Input1, Input2) -> Result,
+    f: suspend(Input1, Input2) -> Result
 ): suspend (Input1, Input2) -> Result = MemoizeSuspend2(f).memoize()
 fun <Input1, Input2, Input3, Result> memoizeSuspend(
-    f: suspend(Input1, Input2, Input3) -> Result,
+    f: suspend(Input1, Input2, Input3) -> Result
 ): suspend (Input1, Input2, Input3) -> Result = MemoizeSuspend3(f).memoize()
 
 /* mark: memoizeSuspend with duration methods */
 fun <Result> memoizeSuspend(
     validFor: Duration,
-    f: suspend() -> Result,
+    f: suspend() -> Result
 ): suspend () -> Result = MemoizeSuspendExpiring0(validFor, f).memoize()
 fun <Input, Result> memoizeSuspend(
     validFor: Duration,
-    f: suspend(Input) -> Result,
+    f: suspend(Input) -> Result
 ): suspend (Input) -> Result = MemoizeSuspendExpiring1(validFor, f).memoize()
 fun <Input1, Input2, Result> memoizeSuspend(
     validFor: Duration,
-    f: suspend(Input1, Input2) -> Result,
+    f: suspend(Input1, Input2) -> Result
 ): suspend (Input1, Input2) -> Result = MemoizeSuspendExpiring2(validFor, f).memoize()
 fun <Input1, Input2, Input3, Result> memoizeSuspend(
     validFor: Duration,
-    f: suspend(Input1, Input2, Input3) -> Result,
+    f: suspend(Input1, Input2, Input3) -> Result
 ): suspend (Input1, Input2, Input3) -> Result = MemoizeSuspendExpiring3(validFor, f).memoize()
 
 /* mark: extensions to functions */
@@ -701,16 +707,16 @@ fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result
 
 /* mark: cacheFirstResult methods */
 fun <Result> cacheFirstResult(
-    f: () -> Result,
+    f: () -> Result
 ): () -> Result = Memoize0(f)
 fun <Input, Result> cacheFirstResult(
-    f: (Input) -> Result,
+    f: (Input) -> Result
 ): (Input) -> Result = CachedFirstResult1(f)
 fun <Input1, Input2, Result> cacheFirstResult(
-    f: (Input1, Input2) -> Result,
+    f: (Input1, Input2) -> Result
 ): (Input1, Input2) -> Result = CachedFirstResult2(f)
 fun <Input1, Input2, Input3, Result> cacheFirstResult(
-    f: (Input1, Input2, Input3) -> Result,
+    f: (Input1, Input2, Input3) -> Result
 ): (Input1, Input2, Input3) -> Result = CachedFirstResult3(f)
 
 /* mark: cacheFirstResultSuspend methods */
@@ -722,5 +728,5 @@ fun <Input1, Input2, Result> cacheFirstResultSuspend(
     f: suspend(Input1, Input2) -> Result
 ) = CachedFirstResultSuspend2(f).cacheFirstResult()
 fun <Input1, Input2, Input3, Result> cacheFirstResultSuspend(
-    f: suspend(Input1, Input2, Input3) -> Result,
+    f: suspend(Input1, Input2, Input3) -> Result
 ) = CachedFirstResultSuspend3(f).cacheFirstResult()

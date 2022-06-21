@@ -32,7 +32,7 @@ internal suspend fun Collection<SavedFrame>.toVerificationFrameData(
         val viewFinderRect = determineViewFinderCrop(
             cameraPreviewImageSize = image.size(),
             previewBounds = savedFrame.frame.cameraPreviewImage.viewBounds,
-            viewFinder = savedFrame.frame.cardFinder,
+            viewFinder = savedFrame.frame.cardFinder
         )
             .move(-cropRect.left, -cropRect.top)
 
@@ -45,7 +45,7 @@ internal suspend fun Collection<SavedFrame>.toVerificationFrameData(
     val payloadInfo = PayloadInfo(
         imageCompressionType = format.string,
         imageCompressionQuality = imageSettings.first.toFloat(),
-        imagePayloadSizeInBytes = imagePayloadSize,
+        imagePayloadSizeInBytes = imagePayloadSize
     )
 
     return Pair(verificationFramesData, payloadInfo)

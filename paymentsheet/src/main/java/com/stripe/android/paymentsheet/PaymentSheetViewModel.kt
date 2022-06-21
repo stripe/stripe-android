@@ -546,7 +546,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
         Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val application: Application,
+            val application: Application
         )
 
         @Inject

@@ -600,7 +600,7 @@ internal class DefaultFlowControllerTest {
             )
 
         verify(paymentLauncher).confirm(
-            eq(confirmPaymentIntentParams),
+            eq(confirmPaymentIntentParams)
         )
     }
 

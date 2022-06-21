@@ -114,7 +114,7 @@ internal class IdentityScanFlow(
                 imageStream.map { cameraPreviewImage ->
                     AnalyzerInput(cameraPreviewImage, viewFinder)
                 },
-                coroutineScope,
+                coroutineScope
             )
         }
     }

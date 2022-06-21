@@ -144,7 +144,7 @@ public final class com/stripe/android/core/injection/CoroutineContextModule_Prov
 	public static fun provideWorkContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
 }
 
-public final class com/stripe/android/core/injection/InjectableKtxKt {
+public final class com/stripe/android/core/injection/InjectWithFallbackKt {
 }
 
 public final class com/stripe/android/core/injection/InjectorKt {
@@ -295,6 +295,9 @@ public final class com/stripe/android/core/networking/JsonUtilsKt {
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
 }
 
+public final class com/stripe/android/core/networking/ResponseJsonKt {
+}
+
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/core/networking/RetryDelaySupplier_Factory;
@@ -330,9 +333,6 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
-}
-
-public final class com/stripe/android/core/networking/StripeResponseKtxKt {
 }
 
 public final class com/stripe/android/core/version/StripeSdkVersion {

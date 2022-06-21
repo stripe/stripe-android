@@ -413,7 +413,8 @@ internal abstract class IdentityUploadFragment(
                         )
                     }
                 }
-            }, onFailure = {
+            },
+            onFailure = {
                 Log.e(TAG, "Fail to observeForVerificationPage: $it")
                 navigateToDefaultErrorFragment()
             }

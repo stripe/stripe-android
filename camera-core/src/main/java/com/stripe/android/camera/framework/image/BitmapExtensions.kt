@@ -107,7 +107,7 @@ fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
     } else {
         val scaleFactor = max(
             size.width.toFloat() / this.width,
-            size.height.toFloat() / this.height,
+            size.height.toFloat() / this.height
         )
         val scaled = this.scale(scaleFactor, filter)
         scaled.crop(size.centerOn(scaled.size().toRect()))
@@ -232,7 +232,11 @@ fun Bitmap.longerEdge(): Int =
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.mirrorHorizontally(): Bitmap =
     Bitmap.createBitmap(
-        this, 0, 0, this.width, this.height,
+        this,
+        0,
+        0,
+        this.width,
+        this.height,
         Matrix().also {
             it.preScale(
                 -1f,
@@ -246,7 +250,11 @@ fun Bitmap.mirrorHorizontally(): Bitmap =
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.mirrorVertically(): Bitmap =
     Bitmap.createBitmap(
-        this, 0, 0, this.width, this.height,
+        this,
+        0,
+        0,
+        this.width,
+        this.height,
         Matrix().also {
             it.preScale(
                 1f,

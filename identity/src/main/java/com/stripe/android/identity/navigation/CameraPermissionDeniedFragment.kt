@@ -17,7 +17,6 @@ internal class CameraPermissionDeniedFragment(
     identityViewModelFactory: ViewModelProvider.Factory
 ) : BaseErrorFragment(identityViewModelFactory) {
     override fun onCustomizingViews() {
-
         title.text = getString(R.string.camera_permission)
         message1.text = getString(R.string.grant_camera_permission_text)
 

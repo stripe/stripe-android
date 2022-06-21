@@ -36,5 +36,5 @@ internal data class FaceUploadParam(
     @SerialName("best_exposure_iso")
     val bestExposureIso: Float? = null,
     @SerialName("training_consent")
-    val trainingConsent: Boolean? = null,
+    val trainingConsent: Boolean? = null
 )

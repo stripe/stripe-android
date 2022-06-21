@@ -34,7 +34,7 @@ class MainLoopStateMachineTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         assertTrue(state.runOcr)
@@ -47,12 +47,12 @@ class MainLoopStateMachineTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = null,
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -67,12 +67,12 @@ class MainLoopStateMachineTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("5445435282861343"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -86,12 +86,12 @@ class MainLoopStateMachineTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 1,
+            strictModeFrames = 1
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("4847186095118770"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -104,7 +104,7 @@ class MainLoopStateMachineTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 1,
+            strictModeFrames = 1
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -113,8 +113,8 @@ class MainLoopStateMachineTest {
                 side = CardDetect.Prediction.Side.PAN,
                 noCardProbability = 0F,
                 noPanProbability = 0F,
-                panProbability = 1F,
-            ),
+                panProbability = 1F
+            )
         )
 
         val newState = state.consumeTransition(prediction)
@@ -127,7 +127,7 @@ class MainLoopStateMachineTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 1,
+            strictModeFrames = 1
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -136,8 +136,8 @@ class MainLoopStateMachineTest {
                 side = CardDetect.Prediction.Side.PAN,
                 noCardProbability = 0F,
                 noPanProbability = 0F,
-                panProbability = 1F,
-            ),
+                panProbability = 1F
+            )
         )
 
         val newState = state.consumeTransition(prediction)
@@ -151,7 +151,7 @@ class MainLoopStateMachineTest {
             visibleCardCount = 1,
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         assertTrue(state.runOcr)
@@ -166,12 +166,12 @@ class MainLoopStateMachineTest {
             visibleCardCount = 1,
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("4847186095118770"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -186,7 +186,7 @@ class MainLoopStateMachineTest {
             visibleCardCount = 1,
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -195,8 +195,8 @@ class MainLoopStateMachineTest {
                 side = CardDetect.Prediction.Side.PAN,
                 panProbability = 1.0F,
                 noPanProbability = 0.0F,
-                noCardProbability = 0.0F,
-            ),
+                noCardProbability = 0.0F
+            )
         )
 
         // this is -2 because it must be:
@@ -220,12 +220,12 @@ class MainLoopStateMachineTest {
             visibleCardCount = 1,
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("4847186095118770"),
-            card = null,
+            card = null
         )
 
         // this is -2 because it must be:
@@ -258,12 +258,12 @@ class MainLoopStateMachineTest {
                 visibleCardCount = 1,
                 requiredCardIssuer = CardIssuer.Visa,
                 requiredLastFour = "8770",
-                strictModeFrames = 0,
+                strictModeFrames = 0
             )
 
             val prediction = MainLoopAnalyzer.Prediction(
                 ocr = SSDOcr.Prediction("4847186095118770"),
-                card = null,
+                card = null
             )
 
             // this is -3 because it must be:
@@ -300,12 +300,12 @@ class MainLoopStateMachineTest {
                 visibleCardCount = 1,
                 requiredCardIssuer = CardIssuer.Visa,
                 requiredLastFour = "8770",
-                strictModeFrames = 0,
+                strictModeFrames = 0
             )
 
             val predictionWithCard = MainLoopAnalyzer.Prediction(
                 ocr = SSDOcr.Prediction("4847186095118770"),
-                card = null,
+                card = null
             )
 
             whenever(mockClockMark.elapsedSince())
@@ -346,7 +346,7 @@ class MainLoopStateMachineTest {
                 visibleCardCount = 1,
                 requiredCardIssuer = CardIssuer.Visa,
                 requiredLastFour = "8770",
-                strictModeFrames = 0,
+                strictModeFrames = 0
             )
 
             whenever(mockClockMark.elapsedSince())
@@ -354,7 +354,7 @@ class MainLoopStateMachineTest {
 
             val prediction = MainLoopAnalyzer.Prediction(
                 ocr = null,
-                card = null,
+                card = null
             )
 
             val newState = state.consumeTransition(prediction)
@@ -370,12 +370,12 @@ class MainLoopStateMachineTest {
             visibleCardCount = 1,
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction(pan = "5445435282861343"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -386,7 +386,7 @@ class MainLoopStateMachineTest {
     fun `OcrSatisfied only runs the CardDetect ML model`() {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
-            visibleCardCount = 0,
+            visibleCardCount = 0
         )
 
         assertFalse(state.runOcr)
@@ -398,7 +398,7 @@ class MainLoopStateMachineTest {
     fun `OcrSatisfied doesn't transition if no card detected and it hasn't timed out`() = runTest {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
-            visibleCardCount = 0,
+            visibleCardCount = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -407,8 +407,8 @@ class MainLoopStateMachineTest {
                 side = CardDetect.Prediction.Side.PAN,
                 panProbability = 1.0F,
                 noPanProbability = 0.0F,
-                noCardProbability = 0.0F,
-            ),
+                noCardProbability = 0.0F
+            )
         )
 
         val newState = state.consumeTransition(prediction)
@@ -420,7 +420,7 @@ class MainLoopStateMachineTest {
     fun `OcrSatisfied transitions to Finished when enough cards are seen`() = runTest {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
-            visibleCardCount = DESIRED_CARD_COUNT - 1,
+            visibleCardCount = DESIRED_CARD_COUNT - 1
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -429,8 +429,8 @@ class MainLoopStateMachineTest {
                 side = CardDetect.Prediction.Side.PAN,
                 panProbability = 1.0F,
                 noPanProbability = 0.0F,
-                noCardProbability = 0.0F,
-            ),
+                noCardProbability = 0.0F
+            )
         )
 
         val newState = state.consumeTransition(prediction)
@@ -451,12 +451,12 @@ class MainLoopStateMachineTest {
 
             val state = MainLoopState.OcrSatisfied(
                 pan = "4847186095118770",
-                visibleCardCount = DESIRED_CARD_COUNT - 1,
+                visibleCardCount = DESIRED_CARD_COUNT - 1
             )
 
             val prediction = MainLoopAnalyzer.Prediction(
                 ocr = null,
-                card = null,
+                card = null
             )
 
             whenever(mockClockMark.elapsedSince())
@@ -473,7 +473,7 @@ class MainLoopStateMachineTest {
             panCounter = ItemCounter("4847186095118770"),
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         assertTrue(state.runOcr)
@@ -487,12 +487,12 @@ class MainLoopStateMachineTest {
             panCounter = ItemCounter("4847186095118770"),
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("4847186095118770"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -506,12 +506,12 @@ class MainLoopStateMachineTest {
             panCounter = ItemCounter("4847186095118770"),
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("4847186095118770"),
-            card = null,
+            card = null
         )
 
         // this is -2 because it must be:
@@ -543,12 +543,12 @@ class MainLoopStateMachineTest {
                 panCounter = ItemCounter("4847186095118770"),
                 requiredCardIssuer = CardIssuer.Visa,
                 requiredLastFour = "8770",
-                strictModeFrames = 0,
+                strictModeFrames = 0
             )
 
             val prediction = MainLoopAnalyzer.Prediction(
                 ocr = null,
-                card = null,
+                card = null
             )
 
             whenever(mockClockMark.elapsedSince())
@@ -566,12 +566,12 @@ class MainLoopStateMachineTest {
             panCounter = ItemCounter("4847186095118770"),
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction(pan = "5445435282861343"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -584,7 +584,7 @@ class MainLoopStateMachineTest {
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         assertTrue(state.runOcr)
@@ -598,12 +598,12 @@ class MainLoopStateMachineTest {
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = null,
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -617,12 +617,12 @@ class MainLoopStateMachineTest {
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.MasterCard,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("5445435282861343"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -636,12 +636,12 @@ class MainLoopStateMachineTest {
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
-            strictModeFrames = 0,
+            strictModeFrames = 0
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = SSDOcr.Prediction("4847186095118770"),
-            card = null,
+            card = null
         )
 
         val newState = state.consumeTransition(prediction)
@@ -664,12 +664,12 @@ class MainLoopStateMachineTest {
                 pan = "5445435282861343",
                 requiredCardIssuer = CardIssuer.Visa,
                 requiredLastFour = "8770",
-                strictModeFrames = 0,
+                strictModeFrames = 0
             )
 
             val prediction = MainLoopAnalyzer.Prediction(
                 ocr = null,
-                card = null,
+                card = null
             )
 
             whenever(mockClockMark.elapsedSince())
@@ -699,8 +699,8 @@ class MainLoopStateMachineTest {
                 side = CardDetect.Prediction.Side.NO_CARD,
                 panProbability = 0.0F,
                 noPanProbability = 0.0F,
-                noCardProbability = 1.0F,
-            ),
+                noCardProbability = 1.0F
+            )
         )
 
         val newState = state.consumeTransition(prediction)

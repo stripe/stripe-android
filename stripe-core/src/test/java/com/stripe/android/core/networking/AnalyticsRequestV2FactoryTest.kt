@@ -91,7 +91,7 @@ class AnalyticsRequestV2FactoryTest {
             additionalParams = mapOf(
                 additionalParam1 to additionalValue1,
                 additionalParam2 to additionalValue2,
-                additionalParam3 to additionalValue3,
+                additionalParam3 to additionalValue3
             ),
             includeSDKParams = true
         )

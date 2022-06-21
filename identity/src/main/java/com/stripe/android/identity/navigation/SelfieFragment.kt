@@ -220,7 +220,7 @@ internal class SelfieFragment(
                                         numFrames = faceDetectorTransitioner.numFrames
                                     ),
                                     fromFragment = fragmentId,
-                                    clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM,
+                                    clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM
                                 )
                             }.onFailure { throwable ->
                                 Log.e(

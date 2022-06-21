@@ -1,4 +1,5 @@
 @file:Suppress("deprecation")
+
 /*
  * camera1 is deprecated, but still our best option for android 5.0
  *
@@ -66,7 +67,7 @@ internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CameraPreviewImage<ImageType>(
     val image: ImageType,
-    val viewBounds: Rect,
+    val viewBounds: Rect
 )
 
 /**
@@ -170,8 +171,8 @@ class Camera1Adapter(
                             previewView.top,
                             previewView.width,
                             previewView.height
-                        ),
-                    ),
+                        )
+                    )
                 )
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
