@@ -212,7 +212,7 @@ internal fun VerificationBody(
             contentAlignment = Alignment.Center
         ) {
             CompositionLocalProvider(
-                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high,
+                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high
             ) {
                 Text(
                     text = stringResource(id = R.string.verification_resend),

@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 internal fun Form(
     formController: FormController,
-    enabledFlow: Flow<Boolean>,
+    enabledFlow: Flow<Boolean>
 ) {
     FormUI(
         formController.hiddenIdentifiers,

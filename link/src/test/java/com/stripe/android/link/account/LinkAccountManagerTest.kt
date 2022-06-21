@@ -358,7 +358,12 @@ class LinkAccountManagerTest {
 
         verify(linkRepository, times(2))
             .createPaymentDetails(
-                anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
             )
         verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
 
@@ -389,7 +394,12 @@ class LinkAccountManagerTest {
 
         verify(linkRepository)
             .createPaymentDetails(
-                anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
             )
         verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
     }

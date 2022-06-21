@@ -16,7 +16,7 @@ import kotlinx.parcelize.Parcelize
  */
 internal sealed class SupportedPaymentMethod(
     val type: PaymentMethod.Type,
-    val formSpec: List<FormItemSpec>,
+    val formSpec: List<FormItemSpec>
 ) : Parcelable {
     internal val requiresMandate = type.requiresMandate
 

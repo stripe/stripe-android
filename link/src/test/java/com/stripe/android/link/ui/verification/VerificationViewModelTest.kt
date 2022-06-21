@@ -129,6 +129,9 @@ class VerificationViewModelTest {
     }
 
     private fun createViewModel() = VerificationViewModel(
-        linkAccountManager, navigator, logger, linkAccount
+        linkAccountManager,
+        navigator,
+        logger,
+        linkAccount
     )
 }

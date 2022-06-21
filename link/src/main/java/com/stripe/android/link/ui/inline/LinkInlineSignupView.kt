@@ -121,7 +121,7 @@ internal fun LinkInlineSignup(
     onUserInteracted: () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         PaymentsTheme {
             Column(

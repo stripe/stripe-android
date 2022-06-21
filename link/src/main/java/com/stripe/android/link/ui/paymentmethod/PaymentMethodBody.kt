@@ -48,7 +48,7 @@ private fun PaymentMethodBodyPreview() {
                 secondaryButtonLabel = "Cancel",
                 errorMessage = null,
                 onPrimaryButtonClick = {},
-                onSecondaryButtonClick = {},
+                onSecondaryButtonClick = {}
             ) {}
         }
     }

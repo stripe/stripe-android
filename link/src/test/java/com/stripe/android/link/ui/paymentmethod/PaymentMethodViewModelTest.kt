@@ -63,7 +63,7 @@ class PaymentMethodViewModelTest {
         IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
         IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
         IdentifierSpec.Country to FormFieldEntry("US", true),
-        IdentifierSpec.PostalCode to FormFieldEntry("12345", true),
+        IdentifierSpec.PostalCode to FormFieldEntry("12345", true)
     )
     private val formControllerSubcomponent = mock<FormControllerSubcomponent>().apply {
         whenever(formController).thenReturn(mock())
