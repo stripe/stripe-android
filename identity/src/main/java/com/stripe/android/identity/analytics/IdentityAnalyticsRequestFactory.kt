@@ -63,7 +63,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             PARAM_DOC_BACK_UPLOAD_TYPE to docBackUploadType?.name,
             PARAM_DOC_FRONT_MODEL_SCORE to docFrontModelScore,
             PARAM_DOC_BACK_MODEL_SCORE to docBackModelScore,
-            PARAM_SELFIE_MODEL_SCORE to selfieModelScore,
+            PARAM_SELFIE_MODEL_SCORE to selfieModelScore
         )
     )
 
@@ -71,7 +71,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         isFromFallbackUrl: Boolean,
         lastScreenName: String? = null,
         scanType: IdentityScanState.ScanType? = null,
-        requireSelfie: Boolean? = null,
+        requireSelfie: Boolean? = null
     ) = requestFactory.createRequestR(
         eventName = EVENT_VERIFICATION_CANCELED,
         additionalParams =
@@ -80,7 +80,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
             PARAM_SCAN_TYPE to scanType?.toParam(),
             PARAM_REQUIRE_SELFIE to requireSelfie,
-            PARAM_LAST_SCREEN_NAME to lastScreenName,
+            PARAM_LAST_SCREEN_NAME to lastScreenName
         )
     )
 
@@ -136,27 +136,27 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     )
 
     fun cameraPermissionDenied(
-        scanType: IdentityScanState.ScanType,
+        scanType: IdentityScanState.ScanType
     ) = requestFactory.createRequestR(
         eventName = EVENT_CAMERA_PERMISSION_DENIED,
         additionalParams = mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
-            PARAM_SCAN_TYPE to scanType.toParam(),
+            PARAM_SCAN_TYPE to scanType.toParam()
         )
     )
 
     fun cameraPermissionGranted(
-        scanType: IdentityScanState.ScanType,
+        scanType: IdentityScanState.ScanType
     ) = requestFactory.createRequestR(
         eventName = EVENT_CAMERA_PERMISSION_GRANTED,
         additionalParams = mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
-            PARAM_SCAN_TYPE to scanType.toParam(),
+            PARAM_SCAN_TYPE to scanType.toParam()
         )
     )
 
     fun documentTimeout(
-        scanType: IdentityScanState.ScanType,
+        scanType: IdentityScanState.ScanType
     ) = requestFactory.createRequestR(
         eventName = EVENT_DOCUMENT_TIMEOUT,
         additionalParams = mapOf(
@@ -169,7 +169,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     fun selfieTimeout() = requestFactory.createRequestR(
         eventName = EVENT_SELFIE_TIMEOUT,
         additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+            PARAM_VERIFICATION_SESSION to args.verificationSessionId
         )
     )
 

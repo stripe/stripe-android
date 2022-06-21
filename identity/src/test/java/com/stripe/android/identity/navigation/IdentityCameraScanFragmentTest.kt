@@ -180,9 +180,10 @@ class IdentityCameraScanFragmentTest {
 
     internal class TestFragment(
         identityScanViewModelFactory: ViewModelProvider.Factory,
-        identityViewModelFactory: ViewModelProvider.Factory,
+        identityViewModelFactory: ViewModelProvider.Factory
     ) : IdentityCameraScanFragment(
-        identityScanViewModelFactory, identityViewModelFactory
+        identityScanViewModelFactory,
+        identityViewModelFactory
     ) {
         override val fragmentId = 0
 
@@ -241,7 +242,7 @@ class IdentityCameraScanFragmentTest {
             frame = mock(),
             result = FaceDetectorOutput(
                 boundingBox = mock(),
-                resultScore = SELFIE_SCORE,
+                resultScore = SELFIE_SCORE
             ),
             identityState = IdentityScanState.Finished(
                 type = IdentityScanState.ScanType.SELFIE,
@@ -281,7 +282,7 @@ class IdentityCameraScanFragmentTest {
             frame = mock(),
             result = FaceDetectorOutput(
                 boundingBox = mock(),
-                resultScore = SELFIE_SCORE,
+                resultScore = SELFIE_SCORE
             ),
             identityState = IdentityScanState.TimeOut(
                 type = IdentityScanState.ScanType.SELFIE,

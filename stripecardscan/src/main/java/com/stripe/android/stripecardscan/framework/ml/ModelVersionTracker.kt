@@ -19,7 +19,7 @@ internal fun trackModelLoaded(
     modelClass: String,
     modelVersion: String,
     modelFrameworkVersion: Int,
-    success: Boolean,
+    success: Boolean
 ) {
     MODEL_MAP.getOrPut(modelClass) { mutableSetOf() }
         .add(Triple(modelVersion, modelFrameworkVersion, success))

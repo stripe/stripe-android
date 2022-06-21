@@ -44,7 +44,7 @@ internal class IdentityActivity :
             this,
             this,
             this,
-            this,
+            this
         )
 
     private val binding by lazy {
@@ -80,7 +80,7 @@ internal class IdentityActivity :
         supportFragmentManager.fragmentFactory = identityViewModel.identityFragmentFactory
         super.onCreate(savedInstanceState)
         fallbackUrlLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultContracts.StartActivityForResult()
         ) {
             identityViewModel.retrieveAndBufferVerificationPage()
             identityViewModel.observeForVerificationPage(
@@ -103,7 +103,8 @@ internal class IdentityActivity :
                             VerificationFlowResult.Canceled
                         }
                     )
-                }, onFailure = {
+                },
+                onFailure = {
                     identityViewModel.sendAnalyticsRequest(
                         identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                             isFromFallbackUrl = true,
@@ -213,7 +214,7 @@ internal class IdentityActivity :
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
                             lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
                         )
                     )
                     finishWithResult(
@@ -286,7 +287,7 @@ internal class IdentityActivity :
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
                             lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
                         )
                     )
                     verificationFlowFinishable.finishWithResult(

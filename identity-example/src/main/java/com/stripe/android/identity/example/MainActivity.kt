@@ -63,7 +63,6 @@ abstract class MainActivity : AppCompatActivity() {
                     is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
                         binding.resultView.text =
                             "Verification result: ${it.javaClass.simpleName} - ${it.throwable}"
-
                     }
                 }
             }
@@ -161,13 +160,13 @@ abstract class MainActivity : AppCompatActivity() {
         @SerialName("client_secret") val clientSecret: String,
         @SerialName("ephemeral_key_secret") val ephemeralKeySecret: String,
         @SerialName("id") val verificationSessionId: String,
-        @SerialName("url") val url: String,
+        @SerialName("url") val url: String
     )
 
     @Serializable
     data class VerificationSessionCreationRequest(
         @SerialName("options") val options: Options? = null,
-        @SerialName("type") val type: String = "document",
+        @SerialName("type") val type: String = "document"
     ) {
         @Serializable
         data class Options(

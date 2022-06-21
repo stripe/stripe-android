@@ -115,7 +115,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
-                        CardScanSheetResult.Canceled(reason),
+                        CardScanSheetResult.Canceled(reason)
                     )
                 setResult(RESULT_CANCELED, intent)
             }
@@ -124,7 +124,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
-                        CardScanSheetResult.Failed(cause ?: UnknownScanException()),
+                        CardScanSheetResult.Failed(cause ?: UnknownScanException())
                     )
                 setResult(RESULT_CANCELED, intent)
             }
@@ -139,7 +139,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
              * A final result was received from the aggregator. Set the result from this activity.
              */
             override suspend fun onResult(
-                result: MainLoopAggregator.FinalResult,
+                result: MainLoopAggregator.FinalResult
             ) {
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
@@ -152,7 +152,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
              * An interim result was received from the result aggregator.
              */
             override suspend fun onInterimResult(
-                result: MainLoopAggregator.InterimResult,
+                result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
                 if (
                     result.state is MainLoopState.OcrFound &&
@@ -230,7 +230,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
      * Set up viewFinderWindowView and viewFinderBorderView centered with predefined margins
      */
     private fun setupViewFinderConstraints() {
-
         val screenSize = Resources.getSystem().displayMetrics.let {
             Size(it.widthPixels, it.heightPixels)
         }
@@ -242,7 +241,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         listOf(viewBinding.viewFinderWindow, viewBinding.viewFinderBorder).forEach { view ->
             (view.layoutParams as ViewGroup.MarginLayoutParams)
                 .updateMargins(
-                    viewFinderMargin, viewFinderMargin, viewFinderMargin, viewFinderMargin
+                    viewFinderMargin,
+                    viewFinderMargin,
+                    viewFinderMargin,
+                    viewFinderMargin
                 )
         }
 
@@ -334,7 +336,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             device = Device.fromContext(this),
             appDetails = AppDetails.fromContext(this),
             scanStatistics = ScanStatistics.fromStats(),
-            scanConfig = ScanConfig(0),
+            scanConfig = ScanConfig(0)
         )
         super.closeScanner()
     }

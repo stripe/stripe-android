@@ -96,12 +96,12 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
  */
 private fun Fragment.navigateToRequirementErrorFragment(
     @IdRes fromFragment: Int,
-    requirementError: VerificationPageDataRequirementError,
+    requirementError: VerificationPageDataRequirementError
 ) {
     findNavController()
         .navigateToErrorFragmentWithRequirementError(
             fromFragment,
-            requirementError,
+            requirementError
         )
 }
 

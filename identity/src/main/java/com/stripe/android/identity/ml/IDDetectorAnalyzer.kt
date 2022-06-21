@@ -56,7 +56,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             arrayOf(tensorImage.buffer),
             mapOf(
                 OUTPUT_BOUNDING_BOX_TENSOR_INDEX to boundingBoxes,
-                OUTPUT_CATEGORY_TENSOR_INDEX to categories,
+                OUTPUT_CATEGORY_TENSOR_INDEX to categories
             )
         )
 
@@ -80,7 +80,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
                 left = boundingBoxes[0][0],
                 top = boundingBoxes[0][1],
                 width = boundingBoxes[0][2],
-                height = boundingBoxes[0][3],
+                height = boundingBoxes[0][3]
             ),
             resultCategory,
             resultScore,
@@ -126,7 +126,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             INDEX_PASSPORT to Category.PASSPORT,
             INDEX_ID_FRONT to Category.ID_FRONT,
             INDEX_ID_BACK to Category.ID_BACK,
-            INDEX_INVALID to Category.INVALID,
+            INDEX_INVALID to Category.INVALID
         )
         val TAG: String = IDDetectorAnalyzer::class.java.simpleName
     }

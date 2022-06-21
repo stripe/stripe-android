@@ -11,12 +11,11 @@ class EncodeTest {
     @Test
     @SmallTest
     fun testEncodeToXWWWFormUrl_flatObject() {
-
         @Serializable
         data class TestClassFlat(
             @SerialName("field_1") val field1: String,
             @SerialName("field_2") val field2: Int,
-            @SerialName("field_3") val field3: Boolean,
+            @SerialName("field_3") val field3: Boolean
         )
 
         assertEquals(
@@ -24,20 +23,19 @@ class EncodeTest {
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassFlat.serializer(),
                 value = TestClassFlat("aa", 1, true)
-            ),
+            )
         )
     }
 
     @Test
     @SmallTest
     fun testEncodeToXWWWFormUrl_flatObjectWithNulls() {
-
         @Serializable
         data class TestClassFlat(
             @SerialName("field_1") val field1: String,
             @SerialName("field_2") val field2: Int,
             @SerialName("field_3") val field4: String?,
-            @SerialName("field_4") val field3: Boolean,
+            @SerialName("field_4") val field3: Boolean
         )
 
         assertEquals(
@@ -45,18 +43,17 @@ class EncodeTest {
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassFlat.serializer(),
                 value = TestClassFlat("aa", 1, null, true)
-            ),
+            )
         )
     }
 
     @Test
     @SmallTest
     fun testEncodeToXWWWFormUrl_nestedObject() {
-
         @Serializable
         data class TestClassSubObject(
             @SerialName("sub_field_1") val field1: String,
-            @SerialName("sub_field_2") val field2: Int,
+            @SerialName("sub_field_2") val field2: Int
         )
 
         @Serializable
@@ -64,7 +61,7 @@ class EncodeTest {
             @SerialName("field_1") val field1: String,
             @SerialName("field_2") val field2: Int,
             @SerialName("field_3") val field3: Boolean,
-            @SerialName("field_4") val field4: TestClassSubObject,
+            @SerialName("field_4") val field4: TestClassSubObject
         )
 
         assertEquals(
@@ -78,21 +75,20 @@ class EncodeTest {
                     field3 = true,
                     field4 = TestClassSubObject(
                         field1 = "bb",
-                        field2 = 2,
+                        field2 = 2
                     )
                 )
-            ),
+            )
         )
     }
 
     @Test
     @SmallTest
     fun testEncodeToXWWWFormUrl_multipleNestedObjects() {
-
         @Serializable
         data class TestClassSubSubObject(
             @SerialName("sub_sub_field_1") val field1: Int,
-            @SerialName("sub_sub_field_2") val field2: Boolean,
+            @SerialName("sub_sub_field_2") val field2: Boolean
         )
 
         @Serializable
@@ -107,7 +103,7 @@ class EncodeTest {
             @SerialName("field_1") val field1: String,
             @SerialName("field_2") val field2: Int,
             @SerialName("field_3") val field3: Boolean,
-            @SerialName("field_4") val field4: TestClassSubObject,
+            @SerialName("field_4") val field4: TestClassSubObject
         )
 
         assertEquals(
@@ -126,22 +122,21 @@ class EncodeTest {
                         field2 = 2,
                         field3 = TestClassSubSubObject(
                             field1 = 3,
-                            field2 = false,
-                        ),
+                            field2 = false
+                        )
                     )
                 )
-            ),
+            )
         )
     }
 
     @Test
     @SmallTest
     fun testEncodeToXWWWFormUrl_multipleNestedObjectsWithList() {
-
         @Serializable
         data class TestClassSubSubObject(
             @SerialName("sub_sub_field_1") val field1: Int,
-            @SerialName("sub_sub_field_2") val field2: Boolean,
+            @SerialName("sub_sub_field_2") val field2: Boolean
         )
 
         @Serializable
@@ -156,7 +151,7 @@ class EncodeTest {
             @SerialName("field_1") val field1: String,
             @SerialName("field_2") val field2: Int,
             @SerialName("field_3") val field3: Boolean,
-            @SerialName("field_4") val field4: TestClassSubObject,
+            @SerialName("field_4") val field4: TestClassSubObject
         )
 
         assertEquals(
@@ -177,11 +172,11 @@ class EncodeTest {
                         field2 = listOf("2", "4", "6"),
                         field3 = TestClassSubSubObject(
                             field1 = 3,
-                            field2 = false,
-                        ),
+                            field2 = false
+                        )
                     )
                 )
-            ),
+            )
         )
     }
 
@@ -191,14 +186,14 @@ class EncodeTest {
         @Serializable
         data class TestClassSimple(
             @SerialName("sub_field_1") val field1: String,
-            @SerialName("sub_field_2") val field2: String,
+            @SerialName("sub_field_2") val field2: String
         )
 
         @Serializable
         data class TestClassArray(
             @SerialName("field_1") val field1: String,
             @SerialName("field_2") val field2: List<TestClassSimple>,
-            @SerialName("field_3") val field3: Boolean,
+            @SerialName("field_3") val field3: Boolean
         )
 
         assertEquals(
@@ -215,16 +210,16 @@ class EncodeTest {
                     field2 = listOf(
                         TestClassSimple(
                             field1 = "bb",
-                            field2 = "22",
+                            field2 = "22"
                         ),
                         TestClassSimple(
                             field1 = "cc",
-                            field2 = "33",
+                            field2 = "33"
                         )
                     ),
-                    field3 = true,
+                    field3 = true
                 )
-            ),
+            )
         )
     }
 }

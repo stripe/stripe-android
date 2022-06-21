@@ -38,7 +38,8 @@ internal abstract class IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityCameraScanFragment(
-    identityCameraScanViewModelFactory, identityViewModelFactory
+    identityCameraScanViewModelFactory,
+    identityViewModelFactory
 ) {
     abstract val frontScanType: IdentityScanState.ScanType
 

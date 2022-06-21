@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class VerificationFrameData(
     @SerialName("image_data") val imageData: String,
-    @SerialName("viewfinder_margins") val viewFinderMargins: ViewFinderMargins,
+    @SerialName("viewfinder_margins") val viewFinderMargins: ViewFinderMargins
 )
 
 @Serializable
@@ -15,14 +15,14 @@ internal data class ViewFinderMargins(
     @SerialName("left") val left: Int,
     @SerialName("upper") val top: Int,
     @SerialName("right") val right: Int,
-    @SerialName("lower") val bottom: Int,
+    @SerialName("lower") val bottom: Int
 ) {
     companion object {
         fun fromRect(rect: Rect) = ViewFinderMargins(
             left = rect.left,
             top = rect.top,
             right = rect.right,
-            bottom = rect.bottom,
+            bottom = rect.bottom
         )
     }
 }
@@ -30,7 +30,7 @@ internal data class ViewFinderMargins(
 @Serializable
 internal data class VerifyFramesRequest(
     @SerialName("client_secret") val clientSecret: String,
-    @SerialName("verification_frames_data") val verificationFramesData: String,
+    @SerialName("verification_frames_data") val verificationFramesData: String
 )
 
 @Serializable

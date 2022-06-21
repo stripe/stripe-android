@@ -64,22 +64,22 @@ class DurationTest {
         assertEquals(
             randomFloat.roundToLong(),
             randomFloat.nanoseconds.inNanoseconds,
-            randomFloat.toString(),
+            randomFloat.toString()
         )
         assertEquals(
             randomFloat.truncate(3),
             randomFloat.microseconds.inMicroseconds.toFloat(),
-            randomFloat.toString(),
+            randomFloat.toString()
         )
         assertEquals(
             randomFloat.truncate(6),
             randomFloat.milliseconds.inMilliseconds.toFloat(),
-            randomFloat.toString(),
+            randomFloat.toString()
         )
         assertEquals(
             randomFloat.truncate(9),
             randomFloat.seconds.inSeconds.toFloat(),
-            randomFloat.toString(),
+            randomFloat.toString()
         )
         assertEquals(randomFloat, randomFloat.minutes.inMinutes.toFloat(), randomFloat.toString())
         assertEquals(randomFloat, randomFloat.hours.inHours.toFloat(), randomFloat.toString())
@@ -92,52 +92,52 @@ class DurationTest {
         assertEquals(
             randomDouble.roundToLong(),
             randomDouble.nanoseconds.inNanoseconds,
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(3),
             randomDouble.microseconds.inMicroseconds,
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(6),
             randomDouble.milliseconds.inMilliseconds.truncate(6),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(9),
             randomDouble.seconds.inSeconds.truncate(9),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(8),
             randomDouble.minutes.inMinutes.truncate(8),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(10),
             randomDouble.hours.inHours.truncate(10),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(10),
             randomDouble.days.inDays.truncate(10),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(11),
             randomDouble.weeks.inWeeks.truncate(11),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(11),
             randomDouble.months.inMonths.truncate(11),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
         assertEquals(
             randomDouble.truncate(11),
             randomDouble.years.inYears.truncate(11),
-            randomDouble.toString(),
+            randomDouble.toString()
         )
     }
 
@@ -157,20 +157,20 @@ class DurationTest {
         assertEquals(Duration.ZERO, max(Duration.ZERO, Duration.NEGATIVE_INFINITE))
         assertEquals(
             Duration.NEGATIVE_INFINITE,
-            max(Duration.NEGATIVE_INFINITE, Duration.NEGATIVE_INFINITE),
+            max(Duration.NEGATIVE_INFINITE, Duration.NEGATIVE_INFINITE)
         )
 
         assertEquals(
             Duration.NEGATIVE_INFINITE,
-            min(1.milliseconds, Duration.NEGATIVE_INFINITE),
+            min(1.milliseconds, Duration.NEGATIVE_INFINITE)
         )
         assertEquals(
             Duration.NEGATIVE_INFINITE,
-            min(Duration.NEGATIVE_INFINITE, 1.milliseconds),
+            min(Duration.NEGATIVE_INFINITE, 1.milliseconds)
         )
         assertEquals(
             Duration.NEGATIVE_INFINITE,
-            min(Duration.NEGATIVE_INFINITE, Duration.NEGATIVE_INFINITE),
+            min(Duration.NEGATIVE_INFINITE, Duration.NEGATIVE_INFINITE)
         )
         assertEquals(Duration.ZERO, min(Duration.ZERO, Duration.INFINITE))
         assertEquals(Duration.ZERO, min(Duration.INFINITE, Duration.ZERO))
@@ -224,7 +224,7 @@ class DurationTest {
 
         assertEquals(
             (2 * 365.25 * 24 * 60 * 60 * 1000 * 1000 * 1000).toLong(),
-            duration.inNanoseconds,
+            duration.inNanoseconds
         )
         assertEquals(2 * 365.25 * 24 * 60 * 60 * 1000 * 1000, duration.inMicroseconds)
         assertEquals(2 * 365.25 * 24 * 60 * 60 * 1000, duration.inMilliseconds)

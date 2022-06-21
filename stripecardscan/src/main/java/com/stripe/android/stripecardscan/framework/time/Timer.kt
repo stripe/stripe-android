@@ -14,7 +14,7 @@ internal sealed class Timer {
             tag: String,
             name: String,
             enabled: Boolean,
-            updateInterval: Duration = 2.seconds,
+            updateInterval: Duration = 2.seconds
         ) = if (enabled) {
             LoggingTimer(
                 tag,

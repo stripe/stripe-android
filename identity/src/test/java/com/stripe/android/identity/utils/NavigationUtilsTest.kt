@@ -185,7 +185,7 @@ internal class NavigationUtilsTest {
                 mockIdentityViewModel,
                 mock(),
                 mock(),
-                fromFragment,
+                fromFragment
             )
 
             requireNotNull(navController.backStack.last().arguments).let { arguments ->
@@ -217,7 +217,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
+                    R.id.consentFragment
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -268,7 +268,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
+                    R.id.consentFragment
                 )
 
                 verify(mockIdentityViewModel).postVerificationPageSubmit()
@@ -294,7 +294,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
+                    R.id.consentFragment
                 )
 
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
@@ -331,7 +331,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
+                    R.id.consentFragment
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -358,7 +358,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
+                    R.id.consentFragment
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -385,7 +385,7 @@ internal class NavigationUtilsTest {
                     mockIdentityViewModel,
                     mock(),
                     mock(),
-                    R.id.consentFragment,
+                    R.id.consentFragment
                 )
 
                 assertThat(navController.currentDestination?.id)

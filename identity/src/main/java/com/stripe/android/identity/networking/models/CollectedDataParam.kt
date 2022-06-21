@@ -89,7 +89,7 @@ internal data class CollectedDataParam(
                     ),
                     idDocumentType = type
                 )
-            } else
+            } else {
                 CollectedDataParam(
                     idDocumentFront = DocumentUploadParam(
                         backScore = requireNotNull(frontHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
@@ -110,6 +110,7 @@ internal data class CollectedDataParam(
                     ),
                     idDocumentType = type
                 )
+            }
 
         fun createForSelfie(
             firstHighResResult: UploadedResult,
@@ -133,7 +134,7 @@ internal data class CollectedDataParam(
                 bestFaceScore = bestFaceScore,
                 faceScoreVariance = faceScoreVariance,
                 numFrames = numFrames,
-                trainingConsent = trainingConsent,
+                trainingConsent = trainingConsent
             )
         )
     }

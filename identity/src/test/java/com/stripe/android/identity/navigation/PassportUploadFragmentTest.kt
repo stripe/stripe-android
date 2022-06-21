@@ -316,10 +316,11 @@ class PassportUploadFragmentTest {
                 isFront = eq(true),
                 docCapturePage = same(DOCUMENT_CAPTURE),
                 uploadMethod =
-                if (isTakePhoto)
+                if (isTakePhoto) {
                     eq(UploadMethod.MANUALCAPTURE)
-                else
+                } else {
                     eq(UploadMethod.FILEUPLOAD)
+                }
             )
             assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -368,7 +369,8 @@ class PassportUploadFragmentTest {
         identityViewModelFactory: ViewModelProvider.Factory,
         val navController: TestNavHostController
     ) : PassportUploadFragment(
-        identityUploadViewModelFactory, identityViewModelFactory
+        identityUploadViewModelFactory,
+        identityViewModelFactory
     ) {
         override fun onCreateView(
             inflater: LayoutInflater,

@@ -86,8 +86,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$SUBMIT",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey,
-            ),
+                apiKey = ephemeralKey
+            )
         ),
         VerificationPageData.serializer()
     )

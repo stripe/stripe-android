@@ -90,7 +90,7 @@ internal class PassportScanFragment(
                                                         frontLowResResult = requireNotNull(it.frontLowResResult.data)
                                                     ),
                                                     clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                                    fromFragment = R.id.passportScanFragment,
+                                                    fromFragment = R.id.passportScanFragment
                                                 )
                                             }
                                         }.onFailure { throwable ->
