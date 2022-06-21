@@ -167,6 +167,6 @@ internal abstract class IdentityCameraScanFragment(
 
     internal companion object {
         private val TAG: String = IdentityCameraScanFragment::class.java.simpleName
-        val MINIMUM_RESOLUTION = Size(1067, 600)
+        val MINIMUM_RESOLUTION = Size(1440, 1080)
     }
 }
