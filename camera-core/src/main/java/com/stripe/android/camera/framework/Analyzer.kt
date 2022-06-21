@@ -41,7 +41,7 @@ data class AnalyzerPool<DataFrame, State, Output>(
         suspend fun <DataFrame, State, Output> of(
             analyzerFactory: AnalyzerFactory<DataFrame, State, Output,
                 out Analyzer<DataFrame, State, Output>>,
-            desiredAnalyzerCount: Int = DEFAULT_ANALYZER_PARALLEL_COUNT,
+            desiredAnalyzerCount: Int = DEFAULT_ANALYZER_PARALLEL_COUNT
         ) = AnalyzerPool(
             desiredAnalyzerCount = desiredAnalyzerCount,
             analyzers = (0 until desiredAnalyzerCount).mapNotNull { analyzerFactory.newInstance() }
