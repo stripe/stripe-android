@@ -36,23 +36,23 @@ class AnalyticsRequestV2FactoryTest {
 
     @Test
     fun `verify clientId and origin`() {
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             includeSDKParams = true
         )
 
-        assertThat(requestR.postParameters.toMap()[PARAM_CLIENT_ID]).isEqualTo(CLIENT_ID)
-        assertThat(requestR.headers[AnalyticsRequestV2.HEADER_ORIGIN]).isEqualTo(ORIGIN)
+        assertThat(request.postParameters.toMap()[PARAM_CLIENT_ID]).isEqualTo(CLIENT_ID)
+        assertThat(request.headers[AnalyticsRequestV2.HEADER_ORIGIN]).isEqualTo(ORIGIN)
     }
 
     @Test
     fun `verify SDKParams are included`() {
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             includeSDKParams = true
         )
 
-        requestR.postParameters.toMap().let { paramsMap ->
+        request.postParameters.toMap().let { paramsMap ->
             sdkParamKeys.forEach {
                 assertThat(paramsMap).containsKey(it)
             }
@@ -61,12 +61,12 @@ class AnalyticsRequestV2FactoryTest {
 
     @Test
     fun `SDKParams are not included`() {
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             includeSDKParams = false
         )
 
-        requestR.postParameters.toMap().let { paramsMap ->
+        request.postParameters.toMap().let { paramsMap ->
             sdkParamKeys.forEach {
                 assertThat(paramsMap).doesNotContainKey(it)
             }
@@ -86,7 +86,7 @@ class AnalyticsRequestV2FactoryTest {
             "nestedParam2" to "nestedValue2"
         )
 
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             additionalParams = mapOf(
                 additionalParam1 to additionalValue1,
@@ -96,7 +96,7 @@ class AnalyticsRequestV2FactoryTest {
             includeSDKParams = true
         )
 
-        requestR.postParameters.toMap().let { paramsMap ->
+        request.postParameters.toMap().let { paramsMap ->
             assertThat(paramsMap[additionalParam1]).isEqualTo(additionalValue1)
             assertThat(paramsMap[additionalParam2]).isEqualTo(additionalValue2)
             assertThat(paramsMap[additionalParam3]).isEqualTo(

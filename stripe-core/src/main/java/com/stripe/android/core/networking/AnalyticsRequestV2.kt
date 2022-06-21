@@ -22,7 +22,7 @@ import java.util.UUID
  *   [HEADER_USER_AGENT] - Used for parsing client info, needs to conform the format starting with "Stripe/v1"
  *
  * It sets four params required r.stripe.com -
- *   [PARAM_EVENT_ID] - A string identifying the client making the request, set from analytics server
+ *   [PARAM_CLIENT_ID] - A string identifying the client making the request, set from analytics server
  *   [PARAM_CREATED] - Timestamp when the event was created in seconds
  *   [PARAM_EVENT_NAME] - An identifying name for this type of event
  *   [PARAM_EVENT_ID] - UUID used to deduplicate events
