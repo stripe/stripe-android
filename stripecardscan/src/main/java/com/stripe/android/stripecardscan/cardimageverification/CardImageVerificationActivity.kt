@@ -75,7 +75,7 @@ internal interface CardImageVerificationResultListener : ScanResultListener {
 internal data class CardVerificationFlowParameters(
     val cardIssuer: CardIssuer?,
     val lastFour: String?,
-    val strictModeFrames: Int,
+    val strictModeFrames: Int
 )
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
@@ -128,7 +128,7 @@ internal open class CardImageVerificationActivity :
             stripePublishableKey = "",
             configuration = CardImageVerificationSheet.Configuration(),
             cardImageVerificationIntentId = "",
-            cardImageVerificationIntentSecret = "",
+            cardImageVerificationIntentSecret = ""
         )
     }
 
@@ -192,7 +192,7 @@ internal open class CardImageVerificationActivity :
                         civId = params.cardImageVerificationIntentId,
                         civSecret = params.cardImageVerificationIntentSecret,
                         savedFrames = frames,
-                        verificationFramesData = verificationFramesAndPayload.first,
+                        verificationFramesData = verificationFramesAndPayload.first
                     )
 
                     completionLoopStat.trackResult("complete")
@@ -212,7 +212,7 @@ internal open class CardImageVerificationActivity :
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
-                        CardImageVerificationSheetResult.Canceled(reason),
+                        CardImageVerificationSheetResult.Canceled(reason)
                     )
                 setResult(RESULT_CANCELED, intent)
             }
@@ -221,7 +221,7 @@ internal open class CardImageVerificationActivity :
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
-                        CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException()),
+                        CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException())
                     )
                 setResult(RESULT_CANCELED, intent)
             }
@@ -236,7 +236,7 @@ internal open class CardImageVerificationActivity :
              * A final result was received from the aggregator. Set the result from this activity.
              */
             override suspend fun onResult(
-                result: MainLoopAggregator.FinalResult,
+                result: MainLoopAggregator.FinalResult
             ) {
                 super.onResult(result)
 
@@ -245,7 +245,7 @@ internal open class CardImageVerificationActivity :
                     cameraAdapter.unbindFromLifecycle(this@CardImageVerificationActivity)
                     resultListener.cardReadyForVerification(
                         pan = result.pan,
-                        frames = scanFlow.selectCompletionLoopFrames(result.savedFrames),
+                        frames = scanFlow.selectCompletionLoopFrames(result.savedFrames)
                     )
                 }.let { }
             }
@@ -254,7 +254,7 @@ internal open class CardImageVerificationActivity :
              * An interim result was received from the result aggregator.
              */
             override suspend fun onInterimResult(
-                result: MainLoopAggregator.InterimResult,
+                result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
                 if (
                     result.state is MainLoopState.OcrFound &&
@@ -279,7 +279,7 @@ internal open class CardImageVerificationActivity :
                     cardNumberTextView.text = getString(
                         R.string.stripe_card_description,
                         cardIssuer?.displayName ?: "",
-                        lastFour,
+                        lastFour
                     )
                     cardNumberTextView.show()
                 } else {
@@ -328,7 +328,8 @@ internal open class CardImageVerificationActivity :
         cannotScanTextView.setOnClickListener { userCannotScan() }
 
         displayState(
-            requireNotNull(scanState), scanStatePrevious
+            requireNotNull(scanState),
+            scanStatePrevious
         )
     }
 
@@ -364,7 +365,7 @@ internal open class CardImageVerificationActivity :
         val result = getCardImageVerificationIntentDetails(
             stripePublishableKey = params.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
-            civSecret = params.cardImageVerificationIntentSecret,
+            civSecret = params.cardImageVerificationIntentSecret
         )
     ) {
         is NetworkResult.Success ->
@@ -377,7 +378,7 @@ internal open class CardImageVerificationActivity :
                     CardVerificationFlowParameters(
                         cardIssuer = getIssuerByDisplayName(expectedCard.issuer),
                         lastFour = expectedCard.lastFour,
-                        strictModeFrames = params.configuration.strictModeFrames.count,
+                        strictModeFrames = params.configuration.strictModeFrames.count
                     )
                 } else {
                     launch(Dispatchers.Main) {
@@ -401,7 +402,7 @@ internal open class CardImageVerificationActivity :
     }
 
     private fun onScanDetailsAvailable(
-        cardVerificationFlowParameters: CardVerificationFlowParameters?,
+        cardVerificationFlowParameters: CardVerificationFlowParameters?
     ) {
         if (cardVerificationFlowParameters != null &&
             !cardVerificationFlowParameters.lastFour.isNullOrEmpty()
@@ -424,7 +425,7 @@ internal open class CardImageVerificationActivity :
             cardDescriptionTextView,
             processingOverlayView,
             processingSpinnerView,
-            processingTextView,
+            processingTextView
         )
     }
 
@@ -446,7 +447,7 @@ internal open class CardImageVerificationActivity :
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
-            resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
+            resources.getDimensionPixelSize(R.dimen.stripeButtonPadding)
         )
 
         cannotScanTextView.setVisible(params.configuration.enableCannotScanButton)
@@ -510,7 +511,7 @@ internal open class CardImageVerificationActivity :
     protected open fun setupCannotScanTextViewConstraints() {
         cannotScanTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+            ConstraintLayout.LayoutParams.WRAP_CONTENT // height
         ).apply {
             marginStart = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
             marginEnd = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
@@ -528,7 +529,7 @@ internal open class CardImageVerificationActivity :
     protected open fun setupCardDescriptionTextViewConstraints() {
         cardDescriptionTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+            ConstraintLayout.LayoutParams.WRAP_CONTENT // height
         ).apply {
             marginStart = resources.getDimensionPixelSize(R.dimen.stripeCardDescriptionMargin)
             marginEnd = resources.getDimensionPixelSize(R.dimen.stripeCardDescriptionMargin)
@@ -546,7 +547,7 @@ internal open class CardImageVerificationActivity :
     protected open fun setupProcessingOverlayViewConstraints() {
         processingOverlayView.layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_PARENT, // width
-            ConstraintLayout.LayoutParams.MATCH_PARENT, // height
+            ConstraintLayout.LayoutParams.MATCH_PARENT // height
         )
 
         processingOverlayView.constrainToParent()
@@ -555,7 +556,7 @@ internal open class CardImageVerificationActivity :
     protected open fun setupProcessingSpinnerViewConstraints() {
         processingSpinnerView.layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.WRAP_CONTENT, // width
-            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+            ConstraintLayout.LayoutParams.WRAP_CONTENT // height
         )
 
         processingSpinnerView.constrainToParent()
@@ -564,7 +565,7 @@ internal open class CardImageVerificationActivity :
     protected open fun setupProcessingTextViewConstraints() {
         processingTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+            ConstraintLayout.LayoutParams.WRAP_CONTENT // height
         )
 
         processingTextView.addConstraints {
@@ -643,7 +644,7 @@ internal open class CardImageVerificationActivity :
             appDetails = AppDetails.fromContext(this),
             scanStatistics = ScanStatistics.fromStats(),
             scanConfig = ScanConfig(
-                strictModeFrameCount = params.configuration.strictModeFrames.count,
+                strictModeFrameCount = params.configuration.strictModeFrames.count
             ),
             payloadInfo = currentScanPayloadInfo
         )

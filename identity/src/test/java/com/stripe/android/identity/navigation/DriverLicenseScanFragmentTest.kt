@@ -225,7 +225,7 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT
                         )
                     ),
                     eq(
@@ -274,7 +274,7 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT
                         )
                     ),
                     eq(

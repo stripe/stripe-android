@@ -529,10 +529,11 @@ class IdentityUploadFragmentTest {
                     isFront = eq(true),
                     docCapturePage = same(DOCUMENT_CAPTURE),
                     uploadMethod =
-                    if (isTakePhoto)
+                    if (isTakePhoto) {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                    else
+                    } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
+                    }
                 )
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -543,10 +544,11 @@ class IdentityUploadFragmentTest {
                     isFront = eq(false),
                     docCapturePage = same(DOCUMENT_CAPTURE),
                     uploadMethod =
-                    if (isTakePhoto)
+                    if (isTakePhoto) {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                    else
+                    } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
+                    }
                 )
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.VISIBLE)

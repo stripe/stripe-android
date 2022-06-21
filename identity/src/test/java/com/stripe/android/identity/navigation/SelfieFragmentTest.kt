@@ -318,7 +318,7 @@ internal class SelfieFragmentTest {
             ) to FaceDetectorOutput(
                 boundingBox = mock(),
                 resultScore = 0.82f
-            ), // last
+            ) // last
         )
 
         const val SCORE_VARIANCE = 0.1f

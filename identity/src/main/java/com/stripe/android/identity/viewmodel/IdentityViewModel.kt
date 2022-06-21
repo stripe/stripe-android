@@ -318,14 +318,15 @@ internal class IdentityViewModel @Inject constructor(
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
-            if (isHighRes)
+            if (isHighRes) {
                 identityIO.cropAndPadBitmap(
                     originalBitmap,
                     boundingBox,
                     originalBitmap.longerEdge() * docCapturePage.highResImageCropPadding
                 )
-            else
-                originalBitmap,
+            } else {
+                originalBitmap
+            },
             verificationId = verificationArgs.verificationSessionId,
             fileName =
             StringBuilder().also { nameBuilder ->
@@ -337,15 +338,17 @@ internal class IdentityViewModel @Inject constructor(
                 nameBuilder.append(".jpeg")
             }.toString(),
             maxDimension =
-            if (isHighRes)
+            if (isHighRes) {
                 docCapturePage.highResImageMaxDimension
-            else
-                docCapturePage.lowResImageMaxDimension,
+            } else {
+                docCapturePage.lowResImageMaxDimension
+            },
             compressionQuality =
-            if (isHighRes)
+            if (isHighRes) {
                 docCapturePage.highResImageCompressionQuality
-            else
+            } else {
                 docCapturePage.lowResImageCompressionQuality
+            }
         ).let { imageFile ->
             uploadDocumentImagesAndNotify(
                 imageFile = imageFile,
@@ -438,14 +441,15 @@ internal class IdentityViewModel @Inject constructor(
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
-            if (isHighRes)
+            if (isHighRes) {
                 identityIO.cropAndPadBitmap(
                     originalBitmap,
                     boundingBox,
                     boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH * selfieCapturePage.highResImageCropPadding
                 )
-            else
-                originalBitmap,
+            } else {
+                originalBitmap
+            },
             verificationId = verificationArgs.verificationSessionId,
             fileName =
             StringBuilder().also { nameBuilder ->
@@ -465,15 +469,17 @@ internal class IdentityViewModel @Inject constructor(
                 nameBuilder.append(".jpeg")
             }.toString(),
             maxDimension =
-            if (isHighRes)
+            if (isHighRes) {
                 selfieCapturePage.highResImageMaxDimension
-            else
-                selfieCapturePage.lowResImageMaxDimension,
+            } else {
+                selfieCapturePage.lowResImageMaxDimension
+            },
             compressionQuality =
-            if (isHighRes)
+            if (isHighRes) {
                 selfieCapturePage.highResImageCompressionQuality
-            else
+            } else {
                 selfieCapturePage.lowResImageCompressionQuality
+            }
         ).let { imageFile ->
             uploadSelfieImagesAndNotify(
                 imageFile = imageFile,
@@ -532,7 +538,7 @@ internal class IdentityViewModel @Inject constructor(
     fun observeForVerificationPage(
         owner: LifecycleOwner,
         onSuccess: (VerificationPage) -> Unit,
-        onFailure: (Throwable?) -> Unit,
+        onFailure: (Throwable?) -> Unit
     ) {
         verificationPage.observe(owner) { resource ->
             when (resource.status) {
@@ -584,7 +590,7 @@ internal class IdentityViewModel @Inject constructor(
                             "Failed to retrieve verification page with " +
                                 "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: ${verificationArgs.ephemeralKeySecret}",
                             it
-                        ),
+                        )
                     )
                 }
             )
@@ -673,7 +679,7 @@ internal class IdentityViewModel @Inject constructor(
                         docBackUploadType = latestState.docBackUploadType,
                         docFrontModelScore = latestState.docFrontModelScore,
                         docBackModelScore = latestState.docBackModelScore,
-                        selfieModelScore = latestState.selfieModelScore,
+                        selfieModelScore = latestState.selfieModelScore
                     )
                 )
             }
@@ -686,7 +692,7 @@ internal class IdentityViewModel @Inject constructor(
         private val cameraPermissionEnsureable: CameraPermissionEnsureable,
         private val appSettingsOpenable: AppSettingsOpenable,
         private val verificationFlowFinishable: VerificationFlowFinishable,
-        private val fallbackUrlLauncher: FallbackUrlLauncher,
+        private val fallbackUrlLauncher: FallbackUrlLauncher
     ) : ViewModelProvider.Factory, Injectable<Context> {
         @Inject
         lateinit var subComponentBuilderProvider: Provider<IdentityViewModelSubcomponent.Builder>

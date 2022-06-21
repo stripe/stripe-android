@@ -33,7 +33,7 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                false,
+                false
             )
             return null
         }
@@ -44,7 +44,7 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                true,
+                true
             )
             loadedData
         } catch (t: Throwable) {
@@ -53,7 +53,7 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                false,
+                false
             )
             null
         }
@@ -68,7 +68,7 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                false,
+                false
             )
             return null
         }
@@ -79,7 +79,7 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                true,
+                true
             )
             loadedData
         } catch (t: Throwable) {
@@ -87,7 +87,7 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                true,
+                true
             )
             null
         }
@@ -115,7 +115,7 @@ private suspend fun readAssetToByteBuffer(context: Context, assetFileName: Strin
                 readFileToByteBuffer(
                     input,
                     fileDescriptor.startOffset,
-                    fileDescriptor.declaredLength,
+                    fileDescriptor.declaredLength
                 )
             }
         }

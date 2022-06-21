@@ -593,7 +593,7 @@ internal class DocSelectionFragmentTest {
         val DOC_SELECT_SINGLE_CHOICE_PASSPORT = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                PASSPORT_KEY to PASSPORT_BODY_TEXT,
+                PASSPORT_KEY to PASSPORT_BODY_TEXT
             ),
             buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
             body = PASSPORT_SINGLE_BODY_TEXT
@@ -602,7 +602,7 @@ internal class DocSelectionFragmentTest {
         val DOC_SELECT_SINGLE_CHOICE_ID = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                ID_CARD_KEY to ID_BODY_TEXT,
+                ID_CARD_KEY to ID_BODY_TEXT
             ),
             buttonText = DOCUMENT_SELECT_BUTTON_TEXT,
             body = ID_SINGLE_BODY_TEXT
@@ -628,7 +628,7 @@ internal class DocSelectionFragmentTest {
             id = "id",
             objectType = "type",
             requirements = VerificationPageDataRequirements(
-                errors = emptyList(),
+                errors = emptyList()
 //                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTBACK)
             ),
             status = VerificationPageData.Status.VERIFIED,

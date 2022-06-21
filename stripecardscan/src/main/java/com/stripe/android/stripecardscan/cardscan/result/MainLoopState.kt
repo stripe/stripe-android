@@ -27,12 +27,12 @@ internal sealed class MainLoopState : MachineState() {
     }
 
     internal abstract suspend fun consumeTransition(
-        transition: SSDOcr.Prediction,
+        transition: SSDOcr.Prediction
     ): MainLoopState
 
     class Initial : MainLoopState() {
         override suspend fun consumeTransition(
-            transition: SSDOcr.Prediction,
+            transition: SSDOcr.Prediction
         ): MainLoopState = if (transition.pan.isNullOrEmpty()) {
             this
         } else {
@@ -63,7 +63,7 @@ internal sealed class MainLoopState : MachineState() {
         private fun isNoCardVisible() = lastCardVisible.elapsedSince() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
-            transition: SSDOcr.Prediction,
+            transition: SSDOcr.Prediction
         ): MainLoopState {
             val transitionPan = transition.pan
             if (!transitionPan.isNullOrEmpty()) {
@@ -76,7 +76,7 @@ internal sealed class MainLoopState : MachineState() {
             return when {
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
-                        pan = pan,
+                        pan = pan
                     )
                 isNoCardVisible() ->
                     Initial()
@@ -87,7 +87,7 @@ internal sealed class MainLoopState : MachineState() {
 
     class Finished(val pan: String) : MainLoopState() {
         override suspend fun consumeTransition(
-            transition: SSDOcr.Prediction,
+            transition: SSDOcr.Prediction
         ): MainLoopState = this
     }
 }

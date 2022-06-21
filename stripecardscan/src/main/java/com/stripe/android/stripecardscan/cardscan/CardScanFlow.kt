@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 internal abstract class CardScanFlow(
-    private val scanErrorListener: AnalyzerLoopErrorListener,
+    private val scanErrorListener: AnalyzerLoopErrorListener
 ) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
@@ -86,12 +86,13 @@ internal abstract class CardScanFlow(
                         SSDOcr.cameraPreviewToInput(
                             it.image,
                             minAspectRatioSurroundingSize(
-                                it.viewBounds.size(), it.image.width.toFloat() / it.image.height
+                                it.viewBounds.size(),
+                                it.image.width.toFloat() / it.image.height
                             ).centerOn(it.viewBounds),
                             viewFinder
                         )
                     },
-                    coroutineScope,
+                    coroutineScope
                 )
             }
         }

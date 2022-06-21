@@ -19,7 +19,7 @@ internal class MLImage(val width: Int, val height: Int, private val imageData: B
     constructor(bitmap: Bitmap, mean: Float = 0F, std: Float = 255F) : this(
         bitmap,
         ImageTransformValues(mean, mean, mean),
-        ImageTransformValues(std, std, std),
+        ImageTransformValues(std, std, std)
     )
 
     constructor(bitmap: Bitmap, mean: ImageTransformValues, std: ImageTransformValues) : this(
@@ -49,7 +49,7 @@ internal class MLImage(val width: Int, val height: Int, private val imageData: B
      */
     fun toBitmap(mean: Float = 0F, std: Float = 255F) = toBitmap(
         ImageTransformValues(mean, mean, mean),
-        ImageTransformValues(std, std, std),
+        ImageTransformValues(std, std, std)
     )
 
     /**

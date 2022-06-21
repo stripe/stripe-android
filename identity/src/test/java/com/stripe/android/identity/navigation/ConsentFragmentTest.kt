@@ -102,7 +102,7 @@ internal class ConsentFragmentTest {
                 privacyPolicy = null,
                 timeEstimate = null,
                 body = CONSENT_BODY,
-                declineButtonText = CONSENT_DECLINE_TEXT,
+                declineButtonText = CONSENT_DECLINE_TEXT
             )
         )
         whenever(it.requirements).thenReturn(

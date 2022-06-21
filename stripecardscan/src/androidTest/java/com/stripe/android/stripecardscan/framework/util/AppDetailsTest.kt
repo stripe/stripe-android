@@ -14,16 +14,16 @@ class AppDetailsTest {
 
         assertEquals(
             "com.stripe.android.stripecardscan.test",
-            appDetails.appPackageName,
+            appDetails.appPackageName
         )
         assertEquals("", appDetails.applicationId)
         assertEquals(
             "com.stripe.android.stripecardscan",
-            appDetails.libraryPackageName,
+            appDetails.libraryPackageName
         )
         assertTrue(
             appDetails.sdkVersion.startsWith("1."),
-            "${appDetails.sdkVersion} does not start with \"2.\"",
+            "${appDetails.sdkVersion} does not start with \"2.\""
         )
         assertEquals(-1, appDetails.sdkVersionCode)
         assertTrue(appDetails.sdkFlavor.isNotEmpty())
