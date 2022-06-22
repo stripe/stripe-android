@@ -19,9 +19,11 @@ internal class ModelPerformanceTracker @Inject constructor(
     private val inferenceStats = mutableListOf<TaskStats>()
 
     private fun List<TaskStats>.averageDuration() =
-        (this.fold(Duration.ZERO) { accDuration, next ->
-            accDuration + next.duration
-        } / size).inMicroseconds.toLong()
+        (
+            this.fold(Duration.ZERO) { accDuration, next ->
+                accDuration + next.duration
+            } / size
+            ).inMicroseconds.toLong()
 
     fun trackPreprocess(): StatTracker =
         StatTrackerImpl { startedAt, _ ->

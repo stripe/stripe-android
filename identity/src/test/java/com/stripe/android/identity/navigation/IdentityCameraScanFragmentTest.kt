@@ -192,8 +192,8 @@ class IdentityCameraScanFragmentTest {
             runBlocking {
                 verify(mockFPSTracker).reportAndReset(
                     if (finalResult.result is FaceDetectorOutput) {
-                        eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE) 
-                    }else {
+                        eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
+                    } else {
                         eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
                     }
                 )
