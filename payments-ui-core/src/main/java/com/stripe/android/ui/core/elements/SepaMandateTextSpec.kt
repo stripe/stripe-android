@@ -16,7 +16,7 @@ internal data class SepaMandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes
-    val stringResId: Int = R.string.sepa_mandate,
+    val stringResId: Int = R.string.sepa_mandate
 ) : FormItemSpec() {
     @Transient
     private val mandateTextSpec = MandateTextSpec(apiPath, stringResId)

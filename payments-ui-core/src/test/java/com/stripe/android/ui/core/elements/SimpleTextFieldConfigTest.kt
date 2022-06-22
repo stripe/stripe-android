@@ -7,10 +7,9 @@ import org.junit.Test
 class SimpleTextFieldConfigTest {
     @Test
     fun `test number keyboards only accept numbers`() {
-
         val textConfig = SimpleTextFieldConfig(
             label = 1,
-            keyboard = KeyboardType.Number,
+            keyboard = KeyboardType.Number
         )
 
         assertThat(textConfig.filter("abc123")).isEqualTo("123")
@@ -18,10 +17,9 @@ class SimpleTextFieldConfigTest {
 
     @Test
     fun `test number password keyboards only accept numbers`() {
-
         val textConfig = SimpleTextFieldConfig(
             label = 1,
-            keyboard = KeyboardType.NumberPassword,
+            keyboard = KeyboardType.NumberPassword
         )
 
         assertThat(textConfig.filter("abc123")).isEqualTo("123")

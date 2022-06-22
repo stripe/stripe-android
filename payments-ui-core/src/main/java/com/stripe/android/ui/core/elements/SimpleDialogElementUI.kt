@@ -19,7 +19,6 @@ fun SimpleDialogElementUI(
     onConfirmListener: (() -> Unit) = {},
     onDismissListener: (() -> Unit) = {}
 ) {
-
     if (openDialog.value) {
         PaymentsTheme {
             AlertDialog(

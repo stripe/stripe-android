@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.map
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class OTPElement(
     override val identifier: IdentifierSpec,
-    override val controller: OTPController,
+    override val controller: OTPController
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.fieldValue.map {

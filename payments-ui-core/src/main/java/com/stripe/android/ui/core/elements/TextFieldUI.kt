@@ -207,7 +207,7 @@ fun TextField(
             }
         ),
         singleLine = true,
-        colors = colors,
+        colors = colors
     )
 }
 

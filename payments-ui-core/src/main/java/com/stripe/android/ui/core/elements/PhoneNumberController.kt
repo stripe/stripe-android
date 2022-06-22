@@ -92,7 +92,8 @@ class PhoneNumberController internal constructor(
                 while (charIndex < initialValue.length - 1 && charIndex < 4) {
                     charIndex++
                     PhoneNumberFormatter.findBestCountryForPrefix(
-                        initialValue.substring(0, charIndex), LocaleListCompat.getAdjustedDefault()
+                        initialValue.substring(0, charIndex),
+                        LocaleListCompat.getAdjustedDefault()
                     )?.let {
                         return PhoneNumberController(
                             initialPhoneNumber = initialValue.substring(charIndex),
