@@ -92,6 +92,7 @@ internal class IdentityViewModelTest {
         mockIdentityModelFetcher,
         mockIdentityIO,
         mock(),
+        mock(),
         mock()
     )
 

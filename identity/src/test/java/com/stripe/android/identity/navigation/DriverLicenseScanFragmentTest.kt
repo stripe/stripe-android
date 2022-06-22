@@ -71,6 +71,7 @@ internal class DriverLicenseScanFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(mock())
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
@@ -87,6 +88,7 @@ internal class DriverLicenseScanFragmentTest {
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { it.fpsTracker } doReturn mock()
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {

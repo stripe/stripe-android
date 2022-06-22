@@ -53,7 +53,7 @@ internal class IdentityActivityTest {
         mockCameraPermissionEnsureable,
         mockAppSettingsOpenable,
         mockVerificationFlowFinishable,
-        IdentityScanViewModel.IdentityScanViewModelFactory(),
+        IdentityScanViewModel.IdentityScanViewModelFactory(mock()),
         IdentityUploadViewModel.FrontBackUploadViewModelFactory(mock()),
         ConsentFragmentViewModel.ConsentFragmentViewModelFactory(mock(), mock()),
         mockIdentityViewModelFactory,

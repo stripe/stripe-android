@@ -69,6 +69,7 @@ class PassportScanFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(mock())
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
@@ -85,6 +86,7 @@ class PassportScanFragmentTest {
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { fpsTracker } doReturn mock()
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {

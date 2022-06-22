@@ -62,6 +62,7 @@ class IdentityDocumentScanFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(mock())
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
@@ -74,6 +75,7 @@ class IdentityDocumentScanFragmentTest {
                 args = mock()
             )
         )
+        whenever(it.fpsTracker).thenReturn(mock())
     }
 
     internal class TestFragment(

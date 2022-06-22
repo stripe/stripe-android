@@ -18,6 +18,7 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.ID
@@ -72,6 +73,7 @@ internal class IDScanFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(mock())
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
@@ -79,6 +81,8 @@ internal class IDScanFragmentTest {
 
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
+
+    private val mockFPSTracker = mock<FPSTracker>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
@@ -88,6 +92,7 @@ internal class IDScanFragmentTest {
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { it.fpsTracker } doReturn mockFPSTracker
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
@@ -128,6 +133,7 @@ internal class IDScanFragmentTest {
                         params[PARAM_SCAN_TYPE] == ID
                 }
             )
+            verify(mockFPSTracker).start()
         }
     }
 
@@ -144,6 +150,8 @@ internal class IDScanFragmentTest {
                 same(idScanFragment.lifecycleScope),
                 eq(IdentityScanState.ScanType.ID_FRONT)
             )
+
+            verify(mockFPSTracker).start()
 
             // mock success of front scan
             val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
@@ -170,6 +178,7 @@ internal class IDScanFragmentTest {
 
             // verify start to scan back
             assertThat(idScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockFPSTracker, times(2)).start()
             verify(mockScanFlow).startFlow(
                 same(idScanFragment.requireContext()),
                 any(),
