@@ -23,7 +23,7 @@ internal class ModelPerformanceTracker @Inject constructor(
             this.fold(Duration.ZERO) { accDuration, next ->
                 accDuration + next.duration
             } / size
-            ).inMicroseconds.toLong()
+            ).inMilliseconds.toLong()
 
     fun trackPreprocess(): StatTracker =
         StatTrackerImpl { startedAt, _ ->
