@@ -1,7 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,8 +27,7 @@ import java.io.File
  * TODO(ccen): Extract type parameters and move to camera-core
  */
 internal open class CameraViewModel(
-    @VisibleForTesting
-    internal val modelPerformanceTracker: ModelPerformanceTracker
+    private val modelPerformanceTracker: ModelPerformanceTracker
 ) :
     ViewModel(),
     AnalyzerLoopErrorListener,
