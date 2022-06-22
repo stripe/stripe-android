@@ -53,6 +53,9 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.address.autocomplete.AddressAutocompleteResult
+import com.stripe.android.ui.core.elements.AddressAutocompleteTextField
+import com.stripe.android.ui.core.elements.AddressAutocompleteTextFieldController
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
 
@@ -143,32 +146,30 @@ internal class AddressOptionsActivity : ComponentActivity() {
                                                 ) {
                                                     Loading()
                                                 }
-                                                FormUI(
-                                                    viewModel.formController.hiddenIdentifiers,
-                                                    viewModel.isEnabled,
-                                                    viewModel.formController.elements,
-                                                    viewModel.formController.lastTextFieldIdentifier
-                                                ) {
-                                                    Loading()
-                                                }
                                                 Button(onClick = { navController.navigate("AutoComplete") }) {
                                                     Text(text = "Change to AutoComplete screen")
                                                 }
                                             }
                                         }
                                         composable("AutoComplete") {
-                                            Column {
-                                                Text("AutoComplete Screen")
-                                                FormUI(
-                                                    viewModel.formController.hiddenIdentifiers,
-                                                    viewModel.isEnabled,
-                                                    viewModel.formController.elements,
-                                                    viewModel.formController.lastTextFieldIdentifier
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth().fillMaxHeight()
+                                            ) {
+                                                AddressAutocompleteTextField(
+                                                    controller = AddressAutocompleteTextFieldController(
+                                                        context = this@AddressOptionsActivity,
+                                                        country = "US",
+                                                        googlePlacesApiKey = "AIzaSyDnBZ_Wlh7BUW9WbpX-2__Vcz7qFKgnQTc",
+                                                        workerScope = lifecycleScope
+                                                    ),
                                                 ) {
-                                                    Loading()
-                                                }
-                                                Button(onClick = { navController.navigate("BaseAddress") }) {
-                                                    Text(text = "Change to BaseAddress screen")
+                                                    val autoCompleteResult =
+                                                        AddressAutocompleteResult.Succeeded(it)
+                                                    setResult(
+                                                        autoCompleteResult.resultCode,
+                                                        Intent().putExtras(autoCompleteResult.toBundle())
+                                                    )
+                                                    finish()
                                                 }
                                             }
                                         }
