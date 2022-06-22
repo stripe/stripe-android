@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.paymentsColors
@@ -23,28 +24,41 @@ internal fun RowElementUI(
     hiddenIdentifiers: List<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
-    val fields = controller.fields
-    val numVisibleFields = fields.filter { !hiddenIdentifiers.contains(it.identifier) }.size
+    val visibleFields = controller.fields.filter { !hiddenIdentifiers.contains(it.identifier) }
     val dividerHeight = remember { mutableStateOf(0.dp) }
-    // Only draw the row if the items in the row are not hidden, otherwise the entire
+    // Only draw the row if there are items in the row that are not hidden, otherwise the entire
     // section will fail to draw
-    if (fields.map { it.identifier }.any { !hiddenIdentifiers.contains(it) }) {
+    if (visibleFields.isNotEmpty()) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            fields.forEachIndexed { index, field ->
+            visibleFields.forEachIndexed { index, field ->
+                val nextFocusDirection = if (index == visibleFields.size - 1) {
+                    FocusDirection.Down
+                } else {
+                    FocusDirection.Right
+                }
+
+                val previousFocusDirection = if (index == 0) {
+                    FocusDirection.Up
+                } else {
+                    FocusDirection.Left
+                }
+
                 SectionFieldElementUI(
                     enabled,
                     field,
                     hiddenIdentifiers = hiddenIdentifiers,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
                     modifier = Modifier
-                        .weight(1.0f / numVisibleFields.toFloat())
+                        .weight(1.0f / visibleFields.size.toFloat())
                         .onSizeChanged {
                             dividerHeight.value =
                                 (it.height / Resources.getSystem().displayMetrics.density).dp
-                        }
+                        },
+                    nextFocusDirection = nextFocusDirection,
+                    previousFocusDirection = previousFocusDirection
                 )
 
-                if (index != fields.lastIndex) {
+                if (index != visibleFields.lastIndex) {
                     Divider(
                         modifier = Modifier
                             .height(dividerHeight.value)
