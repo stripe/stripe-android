@@ -57,7 +57,8 @@ data class SimpleTextSpec(
     override val apiPath: IdentifierSpec,
 
     @SerialName("label")
-    @StringRes val label: Int,
+    @StringRes
+    val label: Int,
 
     @SerialName("capitalization")
     val capitalization: Capitalization = Capitalization.None,

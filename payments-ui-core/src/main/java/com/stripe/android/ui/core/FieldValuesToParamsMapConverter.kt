@@ -44,7 +44,7 @@ class FieldValuesToParamsMapConverter {
          */
         private fun transformToParamsMap(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-            code: PaymentMethodCode,
+            code: PaymentMethodCode
         ): MutableMap<String, Any?> {
             val destMap = mutableMapOf<String, Any?>()
 

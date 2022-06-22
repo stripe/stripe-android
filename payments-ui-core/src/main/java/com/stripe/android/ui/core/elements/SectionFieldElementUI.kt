@@ -10,7 +10,7 @@ internal fun SectionFieldElementUI(
     field: SectionFieldElement,
     modifier: Modifier = Modifier,
     hiddenIdentifiers: List<IdentifierSpec>? = null,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
         when (val controller = field.sectionFieldErrorController()) {
