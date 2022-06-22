@@ -22,6 +22,14 @@ public final class com/stripe/android/core/AppInfo$Companion {
 	public static synthetic fun create$default (Lcom/stripe/android/core/AppInfo$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/AppInfo;
 }
 
+public final class com/stripe/android/core/AppInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/AppInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/AppInfo;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -40,7 +48,6 @@ public final class com/stripe/android/core/Logger$DefaultImpls {
 
 public final class com/stripe/android/core/StripeError : com/stripe/android/core/model/StripeModel, java/io/Serializable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
@@ -64,6 +71,14 @@ public final class com/stripe/android/core/StripeError : com/stripe/android/core
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/core/StripeError$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/StripeError;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/StripeError;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/exception/APIConnectionException : com/stripe/android/core/exception/StripeException {
 	public static final field Companion Lcom/stripe/android/core/exception/APIConnectionException$Companion;
 	public fun <init> ()V
@@ -72,7 +87,6 @@ public final class com/stripe/android/core/exception/APIConnectionException : co
 }
 
 public final class com/stripe/android/core/exception/APIConnectionException$Companion {
-	public static synthetic fun create$default (Lcom/stripe/android/core/exception/APIConnectionException$Companion;Ljava/io/IOException;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/exception/APIConnectionException;
 }
 
 public final class com/stripe/android/core/exception/APIException : com/stripe/android/core/exception/StripeException {
@@ -82,7 +96,6 @@ public final class com/stripe/android/core/exception/APIException : com/stripe/a
 }
 
 public final class com/stripe/android/core/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
-	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/InvalidRequestException : com/stripe/android/core/exception/StripeException {
@@ -112,7 +125,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public final fun getStatusCode ()I
 	public final fun getStripeError ()Lcom/stripe/android/core/StripeError;
 	public fun hashCode ()I
-	public final fun isClientError ()Z
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -132,7 +144,7 @@ public final class com/stripe/android/core/injection/CoroutineContextModule_Prov
 	public static fun provideWorkContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
 }
 
-public final class com/stripe/android/core/injection/InjectableKtxKt {
+public final class com/stripe/android/core/injection/InjectWithFallbackKt {
 }
 
 public final class com/stripe/android/core/injection/InjectorKt {
@@ -149,12 +161,19 @@ public final class com/stripe/android/core/injection/LoggingModule_ProvideLogger
 public final class com/stripe/android/core/injection/NamedConstantsKt {
 }
 
+public final class com/stripe/android/core/model/CountryCode$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/CountryCode;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/model/CountryCode;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/model/CountryCodeKt {
 }
 
 public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/core/model/StripeFilePurpose;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()Ljava/lang/String;
@@ -178,6 +197,14 @@ public final class com/stripe/android/core/model/StripeFile : com/stripe/android
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/core/model/StripeFile$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/StripeFile;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/model/StripeFile;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/model/StripeFileParams {
@@ -205,6 +232,14 @@ public final class com/stripe/android/core/model/StripeFileParams$FileLink : and
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/core/model/StripeFileParams$FileLink$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/StripeFileParams$FileLink;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/model/StripeFileParams$FileLink;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
 	public static final field BusinessIcon Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field BusinessLogo Lcom/stripe/android/core/model/StripeFilePurpose;
@@ -222,6 +257,14 @@ public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/E
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {
 	public abstract fun equals (Ljava/lang/Object;)Z
 	public abstract fun hashCode ()I
+}
+
+public final class com/stripe/android/core/networking/ApiRequest$Options$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/networking/ApiRequest$Options;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/core/networking/ApiRequest$Options;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/networking/ApiRequest_Options_Factory : dagger/internal/Factory {
@@ -250,7 +293,9 @@ public final class com/stripe/android/core/networking/JsonUtilsKt {
 }
 
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
-	public static final fun getDEFAULT_RETRY_CODES ()Ljava/lang/Iterable;
+}
+
+public final class com/stripe/android/core/networking/ResponseJsonKt {
 }
 
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
@@ -288,9 +333,6 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
-}
-
-public final class com/stripe/android/core/networking/StripeResponseKtxKt {
 }
 
 public final class com/stripe/android/core/version/StripeSdkVersion {

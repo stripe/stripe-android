@@ -2,9 +2,8 @@ package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.camera.framework.util.FrameRateTracker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -95,9 +94,9 @@ abstract class ResultAggregator<
     >(
     private val listener: AggregateResultListener<InterimResult, FinalResult>,
     private val initialState: State,
-    private val statsName: String?,
+    private val statsName: String?
 ) : StatefulResultHandler<DataFrame, State, AnalyzerResult, Boolean>(initialState),
-    LifecycleObserver {
+    LifecycleEventObserver {
 
     private var isCanceled = false
     private var isPaused = false
@@ -115,16 +114,26 @@ abstract class ResultAggregator<
      * scanning app. In the case that the scan should be restarted, this feature pauses the result
      * handlers and resets the state.
      */
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun resetAndPause() {
         reset()
         isPaused = true
     }
 
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_PAUSE -> resetAndPause()
+            Lifecycle.Event.ON_RESUME -> resume()
+            Lifecycle.Event.ON_CREATE -> Unit // not used
+            Lifecycle.Event.ON_START -> Unit // not used
+            Lifecycle.Event.ON_STOP -> Unit // not used
+            Lifecycle.Event.ON_DESTROY -> Unit // not used
+            Lifecycle.Event.ON_ANY -> Unit // not used
+        }
+    }
+
     /**
      * Resume aggregation after it has been paused.
      */
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun resume() {
         isPaused = false
     }
@@ -190,6 +199,6 @@ abstract class ResultAggregator<
      */
     abstract suspend fun aggregateResult(
         frame: DataFrame,
-        result: AnalyzerResult,
+        result: AnalyzerResult
     ): Pair<InterimResult, FinalResult?>
 }

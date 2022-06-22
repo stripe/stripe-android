@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
@@ -71,7 +72,7 @@ internal object FinancialConnectionsSheetModule {
     ): AnalyticsRequestFactory = AnalyticsRequestFactory(
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
-        packageInfo = application.packageManager.getPackageInfo(application.packageName, 0),
+        packageInfo = application.packageInfo,
         publishableKeyProvider = { publishableKey }
     )
 }

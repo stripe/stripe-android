@@ -1,10 +1,10 @@
-package com.stripe.android.model
+package com.stripe.android.core.utils
 
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.utils.ContextUtils.packageInfo
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever

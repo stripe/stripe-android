@@ -11,7 +11,7 @@ import com.stripe.android.ui.core.paymentsColors
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun H6Text(
     text: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Text(
         text = text,

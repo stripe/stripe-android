@@ -56,7 +56,7 @@ fun LinkVerificationDialog(
                             openDialog = false
                             verificationCallback(false)
                         },
-                        properties = DialogProperties(usePlatformDefaultWidth = false),
+                        properties = DialogProperties(usePlatformDefaultWidth = false)
                     ) {
                         DefaultLinkTheme {
                             Surface(

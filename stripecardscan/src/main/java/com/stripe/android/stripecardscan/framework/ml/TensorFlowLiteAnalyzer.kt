@@ -18,7 +18,7 @@ import java.nio.ByteBuffer
  */
 internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: Interpreter,
-    private val delegate: NnApiDelegate? = null,
+    private val delegate: NnApiDelegate? = null
 ) : Analyzer<Input, Any, Output>, Closeable {
 
     protected abstract suspend fun interpretMLOutput(data: Input, mlOutput: MLOutput): Output
@@ -27,7 +27,7 @@ internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>
 
     protected abstract suspend fun executeInference(
         tfInterpreter: Interpreter,
-        data: MLInput,
+        data: MLInput
     ): MLOutput
 
     override suspend fun analyze(data: Input, state: Any): Output {
@@ -53,7 +53,7 @@ internal abstract class TFLAnalyzerFactory<
     AnalyzerType : Analyzer<Input, Any, Output>
     >(
     private val context: Context,
-    private val fetchedModel: FetchedData,
+    private val fetchedModel: FetchedData
 ) : AnalyzerFactory<Input, Any, Output, AnalyzerType> {
     protected abstract val tfOptions: Interpreter.Options
 
@@ -72,14 +72,14 @@ internal abstract class TFLAnalyzerFactory<
         Log.e(
             LOG_TAG,
             "Error loading ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}",
-            t,
+            t
         )
         null
     }.apply {
         if (this == null) {
             Log.w(
                 LOG_TAG,
-                "Unable to load ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}",
+                "Unable to load ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}"
             )
         }
     }

@@ -20,11 +20,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavArgument
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
@@ -159,6 +161,13 @@ internal abstract class IdentityUploadFragment(
         super.onViewCreated(view, savedInstanceState)
         maybeResetUploadedState()
         collectUploadedStateAndUpdateUI()
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                scanType = frontScanType,
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD
+            )
+        )
     }
 
     private fun checkBackFields(
@@ -386,19 +395,26 @@ internal abstract class IdentityUploadFragment(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 lifecycleScope.launch {
-                    postVerificationPageDataAndMaybeSubmit(
-                        identityViewModel = identityViewModel,
-                        collectedDataParam = collectedDataParam,
-                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                        fromFragment = fragmentId,
-                        verificationPage.selfieCapture?.let {
-                            {
-                                findNavController().navigate(R.id.action_global_selfieFragment)
-                            }
+                    if (verificationPage.requireSelfie()) {
+                        postVerificationPageDataAndMaybeSubmit(
+                            identityViewModel = identityViewModel,
+                            collectedDataParam = collectedDataParam,
+                            clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
+                            fromFragment = fragmentId
+                        ) {
+                            findNavController().navigate(R.id.action_global_selfieFragment)
                         }
-                    )
+                    } else {
+                        postVerificationPageDataAndMaybeSubmit(
+                            identityViewModel = identityViewModel,
+                            collectedDataParam = collectedDataParam,
+                            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                            fromFragment = fragmentId
+                        )
+                    }
                 }
-            }, onFailure = {
+            },
+            onFailure = {
                 Log.e(TAG, "Fail to observeForVerificationPage: $it")
                 navigateToDefaultErrorFragment()
             }

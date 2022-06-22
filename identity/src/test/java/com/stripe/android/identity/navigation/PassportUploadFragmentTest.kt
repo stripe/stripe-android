@@ -22,6 +22,7 @@ import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
@@ -86,6 +87,12 @@ class PassportUploadFragmentTest {
             successCaptor.firstValue(verificationPage)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -94,6 +101,12 @@ class PassportUploadFragmentTest {
             successCaptor.firstValue(verificationPageWithSelfie)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
     }
 
     private val navController = TestNavHostController(
@@ -248,7 +261,7 @@ class PassportUploadFragmentTest {
                     )
                 )
                 assertThat(clearDataParamCaptor.firstValue).isEqualTo(
-                    ClearDataParam.UPLOAD_TO_CONFIRM
+                    ClearDataParam.UPLOAD_TO_SELFIE
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -303,10 +316,11 @@ class PassportUploadFragmentTest {
                 isFront = eq(true),
                 docCapturePage = same(DOCUMENT_CAPTURE),
                 uploadMethod =
-                if (isTakePhoto)
+                if (isTakePhoto) {
                     eq(UploadMethod.MANUALCAPTURE)
-                else
+                } else {
                     eq(UploadMethod.FILEUPLOAD)
+                }
             )
             assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -355,7 +369,8 @@ class PassportUploadFragmentTest {
         identityViewModelFactory: ViewModelProvider.Factory,
         val navController: TestNavHostController
     ) : PassportUploadFragment(
-        identityUploadViewModelFactory, identityViewModelFactory
+        identityUploadViewModelFactory,
+        identityViewModelFactory
     ) {
         override fun onCreateView(
             inflater: LayoutInflater,

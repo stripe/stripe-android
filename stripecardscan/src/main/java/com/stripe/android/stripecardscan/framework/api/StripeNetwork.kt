@@ -23,7 +23,7 @@ internal class StripeNetwork internal constructor(
     internal constructor(
         baseUrl: String,
         retryTotalAttempts: Int,
-        retryStatusCodes: Iterable<Int>,
+        retryStatusCodes: Iterable<Int>
     ) : this(
         baseUrl,
         retryStatusCodes,
@@ -45,7 +45,7 @@ internal class StripeNetwork internal constructor(
                 stripePublishableKey = stripePublishableKey,
                 retryResponseCodes = retryStatusCodes,
                 path = path,
-                encodedData = encodeToXWWWFormUrl(requestSerializer, data),
+                encodedData = encodeToXWWWFormUrl(requestSerializer, data)
             ),
             responseSerializer = responseSerializer,
             errorSerializer = errorSerializer
@@ -80,7 +80,7 @@ internal class StripeNetwork internal constructor(
         translateNetworkResult(
             getWithRetries(stripePublishableKey, path, retryStatusCodes),
             responseSerializer,
-            errorSerializer,
+            errorSerializer
         )
 
     override suspend fun downloadFileWithRetries(
@@ -108,7 +108,7 @@ internal class StripeNetwork internal constructor(
         stripePublishableKey: String,
         retryResponseCodes: Iterable<Int>,
         path: String,
-        encodedData: String,
+        encodedData: String
     ): NetworkResult<out String, out String> = executeAndConvertToNetworkResult(
         CardScanRequest.createPost(
             stripePublishableKey = stripePublishableKey,
@@ -131,7 +131,7 @@ internal class StripeNetwork internal constructor(
             stripePublishableKey = stripePublishableKey,
             baseUrl = baseUrl,
             path = path,
-            retryResponseCodes = retryResponseCodes,
+            retryResponseCodes = retryResponseCodes
         )
     )
 

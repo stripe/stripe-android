@@ -12,12 +12,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
@@ -34,8 +38,11 @@ internal abstract class IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityCameraScanFragment(
-    identityCameraScanViewModelFactory, identityViewModelFactory
+    identityCameraScanViewModelFactory,
+    identityViewModelFactory
 ) {
+    abstract val frontScanType: IdentityScanState.ScanType
+
     protected lateinit var binding: IdentityDocumentScanFragmentBinding
     protected lateinit var headerTitle: TextView
     protected lateinit var messageView: TextView
@@ -67,6 +74,13 @@ internal abstract class IdentityDocumentScanFragment(
             identityViewModel.resetDocumentUploadedState()
         }
         super.onViewCreated(view, savedInstanceState)
+
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                scanType = frontScanType,
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+            )
+        )
     }
 
     /**
@@ -115,6 +129,21 @@ internal abstract class IdentityDocumentScanFragment(
         }
     }
 
+    override fun createCameraAdapter() = Camera1Adapter(
+        requireNotNull(activity),
+        cameraView.previewFrame,
+        MINIMUM_RESOLUTION,
+        DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
+            Log.e(TAG, "scan fails with exception: $cause")
+            identityViewModel.sendAnalyticsRequest(
+                identityViewModel.identityAnalyticsRequestFactory.cameraError(
+                    scanType = frontScanType,
+                    throwable = IllegalStateException(cause)
+                )
+            )
+        }
+    )
+
     /**
      * Collect the [IdentityViewModel.documentUploadState] and update UI accordingly.
      *
@@ -139,25 +168,37 @@ internal abstract class IdentityDocumentScanFragment(
                                 onSuccess = { verificationPage ->
                                     lifecycleScope.launch {
                                         runCatching {
-                                            postVerificationPageDataAndMaybeSubmit(
-                                                identityViewModel = identityViewModel,
-                                                collectedDataParam =
-                                                CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                                    type = type,
-                                                    frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                                    frontLowResResult = requireNotNull(it.frontLowResResult.data),
-                                                    backHighResResult = requireNotNull(it.backHighResResult.data),
-                                                    backLowResResult = requireNotNull(it.backLowResResult.data)
-                                                ),
-                                                clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                                fromFragment = fragmentId,
-                                                notSubmitBlock =
-                                                verificationPage.selfieCapture?.let {
-                                                    {
-                                                        findNavController().navigate(R.id.action_global_selfieFragment)
-                                                    }
+                                            if (verificationPage.requireSelfie()) {
+                                                postVerificationPageDataAndMaybeSubmit(
+                                                    identityViewModel = identityViewModel,
+                                                    collectedDataParam =
+                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                                        type = type,
+                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data),
+                                                        backHighResResult = requireNotNull(it.backHighResResult.data),
+                                                        backLowResResult = requireNotNull(it.backLowResResult.data)
+                                                    ),
+                                                    clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
+                                                    fromFragment = fragmentId
+                                                ) {
+                                                    findNavController().navigate(R.id.action_global_selfieFragment)
                                                 }
-                                            )
+                                            } else {
+                                                postVerificationPageDataAndMaybeSubmit(
+                                                    identityViewModel = identityViewModel,
+                                                    collectedDataParam =
+                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                                        type = type,
+                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
+                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data),
+                                                        backHighResResult = requireNotNull(it.backHighResResult.data),
+                                                        backLowResResult = requireNotNull(it.backLowResResult.data)
+                                                    ),
+                                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                                    fromFragment = fragmentId
+                                                )
+                                            }
                                         }.onFailure { throwable ->
                                             Log.e(
                                                 TAG,

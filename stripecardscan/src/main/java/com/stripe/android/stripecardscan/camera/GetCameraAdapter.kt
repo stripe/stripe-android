@@ -21,7 +21,7 @@ internal fun getCameraAdapter(
     activity: Activity,
     previewView: ViewGroup,
     minimumResolution: Size,
-    cameraErrorListener: CameraErrorListener,
+    cameraErrorListener: CameraErrorListener
 ): CameraAdapter<CameraPreviewImage<Bitmap>> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
         try {
@@ -43,18 +43,18 @@ private fun getAlternateCamera(
     activity: Activity,
     previewView: ViewGroup,
     minimumResolution: Size,
-    cameraErrorListener: CameraErrorListener,
+    cameraErrorListener: CameraErrorListener
 ): CameraAdapter<CameraPreviewImage<Bitmap>> =
     Class.forName("com.stripe.android.stripecardscan.camera.extension.CameraAdapterImpl")
         .getConstructor(
             Activity::class.java,
             ViewGroup::class.java,
             Size::class.java,
-            CameraErrorListener::class.java,
+            CameraErrorListener::class.java
         )
         .newInstance(
             activity,
             previewView,
             minimumResolution,
-            cameraErrorListener,
+            cameraErrorListener
         ) as CameraAdapter<CameraPreviewImage<Bitmap>>

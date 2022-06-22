@@ -37,7 +37,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         fun cameraPreviewToInput(
             cameraPreviewImage: Bitmap,
             previewBounds: Rect,
-            cardFinder: Rect,
+            cardFinder: Rect
         ) = Input(
             cropCameraPreviewToSquare(cameraPreviewImage, previewBounds, cardFinder)
                 .scale(TRAINED_IMAGE_SIZE)
@@ -54,7 +54,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         val side: Side,
         val noCardProbability: Float,
         val noPanProbability: Float,
-        val panProbability: Float,
+        val panProbability: Float
     ) {
         val maxConfidence = max(max(noCardProbability, noPanProbability), panProbability)
 
@@ -81,7 +81,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
             2 -> Prediction.Side.PAN
             else -> throw EnumConstantNotPresentException(
                 Prediction.Side::class.java,
-                index.toString(),
+                index.toString()
             )
         }
 
@@ -89,7 +89,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
             side = side,
             noPanProbability = mlOutput[0][0],
             noCardProbability = mlOutput[0][1],
-            panProbability = mlOutput[0][2],
+            panProbability = mlOutput[0][2]
         )
     }
 
@@ -98,7 +98,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
-        data: ByteBuffer,
+        data: ByteBuffer
     ): Array<FloatArray> {
         val mlOutput = arrayOf(FloatArray(NUM_CLASS))
         tfInterpreter.run(data, mlOutput)
@@ -113,7 +113,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
     class Factory(
         context: Context,
         fetchedModel: FetchedData,
-        threads: Int = DEFAULT_THREADS,
+        threads: Int = DEFAULT_THREADS
     ) : TFLAnalyzerFactory<Input, Prediction, CardDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false

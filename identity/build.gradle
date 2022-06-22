@@ -24,11 +24,11 @@ dependencies {
     implementation project(":stripe-core")
 
     // vanilla tflite library
-    implementation "org.tensorflow:tensorflow-lite:2.8.0"
+    implementation "org.tensorflow:tensorflow-lite:2.9.0"
     // flex ops
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.9.0'
     // support library to reshape image to the input model shape
-    implementation 'org.tensorflow:tensorflow-lite-support:0.3.1'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.1'
 
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
@@ -51,6 +51,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation "androidx.browser:browser:$androidxBrowserVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
@@ -90,6 +91,9 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
         }
     }
 

@@ -10,9 +10,8 @@ import androidx.annotation.IntDef
 import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.onClosed
@@ -35,7 +34,7 @@ import kotlinx.coroutines.runBlocking
 internal annotation class RotationValue
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
+abstract class CameraAdapter<CameraOutput> : LifecycleEventObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
@@ -81,9 +80,44 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         Log.e(logTag, "Unable to send image to channel", t)
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun onDestroyed() {
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_DESTROY -> onDestroyed()
+            Lifecycle.Event.ON_PAUSE -> onPause()
+            Lifecycle.Event.ON_CREATE -> onCreate()
+            Lifecycle.Event.ON_START -> onStart()
+            Lifecycle.Event.ON_RESUME -> onResume()
+            Lifecycle.Event.ON_STOP -> onStop()
+            Lifecycle.Event.ON_ANY -> onAny()
+        }
+    }
+
+    protected open fun onDestroyed() {
         runBlocking { imageChannel.close() }
+    }
+
+    protected open fun onPause() {
+        // support onPause events.
+    }
+
+    protected open fun onCreate() {
+        // support onCreate events.
+    }
+
+    protected open fun onStart() {
+        // support onStart events.
+    }
+
+    protected open fun onResume() {
+        // support onResume events.
+    }
+
+    protected open fun onStop() {
+        // support onStop events.
+    }
+
+    protected open fun onAny() {
+        // support onAny events.
     }
 
     /**
@@ -113,11 +147,6 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
      * Determine if the adapter is currently bound.
      */
     open fun isBoundToLifecycle() = lifecyclesBound > 0
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    open fun onPause() {
-        // support OnPause events.
-    }
 
     /**
      * Execute a task with flash support.

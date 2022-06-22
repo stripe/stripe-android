@@ -194,7 +194,7 @@ internal sealed class PhoneNumberFormatter {
         fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
             countryCodesForPrefix(prefix).takeIf { it.isNotEmpty() }?.let {
                 for (i in 0 until userLocales.size()) {
-                    val locale = userLocales.get(i)
+                    val locale = userLocales.get(i)!!
                     if (it.contains(locale.country)) {
                         return locale.country
                     }

@@ -1,5 +1,6 @@
 package com.stripe.android.identity.networking
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -10,6 +11,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
@@ -84,8 +86,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$SUBMIT",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey,
-            ),
+                apiKey = ephemeralKey
+            )
         ),
         VerificationPageData.serializer()
     )
@@ -167,6 +169,14 @@ internal class DefaultIdentityRepository @Inject constructor(
         }
     )
 
+    override suspend fun sendAnalyticsRequest(analyticsRequestV2: AnalyticsRequestV2) {
+        runCatching {
+            stripeNetworkClient.executeRequest(analyticsRequestV2)
+        }.onFailure {
+            Log.e(TAG, "Exception while making analytics request")
+        }
+    }
+
     private suspend fun <Response> executeRequestWithKSerializer(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>
@@ -233,5 +243,6 @@ internal class DefaultIdentityRepository @Inject constructor(
     internal companion object {
         const val SUBMIT = "submit"
         const val DATA = "data"
+        val TAG: String = DefaultIdentityRepository::class.java.simpleName
     }
 }

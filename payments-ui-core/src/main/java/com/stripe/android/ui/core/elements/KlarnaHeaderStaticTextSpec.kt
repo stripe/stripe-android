@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -7,6 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class KlarnaHeaderStaticTextSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(): FormElement =
@@ -14,7 +16,7 @@ internal data class KlarnaHeaderStaticTextSpec(
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.apiPath,
-            stringResId = KlarnaHelper.getKlarnaHeader(),
+            stringResId = KlarnaHelper.getKlarnaHeader()
         )
 
     companion object {

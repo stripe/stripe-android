@@ -1,15 +1,20 @@
 package com.stripe.android.link.ui.paymentmethod
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,7 +48,7 @@ private fun PaymentMethodBodyPreview() {
                 secondaryButtonLabel = "Cancel",
                 errorMessage = null,
                 onPrimaryButtonClick = {},
-                onSecondaryButtonClick = {},
+                onSecondaryButtonClick = {}
             ) {}
         }
     }
@@ -52,33 +57,52 @@ private fun PaymentMethodBodyPreview() {
 @Composable
 internal fun PaymentMethodBody(
     linkAccount: LinkAccount,
-    injector: NonFallbackInjector
+    injector: NonFallbackInjector,
+    loadFromArgs: Boolean
 ) {
     val viewModel: PaymentMethodViewModel = viewModel(
-        factory = PaymentMethodViewModel.Factory(linkAccount, injector)
+        factory = PaymentMethodViewModel.Factory(linkAccount, injector, loadFromArgs)
     )
 
-    val formValues by viewModel.formController.completeFormValues.collectAsState(null)
-    val isProcessing by viewModel.isProcessing.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
+    val formController by viewModel.formController.collectAsState()
 
-    PaymentMethodBody(
-        isProcessing = isProcessing,
-        primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
-        primaryButtonEnabled = formValues != null,
-        secondaryButtonLabel = stringResource(id = viewModel.secondaryButtonLabel),
-        errorMessage = errorMessage,
-        onPrimaryButtonClick = {
-            formValues?.let {
-                viewModel.startPayment(it)
+    if (formController == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        formController?.let {
+            val formValues by it.completeFormValues.collectAsState(null)
+            val isProcessing by viewModel.isProcessing.collectAsState()
+            val errorMessage by viewModel.errorMessage.collectAsState()
+
+            PaymentMethodBody(
+                isProcessing = isProcessing,
+                primaryButtonLabel = primaryButtonLabel(
+                    viewModel.args,
+                    LocalContext.current.resources
+                ),
+                primaryButtonEnabled = formValues != null,
+                secondaryButtonLabel = stringResource(id = viewModel.secondaryButtonLabel),
+                errorMessage = errorMessage,
+                onPrimaryButtonClick = {
+                    formValues?.let {
+                        viewModel.startPayment(it)
+                    }
+                },
+                onSecondaryButtonClick = viewModel::onSecondaryButtonClick
+            ) {
+                Form(
+                    it,
+                    viewModel.isEnabled
+                )
             }
-        },
-        onSecondaryButtonClick = viewModel::onSecondaryButtonClick
-    ) {
-        Form(
-            viewModel.formController,
-            viewModel.isEnabled
-        )
+        }
     }
 }
 

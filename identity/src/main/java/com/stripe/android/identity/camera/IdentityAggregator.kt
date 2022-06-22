@@ -40,12 +40,13 @@ internal class IdentityAggregator(
                         "verificationPage.selfieCapture is null."
                 }
             )
-        } else
+        } else {
             IDDetectorTransitioner(
                 timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
                 iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
                 timeRequired = verificationPage.documentCapture.motionBlurMinDuration
             )
+        }
     ),
     statsName = null
 ) {

@@ -304,7 +304,7 @@ class LpmRepository @Inject constructor(
         /**
          * This describes how the UI should look.
          */
-        val formSpec: LayoutSpec,
+        val formSpec: LayoutSpec
     ) {
         /**
          * Returns true if the payment method supports confirming from a saved

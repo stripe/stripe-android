@@ -140,7 +140,7 @@ class LayoutTest {
     fun projectRegionOfInterest_smaller() {
         assertEquals(
             Rect(2, 14, 16, 28),
-            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(4, 28, 32, 56)),
+            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(4, 28, 32, 56))
         )
     }
 
@@ -149,7 +149,7 @@ class LayoutTest {
     fun projectRegionOfInterest_exactFit() {
         assertEquals(
             Rect(0, 0, 18, 42),
-            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(0, 0, 36, 84)),
+            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(0, 0, 36, 84))
         )
     }
 
@@ -158,7 +158,7 @@ class LayoutTest {
     fun projectRegionOfInterest_larger() {
         assertEquals(
             Rect(0, -1, 19, 42),
-            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(0, -2, 38, 84)),
+            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(0, -2, 38, 84))
         )
     }
 
@@ -178,7 +178,7 @@ class LayoutTest {
     fun projectRegionOfInterest_offCenter() {
         assertEquals(
             Rect(6, 14, 16, 20),
-            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(12, 28, 32, 40)),
+            Size(36, 84).projectRegionOfInterest(Size(18, 42), Rect(12, 28, 32, 40))
         )
     }
 

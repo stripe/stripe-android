@@ -18,7 +18,7 @@ open class AddressElement constructor(
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
-    ),
+    )
 ) : SectionMultiFieldElement(_identifier) {
 
     @VisibleForTesting

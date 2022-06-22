@@ -148,7 +148,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
 
-    override var newLpm: PaymentSelection.New? = null
+    override var newPaymentSelection: PaymentSelection.New? = null
 
     @VisibleForTesting
     internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
@@ -425,7 +425,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(it.convertToPaymentSelection())
+            updateSelection(PaymentSelection.New.Link(it))
             checkout(CheckoutIdentifier.SheetBottomBuy)
         } ?: run {
             // Link PaymentDetails creationg failed, fallback to regular checkout.
@@ -561,7 +561,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
         Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val application: Application,
+            val application: Application
         )
 
         @Inject

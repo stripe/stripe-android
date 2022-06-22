@@ -24,7 +24,7 @@ private val illegalFileNameCharacters = setOf(
     ';',
     '=',
     '[',
-    ']',
+    ']'
 )
 
 /**
@@ -64,7 +64,7 @@ internal suspend fun calculateHash(file: File, hashAlgorithm: String): String? =
 internal class HashMismatchException(
     val algorithm: String,
     val expected: String,
-    val actual: String?,
+    val actual: String?
 ) :
     Exception("Invalid hash for algorithm '$algorithm'. Expected '$expected' but got '$actual'") {
     override fun toString() =

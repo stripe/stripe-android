@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.utils.ContextUtils.packageInfo
 import java.math.BigDecimal
 import java.math.MathContext
 import java.util.Locale

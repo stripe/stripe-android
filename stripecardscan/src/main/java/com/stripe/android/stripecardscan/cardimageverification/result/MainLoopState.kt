@@ -11,7 +11,7 @@ import com.stripe.android.stripecardscan.payment.card.RequiresMatchingCard
 
 internal sealed class MainLoopState(
     val runOcr: Boolean,
-    val runCardDetect: Boolean,
+    val runCardDetect: Boolean
 ) : MachineState() {
 
     companion object {
@@ -57,14 +57,14 @@ internal sealed class MainLoopState(
     }
 
     internal abstract suspend fun consumeTransition(
-        transition: MainLoopAnalyzer.Prediction,
+        transition: MainLoopAnalyzer.Prediction
     ): MainLoopState
 
     class Initial(
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String?,
         private val strictModeFrames: Int,
-        private var panCounter: ItemCounter<String>? = null,
+        private var panCounter: ItemCounter<String>? = null
     ) : MainLoopState(runOcr = true, runCardDetect = true),
         RequiresMatchingCard {
 
@@ -77,7 +77,7 @@ internal sealed class MainLoopState(
             get() = visibleCardCount >= strictModeFrames
 
         override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
+            transition: MainLoopAnalyzer.Prediction
         ): MainLoopState {
             if (transition.isCardVisible == true) {
                 visibleCardCount++
@@ -94,7 +94,7 @@ internal sealed class MainLoopState(
                         pan = transition.ocr?.pan ?: "",
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 comparisonResult is CardMatchResult.Match && hasEnoughVisibleCards ->
                     // Match result implies that `panCounter` is not null
@@ -103,7 +103,7 @@ internal sealed class MainLoopState(
                         visibleCardCount = visibleCardCount,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 comparisonResult is CardMatchResult.NoRequiredCard && hasEnoughVisibleCards ->
                     // NoCardRequired result implies that `panCounter` is not null
@@ -112,7 +112,7 @@ internal sealed class MainLoopState(
                         visibleCardCount = visibleCardCount,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 else -> this // comparisonResult is NoPan or not enough visible cards
             }
@@ -124,7 +124,7 @@ internal sealed class MainLoopState(
         private var visibleCardCount: Int,
         private val requiredCardIssuer: CardIssuer?,
         private val requiredLastFour: String?,
-        private val strictModeFrames: Int,
+        private val strictModeFrames: Int
     ) : MainLoopState(runOcr = true, runCardDetect = true) {
 
         val mostLikelyPan: String
@@ -139,7 +139,7 @@ internal sealed class MainLoopState(
         private fun isNoCardVisible() = lastCardVisible.elapsedSince() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
+            transition: MainLoopAnalyzer.Prediction
         ): MainLoopState {
             val transitionPan = transition.ocr?.pan
             if (!transitionPan.isNullOrEmpty()) {
@@ -157,29 +157,29 @@ internal sealed class MainLoopState(
             return when {
                 isCardSatisfied() && isOcrSatisfied() ->
                     Finished(
-                        pan = pan,
+                        pan = pan
                     )
                 isCardSatisfied() ->
                     CardSatisfied(
                         panCounter = panCounter,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 isOcrSatisfied() ->
                     OcrSatisfied(
                         pan = pan,
-                        visibleCardCount = visibleCardCount,
+                        visibleCardCount = visibleCardCount
                     )
                 isTimedOut() ->
                     Finished(
-                        pan = pan,
+                        pan = pan
                     )
                 isNoCardVisible() ->
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 else -> this
             }
@@ -188,13 +188,13 @@ internal sealed class MainLoopState(
 
     class OcrSatisfied(
         val pan: String,
-        private var visibleCardCount: Int,
+        private var visibleCardCount: Int
     ) : MainLoopState(runOcr = false, runCardDetect = true) {
         private fun isCardSatisfied() = visibleCardCount >= DESIRED_CARD_COUNT
         private fun isTimedOut() = reachedStateAt.elapsedSince() > CARD_ONLY_SEARCH_DURATION
 
         override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
+            transition: MainLoopAnalyzer.Prediction
         ): MainLoopState {
             if (transition.isCardVisible == true) {
                 visibleCardCount++
@@ -211,7 +211,7 @@ internal sealed class MainLoopState(
         private val panCounter: ItemCounter<String>,
         private val requiredCardIssuer: CardIssuer?,
         private val requiredLastFour: String?,
-        private val strictModeFrames: Int,
+        private val strictModeFrames: Int
     ) : MainLoopState(runOcr = true, runCardDetect = false) {
 
         private var lastCardVisible = Clock.markNow()
@@ -225,7 +225,7 @@ internal sealed class MainLoopState(
         private fun isNoCardVisible() = lastCardVisible.elapsedSince() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
+            transition: MainLoopAnalyzer.Prediction
         ): MainLoopState {
             if (!transition.ocr?.pan.isNullOrEmpty()) {
                 panCounter.countItem(transition.ocr?.pan ?: "")
@@ -237,13 +237,13 @@ internal sealed class MainLoopState(
             return when {
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
-                        pan = pan,
+                        pan = pan
                     )
                 isNoCardVisible() ->
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 else -> this
             }
@@ -254,12 +254,12 @@ internal sealed class MainLoopState(
         val pan: String,
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String?,
-        private val strictModeFrames: Int,
+        private val strictModeFrames: Int
     ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
         private fun isTimedOut() = reachedStateAt.elapsedSince() > WRONG_CARD_DURATION
 
         override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
+            transition: MainLoopAnalyzer.Prediction
         ): MainLoopState {
             val pan = transition.ocr?.pan
             val cardMatch = compareToRequiredCard(pan)
@@ -270,7 +270,7 @@ internal sealed class MainLoopState(
                         pan = transition.ocr?.pan ?: "",
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 cardMatch is CardMatchResult.Match ->
                     OcrFound(
@@ -278,7 +278,7 @@ internal sealed class MainLoopState(
                         visibleCardCount = if (transition.isCardVisible == true) 1 else 0,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 cardMatch is CardMatchResult.NoRequiredCard ->
                     OcrFound(
@@ -286,13 +286,13 @@ internal sealed class MainLoopState(
                         visibleCardCount = if (transition.isCardVisible == true) 1 else 0,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 isTimedOut() ->
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
-                        strictModeFrames = strictModeFrames,
+                        strictModeFrames = strictModeFrames
                     )
                 else -> this
             }
@@ -301,7 +301,7 @@ internal sealed class MainLoopState(
 
     class Finished(val pan: String) : MainLoopState(runOcr = false, runCardDetect = false) {
         override suspend fun consumeTransition(
-            transition: MainLoopAnalyzer.Prediction,
+            transition: MainLoopAnalyzer.Prediction
         ): MainLoopState = this
     }
 }

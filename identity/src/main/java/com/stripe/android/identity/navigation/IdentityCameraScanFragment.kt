@@ -14,15 +14,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.Camera1Adapter
-import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
+import com.stripe.android.identity.ml.FaceDetectorOutput
+import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.IdentityScanState.Companion.isBack
+import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
@@ -69,12 +72,44 @@ internal abstract class IdentityCameraScanFragment(
                 viewLifecycleOwner,
                 onSuccess = { verificationPage ->
                     if (finalResult.identityState is IdentityScanState.Finished) {
+                        when (finalResult.result) {
+                            is FaceDetectorOutput -> {
+                                identityViewModel.updateAnalyticsState { oldState ->
+                                    oldState.copy(selfieModelScore = finalResult.result.resultScore)
+                                }
+                            }
+                            is IDDetectorOutput -> {
+                                if (finalResult.identityState.type.isFront()) {
+                                    identityViewModel.updateAnalyticsState { oldState ->
+                                        oldState.copy(docFrontModelScore = finalResult.result.resultScore)
+                                    }
+                                } else if (finalResult.identityState.type.isBack()) {
+                                    identityViewModel.updateAnalyticsState { oldState ->
+                                        oldState.copy(docBackModelScore = finalResult.result.resultScore)
+                                    }
+                                }
+                            }
+                        }
                         identityViewModel.uploadScanResult(
                             finalResult,
                             verificationPage,
                             identityScanViewModel.targetScanType
                         )
                     } else if (finalResult.identityState is IdentityScanState.TimeOut) {
+                        when (finalResult.result) {
+                            is FaceDetectorOutput -> {
+                                identityViewModel.sendAnalyticsRequest(
+                                    identityViewModel.identityAnalyticsRequestFactory.selfieTimeout()
+                                )
+                            }
+                            is IDDetectorOutput -> {
+                                identityViewModel.sendAnalyticsRequest(
+                                    identityViewModel.identityAnalyticsRequestFactory.documentTimeout(
+                                        scanType = finalResult.identityState.type
+                                    )
+                                )
+                            }
+                        }
                         findNavController().navigate(
                             R.id.action_global_couldNotCaptureFragment,
                             bundleOf(
@@ -124,15 +159,7 @@ internal abstract class IdentityCameraScanFragment(
         }
     }
 
-    protected open fun createCameraAdapter() =
-        Camera1Adapter(
-            requireNotNull(activity),
-            cameraView.previewFrame,
-            MINIMUM_RESOLUTION,
-            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-                Log.e(TAG, "scan fails with exception: $cause")
-            }
-        )
+    protected abstract fun createCameraAdapter(): Camera1Adapter
 
     /**
      * Called back each time when [CameraViewModel.displayStateChanged] is changed.
@@ -145,6 +172,46 @@ internal abstract class IdentityCameraScanFragment(
      * Start scanning for the required scan type.
      */
     protected fun startScanning(scanType: IdentityScanState.ScanType) {
+        identityViewModel.updateAnalyticsState { oldState ->
+            when (scanType) {
+                IdentityScanState.ScanType.ID_FRONT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                    )
+                }
+                IdentityScanState.ScanType.ID_BACK -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                    )
+                }
+                IdentityScanState.ScanType.DL_FRONT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                    )
+                }
+                IdentityScanState.ScanType.DL_BACK -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                    )
+                }
+                IdentityScanState.ScanType.PASSPORT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                    )
+                }
+                IdentityScanState.ScanType.SELFIE -> {
+                    oldState.copy(
+                        selfieRetryTimes =
+                        oldState.selfieRetryTimes?.let { it + 1 } ?: 0
+                    )
+                }
+            }
+        }
         identityScanViewModel.targetScanType = scanType
         resetUI()
         cameraAdapter.bindToLifecycle(this)
@@ -176,6 +243,6 @@ internal abstract class IdentityCameraScanFragment(
 
     internal companion object {
         private val TAG: String = IdentityCameraScanFragment::class.java.simpleName
-        val MINIMUM_RESOLUTION = Size(1067, 600)
+        val MINIMUM_RESOLUTION = Size(1440, 1080)
     }
 }

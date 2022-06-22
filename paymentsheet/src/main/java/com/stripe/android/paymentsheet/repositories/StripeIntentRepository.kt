@@ -56,11 +56,13 @@ internal sealed class StripeIntentRepository {
                 is PaymentIntentClientSecret -> {
                     requireNotNull(
                         locale?.let {
-                            stripeRepository.retrievePaymentIntentWithOrderedPaymentMethods(
-                                clientSecret.value,
-                                requestOptions,
-                                it
-                            )
+                            runCatching {
+                                stripeRepository.retrievePaymentIntentWithOrderedPaymentMethods(
+                                    clientSecret.value,
+                                    requestOptions,
+                                    it
+                                )
+                            }.getOrNull()
                         } ?: stripeRepository.retrievePaymentIntent(
                             clientSecret.value,
                             requestOptions,
@@ -77,11 +79,13 @@ internal sealed class StripeIntentRepository {
                 is SetupIntentClientSecret -> {
                     requireNotNull(
                         locale?.let {
-                            stripeRepository.retrieveSetupIntentWithOrderedPaymentMethods(
-                                clientSecret.value,
-                                requestOptions,
-                                locale
-                            )
+                            runCatching {
+                                stripeRepository.retrieveSetupIntentWithOrderedPaymentMethods(
+                                    clientSecret.value,
+                                    requestOptions,
+                                    locale
+                                )
+                            }.getOrNull()
                         } ?: stripeRepository.retrieveSetupIntent(
                             clientSecret.value,
                             requestOptions,

@@ -26,16 +26,16 @@ import kotlinx.coroutines.launch
 
 internal data class SavedFrame(
     val hasOcr: Boolean,
-    val frame: MainLoopAnalyzer.Input,
+    val frame: MainLoopAnalyzer.Input
 )
 
 internal data class SavedFrameType(
     val hasCard: Boolean,
-    val hasOcr: Boolean,
+    val hasOcr: Boolean
 )
 
 internal abstract class CardImageVerificationFlow(
-    private val scanErrorListener: AnalyzerLoopErrorListener,
+    private val scanErrorListener: AnalyzerLoopErrorListener
 ) : ScanFlow<CardVerificationFlowParameters?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
@@ -69,7 +69,7 @@ internal abstract class CardImageVerificationFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: CardVerificationFlowParameters?,
+        parameters: CardVerificationFlowParameters?
     ) = coroutineScope.launch(Dispatchers.Main) {
         if (canceled) {
             return@launch
@@ -79,7 +79,7 @@ internal abstract class CardImageVerificationFlow(
             listener = this@CardImageVerificationFlow,
             requiredCardIssuer = parameters?.cardIssuer,
             requiredLastFour = parameters?.lastFour,
-            strictModeFrames = parameters?.strictModeFrames ?: 0,
+            strictModeFrames = parameters?.strictModeFrames ?: 0
         ).also { mainLoopOcrAggregator ->
             // make this result aggregator pause and reset when the lifecycle pauses.
             mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
@@ -99,9 +99,9 @@ internal abstract class CardImageVerificationFlow(
                         CardDetectModelManager.fetchModel(
                             context,
                             forImmediateUse = true,
-                            isOptional = false,
+                            isOptional = false
                         )
-                    ),
+                    )
                 )
             )
             mainLoopAnalyzerPool = analyzerPool
@@ -115,10 +115,10 @@ internal abstract class CardImageVerificationFlow(
                     imageStream.map {
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
-                            cardFinder = viewFinder,
+                            cardFinder = viewFinder
                         )
                     },
-                    coroutineScope,
+                    coroutineScope
                 )
             }
         }
@@ -151,7 +151,7 @@ internal abstract class CardImageVerificationFlow(
      * Select which frames to use in the completion loop.
      */
     fun <SavedFrame> selectCompletionLoopFrames(
-        frames: Map<SavedFrameType, List<SavedFrame>>,
+        frames: Map<SavedFrameType, List<SavedFrame>>
     ): Collection<SavedFrame> {
         fun getFrames(frameType: SavedFrameType) = frames[frameType] ?: emptyList()
 

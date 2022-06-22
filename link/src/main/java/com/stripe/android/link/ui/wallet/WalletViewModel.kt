@@ -35,6 +35,7 @@ internal class WalletViewModel @Inject constructor(
     private val logger: Logger
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
+    val initiallySelectedId = args.selectedPaymentDetails?.paymentDetails?.id
 
     private val _paymentDetails =
         MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
@@ -47,7 +48,7 @@ internal class WalletViewModel @Inject constructor(
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     init {
-        loadPaymentDetails()
+        loadPaymentDetails(true)
 
         viewModelScope.launch {
             navigator.getResultFlow<CardEditViewModel.Result>(CardEditViewModel.Result.KEY)
@@ -102,7 +103,7 @@ internal class WalletViewModel @Inject constructor(
                         )
                     navigator.dismiss(
                         LinkActivityResult.Success.Selected(
-                            LinkPaymentDetails(selectedPaymentDetails, params)
+                            LinkPaymentDetails.Saved(selectedPaymentDetails, params)
                         )
                     )
                 }
@@ -117,7 +118,7 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun addNewPaymentMethod(clearBackStack: Boolean = false) {
-        navigator.navigateTo(LinkScreen.PaymentMethod, clearBackStack)
+        navigator.navigateTo(LinkScreen.PaymentMethod(), clearBackStack)
     }
 
     fun editPaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
@@ -141,16 +142,28 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentDetails() {
+    private fun loadPaymentDetails(initialSetup: Boolean = false) {
         _isProcessing.value = true
         viewModelScope.launch {
             linkAccountManager.listPaymentDetails().fold(
                 onSuccess = { response ->
-                    response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
-                        .takeIf { it.isNotEmpty() }?.let {
-                            _paymentDetails.value = it
-                            _isProcessing.value = false
-                        } ?: addNewPaymentMethod(clearBackStack = true)
+                    val hasSavedCards =
+                        response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
+                            .takeIf { it.isNotEmpty() }?.let {
+                                _paymentDetails.value = it
+                                _isProcessing.value = false
+                                true
+                            } ?: false
+
+                    if (initialSetup && args.selectedPaymentDetails is LinkPaymentDetails.New) {
+                        // User is returning and had previously added a new payment method
+                        navigator.navigateTo(
+                            LinkScreen.PaymentMethod(true),
+                            clearBackStack = !hasSavedCards
+                        )
+                    } else if (!hasSavedCards) {
+                        addNewPaymentMethod(clearBackStack = true)
+                    }
                 },
                 // If we can't load the payment details there's nothing to see here
                 onFailure = ::onFatal

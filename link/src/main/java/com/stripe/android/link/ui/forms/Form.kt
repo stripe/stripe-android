@@ -12,13 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.FormUI
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 internal fun Form(
     formController: FormController,
-    enabledFlow: Flow<Boolean>,
+    enabledFlow: Flow<Boolean>
 ) {
     FormUI(
         formController.hiddenIdentifiers,

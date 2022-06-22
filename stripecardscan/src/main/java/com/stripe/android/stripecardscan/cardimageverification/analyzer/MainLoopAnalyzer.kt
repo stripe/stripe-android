@@ -12,17 +12,17 @@ import kotlinx.coroutines.supervisorScope
 
 internal class MainLoopAnalyzer(
     private val ssdOcr: Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>?,
-    private val cardDetect: Analyzer<CardDetect.Input, Any, CardDetect.Prediction>?,
+    private val cardDetect: Analyzer<CardDetect.Input, Any, CardDetect.Prediction>?
 ) : Analyzer<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction> {
 
     data class Input(
         val cameraPreviewImage: CameraPreviewImage<Bitmap>,
-        val cardFinder: Rect,
+        val cardFinder: Rect
     )
 
     class Prediction(
         val ocr: SSDOcr.Prediction?,
-        val card: CardDetect.Prediction?,
+        val card: CardDetect.Prediction?
     ) {
         val isCardVisible = card?.side?.let {
             it == CardDetect.Prediction.Side.NO_PAN || it == CardDetect.Prediction.Side.PAN
@@ -35,9 +35,9 @@ internal class MainLoopAnalyzer(
                 CardDetect.cameraPreviewToInput(
                     data.cameraPreviewImage.image,
                     data.cameraPreviewImage.viewBounds,
-                    data.cardFinder,
+                    data.cardFinder
                 ),
-                Unit,
+                Unit
             )
         } else {
             null
@@ -48,9 +48,9 @@ internal class MainLoopAnalyzer(
                 SSDOcr.cameraPreviewToInput(
                     data.cameraPreviewImage.image,
                     data.cameraPreviewImage.viewBounds,
-                    data.cardFinder,
+                    data.cardFinder
                 ),
-                Unit,
+                Unit
             )
         } else {
             null
@@ -58,7 +58,7 @@ internal class MainLoopAnalyzer(
 
         Prediction(
             ocr = ocrResult,
-            card = cardResult,
+            card = cardResult
         )
     }
 
@@ -74,11 +74,11 @@ internal class MainLoopAnalyzer(
             CardDetect.Input,
             Any,
             CardDetect.Prediction,
-            out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>,
+            out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>
     ) : AnalyzerFactory<Input, MainLoopState, Prediction, MainLoopAnalyzer> {
         override suspend fun newInstance() = MainLoopAnalyzer(
             ssdOcr = ssdOcrFactory.newInstance(),
-            cardDetect = cardDetectFactory.newInstance(),
+            cardDetect = cardDetectFactory.newInstance()
         )
     }
 }

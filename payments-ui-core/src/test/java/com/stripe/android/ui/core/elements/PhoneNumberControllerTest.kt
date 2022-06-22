@@ -72,7 +72,8 @@ internal class PhoneNumberControllerTest {
         assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
     }
 
-    @Test @Config(qualifiers = "fr-rCA")
+    @Test
+    @Config(qualifiers = "fr-rCA")
     fun `when initial number is in E164 format with multiple regions then locale is used`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "+11234567890"
@@ -82,7 +83,8 @@ internal class PhoneNumberControllerTest {
         assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
     }
 
-    @Test @Config(qualifiers = "fr-rCA")
+    @Test
+    @Config(qualifiers = "fr-rCA")
     fun `when initial number is not in E164 format then locale is used`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "1234567890"

@@ -39,7 +39,7 @@ class SSDOcrTest {
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            fetcher.fetchData(forImmediateUse = true, isOptional = false)
         ).newInstance()
         assertNotNull(model)
 
@@ -47,7 +47,7 @@ class SSDOcrTest {
             SSDOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
-                bitmap.size().toRect(),
+                bitmap.size().toRect()
             ),
             Unit
         )
@@ -76,7 +76,7 @@ class SSDOcrTest {
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            fetcher.fetchData(forImmediateUse = true, isOptional = false)
         ).newInstance()
         assertNotNull(model)
 
@@ -84,7 +84,7 @@ class SSDOcrTest {
             SSDOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
-                bitmap.size().toRect(),
+                bitmap.size().toRect()
             ),
             Unit
         )
@@ -113,7 +113,7 @@ class SSDOcrTest {
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            fetcher.fetchData(forImmediateUse = true, isOptional = false)
         ).newInstance()
         assertNotNull(model)
 
@@ -121,7 +121,7 @@ class SSDOcrTest {
             SSDOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
-                bitmap.size().toRect(),
+                bitmap.size().toRect()
             ),
             Unit
         )

@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 class AuBankAccountNumberSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec = DEFAULT_API_PATH
 ) : FormItemSpec() {
     fun transform(

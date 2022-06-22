@@ -80,52 +80,76 @@ internal enum class FieldType(
 internal enum class NameType(@StringRes val stringResId: Int) {
     @SerialName("area")
     Area(R.string.address_label_hk_area),
+
     @SerialName("cedex")
     Cedex(R.string.address_label_cedex),
+
     @SerialName("city")
     City(R.string.address_label_city),
+
     @SerialName("country")
-    Country(R.string.address_label_country),
+    Country(R.string.address_label_country_or_region),
+
     @SerialName("county")
     County(R.string.address_label_county),
+
     @SerialName("department")
     Department(R.string.address_label_department),
+
     @SerialName("district")
     District(R.string.address_label_district),
+
     @SerialName("do_si")
     DoSi(R.string.address_label_kr_do_si),
+
     @SerialName("eircode")
     Eircode(R.string.address_label_ie_eircode),
+
     @SerialName("emirate")
     Emirate(R.string.address_label_ae_emirate),
+
     @SerialName("island")
     Island(R.string.address_label_island),
+
     @SerialName("neighborhood")
     Neighborhood(R.string.address_label_neighborhood),
+
     @SerialName("oblast")
     Oblast(R.string.address_label_oblast),
+
     @SerialName("parish")
     Parish(R.string.address_label_bb_jm_parish),
+
     @SerialName("pin")
     Pin(R.string.address_label_in_pin),
+
     @SerialName("post_town")
     PostTown(R.string.address_label_post_town),
+
     @SerialName("postal")
     Postal(R.string.address_label_postal_code),
+
     @SerialName("prefecture")
     Perfecture(R.string.address_label_jp_prefecture),
+
     @SerialName("province")
     Province(R.string.address_label_province),
+
     @SerialName("state")
     State(R.string.address_label_state),
+
     @SerialName("suburb")
     Suburb(R.string.address_label_suburb),
+
     @SerialName("suburb_or_city")
     SuburbOrCity(R.string.address_label_au_suburb_or_city),
+
     @SerialName("townland")
     Townload(R.string.address_label_ie_townland),
+
     @SerialName("village_township")
     VillageTownship(R.string.address_label_village_township),
+
     @SerialName("zip")
     Zip(R.string.address_label_zip_code)
 }
@@ -135,7 +159,7 @@ internal class StateSchema(
     @SerialName("key")
     val key: String, // abbreviation
     @SerialName("name")
-    val name: String, // display name
+    val name: String // display name
 )
 
 @Serializable
@@ -145,7 +169,7 @@ internal class FieldSchema(
     @SerialName("examples")
     val examples: List<String> = emptyList(),
     @SerialName("nameType")
-    val nameType: NameType, // label,
+    val nameType: NameType // label,
 )
 
 @Serializable

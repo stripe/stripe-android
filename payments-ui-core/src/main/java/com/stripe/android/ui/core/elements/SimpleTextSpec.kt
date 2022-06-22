@@ -77,10 +77,12 @@ enum class KeyboardType {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 data class SimpleTextSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec,
 
     @SerialName("label")
-    @StringRes val label: Int,
+    @StringRes
+    val label: Int,
 
     @SerialName("capitalization")
     val capitalization: Capitalization = DEFAULT_CAPITALIZATION,

@@ -18,6 +18,12 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.DRIVER_LICENSE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
@@ -42,6 +48,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -72,9 +79,14 @@ internal class DriverLicenseScanFragmentTest {
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
 
-    private val mockIdentityViewModel = mock<IdentityViewModel>() {
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
@@ -103,6 +115,19 @@ internal class DriverLicenseScanFragmentTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `when started analytics event is sent`() {
+        launchDriverLicenseFragment().onFragment {
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE &&
+                        params[PARAM_SCAN_TYPE] == DRIVER_LICENSE
+                }
+            )
+        }
     }
 
     @Test
@@ -200,7 +225,7 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT
                         )
                     ),
                     eq(
@@ -249,11 +274,11 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT
                         )
                     ),
                     eq(
-                        ClearDataParam.UPLOAD_TO_CONFIRM
+                        ClearDataParam.UPLOAD_TO_SELFIE
                     )
                 )
 

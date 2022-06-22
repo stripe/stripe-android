@@ -346,6 +346,7 @@ class LinkAccountManagerTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
                 anyOrNull()
             )
         ).thenReturn(
@@ -353,10 +354,17 @@ class LinkAccountManagerTest {
             Result.success(mock())
         )
 
-        accountManager.createPaymentDetails(mock(), mock(), mock())
+        accountManager.createPaymentDetails(mock(), mock(), "", mock())
 
         verify(linkRepository, times(2))
-            .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            .createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
 
         assertThat(accountManager.linkAccount.value).isNotNull()
@@ -374,6 +382,7 @@ class LinkAccountManagerTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
                 anyOrNull()
             )
         ).thenReturn(
@@ -381,10 +390,17 @@ class LinkAccountManagerTest {
             Result.success(mock())
         )
 
-        accountManager.createPaymentDetails(mock(), mock(), mock())
+        accountManager.createPaymentDetails(mock(), mock(), "", mock())
 
         verify(linkRepository)
-            .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            .createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
     }
 

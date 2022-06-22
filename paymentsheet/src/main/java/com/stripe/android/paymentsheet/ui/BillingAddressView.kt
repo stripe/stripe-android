@@ -12,18 +12,18 @@ import android.view.View.OnFocusChangeListener
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
-import androidx.core.os.ConfigurationCompat
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.stripe.android.model.Address
+import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryCode.Companion.isUS
+import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
-import com.stripe.android.core.model.Country
-import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
 import kotlin.properties.Delegates
@@ -148,7 +148,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         viewBinding.stateDivider,
         stateLayout,
-        stateView,
+        stateView
     )
 
     private val allFields = setOf(
@@ -384,7 +384,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
 
     private fun getLocale(): Locale {
-        return ConfigurationCompat.getLocales(context.resources.configuration)[0]!!
+        return LocaleListCompat.getAdjustedDefault().get(0)!!
     }
 
     internal sealed class PostalCodeConfig {

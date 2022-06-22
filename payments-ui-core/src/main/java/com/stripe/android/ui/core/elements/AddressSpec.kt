@@ -15,6 +15,7 @@ enum class DisplayField {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 data class AddressSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
 
     @SerialName("allowed_country_codes")
