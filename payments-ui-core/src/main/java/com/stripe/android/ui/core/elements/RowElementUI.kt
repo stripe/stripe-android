@@ -31,7 +31,7 @@ internal fun RowElementUI(
     if (visibleFields.isNotEmpty()) {
         Row(modifier = Modifier.fillMaxWidth()) {
             visibleFields.forEachIndexed { index, field ->
-                val nextFocusDirection = if (index == visibleFields.size - 1) {
+                val nextFocusDirection = if (index == visibleFields.lastIndex) {
                     FocusDirection.Down
                 } else {
                     FocusDirection.Right
