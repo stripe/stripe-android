@@ -32,7 +32,7 @@ class AnalyticsRequestV2Factory(
      *
      * @param includeSDKParams - whether to include default SDK params.
      */
-    fun createRequestR(
+    fun createRequest(
         eventName: String,
         additionalParams: Map<String, Any?> = mapOf(),
         includeSDKParams: Boolean = true
