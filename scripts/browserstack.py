@@ -119,7 +119,7 @@ def executeTests(appUrl, testUrl):
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     response = requests.post(url, json={
          "app": appUrl,
-         "devices": ["Google Pixel 3-9.0"],
+         "devices": ["Samsung Galaxy S22-12.0"],
          "testSuite": testUrl,
          "networkLogs": True,
          "deviceLogs": True,
@@ -127,7 +127,27 @@ def executeTests(appUrl, testUrl):
 #          "language": "en_US",
          "locale": "en_US",
          "enableSpoonFramework": False,
-         "project": "Mobile Payments"
+         "project": "Mobile Payments",
+         "shards": {
+            "numberOfShards": 3,
+            "mapping": [
+                {
+                   "name": "Shard 1",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers", "com.stripe.android.TestCustomers"]
+                },
+                {
+                   "name": "Shard 2",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestFieldPopulation", "com.stripe.android.TestGooglePay"]
+                },
+                {
+                   "name": "Shard 3",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestHardCodedLpms", "com.stripe.android.TestMultiStepFieldsReloaded"]
+                },
+            ]
+         }
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
