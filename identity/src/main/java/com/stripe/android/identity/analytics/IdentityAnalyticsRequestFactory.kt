@@ -259,7 +259,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_SIDE = "side"
         const val PARAM_TYPE = "type"
         const val PARAM_VALUE = "value"
-        const val PARAM_PREPROCESS = "preproces"
+        const val PARAM_PREPROCESS = "preprocess"
         const val PARAM_INFERENCE = "inference"
         const val PARAM_ML_MODEL = "ml_model"
         const val PARAM_FRAMES = "frames"
