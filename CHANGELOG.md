@@ -2,8 +2,21 @@
 
 ## X.X.X
 
+## 20.6.0 - 2022-06-23
+This release contains new `rememberFinancialConnections` features for the Financial Connections SDK.
+
 ### Financial Connections
 * [ADDED][5117](https://github.com/stripe/stripe-android/pull/5117) Adds rememberFinancialConnectionsSheet and rememberFinancialConnectionsSheetForToken.
+
+### Payments
+* [FIXED][5195](https://github.com/stripe/stripe-android/pull/5195) Fix focus when navigating across compose fields
+* [FIXED][5196](https://github.com/stripe/stripe-android/pull/5196) Fix PaymentOptionsAddPaymentMethodFragmentTest
+* [FIXED][5183](https://github.com/stripe/stripe-android/pull/5183) Fix Link payment option card in dark mode
+* [FIXED][5148](https://github.com/stripe/stripe-android/pull/5148) Restore selected payment method when user returns to Link
+* [FIXED][5142](https://github.com/stripe/stripe-android/pull/5142) Fix issue with animations running on main thread
+
+### CardScan
+* [CHANGED][5144](https://github.com/stripe/stripe-android/pull/5144) Add a minimal TFLite module to stripecardscan.
 
 ## 20.5.0 - 2022-06-01
 This release contains several bug fixes for Payments and PaymentSheet, deprecates the PaymentSheet's `primaryButtonColor` api in favor of the new [appearance api](https://stripe.com/docs/elements/appearance-api?platform=android), and adds card brand icons to the card details form. 
