@@ -2,7 +2,7 @@
 
 ## X.X.X
 
-## 20.6.0 - 2022-06-23
+## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
 
 ### Financial Connections
