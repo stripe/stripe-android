@@ -15,6 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
@@ -68,6 +69,7 @@ internal class SelfieFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { it.identityScanFlow } doReturn mockScanFlow
         on { it.finalResult } doReturn finalResultLiveData
+        on { it.interimResults } doReturn mock()
         on { it.displayStateChanged } doReturn displayStateChanged
     }
 
@@ -76,6 +78,7 @@ internal class SelfieFragmentTest {
         MutableStateFlow(DocumentUploadState())
 
     private val selfieUploadState = MutableStateFlow(SelfieUploadState())
+    private val mockFPSTracker = mock<FPSTracker>()
 
     private val errorUploadState = mock<SelfieUploadState> {
         on { hasError() } doReturn true
@@ -107,6 +110,7 @@ internal class SelfieFragmentTest {
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { fpsTracker } doReturn mockFPSTracker
     }
 
     @Test

@@ -18,6 +18,8 @@ import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.TYPE_DOCUMENT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.TYPE_SELFIE
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
@@ -67,7 +69,18 @@ internal abstract class IdentityCameraScanFragment(
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
+
+        identityScanViewModel.interimResults.observe(viewLifecycleOwner) {
+            identityViewModel.fpsTracker.trackFrame()
+        }
+
         identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
+            lifecycleScope.launch {
+                identityViewModel.fpsTracker.reportAndReset(
+                    if (finalResult.result is FaceDetectorOutput) TYPE_SELFIE else TYPE_DOCUMENT
+                )
+            }
+
             identityViewModel.observeForVerificationPage(
                 viewLifecycleOwner,
                 onSuccess = { verificationPage ->
@@ -217,6 +230,8 @@ internal abstract class IdentityCameraScanFragment(
         cameraAdapter.bindToLifecycle(this)
         identityScanViewModel.scanState = null
         identityScanViewModel.scanStatePrevious = null
+
+        identityViewModel.fpsTracker.start()
         identityScanViewModel.identityScanFlow.startFlow(
             context = requireContext(),
             imageStream = cameraAdapter.getImageStream(),

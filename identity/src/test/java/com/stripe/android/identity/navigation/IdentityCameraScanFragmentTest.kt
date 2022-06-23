@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
@@ -16,6 +17,7 @@ import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.analytics.AnalyticsState
+import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
@@ -29,6 +31,7 @@ import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -49,12 +52,15 @@ class IdentityCameraScanFragmentTest {
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
+    private val interimResultsLiveData = MutableLiveData<IdentityAggregator.InterimResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockScanFlow = mock<IdentityScanFlow>()
+    private val mockFPSTracker = mock<FPSTracker>()
 
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(interimResultsLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
         whenever(it.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
     }
@@ -64,6 +70,7 @@ class IdentityCameraScanFragmentTest {
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         whenever(it.pageAndModelFiles).thenReturn(mockPageAndModel)
         whenever(it.identityAnalyticsRequestFactory).thenReturn(mockIdentityAnalyticsRequestFactory)
+        whenever(it.fpsTracker).thenReturn(mockFPSTracker)
     }
 
     @Test
@@ -139,6 +146,21 @@ class IdentityCameraScanFragmentTest {
         }
     }
 
+    @Test
+    fun `when interimResult is available frame is tracked`() {
+        launchFragmentInContainer(
+            themeResId = R.style.Theme_MaterialComponents
+        ) {
+            TestFragment(
+                viewModelFactoryFor(mockIdentityScanViewModel),
+                viewModelFactoryFor(mockIdentityViewModel)
+            )
+        }.onFragment {
+            interimResultsLiveData.postValue(mock())
+            verify(mockFPSTracker).trackFrame()
+        }
+    }
+
     private fun launchTestFragmentWithFinalResult(
         finalResult: IdentityAggregator.FinalResult,
         testBlock: () -> Unit
@@ -166,6 +188,16 @@ class IdentityCameraScanFragmentTest {
             finalResultLiveData.postValue(
                 finalResult
             )
+
+            runBlocking {
+                verify(mockFPSTracker).reportAndReset(
+                    if (finalResult.result is FaceDetectorOutput) {
+                        eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
+                    } else {
+                        eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
+                    }
+                )
+            }
 
             val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
             verify(mockIdentityViewModel).observeForVerificationPage(

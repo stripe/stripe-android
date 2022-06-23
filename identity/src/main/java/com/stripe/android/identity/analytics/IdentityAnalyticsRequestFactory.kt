@@ -173,6 +173,24 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
+    fun averageFps(type: String, value: Int) = requestFactory.createRequest(
+        eventName = EVENT_AVERAGE_FPS,
+        additionalParams = mapOf(
+            PARAM_TYPE to type,
+            PARAM_VALUE to value
+        )
+    )
+
+    fun modelPerformance(mlModel: String, preprocess: Long, inference: Long, frames: Int) = requestFactory.createRequest(
+        eventName = EVENT_MODEL_PERFORMANCE,
+        additionalParams = mapOf(
+            PARAM_PREPROCESS to preprocess,
+            PARAM_INFERENCE to inference,
+            PARAM_ML_MODEL to mlModel,
+            PARAM_FRAMES to frames
+        )
+    )
+
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
             IdentityScanState.ScanType.ID_FRONT -> ID
@@ -217,6 +235,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_CAMERA_PERMISSION_GRANTED = "camera_permission_granted"
         const val EVENT_DOCUMENT_TIMEOUT = "document_timeout"
         const val EVENT_SELFIE_TIMEOUT = "selfie_timeout"
+        const val EVENT_AVERAGE_FPS = "average_fps"
+        const val EVENT_MODEL_PERFORMANCE = "model_performance"
 
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
         const val PARAM_VERIFICATION_SESSION = "verification_session"
@@ -237,6 +257,12 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_STACKTRACE = "stacktrace"
         const val PARAM_SCREEN_NAME = "screen_name"
         const val PARAM_SIDE = "side"
+        const val PARAM_TYPE = "type"
+        const val PARAM_VALUE = "value"
+        const val PARAM_PREPROCESS = "preprocess"
+        const val PARAM_INFERENCE = "inference"
+        const val PARAM_ML_MODEL = "ml_model"
+        const val PARAM_FRAMES = "frames"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_SELECT = "document_select"
@@ -245,5 +271,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_SELFIE = "selfie"
         const val SCREEN_NAME_CONFIRMATION = "confirmation"
         const val SCREEN_NAME_ERROR = "error"
+        const val TYPE_SELFIE = "selfie"
+        const val TYPE_DOCUMENT = "document"
     }
 }
