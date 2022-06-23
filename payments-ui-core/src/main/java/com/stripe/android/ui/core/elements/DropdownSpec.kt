@@ -10,7 +10,7 @@ data class DropdownSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec,
 
-    @SerialName("label_translation_id")
+    @SerialName("translation_id")
     val labelTranslationId: TranslationId,
 
     @SerialName("items")
