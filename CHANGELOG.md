@@ -3,7 +3,7 @@
 ## X.X.X
 
 ## 20.6.0 - 2022-06-23
-This release contains new `rememberFinancialConnections` features for the Financial Connections SDK.
+This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connectionsß.
 
 ### Financial Connections
 * [ADDED][5117](https://github.com/stripe/stripe-android/pull/5117) Adds rememberFinancialConnectionsSheet and rememberFinancialConnectionsSheetForToken.
