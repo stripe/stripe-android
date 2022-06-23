@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
+import android.content.Context
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -13,9 +14,11 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -26,6 +29,8 @@ import org.robolectric.RobolectricTestRunner
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewModelTestInjection() {
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val lpmRepository = LpmRepository(context.resources)
 
     @Before
     fun setup() {
@@ -41,54 +46,15 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
     }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
+    fun `Factory gets initialized by Injector when Injector is available`() = runTest(UnconfinedTestDispatcher()) {
         createFragment { fragment, _, viewModel ->
-            val factory = PaymentOptionsViewModel.Factory(
-                { ApplicationProvider.getApplicationContext() },
-                {
-                    PaymentOptionContract.Args(
-                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        emptyList(),
-                        null,
-                        false,
-                        null,
-                        null,
-                        DUMMY_INJECTOR_KEY,
-                        false,
-                        mock()
-                    )
-                },
-                fragment
-            )
             assertThat(fragment.sheetViewModel).isEqualTo(viewModel)
-
-            WeakMapInjectorRegistry.clear()
         }
     }
 
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+    fun `Factory gets initialized with fallback when no Injector is available`() = runTest(UnconfinedTestDispatcher()) {
         createFragment(registerInjector = false) { fragment, _, viewModel ->
-            val context = ApplicationProvider.getApplicationContext<Application>()
-            val productUsage = setOf("TestProductUsage")
-            PaymentConfiguration.init(context, "testKey")
-            val factory = PaymentOptionsViewModel.Factory(
-                { context },
-                {
-                    PaymentOptionContract.Args(
-                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        emptyList(),
-                        null,
-                        false,
-                        null,
-                        null,
-                        DUMMY_INJECTOR_KEY,
-                        false,
-                        productUsage
-                    )
-                },
-                fragment
-            )
             assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
         }
     }
@@ -108,7 +74,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         registerInjector: Boolean = true,
         onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding, PaymentOptionsViewModel) -> Unit
-    ) {
+    ): FragmentScenario<PaymentOptionsAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(
             paymentMethods = args.paymentMethods,
@@ -117,10 +83,11 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         )
         viewModel.setStripeIntent(args.stripeIntent)
         TestUtils.idleLooper()
+
         if (registerInjector) {
-            registerViewModel(args.injectorKey, viewModel, createFormViewModel())
+            registerViewModel(args.injectorKey, viewModel, lpmRepository)
         }
-        launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
+        return launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
             bundleOf(
                 PaymentOptionsActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentOptionsActivity.EXTRA_STARTER_ARGS to args
