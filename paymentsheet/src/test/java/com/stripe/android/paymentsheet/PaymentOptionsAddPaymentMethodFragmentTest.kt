@@ -46,7 +46,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
     }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() = runTest(UnconfinedTestDispatcher()) {
+    fun `Factory gets initialized by Injector when Injector is available`() {
         createFragment { fragment, _, viewModel ->
             assertThat(fragment.sheetViewModel).isEqualTo(viewModel)
         }
