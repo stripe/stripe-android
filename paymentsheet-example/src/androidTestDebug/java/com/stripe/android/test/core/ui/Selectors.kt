@@ -209,7 +209,7 @@ class Selectors(
         AuthorizeAction.Fail -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
-                className = "android.widget.Button",
+                className = "android.widget.TextView",
                 device = device
             ) {}
         }
