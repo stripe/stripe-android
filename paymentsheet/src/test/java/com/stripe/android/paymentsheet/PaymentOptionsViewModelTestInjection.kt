@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -71,6 +72,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         )
     }
 
+    @FlowPreview
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentOptionsViewModel,
