@@ -89,16 +89,16 @@ class AnalyticsRequestV2FactoryTest {
                         "nestedLv2Param3" to "nestedLv2Value3",
                         "nestedLv2Param2" to "nestedLv2Value2",
                         "nestedLv2Param4" to null,
-                        "nestedLv2Param5" to "",
+                        "nestedLv2Param5" to ""
                     ),
                     "nestedParam5" to mapOf(
                         "nestedLv2Param6" to mapOf(
                             "nestedLvl3Param1" to "nestedLvl3Param2"
                         )
-                    ),
+                    )
                 ),
                 "param4" to null,
-                "param5" to "",
+                "param5" to ""
             ),
             includeSDKParams = true
         )
