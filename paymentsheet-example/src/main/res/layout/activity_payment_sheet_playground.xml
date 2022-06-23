@@ -140,45 +140,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mode_radio_group" />
 
-        <RadioGroup
-            android:id="@+id/currency_radio_group"
+        <Spinner
+            android:id="@+id/currency_spinner"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:orientation="horizontal"
             android:layout_marginStart="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currency_text_view">
-
-            <RadioButton
-                android:id="@+id/currency_usd_button"
-                android:text="@string/currency_usd"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                tools:ignore="HardcodedText" />
-
-            <RadioButton
-                android:id="@+id/currency_aud_button"
-                android:text="@string/currency_aud"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                tools:ignore="HardcodedText" />
-
-            <RadioButton
-                android:id="@+id/currency_eur_button"
-                android:text="@string/currency_eur"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:ignore="HardcodedText" />
-
-            <RadioButton
-                android:id="@+id/currency_gbp_button"
-                android:text="@string/currency_gbp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:ignore="HardcodedText" />
-        </RadioGroup>
+            app:layout_constraintTop_toBottomOf="@+id/currency_text_view" />
 
         <TextView
             android:id="@+id/google_pay_text_view"
@@ -223,7 +192,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currency_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/currency_spinner" />
 
         <RadioGroup
             android:id="@+id/default_billing_radio_group"

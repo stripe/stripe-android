@@ -9,11 +9,13 @@ enum class CheckoutMode(val value: String) {
     PaymentWithSetup("payment_with_setup")
 }
 
-enum class CheckoutCurrency(val value: String) {
-    USD("usd"),
-    EUR("eur"),
-    AUD("aud"),
-    GBP("gbp"),
+data class CheckoutCurrency(val value: String) {
+    companion object {
+        val USD = CheckoutCurrency("usd")
+        val EUR = CheckoutCurrency("eur")
+        val AUD = CheckoutCurrency("aud")
+        val GBP = CheckoutCurrency("gbp")
+    }
 }
 
 enum class Toggle(val key: String, val default: Any) {

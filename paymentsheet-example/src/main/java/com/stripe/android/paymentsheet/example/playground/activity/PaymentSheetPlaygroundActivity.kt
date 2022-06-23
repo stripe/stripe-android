@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
-import android.widget.RadioGroup
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -24,6 +26,7 @@ import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
+
 
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
@@ -68,12 +71,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
     private val currency: CheckoutCurrency
-        get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
-            R.id.currency_usd_button -> CheckoutCurrency.USD
-            R.id.currency_aud_button -> CheckoutCurrency.AUD
-            R.id.currency_gbp_button -> CheckoutCurrency.GBP
-            else -> CheckoutCurrency.EUR
-        }
+        get() = CheckoutCurrency(stripeSupportedCurrencies[viewBinding.currencySpinner.selectedItemPosition])
 
     private val mode: CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
@@ -127,6 +125,13 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             ::onPaymentSheetResult
         )
         val backendUrl = Settings(this).playgroundBackendUrl
+
+        viewBinding.currencySpinner.adapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                stripeSupportedCurrencies
+            )
 
         viewBinding.resetDefaultsButton.setOnClickListener {
             setToggles(
@@ -196,12 +201,22 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
         }
 
-        viewBinding.currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
-            // when the currency changes the merchant may change, so the new customer id
-            // created might not match the previous new customer
-            viewModel.temporaryCustomerId = null
-        }
+        viewBinding.currencySpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    // when the currency changes the merchant may change, so the new customer id
+                    // created might not match the previous new customer
+                    viewModel.temporaryCustomerId = null
+                }
 
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        
         disableViews()
     }
 
@@ -247,11 +262,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             false -> viewBinding.googlePayRadioGroup.check(R.id.google_pay_off_button)
         }
 
-        when (currency) {
-            CheckoutCurrency.USD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_usd_button)
-            CheckoutCurrency.AUD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_aud_button)
-            else -> viewBinding.currencyRadioGroup.check(R.id.currency_eur_button)
-        }
+        viewBinding.currencySpinner.setSelection(
+            stripeSupportedCurrencies.indexOf(currency)
+        )
 
         when (mode) {
             CheckoutMode.Payment.value -> viewBinding.modeRadioGroup.check(R.id.mode_payment_button)
@@ -417,5 +430,21 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
+
+        // List was created from: https://stripe.com/docs/currencies
+        private val stripeSupportedCurrencies = listOf(
+            "USD", "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM",
+            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
+            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
+            "DZD", "EGP", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GIP", "GMD", "GNF", "GTQ",
+            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY",
+            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
+            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
+            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",
+            "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SEK",
+            "SGD", "SHP", "SLL", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TRY", "TTD",
+            "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF",
+            "XPF", "YER", "ZAR", "ZMW"
+        )
     }
 }
