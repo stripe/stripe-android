@@ -12,6 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
@@ -199,7 +200,7 @@ internal class CouldNotCaptureFragmentTest {
         verify(mockIdentityViewModel).sendAnalyticsRequest(
             argThat {
                 eventName == EVENT_SCREEN_PRESENTED &&
-                    params[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
+                    (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
             }
         )
 

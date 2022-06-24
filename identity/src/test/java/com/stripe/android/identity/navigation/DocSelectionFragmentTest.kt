@@ -15,6 +15,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_DENIED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_GRANTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
@@ -113,7 +114,7 @@ internal class DocSelectionFragmentTest {
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_DOC_SELECT
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_DOC_SELECT
                 }
             )
             assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
