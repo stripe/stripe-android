@@ -34,12 +34,15 @@ internal class FPSTracker @Inject constructor(
      * Reports FPS since last start.
      */
     suspend fun reportAndReset(type: String) {
-        identityRepository.sendAnalyticsRequest(
-            identityAnalyticsRequestFactory.averageFps(
-                type = type,
-                value = frames.get().div(startedAt.elapsedSince().inSeconds).toInt()
+        frames.get().let { totalFrames->
+            identityRepository.sendAnalyticsRequest(
+                identityAnalyticsRequestFactory.averageFps(
+                    type = type,
+                    value = totalFrames.div(startedAt.elapsedSince().inSeconds).toInt(),
+                    frames = totalFrames
+                )
             )
-        )
+        }
         frames.set(0)
     }
 }
