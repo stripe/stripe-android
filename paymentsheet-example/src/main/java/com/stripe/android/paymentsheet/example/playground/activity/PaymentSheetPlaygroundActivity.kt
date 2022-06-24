@@ -14,6 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
@@ -26,6 +28,7 @@ import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
@@ -72,6 +75,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private val currency: CheckoutCurrency
         get() = CheckoutCurrency(stripeSupportedCurrencies[viewBinding.currencySpinner.selectedItemPosition])
+
+    private val merchantCountryCode: CountryCode
+        get() = countryCurrencyPairs[viewBinding.merchantCountrySpinner.selectedItemPosition].first.code
 
     private val mode: CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
@@ -133,25 +139,47 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 stripeSupportedCurrencies
             )
 
+        viewBinding.merchantCountrySpinner.adapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                countryCurrencyPairs.map { it.first }
+            )
+
         viewBinding.resetDefaultsButton.setOnClickListener {
             setToggles(
-                Toggle.Customer.default.toString(),
-                Toggle.Link.default as Boolean,
-                Toggle.GooglePay.default as Boolean,
-                Toggle.Currency.default.toString(),
-                Toggle.Mode.default.toString(),
-                Toggle.SetShippingAddress.default as Boolean,
-                Toggle.SetDefaultBillingAddress.default as Boolean,
-                Toggle.SetAutomaticPaymentMethods.default as Boolean,
-                Toggle.SetDelayedPaymentMethods.default as Boolean,
+                customer = Toggle.Customer.default.toString(),
+                link = Toggle.Link.default as Boolean,
+                googlePay = Toggle.GooglePay.default as Boolean,
+                currency = Toggle.Currency.default.toString(),
+                merchantCountryCode = Toggle.MerchantCountryCode.default.toString(),
+                mode = Toggle.Mode.default.toString(),
+                setShippingAddress = Toggle.SetShippingAddress.default as Boolean,
+                setDefaultBillingAddress = Toggle.SetDefaultBillingAddress.default as Boolean,
+                setAutomaticPaymentMethods = Toggle.SetAutomaticPaymentMethods.default as Boolean,
+                setDelayedPaymentMethods = Toggle.SetDelayedPaymentMethods.default as Boolean,
             )
         }
 
         viewBinding.reloadButton.setOnClickListener {
+            viewModel.storeToggleState(
+                customer = customer.value,
+                link = linkEnabled,
+                googlePay = googlePayConfig != null,
+                currency = currency.value,
+                merchantCountryCode = merchantCountryCode.value,
+                mode = mode.value,
+                setShippingAddress = setShippingAddress,
+                setDefaultBillingAddress = setDefaultBillingAddress,
+                setAutomaticPaymentMethods = setAutomaticPaymentMethods,
+                setDelayedPaymentMethods = setDelayedPaymentMethods
+            )
+
             lifecycleScope.launch {
                 viewModel.prepareCheckout(
                     customer,
                     currency,
+                    merchantCountryCode,
                     mode,
                     linkEnabled,
                     setShippingAddress,
@@ -201,7 +229,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
         }
 
-        viewBinding.currencySpinner.onItemSelectedListener =
+        viewBinding.merchantCountrySpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -209,29 +237,37 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     position: Int,
                     id: Long
                 ) {
-                    // when the currency changes the merchant may change, so the new customer id
+                    viewBinding.currencySpinner.setSelection(
+                        stripeSupportedCurrencies.indexOf(
+                            countryCurrencyPairs[position].second
+                        )
+                    )
+
+                    // when the merchant changes, so the new customer id
                     // created might not match the previous new customer
                     viewModel.temporaryCustomerId = null
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-        
+
         disableViews()
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.storeToggleState(
-            customer.value,
-            linkEnabled,
-            googlePayConfig != null,
-            currency.value,
-            mode.value,
-            setShippingAddress,
-            setDefaultBillingAddress,
-            setAutomaticPaymentMethods,
-            setDelayedPaymentMethods
+    override fun onResume() {
+        super.onResume()
+        val savedToggles = viewModel.getSavedToggleState()
+        setToggles(
+            customer = savedToggles.customer,
+            link = savedToggles.link,
+            googlePay = savedToggles.googlePay,
+            currency = savedToggles.currency,
+            merchantCountryCode = savedToggles.merchantCountryCode,
+            mode = savedToggles.mode,
+            setShippingAddress = savedToggles.setShippingAddress,
+            setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
+            setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
+            setDefaultBillingAddress = savedToggles.setDefaultBillingAddress
         )
     }
 
@@ -240,11 +276,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         link: Boolean,
         googlePay: Boolean,
         currency: String?,
+        merchantCountryCode: String,
         mode: String?,
         setShippingAddress: Boolean,
         setDefaultBillingAddress: Boolean,
         setAutomaticPaymentMethods: Boolean,
-        setDelayedPaymentMethods: Boolean,
+        setDelayedPaymentMethods: Boolean
     ) {
         when (customer) {
             CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
@@ -264,6 +301,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewBinding.currencySpinner.setSelection(
             stripeSupportedCurrencies.indexOf(currency)
+        )
+        viewBinding.merchantCountrySpinner.setSelection(
+            countryCurrencyPairs.map{it.first.code.value}.indexOf(merchantCountryCode)
         )
 
         when (mode) {
@@ -431,20 +471,52 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
 
+        /**
+         * This is a pairing of the countries to their default currency
+         **/
+        private val countryCurrencyPairs = CountryUtils.getOrderedCountries(Locale.getDefault())
+            .filter {
+                /**
+                 * Modify this list if you want to change the countries displayed in the playground.
+                 */
+                setOf("US", "GB", "AU").contains(it.code.value)
+            }.map {
+                /**
+                 * Modify this statement to change the default currency associated with each
+                 * country.  The currency values should match the stripeSupportedCurrencies.
+                 */
+                when (it.code.value) {
+                    "GB" -> {
+                        it to "GBP"
+                    }
+                    "AU" -> {
+                        it to "AUD"
+                    }
+                    "US" -> {
+                        it to "USD"
+                    }
+                    else -> {
+                        it to "USD"
+                    }
+                }
+            }
+
         // List was created from: https://stripe.com/docs/currencies
+        /** Modify this list if you want to change the currencies displayed in the playground **/
         private val stripeSupportedCurrencies = listOf(
-            "USD", "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM",
-            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
-            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
-            "DZD", "EGP", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GIP", "GMD", "GNF", "GTQ",
-            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY",
-            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
-            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
-            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",
-            "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SEK",
-            "SGD", "SHP", "SLL", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TRY", "TTD",
-            "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF",
-            "XPF", "YER", "ZAR", "ZMW"
+            "AUD", "EUR", "GBP", "USD",
+//            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
+//            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
+//            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
+//            "DZD", "EGP", "ETB", "FJD", "FKP",  "GEL", "GIP", "GMD", "GNF", "GTQ",
+//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY",
+//            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
+//            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
+//            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",
+//            "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SEK",
+//            "SGD", "SHP", "SLL", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TRY", "TTD",
+//            "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF",
+//            "XPF", "YER", "ZAR", "ZMW"
         )
     }
 }

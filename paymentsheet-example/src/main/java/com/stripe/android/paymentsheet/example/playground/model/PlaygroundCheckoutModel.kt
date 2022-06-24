@@ -18,11 +18,25 @@ data class CheckoutCurrency(val value: String) {
     }
 }
 
+data class SavedToggles(
+    val customer: String,
+    val googlePay: Boolean,
+    val currency: String,
+    val merchantCountryCode: String,
+    val mode: String,
+    val setShippingAddress: Boolean,
+    val setAutomaticPaymentMethods: Boolean,
+    val setDelayedPaymentMethods: Boolean,
+    val setDefaultBillingAddress: Boolean,
+    val link: Boolean
+)
+
 enum class Toggle(val key: String, val default: Any) {
     Customer("customer", CheckoutCustomer.Guest.value),
     Link("link", true),
     GooglePay("googlePayConfig", true),
     Currency("currency", CheckoutCurrency.USD.value),
+    MerchantCountryCode("merchantCountry", "US"),
     Mode("mode", CheckoutMode.Payment.value),
     SetShippingAddress("setShippingAddress", true),
     SetDefaultBillingAddress("setDefaultBillingAddress", true),
@@ -46,11 +60,7 @@ data class CheckoutRequest(
     val set_shipping_address: Boolean,
     val automatic_payment_methods: Boolean,
     val use_link: Boolean,
-    val merchant_country_code: String? = when (currency.uppercase()) {
-        "AUD" -> "AU"
-        "EUR" -> "GB"
-        else -> null
-    }
+    val merchant_country_code: String
 )
 
 @Serializable

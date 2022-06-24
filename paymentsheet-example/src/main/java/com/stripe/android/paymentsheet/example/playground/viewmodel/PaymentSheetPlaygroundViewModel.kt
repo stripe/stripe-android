@@ -11,12 +11,14 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
+import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 
 class PaymentSheetPlaygroundViewModel(
@@ -42,6 +44,7 @@ class PaymentSheetPlaygroundViewModel(
         link: Boolean,
         googlePay: Boolean,
         currency: String,
+        merchantCountryCode: String,
         mode: String,
         setShippingAddress: Boolean,
         setDefaultBillingAddress: Boolean,
@@ -58,12 +61,75 @@ class PaymentSheetPlaygroundViewModel(
         editor.putBoolean(Toggle.Link.key, link)
         editor.putBoolean(Toggle.GooglePay.key, googlePay)
         editor.putString(Toggle.Currency.key, currency)
+        editor.putString(Toggle.MerchantCountryCode.key, merchantCountryCode)
         editor.putString(Toggle.Mode.key, mode)
         editor.putBoolean(Toggle.SetShippingAddress.key, setShippingAddress)
         editor.putBoolean(Toggle.SetDefaultBillingAddress.key, setDefaultBillingAddress)
         editor.putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
         editor.putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
         editor.apply()
+    }
+
+    fun getSavedToggleState(): SavedToggles {
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            sharedPreferencesName,
+            AppCompatActivity.MODE_PRIVATE
+        )
+
+        val customer = sharedPreferences.getString(
+            Toggle.Customer.key,
+            Toggle.Customer.default.toString()
+        )
+        val googlePay = sharedPreferences.getBoolean(
+            Toggle.GooglePay.key,
+            Toggle.GooglePay.default as Boolean
+        )
+        val currency = sharedPreferences.getString(
+            Toggle.Currency.key,
+            Toggle.Currency.default.toString()
+        )
+        val merchantCountryCode = sharedPreferences.getString(
+            Toggle.MerchantCountryCode.key,
+            Toggle.MerchantCountryCode.default.toString()
+        )
+        val mode = sharedPreferences.getString(
+            Toggle.Mode.key,
+            Toggle.Mode.default.toString()
+        )
+        val setShippingAddress = sharedPreferences.getBoolean(
+            Toggle.SetShippingAddress.key,
+            Toggle.SetShippingAddress.default as Boolean
+        )
+        val setAutomaticPaymentMethods = sharedPreferences.getBoolean(
+            Toggle.SetAutomaticPaymentMethods.key,
+            Toggle.SetAutomaticPaymentMethods.default as Boolean
+        )
+        val setDelayedPaymentMethods = sharedPreferences.getBoolean(
+            Toggle.SetDelayedPaymentMethods.key,
+            Toggle.SetDelayedPaymentMethods.default as Boolean
+        )
+        val setDefaultBillingAddress = sharedPreferences.getBoolean(
+            Toggle.SetDefaultBillingAddress.key,
+            Toggle.SetDefaultBillingAddress.default as Boolean
+        )
+        val setLink = sharedPreferences.getBoolean(
+            Toggle.Link.key,
+            Toggle.Link.default as Boolean
+        )
+
+        return SavedToggles(
+            customer= customer.toString(),
+            googlePay = googlePay,
+            currency = currency.toString(),
+            merchantCountryCode = merchantCountryCode.toString(),
+            mode = mode.toString(),
+            setShippingAddress = setShippingAddress,
+            setAutomaticPaymentMethods = setAutomaticPaymentMethods,
+            setDelayedPaymentMethods = setDelayedPaymentMethods,
+            setDefaultBillingAddress = setDefaultBillingAddress,
+            link = setLink
+        )
+
     }
 
     /**
@@ -73,6 +139,7 @@ class PaymentSheetPlaygroundViewModel(
     fun prepareCheckout(
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
+        merchantCountry: CountryCode,
         mode: CheckoutMode,
         linkEnabled: Boolean,
         setShippingAddress: Boolean,
@@ -85,12 +152,13 @@ class PaymentSheetPlaygroundViewModel(
         inProgress.postValue(true)
 
         val requestBody = CheckoutRequest(
-            customer.value,
-            currency.value,
-            mode.value,
-            setShippingAddress,
-            setAutomaticPaymentMethod,
-            linkEnabled
+            customer = customer.value,
+            currency = currency.value.lowercase(),
+            mode = mode.value,
+            set_shipping_address = setShippingAddress,
+            automatic_payment_methods = setAutomaticPaymentMethod,
+            use_link = linkEnabled,
+            merchant_country_code = merchantCountry.value
         )
 
         Fuel.post(backendUrl + "checkout")
