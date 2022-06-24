@@ -119,7 +119,7 @@ def executeTests(appUrl, testUrl):
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     response = requests.post(url, json={
          "app": appUrl,
-         "devices": ["Samsung Galaxy S22-12.0"],
+         "devices": ["Google Pixel 3-9.0"],
          "testSuite": testUrl,
          "networkLogs": True,
          "deviceLogs": True,
