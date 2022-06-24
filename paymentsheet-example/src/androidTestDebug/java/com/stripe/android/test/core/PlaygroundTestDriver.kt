@@ -301,23 +301,14 @@ class PlaygroundTestDriver(
                 if(authorizeAction.exists()){
                     authorizeAction.click()
                 }
-                // Failure isn't showing the same way each time.
-                else if(!authorizeAction.exists() && (testParameters.authorizationAction == AuthorizeAction.Fail)){
+                // Buttons aren't showing the same way each time in the web page.
+                else if(!authorizeAction.exists()){
                     object : UiAutomatorText(
-                        label = AuthorizeAction.Fail.text,
+                        label = requireNotNull(testParameters.authorizationAction).text,
                         className = "android.widget.TextView",
                         device = device
                     ) {}.click()
                     Log.e("Stripe", "Fail authorization was a text view not a button this time")
-                }
-                // Failure isn't showing the same way each time.
-                else if(!authorizeAction.exists() && (testParameters.authorizationAction == AuthorizeAction.Authorize)){
-                    object : UiAutomatorText(
-                        label = AuthorizeAction.Authorize.text,
-                        className = "android.widget.TextView",
-                        device = device
-                    ) {}.click()
-                    Log.e("Stripe", "Authorization was a text view not a button this time")
                 }
 
                 when (testParameters.authorizationAction) {
