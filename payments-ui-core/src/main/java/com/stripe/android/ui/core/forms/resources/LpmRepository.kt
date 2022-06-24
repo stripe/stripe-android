@@ -8,6 +8,8 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -61,10 +63,20 @@ class LpmRepository @Inject constructor(
     }
 
     @VisibleForTesting
-    fun initialize(inputStream: InputStream?) {
+    fun initialize(
+        inputStream: InputStream?,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+            DefaultIsFinancialConnectionsAvailable()
+    ) {
         val parsedSupportedPaymentMethod = parseLpms(inputStream)
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
+            ?.toMutableList()
+
+        parsedSupportedPaymentMethod?.removeAll {
+            !isFinancialConnectionsAvailable() &&
+                it.code == PaymentMethod.Type.USBankAccount.code
+        }
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
         codeToSupportedPaymentMethod =

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import org.junit.Test
@@ -109,5 +110,45 @@ class LpmRepositoryTest {
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
+    }
+
+    @Test
+    fun `Verify that us_bank_account is supported when financial connections sdk available`() {
+        lpmRepository.initialize(
+            """
+              [
+                {
+                  "type": "us_bank_account"
+                }
+              ]
+            """.trimIndent().byteInputStream(),
+            isFinancialConnectionsAvailable = object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return true
+                }
+            }
+        )
+
+        assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
+    }
+
+    @Test
+    fun `Verify that us_bank_account not supported when financial connections sdk not available`() {
+        lpmRepository.initialize(
+            """
+              [
+                {
+                  "type": "us_bank_account"
+                }
+              ]
+            """.trimIndent().byteInputStream(),
+            isFinancialConnectionsAvailable = object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return false
+                }
+            }
+        )
+
+        assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
     }
 }
