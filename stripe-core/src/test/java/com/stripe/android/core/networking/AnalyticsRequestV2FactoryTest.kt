@@ -110,20 +110,20 @@ class AnalyticsRequestV2FactoryTest {
                 URLEncoder.encode(
                     """
                     {
-                       "nestedParam1": "nestedValue1",
-                       "nestedParam2": "nestedValue2",
-                       "nestedParam3": "nestedValue3",
-                       "nestedParam4": {
-                          "nestedLv2Param1": "nestedLv2Value1",
-                          "nestedLv2Param2": "nestedLv2Value2",
-                          "nestedLv2Param3": "nestedLv2Value3",
-                          "nestedLv2Param5": ""
-                       },
-                       "nestedParam5": {
-                          "nestedLv2Param6": {
-                             "nestedLvl3Param1": "nestedLvl3Param2"
-                          }
-                       }
+                      "nestedParam1": "nestedValue1",
+                      "nestedParam2": "nestedValue2",
+                      "nestedParam3": "nestedValue3",
+                      "nestedParam4": {
+                        "nestedLv2Param1": "nestedLv2Value1",
+                        "nestedLv2Param2": "nestedLv2Value2",
+                        "nestedLv2Param3": "nestedLv2Value3",
+                        "nestedLv2Param5": ""
+                      },
+                      "nestedParam5": {
+                        "nestedLv2Param6": {
+                          "nestedLvl3Param1": "nestedLvl3Param2"
+                        }
+                      }
                     }
                     """.trimIndent(),
                     Charsets.UTF_8.name()

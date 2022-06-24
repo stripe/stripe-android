@@ -44,8 +44,8 @@ class AnalyticsRequestV2(
     // E.g for a nested map with value {"key", {"nestedKey1" -> "value1", "nestedKey2" -> "value2"}}
     // The params are encoded as a prettified json format sorted by key as follows
     // key="{
-    //    "nestedKey1": "value1",
-    //    "nestedKey2": "value2"
+    //   "nestedKey1": "value1",
+    //   "nestedKey2": "value2"
     // }"
     // As opposed to
     // key[nestedKey1]="value1"&key[nestedKey2]="value2"
@@ -110,16 +110,16 @@ class AnalyticsRequestV2(
                 }
             if (encodedValue.isNotBlank()) {
                 if (first) {
-                    stringBuilder.append(TAB.repeat(level)).append("$TAB\"$key\": $encodedValue")
+                    stringBuilder.append(INDENTATION.repeat(level)).append("$INDENTATION\"$key\": $encodedValue")
                     first = false
                 } else {
-                    stringBuilder.appendLine(",").append(TAB.repeat(level))
-                        .append("$TAB\"$key\": $encodedValue")
+                    stringBuilder.appendLine(",").append(INDENTATION.repeat(level))
+                        .append("$INDENTATION\"$key\": $encodedValue")
                 }
             }
         }
         stringBuilder.appendLine()
-        stringBuilder.append(TAB.repeat(level)).append("}")
+        stringBuilder.append(INDENTATION.repeat(level)).append("}")
         return stringBuilder.toString()
     }
 
@@ -163,6 +163,6 @@ class AnalyticsRequestV2(
         internal const val PARAM_EVENT_NAME = "event_name"
         internal const val PARAM_EVENT_ID = "event_id"
 
-        private const val TAB = "   "
+        private const val INDENTATION = "  "
     }
 }
