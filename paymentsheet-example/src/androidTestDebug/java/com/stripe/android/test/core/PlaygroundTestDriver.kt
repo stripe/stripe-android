@@ -246,7 +246,11 @@ class PlaygroundTestDriver(
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
         selectors.automatic.click()
-        selectors.currency.click()
+
+        // Set the country first because it will update the default currency value
+        selectors.setMerchantCountry(testParameters.merchantCountryCode)
+        selectors.setCurrency(testParameters.currency)
+
         selectors.checkout.click()
         selectors.delayed.click()
 
@@ -255,7 +259,6 @@ class PlaygroundTestDriver(
 
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
-
     }
 
     internal fun launchComplete() {
