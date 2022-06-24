@@ -310,6 +310,15 @@ class PlaygroundTestDriver(
                     ) {}.click()
                     Log.e("Stripe", "Fail authorization was a text view not a button this time")
                 }
+                // Failure isn't showing the same way each time.
+                else if(!authorizeAction.exists() && (testParameters.authorizationAction == AuthorizeAction.Authorize)){
+                    object : UiAutomatorText(
+                        label = AuthorizeAction.Authorize.text,
+                        className = "android.widget.TextView",
+                        device = device
+                    ) {}.click()
+                    Log.e("Stripe", "Authorization was a text view not a button this time")
+                }
 
                 when (testParameters.authorizationAction) {
                     AuthorizeAction.Authorize -> {}
