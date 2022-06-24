@@ -34,7 +34,7 @@ internal class FPSTracker @Inject constructor(
      * Reports FPS since last start.
      */
     suspend fun reportAndReset(type: String) {
-        frames.get().let { totalFrames->
+        frames.get().let { totalFrames ->
             identityRepository.sendAnalyticsRequest(
                 identityAnalyticsRequestFactory.averageFps(
                     type = type,
