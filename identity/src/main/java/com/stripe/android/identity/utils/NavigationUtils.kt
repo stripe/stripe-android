@@ -8,6 +8,17 @@ import androidx.navigation.NavArgument
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD_ID
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD_PASSPORT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_ID
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
@@ -44,6 +55,9 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     @IdRes fromFragment: Int,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
+    identityViewModel.screenTracker.screenTransitionStart(
+        fromFragment.fragmentIdToScreenName()
+    )
     runCatching {
         identityViewModel.postVerificationPageData(collectedDataParam, clearDataParam)
     }.fold(
@@ -164,6 +178,51 @@ private fun NavController.isBackingToUploadFragment() =
     previousBackStackEntry?.destination?.id == R.id.IDUploadFragment ||
         previousBackStackEntry?.destination?.id == R.id.passportUploadFragment ||
         previousBackStackEntry?.destination?.id == R.id.driverLicenseUploadFragment
+
+internal fun Int.fragmentIdToScreenName(): String = when (this) {
+    R.id.consentFragment -> {
+        SCREEN_NAME_CONSENT
+    }
+    R.id.docSelectionFragment -> {
+        SCREEN_NAME_DOC_SELECT
+    }
+    R.id.IDScanFragment -> {
+        SCREEN_NAME_LIVE_CAPTURE_ID
+    }
+    R.id.passportScanFragment -> {
+        SCREEN_NAME_LIVE_CAPTURE_PASSPORT
+    }
+    R.id.driverLicenseScanFragment -> {
+        SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
+    }
+    R.id.IDUploadFragment -> {
+        SCREEN_NAME_FILE_UPLOAD_ID
+    }
+    R.id.passportUploadFragment -> {
+        SCREEN_NAME_FILE_UPLOAD_PASSPORT
+    }
+    R.id.driverLicenseUploadFragment -> {
+        SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
+    }
+    R.id.selfieFragment -> {
+        SCREEN_NAME_SELFIE
+    }
+    R.id.confirmationFragment -> {
+        SCREEN_NAME_CONFIRMATION
+    }
+    R.id.cameraPermissionDeniedFragment -> {
+        SCREEN_NAME_ERROR
+    }
+    R.id.errorFragment -> {
+        SCREEN_NAME_ERROR
+    }
+    R.id.couldNotCaptureFragment -> {
+        SCREEN_NAME_ERROR
+    }
+    else -> {
+        throw IllegalArgumentException("Invalid fragment ID: $this")
+    }
+}
 
 /**
  * Argument to indicate if take photo option should be shown when picking an image.

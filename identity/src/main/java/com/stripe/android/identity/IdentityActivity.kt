@@ -18,6 +18,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.camera.CameraPermissionCheckingActivity
+import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.IdentityActivityBinding
@@ -121,6 +122,10 @@ internal class IdentityActivity :
                 identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
             )
         }
+
+        identityViewModel.screenTracker.screenTransitionStart(
+            startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
+        )
 
         if (savedInstanceState == null || !savedInstanceState.getBoolean(
                 KEY_LAUNCHED_FALLBACK_URL,

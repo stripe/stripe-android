@@ -26,6 +26,7 @@ import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -94,6 +95,9 @@ internal class ConsentFragment(
             }
         )
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 screenName = SCREEN_NAME_CONSENT

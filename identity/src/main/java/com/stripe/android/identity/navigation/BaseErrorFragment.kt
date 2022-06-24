@@ -8,10 +8,13 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Base error fragment displaying error messages and two buttons
@@ -19,7 +22,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal abstract class BaseErrorFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
-    private val identityViewModel: IdentityViewModel by activityViewModels {
+    protected val identityViewModel: IdentityViewModel by activityViewModels {
         identityViewModelFactory
     }
 
@@ -46,6 +49,9 @@ internal abstract class BaseErrorFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch(Dispatchers.IO) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_ERROR)
+        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 screenName = SCREEN_NAME_ERROR

@@ -70,7 +70,8 @@ internal class StripeIdentityVerificationSheet private constructor(
                 verificationSessionId,
                 ephemeralKeySecret,
                 configuration.brandLogo,
-                injectorKey
+                injectorKey,
+                System.currentTimeMillis()
             )
         )
     }

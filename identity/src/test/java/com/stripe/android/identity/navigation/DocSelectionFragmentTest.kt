@@ -18,6 +18,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRIVING_LICENSE_KEY
@@ -56,6 +57,8 @@ internal class DocSelectionFragmentTest {
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val verificationPage = mock<VerificationPage>()
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { identityAnalyticsRequestFactory }.thenReturn(
             IdentityAnalyticsRequestFactory(
@@ -63,6 +66,7 @@ internal class DocSelectionFragmentTest {
                 args = mock()
             )
         )
+        on { screenTracker }.thenReturn(mockScreenTracker)
     }
     private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
     private val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
@@ -194,6 +198,8 @@ internal class DocSelectionFragmentTest {
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
+
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
@@ -237,6 +243,8 @@ internal class DocSelectionFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -283,6 +291,8 @@ internal class DocSelectionFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -338,6 +348,8 @@ internal class DocSelectionFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -564,6 +576,9 @@ internal class DocSelectionFragmentTest {
             it.requireView(),
             navController
         )
+        runBlocking {
+            verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_DOC_SELECT))
+        }
         testBlock(DocSelectionFragmentBinding.bind(it.requireView()), navController, it)
     }
 

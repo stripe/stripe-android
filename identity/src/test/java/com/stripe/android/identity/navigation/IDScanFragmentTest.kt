@@ -25,7 +25,8 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_ID
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
@@ -85,6 +86,8 @@ internal class IDScanFragmentTest {
 
     private val mockFPSTracker = mock<FPSTracker>()
 
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
@@ -94,6 +97,7 @@ internal class IDScanFragmentTest {
                 args = mock()
             )
         on { it.fpsTracker } doReturn mockFPSTracker
+        on { it.screenTracker } doReturn mockScreenTracker
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
@@ -127,10 +131,13 @@ internal class IDScanFragmentTest {
     @Test
     fun `when started analytics event is sent`() {
         launchIDScanFragment().onFragment {
+            runBlocking {
+                mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_ID))
+            }
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_ID &&
                         (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCAN_TYPE] == ID
                 }
             )
@@ -275,6 +282,13 @@ internal class IDScanFragmentTest {
                     on { selfieCapture } doReturn mock() // return non null selfieCapture
                 }
                 successCaptor.lastValue.invoke(mockVerificationPage)
+
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(
+                        SCREEN_NAME_LIVE_CAPTURE_ID
+                    ),
+                    any()
+                )
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
