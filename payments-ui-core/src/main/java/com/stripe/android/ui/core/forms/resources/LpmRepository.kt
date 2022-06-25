@@ -44,7 +44,9 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository @Inject constructor(
-    resources: Resources?
+    resources: Resources?,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+        DefaultIsFinancialConnectionsAvailable()
 ) {
     private val lpmSerializer: LpmSerializer = LpmSerializer()
 
@@ -63,11 +65,7 @@ class LpmRepository @Inject constructor(
     }
 
     @VisibleForTesting
-    fun initialize(
-        inputStream: InputStream?,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-            DefaultIsFinancialConnectionsAvailable()
-    ) {
+    fun initialize(inputStream: InputStream?) {
         val parsedSupportedPaymentMethod = parseLpms(inputStream)
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }

@@ -13,7 +13,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources
+        ApplicationProvider.getApplicationContext<Application>().resources,
+        object : IsFinancialConnectionsAvailable {
+            override fun invoke(): Boolean {
+                return true
+            }
+        }
     )
 
     @Test
@@ -121,12 +126,7 @@ class LpmRepositoryTest {
                   "type": "us_bank_account"
                 }
               ]
-            """.trimIndent().byteInputStream(),
-            isFinancialConnectionsAvailable = object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return true
-                }
-            }
+            """.trimIndent().byteInputStream()
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
@@ -134,6 +134,15 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that us_bank_account not supported when financial connections sdk not available`() {
+        val lpmRepository = LpmRepository(
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return false
+                }
+            }
+        )
+
         lpmRepository.initialize(
             """
               [
@@ -141,12 +150,7 @@ class LpmRepositoryTest {
                   "type": "us_bank_account"
                 }
               ]
-            """.trimIndent().byteInputStream(),
-            isFinancialConnectionsAvailable = object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return false
-                }
-            }
+            """.trimIndent().byteInputStream()
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
