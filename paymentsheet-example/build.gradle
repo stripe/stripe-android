@@ -118,7 +118,7 @@ android {
         applicationId "com.stripe.android.paymentsheet.example"
         minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
-        versionCode 8
+        versionCode 9
         versionName VERSION_NAME
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"

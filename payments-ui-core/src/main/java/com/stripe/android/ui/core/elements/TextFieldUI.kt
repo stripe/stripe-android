@@ -93,10 +93,12 @@ fun TextFieldSection(
 @Composable
 fun TextField(
     textFieldController: TextFieldController,
-    modifier: Modifier = Modifier,
-    imeAction: ImeAction,
     enabled: Boolean,
-    onTextStateChanged: (TextFieldState?) -> Unit = {}
+    imeAction: ImeAction,
+    modifier: Modifier = Modifier,
+    onTextStateChanged: (TextFieldState?) -> Unit = {},
+    nextFocusDirection: FocusDirection = FocusDirection.Next,
+    previousFocusDirection: FocusDirection = FocusDirection.Previous
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
@@ -120,7 +122,7 @@ fun TextField(
     @Suppress("UNUSED_VALUE")
     processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
         if (!processedIsFull) {
-            focusManager.moveFocus(FocusDirection.Next)
+            focusManager.moveFocus(nextFocusDirection)
         }
         true
     } else {
@@ -143,7 +145,7 @@ fun TextField(
                     event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
                     value.isEmpty()
                 ) {
-                    focusManager.moveFocus(FocusDirection.Previous)
+                    focusManager.moveFocus(previousFocusDirection)
                     true
                 } else {
                     false
@@ -200,7 +202,7 @@ fun TextField(
         ),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(FocusDirection.Next)
+                focusManager.moveFocus(nextFocusDirection)
             },
             onDone = {
                 focusManager.clearFocus(true)

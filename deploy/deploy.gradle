@@ -99,8 +99,13 @@ afterEvaluate { project ->
                         dependencyNode.appendNode("scope", scope)
 
                     }
-                    configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
-                    configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
+
+                    if (configurations.hasProperty("api")) {
+                        configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
+                    }
+                    if (configurations.hasProperty("implementation")) {
+                        configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
+                    }
                 }
 
             }

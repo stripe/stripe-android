@@ -3,6 +3,7 @@ package com.stripe.android.core.networking
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.HEADER_ORIGIN
+import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CLIENT_ID
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CREATED
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_ID
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_NAME
@@ -40,12 +41,11 @@ class AnalyticsRequestV2(
 ) : StripeRequest() {
     // Note: nested params are calculated as a json string, which is different from other requests
     // that uses form encoding.
-    // There are at most two levels of nest params for AnalyticsRequestV2.
     // E.g for a nested map with value {"key", {"nestedKey1" -> "value1", "nestedKey2" -> "value2"}}
     // The params are encoded as a prettified json format sorted by key as follows
     // key="{
-    //    "nestedKey1": "value1",
-    //    "nestedKey2": "value2"
+    //   "nestedKey1": "value1",
+    //   "nestedKey2": "value2"
     // }"
     // As opposed to
     // key[nestedKey1]="value1"&key[nestedKey2]="value2"
@@ -93,22 +93,33 @@ class AnalyticsRequestV2(
         }
     }
 
-    private fun encodeMapParam(map: Map<*, *>): String {
+    private fun encodeMapParam(map: Map<*, *>, level: Int = 0): String {
         val stringBuilder = StringBuilder()
         var first = true
         stringBuilder.appendLine("{")
         map.toSortedMap { key1, key2 ->
             key1.toString().compareTo(key2.toString())
         }.forEach { (key, value) ->
-            if (first) {
-                stringBuilder.append("  \"$key\": \"$value\"")
-                first = false
-            } else {
-                stringBuilder.appendLine(",").append("  \"$key\": \"$value\"")
+            val encodedValue =
+                when (value) {
+                    is Map<*, *> -> {
+                        encodeMapParam(value, level + 1)
+                    }
+                    null -> ""
+                    else -> "\"$value\""
+                }
+            if (encodedValue.isNotBlank()) {
+                if (first) {
+                    stringBuilder.append(INDENTATION.repeat(level)).append("$INDENTATION\"$key\": $encodedValue")
+                    first = false
+                } else {
+                    stringBuilder.appendLine(",").append(INDENTATION.repeat(level))
+                        .append("$INDENTATION\"$key\": $encodedValue")
+                }
             }
         }
         stringBuilder.appendLine()
-        stringBuilder.append("}")
+        stringBuilder.append(INDENTATION.repeat(level)).append("}")
         return stringBuilder.toString()
     }
 
@@ -151,5 +162,7 @@ class AnalyticsRequestV2(
         internal const val PARAM_CREATED = "created"
         internal const val PARAM_EVENT_NAME = "event_name"
         internal const val PARAM_EVENT_ID = "event_id"
+
+        private const val INDENTATION = "  "
     }
 }

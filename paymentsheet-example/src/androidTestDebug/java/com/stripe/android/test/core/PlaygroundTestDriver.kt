@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
+import com.stripe.android.test.core.ui.UiAutomatorText
 import org.junit.Assume
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -299,7 +301,18 @@ class PlaygroundTestDriver(
 
                 blockUntilAuthorizationPageLoaded()
 
-                authorizeAction.click()
+                if(authorizeAction.exists()){
+                    authorizeAction.click()
+                }
+                // Buttons aren't showing the same way each time in the web page.
+                else if(!authorizeAction.exists()){
+                    object : UiAutomatorText(
+                        label = requireNotNull(testParameters.authorizationAction).text,
+                        className = "android.widget.TextView",
+                        device = device
+                    ) {}.click()
+                    Log.e("Stripe", "Fail authorization was a text view not a button this time")
+                }
 
                 when (testParameters.authorizationAction) {
                     AuthorizeAction.Authorize -> {}
