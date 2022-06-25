@@ -2,11 +2,13 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.view.BecsDebitBanks
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 data class BsbSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic(
         "au_becs_debit[bsb_number]"
     )
@@ -144,5 +146,5 @@ private val banks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("04", "Westpac Banking Corporation"),
     BecsDebitBanks.Bank("06", "Commonwealth Bank of Australia"),
     BecsDebitBanks.Bank("08", "National Australia Bank"),
-    BecsDebitBanks.Bank("09", "Reserve Bank of Australia"),
+    BecsDebitBanks.Bank("09", "Reserve Bank of Australia")
 )

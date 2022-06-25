@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -8,6 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class StaticTextSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("static_text"),
     @StringRes val stringResId: Int
 ) : FormItemSpec() {

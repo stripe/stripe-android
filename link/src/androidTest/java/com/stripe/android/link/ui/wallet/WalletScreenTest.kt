@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
-import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -9,6 +9,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -28,16 +30,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.StripeIntentFixtures
-import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
@@ -47,19 +45,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class WalletScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidIntentComposeRule<LinkActivity> {
-        PaymentConfiguration.init(it, "publishable_key")
-        Intent(it, LinkActivity::class.java).apply {
-            putExtra(
-                LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    StripeIntentFixtures.PI_SUCCEEDED,
-                    true,
-                    "Merchant, Inc"
-                )
-            )
-        }
-    }
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val primaryButtonLabel = "Pay $10.99"
     private val paymentDetails = listOf(
@@ -78,8 +64,17 @@ internal class WalletScreenTest {
             11,
             CardBrand.MasterCard,
             "4444"
+        ),
+        ConsumerPaymentDetails.Card(
+            "id3",
+            false,
+            2023,
+            11,
+            CardBrand.AmericanExpress,
+            "0005"
         )
     )
+    private val paymentDetailsFlow = MutableStateFlow(paymentDetails)
 
     @Test
     fun default_payment_method_is_initially_selected() {
@@ -256,6 +251,26 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
+    @Test
+    fun when_selected_item_is_removed_then_default_is_selected() {
+        setContent()
+
+        val secondPaymentMethod = paymentDetails[1]
+
+        toggleListExpanded()
+        onPaymentDetailsItem(secondPaymentMethod).performClick()
+        toggleListExpanded()
+
+        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+            .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
+
+        val defaultPaymentDetails = paymentDetails.first()
+        paymentDetailsFlow.tryEmit(listOf(paymentDetails[2], defaultPaymentDetails))
+
+        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+            .filter(hasText(defaultPaymentDetails.last4, substring = true)).assertCountEquals(1)
+    }
+
     private fun setContent(
         isProcessing: Boolean = false,
         errorMessage: ErrorMessage? = null,
@@ -264,11 +279,12 @@ internal class WalletScreenTest {
         onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayAnotherWayClick: () -> Unit = {},
-        showBottomSheetContent: ((BottomSheetContent?) -> Unit)? = null,
+        showBottomSheetContent: ((BottomSheetContent?) -> Unit)? = null
     ) = composeTestRule.setContent {
         var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val coroutineScope = rememberCoroutineScope()
+        val paymentDetails by paymentDetailsFlow.collectAsState()
 
         if (bottomSheetContent != null) {
             DisposableEffect(bottomSheetContent) {
@@ -286,13 +302,13 @@ internal class WalletScreenTest {
                 Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
             },
             modifier = Modifier.fillMaxHeight(),
-            sheetState = sheetState,
+            sheetState = sheetState
         ) {
-
             DefaultLinkTheme {
                 WalletBody(
                     isProcessing = isProcessing,
                     paymentDetails = paymentDetails,
+                    initiallySelectedId = null,
                     primaryButtonLabel = primaryButtonLabel,
                     errorMessage = errorMessage,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,

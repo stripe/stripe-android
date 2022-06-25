@@ -6,6 +6,7 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 internal class PhoneNumberControllerTest {
@@ -48,5 +49,48 @@ internal class PhoneNumberControllerTest {
         phoneNumberController.onValueChange("")
         idleLooper()
         assertThat(isComplete.last()).isFalse()
+    }
+
+    @Test
+    fun `when initial number is in E164 format then initial country is set`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initialValue = "+491234567890"
+        )
+
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo("DE")
+        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
+    }
+
+    @Test
+    fun `when initial country is set then prefix is removed from initial number`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initialValue = "+441234567890",
+            initiallySelectedCountryCode = "JE"
+        )
+
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo("JE")
+        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
+    }
+
+    @Test
+    @Config(qualifiers = "fr-rCA")
+    fun `when initial number is in E164 format with multiple regions then locale is used`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initialValue = "+11234567890"
+        )
+
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
+        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
+    }
+
+    @Test
+    @Config(qualifiers = "fr-rCA")
+    fun `when initial number is not in E164 format then locale is used`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initialValue = "1234567890"
+        )
+
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
+        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
     }
 }

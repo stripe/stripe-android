@@ -74,7 +74,6 @@ internal class LinkActivity : ComponentActivity() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         setContent {
-
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
             val coroutineScope = rememberCoroutineScope()
@@ -89,7 +88,6 @@ internal class LinkActivity : ComponentActivity() {
             }
 
             DefaultLinkTheme {
-
                 ModalBottomSheetLayout(
                     sheetContent = bottomSheetContent ?: {
                         // Must have some content at startup or bottom sheet crashes when
@@ -97,7 +95,7 @@ internal class LinkActivity : ComponentActivity() {
                         Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                     },
                     modifier = Modifier.fillMaxHeight(),
-                    sheetState = sheetState,
+                    sheetState = sheetState
                 ) {
                     navController = rememberNavController()
 
@@ -114,7 +112,6 @@ internal class LinkActivity : ComponentActivity() {
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
-
                             composable(LinkScreen.Loading.route) {
                                 Box(
                                     modifier = Modifier
@@ -167,11 +164,21 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(LinkScreen.PaymentMethod.route) {
+                            composable(
+                                LinkScreen.PaymentMethod.route,
+                                arguments = listOf(
+                                    navArgument(LinkScreen.PaymentMethod.loadArg) {
+                                        type = NavType.BoolType
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val loadFromArgs = backStackEntry.arguments
+                                    ?.getBoolean(LinkScreen.PaymentMethod.loadArg) ?: false
                                 linkAccount?.let { account ->
                                     PaymentMethodBody(
                                         account,
-                                        viewModel.injector
+                                        viewModel.injector,
+                                        loadFromArgs
                                     )
                                 }
                             }
@@ -223,7 +230,8 @@ internal class LinkActivity : ComponentActivity() {
                     }
                     window.decorView.rootView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
-            })
+            }
+        )
     }
 
     override fun onDestroy() {

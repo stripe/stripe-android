@@ -86,6 +86,7 @@ private fun WalletBodyPreview() {
                         "4444"
                     )
                 ),
+                initiallySelectedId = null,
                 primaryButtonLabel = "Pay $10.99",
                 errorMessage = null,
                 onAddNewPaymentMethodClick = {},
@@ -119,6 +120,7 @@ internal fun WalletBody(
     WalletBody(
         isProcessing = isProcessing,
         paymentDetails = paymentDetails,
+        initiallySelectedId = viewModel.initiallySelectedId,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         errorMessage = errorMessage,
         onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
@@ -134,6 +136,7 @@ internal fun WalletBody(
 internal fun WalletBody(
     isProcessing: Boolean,
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
+    initiallySelectedId: String?,
     primaryButtonLabel: String,
     errorMessage: ErrorMessage?,
     onAddNewPaymentMethodClick: () -> Unit,
@@ -176,20 +179,22 @@ internal fun WalletBody(
         ScrollableTopLevelColumn {
             Spacer(modifier = Modifier.height(12.dp))
 
-            var selectedIndex by rememberSaveable {
-                mutableStateOf(
-                    paymentDetails.indexOfFirst { it.isDefault }
-                        .takeUnless { it == -1 } ?: 0
-                )
+            var selectedItemId by rememberSaveable {
+                mutableStateOf(initiallySelectedId ?: getDefaultSelectedCard(paymentDetails))
+            }
+
+            // Update selected item if it's not on the list anymore
+            if (paymentDetails.firstOrNull { it.id == selectedItemId } == null) {
+                selectedItemId = getDefaultSelectedCard(paymentDetails)
             }
 
             if (isWalletExpanded) {
                 ExpandedPaymentDetails(
                     paymentDetails = paymentDetails,
-                    selectedIndex = selectedIndex,
+                    selectedItemId = selectedItemId,
                     enabled = !isProcessing,
                     onIndexSelected = {
-                        selectedIndex = it
+                        selectedItemId = paymentDetails[it].id
                     },
                     onMenuButtonClick = {
                         showBottomSheetContent {
@@ -215,7 +220,7 @@ internal fun WalletBody(
                 )
             } else {
                 CollapsedPaymentDetails(
-                    selectedPaymentMethod = paymentDetails[selectedIndex],
+                    selectedPaymentMethod = paymentDetails.first { it.id == selectedItemId },
                     enabled = !isProcessing,
                     onClick = {
                         isWalletExpanded = true
@@ -235,7 +240,7 @@ internal fun WalletBody(
                 },
                 icon = R.drawable.stripe_ic_lock
             ) {
-                onPrimaryButtonClick(paymentDetails[selectedIndex])
+                onPrimaryButtonClick(paymentDetails.first { it.id == selectedItemId })
             }
             SecondaryButton(
                 enabled = !isProcessing,
@@ -266,7 +271,8 @@ internal fun CollapsedPaymentDetails(
                 shape = MaterialTheme.shapes.large
             )
             .clickable(
-                enabled = enabled, onClick = onClick
+                enabled = enabled,
+                onClick = onClick
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -295,7 +301,7 @@ internal fun CollapsedPaymentDetails(
 @Composable
 internal fun ExpandedPaymentDetails(
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
-    selectedIndex: Int,
+    selectedItemId: String,
     enabled: Boolean,
     onIndexSelected: (Int) -> Unit,
     onMenuButtonClick: (ConsumerPaymentDetails.Card) -> Unit,
@@ -349,7 +355,7 @@ internal fun ExpandedPaymentDetails(
                     CardPaymentMethodItem(
                         cardDetails = item,
                         enabled = enabled,
-                        isSelected = selectedIndex == index,
+                        isSelected = selectedItemId == item.id,
                         onClick = {
                             onIndexSelected(index)
                         },
@@ -465,3 +471,6 @@ internal fun CardDetails(
         )
     }
 }
+
+private fun getDefaultSelectedCard(paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>) =
+    paymentDetails.firstOrNull { it.isDefault }?.id ?: paymentDetails.first().id

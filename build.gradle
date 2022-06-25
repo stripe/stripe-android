@@ -4,8 +4,8 @@ import java.time.Duration
 buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
-    ext.kotlinVersion = '1.6.10'
-    ext.dokkaVersion = '1.6.21'
+    ext.kotlinVersion = '1.6.21'
+    ext.dokkaVersion = '1.7.0'
 
     repositories {
         mavenCentral()
@@ -14,11 +14,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.10.0"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.10.1"
         classpath 'com.karumi:shot:5.14.1'
         classpath buildLibs.detektGradlePlugin
     }
@@ -56,17 +56,17 @@ allprojects {
 
 ext {
     buildToolsVersion = "30.0.3"
-    compileSdkVersion = 31
+    compileSdkVersion = 32
 
     androidxActivityVersion = '1.4.0'
-    androidxAnnotationVersion = '1.3.0'
-    androidxAppcompatVersion = '1.4.1'
+    androidxAnnotationVersion = '1.4.0'
+    androidxAppcompatVersion = '1.4.2'
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
-    androidxComposeVersion = '1.1.1'
+    androidxComposeVersion = '1.2.0-rc01'
     androidxConstraintlayoutComposeVersion = '1.0.1'
-    androidxConstraintlayoutVersion = '2.1.3'
-    androidxCoreVersion = '1.7.0'
+    androidxConstraintlayoutVersion = '2.1.4'
+    androidxCoreVersion = '1.8.0'
     androidxFragmentVersion = '1.4.1'
     androidxLifecycleVersion = '2.4.1'
     androidxNavigationVersion = '2.4.2'
@@ -74,14 +74,14 @@ ext {
     androidxRecyclerviewVersion = '1.2.1'
     androidxSecurityVersion = '1.1.0-alpha03'
 
-    kotlinCoroutinesVersion = '1.6.1'
+    kotlinCoroutinesVersion = '1.6.3'
     kotlinSerializationVersion = '1.3.3'
-    flowlayoutVersion = '0.23.1'
-    ktlintVersion = '0.45.2'
+    accompanistVersion = '0.24.11-rc'
+    ktlintVersion = '0.46.1'
     // material 1.6 causes paymentsheet to not render correctly.
     // see here: https://github.com/material-components/material-components-android/issues/2702
     materialVersion = '1.5.0'
-    daggerVersion = '2.41'
+    daggerVersion = '2.42'
     playServicesWalletVersion = '19.1.0'
 
     androidTestVersion = '1.4.0'
@@ -89,7 +89,7 @@ ext {
     truthVersion = '1.1.3'
     junitVersion = '4.13.2'
     robolectricVersion = '4.8.1'
-    mockitoCoreVersion = '4.5.1'
+    mockitoCoreVersion = '4.6.1'
     mockitoKotlinVersion = '4.0.0'
     espressoVersion = '3.4.0'
     jsonVersion = '20220320'

@@ -58,6 +58,9 @@ internal abstract class LinkPaymentLauncherComponent {
         fun customerEmail(@Named(CUSTOMER_EMAIL) customerEmail: String?): Builder
 
         @BindsInstance
+        fun customerPhone(@Named(CUSTOMER_PHONE) customerPhone: String?): Builder
+
+        @BindsInstance
         fun context(context: Context): Builder
 
         @BindsInstance

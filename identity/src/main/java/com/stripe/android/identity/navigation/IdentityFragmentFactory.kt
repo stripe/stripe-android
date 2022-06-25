@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
@@ -21,7 +22,8 @@ internal class IdentityFragmentFactory @Inject constructor(
     private val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory,
     private val identityUploadViewModelFactory: IdentityUploadViewModel.FrontBackUploadViewModelFactory,
     private val consentFragmentViewModelFactory: ConsentFragmentViewModel.ConsentFragmentViewModelFactory,
-    internal val identityViewModelFactory: IdentityViewModel.IdentityViewModelFactory
+    internal val identityViewModelFactory: IdentityViewModel.IdentityViewModelFactory,
+    private val fallbackUrlLauncher: FallbackUrlLauncher
 ) : FragmentFactory() {
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
@@ -43,7 +45,8 @@ internal class IdentityFragmentFactory @Inject constructor(
                 identityViewModelFactory
             )
             CameraPermissionDeniedFragment::class.java.name -> CameraPermissionDeniedFragment(
-                appSettingsOpenable
+                appSettingsOpenable,
+                identityViewModelFactory
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
                 identityUploadViewModelFactory,
@@ -59,7 +62,8 @@ internal class IdentityFragmentFactory @Inject constructor(
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory,
-                consentFragmentViewModelFactory
+                consentFragmentViewModelFactory,
+                fallbackUrlLauncher
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(
                 identityViewModelFactory,
@@ -70,7 +74,11 @@ internal class IdentityFragmentFactory @Inject constructor(
                 verificationFlowFinishable
             )
             ErrorFragment::class.java.name -> ErrorFragment(
-                verificationFlowFinishable
+                verificationFlowFinishable,
+                identityViewModelFactory
+            )
+            CouldNotCaptureFragment::class.java.name -> CouldNotCaptureFragment(
+                identityViewModelFactory
             )
             else -> super.instantiate(classLoader, className)
         }

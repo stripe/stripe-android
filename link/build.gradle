@@ -44,7 +44,7 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
-    implementation "com.google.accompanist:accompanist-flowlayout:$flowlayoutVersion"
+    implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
     implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
 
     testImplementation project(':payments-core')
@@ -105,7 +105,8 @@ android {
     kotlinOptions {
         freeCompilerArgs = [
                 "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi",
-                "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
+                "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+                "-Xopt-in=kotlin.RequiresOptIn"
         ]
         jvmTarget = "1.8"
     }

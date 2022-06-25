@@ -26,7 +26,10 @@ internal class CardNumberControllerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val cardNumberController = CardNumberEditableController(
-        CardNumberConfig(), FakeCardAccountRangeRepository(), testDispatcher, initialValue = null
+        CardNumberConfig(),
+        FakeCardAccountRangeRepository(),
+        testDispatcher,
+        initialValue = null
     )
 
     @After
@@ -36,7 +39,6 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `When invalid card number verify visible error`() {
-
         val errorFlowValues = mutableListOf<FieldError?>()
         cardNumberController.error.asLiveData()
             .observeForever {
@@ -145,13 +147,13 @@ internal class CardNumberControllerTest {
                     staticIcons = listOf(
                         TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
                         TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false)
                     ),
                     animatedIcons = listOf(
                         TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
                         TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
                         TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
-                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false),
+                        TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
                     )
                 )
             )

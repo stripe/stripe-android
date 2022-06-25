@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui.inline
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.LinkAccount
@@ -45,7 +45,24 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            Truth.assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+
+            verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
+        }
+
+    @Test
+    fun `When email and phone are provided it should prefill all values`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = InlineSignupViewModel(
+                merchantName = MERCHANT_NAME,
+                customerEmail = CUSTOMER_EMAIL,
+                customerPhone = CUSTOMER_PHONE,
+                linkAccountManager = linkAccountManager,
+                logger = Logger.noop()
+            )
+            viewModel.toggleExpanded()
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.phoneController.initialPhoneNumber).isEqualTo(CUSTOMER_PHONE)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }
@@ -70,7 +87,7 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            Truth.assertThat(viewModel.userInput.value).isEqualTo(UserInput.SignIn(email))
+            assertThat(viewModel.userInput.value).isEqualTo(UserInput.SignIn(email))
         }
 
     @Test
@@ -86,8 +103,8 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            Truth.assertThat(viewModel.userInput.value).isNull()
-            Truth.assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.userInput.value).isNull()
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
         }
 
     @Test
@@ -98,7 +115,7 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             viewModel.emailController.onRawValueChange(email)
 
-            Truth.assertThat(viewModel.userInput.value).isNull()
+            assertThat(viewModel.userInput.value).isNull()
 
             whenever(linkAccountManager.lookupConsumer(any(), any()))
                 .thenReturn(Result.success(null))
@@ -106,12 +123,12 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            Truth.assertThat(viewModel.userInput.value).isNull()
+            assertThat(viewModel.userInput.value).isNull()
 
             val phone = "1234567890"
             viewModel.phoneController.onRawValueChange(phone)
 
-            Truth.assertThat(viewModel.userInput.value)
+            assertThat(viewModel.userInput.value)
                 .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
         }
 
@@ -123,7 +140,7 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             viewModel.emailController.onRawValueChange(email)
 
-            Truth.assertThat(viewModel.userInput.value).isNull()
+            assertThat(viewModel.userInput.value).isNull()
 
             whenever(linkAccountManager.lookupConsumer(any(), any()))
                 .thenReturn(Result.success(null))
@@ -131,22 +148,23 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            Truth.assertThat(viewModel.userInput.value).isNull()
+            assertThat(viewModel.userInput.value).isNull()
 
             val phone = "1234567890"
             viewModel.phoneController.onRawValueChange(phone)
 
-            Truth.assertThat(viewModel.userInput.value)
+            assertThat(viewModel.userInput.value)
                 .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
 
             viewModel.phoneController.onRawValueChange("")
 
-            Truth.assertThat(viewModel.userInput.value).isNull()
+            assertThat(viewModel.userInput.value).isNull()
         }
 
     private fun createViewModel() = InlineSignupViewModel(
         merchantName = MERCHANT_NAME,
         customerEmail = CUSTOMER_EMAIL,
+        customerPhone = null,
         linkAccountManager = linkAccountManager,
         logger = Logger.noop()
     )
@@ -170,5 +188,6 @@ class InlineSignupViewModelTest {
     private companion object {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
+        const val CUSTOMER_PHONE = "1234567890"
     }
 }

@@ -121,7 +121,7 @@ internal fun LinkInlineSignup(
     onUserInteracted: () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         PaymentsTheme {
             Column(
@@ -191,7 +191,8 @@ internal fun LinkInlineSignup(
                                 PhoneNumberCollectionSection(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
-                                    requestFocusWhenShown = true
+                                    requestFocusWhenShown =
+                                    phoneNumberController.initialPhoneNumber.isEmpty()
                                 )
                                 LinkTerms(
                                     modifier = Modifier.padding(top = 8.dp),

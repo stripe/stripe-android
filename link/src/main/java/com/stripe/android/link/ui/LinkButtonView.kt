@@ -70,7 +70,7 @@ private fun LinkButton(
     onClick: () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         DefaultLinkTheme {
             Button(
@@ -114,7 +114,7 @@ private fun LinkButton(
                             modifier = Modifier
                                 .padding(6.dp),
                             color = MaterialTheme.linkColors.buttonLabel,
-                            fontSize = 14.sp,
+                            fontSize = 14.sp
                         )
                     }
                 }

@@ -59,7 +59,7 @@ import kotlin.math.min
 @Composable
 internal fun DropDown(
     controller: DropdownFieldController,
-    enabled: Boolean,
+    enabled: Boolean
 ) {
     val label by controller.label.collectAsState(null)
     val selectedIndex by controller.selectedIndex.collectAsState(0)
@@ -90,7 +90,7 @@ internal fun DropDown(
                 }
                 .clickable(
                     enabled = enabled,
-                    onClickLabel = stringResource(R.string.change),
+                    onClickLabel = stringResource(R.string.change)
                 ) {
                     expanded = true
                 }

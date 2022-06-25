@@ -1,6 +1,8 @@
-package com.stripe.android.link.injection
+package com.stripe.android.ui.core.injection
 
-import com.stripe.android.link.ui.forms.FormController
+import androidx.annotation.RestrictTo
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import dagger.BindsInstance
@@ -13,7 +15,8 @@ import kotlinx.coroutines.CoroutineScope
 @Subcomponent(
     modules = [FormControllerModule::class]
 )
-internal interface FormControllerSubcomponent {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface FormControllerSubcomponent {
     val formController: FormController
 
     @Subcomponent.Builder
@@ -30,6 +33,12 @@ internal interface FormControllerSubcomponent {
 
         @BindsInstance
         fun viewModelScope(viewModelScope: CoroutineScope): Builder
+
+        @BindsInstance
+        fun stripeIntent(stripeIntent: StripeIntent): Builder
+
+        @BindsInstance
+        fun merchantName(merchantName: String): Builder
 
         fun build(): FormControllerSubcomponent
     }

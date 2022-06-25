@@ -14,7 +14,7 @@ import com.stripe.android.identity.networking.Status
  */
 internal class PairMediatorLiveData<DataType>(
     firstLiveData: LiveData<Resource<DataType>>,
-    secondLiveData: LiveData<Resource<DataType>>,
+    secondLiveData: LiveData<Resource<DataType>>
 ) : MediatorLiveData<Resource<Pair<DataType, DataType>>>() {
     private var firstValue: DataType? = null
     private var secondValue: DataType? = null

@@ -14,13 +14,13 @@ internal data class CardImageVerificationDetailsResult(
     val expectedCard: CardImageVerificationDetailsExpectedCard?,
 
     @SerialName("accepted_image_configs")
-    val acceptedImageConfigs: CardImageVerificationDetailsAcceptedImageConfigs? = null,
+    val acceptedImageConfigs: CardImageVerificationDetailsAcceptedImageConfigs? = null
 )
 
 @Serializable
 internal data class CardImageVerificationDetailsExpectedCard(
     @SerialName("issuer") val issuer: String?,
-    @SerialName("last4") val lastFour: String?,
+    @SerialName("last4") val lastFour: String?
 )
 
 @Serializable
@@ -38,7 +38,7 @@ internal enum class CardImageVerificationDetailsFormat {
 @Serializable
 internal data class CardImageVerificationDetailsImageSettings(
     @SerialName("compression_ratio") val compressionRatio: Double? = null,
-    @SerialName("image_size") val imageSize: DoubleArray? = null,
+    @SerialName("image_size") val imageSize: DoubleArray? = null
 )
 
 @Serializable
@@ -52,5 +52,5 @@ internal data class CardImageVerificationDetailsAcceptedImageConfigs(
             CardImageVerificationDetailsImageSettings?>? = null,
 
     @SerialName("preferred_formats")
-    val preferredFormats: Array<CardImageVerificationDetailsFormat>? = null,
+    val preferredFormats: Array<CardImageVerificationDetailsFormat>? = null
 )

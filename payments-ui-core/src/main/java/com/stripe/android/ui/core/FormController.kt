@@ -1,5 +1,6 @@
-package com.stripe.android.link.ui.forms
+package com.stripe.android.ui.core
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -23,14 +24,15 @@ import javax.inject.Inject
  *
  * @param: formSpec A representation of the layout which is used to display the UI fields on screen.
  */
-internal class FormController @Inject internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FormController @Inject constructor(
     private val formSpec: LayoutSpec,
     private val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElements,
     viewModelScope: CoroutineScope
 ) {
     // Initial value is null while loading in the background
-    internal val elements: StateFlow<List<FormElement>?>
+    val elements: StateFlow<List<FormElement>?>
 
     init {
         if (resourceRepository.isLoaded()) {
@@ -58,7 +60,7 @@ internal class FormController @Inject internal constructor(
     /**
      * List of field identifiers which should not be visible.
      */
-    internal val hiddenIdentifiers =
+    val hiddenIdentifiers =
         cardBillingElement.map {
             it?.hiddenIdentifiers ?: flowOf(emptyList())
         }.flattenConcat()

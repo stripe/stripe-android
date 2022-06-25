@@ -60,7 +60,8 @@ import javax.inject.Provider
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
     private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripeDefaultTheme
     )
     val lpmRepository = LpmRepository(context.resources)
 
@@ -235,7 +236,7 @@ internal class FormViewModelTest {
             resourceRepository = createRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
-                    CountrySpec(),
+                    CountrySpec()
                 )
             ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -261,7 +262,7 @@ internal class FormViewModelTest {
                 LayoutSpec.create(
                     NameSpec(),
                     EmailSpec(),
-                    CountrySpec(),
+                    CountrySpec()
                 )
             ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -288,7 +289,7 @@ internal class FormViewModelTest {
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
                     EmailSpec(),
-                    CountrySpec(),
+                    CountrySpec()
                 )
             ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -432,7 +433,7 @@ internal class FormViewModelTest {
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
                         R.string.sepa_mandate
-                    ),
+                    )
                 )
             ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -518,7 +519,7 @@ internal class FormViewModelTest {
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
                         R.string.sepa_mandate
-                    ),
+                    )
                 )
             ),
             transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
@@ -619,7 +620,7 @@ internal class FormViewModelTest {
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
                             R.string.address_label_zip_code
-                        ),
+                        )
                     )
                 )
         }

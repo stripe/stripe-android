@@ -3,15 +3,22 @@ package com.stripe.android.identity.viewmodel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
+import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
+import com.stripe.android.identity.ml.FaceDetectorAnalyzer
+import com.stripe.android.identity.ml.FaceDetectorOutput
+import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -19,12 +26,14 @@ import java.io.File
  *
  * TODO(ccen): Extract type parameters and move to camera-core
  */
-internal open class CameraViewModel :
+internal open class CameraViewModel(
+    private val modelPerformanceTracker: ModelPerformanceTracker
+) :
     ViewModel(),
     AnalyzerLoopErrorListener,
     AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     SimpleScanStateful<IdentityScanState> {
-    private val interimResults = MutableLiveData<IdentityAggregator.InterimResult>()
+    internal val interimResults = MutableLiveData<IdentityAggregator.InterimResult>()
     internal val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
     internal val displayStateChanged =
@@ -42,7 +51,8 @@ internal open class CameraViewModel :
             this,
             idDetectorModelFile,
             faceDetectorModelFile,
-            verificationPage
+            verificationPage,
+            modelPerformanceTracker
         )
     }
 
@@ -58,13 +68,25 @@ internal open class CameraViewModel :
 
     override suspend fun onResult(result: IdentityAggregator.FinalResult) {
         Log.d(TAG, "Final result received: $result")
-        finalResult.postValue(result)
+
+        modelPerformanceTracker.reportAndReset(
+            if (result.result is FaceDetectorOutput) {
+                FaceDetectorAnalyzer.MODEL_NAME
+            } else {
+                IDDetectorAnalyzer.MODEL_NAME
+            }
+        )
+        viewModelScope.launch(Dispatchers.Main) {
+            finalResult.value = result
+        }
     }
 
     override suspend fun onInterimResult(result: IdentityAggregator.InterimResult) {
         Log.d(TAG, "Interim result received: $result")
-        interimResults.postValue(result)
 
+        viewModelScope.launch(Dispatchers.Main) {
+            interimResults.value = result
+        }
         // This will trigger displayState
         changeScanState(result.identityState)
     }

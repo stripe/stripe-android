@@ -13,7 +13,13 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.FPSTracker
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
@@ -42,6 +48,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -62,6 +69,7 @@ internal class SelfieFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { it.identityScanFlow } doReturn mockScanFlow
         on { it.finalResult } doReturn finalResultLiveData
+        on { it.interimResults } doReturn mock()
         on { it.displayStateChanged } doReturn displayStateChanged
     }
 
@@ -70,6 +78,7 @@ internal class SelfieFragmentTest {
         MutableStateFlow(DocumentUploadState())
 
     private val selfieUploadState = MutableStateFlow(SelfieUploadState())
+    private val mockFPSTracker = mock<FPSTracker>()
 
     private val errorUploadState = mock<SelfieUploadState> {
         on { hasError() } doReturn true
@@ -81,7 +90,7 @@ internal class SelfieFragmentTest {
     }
 
     private val mockUploadedResult = mock<UploadedResult> {
-        on { uploadedStripeFile }.thenReturn(mock())
+        on { uploadedStripeFile }.thenReturn(StripeFile(id = "testId"))
     }
     private val successUploadState = SelfieUploadState(
         firstHighResResult = Resource.success(mockUploadedResult),
@@ -96,11 +105,24 @@ internal class SelfieFragmentTest {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
         on { selfieUploadState } doReturn selfieUploadState
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        on { fpsTracker } doReturn mockFPSTracker
     }
 
     @Test
     fun `when initialized UI is reset and bound`() {
         launchSelfieFragment { binding, _, _ ->
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_SELFIE
+                }
+            )
+
             val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
             verify(
                 mockIdentityViewModel,
@@ -194,6 +216,7 @@ internal class SelfieFragmentTest {
                             bestHighResResult = requireNotNull(successUploadState.bestHighResResult.data),
                             bestLowResResult = requireNotNull(successUploadState.bestLowResResult.data),
                             trainingConsent = binding.allowImageCollection.isChecked,
+                            bestFaceScore = BEST_FACE_SCORE,
                             faceScoreVariance = SCORE_VARIANCE,
                             numFrames = NUM_FRAMES
                         )
@@ -299,10 +322,11 @@ internal class SelfieFragmentTest {
             ) to FaceDetectorOutput(
                 boundingBox = mock(),
                 resultScore = 0.82f
-            ), // last
+            ) // last
         )
 
         const val SCORE_VARIANCE = 0.1f
+        const val BEST_FACE_SCORE = 0.91f
         const val NUM_FRAMES = 8
         const val CONSENT_TEXT = "TEST CONSENT TEXT"
 
@@ -311,6 +335,7 @@ internal class SelfieFragmentTest {
             transitioner = mock<FaceDetectorTransitioner> {
                 on { filteredFrames }.thenReturn(FILTERED_FRAMES)
                 on { scoreVariance }.thenReturn(SCORE_VARIANCE)
+                on { bestFaceScore }.thenReturn(BEST_FACE_SCORE)
                 on { numFrames }.thenReturn(NUM_FRAMES)
             }
         )

@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.injection.MERCHANT_NAME
@@ -49,6 +50,7 @@ import kotlin.coroutines.CoroutineContext
 class LinkPaymentLauncher @AssistedInject internal constructor(
     @Assisted(MERCHANT_NAME) private val merchantName: String,
     @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
+    @Assisted(CUSTOMER_PHONE) private val customerPhone: String?,
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -65,6 +67,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .merchantName(merchantName)
         .customerEmail(customerEmail)
+        .customerPhone(customerPhone)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -109,14 +112,17 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      * @param stripeIntent the PaymentIntent or SetupIntent.
      * @param completePayment whether the payment should be completed, or the selected payment
      *  method should be returned as a result.
+     * @param selectedPaymentDetails the payment method previously selected by the user, if they are
+     *  returning to Link. It will be the initially selected value.
      * @param coroutineScope the coroutine scope used to collect the account status flow.
      */
     suspend fun setup(
         stripeIntent: StripeIntent,
         completePayment: Boolean,
+        selectedPaymentDetails: LinkPaymentDetails?,
         coroutineScope: CoroutineScope
     ): AccountStatus {
-        val component = setupDependencies(stripeIntent, completePayment)
+        val component = setupDependencies(stripeIntent, completePayment, selectedPaymentDetails)
         accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
         return accountStatus.value
@@ -149,19 +155,22 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> =
         linkAccountManager.createPaymentDetails(
-            SupportedPaymentMethod.Card(),
+            SupportedPaymentMethod.Card,
             paymentMethodCreateParams
         )
 
     private fun setupDependencies(
         stripeIntent: StripeIntent,
-        completePayment: Boolean
+        completePayment: Boolean,
+        selectedPaymentDetails: LinkPaymentDetails?
     ): LinkPaymentLauncherComponent {
         val args = LinkActivityContract.Args(
             stripeIntent,
             completePayment,
             merchantName,
             customerEmail,
+            customerPhone,
+            selectedPaymentDetails,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
                 productUsage,

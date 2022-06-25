@@ -16,7 +16,6 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -44,14 +43,13 @@ internal class SignUpViewModel @Inject constructor(
 ) : ViewModel() {
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
+    private val prefilledPhone =
+        args.customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
 
     val merchantName: String = args.merchantName
 
-    val emailController: TextFieldController = SimpleTextFieldController
-        .createEmailSectionController(prefilledEmail)
-
-    val phoneController: PhoneNumberController =
-        PhoneNumberController.createPhoneNumberController()
+    val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
+    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -209,7 +207,7 @@ internal class SignUpViewModel @Inject constructor(
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
-        const val LOOKUP_DEBOUNCE_MS = 700L
+        const val LOOKUP_DEBOUNCE_MS = 1000L
 
         const val PREFILLED_EMAIL = "prefilled_email"
     }

@@ -71,7 +71,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 
     protected fun subscribeToFlow(
         flow: Flow<DataFrame>,
-        processingCoroutineScope: CoroutineScope,
+        processingCoroutineScope: CoroutineScope
     ): Job? {
         if (!started.getAndSet(true)) {
             startedAt = Clock.markNow()
@@ -112,7 +112,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
      */
     private suspend fun startWorker(
         flow: Flow<DataFrame>,
-        analyzer: Analyzer<DataFrame, in State, Output>,
+        analyzer: Analyzer<DataFrame, in State, Output>
     ) {
         flow.collect { frame ->
             val stat = analyzer.statsName?.let { Stats.trackRepeatingTask(it) }
@@ -176,7 +176,7 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     analyzerLoopErrorListener: AnalyzerLoopErrorListener
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener,
+    analyzerLoopErrorListener
 ) {
     /**
      * Subscribe to a flow. Loops can only subscribe to a single flow at a time.
@@ -214,7 +214,7 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val timeLimit: Duration = Duration.INFINITE
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener,
+    analyzerLoopErrorListener
 ) {
     private val framesProcessed: AtomicInteger = AtomicInteger(0)
     private var framesToProcess = 0

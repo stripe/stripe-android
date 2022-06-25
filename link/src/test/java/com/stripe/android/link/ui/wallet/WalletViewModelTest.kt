@@ -37,8 +37,10 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -47,9 +49,6 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
-    private val linkAccount = mock<LinkAccount>().apply {
-        whenever(clientSecret).thenReturn(CLIENT_SECRET)
-    }
     private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkAccountManager: LinkAccountManager
     private val navigator = mock<Navigator>()
@@ -60,7 +59,12 @@ class WalletViewModelTest {
     fun before() {
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         whenever(args.completePayment).thenReturn(true)
-        linkAccountManager = mock()
+        val mockLinkAccount = mock<LinkAccount>().apply {
+            whenever(clientSecret).thenReturn(CLIENT_SECRET)
+        }
+        linkAccountManager = mock<LinkAccountManager>().apply {
+            whenever(linkAccount).thenReturn(MutableStateFlow(mockLinkAccount))
+        }
     }
 
     @Test
@@ -95,8 +99,50 @@ class WalletViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(LinkScreen.PaymentMethod, true)
+        verify(navigator).navigateTo(argWhere { it is LinkScreen.PaymentMethod }, eq(true))
     }
+
+    @Test
+    fun `On initialization when initially selected item exists then it is selected`() = runTest {
+        val selected = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        whenever(args.selectedPaymentDetails).thenReturn(
+            LinkPaymentDetails.Saved(
+                selected,
+                mock()
+            )
+        )
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.initiallySelectedId).isEqualTo(selected.id)
+
+        verify(navigator, times(0)).navigateTo(anyOrNull(), anyOrNull())
+    }
+
+    @Test
+    fun `On initialization when initially selected is new then navigate to AddPaymentMethod`() =
+        runTest {
+            whenever(args.selectedPaymentDetails).thenReturn(
+                LinkPaymentDetails.New(
+                    mock(),
+                    mock(),
+                    mock()
+                )
+            )
+            whenever(linkAccountManager.listPaymentDetails())
+                .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+            createViewModel()
+
+            verify(navigator).navigateTo(
+                argWhere {
+                    it.route == LinkScreen.PaymentMethod(true).route
+                },
+                eq(false)
+            )
+        }
 
     @Test
     fun `onSelectedPaymentDetails returns PaymentMethodCreateParams when completePayment is false`() {
@@ -108,15 +154,13 @@ class WalletViewModelTest {
         val paramsCaptor = argumentCaptor<LinkActivityResult>()
         verify(navigator).dismiss(paramsCaptor.capture())
 
-        assertThat(paramsCaptor.firstValue).isEqualTo(
-            LinkActivityResult.Success.Selected(
-                LinkPaymentDetails(
-                    paymentDetails,
-                    PaymentMethodCreateParams.createLink(
-                        paymentDetails.id,
-                        CLIENT_SECRET
-                    )
-                )
+        val selected =
+            (paramsCaptor.firstValue as LinkActivityResult.Success.Selected).paymentDetails
+        assertThat(selected.paymentDetails).isEqualTo(paymentDetails)
+        assertThat(selected.paymentMethodCreateParams).isEqualTo(
+            PaymentMethodCreateParams.createLink(
+                paymentDetails.id,
+                CLIENT_SECRET
             )
         )
     }
@@ -227,7 +271,7 @@ class WalletViewModelTest {
 
         viewModel.addNewPaymentMethod()
 
-        verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
+        verify(navigator).navigateTo(argWhere { it is LinkScreen.PaymentMethod }, eq(false))
     }
 
     @Test
@@ -311,7 +355,6 @@ class WalletViewModelTest {
     private fun createViewModel() =
         WalletViewModel(
             args,
-            linkAccount,
             linkAccountManager,
             navigator,
             confirmationManager,

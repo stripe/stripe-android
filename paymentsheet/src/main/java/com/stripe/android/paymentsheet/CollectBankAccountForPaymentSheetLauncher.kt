@@ -9,7 +9,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 
 internal class CollectBankAccountForPaymentSheetLauncher(
-    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
+    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(

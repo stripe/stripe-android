@@ -11,12 +11,20 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
+import com.stripe.android.identity.viewModelFactoryFor
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -24,6 +32,13 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CameraPermissionDeniedFragmentTest {
     private val mockAppSettingsOpenable = mock<AppSettingsOpenable>()
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+    }
 
     @Test
     fun `when scan type is ID_FRONT title is set and clicking upload navigates to id upload fragment`() {
@@ -119,6 +134,13 @@ class CameraPermissionDeniedFragmentTest {
                     it.getString(expectedTitleSuffix)
                 )
             )
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
+                }
+            )
         }
     }
 
@@ -132,6 +154,9 @@ class CameraPermissionDeniedFragmentTest {
         },
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        CameraPermissionDeniedFragment(mockAppSettingsOpenable)
+        CameraPermissionDeniedFragment(
+            mockAppSettingsOpenable,
+            viewModelFactoryFor(mockIdentityViewModel)
+        )
     }
 }

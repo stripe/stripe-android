@@ -118,11 +118,11 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         fun cameraPreviewToInput(
             cameraPreviewImage: Bitmap,
             previewBounds: Rect,
-            cardFinder: Rect,
+            cardFinder: Rect
         ) = Input(
             cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder)
                 .scale(Factory.TRAINED_IMAGE_SIZE)
-                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD),
+                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD)
         )
     }
 
@@ -131,7 +131,7 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
 
     override suspend fun interpretMLOutput(
         data: Input,
-        mlOutput: Map<Int, Array<FloatArray>>,
+        mlOutput: Map<Int, Array<FloatArray>>
     ): Prediction {
         val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
         val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
@@ -140,12 +140,12 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
             locations = outputLocations,
             featureMapSizes = FEATURE_MAP_SIZES,
             numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
-            locationsPerPrior = NUM_OF_COORDINATES,
+            locationsPerPrior = NUM_OF_COORDINATES
         ).reshape(NUM_OF_COORDINATES)
         boxes.adjustLocations(
             priors = PRIORS,
             centerVariance = CENTER_VARIANCE,
-            sizeVariance = SIZE_VARIANCE,
+            sizeVariance = SIZE_VARIANCE
         )
         boxes.forEach { it.toRectForm() }
 
@@ -153,7 +153,7 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
             locations = outputClasses,
             featureMapSizes = FEATURE_MAP_SIZES,
             numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
-            locationsPerPrior = NUM_OF_CLASSES,
+            locationsPerPrior = NUM_OF_CLASSES
         ).reshape(NUM_OF_CLASSES)
         scores.forEach { it.softMax() }
 
@@ -164,9 +164,9 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
                 probabilityThreshold = PROB_THRESHOLD,
                 intersectionOverUnionThreshold = IOU_THRESHOLD,
                 limit = LIMIT,
-                classifierToLabel = { if (it == 10) 0 else it },
+                classifierToLabel = { if (it == 10) 0 else it }
             ),
-            VERTICAL_THRESHOLD,
+            VERTICAL_THRESHOLD
         )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
@@ -179,11 +179,11 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,
-        data: Array<ByteBuffer>,
+        data: Array<ByteBuffer>
     ): Map<Int, Array<FloatArray>> {
         val mlOutput = mapOf(
             0 to arrayOf(FloatArray(NUM_CLASS)),
-            1 to arrayOf(FloatArray(NUM_LOC)),
+            1 to arrayOf(FloatArray(NUM_LOC))
         )
 
         tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
@@ -198,7 +198,7 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
     class Factory(
         context: Context,
         fetchedModel: FetchedData,
-        threads: Int = DEFAULT_THREADS,
+        threads: Int = DEFAULT_THREADS
     ) : TFLAnalyzerFactory<Input, Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false

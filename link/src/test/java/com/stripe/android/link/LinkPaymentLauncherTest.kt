@@ -26,6 +26,7 @@ class LinkPaymentLauncherTest {
     private var linkPaymentLauncher = LinkPaymentLauncher(
         MERCHANT_NAME,
         null,
+        null,
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },
@@ -48,12 +49,13 @@ class LinkPaymentLauncherTest {
         runTest {
             launch {
                 val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-                linkPaymentLauncher.setup(stripeIntent, true, this)
+                linkPaymentLauncher.setup(stripeIntent, true, null, this)
                 linkPaymentLauncher.present(mockHostActivityLauncher)
 
                 verify(mockHostActivityLauncher).launch(
                     argWhere { arg ->
                         arg.stripeIntent == stripeIntent &&
+                            arg.merchantName == MERCHANT_NAME &&
                             arg.injectionParams != null &&
                             arg.injectionParams.productUsage == setOf(PRODUCT_USAGE) &&
                             arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&

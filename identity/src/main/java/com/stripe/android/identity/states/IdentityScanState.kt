@@ -92,7 +92,7 @@ internal sealed class IdentityScanState(
         val reason: String,
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        val reachedStateAt: ClockMark = Clock.markNow(),
+        val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
@@ -124,5 +124,13 @@ internal sealed class IdentityScanState(
             analyzerInput: AnalyzerInput,
             analyzerOutput: AnalyzerOutput
         ) = this
+    }
+
+    internal companion object {
+        fun ScanType.isFront() =
+            this == ScanType.ID_FRONT || this == ScanType.DL_FRONT || this == ScanType.PASSPORT
+
+        fun ScanType.isBack() =
+            this == ScanType.ID_BACK || this == ScanType.DL_BACK
     }
 }

@@ -1,16 +1,12 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.content.Intent
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.StripeIntentFixtures
-import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
@@ -21,19 +17,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class PaymentMethodScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidIntentComposeRule<LinkActivity> {
-        PaymentConfiguration.init(it, "publishable_key")
-        Intent(it, LinkActivity::class.java).apply {
-            putExtra(
-                LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    StripeIntentFixtures.PI_SUCCEEDED,
-                    true,
-                    "Merchant, Inc"
-                )
-            )
-        }
-    }
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val primaryButtonLabel = "Pay $10.99"
     private val secondaryButtonLabel = "Cancel"

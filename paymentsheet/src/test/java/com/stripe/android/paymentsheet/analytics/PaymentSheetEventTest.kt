@@ -66,7 +66,7 @@ class PaymentSheetEventTest {
             "colorsDark" to false,
             "corner_radius" to false,
             "border_width" to false,
-            "font" to false,
+            "font" to false
         )
         val expectedAppearance = mapOf(
             "colorsLight" to false,
@@ -103,7 +103,7 @@ class PaymentSheetEventTest {
             "colorsDark" to true,
             "corner_radius" to true,
             "border_width" to true,
-            "font" to true,
+            "font" to true
         )
         val expectedAppearance = mapOf(
             "colorsLight" to true,

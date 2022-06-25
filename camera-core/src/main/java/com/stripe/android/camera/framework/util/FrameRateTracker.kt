@@ -22,7 +22,7 @@ internal interface FrameRateListener {
 internal class FrameRateTracker(
     private val name: String,
     private val listener: FrameRateListener? = null,
-    private val notifyInterval: Duration = 1.seconds,
+    private val notifyInterval: Duration = 1.seconds
 ) {
     private var firstFrameTime: ClockMark? = null
     private var lastNotifyTime: ClockMark = Clock.markNow()

@@ -11,7 +11,7 @@ fun Locale.getCountryCode(): CountryCode = CountryCode.create(this.country)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class CountryCode(
-    val value: String,
+    val value: String
 ) : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

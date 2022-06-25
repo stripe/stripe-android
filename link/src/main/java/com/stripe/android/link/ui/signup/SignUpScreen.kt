@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -88,6 +89,7 @@ internal fun SignUpBody(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SignUpBody(
     merchantName: String,
@@ -139,7 +141,7 @@ internal fun SignUpBody(
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,
-                        requestFocusWhenShown = true
+                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty()
                     )
                     LinkTerms(
                         modifier = Modifier

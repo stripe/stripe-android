@@ -4,6 +4,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.core.os.LocaleListCompat
 import kotlin.math.max
 import kotlin.math.min
 
@@ -189,6 +190,20 @@ internal sealed class PhoneNumberFormatter {
             allMetadata.find { countryCode.uppercase() == it.regionCode }?.let {
                 WithRegion(it)
             } ?: UnknownRegion(countryCode)
+
+        fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
+            countryCodesForPrefix(prefix).takeIf { it.isNotEmpty() }?.let {
+                for (i in 0 until userLocales.size()) {
+                    val locale = userLocales.get(i)!!
+                    if (it.contains(locale.country)) {
+                        return locale.country
+                    }
+                }
+                it.first()
+            }
+
+        private fun countryCodesForPrefix(prefix: String) =
+            allMetadata.filter { it.prefix == prefix }.map { it.regionCode }
 
         // List shared with iOS: https://github.com/stripe/stripe-ios/blob/master/StripeUICore/StripeUICore/Source/Validators/PhoneNumber.swift
         private val allMetadata = listOf(

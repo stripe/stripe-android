@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class SectionSingleFieldElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: IdentifierSpec
 ) : SectionFieldElement {
     /**
      * Some fields in the section will have a single input controller.

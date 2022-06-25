@@ -50,7 +50,7 @@ class ImageTest {
             assertEquals(
                 rawImageByte,
                 convertedImage.get(),
-                "Difference at byte ${rawImage.position()}",
+                "Difference at byte ${rawImage.position()}"
             )
         }
 

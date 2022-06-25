@@ -9,7 +9,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -49,7 +48,7 @@ internal class LinkAccountManager @Inject constructor(
                     cookieStore.getAuthSessionCookie()?.let {
                         lookupConsumer(null).getOrNull()?.accountStatus
                     }
-                    // If the user recently signed up on this device, use their email
+                        // If the user recently signed up on this device, use their email
                         ?: cookieStore.getNewUserEmail()?.let {
                             lookupConsumer(it).getOrNull()?.accountStatus
                         }
@@ -193,9 +192,10 @@ internal class LinkAccountManager @Inject constructor(
     ): Result<LinkPaymentDetails> =
         linkAccount.value?.let { account ->
             createPaymentDetails(
-                paymentMethod.createParams(paymentMethodCreateParams, account.email),
-                args.stripeIntent,
-                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+                paymentMethod,
+                paymentMethodCreateParams,
+                account.email,
+                args.stripeIntent
             )
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")
@@ -205,14 +205,16 @@ internal class LinkAccountManager @Inject constructor(
      * Create a new payment method in the signed in consumer account.
      */
     suspend fun createPaymentDetails(
-        paymentDetails: ConsumerPaymentDetailsCreateParams,
-        stripeIntent: StripeIntent,
-        extraConfirmationParams: Map<String, Any>?
+        paymentMethod: SupportedPaymentMethod,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        userEmail: String,
+        stripeIntent: StripeIntent
     ) = retryingOnAuthError { clientSecret ->
         linkRepository.createPaymentDetails(
-            paymentDetails,
+            paymentMethod,
+            paymentMethodCreateParams,
+            userEmail,
             stripeIntent,
-            extraConfirmationParams,
             clientSecret,
             consumerPublishableKey
         )
