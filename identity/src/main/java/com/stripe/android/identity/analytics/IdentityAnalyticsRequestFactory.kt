@@ -182,6 +182,21 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             )
         )
 
+    fun timeToScreen(
+        value: Long,
+        networkTime: Long? = null,
+        fromScreenName: String?,
+        toScreenName: String
+    ) = requestFactory.createRequest(
+        eventName = EVENT_TIME_TO_SCREEN,
+        additionalParams = additionalParamWithEventMetadata(
+            PARAM_VALUE to value,
+            PARAM_NETWORK_TIME to networkTime,
+            PARAM_FROM_SCREEN_NAME to fromScreenName,
+            PARAM_TO_SCREEN_NAME to toScreenName
+        )
+    )
+
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
             IdentityScanState.ScanType.ID_FRONT -> ID
@@ -228,6 +243,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_SELFIE_TIMEOUT = "selfie_timeout"
         const val EVENT_AVERAGE_FPS = "average_fps"
         const val EVENT_MODEL_PERFORMANCE = "model_performance"
+        const val EVENT_TIME_TO_SCREEN = "time_to_screen"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
@@ -255,11 +271,20 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_INFERENCE = "inference"
         const val PARAM_ML_MODEL = "ml_model"
         const val PARAM_FRAMES = "frames"
+        const val PARAM_NETWORK_TIME = "network_time"
+        const val PARAM_FROM_SCREEN_NAME = "from_screen_name"
+        const val PARAM_TO_SCREEN_NAME = "to_screen_name"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_SELECT = "document_select"
         const val SCREEN_NAME_LIVE_CAPTURE = "live_capture"
+        const val SCREEN_NAME_LIVE_CAPTURE_PASSPORT = "live_capture_passport"
+        const val SCREEN_NAME_LIVE_CAPTURE_ID = "live_capture_id"
+        const val SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE = "live_capture_driver_license"
         const val SCREEN_NAME_FILE_UPLOAD = "file_upload"
+        const val SCREEN_NAME_FILE_UPLOAD_PASSPORT = "file_upload_passport"
+        const val SCREEN_NAME_FILE_UPLOAD_ID = "file_upload_id"
+        const val SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE = "file_upload_driver_license"
         const val SCREEN_NAME_SELFIE = "selfie"
         const val SCREEN_NAME_CONFIRMATION = "confirmation"
         const val SCREEN_NAME_ERROR = "error"

@@ -11,6 +11,7 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult.Failed
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
@@ -40,6 +41,9 @@ internal class ErrorFragment(
 
             // If this is final destination, clicking bottom button and pressBack would end flow
             (args.getSerializable(ARG_FAILED_REASON) as? Throwable)?.let { failedReason ->
+                identityViewModel.screenTracker.screenTransitionStart(
+                    SCREEN_NAME_ERROR
+                )
                 bottomButton.setOnClickListener {
                     verificationFlowFinishable.finishWithResult(
                         Failed(failedReason)
@@ -47,6 +51,9 @@ internal class ErrorFragment(
                 }
             } ?: run {
                 bottomButton.setOnClickListener {
+                    identityViewModel.screenTracker.screenTransitionStart(
+                        SCREEN_NAME_ERROR
+                    )
                     val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int
                     if (destination == UNEXPECTED_DESTINATION) {
                         findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)

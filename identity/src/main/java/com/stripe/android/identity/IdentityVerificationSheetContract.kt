@@ -17,7 +17,8 @@ internal class IdentityVerificationSheetContract :
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
         val brandLogo: Uri,
-        @InjectorKey val injectorKey: String
+        @InjectorKey val injectorKey: String,
+        val presentTime: Long
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

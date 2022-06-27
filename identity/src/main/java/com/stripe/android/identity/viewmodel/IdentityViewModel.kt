@@ -27,6 +27,7 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
 import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
@@ -72,7 +73,8 @@ internal class IdentityViewModel @Inject constructor(
     private val identityIO: IdentityIO,
     val identityFragmentFactory: IdentityFragmentFactory,
     val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    val fpsTracker: FPSTracker
+    val fpsTracker: FPSTracker,
+    val screenTracker: ScreenTracker
 ) : ViewModel() {
 
     /**

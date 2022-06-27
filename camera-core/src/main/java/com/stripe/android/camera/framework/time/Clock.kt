@@ -12,7 +12,8 @@ object Clock {
 /**
  * Convert a milliseconds since epoch timestamp to a clock mark.
  */
-internal fun Long.asEpochMillisecondsClockMark(): ClockMark = AbsoluteClockMark(this)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Long.asEpochMillisecondsClockMark(): ClockMark = AbsoluteClockMark(this)
 
 /**
  * A marked point in time.

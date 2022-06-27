@@ -21,6 +21,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
@@ -102,6 +103,8 @@ internal class SelfieFragmentTest {
         bestLowResResult = Resource.success(mockUploadedResult)
     )
 
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
@@ -112,11 +115,15 @@ internal class SelfieFragmentTest {
                 args = mock()
             )
         on { fpsTracker } doReturn mockFPSTracker
+        on { screenTracker } doReturn mockScreenTracker
     }
 
     @Test
     fun `when initialized UI is reset and bound`() {
         launchSelfieFragment { binding, _, _ ->
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_SELFIE))
+            }
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&

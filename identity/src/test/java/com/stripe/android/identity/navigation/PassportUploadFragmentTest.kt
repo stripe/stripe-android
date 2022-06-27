@@ -23,6 +23,8 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_P
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD_PASSPORT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
@@ -81,6 +83,7 @@ class PassportUploadFragmentTest {
         on { hasError() } doReturn true
     }
 
+    private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
@@ -93,6 +96,7 @@ class PassportUploadFragmentTest {
                 args = mock()
             )
         )
+        whenever(it.screenTracker).thenReturn(mockScreenTracker)
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -107,6 +111,7 @@ class PassportUploadFragmentTest {
                 args = mock()
             )
         )
+        whenever(it.screenTracker).thenReturn(mockScreenTracker)
     }
 
     private val navController = TestNavHostController(
@@ -117,6 +122,10 @@ class PassportUploadFragmentTest {
     fun `when initialized viewmodel registers activityResultCaller and UI is correct`() {
         launchFragment { binding, _, fragment ->
             verify(mockIdentityUploadViewModel).registerActivityResultCaller(same(fragment))
+
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_FILE_UPLOAD_PASSPORT))
+            }
 
             assertThat(binding.selectFront.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
@@ -208,6 +217,8 @@ class PassportUploadFragmentTest {
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_FILE_UPLOAD_PASSPORT), any())
+
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
                         idDocumentFront = DocumentUploadParam(
@@ -250,6 +261,8 @@ class PassportUploadFragmentTest {
                 )
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_FILE_UPLOAD_PASSPORT), any())
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
