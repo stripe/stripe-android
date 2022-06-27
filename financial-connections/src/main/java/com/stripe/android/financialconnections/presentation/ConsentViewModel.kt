@@ -5,6 +5,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -12,6 +13,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,22 +35,20 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        when(tag) {
-            "terms" -> logger.debug("Terms clicked")
-            "privacy" -> logger.debug("Privacy Policy clicked")
-            "more" -> logger.debug("Learn more clicked")
-        }
+        logger.debug("$tag clicked")
     }
 
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
                 title = manifest.businessName + " works with Stripe to link your accounts",
-                content = listOf(
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
+                bullets = listOf(
+                    R.drawable.stripe_ic_safe to TextResource.StringId(
+                        R.string.consent_pane_body1,
+                        listOf(requireNotNull(manifest.businessName))
+                    ),
+                    R.drawable.stripe_ic_shield to TextResource.StringId(R.string.consent_pane_body2),
+                    R.drawable.stripe_ic_lock to TextResource.StringId(R.string.consent_pane_body3),
                 )
             )
         }
@@ -71,5 +71,5 @@ internal class ConsentViewModel @Inject constructor(
 
 internal data class ConsentState(
     val title: String = "",
-    val content: List<String> = emptyList()
+    val bullets: List<Pair<Int, TextResource>> = emptyList(),
 ) : MavericksState
