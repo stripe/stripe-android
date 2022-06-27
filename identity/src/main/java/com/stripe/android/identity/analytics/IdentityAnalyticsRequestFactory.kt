@@ -21,17 +21,20 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         origin = ORIGIN
     )
 
+    private fun additionalParamWithEventMetadata(vararg pairs: Pair<String, *>) =
+        mapOf(
+            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+            PARAM_EVENT_META_DATA to mapOf(*pairs)
+        )
+
     fun sheetPresented() = requestFactory.createRequest(
         EVENT_SHEET_PRESENTED,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId
-        )
+        additionalParams = additionalParamWithEventMetadata()
     )
 
     fun sheetClosed(sessionResult: String) = requestFactory.createRequest(
         eventName = EVENT_SHEET_CLOSED,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_SESSION_RESULT to sessionResult
         )
     )
@@ -50,10 +53,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         selfieModelScore: Float? = null
     ) = requestFactory.createRequest(
         eventName = EVENT_VERIFICATION_SUCCEEDED,
-        additionalParams =
-        mapOf(
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
             PARAM_SCAN_TYPE to scanType?.toParam(),
             PARAM_REQUIRE_SELFIE to requireSelfie,
             PARAM_DOC_FRONT_RETRY_TIMES to docFrontRetryTimes,
@@ -74,10 +75,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         requireSelfie: Boolean? = null
     ) = requestFactory.createRequest(
         eventName = EVENT_VERIFICATION_CANCELED,
-        additionalParams =
-        mapOf(
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
             PARAM_SCAN_TYPE to scanType?.toParam(),
             PARAM_REQUIRE_SELFIE to requireSelfie,
             PARAM_LAST_SCREEN_NAME to lastScreenName
@@ -93,10 +92,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         throwable: Throwable
     ) = requestFactory.createRequest(
         eventName = EVENT_VERIFICATION_FAILED,
-        additionalParams =
-        mapOf(
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
             PARAM_SCAN_TYPE to scanType?.toParam(),
             PARAM_REQUIRE_SELFIE to requireSelfie,
             PARAM_DOC_FRONT_UPLOAD_TYPE to docFrontUploadType?.name,
@@ -113,8 +110,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         screenName: String
     ) = requestFactory.createRequest(
         eventName = EVENT_SCREEN_PRESENTED,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType?.toParam(),
             PARAM_SCREEN_NAME to screenName
         )
@@ -125,8 +121,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         throwable: Throwable
     ) = requestFactory.createRequest(
         eventName = EVENT_CAMERA_ERROR,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType.toParam(),
             PARAM_ERROR to mapOf(
                 PARAM_EXCEPTION to throwable.javaClass.name,
@@ -139,8 +134,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         scanType: IdentityScanState.ScanType
     ) = requestFactory.createRequest(
         eventName = EVENT_CAMERA_PERMISSION_DENIED,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType.toParam()
         )
     )
@@ -149,8 +143,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         scanType: IdentityScanState.ScanType
     ) = requestFactory.createRequest(
         eventName = EVENT_CAMERA_PERMISSION_GRANTED,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType.toParam()
         )
     )
@@ -159,8 +152,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         scanType: IdentityScanState.ScanType
     ) = requestFactory.createRequest(
         eventName = EVENT_DOCUMENT_TIMEOUT,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType.toParam(),
             PARAM_SIDE to scanType.toSide()
         )
@@ -168,28 +160,27 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     fun selfieTimeout() = requestFactory.createRequest(
         eventName = EVENT_SELFIE_TIMEOUT,
-        additionalParams = mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId
-        )
+        additionalParams = additionalParamWithEventMetadata()
     )
 
     fun averageFps(type: String, value: Int) = requestFactory.createRequest(
         eventName = EVENT_AVERAGE_FPS,
-        additionalParams = mapOf(
+        additionalParams = additionalParamWithEventMetadata(
             PARAM_TYPE to type,
             PARAM_VALUE to value
         )
     )
 
-    fun modelPerformance(mlModel: String, preprocess: Long, inference: Long, frames: Int) = requestFactory.createRequest(
-        eventName = EVENT_MODEL_PERFORMANCE,
-        additionalParams = mapOf(
-            PARAM_PREPROCESS to preprocess,
-            PARAM_INFERENCE to inference,
-            PARAM_ML_MODEL to mlModel,
-            PARAM_FRAMES to frames
+    fun modelPerformance(mlModel: String, preprocess: Long, inference: Long, frames: Int) =
+        requestFactory.createRequest(
+            eventName = EVENT_MODEL_PERFORMANCE,
+            additionalParams = additionalParamWithEventMetadata(
+                PARAM_PREPROCESS to preprocess,
+                PARAM_INFERENCE to inference,
+                PARAM_ML_MODEL to mlModel,
+                PARAM_FRAMES to frames
+            )
         )
-    )
 
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
@@ -238,6 +229,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_AVERAGE_FPS = "average_fps"
         const val EVENT_MODEL_PERFORMANCE = "model_performance"
 
+        const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
         const val PARAM_VERIFICATION_SESSION = "verification_session"
         const val PARAM_SESSION_RESULT = "session_result"
