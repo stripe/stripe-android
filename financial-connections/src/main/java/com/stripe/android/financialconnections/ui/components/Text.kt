@@ -11,7 +11,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.core.text.getSpans
 import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.clickableTextSpanStyle
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun AnnotatedText(
@@ -19,8 +19,10 @@ internal fun AnnotatedText(
     onClickableTextClick: (String) -> Unit,
     textStyle: TextStyle
 ) {
-    val urlStyle = clickableTextSpanStyle()
-    val consentTc = annotatedStringResource(
+    val urlStyle = FinancialConnectionsTheme.typography.bodyEmphasized
+        .toSpanStyle()
+        .copy(color = FinancialConnectionsTheme.colors.textBrand)
+    val resource = annotatedStringResource(
         resource = resource
     ) { annotation ->
         when (StringAnnotation.values().firstOrNull { it.value == annotation.key }) {
@@ -29,10 +31,10 @@ internal fun AnnotatedText(
         }
     }
     ClickableText(
-        text = consentTc,
+        text = resource,
         style = textStyle,
         onClick = { offset ->
-            consentTc.getStringAnnotations(
+            resource.getStringAnnotations(
                 tag = StringAnnotation.CLICKABLE.value,
                 start = offset,
                 end = offset

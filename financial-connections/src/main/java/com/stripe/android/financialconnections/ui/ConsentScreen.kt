@@ -88,22 +88,17 @@ private fun ConsentContent(
                 onClick = onContinueClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.consent_pane_agree))
+                Text(text = stringResource(R.string.stripe_consent_pane_agree))
             }
         }
     }
 }
 
 @Composable
-fun clickableTextSpanStyle() = FinancialConnectionsTheme.typography.bodyEmphasized
-    .toSpanStyle()
-    .copy(color = FinancialConnectionsTheme.colors.textBrand)
-
-@Composable
 private fun Subtitle(state: ConsentState) {
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = state.title,
+        text = state.title.toText().toString(),
         textAlign = TextAlign.Center,
         color = FinancialConnectionsTheme.colors.textPrimary,
         style = FinancialConnectionsTheme.typography.subtitle
@@ -143,9 +138,9 @@ private fun ContentPreview() {
         FinancialConnectionsScaffold {
             ConsentContent(
                 state = ConsentState(
-                    title = "Random title",
+                    title = TextResource.StringId(R.string.stripe_consent_pane_title),
                     bullets = listOf(
-                        R.drawable.stripe_ic_lock to TextResource.StringId(R.string.consent_pane_body2)
+                        R.drawable.stripe_ic_lock to TextResource.StringId(R.string.stripe_consent_pane_body2)
                     )
                 ),
                 onContinueClick = {}

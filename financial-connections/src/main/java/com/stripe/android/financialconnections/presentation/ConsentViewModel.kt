@@ -41,14 +41,21 @@ internal class ConsentViewModel @Inject constructor(
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
-                title = manifest.businessName + " works with Stripe to link your accounts",
+                title = TextResource.StringId(
+                    R.string.stripe_consent_pane_title,
+                    listOf(requireNotNull(manifest.businessName))
+                ),
                 bullets = listOf(
                     R.drawable.stripe_ic_safe to TextResource.StringId(
-                        R.string.consent_pane_body1,
+                        R.string.stripe_consent_pane_body1,
                         listOf(requireNotNull(manifest.businessName))
                     ),
-                    R.drawable.stripe_ic_shield to TextResource.StringId(R.string.consent_pane_body2),
-                    R.drawable.stripe_ic_lock to TextResource.StringId(R.string.consent_pane_body3),
+                    R.drawable.stripe_ic_shield to TextResource.StringId(
+                        R.string.stripe_consent_pane_body2
+                    ),
+                    R.drawable.stripe_ic_lock to TextResource.StringId(
+                        R.string.stripe_consent_pane_body3
+                    ),
                 )
             )
         }
@@ -70,6 +77,6 @@ internal class ConsentViewModel @Inject constructor(
 }
 
 internal data class ConsentState(
-    val title: String = "",
+    val title: TextResource = TextResource.Text(""),
     val bullets: List<Pair<Int, TextResource>> = emptyList(),
 ) : MavericksState
