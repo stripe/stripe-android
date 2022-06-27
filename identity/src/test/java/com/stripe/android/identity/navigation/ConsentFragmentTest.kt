@@ -17,8 +17,10 @@ import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT_WITH_SELFIE
@@ -138,6 +140,8 @@ internal class ConsentFragmentTest {
         )
     }
 
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationArgs }.thenReturn(ARGS)
 
@@ -147,6 +151,8 @@ internal class ConsentFragmentTest {
                 args = ARGS
             )
         )
+
+        on { screenTracker }.thenReturn(mockScreenTracker)
     }
 
     private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
@@ -223,7 +229,7 @@ internal class ConsentFragmentTest {
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
                 }
             )
             verify(
@@ -294,6 +300,8 @@ internal class ConsentFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+
                 verify(mockIdentityViewModel).postVerificationPageData(
                     collectedDataParam = eq(
                         CollectedDataParam(biometricConsent = true)
@@ -320,6 +328,8 @@ internal class ConsentFragmentTest {
                 ).thenReturn(correctVerificationData)
                 setUpSuccessVerificationPage(verificationPageWithSelfie)
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     collectedDataParam = eq(
@@ -427,6 +437,9 @@ internal class ConsentFragmentTest {
             it.requireView(),
             navController
         )
+        runBlocking {
+            verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
+        }
         testBlock(ConsentFragmentBinding.bind(it.requireView()), navController, it)
     }
 
@@ -453,7 +466,8 @@ internal class ConsentFragmentTest {
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            presentTime = 0
         )
     }
 }

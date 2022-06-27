@@ -21,9 +21,11 @@ import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.DRIVER_LICENSE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
@@ -79,6 +81,7 @@ internal class DriverLicenseScanFragmentTest {
 
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
@@ -89,6 +92,7 @@ internal class DriverLicenseScanFragmentTest {
                 args = mock()
             )
         on { it.fpsTracker } doReturn mock()
+        on { it.screenTracker } doReturn mockScreenTracker
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
@@ -122,11 +126,14 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when started analytics event is sent`() {
         launchDriverLicenseFragment().onFragment {
+            runBlocking {
+                mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE))
+            }
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE &&
-                        params[PARAM_SCAN_TYPE] == DRIVER_LICENSE
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCAN_TYPE] == DRIVER_LICENSE
                 }
             )
         }
@@ -267,6 +274,13 @@ internal class DriverLicenseScanFragmentTest {
                     on { selfieCapture } doReturn mock() // return non null selfieCapture
                 }
                 successCaptor.lastValue.invoke(mockVerificationPage)
+
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(
+                        SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
+                    ),
+                    any()
+                )
 
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(

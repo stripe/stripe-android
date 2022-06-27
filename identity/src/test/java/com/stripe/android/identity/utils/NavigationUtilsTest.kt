@@ -18,6 +18,7 @@ import com.stripe.android.identity.ERROR_BODY
 import com.stripe.android.identity.ERROR_BUTTON_TEXT
 import com.stripe.android.identity.ERROR_TITLE
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -27,13 +28,17 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class NavigationUtilsTest {
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     @Test
     fun `postVerificationPageDataAndMaybeSubmit from consent navigates to error fragment when has BIOMETRICCONSENT error `() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
@@ -54,7 +59,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.passportUploadFragment,
-            R.id.passportUploadFragment
+            R.id.passportUploadFragment,
+            2
         )
     }
 
@@ -69,7 +75,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.IDUploadFragment,
-            R.id.IDUploadFragment
+            R.id.IDUploadFragment,
+            2
         )
     }
 
@@ -84,7 +91,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.driverLicenseUploadFragment,
-            R.id.driverLicenseUploadFragment
+            R.id.driverLicenseUploadFragment,
+            2
         )
     }
 
@@ -99,7 +107,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.passportScanFragment,
-            R.id.passportScanFragment
+            R.id.passportScanFragment,
+            2
         )
     }
 
@@ -114,7 +123,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.IDScanFragment,
-            R.id.IDScanFragment
+            R.id.IDScanFragment,
+            2
         )
     }
 
@@ -129,7 +139,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.driverLicenseScanFragment,
-            R.id.driverLicenseScanFragment
+            R.id.driverLicenseScanFragment,
+            2
         )
     }
 
@@ -155,7 +166,8 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.consentFragment,
-            ErrorFragment.UNEXPECTED_DESTINATION
+            ErrorFragment.UNEXPECTED_DESTINATION,
+            2
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
@@ -165,19 +177,23 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.docSelectionFragment,
-            ErrorFragment.UNEXPECTED_DESTINATION
+            ErrorFragment.UNEXPECTED_DESTINATION,
+            2
         )
     }
 
     private fun testPostVerificationPageDataAndMaybeSubmitWithError(
         errorResponse: VerificationPageData,
         @IdRes fromFragment: Int,
-        @IdRes backButtonDestination: Int
+        @IdRes backButtonDestination: Int,
+        times: Int = 1
     ) = runBlocking {
         val mockIdentityViewModel = mock<IdentityViewModel>().also {
             whenever(it.postVerificationPageData(any(), any())).thenReturn(
                 errorResponse
             )
+
+            whenever(it.screenTracker).thenReturn(mockScreenTracker)
         }
 
         launchFragment { navController, fragment ->
@@ -187,6 +203,8 @@ internal class NavigationUtilsTest {
                 mock(),
                 fromFragment
             )
+
+            verify(mockScreenTracker, times(times)).screenTransitionStart(eq(fromFragment.fragmentIdToScreenName()), any())
 
             requireNotNull(navController.backStack.last().arguments).let { arguments ->
                 assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
@@ -210,6 +228,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageData(any(), any())).thenThrow(
                     APIException()
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
 
             launchFragment { navController, fragment ->
@@ -233,6 +252,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
             var blockExecuted = false
 
@@ -261,6 +281,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageSubmit()).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
 
             launchFragment { _, fragment ->
@@ -287,6 +308,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageSubmit()).thenReturn(
                     ERROR_VERIFICATION_PAGE_DATA_BIOMETRICCONSENT
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
 
             launchFragment { navController, fragment ->
@@ -324,6 +346,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageSubmit()).thenReturn(
                     CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
 
             launchFragment { navController, fragment ->
@@ -351,6 +374,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageSubmit()).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
 
             launchFragment { navController, fragment ->
@@ -378,6 +402,7 @@ internal class NavigationUtilsTest {
                 whenever(it.postVerificationPageSubmit()).thenThrow(
                     APIException()
                 )
+                whenever(it.screenTracker).thenReturn(mockScreenTracker)
             }
 
             launchFragment { navController, fragment ->

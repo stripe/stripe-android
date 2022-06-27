@@ -86,11 +86,13 @@ internal class IdentityViewModelTest {
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            presentTime = 0
         ),
         mockIdentityRepository,
         mockIdentityModelFetcher,
         mockIdentityIO,
+        mock(),
         mock(),
         mock(),
         mock()

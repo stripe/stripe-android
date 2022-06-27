@@ -12,16 +12,21 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -30,21 +35,27 @@ import org.robolectric.RobolectricTestRunner
 class ErrorFragmentTest {
 
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
+    private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { identityAnalyticsRequestFactory } doReturn
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+
+        on { screenTracker } doReturn mockScreenTracker
     }
 
     @Test
     fun `title and content are set correctly`() {
         launchErrorFragment().onFragment {
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_ERROR))
+            }
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
                 }
             )
 
@@ -87,6 +98,8 @@ class ErrorFragmentTest {
 
             binding.bottomButton.callOnClick()
 
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
+
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.consentFragment)
         }
@@ -114,6 +127,9 @@ class ErrorFragmentTest {
             assertThat(binding.bottomButton.text).isEqualTo(TEST_GO_BACK_BUTTON_TEXT)
 
             binding.bottomButton.callOnClick()
+
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
+
             val resultCaptor = argumentCaptor<VerificationFlowResult.Failed>()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 resultCaptor.capture()
@@ -148,6 +164,8 @@ class ErrorFragmentTest {
             // keep popping until navigationDestination(consentFragment) is reached
             BaseErrorFragmentBinding.bind(it.requireView()).bottomButton.callOnClick()
 
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
+
             assertThat(navController.currentDestination?.id).isEqualTo(navigationDestination)
         }
     }
@@ -178,6 +196,8 @@ class ErrorFragmentTest {
             // navigationDestination(confirmationFragment) is not in backstack,
             // keep popping until firstEntry(consentFragment) is reached
             BaseErrorFragmentBinding.bind(it.requireView()).bottomButton.callOnClick()
+
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
 
             assertThat(navController.currentDestination?.id).isEqualTo(firstEntry)
         }

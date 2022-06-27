@@ -70,6 +70,7 @@ internal class IdentityActivityTest {
             )
         )
         on { verificationPage }.thenReturn(mock())
+        on { screenTracker }.thenReturn(mock())
     }
 
     @Before
@@ -425,7 +426,8 @@ internal class IdentityActivityTest {
             VERIFICATION_SESSION_ID,
             EAK,
             BRAND_LOGO,
-            DUMMY_INJECTOR_KEY
+            DUMMY_INJECTOR_KEY,
+            0
         )
     }
 }

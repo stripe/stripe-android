@@ -17,17 +17,18 @@ import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
+import com.stripe.android.identity.utils.fragmentIdToScreenName
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -75,10 +76,13 @@ internal abstract class IdentityDocumentScanFragment(
         }
         super.onViewCreated(view, savedInstanceState)
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
+        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 scanType = frontScanType,
-                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+                screenName = fragmentId.fragmentIdToScreenName()
             )
         )
     }
