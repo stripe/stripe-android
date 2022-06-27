@@ -163,11 +163,12 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         additionalParams = additionalParamWithEventMetadata()
     )
 
-    fun averageFps(type: String, value: Int) = requestFactory.createRequest(
+    fun averageFps(type: String, value: Int, frames: Int) = requestFactory.createRequest(
         eventName = EVENT_AVERAGE_FPS,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_TYPE to type,
-            PARAM_VALUE to value
+            PARAM_VALUE to value,
+            PARAM_FRAMES to frames
         )
     )
 
