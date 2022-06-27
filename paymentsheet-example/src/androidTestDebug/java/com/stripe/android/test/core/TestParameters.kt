@@ -23,7 +23,13 @@ data class TestParameters(
     val takeScreenshotOnLpmLoad: Boolean = false,
     val forceDarkMode: Boolean? = null,
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-    val snapshotReturningCustomer: Boolean = false
+    val snapshotReturningCustomer: Boolean = false,
+    val merchantCountryCode: String = when (currency) {
+        Currency.EUR -> "GB"
+        Currency.AUD -> "AU"
+        Currency.GBP -> "GB"
+        Currency.USD -> "US"
+    }
 )
 
 /**
