@@ -14,12 +14,6 @@
     <string name="stripe_paymentsheet_payment_method_affirm">Affirm</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
-    <!-- Message shown for Afterpay/Clearpay payments. Placeholder will be replaced with the installment amount,
-    and the Afterpay/Clearpay logo will be added at the end of the message, so the translation must make sense
-    when reading as: "Pay in 4 interest-free payments of $100 with <Afterpay> ⓘ"
-        This will not be translated initially as it must have specific values per language -->
-    <string name="afterpay_clearpay_message">Pay in 4 interest-free payments of %s with</string>
-
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
     <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>-->
 </resources>

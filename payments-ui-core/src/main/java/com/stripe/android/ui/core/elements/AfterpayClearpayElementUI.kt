@@ -33,22 +33,24 @@ fun AfterpayClearpayElementUI(
     element: AfterpayClearpayHeaderElement
 ) {
     val context = LocalContext.current
+    // TODO need to handle the <img/> tag!
+    val messageFormatString = element.getLabel(context.resources)
+    val beforeLogo = messageFormatString.substringBefore("<img/>")
+    val afterLogo = messageFormatString.substringAfter("<img/>")
 
     FlowRow(
         modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
         crossAxisAlignment = FlowCrossAxisAlignment.Center
     ) {
         Text(
-            element.getLabel(context.resources),
+            beforeLogo,
             Modifier
                 .padding(end = 4.dp),
             color = MaterialTheme.paymentsColors.subtitle
         )
         Image(
             painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
-            contentDescription = stringResource(
-                R.string.afterpay_clearpay_message
-            ),
+            contentDescription = messageFormatString,
             colorFilter = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
                 null
             } else {
@@ -72,5 +74,13 @@ fun AfterpayClearpayElementUI(
                 color = MaterialTheme.paymentsColors.subtitle
             )
         }
+
+        // TODO: Need to figure out how to wrap this based on room left on the line.
+        Text(
+            afterLogo,
+            Modifier
+                .padding(end = 4.dp),
+            color = MaterialTheme.paymentsColors.subtitle
+        )
     }
 }

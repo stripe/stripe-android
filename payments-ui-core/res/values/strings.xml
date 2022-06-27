@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Suburb</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Village or Township</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="afterpay_clearpay_message"><![CDATA[Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>]]></string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Billing address</string>
   <!-- Used when a required field is blank and submit is clicked. -->

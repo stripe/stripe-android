@@ -21,14 +21,21 @@ data class AfterpayClearpayHeaderElement(
 
     val infoUrl = url.format(Locale.current.region.lowercase())
 
-    fun getLabel(resources: Resources) =
-        resources.getString(
-            R.string.afterpay_clearpay_message,
-            CurrencyFormatter.format(
-                amount.value / 4,
-                amount.currencyCode
+    fun getLabel(resources: Resources): String {
+        val numInstallments = when (amount.currencyCode.lowercase()) {
+            "eur" -> 3
+            else -> 4
+        }
+        return resources.getString(
+            R.string.afterpay_clearpay_message
+        ).replace("<num_installments/>", numInstallments.toString())
+            .replace(
+                "<installment_price/>", CurrencyFormatter.format(
+                    amount.value / numInstallments,
+                    amount.currencyCode
+                )
             )
-        )
+    }
 
     companion object {
         const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
