@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.TextResource
@@ -36,6 +37,37 @@ internal class ConsentViewModel @Inject constructor(
 
     fun onClickableTextClick(tag: String) {
         logger.debug("$tag clicked")
+        setState {
+            when (tag) {
+                "terms" -> copy(
+                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                )
+                "privacy" -> copy(
+                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                )
+                "disconnect" -> copy(
+                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                )
+                "data" -> copy(
+                    bottomSheetType = ConsentState.BottomSheetType.DATA
+                )
+                "more" -> copy(
+                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                )
+                "data_access" -> copy(
+                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                )
+                else -> TODO("Unrecognized")
+            }
+        }
+    }
+
+    fun onConfirmModalClick() {
+        setState {
+            copy(
+                bottomSheetType = ConsentState.BottomSheetType.NONE
+            )
+        }
     }
 
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
@@ -56,7 +88,52 @@ internal class ConsentViewModel @Inject constructor(
                     R.drawable.stripe_ic_lock to TextResource.StringId(
                         R.string.stripe_consent_pane_body3
                     ),
-                )
+                ),
+                requestedDataTitle = TextResource.StringId(
+                    R.string.stripe_consent_requested_data_title,
+                    listOf(requireNotNull(manifest.businessName))
+                ),
+                requestedDataBullets = manifest.permissions.mapNotNull { permission ->
+                    when (permission) {
+                        FinancialConnectionsAccount.Permissions.BALANCES ->
+                            Pair(
+                                TextResource.StringId(R.string.stripe_consent_requested_data_balances_title),
+                                TextResource.StringId(R.string.stripe_consent_requested_data_balances_desc)
+                            )
+                        FinancialConnectionsAccount.Permissions.OWNERSHIP ->
+                            Pair(
+                                TextResource.StringId(R.string.stripe_consent_requested_data_ownership_title),
+                                TextResource.StringId(R.string.stripe_consent_requested_data_ownership_desc)
+                            )
+                        FinancialConnectionsAccount.Permissions.PAYMENT_METHOD ->
+                            Pair(
+                                TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_title),
+                                TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_desc)
+                            )
+                        FinancialConnectionsAccount.Permissions.TRANSACTIONS ->
+                            Pair(
+                                TextResource.StringId(R.string.stripe_consent_requested_data_transactions_title),
+                                TextResource.StringId(R.string.stripe_consent_requested_data_transactions_desc)
+                            )
+                        FinancialConnectionsAccount.Permissions.UNKNOWN -> null
+                    }
+                }
+            )
+        }
+    }
+
+    fun onModalBottomSheetClosed() {
+        setState {
+            copy(
+                bottomSheetType = ConsentState.BottomSheetType.NONE
+            )
+        }
+    }
+
+    fun onViewEffectLaunched() {
+        setState {
+            copy(
+                viewEffect = null
             )
         }
     }
@@ -79,4 +156,17 @@ internal class ConsentViewModel @Inject constructor(
 internal data class ConsentState(
     val title: TextResource = TextResource.Text(""),
     val bullets: List<Pair<Int, TextResource>> = emptyList(),
-) : MavericksState
+    val requestedDataTitle: TextResource = TextResource.Text(""),
+    val requestedDataBullets: List<Pair<TextResource, TextResource>> = emptyList(),
+    val bottomSheetType: BottomSheetType = BottomSheetType.NONE,
+    val viewEffect: ViewEffect? = null
+) : MavericksState {
+
+    enum class BottomSheetType {
+        NONE, DATA
+    }
+
+    sealed interface ViewEffect {
+        data class OpenUrl(val url: String) : ViewEffect
+    }
+}

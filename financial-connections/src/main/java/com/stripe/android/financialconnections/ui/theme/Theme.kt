@@ -19,9 +19,9 @@ private val LightColorPalette = FinancialConnectionsColors(
     textWhite = Color.White,
     textBrand = Blurple500,
     textInfo = Blue500,
-    textSuccess = Color.Unspecified,
+    textSuccess = Green500,
     textAttention = Color.Unspecified,
-    textCritical = Color.Unspecified
+    textCritical = Red500
 )
 
 private val Typography = FinancialConnectionsTypography(
