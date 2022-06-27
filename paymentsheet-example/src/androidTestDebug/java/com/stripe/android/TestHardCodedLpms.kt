@@ -205,6 +205,7 @@ class TestHardCodedLpms {
                 shipping = Shipping.On,
                 delayed = DelayedPMs.On,
                 automatic = Automatic.Off,
+                merchantCountryCode = "AU"
             )
         )
     }

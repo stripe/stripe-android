@@ -43,4 +43,5 @@
     <string name="currency_aud">AUD</string>
     <string name="show_sheet">Show Sheet</string>
     <string name="appearance_playground">"Appearance Customization"</string>
+    <string name="merchant_country">Merchant</string>
 </resources>

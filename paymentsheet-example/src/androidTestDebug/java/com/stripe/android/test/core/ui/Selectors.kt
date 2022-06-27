@@ -17,6 +17,8 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.WalletConstants
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
@@ -30,6 +32,7 @@ import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+import java.util.Locale
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
@@ -56,12 +59,6 @@ class Selectors(
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
         GooglePayState.On -> EspressoIdButton(R.id.google_pay_on_button)
-    }
-    val currency = when (testParameters.currency) {
-        Currency.EUR -> EspressoLabelIdButton(R.string.currency_eur)
-        Currency.USD -> EspressoLabelIdButton(R.string.currency_usd)
-        Currency.AUD -> EspressoLabelIdButton(R.string.currency_aud)
-        Currency.GBP -> EspressoLabelIdButton(R.string.currency_gbp)
     }
 
     val checkout = when (testParameters.intentType) {
@@ -275,6 +272,19 @@ class Selectors(
             com.stripe.android.ui.core.R.string.cvc_number_hint
         )
     )
+
+    fun setCurrency(currency: Currency) {
+        EspressoIdButton(R.id.currency_spinner).click()
+        EspressoText(currency.name).click()
+    }
+
+    fun setMerchantCountry(merchantCountryCode: String) {
+        EspressoIdButton(R.id.merchant_country_spinner).click()
+        EspressoText(
+            CountryUtils.getDisplayCountry(CountryCode(merchantCountryCode), Locale.getDefault())
+        ).click()
+
+    }
 
     companion object {
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =
