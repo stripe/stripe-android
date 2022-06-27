@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -8,11 +9,14 @@ import android.text.style.ImageSpan
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
+import android.util.Log
+import android.util.TypedValue
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicText
@@ -40,8 +44,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.core.text.HtmlCompat
 import com.stripe.android.ui.core.paymentsColors
+
 
 private const val LINK_TAG = "URL"
 
@@ -72,53 +78,84 @@ fun Html(
     urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
     imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
 ) {
-    val inlineContentMap = imageGetter.entries.associate { (key, value) ->
-        val painter = painterResource(value.id)
-        val height = painter.intrinsicSize.height
-        val width = painter.intrinsicSize.width
-        val newWidth = MaterialTheme.typography.body1.fontSize * (width / height)
+    val context = LocalContext.current
+    BoxWithConstraints {
 
-        key to InlineTextContent(
-            Placeholder(
-                newWidth,
-                MaterialTheme.typography.body1.fontSize,
-                imageAlign
-            ),
-            children = {
-                Image(
-                    modifier = value.modifier,
-                    painter = painter,
-                    contentDescription = stringResource(
-                        value.contentDescription
-                    ),
-                    colorFilter = value.colorFilter
+        val inlineContentMap = imageGetter.entries.associate { (key, value) ->
+            val painter = painterResource(value.id)
+            val height = painter.intrinsicSize.height
+            val width = painter.intrinsicSize.width + 10// + dpToSp(8.dp, context)
+            val newWidth = MaterialTheme.typography.body1.fontSize * (width / height)
+
+            key to InlineTextContent(
+                Placeholder(
+                    newWidth,
+                    MaterialTheme.typography.body1.fontSize,
+                    imageAlign
+                ),
+                children = {
+                    Image(
+                        modifier = value.modifier,
+                        painter = painter,
+                        contentDescription = stringResource(
+                            value.contentDescription
+                        ),
+                        colorFilter = value.colorFilter
+                    )
+                }
+            )
+        }
+
+        val annotatedText = annotatedStringResource(html, imageGetter, urlSpanStyle)
+
+        for (i in 0 until 100) {
+            if (annotatedText.getStringAnnotations(LINK_TAG, i, i).isNotEmpty()) {
+                Log.e(
+                    "MLB",
+                    "$i is Annotated"
                 )
+            }
+        }
+
+        //Pay in 0 interest-free payments of A$12.74 with <img/> (i)
+        //         1         2         3         4         5         6
+        //123456789012345678901234567890123456789012345678901234567890
+
+        ClickableText(
+            annotatedText,
+            modifier = modifier
+                .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
+            inlineContent = inlineContentMap,
+            color = color,
+            style = style,
+            onClick = {
+                if (enabled) {
+                    //Position is the position of the tag in the string
+                    Log.e("MLB", "Clicked on position: $it")
+                    annotatedText
+                        .getStringAnnotations(LINK_TAG, it, it)
+                        .firstOrNull()?.let { annotation ->
+                            Log.e("MLB", "Clicked on link for position: $it")
+                            val openURL = Intent(Intent.ACTION_VIEW)
+                            openURL.data = Uri.parse(annotation.item)
+                            context.startActivity(openURL)
+                        }
+                }
             }
         )
     }
+}
 
-    val annotatedText = annotatedStringResource(html, imageGetter, urlSpanStyle)
+fun dpToPx(dp: Dp, context: Context): Int {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        dp.value,
+        context.resources.displayMetrics
+    ).toInt()
+}
 
-    val context = LocalContext.current
-    ClickableText(
-        annotatedText,
-        modifier = modifier
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item,
-        inlineContent = inlineContentMap,
-        color = color,
-        style = style,
-        onClick = {
-            if (enabled) {
-                annotatedText
-                    .getStringAnnotations(LINK_TAG, it, it)
-                    .firstOrNull()?.let { annotation ->
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(annotation.item)
-                        context.startActivity(openURL)
-                    }
-            }
-        }
-    )
+private fun dpToSp(dp: Dp, context: Context): Float {
+    return dpToPx(dp, context) / context.resources.displayMetrics.scaledDensity
 }
 
 /**
@@ -224,8 +261,37 @@ private fun ClickableText(
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
     val pressIndicator = Modifier.pointerInput(onClick) {
         detectTapGestures { pos ->
+            var nonPlaceholderPosition = pos
+            // If the position is in the bounds of a placeholder set the position to the end of the placeholder.
+            layoutResult.value?.placeholderRects?.filterNotNull()?.firstOrNull() {
+                Log.e(
+                    "MLB",
+                    "pos X: ${pos.x}, pos Y: ${pos.y}, " +
+                        "top left: ${it.topLeft}, bottom right: ${it.bottomRight}," +
+                        " filter: ${pos.x > it.topLeft.x && pos.x < it.topRight.x}"
+                )
+
+                pos.x > it.topLeft.x && pos.x < it.topRight.x
+            }?.let {
+                nonPlaceholderPosition = it.topRight.copy(
+                    x = it.topRight.x + 0.1f
+                )
+            }
+            Log.e(
+                "MLB",
+                "nonPlaceholderPosition: $nonPlaceholderPosition original position: $pos"
+            )
+
             layoutResult.value?.let { layoutResult ->
-                onClick(layoutResult.getOffsetForPosition(pos))
+                Log.e(
+                    "MLB",
+                    "nonPlaceholderPosition: ${
+                        layoutResult.getOffsetForPosition(
+                            nonPlaceholderPosition
+                        )
+                    } original position: ${layoutResult.getOffsetForPosition(pos)}"
+                )
+                onClick(layoutResult.getOffsetForPosition(nonPlaceholderPosition)-1)
             }
         }
     }

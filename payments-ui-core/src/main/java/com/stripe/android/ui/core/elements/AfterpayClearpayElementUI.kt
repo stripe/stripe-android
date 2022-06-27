@@ -2,10 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +39,7 @@ fun AfterpayClearpayElementUI(
     AfterpayClearpayElementUINew(enabled = enabled, element = element)
     AfterpayClearpayElementUIOriginal(enabled = enabled, element = element)
 }
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AfterpayClearpayElementUINew(
@@ -67,7 +66,7 @@ fun AfterpayClearpayElementUINew(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .padding(end = 4.dp)
+//                    .padding(end = 8.dp)
             )
         ),
         modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.res.Resources
+import android.icu.lang.UCharacter
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -28,6 +29,7 @@ data class AfterpayClearpayHeaderElement(
             "eur" -> 3
             else -> 4
         }
+
         return resources.getString(
             R.string.afterpay_clearpay_message
         ).replace("<num_installments/>", numInstallments.toString())
@@ -57,13 +59,15 @@ data class AfterpayClearpayHeaderElement(
                     amount.currencyCode
                 )
             )
+            // The no break space will keep the afterpay logo and (i) on the same line.
             .replace(
                 "<img/>",
-                "<img/><a href=\"$infoUrl\"><b>ⓘ</b></a>"
+                "<img/>$NO_BREAK_SPACE<a href=\"$infoUrl\"><b>ⓘ</b></a>"
             )
     }
 
     companion object {
         const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
+        const val NO_BREAK_SPACE = "\u00A0"
     }
 }
