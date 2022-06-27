@@ -252,15 +252,11 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    override fun getShippingAddress(): ShippingAddress? {
+    private fun getShippingAddress(): ShippingAddress? {
         return viewModel.shippingAddress
     }
 
-    @Suppress("UNREACHABLE_CODE")
-    override fun presentShippingAddress() {
-        // no-op until shipping element is ready
-        return
-
+    private fun presentShippingAddress() {
         val initData = runCatching {
             viewModel.initData
         }.getOrElse {
