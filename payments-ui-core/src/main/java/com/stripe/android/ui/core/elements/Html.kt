@@ -48,7 +48,11 @@ private const val LINK_TAG = "URL"
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddableImage(
     @DrawableRes val id: Int,
-    @StringRes val contentDescription: Int
+    @StringRes val contentDescription: Int,
+    val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null,
+    val modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight(),
 )
 
 /**
@@ -64,7 +68,9 @@ fun Html(
     color: Color,
     style: TextStyle,
     modifier: Modifier = Modifier,
-    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+    enabled: Boolean = true,
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
+    imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
 ) {
     val inlineContentMap = imageGetter.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
@@ -76,17 +82,16 @@ fun Html(
             Placeholder(
                 newWidth,
                 MaterialTheme.typography.body1.fontSize,
-                PlaceholderVerticalAlign.AboveBaseline
+                imageAlign
             ),
             children = {
                 Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
+                    modifier = value.modifier,
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
-                    )
+                    ),
+                    colorFilter = value.colorFilter
                 )
             }
         )
@@ -103,13 +108,15 @@ fun Html(
         color = color,
         style = style,
         onClick = {
-            annotatedText
-                .getStringAnnotations(LINK_TAG, it, it)
-                .firstOrNull()?.let { annotation ->
-                    val openURL = Intent(Intent.ACTION_VIEW)
-                    openURL.data = Uri.parse(annotation.item)
-                    context.startActivity(openURL)
-                }
+            if (enabled) {
+                annotatedText
+                    .getStringAnnotations(LINK_TAG, it, it)
+                    .firstOrNull()?.let { annotation ->
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(annotation.item)
+                        context.startActivity(openURL)
+                    }
+            }
         }
     )
 }
