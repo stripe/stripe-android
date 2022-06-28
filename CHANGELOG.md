@@ -7,8 +7,13 @@
 * [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/Clearpay support for FR, ES countries and EUR currencies
 
 
+### PaymentSheet
+* [Fixed][5215](https://github.com/stripe/stripe-android/pull/5215) Fix issue with us_bank_account appearing in payment sheet when Financial Connections SDK is not available
+
 ## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
+
+* [CHANGED] [5162](https://github.com/stripe/stripe-android/pull/5162) Upgrade `compileSdkVersion` to 32, Kotlin version to 1.6.21, Android Gradle plugin to 7.2.1.
 
 ### Financial Connections
 * [ADDED][5117](https://github.com/stripe/stripe-android/pull/5117) Adds rememberFinancialConnectionsSheet and rememberFinancialConnectionsSheetForToken.

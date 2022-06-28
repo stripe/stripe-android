@@ -8,6 +8,8 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -43,7 +45,9 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository @Inject constructor(
-    resources: Resources?
+    resources: Resources?,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+        DefaultIsFinancialConnectionsAvailable()
 ) {
     private val lpmSerializer: LpmSerializer = LpmSerializer()
 
@@ -66,6 +70,12 @@ class LpmRepository @Inject constructor(
         val parsedSupportedPaymentMethod = parseLpms(inputStream)
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
+            ?.toMutableList()
+
+        parsedSupportedPaymentMethod?.removeAll {
+            !isFinancialConnectionsAvailable() &&
+                it.code == PaymentMethod.Type.USBankAccount.code
+        }
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
         codeToSupportedPaymentMethod =
