@@ -59,7 +59,11 @@ fun AfterpayClearpayElementUINew(
                 } else {
                     R.drawable.stripe_ic_afterpay_logo
                 },
-                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+                if (isClearpay()) {
+                    R.string.stripe_paymentsheet_payment_method_clearpay
+                } else {
+                    R.string.stripe_paymentsheet_payment_method_afterpay
+                },
                 colorFilter = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
                     null
                 } else {

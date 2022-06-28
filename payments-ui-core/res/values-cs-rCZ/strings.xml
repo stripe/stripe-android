@@ -80,8 +80,6 @@
   <string name="stripe_pay_button_amount">Zaplatit %s</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informace o kartě</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Přímé inkasa AU BECS</string>
   <!-- Title for credit card number entry field -->

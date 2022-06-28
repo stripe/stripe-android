@@ -80,8 +80,6 @@
   <string name="stripe_pay_button_amount">ชำระ %s</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">ข้อมูลบัตร</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">การหักบัญชีอัตโนมัติแบบ BECS ในออสเตรเลีย</string>
   <!-- Title for credit card number entry field -->

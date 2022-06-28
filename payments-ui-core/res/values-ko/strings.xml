@@ -38,6 +38,8 @@
   <string name="address_label_suburb">교외</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">마을 또는 면/리</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">청구 주소</string>
   <!-- Used when a required field is blank and submit is clicked. -->
@@ -80,8 +82,6 @@
   <string name="stripe_pay_button_amount">%s 결제</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 자동 이체</string>
   <!-- Title for credit card number entry field -->
