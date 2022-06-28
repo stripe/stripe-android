@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LongParameterList")
 internal class GooglePayLauncherViewModel(
     private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
