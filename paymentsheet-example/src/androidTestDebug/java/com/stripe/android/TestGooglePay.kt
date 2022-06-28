@@ -71,6 +71,7 @@ class TestGooglePay {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
         authorizationAction = AuthorizeAction.Authorize,
+        merchantCountryCode = "GB",
     )
 
     @Test
@@ -89,6 +90,7 @@ class TestGooglePay {
             testParameters.copy(
                 paymentMethod = LpmRepository.HardcodedCard,
                 currency = Currency.USD,
+                merchantCountryCode = "US",
                 intentType = IntentType.Setup, // This means only card will show
             ),
             R.string.stripe_paymentsheet_or_pay_using

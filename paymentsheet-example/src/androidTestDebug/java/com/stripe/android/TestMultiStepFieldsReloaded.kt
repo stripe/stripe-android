@@ -58,6 +58,7 @@ class TestMultiStepFieldsReloaded {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
         authorizationAction = AuthorizeAction.Authorize,
+        merchantCountryCode = "GB",
     )
 
     @Before
@@ -153,6 +154,7 @@ class TestMultiStepFieldsReloaded {
         testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("afterpay_clearpay")!!,
+                merchantCountryCode = "US",
                 currency = Currency.USD,
                 shipping = Shipping.On
             )
@@ -164,6 +166,7 @@ class TestMultiStepFieldsReloaded {
         testDriver.confirmCustom(
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("affirm")!!,
+                merchantCountryCode = "US",
                 currency = Currency.USD,
             )
         )
@@ -175,6 +178,7 @@ class TestMultiStepFieldsReloaded {
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("au_becs_debit")!!,
                 delayed = DelayedPMs.On,
+                merchantCountryCode = "AU",
                 currency = Currency.AUD,
             )
         )
