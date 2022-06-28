@@ -1,6 +1,11 @@
 # CHANGELOG
 
 ## X.X.X
+* This release adds additional support for Afterpay/Clearpay in PaymentSheet.
+
+### PaymentSheet
+* [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/clearpay support for FR, ES countries and EUR currencies
+
 
 ## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
