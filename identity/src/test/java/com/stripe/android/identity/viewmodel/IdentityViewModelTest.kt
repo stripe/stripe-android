@@ -95,6 +95,8 @@ internal class IdentityViewModelTest {
         mock(),
         mock(),
         mock(),
+        mock(),
+        mock(),
         mock()
     )
 

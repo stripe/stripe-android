@@ -32,7 +32,6 @@ import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -156,7 +155,7 @@ internal abstract class IdentityCameraScanFragment(
                             idDetectorModelFile = pageAndModelFiles.idDetectorFile,
                             faceDetectorModelFile = pageAndModelFiles.faceDetectorFile
                         )
-                        lifecycleScope.launch(Dispatchers.Main) {
+                        lifecycleScope.launch(identityViewModel.uiContext) {
                             onCameraReady()
                         }
                     }

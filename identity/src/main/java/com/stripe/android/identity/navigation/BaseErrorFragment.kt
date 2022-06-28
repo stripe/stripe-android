@@ -13,7 +13,6 @@ import com.google.android.material.button.MaterialButton
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -49,7 +48,7 @@ internal abstract class BaseErrorFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_ERROR)
         }
         identityViewModel.sendAnalyticsRequest(

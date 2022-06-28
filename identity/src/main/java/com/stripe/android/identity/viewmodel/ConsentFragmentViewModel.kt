@@ -6,15 +6,17 @@ import android.widget.ImageView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 internal class ConsentFragmentViewModel(
     private val identityIO: IdentityIO,
-    private val identityRepository: IdentityRepository
+    private val identityRepository: IdentityRepository,
+    @IOContext private val workContext: CoroutineContext
 ) : ViewModel() {
 
     private fun Uri.isRemote() = this.scheme == "https" || this.scheme == "http"
@@ -23,7 +25,7 @@ internal class ConsentFragmentViewModel(
         logoUri: Uri,
         imageView: ImageView
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(workContext) {
             runCatching {
                 imageView.setImageURI(
                     if (logoUri.isRemote()) {
@@ -42,13 +44,15 @@ internal class ConsentFragmentViewModel(
 
     internal class ConsentFragmentViewModelFactory @Inject constructor(
         private val identityIO: IdentityIO,
-        private val identityRepository: IdentityRepository
+        private val identityRepository: IdentityRepository,
+        @IOContext private val workContext: CoroutineContext
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ConsentFragmentViewModel(
                 identityIO,
-                identityRepository
+                identityRepository,
+                workContext
             ) as T
         }
     }
