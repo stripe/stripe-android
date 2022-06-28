@@ -4,7 +4,7 @@
 * This release adds additional support for Afterpay/Clearpay in PaymentSheet.
 
 ### PaymentSheet
-* [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/clearpay support for FR, ES countries and EUR currencies
+* [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/Clearpay support for FR, ES countries and EUR currencies
 
 
 ## 20.6.2 - 2022-06-23
