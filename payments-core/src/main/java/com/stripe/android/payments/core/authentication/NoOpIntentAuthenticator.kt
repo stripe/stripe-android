@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 @JvmSuppressWildcards
 internal class NoOpIntentAuthenticator @Inject constructor(
-    private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
+    private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
 ) : PaymentAuthenticator<StripeIntent> {
 
     override suspend fun authenticate(

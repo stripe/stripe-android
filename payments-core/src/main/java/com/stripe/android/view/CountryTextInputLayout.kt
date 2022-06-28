@@ -47,7 +47,8 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
     @LayoutRes
     private var itemLayoutRes: Int = DEFAULT_ITEM_LAYOUT
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // For paymentsheet
     @VisibleForTesting
     val countryAutocomplete: AutoCompleteTextView
 
@@ -84,7 +85,8 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // For paymentsheet
     @JvmSynthetic
     var countryCodeChangeCallback: (CountryCode) -> Unit = {}
 
@@ -252,7 +254,6 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
     @VisibleForTesting
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun updateUiForCountryEntered(countryCode: CountryCode) {
-
         // If the user-typed country matches a valid country, update the selected country
         // Otherwise, revert back to last valid country if country is not recognized.
         val displayCountry = CountryUtils.getCountryByCode(countryCode, getLocale())?.let {

@@ -38,16 +38,16 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     constructor(
         context: Context,
         publishableKey: String,
-        defaultProductUsageTokens: Set<String> = emptySet(),
+        defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
         context,
         { publishableKey },
-        defaultProductUsageTokens,
+        defaultProductUsageTokens
     )
 
     internal constructor(
         context: Context,
-        publishableKeyProvider: Provider<String>,
+        publishableKeyProvider: Provider<String>
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
@@ -60,7 +60,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal constructor(
         context: Context,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
@@ -83,7 +83,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createTokenCreation(
         productUsageTokens: Set<String>,
-        tokenType: Token.Type,
+        tokenType: Token.Type
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.TokenCreate,
@@ -95,7 +95,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
         paymentMethodCode: PaymentMethodCode?,
-        productUsageTokens: Set<String>,
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentMethodCreate,
@@ -107,7 +107,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createSourceCreation(
         @Source.SourceType sourceType: String,
-        productUsageTokens: Set<String> = emptySet(),
+        productUsageTokens: Set<String> = emptySet()
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SourceCreate,
@@ -119,7 +119,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAddSource(
         productUsageTokens: Set<String> = emptySet(),
-        @Source.SourceType sourceType: String,
+        @Source.SourceType sourceType: String
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerAddSource,
@@ -130,7 +130,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDeleteSource(
-        productUsageTokens: Set<String>,
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerDeleteSource,
@@ -140,7 +140,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createAttachPaymentMethod(
-        productUsageTokens: Set<String>,
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerAttachPaymentMethod,
@@ -160,7 +160,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentIntentConfirmation(
-        paymentMethodType: String? = null,
+        paymentMethodType: String? = null
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentIntentConfirm,
@@ -170,7 +170,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createSetupIntentConfirmation(
-        paymentMethodType: String?,
+        paymentMethodType: String?
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SetupIntentConfirm,

@@ -12,7 +12,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor(
     activity: FragmentActivity,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
+    defStyleAttr: Int = 0
 ) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
     private var selectedPosition: Int? = null
 

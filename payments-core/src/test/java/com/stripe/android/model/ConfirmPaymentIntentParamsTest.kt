@@ -389,7 +389,7 @@ class ConfirmPaymentIntentParamsTest {
                 "payment_method_options" to mapOf(
                     PaymentMethod.Type.WeChatPay.code to mapOf(
                         PaymentMethodOptionsParams.WeChatPay.PARAM_CLIENT to "android",
-                        PaymentMethodOptionsParams.WeChatPay.PARAM_APP_ID to appId,
+                        PaymentMethodOptionsParams.WeChatPay.PARAM_APP_ID to appId
                     )
                 ),
                 "client_secret" to CLIENT_SECRET,
@@ -413,7 +413,7 @@ class ConfirmPaymentIntentParamsTest {
                 "payment_method" to "pm_123",
                 "payment_method_options" to mapOf(
                     "us_bank_account" to mapOf(
-                        "setup_future_usage" to "off_session",
+                        "setup_future_usage" to "off_session"
                     )
                 ),
                 "client_secret" to CLIENT_SECRET,
@@ -510,7 +510,7 @@ class ConfirmPaymentIntentParamsTest {
                                 "infer_from_client" to true
                             )
                         )
-                    ),
+                    )
                 )
             )
     }
@@ -525,7 +525,7 @@ class ConfirmPaymentIntentParamsTest {
             .isEqualTo(
                 mapOf(
                     "client_secret" to CLIENT_SECRET,
-                    "use_stripe_sdk" to false,
+                    "use_stripe_sdk" to false
                 )
             )
     }

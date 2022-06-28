@@ -29,7 +29,8 @@ class GooglePayLauncherActivityTest {
     @Test
     fun `start without args should finish with Error result`() {
         ActivityScenario.launch(
-            GooglePayLauncherActivity::class.java, Bundle.EMPTY
+            GooglePayLauncherActivity::class.java,
+            Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)

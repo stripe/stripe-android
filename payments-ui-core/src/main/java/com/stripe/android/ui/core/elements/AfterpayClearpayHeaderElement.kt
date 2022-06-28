@@ -21,7 +21,6 @@ data class AfterpayClearpayHeaderElement(
 
     val infoUrl = url.format(Locale.current.region.lowercase())
 
-
     fun getLabelOriginal(resources: Resources): String {
         val numInstallments = when (amount.currencyCode.lowercase()) {
             "eur" -> 3
@@ -32,7 +31,8 @@ data class AfterpayClearpayHeaderElement(
             R.string.afterpay_clearpay_message
         ).replace("<num_installments/>", numInstallments.toString())
             .replace(
-                "<installment_price/>", CurrencyFormatter.format(
+                "<installment_price/>",
+                CurrencyFormatter.format(
                     amount.value / numInstallments,
                     amount.currencyCode
                 )
@@ -52,7 +52,8 @@ data class AfterpayClearpayHeaderElement(
             R.string.afterpay_clearpay_message
         ).replace("<num_installments/>", numInstallments.toString())
             .replace(
-                "<installment_price/>", CurrencyFormatter.format(
+                "<installment_price/>",
+                CurrencyFormatter.format(
                     amount.value / numInstallments,
                     amount.currencyCode
                 )

@@ -366,7 +366,7 @@ class PaymentAuthWebViewClientTest {
             isPageLoaded,
             clientSecret,
             returnUrl,
-            activityStarter,
+            activityStarter
         ) { error ->
             error?.let(onAuthCompletedErrors::add)
             activityFinished = true

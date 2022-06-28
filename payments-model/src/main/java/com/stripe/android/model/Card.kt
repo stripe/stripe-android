@@ -10,7 +10,9 @@ import kotlinx.parcelize.Parcelize
  * A representation of a [Card API object](https://stripe.com/docs/api/cards/object).
  */
 @Parcelize
-data class Card @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+data class Card
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Two-digit number representing the card’s expiration month.
      *

@@ -9,7 +9,7 @@ import com.stripe.android.financialconnections.moreFinancialConnectionsAccountLi
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
 internal class FakeFinancialConnectionsRepository(
-    private val manifest: FinancialConnectionsSessionManifest,
+    private val manifest: FinancialConnectionsSessionManifest
 ) : FinancialConnectionsRepository {
 
     var getFinancialConnectionsSessionResultProvider: () -> FinancialConnectionsSession =

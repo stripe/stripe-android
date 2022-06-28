@@ -9,7 +9,7 @@ import android.content.pm.PackageManager
  */
 internal data class Settings(
     val backendUrl: String,
-    val publishableKey: String,
+    val publishableKey: String
 ) {
     constructor(context: Context) : this(
         getMetadata(context, METADATA_KEY_BACKEND_URL_KEY),

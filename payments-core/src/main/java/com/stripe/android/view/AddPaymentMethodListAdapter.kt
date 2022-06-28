@@ -14,7 +14,7 @@ import com.stripe.android.model.BankStatuses
 internal class AddPaymentMethodListAdapter(
     val themeConfig: ThemeConfig,
     val items: List<Bank>,
-    val itemSelectedCallback: (Int) -> Unit,
+    val itemSelectedCallback: (Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal var bankStatuses: BankStatuses? = null

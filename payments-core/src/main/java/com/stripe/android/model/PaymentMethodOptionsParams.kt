@@ -60,11 +60,11 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class Blik(
-        var code: String,
+        var code: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
-                PARAM_CODE to code,
+                PARAM_CODE to code
             )
         }
 
@@ -75,7 +75,7 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class WeChatPay(
-        var appId: String,
+        var appId: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
@@ -96,7 +96,7 @@ sealed class PaymentMethodOptionsParams(
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
-                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code,
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
             )
         }
 

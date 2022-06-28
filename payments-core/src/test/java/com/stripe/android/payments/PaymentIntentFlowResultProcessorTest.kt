@@ -69,7 +69,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 .isEqualTo(
                     PaymentIntentResult(
                         intent = PaymentIntentFixtures.CANCELLED,
-                        outcomeFromFlow = StripeIntentResult.Outcome.CANCELED,
+                        outcomeFromFlow = StripeIntentResult.Outcome.CANCELED
                     )
                 )
         }
@@ -90,7 +90,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             val paymentIntentResult = processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
             )
 
@@ -132,7 +132,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             val paymentIntentResult = processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                 )
             )
 
@@ -151,7 +151,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 .isEqualTo(
                     PaymentIntentResult(
                         intent = PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS,
-                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
                     )
                 )
         }
@@ -173,7 +173,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 processor.processResult(
                     PaymentFlowResult.Unvalidated(
                         clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                     )
                 )
             }

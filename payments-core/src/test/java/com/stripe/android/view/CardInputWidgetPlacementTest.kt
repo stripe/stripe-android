@@ -20,7 +20,7 @@ class CardInputWidgetPlacementTest {
         dateEndTouchBufferLimit = 0,
         cvcStartPosition = 0,
         cvcEndTouchBufferLimit = 0,
-        postalCodeStartPosition = 0,
+        postalCodeStartPosition = 0
     )
 
     private val placementPeekCardWithPostalCode = CardInputWidgetPlacement(

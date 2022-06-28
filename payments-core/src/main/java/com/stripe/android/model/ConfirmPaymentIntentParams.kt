@@ -538,7 +538,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 paymentMethodId = paymentMethodId,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card(moto = true),
                 savePaymentMethod = false,
-                useStripeSdk = true,
+                useStripeSdk = true
             )
         }
     }

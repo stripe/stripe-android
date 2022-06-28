@@ -164,7 +164,7 @@ class WeChatPayAuthActivityTest {
         activityResult: Instrumentation.ActivityResult,
         flowOutcome: Int,
         exceptionMessage: String? = null,
-        hasClientSecret: Boolean = false,
+        hasClientSecret: Boolean = false
     ) {
         assertEquals(Activity.RESULT_OK, activityResult.resultCode)
         val flowResult = PaymentFlowResult.Unvalidated.fromIntent(activityResult.resultData)

@@ -56,7 +56,7 @@ internal class FinancialConnectionsSheetActivity :
                     is OpenAuthFlowWithUrl -> startForResult.launch(
                         CreateBrowserIntentForUrl(
                             context = this,
-                            uri = Uri.parse(viewEffect.url),
+                            uri = Uri.parse(viewEffect.url)
                         )
                     )
                     is FinishWithResult -> finishWithResult(

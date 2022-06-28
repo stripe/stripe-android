@@ -43,7 +43,9 @@ internal class CardDisplayTextFactory internal constructor(
         val last4End = last4Start + last4.length
         val brandStart = cardEndingIn.indexOf(brandText)
         val brandEnd = brandStart + brandText.length
+
         @ColorInt val textColor = themeConfig.getTextColor(isSelected)
+
         @ColorInt val lightTextColor = themeConfig.getTextAlphaColor(isSelected)
 
         val displayString = SpannableString(cardEndingIn)

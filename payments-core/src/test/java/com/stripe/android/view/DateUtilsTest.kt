@@ -137,7 +137,7 @@ class DateUtilsTest {
     private companion object {
         fun createCalendar(
             year: Int? = null,
-            month: Int? = null,
+            month: Int? = null
         ): Calendar {
             return Calendar.getInstance().also { calendar ->
                 if (year != null) {

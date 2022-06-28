@@ -21,7 +21,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
             FinancialConnectionsSheetResult.Completed(
-                financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts,
+                financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts
             )
         )
 

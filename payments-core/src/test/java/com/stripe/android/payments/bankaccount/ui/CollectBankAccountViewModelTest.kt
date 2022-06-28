@@ -255,7 +255,7 @@ class CollectBankAccountViewModelTest {
                 forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    linkedAccountSessionId = linkedAccountSessionId,
+                    linkedAccountSessionId = linkedAccountSessionId
                 )
             }.doReturn(result)
         }
@@ -269,7 +269,7 @@ class CollectBankAccountViewModelTest {
                 forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    linkedAccountSessionId = linkedAccountSessionId,
+                    linkedAccountSessionId = linkedAccountSessionId
                 )
             }.doReturn(result)
         }

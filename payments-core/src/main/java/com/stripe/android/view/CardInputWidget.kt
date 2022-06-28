@@ -698,7 +698,8 @@ class CardInputWidget @JvmOverloads constructor(
             )
 
             errorColorInt = getColor(
-                R.styleable.CardInputView_cardTextErrorColor, errorColorInt
+                R.styleable.CardInputView_cardTextErrorColor,
+                errorColorInt
             )
             cardHintText = getString(R.styleable.CardInputView_cardHintText)
             shouldRequestFocus = getBoolean(

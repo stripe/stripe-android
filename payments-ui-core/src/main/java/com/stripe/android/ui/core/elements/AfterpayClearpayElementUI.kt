@@ -96,7 +96,7 @@ fun AfterpayClearpayElementUIOriginal(
             Modifier
                 .padding(end = 4.dp),
             color = MaterialTheme.paymentsColors.subtitle,
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.h6
         )
         Image(
             painter = painterResource(

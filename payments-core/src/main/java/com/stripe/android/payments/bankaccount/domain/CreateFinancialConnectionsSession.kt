@@ -19,7 +19,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
-        customerEmail: String?,
+        customerEmail: String?
     ): Result<FinancialConnectionsSession> = kotlin.runCatching {
         stripeRepository.createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
@@ -39,7 +39,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
-        customerEmail: String?,
+        customerEmail: String?
     ): Result<FinancialConnectionsSession> = kotlin.runCatching {
         stripeRepository.createSetupIntentFinancialConnectionsSession(
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,

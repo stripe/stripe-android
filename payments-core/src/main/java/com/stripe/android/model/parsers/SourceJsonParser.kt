@@ -188,6 +188,7 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         private fun fromSourceJson(jsonObject: JSONObject): Source {
             @Source.SourceType val typeRaw = optString(jsonObject, FIELD_TYPE)
                 ?: Source.SourceType.UNKNOWN
+
             @Source.SourceType val type = asSourceType(typeRaw)
 
             // Until we have models for all types, keep the original hash and the

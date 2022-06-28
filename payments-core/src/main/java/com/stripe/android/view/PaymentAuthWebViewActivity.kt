@@ -38,7 +38,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         PaymentAuthWebViewActivityViewModel.Factory(
             application,
             logger,
-            requireNotNull(_args),
+            requireNotNull(_args)
         )
     }
 

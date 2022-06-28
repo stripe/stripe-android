@@ -890,7 +890,8 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.CARD,
                 typeData = TypeData.Masterpass(
-                    transactionId, cartId
+                    transactionId,
+                    cartId
                 )
             )
         }
@@ -978,7 +979,7 @@ data class SourceParams internal constructor(
             /**
              * The [cvc] for this card
              */
-            val cvc: String? = null,
+            val cvc: String? = null
         ) : TypeData() {
             override val type: String get() = SourceType.CARD
 

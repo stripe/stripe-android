@@ -19,7 +19,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
     suspend fun forPaymentIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
-        clientSecret: String,
+        clientSecret: String
     ): Result<PaymentIntent> = kotlin.runCatching {
         stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
             financialConnectionsSessionId = linkedAccountSessionId,
@@ -38,7 +38,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
     suspend fun forSetupIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
-        clientSecret: String,
+        clientSecret: String
     ): Result<SetupIntent> = kotlin.runCatching {
         stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
             financialConnectionsSessionId = linkedAccountSessionId,

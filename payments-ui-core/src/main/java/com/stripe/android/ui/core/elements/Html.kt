@@ -108,7 +108,7 @@ fun Html(
         style = style,
         onClick = {
             if (enabled) {
-                //Position is the position of the tag in the string
+                // Position is the position of the tag in the string
                 annotatedText
                     .getStringAnnotations(LINK_TAG, it, it)
                     .firstOrNull()?.let { annotation ->

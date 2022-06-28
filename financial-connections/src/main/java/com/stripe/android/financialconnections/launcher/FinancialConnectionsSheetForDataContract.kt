@@ -36,7 +36,7 @@ internal class FinancialConnectionsSheetForDataContract :
             is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetResult.Canceled
             is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetResult.Failed(error)
             is FinancialConnectionsSheetActivityResult.Completed -> FinancialConnectionsSheetResult.Completed(
-                financialConnectionsSession = financialConnectionsSession,
+                financialConnectionsSession = financialConnectionsSession
             )
         }
 }

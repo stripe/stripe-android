@@ -68,7 +68,7 @@ internal object FinancialConnectionsSheetModule {
     @Singleton
     internal fun provideAnalyticsRequestFactory(
         application: Application,
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
+        @Named(PUBLISHABLE_KEY) publishableKey: String
     ): AnalyticsRequestFactory = AnalyticsRequestFactory(
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),

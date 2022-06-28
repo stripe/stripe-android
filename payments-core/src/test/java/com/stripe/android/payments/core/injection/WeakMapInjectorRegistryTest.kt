@@ -24,7 +24,6 @@ class WeakMapInjectorRegistryTest {
 
     @Test
     fun verifyRegistryRetrievesCorrectObject() {
-
         val injector1 = TestInjector()
         val keyForInjector1 =
             WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))

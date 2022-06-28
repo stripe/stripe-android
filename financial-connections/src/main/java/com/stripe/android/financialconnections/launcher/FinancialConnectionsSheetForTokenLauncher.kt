@@ -45,13 +45,13 @@ internal class FinancialConnectionsSheetForTokenLauncher(
             registry
         ) {
             callback.onFinancialConnectionsSheetResult(it)
-        },
+        }
     )
 
     override fun present(configuration: FinancialConnectionsSheet.Configuration) {
         activityResultLauncher.launch(
             FinancialConnectionsSheetActivityArgs.ForToken(
-                configuration,
+                configuration
             )
         )
     }

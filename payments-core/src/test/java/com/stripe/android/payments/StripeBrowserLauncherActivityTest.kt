@@ -19,7 +19,8 @@ class StripeBrowserLauncherActivityTest {
     @Test
     fun `start with no args should finish with no setResult`() {
         ActivityScenario.launch(
-            StripeBrowserLauncherActivity::class.java, Bundle.EMPTY
+            StripeBrowserLauncherActivity::class.java,
+            Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)

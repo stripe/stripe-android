@@ -39,7 +39,7 @@ internal abstract class Stripe3ds2TransactionModule {
         fun provideStripeThreeDs2Service(
             context: Context,
             @Named(ENABLE_LOGGING) enableLogging: Boolean,
-            @IOContext workContext: CoroutineContext,
+            @IOContext workContext: CoroutineContext
         ): StripeThreeDs2Service {
             return StripeThreeDs2ServiceImpl(context, enableLogging, workContext)
         }

@@ -13,7 +13,7 @@ import java.security.InvalidParameterException
  * instances of [com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher].
  */
 internal sealed class FinancialConnectionsSheetActivityArgs constructor(
-    open val configuration: FinancialConnectionsSheet.Configuration,
+    open val configuration: FinancialConnectionsSheet.Configuration
 ) : Parcelable {
 
     @Parcelize

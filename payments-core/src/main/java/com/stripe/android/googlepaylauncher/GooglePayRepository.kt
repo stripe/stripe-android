@@ -40,7 +40,7 @@ internal class DefaultGooglePayRepository(
     internal constructor(
         context: Context,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
-        logger: Logger,
+        logger: Logger
     ) : this(
         context.applicationContext,
         googlePayConfig.environment,

@@ -103,7 +103,8 @@ constructor(
             DefaultFraudDetectionDataRepository(context).refresh()
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // for paymentsheet
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        // for paymentsheet
         @JvmSynthetic
         fun clearInstance() {
             instance = null

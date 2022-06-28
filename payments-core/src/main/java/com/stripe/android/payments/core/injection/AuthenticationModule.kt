@@ -66,7 +66,7 @@ internal abstract class AuthenticationModule {
         @Provides
         @Singleton
         fun providePaymentRelayStarterFactory(
-            lazyRegistry: Lazy<DefaultPaymentAuthenticatorRegistry>,
+            lazyRegistry: Lazy<DefaultPaymentAuthenticatorRegistry>
         ): (AuthActivityStarterHost) -> PaymentRelayStarter =
             { host: AuthActivityStarterHost ->
                 lazyRegistry.get().paymentRelayLauncher?.let {

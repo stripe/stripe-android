@@ -168,7 +168,7 @@ suspend fun Stripe.createSource(
     AuthenticationException::class,
     InvalidRequestException::class,
     APIConnectionException::class,
-    APIException::class,
+    APIException::class
 )
 suspend fun Stripe.createAccountToken(
     accountParams: AccountParams,
@@ -207,7 +207,7 @@ suspend fun Stripe.createAccountToken(
     AuthenticationException::class,
     InvalidRequestException::class,
     APIConnectionException::class,
-    APIException::class,
+    APIException::class
 )
 suspend fun Stripe.createBankAccountToken(
     bankAccountTokenParams: BankAccountTokenParams,
@@ -246,7 +246,7 @@ suspend fun Stripe.createBankAccountToken(
     AuthenticationException::class,
     InvalidRequestException::class,
     APIConnectionException::class,
-    APIException::class,
+    APIException::class
 )
 suspend fun Stripe.createPiiToken(
     personalId: String,
@@ -325,7 +325,7 @@ suspend fun Stripe.createCardToken(
     AuthenticationException::class,
     InvalidRequestException::class,
     APIConnectionException::class,
-    APIException::class,
+    APIException::class
 )
 suspend fun Stripe.createCvcUpdateToken(
     @Size(min = 3, max = 4) cvc: String,
@@ -365,7 +365,7 @@ suspend fun Stripe.createCvcUpdateToken(
     AuthenticationException::class,
     InvalidRequestException::class,
     APIConnectionException::class,
-    APIException::class,
+    APIException::class
 )
 suspend fun Stripe.createPersonToken(
     params: PersonTokenParams,
@@ -411,7 +411,7 @@ suspend fun Stripe.createPersonToken(
 suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
-    stripeAccountId: String? = this.stripeAccountId,
+    stripeAccountId: String? = this.stripeAccountId
 ): StripeFile = runApiRequest {
     stripeRepository.createFile(
         fileParams,
@@ -617,7 +617,7 @@ suspend fun Stripe.confirmSetupIntent(
  */
 suspend fun Stripe.confirmWeChatPayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-    stripeAccountId: String? = this.stripeAccountId,
+    stripeAccountId: String? = this.stripeAccountId
 ): WeChatPayNextAction {
     return runCatching {
         paymentController.confirmWeChatPay(
@@ -699,11 +699,11 @@ private inline fun <reified ApiObject : StripeModel> runApiRequest(
     AuthenticationException::class,
     InvalidRequestException::class,
     APIConnectionException::class,
-    APIException::class,
+    APIException::class
 )
 suspend fun Stripe.getPaymentIntentResult(
     requestCode: Int,
-    data: Intent,
+    data: Intent
 ): PaymentIntentResult {
     return runApiRequest(
         isPaymentResult(
@@ -735,7 +735,7 @@ suspend fun Stripe.getPaymentIntentResult(
 )
 suspend fun Stripe.getSetupIntentResult(
     requestCode: Int,
-    data: Intent,
+    data: Intent
 ): SetupIntentResult {
     return runApiRequest(
         isSetupResult(
@@ -766,7 +766,7 @@ suspend fun Stripe.getSetupIntentResult(
 )
 suspend fun Stripe.getAuthenticateSourceResult(
     requestCode: Int,
-    data: Intent,
+    data: Intent
 ): Source {
     return runApiRequest(
         isAuthenticateSourceResult(
@@ -832,7 +832,7 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
         secondAmount = secondAmount,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
-            stripeAccount = stripeAccountId,
+            stripeAccount = stripeAccountId
         )
     )
 }

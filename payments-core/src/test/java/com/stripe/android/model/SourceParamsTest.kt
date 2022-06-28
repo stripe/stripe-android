@@ -66,7 +66,7 @@ class SourceParamsTest {
             requireNotNull(params.owner)
         ).isEqualTo(
             SourceParams.OwnerParams(
-                name = "Hari Seldon",
+                name = "Hari Seldon"
             )
         )
     }

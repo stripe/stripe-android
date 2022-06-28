@@ -20,7 +20,7 @@ class KlarnaSourceParamsTest {
                 "purchase_country" to "UK",
                 "owner_dob_day" to "01",
                 "owner_dob_month" to "01",
-                "owner_dob_year" to "1990",
+                "owner_dob_year" to "1990"
             )
         )
     }
@@ -40,7 +40,7 @@ class KlarnaSourceParamsTest {
                 "purchase_country" to "UK",
                 "owner_dob_day" to "11",
                 "owner_dob_month" to "12",
-                "owner_dob_year" to "1990",
+                "owner_dob_year" to "1990"
             )
         )
     }

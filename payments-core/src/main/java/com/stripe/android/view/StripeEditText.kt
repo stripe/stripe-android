@@ -266,7 +266,8 @@ open class StripeEditText @JvmOverloads constructor(
 
     override fun getOnFocusChangeListener() = externalFocusChangeListener
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // For paymentsheet
     @VisibleForTesting
     fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
 

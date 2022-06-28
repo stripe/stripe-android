@@ -344,7 +344,8 @@ constructor(
         }
 
         companion object {
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            // For paymentsheet
             @JvmSynthetic
             fun fromCode(code: String?): Type? {
                 return values().firstOrNull { it.code == code }
@@ -929,7 +930,7 @@ constructor(
          *
          * [us_bank_account.routingNumber](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
          */
-        @JvmField val routingNumber: String?,
+        @JvmField val routingNumber: String?
     ) : TypeData() {
         override val type: Type get() = Type.USBankAccount
 

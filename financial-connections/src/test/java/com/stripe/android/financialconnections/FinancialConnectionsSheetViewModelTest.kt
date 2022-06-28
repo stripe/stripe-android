@@ -295,12 +295,12 @@ class FinancialConnectionsSheetViewModelTest {
             data = listOf(
                 FinancialConnectionsAccountFixtures.CREDIT_CARD,
                 FinancialConnectionsAccountFixtures.CHECKING_ACCOUNT
-            ),
+            )
         )
     )
 
     private fun createViewModel(
-        initialState: FinancialConnectionsSheetState,
+        initialState: FinancialConnectionsSheetState
     ): FinancialConnectionsSheetViewModel {
         return FinancialConnectionsSheetViewModel(
             applicationId = "com.example.app",

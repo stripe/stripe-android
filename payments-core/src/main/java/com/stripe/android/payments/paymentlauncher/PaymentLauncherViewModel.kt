@@ -273,7 +273,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal class Factory(
         private val argsSupplier: () -> PaymentLauncherContract.Args,
         private val applicationSupplier: () -> Application,
-        owner: SavedStateRegistryOwner,
+        owner: SavedStateRegistryOwner
     ) : AbstractSavedStateViewModelFactory(owner, null),
         Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(

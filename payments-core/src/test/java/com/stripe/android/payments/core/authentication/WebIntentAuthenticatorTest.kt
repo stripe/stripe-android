@@ -126,7 +126,7 @@ class WebIntentAuthenticatorTest {
             expectedReturnUrl = null,
             expectedRequestCode = PAYMENT_REQUEST_CODE,
             expectedAnalyticsEvent = null,
-            expectedShouldCancelIntentOnUserNavigation = false,
+            expectedShouldCancelIntentOnUserNavigation = false
         )
     }
 

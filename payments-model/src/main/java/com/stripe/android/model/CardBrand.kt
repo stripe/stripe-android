@@ -146,7 +146,7 @@ enum class CardBrand(
         R.drawable.stripe_ic_unionpay,
         pattern = Pattern.compile("^(62|81)[0-9]*$"),
         partialPatterns = mapOf(
-            1 to Pattern.compile("^6|8$"),
+            1 to Pattern.compile("^6|8$")
         ),
         renderingOrder = 7
     ),
