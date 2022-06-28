@@ -44,7 +44,7 @@ internal class SetupIntentFlowResultProcessorTest {
                 .isEqualTo(
                     SetupIntentResult(
                         intent = SetupIntentFixtures.CANCELLED,
-                        outcomeFromFlow = StripeIntentResult.Outcome.CANCELED,
+                        outcomeFromFlow = StripeIntentResult.Outcome.CANCELED
                     )
                 )
         }

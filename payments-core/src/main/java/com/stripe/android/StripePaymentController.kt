@@ -225,7 +225,7 @@ constructor(
             }
             return WeChatPayNextAction(
                 paymentIntent,
-                paymentIntent.nextActionData.weChat,
+                paymentIntent.nextActionData.weChat
             )
         }
     }
@@ -347,7 +347,6 @@ constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-
         authenticatorRegistry.getAuthenticator(source).authenticate(
             host,
             source,

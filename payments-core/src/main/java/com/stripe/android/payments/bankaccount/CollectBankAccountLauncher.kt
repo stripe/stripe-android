@@ -41,7 +41,7 @@ interface CollectBankAccountLauncher {
             return StripeCollectBankAccountLauncher(
                 activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it)
-                },
+                }
             )
         }
 
@@ -58,14 +58,14 @@ interface CollectBankAccountLauncher {
             return StripeCollectBankAccountLauncher(
                 fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it)
-                },
+                }
             )
         }
     }
 }
 
 internal class StripeCollectBankAccountLauncher constructor(
-    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
+    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(

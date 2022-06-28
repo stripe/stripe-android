@@ -53,7 +53,7 @@ class PostalCodeValidator {
     private companion object {
         private val POSTAL_CODE_PATTERNS = mapOf(
             Locale.US.country to
-                Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$"),
+                Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$")
         )
 
         private fun isPostalCodeNotRequired(
