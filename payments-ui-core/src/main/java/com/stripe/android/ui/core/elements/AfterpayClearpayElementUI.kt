@@ -47,13 +47,12 @@ fun AfterpayClearpayElementUINew(
     element: AfterpayClearpayHeaderElement
 ) {
     val context = LocalContext.current
-    // TODO need to handle the <img/> tag!
     val messageFormatString = element.getLabel(context.resources)
         .replace("<img/>", "<img src=\"afterpay\"/>")
 
     Html(
         html = messageFormatString,
-        enabled = enabled,
+        enabled = false,
         imageGetter = mapOf(
             "afterpay" to EmbeddableImage(
                 R.drawable.stripe_ic_afterpay_clearpay_logo,
@@ -62,11 +61,7 @@ fun AfterpayClearpayElementUINew(
                     null
                 } else {
                     ColorFilter.tint(Color.White)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-//                    .padding(end = 8.dp)
+                }
             )
         ),
         modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),

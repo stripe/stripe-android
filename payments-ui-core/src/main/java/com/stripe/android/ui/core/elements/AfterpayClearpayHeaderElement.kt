@@ -1,9 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.res.Resources
-import android.icu.lang.UCharacter
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
