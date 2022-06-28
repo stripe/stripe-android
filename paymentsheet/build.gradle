@@ -50,6 +50,8 @@ dependencies {
     implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
     // Integration with activities
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+    implementation"com.google.accompanist:accompanist-navigation-animation:$accompanistVersion"
     // Integration with constraint layouts
     implementation "androidx.constraintlayout:constraintlayout-compose:$androidxConstraintlayoutComposeVersion"
     // Integration with observables

@@ -1,5 +1,6 @@
-package com.stripe.android.link.injection
+package com.stripe.android.ui.core.injection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 
@@ -11,7 +12,8 @@ import com.stripe.android.core.injection.Injector
  *
  * @see [Injectable]
  */
-internal interface NonFallbackInjectable : Injectable<Unit> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface NonFallbackInjectable : Injectable<Unit> {
 
     /**
      * LinkInjectable classes don't implement fallback because they receive the injector directly

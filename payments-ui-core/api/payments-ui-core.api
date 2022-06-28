@@ -661,3 +661,7 @@ public abstract interface class com/stripe/android/ui/core/injection/FormControl
 	public abstract fun viewOnlyFields (Ljava/util/Set;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 }
 
+public final class com/stripe/android/ui/core/injection/NonFallbackInjectable$DefaultImpls {
+	public static fun fallbackInitialize (Lcom/stripe/android/ui/core/injection/NonFallbackInjectable;Lkotlin/Unit;)Ljava/lang/Void;
+}
+
