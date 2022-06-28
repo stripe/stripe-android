@@ -40,9 +40,11 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -59,6 +61,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowDialog
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PassportUploadFragmentTest {
     @get:Rule
@@ -66,6 +69,7 @@ class PassportUploadFragmentTest {
     private val mockUri = mock<Uri>()
 
     private val mockIdentityUploadViewModel = mock<IdentityUploadViewModel>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
@@ -97,6 +101,8 @@ class PassportUploadFragmentTest {
             )
         )
         whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -112,6 +118,8 @@ class PassportUploadFragmentTest {
             )
         )
         whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val navController = TestNavHostController(

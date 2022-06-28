@@ -27,7 +27,6 @@ import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -85,7 +84,7 @@ internal class DocSelectionFragment(
                 navigateToDefaultErrorFragment()
             }
         )
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_DOC_SELECT)
         }
         identityViewModel.sendAnalyticsRequest(

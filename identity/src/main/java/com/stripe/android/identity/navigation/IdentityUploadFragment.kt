@@ -37,7 +37,6 @@ import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -163,7 +162,7 @@ internal abstract class IdentityUploadFragment(
         maybeResetUploadedState()
         collectUploadedStateAndUpdateUI()
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
         }
         identityViewModel.sendAnalyticsRequest(

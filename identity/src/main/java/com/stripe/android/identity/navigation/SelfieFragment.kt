@@ -35,7 +35,6 @@ import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -119,7 +118,7 @@ internal class SelfieFragment(
             }
         )
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_SELFIE)
         }
         identityViewModel.sendAnalyticsRequest(
