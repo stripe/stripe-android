@@ -5,8 +5,6 @@ import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
@@ -23,6 +21,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -52,10 +51,14 @@ fun AfterpayClearpayElementUINew(
 
     Html(
         html = messageFormatString,
-        enabled = false,
+        enabled = enabled,
         imageGetter = mapOf(
             "afterpay" to EmbeddableImage(
-                R.drawable.stripe_ic_afterpay_clearpay_logo,
+                if (isClearpay()) {
+                    R.drawable.stripe_ic_clearpay_logo
+                } else {
+                    R.drawable.stripe_ic_afterpay_logo
+                },
                 R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
                 colorFilter = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
                     null
@@ -92,7 +95,13 @@ fun AfterpayClearpayElementUIOriginal(
             style = MaterialTheme.typography.h6,
         )
         Image(
-            painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
+            painter = painterResource(
+                if (isClearpay()) {
+                    R.drawable.stripe_ic_clearpay_logo
+                } else {
+                    R.drawable.stripe_ic_afterpay_logo
+                }
+            ),
             contentDescription = stringResource(
                 R.string.afterpay_clearpay_message
             ),
@@ -121,3 +130,5 @@ fun AfterpayClearpayElementUIOriginal(
         }
     }
 }
+
+internal fun isClearpay() = setOf("GB", "ES", "FR").contains(Locale.current.region)

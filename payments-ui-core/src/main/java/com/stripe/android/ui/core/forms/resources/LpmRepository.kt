@@ -31,6 +31,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.isClearpay
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -160,7 +161,11 @@ class LpmRepository @Inject constructor(
             PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
                 "afterpay_clearpay",
                 false,
-                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+                if (isClearpay()) {
+                    R.string.stripe_paymentsheet_payment_method_clearpay
+                } else {
+                    R.string.stripe_paymentsheet_payment_method_afterpay
+                },
                 R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
                 false,
                 AfterpayClearpayRequirement,

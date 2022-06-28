@@ -8,6 +8,8 @@
     <string name="stripe_paymentsheet_payment_method_p24">Przelewy24</string>
     <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
     <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
+    <string name="stripe_paymentsheet_payment_method_afterpay">Afterpay</string>
+    <string name="stripe_paymentsheet_payment_method_clearpay">Clearpay</string>
     <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
     <string name="stripe_paymentsheet_payment_method_us_bank_account">US Bank Account</string>
 
