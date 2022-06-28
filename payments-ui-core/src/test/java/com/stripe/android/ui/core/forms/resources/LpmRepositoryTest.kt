@@ -4,16 +4,40 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.forms.Delayed
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
+
+    @Test
+    fun `Test label for afterpay show correctly when clearpay string`() {
+        Locale.setDefault(Locale.UK)
+        val lpmRepository = LpmRepository(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+        assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_clearpay)
+
+        Locale.setDefault(Locale.US)
+    }
+
+    @Test
+    fun `Test label for afterpay show correctly when afterpay string`() {
+        Locale.setDefault(Locale.US)
+        val lpmRepository = LpmRepository(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+        assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_afterpay)
+    }
 
     @Test
     fun `Verify no fields in the default json are ignored`() {

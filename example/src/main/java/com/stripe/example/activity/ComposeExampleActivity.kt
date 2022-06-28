@@ -50,12 +50,12 @@ class ComposeExampleActivity : AppCompatActivity() {
             Column(modifier = Modifier.padding(horizontal = 10.dp)) {
                 if (inProgress) {
                     LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 Text(
                     stringResource(R.string.payment_auth_intro),
-                    modifier = Modifier.padding(vertical = 5.dp),
+                    modifier = Modifier.padding(vertical = 5.dp)
                 )
                 ConfirmButton(
                     params = confirmParams3ds1,
@@ -123,7 +123,7 @@ class ComposeExampleActivity : AppCompatActivity() {
 
     private fun createAndConfirmPaymentIntent(
         params: PaymentMethodCreateParams,
-        paymentLauncher: PaymentLauncher,
+        paymentLauncher: PaymentLauncher
     ) {
         viewModel.createPaymentIntent("us").observe(
             this

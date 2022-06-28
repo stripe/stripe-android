@@ -21,11 +21,11 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 
@@ -134,5 +134,3 @@ fun AfterpayClearpayElementUIOriginal(
         }
     }
 }
-
-internal fun isClearpay() = setOf("GB", "ES", "FR").contains(Locale.current.region)

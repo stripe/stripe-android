@@ -40,7 +40,7 @@ class AffirmPaymentActivity : StripeIntentActivity() {
                         .setPostalCode("94107")
                         .setState("CA")
                         .build(),
-                    name = "Jane Doe",
+                    name = "Jane Doe"
                 ),
                 supportedPaymentMethods = "affirm"
             )

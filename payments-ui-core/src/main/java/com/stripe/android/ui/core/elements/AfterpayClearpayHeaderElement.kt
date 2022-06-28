@@ -67,5 +67,7 @@ data class AfterpayClearpayHeaderElement(
     companion object {
         const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
         const val NO_BREAK_SPACE = "\u00A0"
+
+        internal fun isClearpay() = setOf("GB", "ES", "FR").contains(Locale.current.region)
     }
 }
