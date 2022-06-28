@@ -34,7 +34,9 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -43,6 +45,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -51,10 +54,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class ConsentFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
@@ -153,6 +158,9 @@ internal class ConsentFragmentTest {
         )
 
         on { screenTracker }.thenReturn(mockScreenTracker)
+
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()

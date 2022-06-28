@@ -19,7 +19,9 @@ import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -31,9 +33,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class ErrorFragmentTest {
-
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
     private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
@@ -44,6 +47,8 @@ class ErrorFragmentTest {
             )
 
         on { screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     @Test

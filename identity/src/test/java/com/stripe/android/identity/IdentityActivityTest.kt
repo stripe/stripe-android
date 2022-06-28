@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.stripe.android.identity
 
 import android.app.Activity
@@ -29,6 +31,8 @@ import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,13 +53,15 @@ internal class IdentityActivityTest {
     private val mockIdentityViewModelFactory = mock<IdentityViewModel.IdentityViewModelFactory>()
     private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     private val testIdentityFragmentFactory = IdentityFragmentFactory(
         mockCameraPermissionEnsureable,
         mockAppSettingsOpenable,
         mockVerificationFlowFinishable,
-        IdentityScanViewModel.IdentityScanViewModelFactory(mock()),
+        IdentityScanViewModel.IdentityScanViewModelFactory(mock(), mock()),
         IdentityUploadViewModel.FrontBackUploadViewModelFactory(mock()),
-        ConsentFragmentViewModel.ConsentFragmentViewModelFactory(mock(), mock()),
+        ConsentFragmentViewModel.ConsentFragmentViewModelFactory(mock(), mock(), testDispatcher),
         mockIdentityViewModelFactory,
         mockFallbackUrlLauncher
     )
@@ -71,6 +77,8 @@ internal class IdentityActivityTest {
         )
         on { verificationPage }.thenReturn(mock())
         on { screenTracker }.thenReturn(mock())
+        on { uiContext }.thenReturn(testDispatcher)
+        on { workContext }.thenReturn(testDispatcher)
     }
 
     @Before

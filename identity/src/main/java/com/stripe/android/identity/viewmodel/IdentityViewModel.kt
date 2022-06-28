@@ -17,7 +17,9 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequestV2
@@ -61,6 +63,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
@@ -74,7 +77,9 @@ internal class IdentityViewModel @Inject constructor(
     val identityFragmentFactory: IdentityFragmentFactory,
     val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     val fpsTracker: FPSTracker,
-    val screenTracker: ScreenTracker
+    val screenTracker: ScreenTracker,
+    @UIContext val uiContext: CoroutineContext,
+    @IOContext val workContext: CoroutineContext
 ) : ViewModel() {
 
     /**

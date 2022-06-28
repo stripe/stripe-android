@@ -30,6 +30,8 @@ import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -37,6 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
@@ -46,6 +49,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper.idleMainLooper
 import kotlin.test.assertFailsWith
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class IdentityDocumentScanFragmentTest {
     @get:Rule
@@ -55,6 +59,7 @@ class IdentityDocumentScanFragmentTest {
     private val mockCameraView = mock<CameraView>().also {
         whenever(it.previewFrame).thenReturn(mockPreviewFrame)
     }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
@@ -67,15 +72,18 @@ class IdentityDocumentScanFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.pageAndModelFiles).thenReturn(mockPageAndModel)
-        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { it.pageAndModelFiles } doReturn mockPageAndModel
+        on { it.identityAnalyticsRequestFactory } doReturn (
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
-        )
-        whenever(it.fpsTracker).thenReturn(mock())
+            )
+        on { it.fpsTracker } doReturn mock()
+        on { screenTracker } doReturn mock()
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     internal class TestFragment(

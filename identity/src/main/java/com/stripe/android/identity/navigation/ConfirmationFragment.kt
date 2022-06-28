@@ -16,7 +16,6 @@ import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -84,7 +83,7 @@ internal class ConfirmationFragment(
             }
         )
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONFIRMATION)
         }
 

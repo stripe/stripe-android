@@ -23,7 +23,9 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -34,9 +36,12 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CouldNotCaptureFragmentTest {
     private val mockScreenTracker = mock<ScreenTracker>()
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { identityAnalyticsRequestFactory } doReturn
             IdentityAnalyticsRequestFactory(
@@ -45,6 +50,8 @@ internal class CouldNotCaptureFragmentTest {
             )
 
         on { screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     @Test

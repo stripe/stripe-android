@@ -756,6 +756,7 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
+                    ShippingAddressCallback {},
                     paymentResultCallback
                 ).create()
             }
@@ -776,6 +777,7 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
+                    ShippingAddressCallback {},
                     paymentResultCallback
                 ).create()
             }

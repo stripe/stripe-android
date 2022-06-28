@@ -12,7 +12,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
-import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel

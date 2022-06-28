@@ -47,9 +47,11 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -68,6 +70,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowDialog
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class IdentityUploadFragmentTest {
     @get:Rule
@@ -77,6 +80,7 @@ class IdentityUploadFragmentTest {
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
     }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPageWithSelfie = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
@@ -105,6 +109,8 @@ class IdentityUploadFragmentTest {
             )
         )
         whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -120,6 +126,8 @@ class IdentityUploadFragmentTest {
             )
         )
         whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
@@ -327,7 +335,10 @@ class IdentityUploadFragmentTest {
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
-                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_FILE_UPLOAD_ID), any())
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(SCREEN_NAME_FILE_UPLOAD_ID),
+                    any()
+                )
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
@@ -380,7 +391,10 @@ class IdentityUploadFragmentTest {
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
-                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_FILE_UPLOAD_ID), any())
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(SCREEN_NAME_FILE_UPLOAD_ID),
+                    any()
+                )
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
