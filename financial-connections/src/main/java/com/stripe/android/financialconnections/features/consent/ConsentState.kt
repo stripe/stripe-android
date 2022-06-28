@@ -5,6 +5,11 @@ import com.stripe.android.financialconnections.ui.TextResource
 
 internal data class ConsentState(
     val title: TextResource = TextResource.Text(""),
+    val disconnectUrl: String = "",
+    val stripeToSUrl: String = "",
+    val faqUrl: String = "",
+    val dataPolicyUrl: String = "",
+    val privacyCenterUrl: String = "",
     val bullets: List<Pair<Int, TextResource>> = emptyList(),
     val requestedDataTitle: TextResource = TextResource.Text(""),
     val requestedDataBullets: List<Pair<TextResource, TextResource>> = emptyList(),
@@ -26,6 +31,6 @@ internal enum class ConsentClickableText(val value: String) {
     PRIVACY("privacy"),
     DISCONNECT("disconnect"),
     DATA("data"),
-    MORE("more"),
+    PRIVACY_CENTER("privacy_center"),
     DATA_ACCESS("data_access")
 }

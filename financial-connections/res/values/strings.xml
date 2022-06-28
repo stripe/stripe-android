@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="more">Learn more</annotation></string>
+    <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="stripe_consent_pane_title">%1$s works with Stripe to link your accounts</string>
     <string name="stripe_consent_pane_title_no_businessname">This business works with Stripe to link your accounts</string>
     <string name="stripe_consent_pane_title_connected_account">%1$s and %2%s work with Stripe to link your accounts</string>

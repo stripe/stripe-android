@@ -11,7 +11,9 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.AccountDisconnectionMethod
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,24 +37,18 @@ internal class ConsentViewModel @Inject constructor(
     fun onClickableTextClick(tag: String) {
         setState {
             when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-                ConsentClickableText.TERMS -> copy(
-                    viewEffect = OpenUrl("http://www.google.com")
-                )
-                ConsentClickableText.PRIVACY -> copy(
-                    viewEffect = OpenUrl("http://www.google.com")
-                )
-                ConsentClickableText.DISCONNECT -> copy(
-                    viewEffect = OpenUrl("http://www.google.com")
-                )
-                ConsentClickableText.DATA -> copy(
-                    bottomSheetType = ConsentState.BottomSheetType.DATA
-                )
-                ConsentClickableText.MORE -> copy(
-                    viewEffect = OpenUrl("http://www.google.com")
-                )
-                ConsentClickableText.DATA_ACCESS -> copy(
-                    viewEffect = OpenUrl("http://www.google.com")
-                )
+                ConsentClickableText.TERMS ->
+                    copy(viewEffect = OpenUrl(stripeToSUrl))
+                ConsentClickableText.PRIVACY ->
+                    copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy))
+                ConsentClickableText.DISCONNECT ->
+                    copy(viewEffect = OpenUrl(disconnectUrl))
+                ConsentClickableText.DATA ->
+                    copy(bottomSheetType = ConsentState.BottomSheetType.DATA)
+                ConsentClickableText.PRIVACY_CENTER ->
+                    copy(viewEffect = OpenUrl(privacyCenterUrl))
+                ConsentClickableText.DATA_ACCESS ->
+                    copy(viewEffect = OpenUrl(dataPolicyUrl))
                 null -> {
                     logger.error("Unrecognized clickable text: $tag")
                     this
@@ -72,6 +68,27 @@ internal class ConsentViewModel @Inject constructor(
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
+                disconnectUrl = when (manifest.accountDisconnectionMethod) {
+                    AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
+                    AccountDisconnectionMethod.SUPPORT -> FinancialConnectionsUrls.Disconnect.support
+                    AccountDisconnectionMethod.EMAIL, null -> FinancialConnectionsUrls.Disconnect.email
+                },
+                faqUrl = when (manifest.isStripeDirect ?: false) {
+                    true -> FinancialConnectionsUrls.FAQ.stripe
+                    false -> FinancialConnectionsUrls.FAQ.merchant
+                },
+                dataPolicyUrl = when (manifest.isStripeDirect ?: false) {
+                    true -> FinancialConnectionsUrls.DataPolicy.stripe
+                    false -> FinancialConnectionsUrls.DataPolicy.merchant
+                },
+                stripeToSUrl = when (manifest.isEndUserFacing ?: false) {
+                    true -> FinancialConnectionsUrls.StripeToS.endUser
+                    false -> FinancialConnectionsUrls.StripeToS.merchantUser
+                },
+                privacyCenterUrl = when (manifest.isStripeDirect ?: false) {
+                    true -> FinancialConnectionsUrls.PrivacyCenter.stripe
+                    false -> FinancialConnectionsUrls.PrivacyCenter.merchant
+                },
                 title = ConsentTextBuilder.getConsentTitle(manifest),
                 bullets = ConsentTextBuilder.getBullets(manifest),
                 requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
