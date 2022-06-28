@@ -1,6 +1,5 @@
-package com.stripe.android.financialconnections.presentation
+package com.stripe.android.financialconnections.features.consent
 
-import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -10,9 +9,9 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,28 +33,30 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        logger.debug("$tag clicked")
         setState {
-            when (tag) {
-                "terms" -> copy(
-                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+            when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
+                ConsentClickableText.TERMS -> copy(
+                    viewEffect = OpenUrl("http://www.google.com")
                 )
-                "privacy" -> copy(
-                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                ConsentClickableText.PRIVACY -> copy(
+                    viewEffect = OpenUrl("http://www.google.com")
                 )
-                "disconnect" -> copy(
-                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                ConsentClickableText.DISCONNECT -> copy(
+                    viewEffect = OpenUrl("http://www.google.com")
                 )
-                "data" -> copy(
+                ConsentClickableText.DATA -> copy(
                     bottomSheetType = ConsentState.BottomSheetType.DATA
                 )
-                "more" -> copy(
-                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                ConsentClickableText.MORE -> copy(
+                    viewEffect = OpenUrl("http://www.google.com")
                 )
-                "data_access" -> copy(
-                    viewEffect = ConsentState.ViewEffect.OpenUrl("http://www.google.com")
+                ConsentClickableText.DATA_ACCESS -> copy(
+                    viewEffect = OpenUrl("http://www.google.com")
                 )
-                else -> TODO("Unrecognized")
+                null -> {
+                    logger.error("Unrecognized clickable text: $tag")
+                    this
+                }
             }
         }
     }
@@ -110,20 +111,3 @@ internal class ConsentViewModel @Inject constructor(
     }
 }
 
-internal data class ConsentState(
-    val title: TextResource = TextResource.Text(""),
-    val bullets: List<Pair<Int, TextResource>> = emptyList(),
-    val requestedDataTitle: TextResource = TextResource.Text(""),
-    val requestedDataBullets: List<Pair<TextResource, TextResource>> = emptyList(),
-    val bottomSheetType: BottomSheetType = BottomSheetType.NONE,
-    val viewEffect: ViewEffect? = null
-) : MavericksState {
-
-    enum class BottomSheetType {
-        NONE, DATA
-    }
-
-    sealed interface ViewEffect {
-        data class OpenUrl(val url: String) : ViewEffect
-    }
-}

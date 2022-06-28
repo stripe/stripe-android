@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.presentation
+package com.stripe.android.financialconnections.features.consent
 
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
