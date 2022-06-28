@@ -613,11 +613,11 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Comp
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository_Factory;
 	public fun get ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
+	public static fun newInstance (Landroid/content/res/Resources;Lcom/stripe/android/payments/financialconnections/IsFinancialConnectionsAvailable;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 }
 
 public abstract class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule {
