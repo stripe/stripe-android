@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
@@ -133,6 +135,7 @@ private fun ConsentContent(
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         sheetBackgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
@@ -147,13 +150,14 @@ private fun ConsentContent(
             )
         }
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
+        Column(
+            Modifier.fillMaxSize()
         ) {
             Column(
-                modifier = Modifier.align(Alignment.TopCenter)
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .padding(24.dp)
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -167,26 +171,35 @@ private fun ConsentContent(
                     ConsentBullet(icon, text) { onClickableTextClick(it) }
                     Spacer(modifier = Modifier.size(16.dp))
                 }
+
+                Spacer(modifier = Modifier.weight(1f))
             }
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                AnnotatedText(
-                    text = TextResource.StringId(R.string.consent_pane_tc),
-                    onClickableTextClick = { onClickableTextClick(it) },
-                    textStyle = FinancialConnectionsTheme.typography.body.copy(
-                        textAlign = TextAlign.Center,
-                        color = FinancialConnectionsTheme.colors.textSecondary
-                    )
-                )
-                Spacer(modifier = Modifier.size(24.dp))
-                FinancialConnectionsButton(
-                    onClick = onContinueClick,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = stringResource(R.string.stripe_consent_pane_agree))
-                }
-            }
+            Footer(onClickableTextClick, onContinueClick)
+        }
+    }
+}
+
+@Composable
+private fun Footer(
+    onClickableTextClick: (String) -> Unit,
+    onContinueClick: () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+        AnnotatedText(
+            text = TextResource.StringId(R.string.consent_pane_tc),
+            onClickableTextClick = { onClickableTextClick(it) },
+            textStyle = FinancialConnectionsTheme.typography.body.copy(
+                textAlign = TextAlign.Center,
+                color = FinancialConnectionsTheme.colors.textSecondary
+            )
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        FinancialConnectionsButton(
+            onClick = onContinueClick,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(text = stringResource(R.string.stripe_consent_pane_agree))
         }
     }
 }
