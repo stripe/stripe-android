@@ -290,6 +290,7 @@ internal class GooglePayLauncherViewModel(
     }
 
     companion object {
-        private const val HAS_LAUNCHED_KEY = "has_launched"
+        @VisibleForTesting
+        const val HAS_LAUNCHED_KEY = "has_launched"
     }
 }
