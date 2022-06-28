@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.presentation
 
+@Suppress("MaxLineLength", "MaximumLineLength")
 object FinancialConnectionsUrls {
     object Disconnect {
         const val email = "ttps://support.stripe.com/contact"
-        const val support =
-            "https://support.stripe.com/user/how-do-i-disconnect-my-linked-financial-account"
+        const val support = "https://support.stripe.com/user/how-do-i-disconnect-my-linked-financial-account"
         const val dashboard = "https://dashboard.stripe.com/settings/linked-accounts"
     }
 
@@ -36,14 +36,12 @@ object FinancialConnectionsUrls {
     const val StripePrivacyPolicy = "https://stripe.com/privacy"
 
     object PartnerNotice {
-        val stripe = "https://stripe.com/docs/linked-accounts/faqs"
-        val merchant =
-            "https://support.stripe.com/user/questions/what-is-the-relationship-between-stripe-and-stripes-service-providers"
+        const val stripe = "https://stripe.com/docs/linked-accounts/faqs"
+        const val merchant = "https://support.stripe.com/user/questions/what-is-the-relationship-between-stripe-and-stripes-service-providers"
     }
 
     object DataPolicy {
-        val stripe = "https://stripe.com/docs/linked-accounts/faqs"
-        val merchant =
-            "https://support.stripe.com/user/questions/what-data-does-stripe-access-from-my-linked-financial-account"
+        const val stripe = "https://stripe.com/docs/linked-accounts/faqs"
+        const val merchant = "https://support.stripe.com/user/questions/what-data-does-stripe-access-from-my-linked-financial-account"
     }
 }

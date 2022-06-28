@@ -68,27 +68,11 @@ internal class ConsentViewModel @Inject constructor(
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
-                disconnectUrl = when (manifest.accountDisconnectionMethod) {
-                    AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
-                    AccountDisconnectionMethod.SUPPORT -> FinancialConnectionsUrls.Disconnect.support
-                    AccountDisconnectionMethod.EMAIL, null -> FinancialConnectionsUrls.Disconnect.email
-                },
-                faqUrl = when (manifest.isStripeDirect ?: false) {
-                    true -> FinancialConnectionsUrls.FAQ.stripe
-                    false -> FinancialConnectionsUrls.FAQ.merchant
-                },
-                dataPolicyUrl = when (manifest.isStripeDirect ?: false) {
-                    true -> FinancialConnectionsUrls.DataPolicy.stripe
-                    false -> FinancialConnectionsUrls.DataPolicy.merchant
-                },
-                stripeToSUrl = when (manifest.isEndUserFacing ?: false) {
-                    true -> FinancialConnectionsUrls.StripeToS.endUser
-                    false -> FinancialConnectionsUrls.StripeToS.merchantUser
-                },
-                privacyCenterUrl = when (manifest.isStripeDirect ?: false) {
-                    true -> FinancialConnectionsUrls.PrivacyCenter.stripe
-                    false -> FinancialConnectionsUrls.PrivacyCenter.merchant
-                },
+                disconnectUrl = ConsentUrlBuilder.getDisconnectUrl(manifest),
+                faqUrl = ConsentUrlBuilder.getFAQUrl(manifest),
+                dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest),
+                stripeToSUrl = ConsentUrlBuilder.getStripeTOSUrl(manifest),
+                privacyCenterUrl = ConsentUrlBuilder.getPrivacyCenterUrl(manifest),
                 title = ConsentTextBuilder.getConsentTitle(manifest),
                 bullets = ConsentTextBuilder.getBullets(manifest),
                 requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
@@ -127,4 +111,3 @@ internal class ConsentViewModel @Inject constructor(
         }
     }
 }
-
