@@ -48,7 +48,7 @@ data class PaymentMethodCreateParams internal constructor(
      *
      * The values of the map must be any of the types supported by [android.os.Parcel.writeValue].
      */
-    private val overrideParamMap: Map<String, @RawValue Any>? = null,
+    private val overrideParamMap: Map<String, @RawValue Any>? = null
 ) : StripeParamsModel, Parcelable {
 
     internal constructor(
@@ -67,7 +67,7 @@ data class PaymentMethodCreateParams internal constructor(
         billingDetails: PaymentMethod.BillingDetails? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
-        overrideParamMap: Map<String, @RawValue Any>? = null,
+        overrideParamMap: Map<String, @RawValue Any>? = null
     ) : this(
         type.code,
         type.requiresMandate,

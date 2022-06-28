@@ -243,7 +243,9 @@ class PaymentMethodCreateParamsTest {
 
         assertThat(
             PaymentMethodCreateParams.createLink(
-                paymentDetailsId, consumerSessionClientSecret, extraParams
+                paymentDetailsId,
+                consumerSessionClientSecret,
+                extraParams
             ).toParamMap()
         ).isEqualTo(
             mapOf(
