@@ -15,6 +15,11 @@ internal sealed interface TextResource {
         val args: List<String> = emptyList()
     ) : TextResource
 
+    /**
+     * Return the string value associated with a particular resource ID.
+     * The returned object will be a String if this is a plain string;
+     * it will be some other type of CharSequence if it is styled.
+     */
     @Composable
     fun toText(): CharSequence {
         return when (this) {

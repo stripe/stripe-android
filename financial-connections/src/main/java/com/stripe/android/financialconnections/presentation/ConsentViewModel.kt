@@ -5,13 +5,11 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.TextResource
@@ -73,51 +71,10 @@ internal class ConsentViewModel @Inject constructor(
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
-                title = TextResource.StringId(
-                    R.string.stripe_consent_pane_title,
-                    listOf(requireNotNull(manifest.businessName))
-                ),
-                bullets = listOf(
-                    R.drawable.stripe_ic_safe to TextResource.StringId(
-                        R.string.stripe_consent_pane_body1,
-                        listOf(requireNotNull(manifest.businessName))
-                    ),
-                    R.drawable.stripe_ic_shield to TextResource.StringId(
-                        R.string.stripe_consent_pane_body2
-                    ),
-                    R.drawable.stripe_ic_lock to TextResource.StringId(
-                        R.string.stripe_consent_pane_body3
-                    ),
-                ),
-                requestedDataTitle = TextResource.StringId(
-                    R.string.stripe_consent_requested_data_title,
-                    listOf(requireNotNull(manifest.businessName))
-                ),
-                requestedDataBullets = manifest.permissions.mapNotNull { permission ->
-                    when (permission) {
-                        FinancialConnectionsAccount.Permissions.BALANCES ->
-                            Pair(
-                                TextResource.StringId(R.string.stripe_consent_requested_data_balances_title),
-                                TextResource.StringId(R.string.stripe_consent_requested_data_balances_desc)
-                            )
-                        FinancialConnectionsAccount.Permissions.OWNERSHIP ->
-                            Pair(
-                                TextResource.StringId(R.string.stripe_consent_requested_data_ownership_title),
-                                TextResource.StringId(R.string.stripe_consent_requested_data_ownership_desc)
-                            )
-                        FinancialConnectionsAccount.Permissions.PAYMENT_METHOD ->
-                            Pair(
-                                TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_title),
-                                TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_desc)
-                            )
-                        FinancialConnectionsAccount.Permissions.TRANSACTIONS ->
-                            Pair(
-                                TextResource.StringId(R.string.stripe_consent_requested_data_transactions_title),
-                                TextResource.StringId(R.string.stripe_consent_requested_data_transactions_desc)
-                            )
-                        FinancialConnectionsAccount.Permissions.UNKNOWN -> null
-                    }
-                }
+                title = ConsentTextBuilder.getConsentTitle(manifest),
+                bullets = ConsentTextBuilder.getBullets(manifest),
+                requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
+                requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
             )
         }
     }

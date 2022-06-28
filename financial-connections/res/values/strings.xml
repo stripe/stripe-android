@@ -2,11 +2,16 @@
 <resources>
     <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="more">Learn more</annotation></string>
     <string name="stripe_consent_pane_title">%1$s works with Stripe to link your accounts</string>
-    <string name="stripe_consent_pane_body1">Only the <annotation clickable="data">data requested</annotation> is shared with %1$s. We never share your login details with them.</string>
+    <string name="stripe_consent_pane_title_no_businessname">This business works with Stripe to link your accounts</string>
+    <string name="stripe_consent_pane_title_connected_account">%1$s and %2%s work with Stripe to link your accounts</string>
+    <string name="stripe_consent_pane_body1">Stripe will allow %1$s to access only the <annotation clickable="data">data requested</annotation>. We never share your login details with them.</string>
+    <string name="stripe_consent_pane_body1_connected_account">%1$s partners with %2$s. Stripe will allow them to access only the <annotation clickable="data">data requested</annotation>.</string>
+    <string name="stripe_consent_pane_body1_no_businessname">tripe will allow this business to access only the <annotation clickable="data">data requested</annotation>. We never share your login details with them.</string>
     <string name="stripe_consent_pane_body2">Your data is encrypted for your protection.</string>
     <string name="stripe_consent_pane_body3">You can <annotation clickable="disconnect">disconnect</annotation> your accounts at anytime.</string>
     <string name="stripe_consent_pane_agree">Agree</string>
     <string name="stripe_consent_requested_data_title">Data requested by %1$s for the account you link:</string>
+    <string name="stripe_consent_requested_data_title_no_businessname">Data requested by this business for the account you link:</string>
     <string name="stripe_consent_requested_data_accountdetails_title">Account details</string>
     <string name="stripe_consent_requested_data_accountdetails_desc">Account number, routing number, account type, account nickname</string>
     <string name="stripe_consent_requested_data_balances_title">Balances</string>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -247,11 +248,13 @@ private fun ConsentBottomSheetBullet(
             painter = painterResource(id = R.drawable.stripe_ic_check),
             contentDescription = null,
             tint = FinancialConnectionsTheme.colors.textSuccess,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier
+                .size(16.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
-            Text(text = title.toText().toString(),
+            Text(
+                text = title.toText().toString(),
                 style = FinancialConnectionsTheme.typography.bodyEmphasized.copy(
                     color = FinancialConnectionsTheme.colors.textPrimary
                 )
@@ -277,7 +280,9 @@ private fun ConsentBullet(
             painter = painterResource(id = icon),
             contentDescription = null,
             tint = FinancialConnectionsTheme.colors.textSecondary,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier
+                .size(16.dp)
+                .offset(y = 4.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         AnnotatedText(
