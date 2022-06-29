@@ -14,13 +14,13 @@ internal fun FinancialConnectionsTopAppBar() {
     TopAppBar(
         title = {
             Icon(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.stripe_logo),
                 contentDescription = null // decorative element
             )
         },
         backgroundColor = FinancialConnectionsTheme.colors.textWhite,
         contentColor = FinancialConnectionsTheme.colors.textBrand,
-        elevation = 12.dp
+        elevation = 4.dp
     )
 }
 

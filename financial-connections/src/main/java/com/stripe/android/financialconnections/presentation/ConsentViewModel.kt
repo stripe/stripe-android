@@ -4,6 +4,8 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -11,6 +13,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +21,7 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     fun onContinueClick() {
@@ -30,10 +34,29 @@ internal class ConsentViewModel @Inject constructor(
         }
     }
 
+    fun onClickableTextClick(tag: String) {
+        logger.debug("$tag clicked")
+    }
+
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
-                title = manifest.businessName + " works with Stripe to link your accounts"
+                title = TextResource.StringId(
+                    R.string.stripe_consent_pane_title,
+                    listOf(requireNotNull(manifest.businessName))
+                ),
+                bullets = listOf(
+                    R.drawable.stripe_ic_safe to TextResource.StringId(
+                        R.string.stripe_consent_pane_body1,
+                        listOf(requireNotNull(manifest.businessName))
+                    ),
+                    R.drawable.stripe_ic_shield to TextResource.StringId(
+                        R.string.stripe_consent_pane_body2
+                    ),
+                    R.drawable.stripe_ic_lock to TextResource.StringId(
+                        R.string.stripe_consent_pane_body3
+                    ),
+                )
             )
         }
     }
@@ -54,6 +77,6 @@ internal class ConsentViewModel @Inject constructor(
 }
 
 internal data class ConsentState(
-    val title: String = "",
-    val content: List<String> = emptyList()
+    val title: TextResource = TextResource.Text(""),
+    val bullets: List<Pair<Int, TextResource>> = emptyList(),
 ) : MavericksState

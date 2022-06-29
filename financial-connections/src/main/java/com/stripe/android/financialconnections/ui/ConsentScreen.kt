@@ -4,26 +4,35 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.presentation.ConsentState
 import com.stripe.android.financialconnections.presentation.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
+@ExperimentalMaterialApi
 @Composable
 internal fun ConsentScreen() {
     // get shared configuration from activity state
@@ -37,56 +46,85 @@ internal fun ConsentScreen() {
     val state = viewModel.collectAsState()
     ConsentContent(
         state = state.value,
-        onContinueClick = viewModel::onContinueClick
+        onContinueClick = viewModel::onContinueClick,
+        onClickableTextClick = viewModel::onClickableTextClick
     )
 }
 
 @Composable
 private fun ConsentContent(
     state: ConsentState,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit
 ) {
-    // Screen content
     Box(
         modifier = Modifier
-            .fillMaxHeight()
-            .padding(16.dp)
+            .fillMaxSize()
+            .padding(24.dp)
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = state.title,
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-            Spacer(modifier = Modifier.size(75.dp))
-            state.content.forEach {
-                BodyText(it)
-                Spacer(modifier = Modifier.size(20.dp))
+            Subtitle(state)
+            Spacer(modifier = Modifier.size(24.dp))
+            state.bullets.forEach { (icon, text) ->
+                ConsentBodyWithIcon(icon, text) { onClickableTextClick(it) }
+                Spacer(modifier = Modifier.size(16.dp))
             }
         }
         Column(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
+            AnnotatedText(
+                resource = TextResource.StringId(R.string.consent_pane_tc),
+                onClickableTextClick = { onClickableTextClick(it) },
+                textStyle = FinancialConnectionsTheme.typography.body.copy(
+                    textAlign = TextAlign.Center,
+                    color = FinancialConnectionsTheme.colors.textSecondary
+                )
+            )
+            Spacer(modifier = Modifier.size(24.dp))
             FinancialConnectionsButton(
                 onClick = onContinueClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Agree")
+                Text(text = stringResource(R.string.stripe_consent_pane_agree))
             }
         }
     }
 }
 
 @Composable
-private fun BodyText(text: String) {
+private fun Subtitle(state: ConsentState) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = state.title.toText().toString(),
+        textAlign = TextAlign.Center,
+        color = FinancialConnectionsTheme.colors.textPrimary,
+        style = FinancialConnectionsTheme.typography.subtitle
+    )
+}
+
+@Composable
+private fun ConsentBodyWithIcon(
+    icon: Int,
+    text: TextResource,
+    onClickableTextClick: (String) -> Unit
+) {
     Row {
-        Text(
-            text = text,
-            color = FinancialConnectionsTheme.colors.textSecondary,
-            style = FinancialConnectionsTheme.typography.body
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            tint = FinancialConnectionsTheme.colors.textSecondary,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        AnnotatedText(
+            text,
+            onClickableTextClick = { onClickableTextClick(it) },
+            textStyle = FinancialConnectionsTheme.typography.body.copy(
+                color = FinancialConnectionsTheme.colors.textSecondary,
+            )
         )
     }
 }
@@ -97,17 +135,16 @@ private fun BodyText(text: String) {
 )
 private fun ContentPreview() {
     FinancialConnectionsTheme {
-        ConsentContent(
-            state = ConsentState(
-                title = "Random title",
-                content = listOf(
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                    "Random very long text that takes more than one line on the screen.",
-                )
-            ),
-            onContinueClick = {}
-        )
+        FinancialConnectionsScaffold {
+            ConsentContent(
+                state = ConsentState(
+                    title = TextResource.StringId(R.string.stripe_consent_pane_title),
+                    bullets = listOf(
+                        R.drawable.stripe_ic_lock to TextResource.StringId(R.string.stripe_consent_pane_body2)
+                    )
+                ),
+                onContinueClick = {}
+            ) {}
+        }
     }
 }
