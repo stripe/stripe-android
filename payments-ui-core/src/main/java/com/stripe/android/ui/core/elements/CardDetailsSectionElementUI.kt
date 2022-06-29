@@ -22,7 +22,6 @@ fun CardDetailsSectionElementUI(
     controller: CardDetailsSectionController,
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
-
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

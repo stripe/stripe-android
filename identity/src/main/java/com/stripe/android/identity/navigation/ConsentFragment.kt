@@ -67,6 +67,11 @@ internal class ConsentFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
+                identityViewModel.updateAnalyticsState { oldState ->
+                    oldState.copy(
+                        requireSelfie = verificationPage.requireSelfie()
+                    )
+                }
                 if (verificationPage.isUnsupportedClient()) {
                     Log.e(TAG, "Unsupported client, launching fallback url")
                     fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
@@ -89,6 +94,9 @@ internal class ConsentFragment(
             }
         )
 
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 screenName = SCREEN_NAME_CONSENT

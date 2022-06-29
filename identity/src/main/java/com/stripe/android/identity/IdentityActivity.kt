@@ -18,6 +18,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.camera.CameraPermissionCheckingActivity
+import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.IdentityActivityBinding
@@ -44,7 +45,7 @@ internal class IdentityActivity :
             this,
             this,
             this,
-            this,
+            this
         )
 
     private val binding by lazy {
@@ -80,7 +81,7 @@ internal class IdentityActivity :
         supportFragmentManager.fragmentFactory = identityViewModel.identityFragmentFactory
         super.onCreate(savedInstanceState)
         fallbackUrlLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultContracts.StartActivityForResult()
         ) {
             identityViewModel.retrieveAndBufferVerificationPage()
             identityViewModel.observeForVerificationPage(
@@ -89,7 +90,7 @@ internal class IdentityActivity :
                     finishWithResult(
                         if (it.submitted) {
                             identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceed(
+                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
                                     isFromFallbackUrl = true
                                 )
                             )
@@ -103,7 +104,8 @@ internal class IdentityActivity :
                             VerificationFlowResult.Canceled
                         }
                     )
-                }, onFailure = {
+                },
+                onFailure = {
                     identityViewModel.sendAnalyticsRequest(
                         identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                             isFromFallbackUrl = true,
@@ -120,6 +122,10 @@ internal class IdentityActivity :
                 identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
             )
         }
+
+        identityViewModel.screenTracker.screenTransitionStart(
+            startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
+        )
 
         if (savedInstanceState == null || !savedInstanceState.getBoolean(
                 KEY_LAUNCHED_FALLBACK_URL,
@@ -213,7 +219,7 @@ internal class IdentityActivity :
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
                             lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
                         )
                     )
                     finishWithResult(
@@ -286,7 +292,7 @@ internal class IdentityActivity :
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
                             lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
                         )
                     )
                     verificationFlowFinishable.finishWithResult(

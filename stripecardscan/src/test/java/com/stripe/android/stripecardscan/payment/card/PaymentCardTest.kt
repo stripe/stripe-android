@@ -55,13 +55,13 @@ class PaymentCardTest {
             990000..990024,
             SAMPLE_CUSTOM_CARD_ISSUER,
             (16..19).toList(),
-            listOf(3),
+            listOf(3)
         )
         supportCardIssuer(
             991000..991999,
             SAMPLE_ADVANCED_CUSTOM_CARD_ISSUER,
             listOf(20),
-            listOf(4),
+            listOf(4)
         )
 
         addFormatPan(SAMPLE_CUSTOM_CARD_ISSUER, 16, 4, 3, 5, 4)
@@ -91,7 +91,7 @@ class PaymentCardTest {
         assertEquals(SAMPLE_CUSTOM_CARD_ISSUER, getCardIssuer(SAMPLE_CUSTOM_19_PAN))
         assertEquals(
             SAMPLE_ADVANCED_CUSTOM_CARD_ISSUER,
-            getCardIssuer(SAMPLE_ADVANCED_CUSTOM_20_PAN),
+            getCardIssuer(SAMPLE_ADVANCED_CUSTOM_20_PAN)
         )
     }
 

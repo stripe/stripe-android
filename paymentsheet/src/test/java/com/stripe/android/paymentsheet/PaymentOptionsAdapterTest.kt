@@ -379,7 +379,7 @@ class PaymentOptionsAdapterTest {
         fragmentConfig: FragmentConfig = CONFIG,
         paymentMethods: List<PaymentMethod> = this.paymentMethods,
         showGooglePay: Boolean = true,
-        showLink: Boolean = false,
+        showLink: Boolean = false
     ): PaymentOptionsAdapter {
         return createAdapter().also {
             it.setItems(fragmentConfig, paymentMethods, showGooglePay, showLink)

@@ -39,7 +39,7 @@ class CardDetectTest {
 
         val model = CardDetect.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            fetcher.fetchData(forImmediateUse = true, isOptional = false)
         ).newInstance()
         assertNotNull(model)
 
@@ -47,7 +47,7 @@ class CardDetectTest {
             CardDetect.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
-                bitmap.size().toRect(),
+                bitmap.size().toRect()
             ),
             Unit
         )
@@ -75,7 +75,7 @@ class CardDetectTest {
 
         val model = CardDetect.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            fetcher.fetchData(forImmediateUse = true, isOptional = false)
         ).newInstance()
         assertNotNull(model)
 
@@ -83,7 +83,7 @@ class CardDetectTest {
             CardDetect.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
-                bitmap.size().toRect(),
+                bitmap.size().toRect()
             ),
             Unit
         )
@@ -111,7 +111,7 @@ class CardDetectTest {
 
         val model = CardDetect.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            fetcher.fetchData(forImmediateUse = true, isOptional = false)
         ).newInstance()
         assertNotNull(model)
 
@@ -119,7 +119,7 @@ class CardDetectTest {
             CardDetect.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
-                bitmap.size().toRect(),
+                bitmap.size().toRect()
             ),
             Unit
         )

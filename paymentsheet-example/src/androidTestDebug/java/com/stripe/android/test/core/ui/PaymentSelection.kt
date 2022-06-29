@@ -5,10 +5,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.TEST_TAG_LIST
@@ -16,6 +15,12 @@ import com.stripe.android.paymentsheet.TEST_TAG_LIST
 class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val label: Int) {
     fun click() {
         val resource = InstrumentationRegistry.getInstrumentation().targetContext.resources
+
+        composeTestRule.waitUntil(5000) {
+            composeTestRule
+                .onAllNodesWithTag(TEST_TAG_LIST)
+                .fetchSemanticsNodes().size == 1
+        }
         composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
             .performScrollToNode(hasText(resource.getString(label)))
         composeTestRule.waitForIdle()

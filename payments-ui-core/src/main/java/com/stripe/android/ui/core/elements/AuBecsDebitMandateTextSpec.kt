@@ -11,6 +11,6 @@ internal data class AuBecsDebitMandateTextSpec(
     fun transform(merchantName: String): FormElement =
         AuBecsDebitMandateTextElement(
             this.apiPath,
-            merchantName,
+            merchantName
         )
 }

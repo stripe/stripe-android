@@ -67,7 +67,7 @@ fun OTPElementUI(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         var focusedElementIndex by remember { mutableStateOf(-1) }
 

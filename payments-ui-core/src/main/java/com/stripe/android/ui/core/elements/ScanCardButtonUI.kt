@@ -66,7 +66,7 @@ internal fun ScanCardButtonUI(
             Modifier
                 .padding(start = 4.dp),
             color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.h6
         )
     }
 }

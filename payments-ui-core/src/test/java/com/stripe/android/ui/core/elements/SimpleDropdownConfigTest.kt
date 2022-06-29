@@ -19,7 +19,7 @@ class SimpleDropdownConfigTest {
             DropdownItemSpec(displayText = "RegioBank", apiValue = "regiobank"),
             DropdownItemSpec(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
             DropdownItemSpec(displayText = "Triodos Bank", apiValue = "triodos_bank"),
-            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot"),
+            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot")
         )
     )
 

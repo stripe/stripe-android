@@ -154,10 +154,10 @@ private fun annotatedStringResource(
                                 addStyle(
                                     SpanStyle(
                                         fontWeight = FontWeight.Bold,
-                                        fontStyle = FontStyle.Italic,
+                                        fontStyle = FontStyle.Italic
                                     ),
                                     start,
-                                    end,
+                                    end
                                 )
                             }
                         }

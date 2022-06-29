@@ -19,7 +19,7 @@ internal data class CardImageVerificationSheetParams(
     val stripePublishableKey: String,
     val configuration: CardImageVerificationSheet.Configuration,
     val cardImageVerificationIntentId: String,
-    val cardImageVerificationIntentSecret: String,
+    val cardImageVerificationIntentSecret: String
 ) : Parcelable
 
 sealed interface CardImageVerificationSheetResult : Parcelable {
@@ -27,12 +27,12 @@ sealed interface CardImageVerificationSheetResult : Parcelable {
     @Parcelize
     data class Completed(
         val cardImageVerificationIntentId: String,
-        val scannedCard: ScannedCard,
+        val scannedCard: ScannedCard
     ) : CardImageVerificationSheetResult
 
     @Parcelize
     data class Canceled(
-        val reason: CancellationReason,
+        val reason: CancellationReason
     ) : CardImageVerificationSheetResult
 
     @Parcelize
@@ -41,7 +41,7 @@ sealed interface CardImageVerificationSheetResult : Parcelable {
 
 class CardImageVerificationSheet private constructor(
     private val stripePublishableKey: String,
-    private val configuration: Configuration,
+    private val configuration: Configuration
 ) {
 
     @Parcelize
@@ -57,12 +57,15 @@ class CardImageVerificationSheet private constructor(
          * This is an experimental feature that should only be used with guidance from Stripe
          * support.
          */
-        val enableCannotScanButton: Boolean = true,
+        val enableCannotScanButton: Boolean = true
     ) : Parcelable {
         sealed class StrictModeFrameCount(val count: Int) : Parcelable {
             @Parcelize object None : StrictModeFrameCount(0)
+
             @Parcelize object Low : StrictModeFrameCount(1)
+
             @Parcelize object Medium : StrictModeFrameCount(MAX_COMPLETION_LOOP_FRAMES / 2)
+
             @Parcelize object High : StrictModeFrameCount(MAX_COMPLETION_LOOP_FRAMES)
         }
     }
@@ -93,13 +96,13 @@ class CardImageVerificationSheet private constructor(
             stripePublishableKey: String,
             config: Configuration = Configuration(),
             cardImageVerificationResultCallback: CardImageVerificationResultCallback,
-            registry: ActivityResultRegistry = from.activityResultRegistry,
+            registry: ActivityResultRegistry = from.activityResultRegistry
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
                 launcher = from.registerForActivityResult(
                     activityResultContract,
                     registry,
-                    cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
+                    cardImageVerificationResultCallback::onCardImageVerificationSheetResult
                 )
             }
 
@@ -116,19 +119,19 @@ class CardImageVerificationSheet private constructor(
             stripePublishableKey: String,
             config: Configuration = Configuration(),
             cardImageVerificationResultCallback: CardImageVerificationResultCallback,
-            registry: ActivityResultRegistry? = null,
+            registry: ActivityResultRegistry? = null
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
                 launcher = if (registry != null) {
                     from.registerForActivityResult(
                         activityResultContract,
                         registry,
-                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
+                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult
                     )
                 } else {
                     from.registerForActivityResult(
                         activityResultContract,
-                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
+                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult
                     )
                 }
             }
@@ -149,12 +152,12 @@ class CardImageVerificationSheet private constructor(
             >() {
             override fun createIntent(
                 context: Context,
-                input: CardImageVerificationSheetParams,
+                input: CardImageVerificationSheetParams
             ) = this@Companion.createIntent(context, input)
 
             override fun parseResult(
                 resultCode: Int,
-                intent: Intent?,
+                intent: Intent?
             ) = this@Companion.parseResult(intent)
         }
     }
@@ -168,14 +171,14 @@ class CardImageVerificationSheet private constructor(
      */
     fun present(
         cardImageVerificationIntentId: String,
-        cardImageVerificationIntentSecret: String,
+        cardImageVerificationIntentSecret: String
     ) {
         launcher.launch(
             CardImageVerificationSheetParams(
                 stripePublishableKey = stripePublishableKey,
                 configuration = configuration,
                 cardImageVerificationIntentId = cardImageVerificationIntentId,
-                cardImageVerificationIntentSecret = cardImageVerificationIntentSecret,
+                cardImageVerificationIntentSecret = cardImageVerificationIntentSecret
             )
         )
     }

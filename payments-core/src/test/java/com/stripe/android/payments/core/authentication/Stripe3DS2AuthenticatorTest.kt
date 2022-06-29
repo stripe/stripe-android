@@ -78,7 +78,7 @@ class Stripe3DS2AuthenticatorTest {
             verify(mockLauncher).launch(
                 argWhere { args ->
                     args.stripeIntent == paymentIntent
-                },
+                }
             )
         }
 

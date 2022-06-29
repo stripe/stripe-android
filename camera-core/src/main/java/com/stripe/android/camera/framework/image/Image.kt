@@ -22,7 +22,7 @@ import com.stripe.android.camera.framework.util.toRect
  */
 private fun getVisiblePreview(previewBounds: Rect) = Size(
     previewBounds.right + previewBounds.left,
-    previewBounds.bottom + previewBounds.top,
+    previewBounds.bottom + previewBounds.top
 )
 
 /**
@@ -40,7 +40,7 @@ private fun getVisiblePreview(previewBounds: Rect) = Size(
 fun determineViewFinderCrop(
     cameraPreviewImageSize: Size,
     previewBounds: Rect,
-    viewFinder: Rect,
+    viewFinder: Rect
 ): Rect {
     require(
         viewFinder.left >= previewBounds.left &&
@@ -72,7 +72,7 @@ fun determineViewFinderCrop(
 fun cropCameraPreviewToViewFinder(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
-    viewFinder: Rect,
+    viewFinder: Rect
 ): Bitmap {
     require(
         viewFinder.left >= previewBounds.left &&
@@ -100,7 +100,7 @@ fun cropCameraPreviewToViewFinder(
 fun cropCameraPreviewToSquare(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
-    viewFinder: Rect,
+    viewFinder: Rect
 ): Bitmap {
     require(
         viewFinder.left >= previewBounds.left &&

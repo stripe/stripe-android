@@ -120,7 +120,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
              * A final result was received from the aggregator. Set the result from this activity.
              */
             override suspend fun onResult(
-                result: MainLoopAggregator.FinalResult,
+                result: MainLoopAggregator.FinalResult
             ) {
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
@@ -133,7 +133,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
              * An interim result was received from the result aggregator.
              */
             override suspend fun onInterimResult(
-                result: MainLoopAggregator.InterimResult,
+                result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
                 if (
                     result.state is MainLoopState.OcrFound &&
@@ -215,7 +215,10 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         listOf(viewBinding.viewFinderWindow, viewBinding.viewFinderBorder).forEach { view ->
             (view.layoutParams as ViewGroup.MarginLayoutParams)
                 .updateMargins(
-                    viewFinderMargin, viewFinderMargin, viewFinderMargin, viewFinderMargin
+                    viewFinderMargin,
+                    viewFinderMargin,
+                    viewFinderMargin,
+                    viewFinderMargin
                 )
         }
 
@@ -302,7 +305,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             device = Device.fromContext(context),
             appDetails = AppDetails.fromContext(context),
             scanStatistics = ScanStatistics.fromStats(),
-            scanConfig = ScanConfig(0),
+            scanConfig = ScanConfig(0)
         )
         super.closeScanner()
     }

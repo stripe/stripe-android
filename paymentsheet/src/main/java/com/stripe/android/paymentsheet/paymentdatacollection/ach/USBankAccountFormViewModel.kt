@@ -196,7 +196,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         _currentScreenState.value = _currentScreenState.value.updateInputs(
-            name.value, email.value, saveForFutureUse.value
+            name.value,
+            email.value,
+            saveForFutureUse.value
         )
         when (screenState) {
             is USBankAccountFormScreenState.NameAndEmailCollection -> {
@@ -451,7 +453,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
         Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val application: Application,
+            val application: Application
         )
 
         @Inject

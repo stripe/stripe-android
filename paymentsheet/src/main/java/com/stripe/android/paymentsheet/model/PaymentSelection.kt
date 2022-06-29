@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -65,12 +66,15 @@ sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Link(
-            val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-            override val paymentMethodCreateParams: PaymentMethodCreateParams
-        ) : New() {
+        data class Link(val linkPaymentDetails: LinkPaymentDetails) : New() {
             @IgnoredOnParcel
             override val customerRequestedSave = CustomerRequestedSave.NoRequest
+
+            @IgnoredOnParcel
+            private val paymentDetails = linkPaymentDetails.paymentDetails
+
+            @IgnoredOnParcel
+            override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
 
             @IgnoredOnParcel
             @DrawableRes
@@ -90,7 +94,7 @@ sealed class PaymentSelection : Parcelable {
             val labelResource: String,
             @DrawableRes val iconResource: Int,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val customerRequestedSave: CustomerRequestedSave,
+            override val customerRequestedSave: CustomerRequestedSave
         ) : New()
     }
 }

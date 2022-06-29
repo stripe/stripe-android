@@ -21,14 +21,19 @@ internal class CardScanActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         stripeCardScanProxy = StripeCardScanProxy.create(
-            this, PaymentConfiguration.getInstance(this).publishableKey, this::onScanFinished
+            this,
+            PaymentConfiguration.getInstance(this).publishableKey,
+            this::onScanFinished
         )
     }
 
     override fun onStart() {
         super.onStart()
         stripeCardScanProxy.attachCardScanFragment(
-            this, supportFragmentManager, R.id.fragment_container, this::onScanFinished
+            this,
+            supportFragmentManager,
+            R.id.fragment_container,
+            this::onScanFinished
         )
     }
 

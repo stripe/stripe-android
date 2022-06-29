@@ -83,7 +83,7 @@ object StorageFactory {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SharedPreferencesStorage(
     private val context: Context,
-    private val purpose: String,
+    private val purpose: String
 ) : Storage {
     private val sharedPrefs: SharedPreferences? by lazy {
         context.getSharedPreferences(STORAGE_FILE_NAME, Context.MODE_PRIVATE)

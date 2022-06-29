@@ -20,19 +20,19 @@ import java.security.NoSuchAlgorithmException
  */
 internal sealed class FetchedModelMeta(
     open val modelVersion: String,
-    open val hashAlgorithm: String,
+    open val hashAlgorithm: String
 )
 internal data class FetchedModelFileMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
-    val modelFile: File?,
+    val modelFile: File?
 ) : FetchedModelMeta(modelVersion, hashAlgorithm)
 
 internal data class FetchedModelResourceMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
     val hash: String,
-    val assetFileName: String?,
+    val assetFileName: String?
 ) : FetchedModelMeta(modelVersion, hashAlgorithm)
 
 /**
@@ -43,13 +43,13 @@ internal sealed class FetchedData(
     open val modelFrameworkVersion: Int,
     open val modelVersion: String,
     open val modelHash: String?,
-    open val modelHashAlgorithm: String?,
+    open val modelHashAlgorithm: String?
 ) {
     companion object {
         fun fromFetchedModelMeta(
             modelClass: String,
             modelFrameworkVersion: Int,
-            meta: FetchedModelMeta,
+            meta: FetchedModelMeta
         ) = when (meta) {
             is FetchedModelFileMeta ->
                 FetchedFile(
@@ -75,7 +75,7 @@ internal sealed class FetchedData(
                     modelVersion = meta.modelVersion,
                     modelHash = meta.hash,
                     modelHashAlgorithm = meta.hashAlgorithm,
-                    assetFileName = meta.assetFileName,
+                    assetFileName = meta.assetFileName
                 )
         }
     }
@@ -89,7 +89,7 @@ internal data class FetchedResource(
     override val modelVersion: String,
     override val modelHash: String?,
     override val modelHashAlgorithm: String?,
-    val assetFileName: String?,
+    val assetFileName: String?
 ) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm) {
     override val successfullyFetched: Boolean = assetFileName != null
 }
@@ -100,7 +100,7 @@ internal data class FetchedFile(
     override val modelVersion: String,
     override val modelHash: String?,
     override val modelHashAlgorithm: String?,
-    val file: File?,
+    val file: File?
 ) : FetchedData(modelClass, modelFrameworkVersion, modelVersion, modelHash, modelHashAlgorithm) {
     override val successfullyFetched: Boolean = modelHash != null
 }
@@ -146,7 +146,7 @@ internal abstract class ResourceFetcher : Fetcher {
             modelVersion = modelVersion,
             modelHash = hash,
             modelHashAlgorithm = hashAlgorithm,
-            assetFileName = assetFileName,
+            assetFileName = assetFileName
         )
 
     override suspend fun isCached(): Boolean = true
@@ -162,7 +162,7 @@ internal abstract class WebFetcher : Fetcher {
         val url: URL,
         val hash: String,
         val hashAlgorithm: String,
-        val modelVersion: String,
+        val modelVersion: String
     )
 
     /**
@@ -176,7 +176,7 @@ internal abstract class WebFetcher : Fetcher {
         val cachedData = FetchedData.fromFetchedModelMeta(
             modelClass,
             modelFrameworkVersion,
-            tryFetchLatestCachedData(),
+            tryFetchLatestCachedData()
         )
 
         // attempt to fetch the data from local cache if it's needed immediately or downloading is
@@ -189,7 +189,7 @@ internal abstract class WebFetcher : Fetcher {
                     Log.d(
                         LOG_TAG,
                         "Fetcher: $modelClass is needed immediately and cached version " +
-                            "${data.modelVersion} is available.",
+                            "${data.modelVersion} is available."
                     )
                     return@fetchData data
                 }
@@ -202,7 +202,7 @@ internal abstract class WebFetcher : Fetcher {
             fetchDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
                 Log.d(
                     LOG_TAG,
-                    "Fetcher: using cached version ${cachedData.modelVersion} for $modelClass",
+                    "Fetcher: using cached version ${cachedData.modelVersion} for $modelClass"
                 )
                 return@fetchData cachedData
             }
@@ -212,7 +212,7 @@ internal abstract class WebFetcher : Fetcher {
         if (forImmediateUse && isOptional) {
             Log.d(
                 LOG_TAG,
-                "Fetcher: optional $modelClass needed for immediate use, but no cache available.",
+                "Fetcher: optional $modelClass needed for immediate use, but no cache available."
             )
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
@@ -220,8 +220,8 @@ internal abstract class WebFetcher : Fetcher {
                 meta = FetchedModelFileMeta(
                     modelVersion = downloadDetails.modelVersion,
                     hashAlgorithm = downloadDetails.hashAlgorithm,
-                    modelFile = null,
-                ),
+                    modelFile = null
+                )
             )
         }
 
@@ -233,7 +233,7 @@ internal abstract class WebFetcher : Fetcher {
                 if (data.successfullyFetched) {
                     Log.d(
                         LOG_TAG,
-                        "Fetcher: $modelClass already has latest version downloaded.",
+                        "Fetcher: $modelClass already has latest version downloaded."
                     )
                     return@fetchData data
                 }
@@ -243,12 +243,12 @@ internal abstract class WebFetcher : Fetcher {
                 if (it.successfullyFetched) {
                     Log.d(
                         LOG_TAG,
-                        "Fetcher: $modelClass successfully downloaded.",
+                        "Fetcher: $modelClass successfully downloaded."
                     )
                 } else {
                     Log.d(
                         LOG_TAG,
-                        "Fetcher: $modelClass failed to download from $downloadDetails.",
+                        "Fetcher: $modelClass failed to download from $downloadDetails."
                     )
                 }
             }
@@ -258,13 +258,13 @@ internal abstract class WebFetcher : Fetcher {
                 Log.w(
                     LOG_TAG,
                     "Fetcher: Failed to download model $modelClass, loaded from local cache",
-                    t,
+                    t
                 )
             } else {
                 Log.e(
                     LOG_TAG,
                     "Fetcher: Failed to download model $modelClass, no local cache available",
-                    t,
+                    t
                 )
             }
             cachedData
@@ -294,7 +294,7 @@ internal abstract class WebFetcher : Fetcher {
         fetchException?.run {
             Log.d(
                 LOG_TAG,
-                "Fetcher: Previous exception encountered for $modelClass, rethrowing",
+                "Fetcher: Previous exception encountered for $modelClass, rethrowing"
             )
             throw this
         }
@@ -304,12 +304,12 @@ internal abstract class WebFetcher : Fetcher {
                 url = downloadDetails.url,
                 outputFile = downloadOutputFile,
                 hash = downloadDetails.hash,
-                hashAlgorithm = downloadDetails.hashAlgorithm,
+                hashAlgorithm = downloadDetails.hashAlgorithm
             )
 
             Log.d(
                 LOG_TAG,
-                "Fetcher: $modelClass downloaded version ${downloadDetails.modelVersion}",
+                "Fetcher: $modelClass downloaded version ${downloadDetails.modelVersion}"
             )
             return@memoizeSuspend FetchedFile(
                 modelClass = modelClass,
@@ -317,7 +317,7 @@ internal abstract class WebFetcher : Fetcher {
                 modelVersion = downloadDetails.modelVersion,
                 modelHash = downloadDetails.hash,
                 modelHashAlgorithm = downloadDetails.hashAlgorithm,
-                file = downloadOutputFile,
+                file = downloadOutputFile
             )
         } finally {
             cleanUpPostDownload(downloadOutputFile)
@@ -334,7 +334,7 @@ internal abstract class WebFetcher : Fetcher {
      */
     protected abstract suspend fun tryFetchMatchingCachedFile(
         hash: String,
-        hashAlgorithm: String,
+        hashAlgorithm: String
     ): FetchedModelMeta
 
     /**
@@ -345,7 +345,7 @@ internal abstract class WebFetcher : Fetcher {
      */
     protected abstract suspend fun getDownloadDetails(
         cachedModelHash: String?,
-        cachedModelHashAlgorithm: String?,
+        cachedModelHashAlgorithm: String?
     ): DownloadDetails?
 
     /**
@@ -388,7 +388,7 @@ private suspend fun downloadAndVerify(
 @Throws(IOException::class, FileAlreadyExistsException::class, NoSuchFileException::class)
 private suspend fun downloadFile(
     url: URL,
-    outputFile: File,
+    outputFile: File
 ) = withContext(Dispatchers.IO) {
     if (outputFile.exists()) {
         outputFile.delete()

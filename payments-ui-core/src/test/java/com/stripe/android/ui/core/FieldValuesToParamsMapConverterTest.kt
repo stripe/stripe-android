@@ -46,7 +46,7 @@ class FieldValuesToParamsMapConverterTest {
             IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
                 "US",
                 true
-            ),
+            )
         ).entries.forEach {
             addPath(map, getKeys(it.key.v1), it.value.value)
         }
@@ -84,7 +84,7 @@ class FieldValuesToParamsMapConverterTest {
                     IdentifierSpec.Line1 to FormFieldEntry(
                         "123 Main Street",
                         true
-                    ),
+                    )
                 ),
                 PaymentMethod.Type.Sofort.code,
                 PaymentMethod.Type.Sofort.requiresMandate

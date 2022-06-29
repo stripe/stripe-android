@@ -14,7 +14,7 @@ data class MandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
-    val stringResId: Int,
+    val stringResId: Int
 ) : FormItemSpec() {
     fun transform(merchantName: String): FormElement =
         // It could be argued that the static text should have a controller, but

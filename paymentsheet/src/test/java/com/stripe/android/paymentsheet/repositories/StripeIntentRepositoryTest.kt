@@ -45,7 +45,9 @@ internal class StripeIntentRepositoryTest {
 
             verify(stripeRepository)
                 .retrievePaymentIntentWithOrderedPaymentMethods(
-                    any(), any(), localeArgumentCaptor.capture()
+                    any(),
+                    any(),
+                    localeArgumentCaptor.capture()
                 )
             verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
             assertThat(paymentIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
@@ -124,7 +126,9 @@ internal class StripeIntentRepositoryTest {
 
             verify(stripeRepository)
                 .retrievePaymentIntentWithOrderedPaymentMethods(
-                    any(), any(), localeArgumentCaptor.capture()
+                    any(),
+                    any(),
+                    localeArgumentCaptor.capture()
                 )
             verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
             assertThat(paymentIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)

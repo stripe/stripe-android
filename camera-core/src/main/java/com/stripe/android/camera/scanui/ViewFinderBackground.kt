@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
  */
 class ViewFinderBackground(
     context: Context,
-    attrs: AttributeSet? = null,
+    attrs: AttributeSet? = null
 ) : View(context, attrs) {
     private var viewFinderRect: Rect? = null
     private var onDrawListener: (() -> Unit)? = null

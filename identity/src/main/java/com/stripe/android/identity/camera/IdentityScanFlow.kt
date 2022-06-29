@@ -10,6 +10,7 @@ import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.scanui.ScanFlow
+import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
@@ -33,7 +34,8 @@ internal class IdentityScanFlow(
     private val aggregateResultListener: AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
     private val faceDetectorModelFile: File?,
-    private val verificationPage: VerificationPage
+    private val verificationPage: VerificationPage,
+    private val modelPerformanceTracker: ModelPerformanceTracker
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
 
@@ -94,12 +96,14 @@ internal class IdentityScanFlow(
                             requireNotNull(faceDetectorModelFile) {
                                 "Failed to initialize FaceDetectorAnalyzer, " +
                                     "faceDetectorModelFile is null"
-                            }
+                            },
+                            modelPerformanceTracker
                         )
                     } else {
                         IDDetectorAnalyzer.Factory(
                             idDetectorModelFile,
-                            verificationPage.documentCapture.models.idDetectorMinScore
+                            verificationPage.documentCapture.models.idDetectorMinScore,
+                            modelPerformanceTracker
                         )
                     }
                 )
@@ -114,7 +118,7 @@ internal class IdentityScanFlow(
                 imageStream.map { cameraPreviewImage ->
                     AnalyzerInput(cameraPreviewImage, viewFinder)
                 },
-                coroutineScope,
+                coroutineScope
             )
         }
     }

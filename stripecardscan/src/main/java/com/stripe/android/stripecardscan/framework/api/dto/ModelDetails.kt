@@ -12,7 +12,7 @@ internal data class ModelDetailsRequest(
     @SerialName("model_framework_version") val modelFrameworkVersion: Int,
     @SerialName("cached_model_hash") val cachedModelHash: String?,
     @SerialName("cached_model_hash_algorithm") val cachedModelHashAlgorithm: String?,
-    @SerialName("beta_opt_in") val betaOptIn: Boolean?,
+    @SerialName("beta_opt_in") val betaOptIn: Boolean?
 )
 
 @Serializable
@@ -22,5 +22,5 @@ internal data class ModelDetailsResponse(
     @SerialName("model_version") val modelVersion: String,
     @SerialName("model_hash") val hash: String,
     @SerialName("model_hash_algorithm") val hashAlgorithm: String,
-    @SerialName("query_again_after_ms") val queryAgainAfterMs: Long? = 0,
+    @SerialName("query_again_after_ms") val queryAgainAfterMs: Long? = 0
 )

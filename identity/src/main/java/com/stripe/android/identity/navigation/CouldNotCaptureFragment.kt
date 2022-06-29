@@ -6,6 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToUploadFragment
@@ -33,6 +34,9 @@ internal class CouldNotCaptureFragment(
             message2.text = getString(R.string.could_not_capture_body2)
             topButton.text = getString(R.string.file_upload)
             topButton.setOnClickListener {
+                identityViewModel.screenTracker.screenTransitionStart(
+                    SCREEN_NAME_ERROR
+                )
                 navigateToUploadFragment(
                     scanType.toUploadDestinationId(),
                     shouldShowTakePhoto = true,
@@ -43,6 +47,9 @@ internal class CouldNotCaptureFragment(
 
         bottomButton.text = getString(R.string.try_again)
         bottomButton.setOnClickListener {
+            identityViewModel.screenTracker.screenTransitionStart(
+                SCREEN_NAME_ERROR
+            )
             findNavController().navigate(
                 scanType.toScanDestinationId(),
                 bundleOf(

@@ -8,5 +8,5 @@ internal data class VerificationPageStaticContentDocumentCaptureModels(
     @SerialName("id_detector_url")
     val idDetectorUrl: String,
     @SerialName("id_detector_min_score")
-    val idDetectorMinScore: Float,
+    val idDetectorMinScore: Float
 )

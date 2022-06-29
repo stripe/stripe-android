@@ -126,7 +126,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
     @VisibleForTesting
     internal fun transformToPaymentSelection(
         formFieldValues: FormFieldValues?,
-        selectedPaymentMethodResources: SupportedPaymentMethod,
+        selectedPaymentMethodResources: SupportedPaymentMethod
     ) = formFieldValues?.let {
         FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
             formFieldValues.fieldValuePairs

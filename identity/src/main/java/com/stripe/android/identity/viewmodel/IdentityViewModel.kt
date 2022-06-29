@@ -17,14 +17,19 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.AnalyticsState
+import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
 import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
@@ -52,11 +57,13 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
@@ -68,7 +75,11 @@ internal class IdentityViewModel @Inject constructor(
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
     val identityFragmentFactory: IdentityFragmentFactory,
-    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
+    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    val fpsTracker: FPSTracker,
+    val screenTracker: ScreenTracker,
+    @UIContext val uiContext: CoroutineContext,
+    @IOContext val workContext: CoroutineContext
 ) : ViewModel() {
 
     /**
@@ -82,6 +93,12 @@ internal class IdentityViewModel @Inject constructor(
      */
     private val _selfieUploadedState = MutableStateFlow(SelfieUploadState())
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
+
+    /**
+     * StateFlow to track analytics status.
+     */
+    private val _analyticsState = MutableStateFlow(AnalyticsState())
+    val analyticsState: StateFlow<AnalyticsState> = _analyticsState
 
     /**
      * Response for initial VerificationPage, used for building UI.
@@ -310,14 +327,15 @@ internal class IdentityViewModel @Inject constructor(
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
-            if (isHighRes)
+            if (isHighRes) {
                 identityIO.cropAndPadBitmap(
                     originalBitmap,
                     boundingBox,
                     originalBitmap.longerEdge() * docCapturePage.highResImageCropPadding
                 )
-            else
-                originalBitmap,
+            } else {
+                originalBitmap
+            },
             verificationId = verificationArgs.verificationSessionId,
             fileName =
             StringBuilder().also { nameBuilder ->
@@ -329,15 +347,17 @@ internal class IdentityViewModel @Inject constructor(
                 nameBuilder.append(".jpeg")
             }.toString(),
             maxDimension =
-            if (isHighRes)
+            if (isHighRes) {
                 docCapturePage.highResImageMaxDimension
-            else
-                docCapturePage.lowResImageMaxDimension,
+            } else {
+                docCapturePage.lowResImageMaxDimension
+            },
             compressionQuality =
-            if (isHighRes)
+            if (isHighRes) {
                 docCapturePage.highResImageCompressionQuality
-            else
+            } else {
                 docCapturePage.lowResImageCompressionQuality
+            }
         ).let { imageFile ->
             uploadDocumentImagesAndNotify(
                 imageFile = imageFile,
@@ -350,6 +370,13 @@ internal class IdentityViewModel @Inject constructor(
                 isFront = isFront
             )
         }
+    }
+
+    /**
+     * Update the analytics state.
+     */
+    internal fun updateAnalyticsState(updateBlock: (AnalyticsState) -> AnalyticsState) {
+        _analyticsState.update(updateBlock)
     }
 
     /**
@@ -373,6 +400,17 @@ internal class IdentityViewModel @Inject constructor(
                 )
             }.fold(
                 onSuccess = { uploadedStripeFile ->
+                    updateAnalyticsState { oldState ->
+                        if (isFront) {
+                            oldState.copy(
+                                docFrontUploadType = uploadMethod
+                            )
+                        } else {
+                            oldState.copy(
+                                docBackUploadType = uploadMethod
+                            )
+                        }
+                    }
                     _documentUploadedState.update { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
@@ -412,14 +450,15 @@ internal class IdentityViewModel @Inject constructor(
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
-            if (isHighRes)
+            if (isHighRes) {
                 identityIO.cropAndPadBitmap(
                     originalBitmap,
                     boundingBox,
                     boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH * selfieCapturePage.highResImageCropPadding
                 )
-            else
-                originalBitmap,
+            } else {
+                originalBitmap
+            },
             verificationId = verificationArgs.verificationSessionId,
             fileName =
             StringBuilder().also { nameBuilder ->
@@ -439,15 +478,17 @@ internal class IdentityViewModel @Inject constructor(
                 nameBuilder.append(".jpeg")
             }.toString(),
             maxDimension =
-            if (isHighRes)
+            if (isHighRes) {
                 selfieCapturePage.highResImageMaxDimension
-            else
-                selfieCapturePage.lowResImageMaxDimension,
+            } else {
+                selfieCapturePage.lowResImageMaxDimension
+            },
             compressionQuality =
-            if (isHighRes)
+            if (isHighRes) {
                 selfieCapturePage.highResImageCompressionQuality
-            else
+            } else {
                 selfieCapturePage.lowResImageCompressionQuality
+            }
         ).let { imageFile ->
             uploadSelfieImagesAndNotify(
                 imageFile = imageFile,
@@ -506,7 +547,7 @@ internal class IdentityViewModel @Inject constructor(
     fun observeForVerificationPage(
         owner: LifecycleOwner,
         onSuccess: (VerificationPage) -> Unit,
-        onFailure: (Throwable?) -> Unit,
+        onFailure: (Throwable?) -> Unit
     ) {
         verificationPage.observe(owner) { resource ->
             when (resource.status) {
@@ -558,7 +599,7 @@ internal class IdentityViewModel @Inject constructor(
                             "Failed to retrieve verification page with " +
                                 "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: ${verificationArgs.ephemeralKeySecret}",
                             it
-                        ),
+                        )
                     )
                 }
             )
@@ -620,13 +661,47 @@ internal class IdentityViewModel @Inject constructor(
             verificationArgs.ephemeralKeySecret
         )
 
+    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
+        viewModelScope.launch {
+            identityRepository.sendAnalyticsRequest(
+                request
+            )
+        }
+    }
+
+    /**
+     * Send VerificationSucceeded analytics event with isFromFallbackUrl = false
+     * based on values in [analyticsState].
+     */
+    fun sendSucceededAnalyticsRequestForNative() {
+        viewModelScope.launch {
+            analyticsState.collectLatest { latestState ->
+                identityRepository.sendAnalyticsRequest(
+                    identityAnalyticsRequestFactory.verificationSucceeded(
+                        isFromFallbackUrl = false,
+                        scanType = latestState.scanType,
+                        requireSelfie = latestState.requireSelfie,
+                        docFrontRetryTimes = latestState.docFrontRetryTimes,
+                        docBackRetryTimes = latestState.docBackRetryTimes,
+                        selfieRetryTimes = latestState.selfieRetryTimes,
+                        docFrontUploadType = latestState.docFrontUploadType,
+                        docBackUploadType = latestState.docBackUploadType,
+                        docFrontModelScore = latestState.docFrontModelScore,
+                        docBackModelScore = latestState.docBackModelScore,
+                        selfieModelScore = latestState.selfieModelScore
+                    )
+                )
+            }
+        }
+    }
+
     internal class IdentityViewModelFactory(
         val context: Context,
         private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
         private val cameraPermissionEnsureable: CameraPermissionEnsureable,
         private val appSettingsOpenable: AppSettingsOpenable,
         private val verificationFlowFinishable: VerificationFlowFinishable,
-        private val fallbackUrlLauncher: FallbackUrlLauncher,
+        private val fallbackUrlLauncher: FallbackUrlLauncher
     ) : ViewModelProvider.Factory, Injectable<Context> {
         @Inject
         lateinit var subComponentBuilderProvider: Provider<IdentityViewModelSubcomponent.Builder>
@@ -653,14 +728,6 @@ internal class IdentityViewModel @Inject constructor(
             DaggerIdentityViewModelFactoryComponent.builder()
                 .context(context)
                 .build().inject(this)
-        }
-    }
-
-    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
-        viewModelScope.launch {
-            identityRepository.sendAnalyticsRequest(
-                request
-            )
         }
     }
 

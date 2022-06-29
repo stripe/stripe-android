@@ -30,7 +30,7 @@ internal object FinancialConnectionsAccountFixtures {
         supportedPaymentMethodTypes = listOf(
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
-        ),
+        )
     )
 
     val SAVINGS_ACCOUNT = FinancialConnectionsAccount(
@@ -45,7 +45,7 @@ internal object FinancialConnectionsAccountFixtures {
         status = FinancialConnectionsAccount.Status.ACTIVE,
         subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
         supportedPaymentMethodTypes = listOf(
-            FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
-        ),
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT
+        )
     )
 }

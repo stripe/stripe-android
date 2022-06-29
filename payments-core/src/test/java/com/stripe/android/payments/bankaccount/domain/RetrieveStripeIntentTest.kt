@@ -133,7 +133,7 @@ class RetrieveStripeIntentTest {
             stripeRepository.retrieveStripeIntent(
                 any(),
                 any(),
-                any(),
+                any()
             )
         ).thenAnswer { intent() }
     }

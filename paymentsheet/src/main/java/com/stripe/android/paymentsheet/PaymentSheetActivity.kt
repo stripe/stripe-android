@@ -161,7 +161,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
-
                 // We only want to do this if the loading fragment is shown.  Otherwise this causes
                 // a new fragment to be created if the activity was destroyed and recreated.
                 if (supportFragmentManager.fragments.firstOrNull() is PaymentSheetLoadingFragment) {

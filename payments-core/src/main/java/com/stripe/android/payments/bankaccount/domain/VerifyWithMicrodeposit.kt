@@ -19,7 +19,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         firstAmount: Int,
-        secondAmount: Int,
+        secondAmount: Int
     ): Result<PaymentIntent> = kotlin.runCatching {
         stripeRepository.verifyPaymentIntentWithMicrodeposits(
             clientSecret = clientSecret,
@@ -38,7 +38,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
     suspend fun forPaymentIntent(
         publishableKey: String,
         clientSecret: String,
-        descriptorCode: String,
+        descriptorCode: String
     ): Result<PaymentIntent> = kotlin.runCatching {
         stripeRepository.verifyPaymentIntentWithMicrodeposits(
             clientSecret = clientSecret,
@@ -57,7 +57,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         firstAmount: Int,
-        secondAmount: Int,
+        secondAmount: Int
     ): Result<SetupIntent> = kotlin.runCatching {
         stripeRepository.verifySetupIntentWithMicrodeposits(
             clientSecret = clientSecret,
@@ -76,7 +76,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
     suspend fun forSetupIntent(
         publishableKey: String,
         clientSecret: String,
-        descriptorCode: String,
+        descriptorCode: String
     ): Result<SetupIntent> = kotlin.runCatching {
         stripeRepository.verifySetupIntentWithMicrodeposits(
             clientSecret = clientSecret,

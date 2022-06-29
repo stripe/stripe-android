@@ -40,7 +40,7 @@ internal fun Image.toBitmap(
         0,
         this.width,
         this.height
-    ),
+    )
 ): Bitmap = when (this.format) {
     ImageFormat.NV21 -> NV21Image(this).crop(crop).toBitmap(renderScript)
     ImageFormat.YUV_420_888 -> NV21Image(this).crop(crop).toBitmap(renderScript)

@@ -504,7 +504,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateCvc()
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // For paymentsheet
     @JvmSynthetic
     fun setCvcIcon(resId: Int?) {
         if (resId != null) {

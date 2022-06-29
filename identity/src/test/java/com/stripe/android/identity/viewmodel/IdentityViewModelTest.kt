@@ -86,11 +86,16 @@ internal class IdentityViewModelTest {
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            presentTime = 0
         ),
         mockIdentityRepository,
         mockIdentityModelFetcher,
         mockIdentityIO,
+        mock(),
+        mock(),
+        mock(),
+        mock(),
         mock(),
         mock()
     )
@@ -178,7 +183,7 @@ internal class IdentityViewModelTest {
             (viewModel.selfieUploadState.value.bestHighResResult),
             (viewModel.selfieUploadState.value.bestLowResResult),
             (viewModel.selfieUploadState.value.lastHighResResult),
-            (viewModel.selfieUploadState.value.lastLowResResult),
+            (viewModel.selfieUploadState.value.lastLowResResult)
         ).forEach { uploadedResult ->
             assertThat(uploadedResult).isEqualTo(
                 Resource.error<UploadedResult>(
@@ -219,6 +224,56 @@ internal class IdentityViewModelTest {
                 Resource.success(FACE_DETECTOR_FILE)
             )
         }
+
+    @Test
+    fun verifyAnalyticsState() {
+        // initialized with all null
+        assertThat(viewModel.analyticsState.value.scanType).isNull()
+        assertThat(viewModel.analyticsState.value.requireSelfie).isNull()
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isNull()
+
+        viewModel.updateAnalyticsState { oldState ->
+            oldState.copy(
+                scanType = IdentityScanState.ScanType.ID_FRONT
+            )
+        }
+
+        assertThat(viewModel.analyticsState.value.scanType).isEqualTo(
+            IdentityScanState.ScanType.ID_FRONT
+        )
+        assertThat(viewModel.analyticsState.value.requireSelfie).isNull()
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isNull()
+
+        viewModel.updateAnalyticsState { oldState ->
+            oldState.copy(
+                requireSelfie = false
+            )
+        }
+
+        assertThat(viewModel.analyticsState.value.scanType).isEqualTo(
+            IdentityScanState.ScanType.ID_FRONT
+        )
+        assertThat(viewModel.analyticsState.value.requireSelfie).isEqualTo(
+            false
+        )
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isNull()
+
+        viewModel.updateAnalyticsState { oldState ->
+            oldState.copy(
+                docFrontUploadType = DocumentUploadParam.UploadMethod.MANUALCAPTURE
+            )
+        }
+
+        assertThat(viewModel.analyticsState.value.scanType).isEqualTo(
+            IdentityScanState.ScanType.ID_FRONT
+        )
+        assertThat(viewModel.analyticsState.value.requireSelfie).isEqualTo(
+            false
+        )
+        assertThat(viewModel.analyticsState.value.docFrontUploadType).isEqualTo(
+            DocumentUploadParam.UploadMethod.MANUALCAPTURE
+        )
+    }
 
     private fun testUploadManualSuccessResult(isFront: Boolean) {
         mockUploadSuccess()
@@ -263,10 +318,11 @@ internal class IdentityViewModelTest {
         viewModel.uploadScanResult(
             FINAL_ID_DETECTOR_RESULT,
             mockVerificationPage,
-            if (isFront)
+            if (isFront) {
                 IdentityScanState.ScanType.ID_FRONT
-            else
+            } else {
                 IdentityScanState.ScanType.ID_BACK
+            }
         )
 
         // high res upload
@@ -280,10 +336,11 @@ internal class IdentityViewModelTest {
             same(CROPPED_BITMAP),
             eq(VERIFICATION_SESSION_ID),
             eq(
-                if (isFront)
+                if (isFront) {
                     "${VERIFICATION_SESSION_ID}_$FRONT.jpeg"
-                else
+                } else {
                     "${VERIFICATION_SESSION_ID}_$BACK.jpeg"
+                }
             ),
             eq(HIGH_RES_IMAGE_MAX_DIMENSION),
             eq(HIGH_RES_COMPRESSION_QUALITY)
@@ -309,10 +366,11 @@ internal class IdentityViewModelTest {
             same(INPUT_BITMAP),
             eq(VERIFICATION_SESSION_ID),
             eq(
-                if (isFront)
+                if (isFront) {
                     "${VERIFICATION_SESSION_ID}_${FRONT}_full_frame.jpeg"
-                else
+                } else {
                     "${VERIFICATION_SESSION_ID}_${BACK}_full_frame.jpeg"
+                }
             ),
             eq(LOW_RES_IMAGE_MAX_DIMENSION),
             eq(LOW_RES_COMPRESSION_QUALITY)
@@ -368,7 +426,7 @@ internal class IdentityViewModelTest {
             ).isEqualTo(
                 Resource.success(
                     UploadedResult(
-                        UPLOADED_STRIPE_FILE,
+                        UPLOADED_STRIPE_FILE
                     )
                 )
             )
@@ -395,7 +453,7 @@ internal class IdentityViewModelTest {
             ).isEqualTo(
                 Resource.success(
                     UploadedResult(
-                        UPLOADED_STRIPE_FILE,
+                        UPLOADED_STRIPE_FILE
                     )
                 )
             )
@@ -533,7 +591,7 @@ internal class IdentityViewModelTest {
             ) to FaceDetectorOutput(
                 boundingBox = mock(),
                 resultScore = 0.82f
-            ), // last
+            ) // last
         )
         val FINAL_FACE_DETECTOR_RESULT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(

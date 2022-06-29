@@ -65,7 +65,7 @@ internal fun PrimaryButton(
     val isEnabled = state == PrimaryButtonState.Enabled
 
     CompositionLocalProvider(
-        LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled,
+        LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         Box(
             modifier = Modifier

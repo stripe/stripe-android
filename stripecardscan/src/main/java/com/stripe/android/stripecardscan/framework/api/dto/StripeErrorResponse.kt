@@ -14,5 +14,5 @@ internal data class StripeServerError(
     @SerialName("doc_url") val docUrl: String? = null,
     @SerialName("message") val message: String,
     @SerialName("param") val param: String? = null,
-    @SerialName("type") val type: String,
+    @SerialName("type") val type: String
 )

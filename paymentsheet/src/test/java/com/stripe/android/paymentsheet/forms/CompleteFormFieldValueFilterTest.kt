@@ -27,7 +27,7 @@ class CompleteFormFieldValueFilterTest {
     private val fieldFlow = MutableStateFlow(
         mapOf(
             IdentifierSpec.Country to FormFieldEntry("US", true),
-            IdentifierSpec.Email to FormFieldEntry("email@email.com", false),
+            IdentifierSpec.Email to FormFieldEntry("email@email.com", false)
         )
     )
 
@@ -64,7 +64,7 @@ class CompleteFormFieldValueFilterTest {
             fieldFlow.value =
                 mapOf(
                     IdentifierSpec.Country to FormFieldEntry("US", true),
-                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
+                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true)
                 )
 
             val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
@@ -99,7 +99,7 @@ class CompleteFormFieldValueFilterTest {
             fieldFlow.value =
                 mapOf(
                     IdentifierSpec.Country to FormFieldEntry("US", true),
-                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
+                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true)
                 )
 
             hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)

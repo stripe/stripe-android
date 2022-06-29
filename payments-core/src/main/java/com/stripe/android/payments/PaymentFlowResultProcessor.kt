@@ -72,7 +72,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         cancelStripeIntentSource(
                             stripeIntent,
                             requestOptions,
-                            sourceId,
+                            sourceId
                         )
                     )
                 }
@@ -173,7 +173,11 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     @IOContext workContext: CoroutineContext,
     val retryDelaySupplier: RetryDelaySupplier
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
-    context, publishableKeyProvider, stripeRepository, logger, workContext
+    context,
+    publishableKeyProvider,
+    stripeRepository,
+    logger,
+    workContext
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -188,7 +192,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
 
     override suspend fun refreshStripeIntentUntilTerminalState(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: ApiRequest.Options
     ): PaymentIntent {
         var remainingRetries = MAX_RETRIES
 
@@ -228,7 +232,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         stripeRepository.cancelPaymentIntentSource(
             stripeIntent.id.orEmpty(),
             sourceId,
-            requestOptions,
+            requestOptions
         )
 
     override fun createStripeIntentResult(
@@ -258,7 +262,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     logger: Logger,
     @IOContext workContext: CoroutineContext
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
-    context, publishableKeyProvider, stripeRepository, logger, workContext
+    context,
+    publishableKeyProvider,
+    stripeRepository,
+    logger,
+    workContext
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -289,7 +297,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         stripeRepository.cancelSetupIntentSource(
             stripeIntent.id.orEmpty(),
             sourceId,
-            requestOptions,
+            requestOptions
         )
 
     override fun createStripeIntentResult(

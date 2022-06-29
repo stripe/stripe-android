@@ -16,6 +16,6 @@ internal data class KlarnaHeaderStaticTextSpec(
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.apiPath,
-            stringResId = KlarnaHelper.getKlarnaHeader(),
+            stringResId = KlarnaHelper.getKlarnaHeader()
         )
 }

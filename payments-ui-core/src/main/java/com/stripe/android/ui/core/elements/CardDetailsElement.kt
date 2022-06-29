@@ -19,7 +19,7 @@ internal class CardDetailsElement(
         context,
         initialValues,
         viewOnlyFields.contains(IdentifierSpec.CardNumber)
-    ),
+    )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
 
@@ -43,7 +43,7 @@ internal class CardDetailsElement(
         controller.numberElement.controller.formFieldValue,
         controller.cvcElement.controller.formFieldValue,
         controller.expirationDateElement.controller.formFieldValue,
-        controller.numberElement.controller.cardBrandFlow,
+        controller.numberElement.controller.cardBrandFlow
     ) { number, cvc, expirationDate, brand ->
         var month = -1
         var year = -1

@@ -56,7 +56,7 @@ data class PaymentsColors(
 data class PaymentsShapes(
     val cornerRadius: Float,
     val borderStrokeWidth: Float,
-    val borderStrokeWidthSelected: Float,
+    val borderStrokeWidthSelected: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -87,13 +87,13 @@ data class PrimaryButtonStyle(
 data class PrimaryButtonColors(
     val background: Color,
     val onBackground: Color,
-    val border: Color,
+    val border: Color
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonShape(
     val cornerRadius: Float,
-    val borderStrokeWidth: Float,
+    val borderStrokeWidth: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -176,7 +176,7 @@ object PaymentsThemeDefaults {
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
-            borderStrokeWidth = 0.0f,
+            borderStrokeWidth = 0.0f
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
@@ -210,14 +210,13 @@ fun PaymentsShapes.toComposeShapes(): PaymentsComposeShapes {
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTypography.toComposeTypography(): Typography {
-
     val fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = TextStyle.Default.copy(
         fontFamily = fontFamily,
         fontSize = (xLargeFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightBold),
+        fontWeight = FontWeight(fontWeightBold)
     )
 
     // h5 is our medium headline label.
@@ -243,7 +242,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     val body1 = TextStyle.Default.copy(
         fontFamily = fontFamily,
         fontSize = (mediumFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightNormal),
+        fontWeight = FontWeight(fontWeightNormal)
     )
 
     // subtitle1 is our only subtitle size. Used for labeling fields.
@@ -388,6 +387,7 @@ fun Context.isSystemDarkTheme(): Boolean {
     return resources.configuration.uiMode and
         UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
 }
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.convertDpToPx(dp: Dp): Float {
     return dp.value * resources.displayMetrics.density

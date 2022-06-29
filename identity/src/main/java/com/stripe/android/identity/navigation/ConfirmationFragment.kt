@@ -8,13 +8,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
 import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * Fragment for confirmation.
@@ -37,7 +40,26 @@ internal class ConfirmationFragment(
     ): View {
         binding = ConfirmationFragmentBinding.inflate(inflater, container, false)
         binding.kontinue.setOnClickListener {
-            // TODO: Send verificationSucceed analytics event
+            lifecycleScope.launch {
+                identityViewModel.analyticsState.collectLatest {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
+                            isFromFallbackUrl = false,
+                            scanType = it.scanType,
+                            requireSelfie = it.requireSelfie,
+                            docFrontRetryTimes = it.docFrontRetryTimes,
+                            docBackRetryTimes = it.docBackRetryTimes,
+                            selfieRetryTimes = it.selfieRetryTimes,
+                            docFrontUploadType = it.docFrontUploadType,
+                            docBackUploadType = it.docBackUploadType,
+                            docFrontModelScore = it.docFrontModelScore,
+                            docBackModelScore = it.docBackModelScore,
+                            selfieModelScore = it.selfieModelScore
+                        )
+                    )
+                }
+            }
+            identityViewModel.sendSucceededAnalyticsRequestForNative()
             verificationFlowFinishable.finishWithResult(
                 IdentityVerificationSheet.VerificationFlowResult.Completed
             )
@@ -61,9 +83,13 @@ internal class ConfirmationFragment(
             }
         )
 
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONFIRMATION)
+        }
+
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_CONFIRMATION
+                screenName = SCREEN_NAME_CONFIRMATION
             )
         )
     }
