@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.AccountDisconnectionMethod
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 
 /**
@@ -9,9 +10,9 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 internal object ConsentUrlBuilder {
     fun getDisconnectUrl(manifest: FinancialConnectionsSessionManifest): String {
         return when (manifest.accountDisconnectionMethod) {
-            FinancialConnectionsSessionManifest.AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
-            FinancialConnectionsSessionManifest.AccountDisconnectionMethod.SUPPORT -> FinancialConnectionsUrls.Disconnect.support
-            FinancialConnectionsSessionManifest.AccountDisconnectionMethod.EMAIL, null -> FinancialConnectionsUrls.Disconnect.email
+            AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
+            AccountDisconnectionMethod.SUPPORT -> FinancialConnectionsUrls.Disconnect.support
+            AccountDisconnectionMethod.EMAIL, null -> FinancialConnectionsUrls.Disconnect.email
         }
     }
 

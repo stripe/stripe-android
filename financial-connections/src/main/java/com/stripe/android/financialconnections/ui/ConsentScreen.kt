@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -63,6 +64,7 @@ internal fun ConsentScreen() {
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
         confirmStateChange = {
             if (it == ModalBottomSheetValue.Hidden) viewModel.onModalBottomSheetClosed()
             true
@@ -209,40 +211,50 @@ private fun RequestedDataBottomSheetContent(
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
-    Column(
-        Modifier
-            .padding(24.dp)
-    ) {
-        Text(
-            text = requestedDataTitle.toText().toString(),
-            color = FinancialConnectionsTheme.colors.textPrimary,
-            style = FinancialConnectionsTheme.typography.heading
-        )
-        Spacer(modifier = Modifier.size(24.dp))
-        requestedDataBullets.forEach { (title, description) ->
-            ConsentBottomSheetBullet(
-                title = TextResource.Text(title.toText().toString()),
-                description = TextResource.Text(description.toText().toString())
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-        }
-
-        AnnotatedText(
-            text = TextResource.StringId(R.string.stripe_consent_requested_data_learnmore),
-            onClickableTextClick = { onClickableTextClick(it) },
-            textStyle = FinancialConnectionsTheme.typography.body.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            clickableStyle = FinancialConnectionsTheme.typography.caption
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand)
-        )
-        Spacer(modifier = Modifier.size(24.dp))
-        FinancialConnectionsButton(
-            onClick = { onConfirmModalClick() },
-            modifier = Modifier.fillMaxWidth()
+    val scrollState = rememberScrollState()
+    Column {
+        Column(
+            Modifier
+                .verticalScroll(scrollState)
+                .padding(24.dp)
         ) {
-            Text(text = stringResource(R.string.stripe_ok))
+            Text(
+                text = requestedDataTitle.toText().toString(),
+                color = FinancialConnectionsTheme.colors.textPrimary,
+                style = FinancialConnectionsTheme.typography.heading
+            )
+            requestedDataBullets.forEach { (title, description) ->
+                Spacer(modifier = Modifier.size(24.dp))
+                ConsentBottomSheetBullet(
+                    title = TextResource.Text(title.toText().toString()),
+                    description = TextResource.Text(description.toText().toString())
+                )
+            }
+        }
+        Column(
+            Modifier.padding(
+                bottom = 16.dp,
+                start = 24.dp,
+                end = 24.dp
+            )
+        ) {
+            AnnotatedText(
+                text = TextResource.StringId(R.string.stripe_consent_requested_data_learnmore),
+                onClickableTextClick = { onClickableTextClick(it) },
+                textStyle = FinancialConnectionsTheme.typography.body.copy(
+                    color = FinancialConnectionsTheme.colors.textSecondary
+                ),
+                clickableStyle = FinancialConnectionsTheme.typography.caption
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textBrand)
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            FinancialConnectionsButton(
+                onClick = { onConfirmModalClick() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.stripe_ok))
+            }
         }
     }
 }

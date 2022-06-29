@@ -1,6 +1,7 @@
+@file:Suppress("MaxLineLength", "MaximumLineLength")
+
 package com.stripe.android.financialconnections.presentation
 
-@Suppress("MaxLineLength", "MaximumLineLength")
 object FinancialConnectionsUrls {
     object Disconnect {
         const val email = "ttps://support.stripe.com/contact"
