@@ -14,7 +14,7 @@ internal object ConsentTextBuilder {
         return listOf(
             R.drawable.stripe_ic_safe to getRequestedDataBullet(manifest),
             R.drawable.stripe_ic_shield to TextResource.StringId(R.string.stripe_consent_pane_body2),
-            R.drawable.stripe_ic_lock to TextResource.StringId(R.string.stripe_consent_pane_body3),
+            R.drawable.stripe_ic_lock to TextResource.StringId(R.string.stripe_consent_pane_body3)
         )
     }
 
@@ -22,7 +22,7 @@ internal object ConsentTextBuilder {
         manifest: FinancialConnectionsSessionManifest
     ): TextResource = when (val name = manifest.name) {
         null -> TextResource.StringId(
-            R.string.stripe_consent_requested_data_title_no_businessname,
+            R.string.stripe_consent_requested_data_title_no_businessname
         )
         else -> TextResource.StringId(
             R.string.stripe_consent_requested_data_title,
@@ -34,7 +34,7 @@ internal object ConsentTextBuilder {
         val name = manifest.name
         return when {
             name == null -> TextResource.StringId(
-                R.string.stripe_consent_pane_title_no_businessname,
+                R.string.stripe_consent_pane_title_no_businessname
             )
             manifest.connectedAccountName != null -> TextResource.StringId(
                 R.string.stripe_consent_pane_title_connected_account,
@@ -53,7 +53,7 @@ internal object ConsentTextBuilder {
         val name = manifest.name
         return when {
             name == null -> TextResource.StringId(
-                R.string.stripe_consent_pane_body1_no_businessname,
+                R.string.stripe_consent_pane_body1_no_businessname
             )
             manifest.connectedAccountName != null -> TextResource.StringId(
                 R.string.stripe_consent_pane_body1_connected_account,

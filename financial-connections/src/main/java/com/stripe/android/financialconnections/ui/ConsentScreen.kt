@@ -100,7 +100,7 @@ private fun ViewEffect(
             is ConsentState.ViewEffect.OpenUrl -> context.startActivity(
                 CreateBrowserIntentForUrl(
                     context = context,
-                    uri = Uri.parse(viewEffect.url),
+                    uri = Uri.parse(viewEffect.url)
                 )
             )
             null -> Unit
@@ -231,7 +231,7 @@ private fun RequestedDataBottomSheetContent(
             text = TextResource.StringId(R.string.stripe_consent_requested_data_learnmore),
             onClickableTextClick = { onClickableTextClick(it) },
             textStyle = FinancialConnectionsTheme.typography.body.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary,
+                color = FinancialConnectionsTheme.colors.textSecondary
             ),
             clickableStyle = FinancialConnectionsTheme.typography.caption
                 .toSpanStyle()
@@ -298,7 +298,7 @@ private fun ConsentBullet(
             text,
             onClickableTextClick = { onClickableTextClick?.invoke(it) },
             textStyle = FinancialConnectionsTheme.typography.body.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary,
+                color = FinancialConnectionsTheme.colors.textSecondary
             )
         )
     }

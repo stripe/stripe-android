@@ -16,7 +16,7 @@ internal class GoNextTest {
 
     val goNext = GoNext(
         navigationManager = navigationManager,
-        logger = Logger.noop(),
+        logger = Logger.noop()
     )
 
     @Test

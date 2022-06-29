@@ -49,55 +49,55 @@ private val Typography = FinancialConnectionsTypography(
         // TODO caps.
         fontSize = 12.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.W600
     ),
     body = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W400,
+        fontWeight = FontWeight.W400
     ),
     bodyEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.W600
     ),
     detail = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W400,
+        fontWeight = FontWeight.W400
     ),
     detailEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.W600
     ),
     caption = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
-        fontWeight = FontWeight.W400,
+        fontWeight = FontWeight.W400
     ),
     captionEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.W600
     ),
     captionTight = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W400,
+        fontWeight = FontWeight.W400
     ),
     captionTightEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W600,
-    ),
+        fontWeight = FontWeight.W600
+    )
 )
 
 @Composable
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
-        LocalFinancialConnectionsColors provides LightColorPalette,
+        LocalFinancialConnectionsColors provides LightColorPalette
     ) {
         MaterialTheme(
             colors = debugColors(),

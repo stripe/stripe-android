@@ -117,7 +117,7 @@ private fun InstitutionGrid(
                             text = institution.name,
                             color = FinancialConnectionsTheme.colors.textWhite,
                             style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

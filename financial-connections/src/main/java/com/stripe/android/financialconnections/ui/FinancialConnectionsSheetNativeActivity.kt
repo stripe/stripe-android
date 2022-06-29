@@ -54,7 +54,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     is OpenAuthFlowWithUrl -> startActivity(
                         CreateBrowserIntentForUrl(
                             context = this,
-                            uri = Uri.parse(viewEffect.url),
+                            uri = Uri.parse(viewEffect.url)
                         )
                     )
                 }

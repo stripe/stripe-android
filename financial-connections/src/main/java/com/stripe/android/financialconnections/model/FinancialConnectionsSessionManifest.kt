@@ -146,7 +146,7 @@ internal data class FinancialConnectionsSessionManifest(
     val paymentMethodType: SupportedPaymentMethodTypes? = null,
 
     @SerialName(value = "success_url")
-    val successUrl: String,
+    val successUrl: String
 
 ) : Parcelable {
 

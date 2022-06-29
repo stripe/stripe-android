@@ -1,10 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
-import com.stripe.android.financialconnections.ui.TextResource
 
 /**
  * Helper to derive urls on the consent screen based on the manifest content.

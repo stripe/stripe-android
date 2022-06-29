@@ -1,4 +1,4 @@
-@file:Suppress("MatchingDeclarationName")
+@file:Suppress("MatchingDeclarationName", "ktlint:filename")
 
 package com.stripe.android.financialconnections.ui.theme
 
@@ -23,7 +23,7 @@ internal data class FinancialConnectionsTypography(
     val caption: TextStyle,
     val captionEmphasized: TextStyle,
     val captionTight: TextStyle,
-    val captionTightEmphasized: TextStyle,
+    val captionTightEmphasized: TextStyle
 )
 
 @Composable

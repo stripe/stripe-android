@@ -99,8 +99,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             url = getManifestUrl,
             options = options,
             params = mapOf(
-                PARAMS_CLIENT_SECRET to clientSecret,
-            ),
+                PARAMS_CLIENT_SECRET to clientSecret
+            )
         )
         return executeRequest(
             financialConnectionsRequest,
@@ -115,8 +115,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             url = consentAcquiredUrl,
             options = options,
             params = mapOf(
-                PARAMS_CLIENT_SECRET to clientSecret,
-            ),
+                PARAMS_CLIENT_SECRET to clientSecret
+            )
         )
         return executeRequest(
             financialConnectionsRequest,
@@ -129,8 +129,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             url = featuredInstitutionsUrl,
             options = options,
             params = mapOf(
-                PARAMS_CLIENT_SECRET to clientSecret,
-            ),
+                PARAMS_CLIENT_SECRET to clientSecret
+            )
         )
         return executeRequest(
             request,
@@ -140,7 +140,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
     override suspend fun searchInstitutions(
         clientSecret: String,
-        query: String,
+        query: String
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = institutionsUrl,
@@ -149,7 +149,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "query" to query,
                 "limit" to SEARCH_INSTITUTIONS_LIMIT
-            ),
+            )
         )
         return executeRequest(
             request,
@@ -159,7 +159,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
 
     override suspend fun postAuthorizationSession(
         clientSecret: String,
-        institutionId: String,
+        institutionId: String
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionUrl,
@@ -168,7 +168,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "use_mobile_handoff" to false,
                 "institution" to institutionId
-            ),
+            )
         )
         return executeRequest(
             request,
