@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -28,12 +29,12 @@ internal fun AutoCompleteScreen(
                 viewModel.navigator.onBack()
             }
         )
-        Column(Modifier.padding(horizontal = 20.dp)) {
+        Column(Modifier.padding(horizontal = 20.dp).fillMaxHeight()) {
             Text("AutoComplete Screen")
             Button(
                 onClick = {
                     // TODO implement this screen
-                    val dummyAddress = ShippingAddress(name = "Skyler")
+                    val dummyAddress = ShippingAddress(line1 = "123 street", line2 = "711", state = "ohio", postalCode = "12345", country = "US", city = "coolcity")
                     viewModel.navigator.setResult(ShippingAddress.KEY, dummyAddress)
                     viewModel.navigator.onBack()
                 },

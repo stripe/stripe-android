@@ -94,6 +94,8 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
+    androidTestImplementation "org.mockito:mockito-android:4.6.1"
+    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
 
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"

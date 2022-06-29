@@ -252,11 +252,11 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    private fun getShippingAddress(): ShippingAddress? {
+    override fun getShippingAddress(): ShippingAddress? {
         return viewModel.shippingAddress
     }
 
-    private fun presentShippingAddress() {
+    override fun presentShippingAddress() {
         val initData = runCatching {
             viewModel.initData
         }.getOrElse {

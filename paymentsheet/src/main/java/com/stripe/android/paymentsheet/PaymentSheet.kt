@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.addresselement.ShippingAddress
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -782,5 +783,8 @@ class PaymentSheet internal constructor(
                 ).create()
             }
         }
+
+        fun getShippingAddress(): ShippingAddress?
+        fun presentShippingAddress()
     }
 }

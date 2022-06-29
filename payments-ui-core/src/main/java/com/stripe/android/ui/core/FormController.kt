@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
@@ -25,7 +26,7 @@ import javax.inject.Inject
  * @param: formSpec A representation of the layout which is used to display the UI fields on screen.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FormController @Inject constructor(
+open class FormController @Inject constructor(
     private val formSpec: LayoutSpec,
     private val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElements,
@@ -85,6 +86,25 @@ class FormController @Inject constructor(
         }
     }.map { map ->
         map.takeIf { it.values.all { entry -> entry.isComplete } }
+    }
+
+    val formValues = combine(
+        elements.filterNotNull().map { elementsList ->
+            combine(
+                elementsList.map {
+                    it.getFormFieldValueFlow()
+                }
+            ) {
+                it.toList().flatten().toMap()
+            }
+        }.flattenConcat(),
+        hiddenIdentifiers
+    ) { elementsList, hiddenIdentifiers ->
+        elementsList.filter { mapEntry ->
+            !hiddenIdentifiers.contains(mapEntry.key)
+        }
+    }.map { map ->
+        map.filter { it.value.isComplete }
     }
 
     private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
