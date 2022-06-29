@@ -343,7 +343,7 @@ class USBankAccountFormViewModelTest {
                 institutionName = "Test",
                 livemode = false,
                 last4 = "4567",
-                supportedPaymentMethodTypes = listOf(),
+                supportedPaymentMethodTypes = listOf()
             )
         )
         whenever(

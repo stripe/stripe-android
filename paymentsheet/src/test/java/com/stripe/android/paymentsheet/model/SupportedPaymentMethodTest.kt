@@ -23,6 +23,7 @@ class SupportedPaymentMethodTest {
     private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
+
     /**
      * To create a baseline for a payment method, create a new file <payment_method>-support.csv,
      * comment out the assert in this test, and copy the output into the new csv file
@@ -181,7 +182,7 @@ class SupportedPaymentMethodTest {
     @Serializable
     internal data class SetupIntentTestInput(
         val lpmTypeFormCode: String,
-        val intentLpms: List<String>,
+        val intentLpms: List<String>
     )
 
     @Serializable
@@ -242,7 +243,7 @@ class SupportedPaymentMethodTest {
                 formExists: Boolean,
                 formShowsSaveCheckbox: Boolean?, // null if no form
                 formShowsCheckboxControlledFields: Boolean?, // null if let form decide
-                supportsAdding: Boolean,
+                supportsAdding: Boolean
             ) = TestOutput(
                 supportCustomerSavedCard = supportCustomerSavedCard,
                 formExists = formExists,

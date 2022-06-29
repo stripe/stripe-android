@@ -83,7 +83,7 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         verificationId: String,
         fileName: String,
         maxDimension: Int,
-        compressionQuality: Float,
+        compressionQuality: Float
     ): File {
         File(
             context.filesDir,

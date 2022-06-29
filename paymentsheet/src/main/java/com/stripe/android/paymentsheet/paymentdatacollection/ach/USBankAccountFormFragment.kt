@@ -139,7 +139,7 @@ internal class USBankAccountFormFragment : Fragment() {
                     sheetViewModel is PaymentSheetViewModel,
                     clientSecret,
                     sheetViewModel?.usBankAccountSavedScreenState,
-                    (sheetViewModel?.newLpm as? PaymentSelection.New.USBankAccount)
+                    (sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount)
                 )
             },
             this
@@ -260,7 +260,7 @@ internal class USBankAccountFormFragment : Fragment() {
             onClick = {
                 viewModel.handlePrimaryButtonClick(screenState)
             },
-            enabled = viewModel.requiredFields.stateIn(coroutineScope).value,
+            enabled = viewModel.requiredFields.stateIn(coroutineScope).value
         )
         updateMandateText(null)
     }

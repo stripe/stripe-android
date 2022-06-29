@@ -1,4 +1,5 @@
 @file:JvmName("PaymentCardUtils")
+
 package com.stripe.android.stripecardscan.payment.card
 
 import androidx.annotation.CheckResult
@@ -91,7 +92,7 @@ internal data class IssuerData(
     val issuer: CardIssuer,
     val panLengths: List<Int>,
     val cvcLengths: List<Int>,
-    val panValidator: PanValidator,
+    val panValidator: PanValidator
 )
 
 /**
@@ -104,155 +105,155 @@ private val ISSUER_TABLE: List<IssuerData> = listOf(
         CardIssuer.AmericanExpress,
         listOf(15),
         (3..4).toList(),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         370000..379999,
         CardIssuer.AmericanExpress,
         listOf(15),
         (3..4).toList(),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         300000..305999,
         CardIssuer.DinersClub,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         309500..309599,
         CardIssuer.DinersClub,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         360000..369999,
         CardIssuer.DinersClub,
         (14..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         380000..399999,
         CardIssuer.DinersClub,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         601100..601199,
         CardIssuer.Discover,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         622126..622925,
         CardIssuer.Discover,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         624000..626999,
         CardIssuer.Discover,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         628200..628899,
         CardIssuer.Discover,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         640000..659999,
         CardIssuer.Discover,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         352800..358999,
         CardIssuer.JCB,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         620000..629999,
         CardIssuer.UnionPay,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         810000..819999,
         CardIssuer.UnionPay,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         222100..272099,
         CardIssuer.MasterCard,
         (16..16).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         510000..559999,
         CardIssuer.MasterCard,
         (16..16).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         500000..509999,
         CardIssuer.MasterCard,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         560000..699999,
         CardIssuer.MasterCard,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         675900..675999,
         CardIssuer.MasterCard,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         676770..676770,
         CardIssuer.MasterCard,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         676774..676774,
         CardIssuer.MasterCard,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
+        LengthPanValidator + LuhnPanValidator
     ),
     IssuerData(
         400000..499999,
         CardIssuer.Visa,
         (16..19).toList(),
         listOf(3),
-        LengthPanValidator + LuhnPanValidator,
-    ),
+        LengthPanValidator + LuhnPanValidator
+    )
 )
 
 /**
@@ -375,7 +376,7 @@ fun supportCardIssuer(
     cardIssuer: CardIssuer,
     panLengths: List<Int>,
     cvcLengths: List<Int>,
-    validationFunction: PanValidator = LengthPanValidator + LuhnPanValidator,
+    validationFunction: PanValidator = LengthPanValidator + LuhnPanValidator
 ) = CUSTOM_ISSUER_TABLE.add(
     IssuerData(iins, cardIssuer, panLengths, cvcLengths, validationFunction)
 )

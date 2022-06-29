@@ -31,6 +31,7 @@ class LinkActivityContract :
      * @param merchantName The customer-facing business name.
      * @param customerEmail Email of the customer, used to pre-fill the form.
      * @param customerPhone Phone number of the customer, used to pre-fill the form.
+     * @param selectedPaymentDetails The payment method previously selected by the user.
      * @param injectionParams Parameters needed to perform dependency injection.
      *                        If null, a new dependency graph will be created.
      */
@@ -41,6 +42,7 @@ class LinkActivityContract :
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
+        internal val selectedPaymentDetails: LinkPaymentDetails? = null,
         internal val injectionParams: InjectionParams? = null
     ) : ActivityStarter.Args {
 

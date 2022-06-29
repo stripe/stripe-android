@@ -29,7 +29,7 @@ interface ScanFlow<Parameters, DataType> {
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: Parameters,
+        parameters: Parameters
     )
 
     /**

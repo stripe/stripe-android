@@ -563,7 +563,7 @@ public final class com/stripe/android/ui/core/elements/TextFieldController$Defau
 
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
-	public static final fun TextField-PwfN4xk (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextField-ndPIYpw (Lcom/stripe/android/ui/core/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/runtime/Composer;II)V
 	public static final fun TextFieldSection-VyDzSTg (Lcom/stripe/android/ui/core/elements/TextFieldController;Landroidx/compose/ui/Modifier;Ljava/lang/Integer;IZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
@@ -585,6 +585,9 @@ public final class com/stripe/android/ui/core/elements/TranslationId$Companion {
 }
 
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
+}
+
+public final class com/stripe/android/ui/core/forms/ConvertToFormValuesMapKt {
 }
 
 public final class com/stripe/android/ui/core/forms/LinkCardFormKt {
@@ -610,11 +613,11 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Comp
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository_Factory;
 	public fun get ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
+	public static fun newInstance (Landroid/content/res/Resources;Lcom/stripe/android/payments/financialconnections/IsFinancialConnectionsAvailable;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 }
 
 public abstract class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule {
@@ -656,5 +659,9 @@ public abstract interface class com/stripe/android/ui/core/injection/FormControl
 	public abstract fun stripeIntent (Lcom/stripe/android/model/StripeIntent;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun viewModelScope (Lkotlinx/coroutines/CoroutineScope;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
 	public abstract fun viewOnlyFields (Ljava/util/Set;)Lcom/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder;
+}
+
+public final class com/stripe/android/ui/core/injection/NonFallbackInjectable$DefaultImpls {
+	public static fun fallbackInitialize (Lcom/stripe/android/ui/core/injection/NonFallbackInjectable;Lkotlin/Unit;)Ljava/lang/Void;
 }
 

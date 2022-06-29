@@ -47,7 +47,7 @@ internal interface Network {
         data: Request,
         requestSerializer: KSerializer<Request>,
         responseSerializer: KSerializer<Response>,
-        errorSerializer: KSerializer<Error>,
+        errorSerializer: KSerializer<Error>
     ): NetworkResult<out Response, out Error>
 
     /**
@@ -57,7 +57,7 @@ internal interface Network {
         stripePublishableKey: String,
         path: String,
         data: Request,
-        requestSerializer: KSerializer<Request>,
+        requestSerializer: KSerializer<Request>
     )
 
     /**
@@ -90,7 +90,7 @@ internal class LegacyStripeNetwork(
     baseUrl: String,
     private val retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration,
     private val retryTotalAttempts: Int,
-    private val retryStatusCodes: Iterable<Int>,
+    private val retryStatusCodes: Iterable<Int>
 ) : Network {
 
     companion object {
@@ -120,7 +120,7 @@ internal class LegacyStripeNetwork(
             networkResult = postDataWithRetries(
                 stripePublishableKey = stripePublishableKey,
                 path = path,
-                encodedData = encodeToXWWWFormUrl(requestSerializer, data),
+                encodedData = encodeToXWWWFormUrl(requestSerializer, data)
             ),
             responseSerializer = responseSerializer,
             errorSerializer = errorSerializer
@@ -154,7 +154,7 @@ internal class LegacyStripeNetwork(
         translateNetworkResult(
             getWithRetries(stripePublishableKey, path),
             responseSerializer,
-            errorSerializer,
+            errorSerializer
         )
 
     override suspend fun downloadFileWithRetries(url: URL, outputFile: File): Int {
@@ -168,7 +168,7 @@ internal class LegacyStripeNetwork(
     private suspend fun postDataWithRetries(
         stripePublishableKey: String,
         path: String,
-        encodedData: String,
+        encodedData: String
     ): NetworkResult<out String, out String> =
         try {
             retry(
@@ -191,7 +191,7 @@ internal class LegacyStripeNetwork(
      */
     private suspend fun getWithRetries(
         stripePublishableKey: String,
-        path: String,
+        path: String
     ): NetworkResult<out String, out String> =
         try {
             retry(
@@ -273,7 +273,7 @@ internal class LegacyStripeNetwork(
      */
     private fun get(
         stripePublishableKey: String,
-        path: String,
+        path: String
     ): NetworkResult<out String, out String> {
         val fullPath = if (path.startsWith("/")) path else "/$path"
         val url = URL("$baseUrl$fullPath")
@@ -357,7 +357,7 @@ private fun <Response, Error> translateNetworkResult(
 internal suspend fun downloadFileWithRetries(
     url: URL,
     outputFile: File,
-    retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration = { _, _ -> 3.seconds },
+    retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration = { _, _ -> 3.seconds }
 ) = retry(
     retryDelayFunction,
     excluding = listOf(FileNotFoundException::class.java)
@@ -371,7 +371,7 @@ internal suspend fun downloadFileWithRetries(
 @Throws(IOException::class)
 private fun downloadFile(
     url: URL,
-    outputFile: File,
+    outputFile: File
 ) = try {
     with(url.openConnection() as HttpURLConnection) {
         requestMethod = REQUEST_METHOD_GET

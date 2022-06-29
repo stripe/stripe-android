@@ -7,11 +7,12 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.withContext
@@ -209,16 +210,17 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun createPaymentDetails(
-        paymentDetails: ConsumerPaymentDetailsCreateParams,
+        paymentMethod: SupportedPaymentMethod,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        userEmail: String,
         stripeIntent: StripeIntent,
-        extraConfirmationParams: Map<String, Any>?,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<LinkPaymentDetails> = withContext(workContext) {
         runCatching {
             stripeRepository.createPaymentDetails(
                 consumerSessionClientSecret,
-                paymentDetails,
+                paymentMethod.createParams(paymentMethodCreateParams, userEmail),
                 consumerPublishableKey?.let {
                     ApiRequest.Options(it)
                 } ?: ApiRequest.Options(
@@ -226,14 +228,15 @@ internal class LinkApiRepository @Inject constructor(
                     stripeAccountIdProvider()
                 )
             )?.paymentDetails?.first()?.let {
-                LinkPaymentDetails(
+                LinkPaymentDetails.New(
                     it,
                     ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
                         .createPaymentMethodCreateParams(
                             consumerSessionClientSecret,
                             it,
-                            extraConfirmationParams
-                        )
+                            paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+                        ),
+                    paymentMethodCreateParams
                 )
             }
         }.fold(

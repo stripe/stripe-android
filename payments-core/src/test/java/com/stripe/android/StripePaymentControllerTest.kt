@@ -202,7 +202,7 @@ internal class StripePaymentControllerTest {
             val actualResponse = controller.confirmAndAuthenticateAlipay(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     "pm_123",
-                    "client_secret",
+                    "client_secret"
                 ),
                 mock(),
                 REQUEST_OPTIONS

@@ -163,7 +163,7 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun getSetupIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val params = analyticsRequestFactory.createSetupIntentConfirmation(
-            PaymentMethod.Type.Card.code,
+            PaymentMethod.Type.Card.code
         ).params
 
         assertThat(params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE])

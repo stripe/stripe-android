@@ -27,7 +27,7 @@ internal class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
     override val requiredCardIssuer: CardIssuer?,
     override val requiredLastFour: String?,
-    strictModeFrames: Int,
+    strictModeFrames: Int
 ) : RequiresMatchingCard,
     ResultAggregator<
         MainLoopAnalyzer.Input,
@@ -40,9 +40,9 @@ internal class MainLoopAggregator(
         initialState = MainLoopState.Initial(
             requiredCardIssuer = requiredCardIssuer,
             requiredLastFour = requiredLastFour,
-            strictModeFrames = strictModeFrames,
+            strictModeFrames = strictModeFrames
         ),
-        statsName = null, // TODO: when we want to collect this in scan stats, give this a name
+        statsName = null // TODO: when we want to collect this in scan stats, give this a name
     ) {
 
     companion object {
@@ -55,13 +55,13 @@ internal class MainLoopAggregator(
 
     internal data class FinalResult(
         val pan: String,
-        val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
+        val savedFrames: Map<SavedFrameType, List<SavedFrame>>
     )
 
     internal data class InterimResult(
         val analyzerResult: MainLoopAnalyzer.Prediction,
         val frame: MainLoopAnalyzer.Input,
-        val state: MainLoopState,
+        val state: MainLoopState
     )
 
     init {
@@ -78,7 +78,7 @@ internal class MainLoopAggregator(
             MAX_SAVED_FRAMES_PER_TYPE
         override fun getSaveFrameIdentifier(
             frame: SavedFrame,
-            metaData: InterimResult,
+            metaData: InterimResult
         ): SavedFrameType? {
             val hasCard = metaData.analyzerResult.isCardVisible == true
             val matchesCard = compareToRequiredCard(metaData.analyzerResult.ocr?.pan)
@@ -97,7 +97,7 @@ internal class MainLoopAggregator(
 
     override suspend fun aggregateResult(
         frame: MainLoopAnalyzer.Input,
-        result: MainLoopAnalyzer.Prediction,
+        result: MainLoopAnalyzer.Prediction
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
         val currentState = previousState.consumeTransition(result)
@@ -107,12 +107,12 @@ internal class MainLoopAggregator(
         val interimResult = InterimResult(
             analyzerResult = result,
             frame = frame,
-            state = currentState,
+            state = currentState
         )
 
         val savedFrame = SavedFrame(
             hasOcr = result.ocr?.pan?.isNotEmpty() == true,
-            frame = frame,
+            frame = frame
         )
 
         frameSaver.saveFrame(savedFrame, interimResult)

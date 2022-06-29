@@ -187,7 +187,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
-                newLpm = sheetViewModel.newLpm,
+                newLpm = sheetViewModel.newPaymentSelection,
                 isShowingLinkInlineSignup = showLinkInlineSignup
             )
         )
@@ -234,7 +234,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             newLpm: PaymentSelection.New?,
             isShowingLinkInlineSignup: Boolean = false
         ): FormFragmentArguments {
-
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(

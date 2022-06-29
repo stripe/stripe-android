@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.utils.navigateToUploadFragment
 
@@ -17,7 +18,6 @@ internal class CameraPermissionDeniedFragment(
     identityViewModelFactory: ViewModelProvider.Factory
 ) : BaseErrorFragment(identityViewModelFactory) {
     override fun onCustomizingViews() {
-
         title.text = getString(R.string.camera_permission)
         message1.text = getString(R.string.grant_camera_permission_text)
 
@@ -26,6 +26,7 @@ internal class CameraPermissionDeniedFragment(
                 getString(R.string.upload_file_text, identityScanType.getDisplayName())
             topButton.text = getString(R.string.file_upload)
             topButton.setOnClickListener {
+                identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_ERROR)
                 navigateToUploadFragment(
                     identityScanType.toUploadDestinationId(),
                     shouldShowTakePhoto = false,

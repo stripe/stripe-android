@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GetFinancialConnectionsAcccountsParams(
     @SerialName("client_secret") private val clientSecret: String,
-    @SerialName("starting_after") private val startingAfterAccountId: String?,
+    @SerialName("starting_after") private val startingAfterAccountId: String?
 ) : Parcelable {
     fun toParamMap(): Map<String, Any> {
         return listOf(

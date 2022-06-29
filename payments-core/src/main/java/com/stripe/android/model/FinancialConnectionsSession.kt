@@ -6,5 +6,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class FinancialConnectionsSession(
     val clientSecret: String?,
-    val id: String?,
+    val id: String?
 ) : StripeModel

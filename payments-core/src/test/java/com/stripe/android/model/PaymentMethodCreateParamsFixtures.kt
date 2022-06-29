@@ -108,7 +108,7 @@ internal object PaymentMethodCreateParamsFixtures {
             accountNumber = "000123456789",
             routingNumber = "110000000",
             accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
-            accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+            accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL
         ),
         billingDetails = BILLING_DETAILS
     )

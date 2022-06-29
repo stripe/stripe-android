@@ -32,7 +32,7 @@ internal sealed class USBankAccountFormScreenState(
         val intentId: String,
         val primaryButtonText: String?,
         val mandateText: String,
-        val saveForFutureUsage: Boolean,
+        val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
@@ -46,7 +46,7 @@ internal sealed class USBankAccountFormScreenState(
         val intentId: String,
         val primaryButtonText: String?,
         val mandateText: String,
-        val saveForFutureUsage: Boolean,
+        val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
@@ -61,7 +61,7 @@ internal sealed class USBankAccountFormScreenState(
         val last4: String?,
         val primaryButtonText: String?,
         val mandateText: String,
-        val saveForFutureUsage: Boolean,
+        val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)

@@ -63,14 +63,15 @@ internal class StripeIdentityVerificationSheet private constructor(
 
     override fun present(
         verificationSessionId: String,
-        ephemeralKeySecret: String,
+        ephemeralKeySecret: String
     ) {
         activityResultLauncher.launch(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
                 ephemeralKeySecret,
                 configuration.brandLogo,
-                injectorKey
+                injectorKey,
+                System.currentTimeMillis()
             )
         )
     }

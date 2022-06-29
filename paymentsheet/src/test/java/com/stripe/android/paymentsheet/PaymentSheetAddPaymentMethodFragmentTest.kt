@@ -312,7 +312,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
                     billingDetails = null
-                ),
+                )
             )
         }
     }
@@ -346,7 +346,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     showCheckbox = true,
                     showCheckboxControlledFields = false,
                     billingDetails = null
-                ),
+                )
             )
         }
     }

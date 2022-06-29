@@ -187,7 +187,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             swapCameraButtonView,
             cardNameTextView,
             cardNumberTextView,
-            privacyLinkTextView,
+            privacyLinkTextView
         )
     }
 
@@ -324,7 +324,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             getFloatResource(R.dimen.stripePanStrokeSize),
             0F,
             0F,
-            getColorByRes(R.color.stripeCardPanOutlineColor),
+            getColorByRes(R.color.stripeCardPanOutlineColor)
         )
 
         cardNameTextView.setTextColor(getColorByRes(R.color.stripeCardNameColor))
@@ -335,7 +335,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             getFloatResource(R.dimen.stripeNameStrokeSize),
             0F,
             0F,
-            getColorByRes(R.color.stripeCardNameOutlineColor),
+            getColorByRes(R.color.stripeCardNameOutlineColor)
         )
     }
 
@@ -379,7 +379,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupCloseButtonViewConstraints() {
         closeButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
@@ -396,7 +396,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupTorchButtonViewConstraints() {
         torchButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
@@ -413,7 +413,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupSwapCameraButtonViewConstraints() {
         swapCameraButtonView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeButtonMargin)
@@ -461,7 +461,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupInstructionsViewConstraints() {
         instructionsTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
@@ -479,7 +479,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupPrivacyLinkViewConstraints() {
         privacyLinkTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeInstructionsMargin)
@@ -497,14 +497,14 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupSecurityNoticeConstraints() {
         securityIconView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
-            0, // height
+            0 // height
         ).apply {
             marginEnd = resources.getDimensionPixelSize(R.dimen.stripeSecurityIconMargin)
         }
 
         securityTextView.layoutParams = ConstraintLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             topMargin = resources.getDimensionPixelSize(R.dimen.stripeSecurityMargin)
             bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeSecurityMargin)
@@ -529,7 +529,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     protected open fun setupCardDetailsConstraints() {
         cardNumberTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             marginStart = resources.getDimensionPixelSize(R.dimen.stripeCardDetailsMargin)
             marginEnd = resources.getDimensionPixelSize(R.dimen.stripeCardDetailsMargin)
@@ -537,7 +537,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
 
         cardNameTextView.layoutParams = ConstraintLayout.LayoutParams(
             0, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
+            ViewGroup.LayoutParams.WRAP_CONTENT // height
         ).apply {
             marginStart = resources.getDimensionPixelSize(R.dimen.stripeCardDetailsMargin)
             marginEnd = resources.getDimensionPixelSize(R.dimen.stripeCardDetailsMargin)
@@ -617,7 +617,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             viewFinder = viewFinderWindowView.asRect(),
             lifecycleOwner = this,
             coroutineScope = this,
-            parameters = deferredScanFlowParameters.await(),
+            parameters = deferredScanFlowParameters.await()
         )
     }
 }

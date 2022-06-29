@@ -26,7 +26,7 @@ class CardDetailsElementTest {
             context,
             initialValues = emptyMap(),
             viewOnlyFields = emptySet(),
-            cardController,
+            cardController
         )
 
         val flowValues = mutableListOf<List<Pair<IdentifierSpec, FormFieldEntry>>>()
@@ -47,7 +47,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                 IdentifierSpec.CardExpMonth to FormFieldEntry("1", true),
-                IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )
     }
@@ -81,7 +81,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                 IdentifierSpec.CardExpMonth to FormFieldEntry("1", true),
-                IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )
     }

@@ -16,7 +16,7 @@ internal abstract class ModelManager {
     suspend fun fetchModel(
         context: Context,
         forImmediateUse: Boolean,
-        isOptional: Boolean = false,
+        isOptional: Boolean = false
     ): FetchedData {
         fetcherMutex.withLock {
             if (!this::fetcher.isInitialized) {

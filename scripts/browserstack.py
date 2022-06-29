@@ -127,7 +127,32 @@ def executeTests(appUrl, testUrl):
 #          "language": "en_US",
          "locale": "en_US",
          "enableSpoonFramework": False,
-         "project": "Mobile Payments"
+         "project": "Mobile Payments",
+         "shards": {
+            "numberOfShards": 4,
+            "mapping": [
+                {
+                   "name": "Shard 1",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers", "com.stripe.android.TestCustomers"]
+                },
+                {
+                   "name": "Shard 2",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestFieldPopulation", "com.stripe.android.TestGooglePay"]
+                },
+                {
+                   "name": "Shard 3",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestHardCodedLpms"]
+                },
+                {
+                   "name": "Shard 4",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestMultiStepFieldsReloaded"]
+                },
+            ]
+         }
       }, auth=(user, authKey))
     jsonResponse = response.json()
 

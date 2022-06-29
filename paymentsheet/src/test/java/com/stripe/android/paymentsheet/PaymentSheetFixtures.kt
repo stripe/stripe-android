@@ -45,14 +45,14 @@ internal object PaymentSheetFixtures {
             ),
             typography = PaymentSheet.Typography.default.copy(
                 sizeScaleFactor = 1.1f,
-                fontResId = 0,
+                fontResId = 0
             ),
             primaryButton = PaymentSheet.PrimaryButton(
                 colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
                 colorsDark = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
                 shape = PaymentSheet.PrimaryButtonShape(
                     cornerRadiusDp = 0.0f,
-                    borderStrokeWidthDp = 20.0f,
+                    borderStrokeWidthDp = 20.0f
                 ),
                 typography = PaymentSheet.PrimaryButtonTypography(
                     fontResId = 0
@@ -96,28 +96,28 @@ internal object PaymentSheetFixtures {
         get() = PaymentSheetContract.Args(
             SetupIntentClientSecret(CLIENT_SECRET),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR,
+            STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
         get() = PaymentSheetContract.Args(
             PAYMENT_INTENT_CLIENT_SECRET,
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR,
+            STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
         get() = PaymentSheetContract.Args(
             PAYMENT_INTENT_CLIENT_SECRET,
             CONFIG_CUSTOMER,
-            STATUS_BAR_COLOR,
+            STATUS_BAR_COLOR
         )
 
     internal val ARGS_WITHOUT_CONFIG
         get() = PaymentSheetContract.Args(
             PAYMENT_INTENT_CLIENT_SECRET,
             config = null,
-            STATUS_BAR_COLOR,
+            STATUS_BAR_COLOR
         )
 
     internal val ARGS_WITHOUT_CUSTOMER
@@ -140,7 +140,7 @@ internal object PaymentSheetFixtures {
                     city = "San Francisco",
                     state = "CA",
                     postalCode = "94111",
-                    country = "DE",
+                    country = "DE"
                 ),
                 email = "email",
                 name = "Jenny Rosen",

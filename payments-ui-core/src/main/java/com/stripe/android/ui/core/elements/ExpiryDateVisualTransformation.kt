@@ -9,7 +9,6 @@ internal class ExpiryDateVisualTransformation : VisualTransformation {
     private val separator = " / "
 
     override fun filter(text: AnnotatedString): TransformedText {
-
         /**
          * Depending on the first number is where the separator will be placed
          * If the first number is 2-9 then the slash will come after the

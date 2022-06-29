@@ -28,12 +28,12 @@ sealed interface CardScanSheetResult : Parcelable {
 
     @Parcelize
     data class Completed(
-        val scannedCard: ScannedCard,
+        val scannedCard: ScannedCard
     ) : CardScanSheetResult
 
     @Parcelize
     data class Canceled(
-        val reason: CancellationReason,
+        val reason: CancellationReason
     ) : CardScanSheetResult
 
     @Parcelize
@@ -66,13 +66,13 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             from: ComponentActivity,
             stripePublishableKey: String,
             cardScanSheetResultCallback: CardScanResultCallback,
-            registry: ActivityResultRegistry = from.activityResultRegistry,
+            registry: ActivityResultRegistry = from.activityResultRegistry
         ) =
             CardScanSheet(stripePublishableKey).apply {
                 launcher = from.registerForActivityResult(
                     activityResultContract,
                     registry,
-                    cardScanSheetResultCallback::onCardScanSheetResult,
+                    cardScanSheetResultCallback::onCardScanSheetResult
                 )
             }
 
@@ -88,19 +88,19 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             from: Fragment,
             stripePublishableKey: String,
             cardScanSheetResultCallback: CardScanResultCallback,
-            registry: ActivityResultRegistry? = null,
+            registry: ActivityResultRegistry? = null
         ) =
             CardScanSheet(stripePublishableKey).apply {
                 launcher = if (registry != null) {
                     from.registerForActivityResult(
                         activityResultContract,
                         registry,
-                        cardScanSheetResultCallback::onCardScanSheetResult,
+                        cardScanSheetResultCallback::onCardScanSheetResult
                     )
                 } else {
                     from.registerForActivityResult(
                         activityResultContract,
-                        cardScanSheetResultCallback::onCardScanSheetResult,
+                        cardScanSheetResultCallback::onCardScanSheetResult
                     )
                 }
             }
@@ -133,12 +133,12 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             >() {
             override fun createIntent(
                 context: Context,
-                input: CardScanSheetParams,
+                input: CardScanSheetParams
             ) = this@Companion.createIntent(context, input)
 
             override fun parseResult(
                 resultCode: Int,
-                intent: Intent?,
+                intent: Intent?
             ) = this@Companion.parseResult(intent)
         }
     }
@@ -181,7 +181,8 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
 
         supportFragmentManager
             .setFragmentResultListener(
-                CARD_SCAN_FRAGMENT_REQUEST_KEY, lifecycleOwner
+                CARD_SCAN_FRAGMENT_REQUEST_KEY,
+                lifecycleOwner
             ) { _, bundle ->
                 val result: CardScanSheetResult = bundle.getParcelable(
                     CARD_SCAN_FRAGMENT_BUNDLE_KEY

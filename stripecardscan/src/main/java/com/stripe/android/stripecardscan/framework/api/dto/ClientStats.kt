@@ -16,7 +16,7 @@ internal data class StatsPayload(
     @SerialName("app") val app: AppInfo,
     @SerialName("scan_stats") val scanStats: ScanStatistics,
     @SerialName("configuration") val configuration: ConfigurationStats,
-    @SerialName("payload_info") val payloadInfo: PayloadInfo? = null,
+    @SerialName("payload_info") val payloadInfo: PayloadInfo? = null
 // TODO: these should probably be reported as part of scanstats
 //    @SerialName("model_versions") val modelVersions: List<ModelVersion>,
 )
@@ -24,7 +24,7 @@ internal data class StatsPayload(
 @Serializable
 internal data class ScanStatistics(
     @SerialName("tasks") val tasks: Map<String, List<TaskStatistics>>,
-    @SerialName("repeating_tasks") val repeatingTasks: Map<String, RepeatingTaskStatistics>,
+    @SerialName("repeating_tasks") val repeatingTasks: Map<String, RepeatingTaskStatistics>
 ) {
     companion object {
         @JvmStatic
@@ -77,17 +77,17 @@ internal data class TaskStatistics(
 
 @Serializable
 internal data class RepeatingTaskStatistics(
-    @SerialName("executions") val executions: Int,
+    @SerialName("executions") val executions: Int
 )
 
 @Serializable
 internal data class ConfigurationStats(
-    @SerialName("strict_mode_frames") val strictModeFrames: Int,
+    @SerialName("strict_mode_frames") val strictModeFrames: Int
 ) {
     companion object {
         @JvmStatic
         internal fun fromScanConfig(scanConfig: ScanConfig) = ConfigurationStats(
-            strictModeFrames = scanConfig.strictModeFrameCount,
+            strictModeFrames = scanConfig.strictModeFrameCount
         )
     }
 }
@@ -96,5 +96,5 @@ internal data class ConfigurationStats(
 internal data class PayloadInfo(
     @SerialName("image_compression_type") val imageCompressionType: String,
     @SerialName("image_compression_quality") val imageCompressionQuality: Float,
-    @SerialName("image_payload_size") val imagePayloadSizeInBytes: Int,
+    @SerialName("image_payload_size") val imagePayloadSizeInBytes: Int
 )

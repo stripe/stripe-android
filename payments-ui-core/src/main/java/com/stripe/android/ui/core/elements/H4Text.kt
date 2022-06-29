@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun H4Text(
     text: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Text(
         text = text,

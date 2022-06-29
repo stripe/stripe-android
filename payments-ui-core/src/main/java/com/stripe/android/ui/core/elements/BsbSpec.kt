@@ -146,5 +146,5 @@ private val banks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("04", "Westpac Banking Corporation"),
     BecsDebitBanks.Bank("06", "Commonwealth Bank of Australia"),
     BecsDebitBanks.Bank("08", "National Australia Bank"),
-    BecsDebitBanks.Bank("09", "Reserve Bank of Australia"),
+    BecsDebitBanks.Bank("09", "Reserve Bank of Australia")
 )

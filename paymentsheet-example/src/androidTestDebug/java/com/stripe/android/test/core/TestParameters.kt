@@ -23,7 +23,8 @@ data class TestParameters(
     val takeScreenshotOnLpmLoad: Boolean = false,
     val forceDarkMode: Boolean? = null,
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-    val snapshotReturningCustomer: Boolean = false
+    val snapshotReturningCustomer: Boolean = false,
+    val merchantCountryCode: String
 )
 
 /**

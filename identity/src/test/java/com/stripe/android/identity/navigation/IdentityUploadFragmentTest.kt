@@ -25,8 +25,12 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_P
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.ID
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD_ID
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
@@ -43,9 +47,11 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -64,6 +70,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowDialog
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class IdentityUploadFragmentTest {
     @get:Rule
@@ -73,6 +80,7 @@ class IdentityUploadFragmentTest {
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
     }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPageWithSelfie = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
@@ -86,19 +94,23 @@ class IdentityUploadFragmentTest {
         on { hasError() } doReturn true
     }
 
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
-
         whenever(it.identityAnalyticsRequestFactory).thenReturn(
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
         )
+        whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -113,6 +125,9 @@ class IdentityUploadFragmentTest {
                 args = mock()
             )
         )
+        whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
@@ -320,6 +335,11 @@ class IdentityUploadFragmentTest {
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(SCREEN_NAME_FILE_UPLOAD_ID),
+                    any()
+                )
+
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
                         idDocumentFront = DocumentUploadParam(
@@ -370,6 +390,11 @@ class IdentityUploadFragmentTest {
                 )
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(SCREEN_NAME_FILE_UPLOAD_ID),
+                    any()
+                )
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
@@ -529,10 +554,11 @@ class IdentityUploadFragmentTest {
                     isFront = eq(true),
                     docCapturePage = same(DOCUMENT_CAPTURE),
                     uploadMethod =
-                    if (isTakePhoto)
+                    if (isTakePhoto) {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                    else
+                    } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
+                    }
                 )
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -543,10 +569,11 @@ class IdentityUploadFragmentTest {
                     isFront = eq(false),
                     docCapturePage = same(DOCUMENT_CAPTURE),
                     uploadMethod =
-                    if (isTakePhoto)
+                    if (isTakePhoto) {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                    else
+                    } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
+                    }
                 )
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.VISIBLE)
@@ -607,11 +634,14 @@ class IdentityUploadFragmentTest {
         )
     }.onFragment {
         (if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel).let { identityViewModel ->
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_FILE_UPLOAD_ID))
+            }
             verify(identityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD &&
-                        params[PARAM_SCAN_TYPE] == IdentityAnalyticsRequestFactory.ID // from frontScanType = IdentityScanState.ScanType.ID_FRONT
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_FILE_UPLOAD_ID &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCAN_TYPE] == ID // from frontScanType = IdentityScanState.ScanType.ID_FRONT
                 }
             )
         }

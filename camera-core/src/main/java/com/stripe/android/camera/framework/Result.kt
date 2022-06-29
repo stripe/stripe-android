@@ -94,7 +94,7 @@ abstract class ResultAggregator<
     >(
     private val listener: AggregateResultListener<InterimResult, FinalResult>,
     private val initialState: State,
-    private val statsName: String?,
+    private val statsName: String?
 ) : StatefulResultHandler<DataFrame, State, AnalyzerResult, Boolean>(initialState),
     LifecycleEventObserver {
 
@@ -199,6 +199,6 @@ abstract class ResultAggregator<
      */
     abstract suspend fun aggregateResult(
         frame: DataFrame,
-        result: AnalyzerResult,
+        result: AnalyzerResult
     ): Pair<InterimResult, FinalResult?>
 }

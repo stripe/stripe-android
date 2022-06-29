@@ -279,7 +279,7 @@ internal class WalletScreenTest {
         onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayAnotherWayClick: () -> Unit = {},
-        showBottomSheetContent: ((BottomSheetContent?) -> Unit)? = null,
+        showBottomSheetContent: ((BottomSheetContent?) -> Unit)? = null
     ) = composeTestRule.setContent {
         var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -302,13 +302,13 @@ internal class WalletScreenTest {
                 Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
             },
             modifier = Modifier.fillMaxHeight(),
-            sheetState = sheetState,
+            sheetState = sheetState
         ) {
-
             DefaultLinkTheme {
                 WalletBody(
                     isProcessing = isProcessing,
                     paymentDetails = paymentDetails,
+                    initiallySelectedId = null,
                     primaryButtonLabel = primaryButtonLabel,
                     errorMessage = errorMessage,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,

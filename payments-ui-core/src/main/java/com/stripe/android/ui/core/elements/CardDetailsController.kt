@@ -42,7 +42,7 @@ internal class CardDetailsController constructor(
             DateConfig(),
             initialValue = initialValues[IdentifierSpec.CardExpMonth] +
                 initialValues[IdentifierSpec.CardExpYear]?.takeLast(2)
-        ),
+        )
     )
 
     private val rowFields = listOf(expirationDateElement, cvcElement)

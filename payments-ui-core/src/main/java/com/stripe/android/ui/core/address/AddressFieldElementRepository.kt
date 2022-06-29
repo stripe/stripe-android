@@ -27,7 +27,7 @@ class AddressFieldElementRepository @Inject constructor(
                 requireNotNull(
                     parseAddressesSchema(
                         resources?.assets?.open(assetFileName)
-                    ),
+                    )
                 )
             }
         )
@@ -79,7 +79,7 @@ class AddressFieldElementRepository @Inject constructor(
             "SB", "SC", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "SS",
             "ST", "SV", "SX", "SZ", "TA", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", "TM",
             "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "US", "UY", "UZ", "VA", "VC",
-            "VE", "VG", "VN", "VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW", "ZZ",
+            "VE", "VG", "VN", "VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW", "ZZ"
             // @formatter:on
         )
     }

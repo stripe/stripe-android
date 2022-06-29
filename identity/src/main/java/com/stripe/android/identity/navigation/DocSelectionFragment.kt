@@ -15,7 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.identity.R
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -84,10 +84,12 @@ internal class DocSelectionFragment(
                 navigateToDefaultErrorFragment()
             }
         )
-
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_DOC_SELECT)
+        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
+                screenName = SCREEN_NAME_DOC_SELECT
             )
         )
     }
@@ -276,12 +278,13 @@ internal class DocSelectionFragment(
             onSuccess = { verificationPage ->
                 findNavController().navigate(
                     R.id.action_camera_permission_denied,
-                    if (verificationPage.documentCapture.requireLiveCapture)
+                    if (verificationPage.documentCapture.requireLiveCapture) {
                         null
-                    else
+                    } else {
                         bundleOf(
                             CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
                         )
+                    }
                 )
             },
             onFailure = {

@@ -22,6 +22,6 @@ fun MandateTextUI(
         color = MaterialTheme.paymentsColors.subtitle,
         modifier = Modifier
             .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item
+            .semantics(mergeDescendants = true) {} // makes it a separate accessibile item
     )
 }

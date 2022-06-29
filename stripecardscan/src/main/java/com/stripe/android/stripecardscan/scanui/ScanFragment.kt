@@ -100,7 +100,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             WindowManager.LayoutParams.FLAG_SECURE +
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_SECURE +
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
     }
 
@@ -116,14 +116,14 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
         when {
             ContextCompat.checkSelfPermission(
                 requireActivity(),
-                Manifest.permission.CAMERA,
+                Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED -> {
                 launch { permissionStat.trackResult("success") }
                 prepareCamera { onCameraReady() }
             }
             storage.getBoolean(
                 PERMISSION_RATIONALE_SHOWN,
-                false,
+                false
             ) -> showPermissionDenied()
             else -> requestCameraPermission()
         }
@@ -260,7 +260,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             activity = requireActivity(),
             previewView = previewFrame,
             minimumResolution = minimumAnalysisResolution,
-            cameraErrorListener = cameraErrorListener,
+            cameraErrorListener = cameraErrorListener
         )
 
     protected abstract val previewFrame: ViewGroup
@@ -273,7 +273,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      * A stream of images from the camera is available to be processed.
      */
     protected abstract suspend fun onCameraStreamAvailable(
-        cameraStream: Flow<CameraPreviewImage<Bitmap>>,
+        cameraStream: Flow<CameraPreviewImage<Bitmap>>
     )
 
     internal companion object {

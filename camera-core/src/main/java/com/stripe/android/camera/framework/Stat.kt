@@ -62,7 +62,7 @@ object Stats {
             if (BuildConfig.DEBUG) {
                 Log.v(
                     logTag,
-                    "Task $name got result $result after ${startedAt.elapsedSince()}",
+                    "Task $name got result $result after ${startedAt.elapsedSince()}"
                 )
             }
         }
@@ -90,7 +90,7 @@ object Stats {
                         totalDuration = duration,
                         totalCpuDuration = duration,
                         minimumDuration = duration,
-                        maximumDuration = duration,
+                        maximumDuration = duration
                     )
                 } else {
                     resultStats[resultName] = RepeatingTaskStats(
@@ -99,14 +99,14 @@ object Stats {
                         totalDuration = taskStats.startedAt.elapsedSince(),
                         totalCpuDuration = taskStats.totalCpuDuration + duration,
                         minimumDuration = minOf(taskStats.minimumDuration, duration),
-                        maximumDuration = maxOf(taskStats.maximumDuration, duration),
+                        maximumDuration = maxOf(taskStats.maximumDuration, duration)
                     )
                 }
             }
             if (BuildConfig.DEBUG) {
                 Log.v(
                     logTag,
-                    "Repeating task $name got result $result after ${startedAt.elapsedSince()}",
+                    "Repeating task $name got result $result after ${startedAt.elapsedSince()}"
                 )
             }
         }
@@ -134,7 +134,7 @@ object Stats {
                         totalDuration = duration,
                         totalCpuDuration = duration,
                         minimumDuration = duration,
-                        maximumDuration = duration,
+                        maximumDuration = duration
                     )
                 } else {
                     resultStats[resultName] = RepeatingTaskStats(
@@ -143,7 +143,7 @@ object Stats {
                         totalDuration = taskStats.startedAt.elapsedSince(),
                         totalCpuDuration = taskStats.totalCpuDuration + duration,
                         minimumDuration = minOf(taskStats.minimumDuration, duration),
-                        maximumDuration = maxOf(taskStats.maximumDuration, duration),
+                        maximumDuration = maxOf(taskStats.maximumDuration, duration)
                     )
                 }
             }
@@ -151,7 +151,7 @@ object Stats {
                 Log.v(
                     logTag,
                     "Persistent repeating task $name got result $result after " +
-                        "${startedAt.elapsedSince()}",
+                        "${startedAt.elapsedSince()}"
                 )
             }
         }
@@ -201,7 +201,7 @@ interface StatTracker {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StatTrackerImpl(
-    private val onComplete: suspend (ClockMark, String?) -> Unit,
+    private val onComplete: suspend (ClockMark, String?) -> Unit
 ) : StatTracker {
     override val startedAt = Clock.markNow()
     override suspend fun trackResult(result: String?) =
@@ -212,7 +212,7 @@ class StatTrackerImpl(
 data class TaskStats(
     val started: ClockMark,
     val duration: Duration,
-    val result: String?,
+    val result: String?
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -222,7 +222,7 @@ data class RepeatingTaskStats(
     val totalDuration: Duration,
     val totalCpuDuration: Duration,
     val minimumDuration: Duration,
-    val maximumDuration: Duration,
+    val maximumDuration: Duration
 ) {
     fun averageDuration() = totalCpuDuration / executions
 }

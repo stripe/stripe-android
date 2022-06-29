@@ -19,7 +19,9 @@ open class UiAutomatorText(
 
     open fun click() {
         if (!exists()) {
-            scroll()
+            if (!exists()) {
+                scroll()
+            }
         }
         if (!exists()) {
             throw InvalidParameterException("Text button not found: $label $className")

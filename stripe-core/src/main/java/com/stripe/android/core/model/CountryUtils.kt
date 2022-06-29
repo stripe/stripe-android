@@ -8,7 +8,9 @@ import java.util.Locale
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
 object CountryUtils {
     internal val CARD_POSTAL_CODE_COUNTRIES = setOf(
-        "US", "GB", "CA"
+        "US",
+        "GB",
+        "CA"
     )
 
     private fun localizedCountries(currentLocale: Locale) =

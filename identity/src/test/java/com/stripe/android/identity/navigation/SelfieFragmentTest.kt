@@ -15,10 +15,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
@@ -38,9 +41,11 @@ import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -56,6 +61,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class SelfieFragmentTest {
     @get:Rule
@@ -64,10 +70,12 @@ internal class SelfieFragmentTest {
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockScanFlow = mock<IdentityScanFlow>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { it.identityScanFlow } doReturn mockScanFlow
         on { it.finalResult } doReturn finalResultLiveData
+        on { it.interimResults } doReturn mock()
         on { it.displayStateChanged } doReturn displayStateChanged
     }
 
@@ -76,6 +84,7 @@ internal class SelfieFragmentTest {
         MutableStateFlow(DocumentUploadState())
 
     private val selfieUploadState = MutableStateFlow(SelfieUploadState())
+    private val mockFPSTracker = mock<FPSTracker>()
 
     private val errorUploadState = mock<SelfieUploadState> {
         on { hasError() } doReturn true
@@ -98,6 +107,8 @@ internal class SelfieFragmentTest {
         bestLowResResult = Resource.success(mockUploadedResult)
     )
 
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
@@ -107,15 +118,22 @@ internal class SelfieFragmentTest {
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { fpsTracker } doReturn mockFPSTracker
+        on { screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     @Test
     fun `when initialized UI is reset and bound`() {
         launchSelfieFragment { binding, _, _ ->
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_SELFIE))
+            }
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_SELFIE
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_SELFIE
                 }
             )
 
@@ -318,7 +336,7 @@ internal class SelfieFragmentTest {
             ) to FaceDetectorOutput(
                 boundingBox = mock(),
                 resultScore = 0.82f
-            ), // last
+            ) // last
         )
 
         const val SCORE_VARIANCE = 0.1f

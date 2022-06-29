@@ -10,13 +10,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun StaticElementUI(
+fun StaticTextElementUI(
     element: StaticTextElement
 ) {
     H6Text(
         text = stringResource(element.stringResId),
         modifier = Modifier
             .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item
+            .semantics(mergeDescendants = true) {} // makes it a separate accessible item
     )
 }

@@ -67,7 +67,7 @@ internal class GooglePayLauncherViewModel(
                 val paymentIntent = requireNotNull(
                     stripeRepository.retrievePaymentIntent(
                         args.clientSecret,
-                        requestOptions,
+                        requestOptions
                     )
                 ) {
                     "Could not retrieve PaymentIntent."
@@ -81,7 +81,7 @@ internal class GooglePayLauncherViewModel(
                 val setupIntent = requireNotNull(
                     stripeRepository.retrieveSetupIntent(
                         args.clientSecret,
-                        requestOptions,
+                        requestOptions
                     )
                 ) {
                     "Could not retrieve SetupIntent."

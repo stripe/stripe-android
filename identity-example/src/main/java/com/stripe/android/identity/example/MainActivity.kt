@@ -53,11 +53,18 @@ abstract class MainActivity : AppCompatActivity() {
                     brandLogo = logoUri
                 )
             ) {
-                Snackbar.make(
-                    binding.root,
-                    "Verification result: $it",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                when (it) {
+                    IdentityVerificationSheet.VerificationFlowResult.Canceled -> {
+                        binding.resultView.text = "Verification result: ${it.javaClass.simpleName}"
+                    }
+                    IdentityVerificationSheet.VerificationFlowResult.Completed -> {
+                        binding.resultView.text = "Verification result: ${it.javaClass.simpleName}"
+                    }
+                    is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
+                        binding.resultView.text =
+                            "Verification result: ${it.javaClass.simpleName} - ${it.throwable}"
+                    }
+                }
             }
 
         binding.useNative.setOnCheckedChangeListener { _, isChecked ->
@@ -65,7 +72,6 @@ abstract class MainActivity : AppCompatActivity() {
                 binding.requireIdNumber.isChecked = false
                 binding.requireMatchingSelfie.isChecked = false
                 binding.requireIdNumber.isEnabled = false
-                binding.requireMatchingSelfie.isEnabled = false
             }
         }
 
@@ -74,12 +80,13 @@ abstract class MainActivity : AppCompatActivity() {
                 binding.requireIdNumber.isChecked = false
                 binding.requireMatchingSelfie.isChecked = false
                 binding.requireIdNumber.isEnabled = true
-                binding.requireMatchingSelfie.isEnabled = true
             }
         }
 
         binding.startVerification.setOnClickListener {
             binding.startVerification.isEnabled = false
+            binding.resultView.text = ""
+            binding.vsView.text = ""
             binding.progressCircular.visibility = View.VISIBLE
             showSnackBar(
                 "Getting verificationSessionId and ephemeralKeySecret from backend...",
@@ -110,7 +117,8 @@ abstract class MainActivity : AppCompatActivity() {
                 .responseString { _, _, result ->
                     when (result) {
                         is Result.Failure -> {
-                            showSnackBar("Error generating verificationSessionId and ephemeralKeySecret: ${result.getException().message}")
+                            binding.resultView.text =
+                                "Error generating verificationSessionId and ephemeralKeySecret: ${result.getException().message}"
                             binding.progressCircular.visibility = View.INVISIBLE
                             binding.startVerification.isEnabled = true
                         }
@@ -122,6 +130,7 @@ abstract class MainActivity : AppCompatActivity() {
                                     VerificationSessionCreationResponse.serializer(),
                                     result.get()
                                 ).let {
+                                    binding.vsView.text = it.verificationSessionId
                                     if (binding.useNative.isChecked) {
                                         identityVerificationSheet.present(
                                             verificationSessionId = it.verificationSessionId,
@@ -133,7 +142,7 @@ abstract class MainActivity : AppCompatActivity() {
                                     }
                                 }
                             } catch (t: Throwable) {
-                                showSnackBar("Fail to decode")
+                                binding.resultView.text = "Fail to decode"
                             }
                         }
                     }
@@ -151,13 +160,13 @@ abstract class MainActivity : AppCompatActivity() {
         @SerialName("client_secret") val clientSecret: String,
         @SerialName("ephemeral_key_secret") val ephemeralKeySecret: String,
         @SerialName("id") val verificationSessionId: String,
-        @SerialName("url") val url: String,
+        @SerialName("url") val url: String
     )
 
     @Serializable
     data class VerificationSessionCreationRequest(
         @SerialName("options") val options: Options? = null,
-        @SerialName("type") val type: String = "document",
+        @SerialName("type") val type: String = "document"
     ) {
         @Serializable
         data class Options(

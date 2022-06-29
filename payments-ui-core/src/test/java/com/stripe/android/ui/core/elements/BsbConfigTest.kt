@@ -10,6 +10,7 @@ class BsbConfigTest {
         BecsDebitBanks.Bank("00", "Stripe Test Bank")
     )
     private val bsbConfig = BsbConfig(banks)
+
     @Test
     fun `visualTransformation formats entered value`() {
         Truth.assertThat(bsbConfig.visualTransformation.filter(AnnotatedString("000000")).text)

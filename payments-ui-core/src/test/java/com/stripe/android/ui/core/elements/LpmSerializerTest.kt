@@ -180,12 +180,14 @@ class LpmSerializerTest {
             assertThat(dropdownSpec.items.size).isEqualTo(2)
             assertThat(dropdownSpec.items[0]).isEqualTo(
                 DropdownItemSpec(
-                    "123", "abc"
+                    "123",
+                    "abc"
                 )
             )
             assertThat(dropdownSpec.items[1]).isEqualTo(
                 DropdownItemSpec(
-                    null, "Other"
+                    null,
+                    "Other"
                 )
             )
         }
@@ -271,7 +273,7 @@ class LpmSerializerTest {
             "name" to "billing_details[name]",
             "mandate" to "mandate",
             "sepa_mandate" to "sepa_mandate",
-            "static_text" to "static_text",
+            "static_text" to "static_text"
         )
         // the types selector, and text do not have default api_paths and are tested separately
 

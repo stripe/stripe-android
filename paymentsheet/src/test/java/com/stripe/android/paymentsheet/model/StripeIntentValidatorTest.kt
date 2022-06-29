@@ -54,7 +54,7 @@ class StripeIntentValidatorTest {
     @Test
     fun `PaymentIntent requireValid() allows status = RequiresAction`() {
         validator.requireValid(
-            PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!,
+            PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!
         )
     }
 

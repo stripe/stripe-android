@@ -70,7 +70,7 @@ class RetryTest {
         assertFailsWith<RuntimeException> {
             retry<Int>(
                 retryDelayFunction = { _, _ -> 1.milliseconds },
-                excluding = listOf(RuntimeException::class.java),
+                excluding = listOf(RuntimeException::class.java)
             ) {
                 executions++
                 throw RuntimeException()

@@ -1,4 +1,5 @@
 @file:Suppress("deprecation")
+
 /*
  * RenderScript is deprecated, but alternatives are not yet well supported.
  *
@@ -286,7 +287,7 @@ private fun Image.yuvToNV21Bytes() = yuvPlanesToNV21Fast(
     height = height,
     planeBuffers = planes.mapArray { it.buffer },
     rowStrides = planes.mapToIntArray { it.rowStride },
-    pixelStrides = planes.mapToIntArray { it.pixelStride },
+    pixelStrides = planes.mapToIntArray { it.pixelStride }
 )
 
 /**
@@ -304,7 +305,7 @@ private fun yuvPlanesToNV21Compat(
     rowStrides: IntArray,
     pixelStrides: IntArray,
     format: Int,
-    crop: Rect = Rect(0, 0, width, height),
+    crop: Rect = Rect(0, 0, width, height)
 ): ByteArray {
     val cropWidth = crop.width()
     val cropHeight = crop.height()
@@ -414,7 +415,7 @@ private fun yuvPlanesToNV21Fast(
     height: Int,
     planeBuffers: Array<ByteBuffer>,
     rowStrides: IntArray,
-    pixelStrides: IntArray,
+    pixelStrides: IntArray
 ): ByteArray {
     val ySize = width * height
     val uvSize = width * height / 4
@@ -481,7 +482,7 @@ private fun yuvPlanesToNV21Fast(
 private fun yuvPlanesToBitmap(
     width: Int,
     height: Int,
-    planeBuffers: Array<ByteBuffer>,
+    planeBuffers: Array<ByteBuffer>
 ): Bitmap {
     val bitmap = ByteArrayOutputStream()
     YuvImage(planeBuffers.toList().toByteArray(), ImageFormat.NV21, width, height, null)
