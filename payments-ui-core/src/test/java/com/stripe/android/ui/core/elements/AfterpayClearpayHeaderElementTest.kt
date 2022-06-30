@@ -24,7 +24,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 4 interest-free payments of $50.00 with <img/> " +
-                "<a href=\"https://static-us.afterpay.com/javascript/modal/us_rebrand_modal.html\">" +
+                "<a href=\"https://static-us.afterpay.com/javascript/modal/en_US.html\">" +
                 "<b>ⓘ</b></a>"
         )
     }
@@ -40,7 +40,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 3 interest-free payments of €66.66 with <img/> " +
-                "<a href=\"https://static-us.afterpay.com/javascript/modal/us_rebrand_modal.html\">" +
+                "<a href=\"https://static-us.afterpay.com/javascript/modal/en_US.html\">" +
                 "<b>ⓘ</b></a>"
         )
     }
@@ -57,7 +57,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 4 interest-free payments of US$50.00 with <img/> " +
-                "<a href=\"https://static-us.afterpay.com/javascript/modal/ca_rebrand_modal.html\">" +
+                "<a href=\"https://static-us.afterpay.com/javascript/modal/en_CA.html\">" +
                 "<b>ⓘ</b></a>"
         )
     }
@@ -70,11 +70,11 @@ class AfterpayClearpayHeaderElementTest {
         )
 
         assertThat(element.infoUrl)
-            .isEqualTo("https://static-us.afterpay.com/javascript/modal/us_rebrand_modal.html")
+            .isEqualTo("https://static-us.afterpay.com/javascript/modal/en_US.html")
     }
 
     @Test
-    fun `Verify infoUrl is localized`() {
+    fun `Verify infoUrl is localized for GB`() {
         Locale.setDefault(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
@@ -82,7 +82,19 @@ class AfterpayClearpayHeaderElementTest {
         )
 
         assertThat(element.infoUrl)
-            .isEqualTo("https://static-us.afterpay.com/javascript/modal/gb_rebrand_modal.html")
+            .isEqualTo("https://static-us.afterpay.com/javascript/modal/en_GB.html")
+    }
+
+    @Test
+    fun `Verify infoUrl is localized for France`() {
+        Locale.setDefault(Locale.FRANCE)
+        val element = AfterpayClearpayHeaderElement(
+            IdentifierSpec.Generic("test"),
+            Amount(123, "USD")
+        )
+
+        assertThat(element.infoUrl)
+            .isEqualTo("https://static-us.afterpay.com/javascript/modal/fr_FR.html")
     }
 
     @Test

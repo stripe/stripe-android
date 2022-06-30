@@ -19,7 +19,10 @@ data class AfterpayClearpayHeaderElement(
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         MutableStateFlow(emptyList())
 
-    val infoUrl = url.format(Locale.current.region.lowercase())
+    val infoUrl = url.format(getLocaleString(Locale.current))
+
+    private fun getLocaleString(locale: Locale) =
+        locale.language.lowercase() + "_" + locale.region.uppercase()
 
     fun getLabel(resources: Resources): String {
         val numInstallments = when (amount.currencyCode.lowercase()) {
@@ -44,7 +47,7 @@ data class AfterpayClearpayHeaderElement(
     }
 
     companion object {
-        const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
+        const val url = "https://static-us.afterpay.com/javascript/modal/%s.html"
         const val NO_BREAK_SPACE = "\u00A0"
 
         internal fun isClearpay() = setOf("GB", "ES", "FR").contains(Locale.current.region)
