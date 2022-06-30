@@ -7,7 +7,7 @@
 
 ### Payments
 * [FIXED] [5226](https://github.com/stripe/stripe-android/pull/5226) Persist `GooglePayLauncherViewModel` state across process death
-* [ADDED] [XXXX](https://github.com/stripe/stripe-android/pull/XXXX) Expose the current card brand in CardFormView, CardInputWidget, and CardMultiLineWidget
+* [ADDED] [5238](https://github.com/stripe/stripe-android/pull/5238) Expose the current card brand in CardFormView, CardInputWidget, and CardMultiLineWidget
 
 ## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
