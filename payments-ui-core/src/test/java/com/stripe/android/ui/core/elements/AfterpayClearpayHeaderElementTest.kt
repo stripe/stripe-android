@@ -108,6 +108,9 @@ class AfterpayClearpayHeaderElementTest {
         Locale.setDefault(Locale.Builder().setRegion("ES").build())
         assertThat(isClearpay()).isTrue()
 
+        Locale.setDefault(Locale.Builder().setRegion("IT").build())
+        assertThat(isClearpay()).isTrue()
+
         Locale.setDefault(Locale.US)
         assertThat(isClearpay()).isFalse()
     }
