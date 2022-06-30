@@ -24,7 +24,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 4 interest-free payments of $50.00 with <img/> " +
-                "<a href=\"https://static-us.afterpay.com/javascript/modal/en_US.html\">" +
+                "<a href=\"https://static.afterpay.com/modal/en_US.html\">" +
                 "<b>ⓘ</b></a>"
         )
     }
@@ -40,7 +40,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 3 interest-free payments of €66.66 with <img/> " +
-                "<a href=\"https://static-us.afterpay.com/javascript/modal/en_US.html\">" +
+                "<a href=\"https://static.afterpay.com/modal/en_US.html\">" +
                 "<b>ⓘ</b></a>"
         )
     }
@@ -57,7 +57,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 4 interest-free payments of US$50.00 with <img/> " +
-                "<a href=\"https://static-us.afterpay.com/javascript/modal/en_CA.html\">" +
+                "<a href=\"https://static.afterpay.com/modal/en_CA.html\">" +
                 "<b>ⓘ</b></a>"
         )
     }
@@ -70,7 +70,7 @@ class AfterpayClearpayHeaderElementTest {
         )
 
         assertThat(element.infoUrl)
-            .isEqualTo("https://static-us.afterpay.com/javascript/modal/en_US.html")
+            .isEqualTo("https://static.afterpay.com/modal/en_US.html")
     }
 
     @Test
@@ -82,7 +82,7 @@ class AfterpayClearpayHeaderElementTest {
         )
 
         assertThat(element.infoUrl)
-            .isEqualTo("https://static-us.afterpay.com/javascript/modal/en_GB.html")
+            .isEqualTo("https://static.afterpay.com/modal/en_GB.html")
     }
 
     @Test
@@ -94,7 +94,7 @@ class AfterpayClearpayHeaderElementTest {
         )
 
         assertThat(element.infoUrl)
-            .isEqualTo("https://static-us.afterpay.com/javascript/modal/fr_FR.html")
+            .isEqualTo("https://static.afterpay.com/modal/fr_FR.html")
     }
 
     @Test
