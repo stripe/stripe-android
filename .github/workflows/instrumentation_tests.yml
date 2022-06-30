@@ -111,10 +111,12 @@ jobs:
           script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot && ./gradlew paymentsheet:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.paymentsheet.screenshot
       - uses: actions/upload-artifact@v2
         with:
+          if: always()
           name: screenshot-test-report-paymentsheet-example
           path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
       - uses: actions/upload-artifact@v2
         with:
+          if: always()
           name: screenshot-test-report-paymentsheet
           path: /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
       - name: Notify failure endpoint
