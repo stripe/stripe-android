@@ -1248,69 +1248,6 @@ public final class com/stripe/android/financialconnections/presentation/Financia
 	public static fun newInstance (Lcom/stripe/android/financialconnections/navigation/NavigationManager;Lcom/stripe/android/financialconnections/di/FinancialConnectionsSubcomponentBuilderProvider;Lcom/stripe/android/financialconnections/domain/GoNext;Lcom/stripe/android/core/Logger;Lcom/stripe/android/financialconnections/domain/NativeAuthFlowCoordinator;Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsSheetNativeState;)Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsSheetNativeViewModel;
 }
 
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls;
-	public static final field StripePrivacyPolicy Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$DataPolicy {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$DataPolicy;
-	public static final field merchant Ljava/lang/String;
-	public static final field stripe Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$Disconnect {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$Disconnect;
-	public static final field dashboard Ljava/lang/String;
-	public static final field email Ljava/lang/String;
-	public static final field support Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$FAQ {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$FAQ;
-	public static final field merchant Ljava/lang/String;
-	public static final field stripe Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$Finicity {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$Finicity;
-	public static final field ToS Ljava/lang/String;
-	public static final field privacyPolicy Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$Link {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$Link;
-	public static final field ToS Ljava/lang/String;
-	public static final field privacyPolicy Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$PartnerNotice {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$PartnerNotice;
-	public static final field merchant Ljava/lang/String;
-	public static final field stripe Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$PrivacyCenter {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$PrivacyCenter;
-	public static final field merchant Ljava/lang/String;
-	public static final field stripe Ljava/lang/String;
-}
-
-public final class com/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$StripeToS {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/presentation/FinancialConnectionsUrls$StripeToS;
-	public static final field endUser Ljava/lang/String;
-	public static final field merchantUser Ljava/lang/String;
-}
-
 public final class com/stripe/android/financialconnections/presentation/InstitutionPickerViewModel_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/presentation/InstitutionPickerViewModel_Factory;
