@@ -13,16 +13,12 @@ internal data class ConsentState(
     val bullets: List<Pair<Int, TextResource>> = emptyList(),
     val requestedDataTitle: TextResource = TextResource.Text(""),
     val requestedDataBullets: List<Pair<TextResource, TextResource>> = emptyList(),
-    val bottomSheetType: BottomSheetType = BottomSheetType.NONE,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {
 
-    enum class BottomSheetType {
-        NONE, DATA
-    }
-
     sealed interface ViewEffect {
         data class OpenUrl(val url: String) : ViewEffect
+        object OpenBottomSheet : ViewEffect
     }
 }
 

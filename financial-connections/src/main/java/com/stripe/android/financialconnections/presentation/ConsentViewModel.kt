@@ -46,7 +46,7 @@ internal class ConsentViewModel @Inject constructor(
                 ConsentClickableText.DISCONNECT ->
                     copy(viewEffect = OpenUrl(disconnectUrl))
                 ConsentClickableText.DATA ->
-                    copy(bottomSheetType = ConsentState.BottomSheetType.DATA)
+                    copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet)
                 ConsentClickableText.PRIVACY_CENTER ->
                     copy(viewEffect = OpenUrl(privacyCenterUrl))
                 ConsentClickableText.DATA_ACCESS ->
@@ -56,14 +56,6 @@ internal class ConsentViewModel @Inject constructor(
                     this
                 }
             }
-        }
-    }
-
-    fun onConfirmModalClick() {
-        setState {
-            copy(
-                bottomSheetType = ConsentState.BottomSheetType.NONE
-            )
         }
     }
 
@@ -79,14 +71,6 @@ internal class ConsentViewModel @Inject constructor(
                 bullets = ConsentTextBuilder.getBullets(manifest),
                 requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
                 requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
-            )
-        }
-    }
-
-    fun onModalBottomSheetClosed() {
-        setState {
-            copy(
-                bottomSheetType = ConsentState.BottomSheetType.NONE
             )
         }
     }

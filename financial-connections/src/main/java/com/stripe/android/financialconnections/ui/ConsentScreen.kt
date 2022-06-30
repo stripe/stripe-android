@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentState
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.presentation.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
@@ -44,7 +46,6 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -64,22 +65,17 @@ internal fun ConsentScreen() {
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
-        confirmStateChange = {
-            if (it == ModalBottomSheetValue.Hidden) viewModel.onModalBottomSheetClosed()
-            true
-        }
+        skipHalfExpanded = true
     )
+
+    BackHandler(bottomSheetState.isVisible) {
+        scope.launch { bottomSheetState.hide() }
+    }
 
     ViewEffect(
         viewModel = viewModel,
+        bottomSheetState = bottomSheetState,
         viewEffect = state.value.viewEffect
-    )
-
-    BottomSheetStateEffect(
-        bottomSheetType = state.value.bottomSheetType,
-        scope = scope,
-        bottomSheetState = bottomSheetState
     )
 
     ConsentContent(
@@ -87,43 +83,29 @@ internal fun ConsentScreen() {
         bottomSheetState = bottomSheetState,
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
-        onConfirmModalClick = viewModel::onConfirmModalClick
+        onConfirmModalClick = { scope.launch { bottomSheetState.hide() } }
     )
 }
 
 @Composable
 private fun ViewEffect(
     viewModel: ConsentViewModel,
-    viewEffect: ConsentState.ViewEffect?
+    viewEffect: ViewEffect?,
+    bottomSheetState: ModalBottomSheetState
 ) {
     val context = LocalContext.current
     LaunchedEffect(viewEffect) {
         when (viewEffect) {
-            is ConsentState.ViewEffect.OpenUrl -> context.startActivity(
+            is ViewEffect.OpenUrl -> context.startActivity(
                 CreateBrowserIntentForUrl(
                     context = context,
                     uri = Uri.parse(viewEffect.url)
                 )
             )
+            is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
             null -> Unit
         }
         viewModel.onViewEffectLaunched()
-    }
-}
-
-@Composable
-private fun BottomSheetStateEffect(
-    bottomSheetType: ConsentState.BottomSheetType,
-    scope: CoroutineScope,
-    bottomSheetState: ModalBottomSheetState
-) {
-    LaunchedEffect(bottomSheetType) {
-        scope.launch {
-            when (bottomSheetType) {
-                ConsentState.BottomSheetType.NONE -> bottomSheetState.hide()
-                else -> bottomSheetState.show()
-            }
-        }
     }
 }
 
