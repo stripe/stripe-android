@@ -234,6 +234,10 @@ internal class ConsentFragmentTest {
         launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
 
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
+            }
+
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
@@ -445,9 +449,6 @@ internal class ConsentFragmentTest {
             it.requireView(),
             navController
         )
-        runBlocking {
-            verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
-        }
         testBlock(ConsentFragmentBinding.bind(it.requireView()), navController, it)
     }
 

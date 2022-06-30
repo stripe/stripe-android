@@ -3,7 +3,10 @@
 ## X.X.X
 
 ### PaymentSheet
-* [Fixed][5215](https://github.com/stripe/stripe-android/pull/5215) Fix issue with us_bank_account appearing in payment sheet when Financial Connections SDK is not available
+* [Fixed] [5215](https://github.com/stripe/stripe-android/pull/5215) Fix issue with us_bank_account appearing in payment sheet when Financial Connections SDK is not available
+
+### Payments
+* [FIXED] [5226](https://github.com/stripe/stripe-android/pull/5226) Persist `GooglePayLauncherViewModel` state across process death
 
 ## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
