@@ -3,7 +3,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.net.Uri
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -142,14 +142,32 @@ private fun ConsentContent(
         sheetShape = RoundedCornerShape(8.dp),
         scrimColor = FinancialConnectionsTheme.colors.textSecondary.copy(alpha = 0.5f),
         sheetContent = {
-            RequestedDataBottomSheetContent(
+            ConsentPermissionsBottomSheetContent(
                 requestedDataTitle = state.requestedDataTitle,
                 requestedDataBullets = state.requestedDataBullets,
                 onConfirmModalClick = onConfirmModalClick,
                 onClickableTextClick = onClickableTextClick
             )
+        },
+        content = {
+            ConsentMainContent(
+                scrollState = scrollState,
+                state = state,
+                onClickableTextClick = onClickableTextClick,
+                onContinueClick = onContinueClick
+            )
         }
-    ) {
+    )
+}
+
+@Composable
+private fun ConsentMainContent(
+    scrollState: ScrollState,
+    state: ConsentState,
+    onClickableTextClick: (String) -> Unit,
+    onContinueClick: () -> Unit
+) {
+    FinancialConnectionsScaffold {
         Column(
             Modifier.fillMaxSize()
         ) {
@@ -174,13 +192,13 @@ private fun ConsentContent(
 
                 Spacer(modifier = Modifier.weight(1f))
             }
-            Footer(onClickableTextClick, onContinueClick)
+            ConsentFooter(onClickableTextClick, onContinueClick)
         }
     }
 }
 
 @Composable
-private fun Footer(
+private fun ConsentFooter(
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit
 ) {
@@ -205,7 +223,7 @@ private fun Footer(
 }
 
 @Composable
-private fun RequestedDataBottomSheetContent(
+private fun ConsentPermissionsBottomSheetContent(
     requestedDataTitle: TextResource,
     requestedDataBullets: List<Pair<TextResource, TextResource>>,
     onClickableTextClick: (String) -> Unit,
