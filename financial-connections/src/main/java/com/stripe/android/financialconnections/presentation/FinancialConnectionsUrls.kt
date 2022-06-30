@@ -2,7 +2,7 @@
 
 package com.stripe.android.financialconnections.presentation
 
-object FinancialConnectionsUrls {
+internal object FinancialConnectionsUrls {
     object Disconnect {
         const val email = "ttps://support.stripe.com/contact"
         const val support = "https://support.stripe.com/user/how-do-i-disconnect-my-linked-financial-account"
