@@ -75,6 +75,30 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `when 3DS2 nextActionData contains threeDs2IntentId and publishableKey then they should be used on source cancel`() =
+        runTest {
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
+                .thenReturn(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
+            whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any()))
+                .thenReturn(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE)
+
+            processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = "client_secret",
+                    sourceId = "source_id",
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    canCancelSource = true
+                )
+            )
+
+            verify(mockStripeRepository).cancelPaymentIntentSource(
+                eq("pi_1ExkUeAWhjPjYwPiLWUvXrSA"),
+                eq("source_id"),
+                eq(ApiRequest.Options("pk_test_nextActionData"))
+            )
+        }
+
+    @Test
     fun `no refresh when user cancels the payment`() =
         runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(

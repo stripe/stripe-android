@@ -19,13 +19,19 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
+import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
+import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
@@ -35,12 +41,15 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
-class Stripe3ds2TransactionViewModelFactoryTest {
+class Stripe3ds2TransactionViewModelTest {
     // FragmentScenario is needed to provide SavedStateRegistryOwner required
     // by Stripe3ds2TransactionViewModelFactory
     private val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
         TestFragment()
     }
+
+    private val context = ApplicationProvider.getApplicationContext<Application>()
+    private val stripeRepository = mock<StripeRepository>()
 
     internal class TestFragment : Fragment() {
         override fun onCreateView(
@@ -51,14 +60,54 @@ class Stripe3ds2TransactionViewModelFactoryTest {
     }
 
     @Test
-    fun `Stripe3ds2TransactionViewModelFactory gets initialized by Injector when Injector is available`() {
+    fun `When nextActionData contains publishableKey then it is used to start 3ds2 auth`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.start3ds2Flow()
+
+            verify(stripeRepository).start3ds2Auth(
+                any(),
+                eq(ApiRequest.Options("pk_test_nextActionData"))
+            )
+        }
+
+    @Test
+    fun `When nextActionData does not contain publishableKey then the default key is used to start 3ds2 auth`() =
+        runTest {
+            val nextActionData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
+                as StripeIntent.NextActionData.SdkData.Use3DS2
+            val viewModel = createViewModel(
+                args = ARGS.copy(
+                    nextActionData = nextActionData.copy(publishableKey = null)
+                )
+            )
+            viewModel.start3ds2Flow()
+
+            verify(stripeRepository).start3ds2Auth(
+                any(),
+                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+            )
+        }
+
+    @Test
+    fun `Stripe3ds2TransactionViewModel gets initialized by Injector when Injector is available`() {
         scenario.onFragment { savedStateRegistryOwner ->
             // The reason the ViewModel cannot be mocked here is because
             // AbstractSavedStateViewModelFactory will call viewModel.setTagIfAbsent, which accesses
             // ViewModel.mBagOfTags that's initialized in base class.
             // Mocking it would leave this field null, causing an NPE.
             val viewModel = Stripe3ds2TransactionViewModel(
-                mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), false
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                false
             )
             val mockBuilder = mock<Stripe3ds2TransactionViewModelSubcomponent.Builder>()
             val mockSubcomponent = mock<Stripe3ds2TransactionViewModelSubcomponent>()
@@ -93,7 +142,7 @@ class Stripe3ds2TransactionViewModelFactoryTest {
     }
 
     @Test
-    fun `Stripe3ds2TransactionViewModelFactory gets initialized with fallback when no Injector is available`() {
+    fun `Stripe3ds2TransactionViewModel gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { savedStateRegistryOwner ->
             val application = ApplicationProvider.getApplicationContext<Application>()
             val factory = Stripe3ds2TransactionViewModelFactory(
@@ -114,6 +163,21 @@ class Stripe3ds2TransactionViewModelFactoryTest {
             )
         }
     }
+
+    private fun createViewModel(args: Stripe3ds2TransactionContract.Args = ARGS) =
+        Stripe3ds2TransactionViewModel(
+            args = args,
+            stripeRepository = stripeRepository,
+            analyticsRequestExecutor = mock(),
+            paymentAnalyticsRequestFactory = mock(),
+            threeDs2Service = StripeThreeDs2ServiceImpl(context, false, Dispatchers.IO),
+            messageVersionRegistry = MessageVersionRegistry(),
+            challengeResultProcessor = mock(),
+            initChallengeRepository = mock(),
+            workContext = Dispatchers.IO,
+            savedStateHandle = mock(),
+            isInstantApp = false
+        )
 
     private companion object {
         val INJECTOR_KEY: String = WeakMapInjectorRegistry.nextKey("TestKey")
