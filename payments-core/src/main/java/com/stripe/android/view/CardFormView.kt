@@ -81,7 +81,10 @@ class CardFormView @JvmOverloads constructor(
 
     private val invalidFields: Set<Fields>
         get() {
-            return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })).toSet()
+            return (
+                cardMultilineWidget.invalidFields.toList() +
+                    listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })
+                ).toSet()
         }
 
     private val cardValidTextWatcher = object : StripeTextWatcher() {
