@@ -34,9 +34,7 @@ internal fun InputAddressScreen(
         Column(Modifier.padding(horizontal = 20.dp)) {
             Text("BaseAddress Screen")
             collectedAddress?.let { address ->
-                address.name?.let {
-                    Text(it)
-                }
+                Text(address.toString())
             }
             if (collectedAddress == null) {
                 Button(
