@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:filename")
+
 package com.stripe.android.financialconnections.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,7 +27,7 @@ internal fun FinancialConnectionsButton(
             start = 16.dp,
             top = 16.dp,
             end = 16.dp,
-            bottom = 16.dp,
+            bottom = 16.dp
         ),
         colors = buttonColors(
             backgroundColor = FinancialConnectionsTheme.colors.textBrand,

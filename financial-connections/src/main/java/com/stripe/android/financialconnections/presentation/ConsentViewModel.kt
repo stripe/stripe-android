@@ -1,19 +1,21 @@
 package com.stripe.android.financialconnections.presentation
 
-import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
+import com.stripe.android.financialconnections.features.consent.ConsentClickableText
+import com.stripe.android.financialconnections.features.consent.ConsentState
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.consent.ConsentUrlBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,28 +37,48 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        logger.debug("$tag clicked")
+        setState {
+            when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
+                ConsentClickableText.TERMS ->
+                    copy(viewEffect = OpenUrl(stripeToSUrl))
+                ConsentClickableText.PRIVACY ->
+                    copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy))
+                ConsentClickableText.DISCONNECT ->
+                    copy(viewEffect = OpenUrl(disconnectUrl))
+                ConsentClickableText.DATA ->
+                    copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet)
+                ConsentClickableText.PRIVACY_CENTER ->
+                    copy(viewEffect = OpenUrl(privacyCenterUrl))
+                ConsentClickableText.DATA_ACCESS ->
+                    copy(viewEffect = OpenUrl(dataPolicyUrl))
+                null -> {
+                    logger.error("Unrecognized clickable text: $tag")
+                    this
+                }
+            }
+        }
     }
 
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
             copy(
-                title = TextResource.StringId(
-                    R.string.stripe_consent_pane_title,
-                    listOf(requireNotNull(manifest.businessName))
-                ),
-                bullets = listOf(
-                    R.drawable.stripe_ic_safe to TextResource.StringId(
-                        R.string.stripe_consent_pane_body1,
-                        listOf(requireNotNull(manifest.businessName))
-                    ),
-                    R.drawable.stripe_ic_shield to TextResource.StringId(
-                        R.string.stripe_consent_pane_body2
-                    ),
-                    R.drawable.stripe_ic_lock to TextResource.StringId(
-                        R.string.stripe_consent_pane_body3
-                    ),
-                )
+                disconnectUrl = ConsentUrlBuilder.getDisconnectUrl(manifest),
+                faqUrl = ConsentUrlBuilder.getFAQUrl(manifest),
+                dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest),
+                stripeToSUrl = ConsentUrlBuilder.getStripeTOSUrl(manifest),
+                privacyCenterUrl = ConsentUrlBuilder.getPrivacyCenterUrl(manifest),
+                title = ConsentTextBuilder.getConsentTitle(manifest),
+                bullets = ConsentTextBuilder.getBullets(manifest),
+                requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
+                requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
+            )
+        }
+    }
+
+    fun onViewEffectLaunched() {
+        setState {
+            copy(
+                viewEffect = null
             )
         }
     }
@@ -75,8 +97,3 @@ internal class ConsentViewModel @Inject constructor(
         }
     }
 }
-
-internal data class ConsentState(
-    val title: TextResource = TextResource.Text(""),
-    val bullets: List<Pair<Int, TextResource>> = emptyList(),
-) : MavericksState

@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -53,37 +54,39 @@ private fun InstitutionPickerContent(
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (Institution) -> Unit
 ) {
-    Column {
-        if (institutionsAsync.complete.not()) {
-            LinearProgressIndicator(
-                color = FinancialConnectionsTheme.colors.textBrand,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-        ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = "Pick your bank",
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-            FinancialConnectionsOutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = query,
-                onValueChange = onQueryChanged,
-                label = { Text("Search for your bank") }
-            )
-            if (institutionsAsync is Fail) {
-                Text(text = "Something failed: " + institutionsAsync.error.toString())
+    FinancialConnectionsScaffold {
+        Column {
+            if (institutionsAsync.complete.not()) {
+                LinearProgressIndicator(
+                    color = FinancialConnectionsTheme.colors.textBrand,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-            InstitutionGrid(
-                institutions = institutionsAsync()?.data ?: emptyList(),
-                onInstitutionSelected = onInstitutionSelected
-            )
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = "Pick your bank",
+                    style = FinancialConnectionsTheme.typography.subtitle
+                )
+                FinancialConnectionsOutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = query,
+                    onValueChange = onQueryChanged,
+                    label = { Text("Search for your bank") }
+                )
+                if (institutionsAsync is Fail) {
+                    Text(text = "Something failed: " + institutionsAsync.error.toString())
+                }
+                InstitutionGrid(
+                    institutions = institutionsAsync()?.data ?: emptyList(),
+                    onInstitutionSelected = onInstitutionSelected
+                )
+            }
         }
     }
 }
@@ -117,7 +120,7 @@ private fun InstitutionGrid(
                             text = institution.name,
                             color = FinancialConnectionsTheme.colors.textWhite,
                             style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

@@ -15,6 +15,11 @@ internal sealed interface TextResource {
         val args: List<String> = emptyList()
     ) : TextResource
 
+    /**
+     * Return the string value associated with a particular resource ID.
+     * The returned object will be a String if this is a plain string;
+     * it will be some other type of CharSequence if it is styled.
+     */
     @Composable
     fun toText(): CharSequence {
         return when (this) {
@@ -25,7 +30,7 @@ internal sealed interface TextResource {
              * This function uses getText and manually handles formats.
              */
             is StringId -> args.foldIndexed(
-                LocalContext.current.resources.getText(value),
+                LocalContext.current.resources.getText(value)
             ) { index, current, arg ->
                 TextUtils.replace(current, arrayOf("%${index + 1}\$s"), arrayOf(arg))
             }

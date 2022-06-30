@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalMaterialApi::class)
+@file:Suppress("ktlint:filename")
 
 package com.stripe.android.financialconnections.ui.components
 
@@ -17,7 +18,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     value: String,
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
-    label: @Composable (() -> Unit)? = null,
+    label: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
@@ -28,7 +29,7 @@ internal fun FinancialConnectionsOutlinedTextField(
             disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
             unfocusedLabelColor = FinancialConnectionsTheme.colors.textSecondary,
             focusedLabelColor = FinancialConnectionsTheme.colors.textBrand,
-            cursorColor = FinancialConnectionsTheme.colors.textBrand,
+            cursorColor = FinancialConnectionsTheme.colors.textBrand
         ),
         onValueChange = onValueChange,
         label = label

@@ -49,7 +49,7 @@ internal interface FinancialConnectionsRepository {
         APIException::class
     )
     suspend fun getFinancialConnectionsSessionManifest(
-        clientSecret: String,
+        clientSecret: String
     ): FinancialConnectionsSessionManifest
 
     @Throws(
@@ -59,7 +59,7 @@ internal interface FinancialConnectionsRepository {
         APIException::class
     )
     suspend fun markConsentAcquired(
-        clientSecret: String,
+        clientSecret: String
     ): FinancialConnectionsSessionManifest
 
     @Throws(
@@ -70,7 +70,7 @@ internal interface FinancialConnectionsRepository {
     )
     suspend fun searchInstitutions(
         clientSecret: String,
-        query: String,
+        query: String
     ): InstitutionResponse
 
     @Throws(
@@ -80,7 +80,7 @@ internal interface FinancialConnectionsRepository {
         APIException::class
     )
     suspend fun featuredInstitutions(
-        clientSecret: String,
+        clientSecret: String
     ): InstitutionResponse
 
     @Throws(

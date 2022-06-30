@@ -15,18 +15,18 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun AnnotatedText(
-    resource: TextResource,
+    text: TextResource,
     onClickableTextClick: (String) -> Unit,
-    textStyle: TextStyle
-) {
-    val urlStyle = FinancialConnectionsTheme.typography.bodyEmphasized
+    textStyle: TextStyle,
+    clickableStyle: SpanStyle = FinancialConnectionsTheme.typography.bodyEmphasized
         .toSpanStyle()
         .copy(color = FinancialConnectionsTheme.colors.textBrand)
+) {
     val resource = annotatedStringResource(
-        resource = resource
+        resource = text
     ) { annotation ->
         when (StringAnnotation.values().firstOrNull { it.value == annotation.key }) {
-            StringAnnotation.CLICKABLE -> urlStyle
+            StringAnnotation.CLICKABLE -> clickableStyle
             else -> null
         }
     }

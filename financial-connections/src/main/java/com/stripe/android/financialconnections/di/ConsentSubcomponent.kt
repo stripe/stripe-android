@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.di
 
-import com.stripe.android.financialconnections.presentation.ConsentState
+import com.stripe.android.financialconnections.features.consent.ConsentState
 import com.stripe.android.financialconnections.presentation.ConsentViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
