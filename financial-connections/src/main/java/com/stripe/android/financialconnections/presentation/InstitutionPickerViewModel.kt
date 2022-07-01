@@ -4,6 +4,7 @@ import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -34,7 +35,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
             searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret
             )
-        }.execute(retainValue = InstitutionPickerState::institutions) { copy(institutions = it) }
+        }.execute(
+            retainValue = InstitutionPickerState::featuredInstitutions) { copy(featuredInstitutions = it)
+        }
     }
 
     fun onQueryChanged(query: String) {
@@ -46,7 +49,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
             )
-        }.execute(retainValue = InstitutionPickerState::institutions) { copy(institutions = it) }
+        }.execute(retainValue = InstitutionPickerState::searchInstitutions) {
+            copy(
+                searchInstitutions = it,
+            )
+        }
     }
 
     fun onInstitutionSelected(institution: Institution) {
@@ -56,6 +63,22 @@ internal class InstitutionPickerViewModel @Inject constructor(
             // TODO@carlosmuvi use this when next steps available in native.
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)
+        }
+    }
+
+    fun onCancelSearchClick() {
+        setState {
+            copy(
+                query = "",
+                searchInstitutions = Success(InstitutionResponse(emptyList())),
+                searchMode = false
+            )
+        }
+    }
+
+    fun onSearchFocused() {
+        setState {
+            copy(searchMode = true)
         }
     }
 
@@ -78,5 +101,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
 internal data class InstitutionPickerState(
     val query: String = "",
-    val institutions: Async<InstitutionResponse> = Uninitialized
+    val searchMode: Boolean = false,
+    val featuredInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
 ) : MavericksState

@@ -129,7 +129,8 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             url = featuredInstitutionsUrl,
             options = options,
             params = mapOf(
-                PARAMS_CLIENT_SECRET to clientSecret
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "limit" to SEARCH_INSTITUTIONS_LIMIT
             )
         )
         return executeRequest(
