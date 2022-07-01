@@ -122,10 +122,11 @@ fun Html(
  * @return the string data associated with the resource
  */
 @Composable
-private fun annotatedStringResource(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun annotatedStringResource(
     text: String,
-    imageGetter: Map<String, EmbeddableImage>,
-    urlSpanStyle: SpanStyle
+    imageGetter: Map<String, EmbeddableImage> = emptyMap(),
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
 ): AnnotatedString {
     val spanned = remember(text) {
         HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY)
