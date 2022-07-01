@@ -75,7 +75,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `when 3DS2 nextActionData contains threeDs2IntentId and publishableKey then they should be used on source cancel`() =
+    fun `when 3DS2 data contains intentId and publishableKey then they are used on source cancel`() =
         runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
