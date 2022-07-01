@@ -3,9 +3,12 @@ package com.stripe.android.googlepaylauncher
 import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.BuildConfig
@@ -129,10 +132,13 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     ) : this(
         activity,
         activity.lifecycleScope,
-        activity,
+        activity.registerForActivityResult(
+            GooglePayPaymentMethodLauncherContract()
+        ) {
+            resultCallback.onResult(it)
+        },
         config,
-        readyCallback,
-        resultCallback
+        readyCallback
     )
 
     /**
@@ -154,28 +160,26 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     ) : this(
         fragment.requireContext(),
         fragment.viewLifecycleOwner.lifecycleScope,
-        fragment,
+        fragment.registerForActivityResult(
+            GooglePayPaymentMethodLauncherContract()
+        ) {
+            resultCallback.onResult(it)
+        },
         config,
-        readyCallback,
-        resultCallback
+        readyCallback
     )
 
     private constructor (
         context: Context,
         lifecycleScope: CoroutineScope,
-        activityResultCaller: ActivityResultCaller,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
         config: Config,
-        readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        readyCallback: ReadyCallback
     ) : this(
         lifecycleScope,
         config,
         readyCallback,
-        activityResultCaller.registerForActivityResult(
-            GooglePayPaymentMethodLauncherContract()
-        ) {
-            resultCallback.onResult(it)
-        },
+        activityResultLauncher,
         false,
         context,
         googlePayRepositoryFactory = {
@@ -376,5 +380,28 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 
         // Error executing a network call
         const val NETWORK_ERROR = 3
+
+        /**
+         * Create a [GooglePayPaymentMethodLauncher] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         */
+        @Composable
+        fun createForCompose(
+            config: Config,
+            readyCallback: ReadyCallback,
+            resultCallback: ResultCallback
+        ) = GooglePayPaymentMethodLauncher(
+            context = LocalContext.current,
+            lifecycleScope = LocalLifecycleOwner.current.lifecycleScope,
+            activityResultLauncher = rememberLauncherForActivityResult(
+                GooglePayPaymentMethodLauncherContract(),
+                resultCallback::onResult
+            ),
+            config = config,
+            readyCallback = readyCallback,
+        )
     }
 }

@@ -2,7 +2,11 @@ package com.stripe.android.googlepaylauncher
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
@@ -276,7 +280,46 @@ class GooglePayLauncher internal constructor(
         fun onResult(result: Result)
     }
 
-    internal companion object {
+    companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
+
+        /**
+         * Create a [GooglePayLauncher] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         */
+        @Composable
+        fun createForCompose(
+            config: Config,
+            readyCallback: ReadyCallback,
+            resultCallback: ResultCallback
+        ): GooglePayLauncher {
+            val repository = DefaultGooglePayRepository(
+                context = LocalContext.current,
+                environment = config.environment,
+                billingAddressParameters = config.billingAddressConfig.convert(),
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                allowCreditCards = config.allowCreditCards
+            )
+
+            return GooglePayLauncher(
+                lifecycleScope = LocalLifecycleOwner.current.lifecycleScope,
+                config = config,
+                readyCallback = readyCallback,
+                activityResultLauncher = rememberLauncherForActivityResult(
+                    GooglePayLauncherContract(),
+                    resultCallback::onResult
+                ),
+                googlePayRepositoryFactory = { repository },
+                PaymentAnalyticsRequestFactory(
+                    LocalContext.current,
+                    PaymentConfiguration.getInstance(LocalContext.current).publishableKey,
+                    setOf(PRODUCT_USAGE)
+                ),
+                DefaultAnalyticsRequestExecutor()
+            )
+        }
     }
 }

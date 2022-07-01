@@ -68,6 +68,10 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),
+            Item(
+                activity.getString(R.string.googlepaycomposelauncher_example),
+                GooglePayLauncherComposeActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
 //            Item(
 //                activity.getString(R.string.googlepayplayground_example),
@@ -76,6 +80,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.googlepaypaymentmethodlauncher_example),
                 GooglePayPaymentMethodLauncherIntegrationActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.googlepaypaymentmethodcomposelauncher_example),
+                GooglePayPaymentMethodLauncherComposeActivity::class.java
             ),
             Item(
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),

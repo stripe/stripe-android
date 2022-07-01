@@ -33,6 +33,7 @@ import com.stripe.example.module.StripeIntentViewModel
  */
 class ComposeExampleActivity : AppCompatActivity() {
     private val viewModel: StripeIntentViewModel by viewModels()
+    private var paymentLauncher: PaymentLauncher? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +47,11 @@ class ComposeExampleActivity : AppCompatActivity() {
         val inProgress by viewModel.inProgress.observeAsState(false)
         val status by viewModel.status.observeAsState("")
 
-        createPaymentLauncher().let { paymentLauncher ->
+        if (paymentLauncher == null) {
+            paymentLauncher = createPaymentLauncher()
+        }
+
+        paymentLauncher?.let { paymentLauncher ->
             Column(modifier = Modifier.padding(horizontal = 10.dp)) {
                 if (inProgress) {
                     LinearProgressIndicator(

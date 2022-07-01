@@ -13,8 +13,10 @@
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Customer Session</string>
     <string name="googlepaylauncher_example">Confirm payment with GooglePayLauncher</string>
+    <string name="googlepaycomposelauncher_example">Confirm payment in Compose with GooglePayLauncher</string>
     <string name="googlepayplayground_example">Test GooglePayLauncher Configurations</string>
     <string name="googlepaypaymentmethodlauncher_example">Create payment method with GooglePayPaymentMethodLauncher</string>
+    <string name="googlepaypaymentmethodcomposelauncher_example">Create payment method in Compose with GooglePayPaymentMethodLauncher</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
     <string name="create_payment_method">Create Payment Method</string>
