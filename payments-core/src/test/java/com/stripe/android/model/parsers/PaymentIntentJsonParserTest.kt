@@ -12,7 +12,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@Suppress("MaximumLineLength")
 class PaymentIntentJsonParserTest {
     @Test
     fun parse_withExpandedPaymentMethod_shouldCreateExpectedObject() {
