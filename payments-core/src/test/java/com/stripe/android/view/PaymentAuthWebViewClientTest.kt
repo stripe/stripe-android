@@ -16,6 +16,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("MaximumLineLength")
 class PaymentAuthWebViewClientTest {
     private val isPageLoaded = MutableLiveData(false)
 

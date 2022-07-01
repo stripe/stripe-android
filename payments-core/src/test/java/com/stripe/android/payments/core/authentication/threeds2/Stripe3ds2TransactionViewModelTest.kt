@@ -72,7 +72,7 @@ class Stripe3ds2TransactionViewModelTest {
         }
 
     @Test
-    fun `When nextActionData does not contain publishableKey then the default key is used to start 3ds2 auth`() =
+    fun `When nextActionData does not contain publishableKey then default key is used in 3ds2`() =
         runTest {
             val nextActionData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
                 as StripeIntent.NextActionData.SdkData.Use3DS2
@@ -97,7 +97,7 @@ class Stripe3ds2TransactionViewModelTest {
             // ViewModel.mBagOfTags that's initialized in base class.
             // Mocking it would leave this field null, causing an NPE.
             val viewModel = Stripe3ds2TransactionViewModel(
-                mock(),
+                ARGS,
                 mock(),
                 mock(),
                 mock(),
