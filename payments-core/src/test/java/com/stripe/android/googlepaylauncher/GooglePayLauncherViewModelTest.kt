@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
+import androidx.lifecycle.SavedStateHandle
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentsClient
@@ -14,6 +15,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.googlepaylauncher.GooglePayLauncherViewModel.Companion.HAS_LAUNCHED_KEY
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -42,6 +44,7 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
     private val stripeRepository = FakeStripeRepository()
+    private val savedStateHandle = SavedStateHandle()
     private val googlePayJsonFactory = GooglePayJsonFactory(
         googlePayConfig = GooglePayConfig(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -122,6 +125,17 @@ class GooglePayLauncherViewModelTest {
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
             )
+    }
+
+    @Test
+    fun `hasLaunched is stored in savedStateHandle`() {
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.hasLaunched).isFalse()
+
+        viewModel.hasLaunched = true
+
+        assertThat(savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY)).isTrue()
     }
 
     @Test
@@ -218,7 +232,8 @@ class GooglePayLauncherViewModelTest {
         stripeRepository,
         paymentController,
         googlePayJsonFactory,
-        googlePayRepository
+        googlePayRepository,
+        savedStateHandle
     )
 
     private class FakePaymentController : AbsPaymentController() {

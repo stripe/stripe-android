@@ -49,7 +49,8 @@ sealed class TextFieldIcon {
         val contentDescription: Int? = null,
 
         /** If it is an icon that should be tinted to match the text the value should be true */
-        val isTintable: Boolean
+        val isTintable: Boolean,
+        val onClick: (() -> Unit)? = null
     ) : TextFieldIcon()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
