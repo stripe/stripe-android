@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.error.SentryErrorReporter
+import com.stripe.android.core.error.ErrorReporter
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -13,6 +15,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.error.FinancialConnectionsSentryConfig
 import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import dagger.Module
@@ -75,4 +78,17 @@ internal object FinancialConnectionsSheetModule {
         packageInfo = application.packageInfo,
         publishableKeyProvider = { publishableKey }
     )
+
+    @Singleton
+    @Provides
+    fun provideErrorReporter(
+        context: Application,
+        logger: Logger
+    ): ErrorReporter {
+        return SentryErrorReporter(
+            context,
+            logger = logger,
+            sentryConfig = FinancialConnectionsSentryConfig
+        )
+    }
 }
