@@ -52,7 +52,8 @@ internal interface IdentityRepository {
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: StripeFilePurpose
+        filePurpose: StripeFilePurpose,
+        onSuccessExecutionTimeBlock: (Long) -> Unit = {}
     ): StripeFile
 
     @Throws(

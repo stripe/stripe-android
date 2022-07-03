@@ -218,7 +218,8 @@ internal class IdentityViewModel @Inject constructor(
         uri: Uri,
         isFront: Boolean,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
-        uploadMethod: UploadMethod
+        uploadMethod: UploadMethod,
+        scanType: IdentityScanState.ScanType
     ) {
         uploadDocumentImagesAndNotify(
             imageFile =
@@ -235,7 +236,9 @@ internal class IdentityViewModel @Inject constructor(
             ),
             uploadMethod = uploadMethod,
             isHighRes = true,
-            isFront = isFront
+            isFront = isFront,
+            scanType = scanType,
+            compressionQuality = docCapturePage.highResImageCompressionQuality
         )
     }
 
@@ -272,7 +275,8 @@ internal class IdentityViewModel @Inject constructor(
                     verificationPage.documentCapture,
                     isHighRes = true,
                     isFront = isFront,
-                    scores
+                    scores,
+                    targetScanType
                 )
 
                 // upload low res
@@ -282,7 +286,8 @@ internal class IdentityViewModel @Inject constructor(
                     verificationPage.documentCapture,
                     isHighRes = false,
                     isFront = isFront,
-                    scores
+                    scores,
+                    targetScanType
                 )
             }
             is FaceDetectorOutput -> {
@@ -323,7 +328,8 @@ internal class IdentityViewModel @Inject constructor(
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         isHighRes: Boolean,
         isFront: Boolean,
-        scores: List<Float>
+        scores: List<Float>,
+        targetScanType: IdentityScanState.ScanType
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
@@ -367,7 +373,14 @@ internal class IdentityViewModel @Inject constructor(
                 uploadMethod = UploadMethod.AUTOCAPTURE,
                 scores = scores,
                 isHighRes = isHighRes,
-                isFront = isFront
+                isFront = isFront,
+                scanType = targetScanType,
+                compressionQuality =
+                if (isHighRes) {
+                    docCapturePage.highResImageCompressionQuality
+                } else {
+                    docCapturePage.lowResImageCompressionQuality
+                }
             )
         }
     }
@@ -388,18 +401,33 @@ internal class IdentityViewModel @Inject constructor(
         uploadMethod: UploadMethod,
         scores: List<Float>? = null,
         isHighRes: Boolean,
-        isFront: Boolean
+        isFront: Boolean,
+        scanType: IdentityScanState.ScanType,
+        compressionQuality: Float
     ) {
         viewModelScope.launch {
             runCatching {
+                var uploadTime = 0L
                 identityRepository.uploadImage(
                     verificationId = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret,
                     imageFile = imageFile,
-                    filePurpose = filePurpose
-                )
+                    filePurpose = filePurpose,
+                    onSuccessExecutionTimeBlock = { uploadTime = it }
+                ) to uploadTime
             }.fold(
-                onSuccess = { uploadedStripeFile ->
+                onSuccess = { fileTimePair ->
+                    identityRepository.sendAnalyticsRequest(
+                        identityAnalyticsRequestFactory.imageUpload(
+                            value = fileTimePair.second,
+                            compressionQuality = compressionQuality,
+                            scanType = scanType,
+                            id = fileTimePair.first.id,
+                            fileName = fileTimePair.first.filename,
+                            fileSize = imageFile.length() / BYTES_IN_KB
+                        )
+                    )
+
                     updateAnalyticsState { oldState ->
                         if (isFront) {
                             oldState.copy(
@@ -416,7 +444,7 @@ internal class IdentityViewModel @Inject constructor(
                             isHighRes = isHighRes,
                             isFront = isFront,
                             newResult = UploadedResult(
-                                uploadedStripeFile,
+                                fileTimePair.first,
                                 scores,
                                 uploadMethod
                             )
@@ -496,7 +524,12 @@ internal class IdentityViewModel @Inject constructor(
                     StripeFilePurpose.fromCode(selfieCapturePage.filePurpose)
                 ),
                 isHighRes = isHighRes,
-                selfie = selfie
+                selfie = selfie,
+                compressionQuality = if (isHighRes) {
+                    selfieCapturePage.highResImageCompressionQuality
+                } else {
+                    selfieCapturePage.lowResImageCompressionQuality
+                }
             )
         }
     }
@@ -505,23 +538,37 @@ internal class IdentityViewModel @Inject constructor(
         imageFile: File,
         filePurpose: StripeFilePurpose,
         isHighRes: Boolean,
-        selfie: FaceDetectorTransitioner.Selfie
+        selfie: FaceDetectorTransitioner.Selfie,
+        compressionQuality: Float
     ) {
         viewModelScope.launch {
             runCatching {
+                var uploadTime = 0L
                 identityRepository.uploadImage(
                     verificationId = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret,
                     imageFile = imageFile,
-                    filePurpose = filePurpose
-                )
+                    filePurpose = filePurpose,
+                    onSuccessExecutionTimeBlock = { uploadTime = it }
+                ) to uploadTime
             }.fold(
-                onSuccess = { uploadedStripeFile ->
+                onSuccess = { fileTimePair ->
+                    identityRepository.sendAnalyticsRequest(
+                        identityAnalyticsRequestFactory.imageUpload(
+                            value = fileTimePair.second,
+                            compressionQuality = compressionQuality,
+                            scanType = IdentityScanState.ScanType.SELFIE,
+                            id = fileTimePair.first.id,
+                            fileName = fileTimePair.first.filename,
+                            fileSize = imageFile.length() / BYTES_IN_KB
+                        )
+                    )
+
                     _selfieUploadedState.update { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
                             newResult = UploadedResult(
-                                uploadedStripeFile
+                                fileTimePair.first
                             ),
                             selfie = selfie
                         )
@@ -735,5 +782,6 @@ internal class IdentityViewModel @Inject constructor(
         val TAG: String = IdentityViewModel::class.java.simpleName
         const val FRONT = "front"
         const val BACK = "back"
+        const val BYTES_IN_KB = 1024
     }
 }

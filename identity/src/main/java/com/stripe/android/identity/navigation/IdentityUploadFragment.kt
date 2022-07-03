@@ -258,7 +258,8 @@ internal abstract class IdentityUploadFragment(
                         uploadResult(
                             uri = it,
                             uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                            isFront = true
+                            isFront = true,
+                            scanType
                         )
                     }
                 } else if (scanType == backScanType) {
@@ -266,7 +267,8 @@ internal abstract class IdentityUploadFragment(
                         uploadResult(
                             uri = it,
                             uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                            isFront = false
+                            isFront = false,
+                            scanType
                         )
                     }
                 }
@@ -283,7 +285,8 @@ internal abstract class IdentityUploadFragment(
                         uploadResult(
                             uri = it,
                             uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                            isFront = true
+                            isFront = true,
+                            scanType
                         )
                     }
                 } else if (scanType == backScanType) {
@@ -291,7 +294,8 @@ internal abstract class IdentityUploadFragment(
                         uploadResult(
                             uri = it,
                             uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                            isFront = false
+                            isFront = false,
+                            scanType
                         )
                     }
                 }
@@ -319,7 +323,8 @@ internal abstract class IdentityUploadFragment(
     private fun uploadResult(
         uri: Uri,
         uploadMethod: DocumentUploadParam.UploadMethod,
-        isFront: Boolean
+        isFront: Boolean,
+        scanType: IdentityScanState.ScanType
     ) {
         if (isFront) {
             showFrontUploading()
@@ -331,7 +336,8 @@ internal abstract class IdentityUploadFragment(
                 uri = uri,
                 isFront = isFront,
                 docCapturePage = docCapturePage,
-                uploadMethod = uploadMethod
+                uploadMethod = uploadMethod,
+                scanType = scanType
             )
         }
     }

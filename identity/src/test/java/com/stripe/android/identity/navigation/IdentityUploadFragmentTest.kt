@@ -558,7 +558,8 @@ class IdentityUploadFragmentTest {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
                     } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
-                    }
+                    },
+                    scanType = eq(scanType)
                 )
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -573,7 +574,8 @@ class IdentityUploadFragmentTest {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
                     } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
-                    }
+                    },
+                    scanType = eq(scanType)
                 )
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.VISIBLE)
