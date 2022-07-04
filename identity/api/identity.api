@@ -282,7 +282,8 @@ public final class com/stripe/android/identity/databinding/SelfieScanFragmentBin
 	public final field headerTitle Landroid/widget/TextView;
 	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field message Landroid/widget/TextView;
-	public final field resultView Landroid/widget/LinearLayout;
+	public final field padding Landroid/view/View;
+	public final field resultView Landroid/widget/ScrollView;
 	public final field scanningView Lcom/google/android/material/card/MaterialCardView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/SelfieScanFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
