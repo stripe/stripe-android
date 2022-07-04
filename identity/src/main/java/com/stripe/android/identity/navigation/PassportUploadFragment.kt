@@ -43,7 +43,7 @@ internal open class PassportUploadFragment(
                 )
             }.onFailure {
                 Log.d(TAG, "fail to submit uploaded files: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         }
     }

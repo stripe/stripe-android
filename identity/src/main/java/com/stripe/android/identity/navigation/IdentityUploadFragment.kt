@@ -206,7 +206,7 @@ internal abstract class IdentityUploadFragment(
                 identityViewModel.documentUploadState.collectLatest { latestState ->
                     if (latestState.hasError()) {
                         Log.e(TAG, "Fail to upload files: ${latestState.getError()}")
-                        navigateToDefaultErrorFragment()
+                        navigateToDefaultErrorFragment(latestState.getError())
                     } else {
                         if (latestState.isFrontHighResUploaded()) {
                             showFrontDone(latestState)
@@ -315,7 +315,7 @@ internal abstract class IdentityUploadFragment(
                 onSuccess(it.documentCapture)
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }
@@ -394,7 +394,7 @@ internal abstract class IdentityUploadFragment(
                 )
             }.onFailure {
                 Log.d(TAG, "fail to submit uploaded files: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         }
     }
@@ -425,7 +425,7 @@ internal abstract class IdentityUploadFragment(
             },
             onFailure = {
                 Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }

@@ -79,7 +79,7 @@ internal class ConfirmationFragment(
             },
             onFailure = {
                 Log.e(TAG, "Failed to get VerificationPage")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
 

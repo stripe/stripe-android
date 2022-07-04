@@ -108,6 +108,7 @@ internal class IDScanFragmentTest {
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
+        on { getError() } doReturn mock()
     }
 
     private val anyLoadingDocumentUploadState = mock<DocumentUploadState> {

@@ -161,7 +161,8 @@ internal class IdentityActivityTest {
             navController.navigate(
                 R.id.errorFragment,
                 bundleOf(
-                    ErrorFragment.ARG_FAILED_REASON to failedReason
+                    ErrorFragment.ARG_SHOULD_FAIL to true,
+                    ErrorFragment.ARG_CAUSE to failedReason
                 )
             )
 
@@ -204,7 +205,8 @@ internal class IdentityActivityTest {
             navController.navigate(
                 R.id.errorFragment,
                 bundleOf(
-                    ErrorFragment.ARG_FAILED_REASON to failedReason
+                    ErrorFragment.ARG_SHOULD_FAIL to true,
+                    ErrorFragment.ARG_CAUSE to failedReason
                 )
             )
 

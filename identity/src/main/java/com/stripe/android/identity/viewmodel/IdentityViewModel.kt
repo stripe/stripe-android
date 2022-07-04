@@ -594,7 +594,7 @@ internal class IdentityViewModel @Inject constructor(
     fun observeForVerificationPage(
         owner: LifecycleOwner,
         onSuccess: (VerificationPage) -> Unit,
-        onFailure: (Throwable?) -> Unit
+        onFailure: (Throwable) -> Unit
     ) {
         verificationPage.observe(owner) { resource ->
             when (resource.status) {
@@ -603,7 +603,7 @@ internal class IdentityViewModel @Inject constructor(
                 }
                 Status.ERROR -> {
                     Log.e(TAG, "Fail to get VerificationPage")
-                    onFailure(resource.throwable)
+                    onFailure(requireNotNull(resource.throwable))
                 }
                 Status.LOADING -> {} // no-op
             }
@@ -641,13 +641,18 @@ internal class IdentityViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    _verificationPage.postValue(
-                        Resource.error(
-                            "Failed to retrieve verification page with " +
-                                "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: ${verificationArgs.ephemeralKeySecret}",
-                            it
-                        )
-                    )
+                    "Failed to retrieve verification page with " +
+                        (
+                            "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
+                                "${verificationArgs.ephemeralKeySecret}"
+                            ).let { msg ->
+                            _verificationPage.postValue(
+                                Resource.error(
+                                    msg,
+                                    IllegalStateException(msg, it)
+                                )
+                            )
+                        }
                 }
             )
         }

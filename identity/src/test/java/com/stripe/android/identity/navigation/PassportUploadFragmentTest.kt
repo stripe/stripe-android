@@ -86,6 +86,7 @@ class PassportUploadFragmentTest {
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
+        on { getError() } doReturn mock()
     }
 
     private val mockScreenTracker = mock<ScreenTracker>()
