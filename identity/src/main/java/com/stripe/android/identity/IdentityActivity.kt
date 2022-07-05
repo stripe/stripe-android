@@ -36,6 +36,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import android.content.Context
 
 /**
  * Host activity to perform Identity verification.
@@ -79,6 +80,7 @@ internal class IdentityActivity :
     private lateinit var fallbackUrlLauncher: ActivityResultLauncher<Intent>
 
     private var launchedFallbackUrl: Boolean = false
+
 
     lateinit var subcomponent: IdentityActivitySubcomponent
 
@@ -394,4 +396,5 @@ internal class IdentityActivity :
         ) = destination?.id == R.id.errorFragment &&
             args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
     }
+
 }

@@ -58,6 +58,7 @@ internal class IdentityActivityTest {
         on { workContext }.thenReturn(testDispatcher)
     }
 
+
     @Before
     fun setUpViewModelFactory() {
         whenever(
