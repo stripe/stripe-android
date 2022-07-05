@@ -74,6 +74,22 @@ class AfterpayClearpayHeaderElementTest {
     }
 
     @Test
+    fun `Verify infoUrl is updated as locale changes`() {
+        Locale.setDefault(Locale.UK)
+        val element = AfterpayClearpayHeaderElement(
+            IdentifierSpec.Generic("test"),
+            Amount(123, "USD")
+        )
+
+        assertThat(element.infoUrl)
+            .isEqualTo("https://static.afterpay.com/modal/en_GB.html")
+
+        Locale.setDefault(Locale.FRANCE)
+        assertThat(element.infoUrl)
+            .isEqualTo("https://static.afterpay.com/modal/fr_FR.html")
+    }
+
+    @Test
     fun `Verify infoUrl is localized for GB`() {
         Locale.setDefault(Locale.UK)
         val element = AfterpayClearpayHeaderElement(

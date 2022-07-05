@@ -19,7 +19,8 @@ data class AfterpayClearpayHeaderElement(
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         MutableStateFlow(emptyList())
 
-    val infoUrl = url.format(getLocaleString(Locale.current))
+    val infoUrl: String
+        get() = url.format(getLocaleString(Locale.current))
 
     private fun getLocaleString(locale: Locale) =
         locale.language.lowercase() + "_" + locale.region.uppercase()
