@@ -81,7 +81,6 @@ internal class IdentityActivity :
 
     private var launchedFallbackUrl: Boolean = false
 
-
     lateinit var subcomponent: IdentityActivitySubcomponent
 
     @Inject
@@ -396,5 +395,4 @@ internal class IdentityActivity :
         ) = destination?.id == R.id.errorFragment &&
             args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
     }
-
 }
