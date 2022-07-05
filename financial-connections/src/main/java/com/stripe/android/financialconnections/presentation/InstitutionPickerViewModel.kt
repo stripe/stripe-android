@@ -5,9 +5,11 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.RedeliverOnStart
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -20,25 +22,42 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.reflect.KProperty1
 
 internal class InstitutionPickerViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
     val searchInstitutions: SearchInstitutions,
     val postAuthorizationSession: PostAuthorizationSession,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val logger: Logger,
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
 
     private var searchJob: Job? = null
 
     init {
+        logErrors()
         suspend {
             searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret
             )
         }.execute(
-            retainValue = InstitutionPickerState::featuredInstitutions) { copy(featuredInstitutions = it)
+            retainValue = InstitutionPickerState::featuredInstitutions
+        ) {
+            copy(featuredInstitutions = it)
         }
+    }
+
+    private fun logErrors() {
+        onAsync(InstitutionPickerState::selectInstitution, onFail = {
+            logger.error("Error selecting institution", it)
+        })
+        onAsync(InstitutionPickerState::featuredInstitutions, onFail = {
+            logger.error("Error fetching featured institutions", it)
+        })
+        onAsync(InstitutionPickerState::searchInstitutions, onFail = {
+            logger.error("Error searching institutions", it)
+        })
     }
 
     fun onQueryChanged(query: String) {
@@ -58,12 +77,16 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onInstitutionSelected(institution: Institution) {
-        viewModelScope.launch {
+        suspend {
+            // api call
             postAuthorizationSession(institution.id)
+            // navigate to next step
             nativeAuthFlowCoordinator().emit(Message.OpenWebAuthFlow)
             // TODO@carlosmuvi use this when next steps available in native.
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)
+        }.execute {
+            copy(selectInstitution = it)
         }
     }
 
@@ -105,4 +128,5 @@ internal data class InstitutionPickerState(
     val searchMode: Boolean = false,
     val featuredInstitutions: Async<InstitutionResponse> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val selectInstitution: Async<Unit> = Uninitialized,
 ) : MavericksState
