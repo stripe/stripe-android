@@ -173,7 +173,6 @@ private fun SearchInstitutionsList(
 ) {
     LazyColumn(
         contentPadding = PaddingValues(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
         content = {
             items(institutions, key = { it.id }) { institution ->
                 Row(
@@ -181,6 +180,7 @@ private fun SearchInstitutionsList(
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable { onInstitutionSelected(institution) }
+                        .padding(vertical = 8.dp)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
@@ -306,7 +306,7 @@ private fun InstitutionPickerPreview() {
                     )
                 )
             ),
-            searchMode = false,
+            searchMode = true,
             query = "",
             onQueryChanged = {},
             onInstitutionSelected = {},
