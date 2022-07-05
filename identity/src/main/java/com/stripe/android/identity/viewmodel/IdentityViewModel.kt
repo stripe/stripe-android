@@ -1,43 +1,36 @@
 package com.stripe.android.identity.viewmodel
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.camera.AppSettingsOpenable
-import com.stripe.android.camera.CameraPermissionEnsureable
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequestV2
-import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
-import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
-import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
+import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
@@ -61,25 +54,23 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
 
-internal class IdentityViewModel @Inject constructor(
+internal class IdentityViewModel constructor(
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
-    val identityRepository: IdentityRepository,
+    private val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
-    val identityFragmentFactory: IdentityFragmentFactory,
-    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    val fpsTracker: FPSTracker,
-    val screenTracker: ScreenTracker,
-    @UIContext val uiContext: CoroutineContext,
-    @IOContext val workContext: CoroutineContext
+    internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    internal val fpsTracker: FPSTracker,
+    internal val screenTracker: ScreenTracker,
+    private val savedStateHandle: SavedStateHandle,
+    @UIContext internal val uiContext: CoroutineContext,
+    @IOContext internal val workContext: CoroutineContext
 ) : ViewModel() {
 
     /**
@@ -696,38 +687,31 @@ internal class IdentityViewModel @Inject constructor(
     }
 
     internal class IdentityViewModelFactory(
-        val context: Context,
-        private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
-        private val cameraPermissionEnsureable: CameraPermissionEnsureable,
-        private val appSettingsOpenable: AppSettingsOpenable,
-        private val verificationFlowFinishable: VerificationFlowFinishable,
-        private val fallbackUrlLauncher: FallbackUrlLauncher
-    ) : ViewModelProvider.Factory, Injectable<Context> {
-        @Inject
-        lateinit var subComponentBuilderProvider: Provider<IdentityViewModelSubcomponent.Builder>
+        savedStateRegistryOwner: SavedStateRegistryOwner,
+        private val uiContextSupplier: () -> CoroutineContext,
+        private val workContextSupplier: () -> CoroutineContext,
+        private val subcomponentSupplier: () -> IdentityActivitySubcomponent,
+    ) : AbstractSavedStateViewModelFactory(savedStateRegistryOwner, null) {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val args = verificationArgsSupplier()
-            injectWithFallback(
-                args.injectorKey,
-                context
-            )
-
-            return subComponentBuilderProvider.get()
-                .args(args)
-                .cameraPermissionEnsureable(cameraPermissionEnsureable)
-                .appSettingsOpenable(appSettingsOpenable)
-                .verificationFlowFinishable(verificationFlowFinishable)
-                .identityViewModelFactory(this)
-                .fallbackUrlLauncher(fallbackUrlLauncher)
-                .build().viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: Context) {
-            DaggerIdentityViewModelFactoryComponent.builder()
-                .context(context)
-                .build().inject(this)
+        override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            handle: SavedStateHandle
+        ): T {
+            val subcomponent = subcomponentSupplier()
+            return IdentityViewModel(
+                subcomponent.verificationArgs,
+                subcomponent.identityRepository,
+                subcomponent.identityModelFetcher,
+                subcomponent.identityIO,
+                subcomponent.identityAnalyticsRequestFactory,
+                subcomponent.fpsTracker,
+                subcomponent.screenTracker,
+                handle,
+                uiContextSupplier(),
+                workContextSupplier()
+            ) as T
         }
     }
 
