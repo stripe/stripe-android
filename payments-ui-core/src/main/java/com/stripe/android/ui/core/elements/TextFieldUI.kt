@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -270,6 +271,9 @@ internal fun TrailingIcon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
+            },
+            modifier = Modifier.clickable {
+                trailingIcon.onClick?.invoke()
             }
         )
     } else {
@@ -277,6 +281,9 @@ internal fun TrailingIcon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
+            },
+            modifier = Modifier.clickable {
+                trailingIcon.onClick?.invoke()
             }
         )
     }

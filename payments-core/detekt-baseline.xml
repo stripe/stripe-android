@@ -236,86 +236,18 @@
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"</ID>
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
-    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:20</ID>
-    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:24</ID>
-    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:25</ID>
-    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:28</ID>
-    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:29</ID>
-    <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:106</ID>
-    <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:42</ID>
-    <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:72</ID>
-    <ID>MaximumLineLength:com.stripe.android.EphemeralKeyManagerTest.kt:199</ID>
-    <ID>MaximumLineLength:com.stripe.android.EphemeralKeyManagerTest.kt:223</ID>
-    <ID>MaximumLineLength:com.stripe.android.EphemeralKeyManagerTest.kt:247</ID>
-    <ID>MaximumLineLength:com.stripe.android.PaymentAnalyticsRequestFactoryTest.kt:296</ID>
     <ID>MaximumLineLength:com.stripe.android.PaymentRelayContract.kt:9</ID>
-    <ID>MaximumLineLength:com.stripe.android.PaymentSessionConfigTest.kt:48</ID>
-    <ID>MaximumLineLength:com.stripe.android.PaymentSessionTest.kt:60</ID>
-    <ID>MaximumLineLength:com.stripe.android.PaymentSessionViewModelTest.kt:177</ID>
-    <ID>MaximumLineLength:com.stripe.android.PaymentSessionViewModelTest.kt:216</ID>
-    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:252</ID>
-    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:273</ID>
-    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:563</ID>
-    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:601</ID>
-    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:783</ID>
-    <ID>MaximumLineLength:com.stripe.android.StripePaymentControllerTest.kt:149</ID>
-    <ID>MaximumLineLength:com.stripe.android.cards.RemoteCardAccountRangeSourceTest.kt:117</ID>
     <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:10</ID>
     <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:19</ID>
     <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:20</ID>
     <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:9</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:15</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:19</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:34</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2AuthParamsTest.kt:82</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2Fixtures.kt:10</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2Fixtures.kt:14</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:103</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:105</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:122</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:123</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:138</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:64</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:75</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:87</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:21</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:22</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:29</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:30</ID>
-    <ID>MaximumLineLength:com.stripe.android.networking.DefaultAlipayRepositoryTest.kt:36</ID>
-    <ID>MaximumLineLength:com.stripe.android.networking.PaymentApiRequestTest.kt:25</ID>
     <ID>MaximumLineLength:com.stripe.android.payments.PaymentFlowFailureMessageFactory.kt:39</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:103</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:114</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:125</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:80</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:91</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:39</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:54</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:67</ID>
-    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:80</ID>
     <ID>MaximumLineLength:com.stripe.android.utils.InjectableActivityScenario.kt:107</ID>
     <ID>MaximumLineLength:com.stripe.android.utils.InjectableActivityScenario.kt:95</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.AddPaymentMethodViewModelTest.kt:30</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.BecsDebitMandateAcceptanceFactoryTest.kt:20</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.BecsDebitMandateAcceptanceTextViewTest.kt:24</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardFormView.kt:83</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:101</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:171</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:196</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardNumberEditTextTest.kt:354</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardNumberEditTextTest.kt:652</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardNumberEditTextTest.kt:877</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:172</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:259</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:278</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:29</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:51</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:73</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:92</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentMethodsActivityTest.kt:36</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.PaymentMethodsViewModelTest.kt:24</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.StripeEditTextTest.kt:99</ID>
     <ID>ReturnCount:DateUtils.kt$DateUtils$@VisibleForTesting @JvmStatic fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean</ID>
     <ID>ReturnCount:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry$@Suppress("UNCHECKED_CAST") override fun &lt;Authenticatable> getAuthenticator( authenticatable: Authenticatable ): PaymentAuthenticator&lt;Authenticatable></ID>
     <ID>ReturnCount:FraudDetectionDataJsonParser.kt$FraudDetectionDataJsonParser$override fun parse(json: JSONObject): FraudDetectionData?</ID>

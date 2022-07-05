@@ -148,7 +148,10 @@ class CardInputWidget @JvmOverloads constructor(
             return cvcEditText.cvc
         }
 
-    private val brand: CardBrand
+    /**
+     * A [CardBrand] matching the current card number inputted by the user.
+     */
+    val brand: CardBrand
         get() {
             return cardNumberEditText.cardBrand
         }

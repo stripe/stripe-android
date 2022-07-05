@@ -81,6 +81,10 @@ internal class ConsentFragment(
                         verificationPage.biometricConsent,
                         verificationPage.requireSelfie()
                     )
+
+                    lifecycleScope.launch(identityViewModel.workContext) {
+                        identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+                    }
                 } else {
                     navigateToDocSelection()
                 }
@@ -94,9 +98,6 @@ internal class ConsentFragment(
             }
         )
 
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
-        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 screenName = SCREEN_NAME_CONSENT

@@ -28,20 +28,24 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewBinding.progressBar.isVisible = true
-        viewBinding.googlePayButton.isEnabled = false
+        // If the activity is being recreated, load the client secret if it has already been fetched
+        savedInstanceState?.let {
+            clientSecret = it.getString(SAVED_CLIENT_SECRET, "")
+        }
 
-        viewModel.createPaymentIntent(COUNTRY_CODE)
-            .observe(this) { result ->
-                result.fold(
-                    onSuccess = ::onPaymentIntentCreated,
-                    onFailure = { error ->
-                        snackbarController.show(
-                            "Could not create PaymentIntent. ${error.message}"
-                        )
-                    }
-                )
-            }
+        if (clientSecret.isBlank()) {
+            viewModel.createPaymentIntent(COUNTRY_CODE)
+                .observe(this) { result ->
+                    result.fold(
+                        onSuccess = ::onPaymentIntentCreated,
+                        onFailure = { error ->
+                            snackbarController.show(
+                                "Could not create PaymentIntent. ${error.message}"
+                            )
+                        }
+                    )
+                }
+        }
 
         val googlePayLauncher = GooglePayLauncher(
             activity = this,
@@ -52,9 +56,9 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
                 billingAddressConfig = GooglePayLauncher.BillingAddressConfig(
                     isRequired = true,
                     format = GooglePayLauncher.BillingAddressConfig.Format.Full,
-                    isPhoneNumberRequired = true
+                    isPhoneNumberRequired = false
                 ),
-                existingPaymentMethodRequired = true
+                existingPaymentMethodRequired = false
             ),
             readyCallback = ::onGooglePayReady,
             resultCallback = ::onGooglePayResult
@@ -64,6 +68,13 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
             viewBinding.progressBar.isVisible = true
             googlePayLauncher.presentForPaymentIntent(clientSecret)
         }
+
+        updateUi()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(SAVED_CLIENT_SECRET, clientSecret)
     }
 
     private fun updateUi() {
@@ -98,10 +109,12 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
             }
         }.let {
             snackbarController.show(it)
+            googlePayButton.isEnabled = false
         }
     }
 
     private companion object {
         private const val COUNTRY_CODE = "US"
+        private const val SAVED_CLIENT_SECRET = "client_secret"
     }
 }

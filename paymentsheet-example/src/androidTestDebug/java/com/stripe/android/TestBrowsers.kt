@@ -73,6 +73,7 @@ class TestBrowsers {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
         authorizationAction = AuthorizeAction.Authorize,
+        merchantCountryCode = "GB",
     )
 
     @Test
