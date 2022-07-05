@@ -43,7 +43,8 @@ import kotlin.coroutines.CoroutineContext
 internal class IdentityActivity :
     CameraPermissionCheckingActivity(),
     VerificationFlowFinishable,
-    FallbackUrlLauncher, Injectable<Context> {
+    FallbackUrlLauncher,
+    Injectable<Context> {
     @VisibleForTesting
     internal lateinit var navController: NavController
 
@@ -79,9 +80,7 @@ internal class IdentityActivity :
 
     private var launchedFallbackUrl: Boolean = false
 
-
     lateinit var subcomponent: IdentityActivitySubcomponent
-
 
     @Inject
     lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Builder>
@@ -395,5 +394,4 @@ internal class IdentityActivity :
         ) = destination?.id == R.id.errorFragment &&
             args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
     }
-
 }

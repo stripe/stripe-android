@@ -690,7 +690,7 @@ internal class IdentityViewModel constructor(
         savedStateRegistryOwner: SavedStateRegistryOwner,
         private val uiContextSupplier: () -> CoroutineContext,
         private val workContextSupplier: () -> CoroutineContext,
-        private val subcomponentSupplier: () -> IdentityActivitySubcomponent,
+        private val subcomponentSupplier: () -> IdentityActivitySubcomponent
     ) : AbstractSavedStateViewModelFactory(savedStateRegistryOwner, null) {
 
         @Suppress("UNCHECKED_CAST")
