@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
@@ -387,21 +388,32 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
          * [ActivityResultLauncher] into current activity, it should be called as part of Compose
          * initialization path.
+         * The GooglePayPaymentMethodLauncher created is remembered across recompositions.
+         * Recomposition will always return the value produced by composition.
          */
         @Composable
-        fun createForCompose(
+        fun rememberLauncher(
             config: Config,
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
-        ) = GooglePayPaymentMethodLauncher(
-            context = LocalContext.current,
-            lifecycleScope = LocalLifecycleOwner.current.lifecycleScope,
-            activityResultLauncher = rememberLauncherForActivityResult(
+        ): GooglePayPaymentMethodLauncher {
+            val activityResultLauncher = rememberLauncherForActivityResult(
                 GooglePayPaymentMethodLauncherContract(),
                 resultCallback::onResult
-            ),
-            config = config,
-            readyCallback = readyCallback,
-        )
+            )
+
+            val context = LocalContext.current
+            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+
+            return remember {
+                GooglePayPaymentMethodLauncher(
+                    context = context,
+                    lifecycleScope = lifecycleScope,
+                    activityResultLauncher = activityResultLauncher,
+                    config = config,
+                    readyCallback = readyCallback,
+                )
+            }
+        }
     }
 }

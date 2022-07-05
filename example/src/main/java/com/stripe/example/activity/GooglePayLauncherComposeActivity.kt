@@ -37,8 +37,6 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         existingPaymentMethodRequired = false
     )
 
-    private var googlePayLauncher: GooglePayLauncher? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -73,56 +71,50 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                 }
             }
 
-            if (googlePayLauncher == null) {
-                googlePayLauncher = GooglePayLauncher.createForCompose(
-                    config = googlePayConfig,
-                    readyCallback = { ready ->
-                        if (!googlePayLaunched) {
-                            googlePayReady = ready
+            val googlePayLauncher = GooglePayLauncher.rememberLauncher(
+                config = googlePayConfig,
+                readyCallback = { ready ->
+                    if (!googlePayLaunched) {
+                        googlePayReady = ready
 
-                            if (!googlePayReady) {
-                                completed = true
-                            }
-
-                            scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar("Google Pay ready? $ready")
-                            }
+                        if (!googlePayReady) {
+                            completed = true
                         }
-                    },
-                    resultCallback = { result ->
-                        when (result) {
-                            GooglePayLauncher.Result.Completed -> {
-                                "Successfully collected payment."
-                            }
-                            GooglePayLauncher.Result.Canceled -> {
-                                "Customer cancelled Google Pay."
-                            }
-                            is GooglePayLauncher.Result.Failed -> {
-                                "Google Pay failed. ${result.error.message}"
-                            }
-                        }.let {
-                            scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(it)
-                                completed = true
-                            }
+
+                        scope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar("Google Pay ready? $ready")
                         }
                     }
-                )
-            }
+                },
+                resultCallback = { result ->
+                    when (result) {
+                        GooglePayLauncher.Result.Completed -> {
+                            "Successfully collected payment."
+                        }
+                        GooglePayLauncher.Result.Canceled -> {
+                            "Customer cancelled Google Pay."
+                        }
+                        is GooglePayLauncher.Result.Failed -> {
+                            "Google Pay failed. ${result.error.message}"
+                        }
+                    }.let {
+                        scope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar(it)
+                            completed = true
+                        }
+                    }
+                }
+            )
 
-            val readyToPay = googlePayReady && clientSecret.isNotBlank() && !completed
+            val readyToPay = googlePayReady && clientSecret.isNotBlank()
 
             Scaffold(scaffoldState = scaffoldState) {
                 Column(Modifier.fillMaxWidth()) {
-                    if (!readyToPay && !completed) {
+                    if (!readyToPay) {
                         LinearProgressIndicator(Modifier.fillMaxWidth())
                     }
 
-                    Spacer(
-                        Modifier
-                            .height(8.dp)
-                            .fillMaxWidth()
-                    )
+                    Spacer(Modifier.height(8.dp).fillMaxWidth())
 
                     AndroidView(
                         factory = { context ->
@@ -131,9 +123,9 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                         modifier = Modifier
                             .wrapContentWidth()
                             .clickable(
-                                enabled = readyToPay,
+                                enabled = readyToPay && !completed,
                                 onClick = {
-                                    googlePayLauncher?.presentForPaymentIntent(clientSecret)
+                                    googlePayLauncher.presentForPaymentIntent(clientSecret)
                                     googlePayLaunched = true
                                 }
                             )

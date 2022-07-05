@@ -39,7 +39,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
             val scope = rememberCoroutineScope()
             var enabled by remember { mutableStateOf(false) }
 
-            val googlePayLauncher = GooglePayPaymentMethodLauncher.createForCompose(
+            val googlePayLauncher = GooglePayPaymentMethodLauncher.rememberLauncher(
                 config = googlePayConfig,
                 readyCallback = { ready ->
                     if (ready) {

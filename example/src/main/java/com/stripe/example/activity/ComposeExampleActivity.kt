@@ -15,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -33,7 +34,6 @@ import com.stripe.example.module.StripeIntentViewModel
  */
 class ComposeExampleActivity : AppCompatActivity() {
     private val viewModel: StripeIntentViewModel by viewModels()
-    private var paymentLauncher: PaymentLauncher? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,37 +46,32 @@ class ComposeExampleActivity : AppCompatActivity() {
     fun ComposeScreen() {
         val inProgress by viewModel.inProgress.observeAsState(false)
         val status by viewModel.status.observeAsState("")
+        val paymentLauncher = createPaymentLauncher()
 
-        if (paymentLauncher == null) {
-            paymentLauncher = createPaymentLauncher()
-        }
-
-        paymentLauncher?.let { paymentLauncher ->
-            Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                if (inProgress) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Text(
-                    stringResource(R.string.payment_auth_intro),
-                    modifier = Modifier.padding(vertical = 5.dp)
+        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+            if (inProgress) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
                 )
-                ConfirmButton(
-                    params = confirmParams3ds1,
-                    buttonName = R.string.confirm_with_3ds1_button,
-                    paymentLauncher = paymentLauncher,
-                    inProgress = inProgress
-                )
-                ConfirmButton(
-                    params = confirmParams3ds2,
-                    buttonName = R.string.confirm_with_3ds2_button,
-                    paymentLauncher = paymentLauncher,
-                    inProgress = inProgress
-                )
-                Divider(modifier = Modifier.padding(vertical = 5.dp))
-                Text(text = status)
             }
+            Text(
+                stringResource(R.string.payment_auth_intro),
+                modifier = Modifier.padding(vertical = 5.dp)
+            )
+            ConfirmButton(
+                params = confirmParams3ds1,
+                buttonName = R.string.confirm_with_3ds1_button,
+                paymentLauncher = paymentLauncher,
+                inProgress = inProgress
+            )
+            ConfirmButton(
+                params = confirmParams3ds2,
+                buttonName = R.string.confirm_with_3ds2_button,
+                paymentLauncher = paymentLauncher,
+                inProgress = inProgress
+            )
+            Divider(modifier = Modifier.padding(vertical = 5.dp))
+            Text(text = status)
         }
     }
 
@@ -85,8 +80,9 @@ class ComposeExampleActivity : AppCompatActivity() {
      */
     @Composable
     fun createPaymentLauncher(): PaymentLauncher {
-        val settings = Settings(LocalContext.current)
-        return PaymentLauncher.createForCompose(
+        val context = LocalContext.current
+        val settings = remember { Settings(context) }
+        return PaymentLauncher.rememberLauncher(
             publishableKey = settings.publishableKey,
             stripeAccountId = settings.stripeAccountId
         ) {

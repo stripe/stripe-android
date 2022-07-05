@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
@@ -289,37 +290,46 @@ class GooglePayLauncher internal constructor(
          * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
          * [ActivityResultLauncher] into current activity, it should be called as part of Compose
          * initialization path.
+         * The GooglePayLauncher created is remembered across recompositions. Recomposition will
+         * always return the value produced by composition.
          */
         @Composable
-        fun createForCompose(
+        fun rememberLauncher(
             config: Config,
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayLauncher {
-            val repository = DefaultGooglePayRepository(
-                context = LocalContext.current,
-                environment = config.environment,
-                billingAddressParameters = config.billingAddressConfig.convert(),
-                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                allowCreditCards = config.allowCreditCards
+            val activityResultLauncher = rememberLauncherForActivityResult(
+                GooglePayLauncherContract(),
+                resultCallback::onResult
             )
 
-            return GooglePayLauncher(
-                lifecycleScope = LocalLifecycleOwner.current.lifecycleScope,
-                config = config,
-                readyCallback = readyCallback,
-                activityResultLauncher = rememberLauncherForActivityResult(
-                    GooglePayLauncherContract(),
-                    resultCallback::onResult
-                ),
-                googlePayRepositoryFactory = { repository },
-                PaymentAnalyticsRequestFactory(
-                    LocalContext.current,
-                    PaymentConfiguration.getInstance(LocalContext.current).publishableKey,
-                    setOf(PRODUCT_USAGE)
-                ),
-                DefaultAnalyticsRequestExecutor()
-            )
+            val context = LocalContext.current
+            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+
+            return remember {
+                GooglePayLauncher(
+                    lifecycleScope = lifecycleScope,
+                    config = config,
+                    readyCallback = readyCallback,
+                    activityResultLauncher = activityResultLauncher,
+                    googlePayRepositoryFactory = {
+                        DefaultGooglePayRepository(
+                            context = context,
+                            environment = config.environment,
+                            billingAddressParameters = config.billingAddressConfig.convert(),
+                            existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                            allowCreditCards = config.allowCreditCards
+                        )
+                    },
+                    PaymentAnalyticsRequestFactory(
+                        context,
+                        PaymentConfiguration.getInstance(context).publishableKey,
+                        setOf(PRODUCT_USAGE)
+                    ),
+                    DefaultAnalyticsRequestExecutor()
+                )
+            }
         }
     }
 }

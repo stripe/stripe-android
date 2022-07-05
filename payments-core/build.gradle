@@ -19,12 +19,12 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     implementation 'com.google.android.instantapps:instantapps:1.1.0'
 
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
