@@ -82,7 +82,7 @@ interface PaymentLauncher {
         @Deprecated(
             "This method creates a new PaymentLauncher object every time it is called, even" +
                 "during recompositions.",
-            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher")
+            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher(publishableKey, stripeAccountId, callback)")
         )
         @Composable
         fun createForCompose(
