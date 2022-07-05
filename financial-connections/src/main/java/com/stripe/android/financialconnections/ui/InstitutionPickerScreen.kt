@@ -133,7 +133,6 @@ private fun InstitutionPickerContent(
                         onInstitutionSelected = onInstitutionSelected
                     )
                 }
-
             }
         }
     }
@@ -161,12 +160,12 @@ private fun FinancialConnectionsSearchRow(
                 onClick = {
                     onCancelSearchClick()
                     focusManager.clearFocus()
-                }) {
+                }
+            ) {
                 Text(text = "Cancel")
             }
         }
     }
-
 }
 
 @Composable
@@ -209,7 +208,6 @@ private fun SearchInstitutionsList(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-
                 }
             }
         }
@@ -252,6 +250,7 @@ private fun FeaturedInstitutionsGrid(
 }
 
 @Composable
+@Suppress("LongMethod")
 @Preview(
     showBackground = true
 )

@@ -1,11 +1,9 @@
 package com.stripe.android.financialconnections.presentation
 
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.RedeliverOnStart
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -20,9 +18,7 @@ import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.reflect.KProperty1
 
 internal class InstitutionPickerViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
