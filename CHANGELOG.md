@@ -12,7 +12,7 @@
 * [ADDED] [5238](https://github.com/stripe/stripe-android/pull/5238) Expose the current card brand in CardFormView, CardInputWidget, and CardMultiLineWidget
 
 ### Identity
-* [ADDED] First release to support capture
+* [ADDED] [5149](https://github.com/stripe/stripe-android/pull/5149) First release to fully support selfie capture
 
 ## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
