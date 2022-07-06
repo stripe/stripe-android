@@ -41,7 +41,7 @@ internal open class CameraViewModel(
     internal val displayStateChanged =
         SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
 
-    internal lateinit var identityScanFlow: IdentityScanFlow
+    internal var identityScanFlow: IdentityScanFlow? = null
 
     internal fun initializeScanFlow(
         verificationPage: VerificationPage,
