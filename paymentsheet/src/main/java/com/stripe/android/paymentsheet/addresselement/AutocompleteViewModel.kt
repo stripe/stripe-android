@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.paymentsheet.injection.AutoCompleteViewModelSubcomponent
@@ -46,7 +45,7 @@ internal class AutocompleteViewModel @Inject constructor(
         get() = _loading
 
     @VisibleForTesting
-    val addressResult = MutableStateFlow<Result<Address?>?>(null)
+    val addressResult = MutableStateFlow<Result<ShippingAddress?>?>(null)
 
     val textFieldController = SimpleTextFieldController(
         SimpleTextFieldConfig(
@@ -69,9 +68,11 @@ internal class AutocompleteViewModel @Inject constructor(
 
     fun initialize(
         clientProvider: () -> PlacesClientProxy? = {
-            args.config?.googlePlacesApiKey?.let {
-                PlacesClientProxy.create(getApplication(), it)
-            }
+            // TODO: Update the PaymentSheet Configuration to include api key
+//            args.config?.googlePlacesApiKey?.let {
+//                PlacesClientProxy.create(getApplication(), it)
+//            }
+            PlacesClientProxy.create(getApplication(), "")
         }
     ) {
         client = clientProvider()
@@ -107,8 +108,16 @@ internal class AutocompleteViewModel @Inject constructor(
             )?.fold(
                 onSuccess = {
                     _loading.value = false
+                    val address = it.place.transformGoogleToStripeAddress(getApplication())
                     addressResult.value = Result.success(
-                        it.place.transformGoogleToStripeAddress(getApplication())
+                        ShippingAddress(
+                            city = address.city,
+                            country = address.country,
+                            line1 = address.line1,
+                            line2 = address.line2,
+                            postalCode = address.postalCode,
+                            state = address.state
+                        )
                     )
                     setResultAndGoBack()
                 },

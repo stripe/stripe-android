@@ -131,7 +131,7 @@ class AutocompleteScreenTest {
     ) =
         composeTestRule.setContent {
             DefaultPaymentsTheme {
-                AutocompleteTextField(
+                AutocompleteScreenUI(
                     viewModel = AutocompleteViewModel(
                         args,
                         AddressElementNavigator(),

@@ -32,7 +32,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -60,11 +59,11 @@ internal fun AutocompleteScreen(injector: NonFallbackInjector) {
             it.initialize()
         }
 
-    AutocompleteTextField(viewModel = viewModel)
+    AutocompleteScreenUI(viewModel = viewModel)
 }
 
 @Composable
-internal fun AutocompleteTextField(viewModel: AutocompleteViewModel) {
+internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState(initial = false)
     val query = viewModel.textFieldController.fieldValue.collectAsState(initial = "")
@@ -95,8 +94,8 @@ internal fun AutocompleteTextField(viewModel: AutocompleteViewModel) {
                             )
                         )
                     },
-                    style = TextStyle.Default.copy(
-                        color = MaterialTheme.paymentsColors.materialColors.primary
+                    style = MaterialTheme.typography.body1.copy(
+                        color = MaterialTheme.colors.primary
                     )
                 ) {
                     viewModel.onEnterAddressManually()

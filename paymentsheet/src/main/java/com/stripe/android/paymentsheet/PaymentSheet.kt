@@ -6,7 +6,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -142,13 +141,7 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = Appearance(),
-
-        /**
-         * Google Places API key used for autocomplete addresses.
-         */
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val googlePlacesApiKey: String? = null
+        val appearance: Appearance = Appearance()
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.

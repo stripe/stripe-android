@@ -5,7 +5,6 @@ import android.text.SpannableString
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
@@ -73,7 +72,7 @@ class AutocompleteViewModelTest {
             )
         )
         val expectedResult = Result.success(
-            Address(
+            ShippingAddress(
                 city = null,
                 country = null,
                 line1 = "",
@@ -130,7 +129,7 @@ class AutocompleteViewModelTest {
     fun `onEnterAddressManually sets the current address and navigates back`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
-            Address(
+            ShippingAddress(
                 city = "city",
                 country = null,
                 line1 = "",

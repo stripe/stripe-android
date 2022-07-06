@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.addresselement
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.model.Address
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
@@ -25,13 +24,13 @@ internal class InputAddressViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            navigator.getResultFlow<Address?>(ShippingAddress.KEY)?.collect {
+            navigator.getResultFlow<ShippingAddress?>(ShippingAddress.KEY)?.collect {
                 val oldShippingAddress = _collectedAddress.value
                 _collectedAddress.emit(
                     ShippingAddress(
-                        name = oldShippingAddress?.name,
-                        company = oldShippingAddress?.company,
-                        phoneNumber = oldShippingAddress?.phoneNumber,
+                        name = oldShippingAddress?.name ?: it?.name,
+                        company = oldShippingAddress?.company ?: it?.company,
+                        phoneNumber = oldShippingAddress?.phoneNumber ?: it?.phoneNumber,
                         city = it?.city,
                         country = it?.country,
                         line1 = it?.line1,

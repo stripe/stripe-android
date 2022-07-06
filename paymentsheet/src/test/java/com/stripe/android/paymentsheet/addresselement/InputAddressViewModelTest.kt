@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.Address
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,8 +29,8 @@ class InputAddressViewModelTest {
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest {
-        val flow = MutableStateFlow<Address?>(null)
-        whenever(navigator.getResultFlow<Address?>(any())).thenReturn(flow)
+        val flow = MutableStateFlow<ShippingAddress?>(null)
+        whenever(navigator.getResultFlow<ShippingAddress?>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
         assertThat(viewModel.collectedAddress.value).isEqualTo(ShippingAddress())
@@ -39,11 +38,11 @@ class InputAddressViewModelTest {
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest {
-        val expectedAddress = Address(city = "Seattle")
-        val flow = MutableStateFlow<Address?>(expectedAddress)
-        whenever(navigator.getResultFlow<Address?>(any())).thenReturn(flow)
+        val expectedAddress = ShippingAddress(name = "skyler", company = "stripe")
+        val flow = MutableStateFlow<ShippingAddress?>(expectedAddress)
+        whenever(navigator.getResultFlow<ShippingAddress?>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(ShippingAddress(city = "Seattle"))
+        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
     }
 }
