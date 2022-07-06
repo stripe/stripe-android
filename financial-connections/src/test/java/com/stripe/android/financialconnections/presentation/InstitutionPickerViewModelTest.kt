@@ -108,11 +108,14 @@ internal class InstitutionPickerViewModelTest {
         }
     }
 
-    private suspend fun givenSearchInstitutionsReturns(query: String, institutionResponse: InstitutionResponse) {
+    private suspend fun givenSearchInstitutionsReturns(
+        query: String,
+        institutionResponse: InstitutionResponse
+    ) {
         whenever(
             searchInstitutions(
-                clientSecret = eq(defaultConfiguration.financialConnectionsSessionClientSecret),
-                query = any()
+                clientSecret = defaultConfiguration.financialConnectionsSessionClientSecret,
+                query = query
             )
         ).thenReturn(
             institutionResponse
