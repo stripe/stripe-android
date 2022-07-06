@@ -5,14 +5,14 @@
 
 ### PaymentSheet
 * [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/Clearpay support for FR, ES countries and EUR currencies
-
-
-### PaymentSheet
 * [Fixed] [5215](https://github.com/stripe/stripe-android/pull/5215) Fix issue with us_bank_account appearing in payment sheet when Financial Connections SDK is not available
 
 ### Payments
 * [FIXED] [5226](https://github.com/stripe/stripe-android/pull/5226) Persist `GooglePayLauncherViewModel` state across process death
 * [ADDED] [5238](https://github.com/stripe/stripe-android/pull/5238) Expose the current card brand in CardFormView, CardInputWidget, and CardMultiLineWidget
+
+### Identity
+* [ADDED] First release to support capture
 
 ## 20.6.2 - 2022-06-23
 This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
