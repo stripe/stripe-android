@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## X.X.X
+
+## 20.7.0 - 2022-07-06
 * This release adds additional support for Afterpay/Clearpay in PaymentSheet.
 
 ### PaymentSheet
