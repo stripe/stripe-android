@@ -231,7 +231,7 @@ internal abstract class IdentityCameraScanFragment(
         identityScanViewModel.scanStatePrevious = null
 
         identityViewModel.fpsTracker.start()
-        identityScanViewModel.identityScanFlow.startFlow(
+        identityScanViewModel.identityScanFlow?.startFlow(
             context = requireContext(),
             imageStream = cameraAdapter.getImageStream(),
             viewFinder = cameraView.viewFinderWindowView.asRect(),
@@ -245,14 +245,14 @@ internal abstract class IdentityCameraScanFragment(
      * Stop scanning, may start again later.
      */
     protected fun stopScanning() {
-        identityScanViewModel.identityScanFlow.resetFlow()
+        identityScanViewModel.identityScanFlow?.resetFlow()
         cameraAdapter.unbindFromLifecycle(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Cancelling IdentityScanFlow")
-        identityScanViewModel.identityScanFlow.cancelFlow()
+        identityScanViewModel.identityScanFlow?.cancelFlow()
     }
 
     internal companion object {

@@ -1,14 +1,18 @@
 package com.stripe.android.identity.networking
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * Indicates the update states of 4 images for documents.
  */
+@Parcelize
 internal data class DocumentUploadState(
     val frontHighResResult: Resource<UploadedResult> = Resource.loading(),
     val frontLowResResult: Resource<UploadedResult> = Resource.loading(),
     val backHighResResult: Resource<UploadedResult> = Resource.loading(),
     val backLowResResult: Resource<UploadedResult> = Resource.loading()
-) {
+) : Parcelable {
     fun update(
         isHighRes: Boolean,
         isFront: Boolean,

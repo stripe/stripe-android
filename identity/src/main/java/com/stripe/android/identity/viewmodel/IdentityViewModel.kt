@@ -59,7 +59,6 @@ import kotlin.coroutines.CoroutineContext
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
-
 internal class IdentityViewModel constructor(
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityRepository: IdentityRepository,
@@ -76,19 +75,32 @@ internal class IdentityViewModel constructor(
     /**
      * StateFlow to track the upload status of high/low resolution image of front and back for documents.
      */
-    private val _documentUploadedState = MutableStateFlow(DocumentUploadState())
+    private val _documentUploadedState =
+        MutableStateFlow(
+            savedStateHandle.get<DocumentUploadState>(DOCUMENT_UPLOAD_STATE) ?: run {
+                DocumentUploadState()
+            }
+        )
     val documentUploadState: StateFlow<DocumentUploadState> = _documentUploadedState
 
     /**
      * StateFlow to track the upload status of high/low resolution images of selfies.
      */
-    private val _selfieUploadedState = MutableStateFlow(SelfieUploadState())
+    private val _selfieUploadedState = MutableStateFlow(
+        savedStateHandle.get<SelfieUploadState>(SELFIE_UPLOAD_STATE) ?: run {
+            SelfieUploadState()
+        }
+    )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
     /**
      * StateFlow to track analytics status.
      */
-    private val _analyticsState = MutableStateFlow(AnalyticsState())
+    private val _analyticsState = MutableStateFlow(
+        savedStateHandle.get<AnalyticsState>(ANALYTICS_STATE) ?: run {
+            AnalyticsState()
+        }
+    )
     val analyticsState: StateFlow<AnalyticsState> = _analyticsState
 
     /**
@@ -188,16 +200,14 @@ internal class IdentityViewModel constructor(
      * Reset document uploaded state to loading state.
      */
     internal fun resetDocumentUploadedState() {
-        _documentUploadedState.update {
-            DocumentUploadState()
-        }
+        _documentUploadedState.updateStateAndSave { DocumentUploadState() }
     }
 
     /**
      * Reset selfie uploaded state to loading state.
      */
     internal fun resetSelfieUploadedState() {
-        _selfieUploadedState.update {
+        _selfieUploadedState.updateStateAndSave {
             SelfieUploadState()
         }
     }
@@ -380,7 +390,7 @@ internal class IdentityViewModel constructor(
      * Update the analytics state.
      */
     internal fun updateAnalyticsState(updateBlock: (AnalyticsState) -> AnalyticsState) {
-        _analyticsState.update(updateBlock)
+        _analyticsState.updateStateAndSave(updateBlock)
     }
 
     /**
@@ -430,7 +440,7 @@ internal class IdentityViewModel constructor(
                             )
                         }
                     }
-                    _documentUploadedState.update { currentState ->
+                    _documentUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
                             isFront = isFront,
@@ -443,7 +453,7 @@ internal class IdentityViewModel constructor(
                     }
                 },
                 onFailure = {
-                    _documentUploadedState.update { currentState ->
+                    _documentUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
                             isFront = isFront,
@@ -554,8 +564,7 @@ internal class IdentityViewModel constructor(
                             fileSize = imageFile.length() / BYTES_IN_KB
                         )
                     )
-
-                    _selfieUploadedState.update { currentState ->
+                    _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
                             newResult = UploadedResult(
@@ -566,7 +575,7 @@ internal class IdentityViewModel constructor(
                     }
                 },
                 onFailure = {
-                    _selfieUploadedState.update { currentState ->
+                    _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
                             selfie = selfie,
@@ -738,6 +747,21 @@ internal class IdentityViewModel constructor(
         }
     }
 
+    private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
+        this.update(function)
+        savedStateHandle.set(
+            when (this) {
+                _documentUploadedState -> DOCUMENT_UPLOAD_STATE
+                _selfieUploadedState -> SELFIE_UPLOAD_STATE
+                _analyticsState -> ANALYTICS_STATE
+                else -> {
+                    throw IllegalStateException("Unexpected state flow: $this")
+                }
+            }, // key
+            this.value // value
+        )
+    }
+
     internal class IdentityViewModelFactory(
         savedStateRegistryOwner: SavedStateRegistryOwner,
         private val uiContextSupplier: () -> CoroutineContext,
@@ -772,5 +796,8 @@ internal class IdentityViewModel constructor(
         const val FRONT = "front"
         const val BACK = "back"
         const val BYTES_IN_KB = 1024
+        private const val DOCUMENT_UPLOAD_STATE = "document_upload_state"
+        private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
+        private const val ANALYTICS_STATE = "analytics_upload_state"
     }
 }
