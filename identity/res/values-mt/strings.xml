@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Instructional text during selfie is being captured -->
-  <string name="Capturing">Qed nieħdu l-istessi...</string>
+  <string name="capturing">Qed nieħdu l-istessi...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Settings tal-App</string>
   <!-- Description of back of driver's license image -->
