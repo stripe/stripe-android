@@ -14,7 +14,7 @@ internal class RetrieveStripeIntent @Inject constructor(
      */
     suspend operator fun invoke(
         publishableKey: String,
-        clientSecret: String,
+        clientSecret: String
     ): Result<StripeIntent> = kotlin.runCatching {
         stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,

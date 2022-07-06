@@ -176,7 +176,7 @@ internal class ConsentFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(
@@ -205,7 +205,7 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when not missing biometricConsent navigate to docSelectionFragment`() {
+    fun `when not missing biometricConsent stay on ConsentFragment`() {
         whenever(verificationPageWithTimeAndPolicy.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = emptyList()
@@ -215,7 +215,7 @@ internal class ConsentFragmentTest {
             setUpSuccessVerificationPage()
 
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.docSelectionFragment)
+                .isEqualTo(R.id.consentFragment)
         }
     }
 
@@ -233,6 +233,10 @@ internal class ConsentFragmentTest {
     fun `when verificationPage is ready UI is bound correctly`() {
         launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
+
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
+            }
 
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
@@ -445,9 +449,6 @@ internal class ConsentFragmentTest {
             it.requireView(),
             navController
         )
-        runBlocking {
-            verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
-        }
         testBlock(ConsentFragmentBinding.bind(it.requireView()), navController, it)
     }
 

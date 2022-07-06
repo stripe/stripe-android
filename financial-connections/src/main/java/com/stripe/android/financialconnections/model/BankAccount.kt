@@ -11,9 +11,11 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class BankAccount(
 
-    @SerialName(value = "id") @Required val id: String,
+    @SerialName(value = "id") @Required
+    val id: String,
 
-    @SerialName(value = "last4") @Required val last4: String,
+    @SerialName(value = "last4") @Required
+    val last4: String,
 
     @SerialName(value = "bank_name") val bankName: String? = null,
 

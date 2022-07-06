@@ -49,6 +49,8 @@ class ConfirmationFragmentTest {
         )
         on { uiContext } doReturn testDispatcher
         on { workContext } doReturn testDispatcher
+        on { screenTracker } doReturn mock()
+        on { analyticsState } doReturn mock()
     }
 
     private val verificationPage = mock<VerificationPage>().also {
@@ -83,7 +85,7 @@ class ConfirmationFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     @Test

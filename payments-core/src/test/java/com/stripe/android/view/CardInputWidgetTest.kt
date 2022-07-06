@@ -1655,6 +1655,30 @@ internal class CardInputWidgetTest {
     }
 
     @Test
+    fun `getBrand returns the right brands`() {
+        cardInputWidget.setCardNumber(null)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.Unknown)
+
+        cardInputWidget.setCardNumber(VISA_NO_SPACES)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.Visa)
+
+        cardInputWidget.setCardNumber(CardNumberFixtures.MASTERCARD_NO_SPACES)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.MasterCard)
+
+        cardInputWidget.setCardNumber(AMEX_NO_SPACES)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.AmericanExpress)
+
+        cardInputWidget.setCardNumber(CardNumberFixtures.DISCOVER_NO_SPACES)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.Discover)
+
+        cardInputWidget.setCardNumber(CardNumberFixtures.JCB_NO_SPACES)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.JCB)
+
+        cardInputWidget.setCardNumber(DINERS_CLUB_14_NO_SPACES)
+        assertThat(cardInputWidget.brand).isEqualTo(CardBrand.DinersClub)
+    }
+
+    @Test
     fun `Enabled but not required postal code should fire card valid callback when changed`() {
         val callback = mock<CardValidCallback>()
         cardInputWidget.setCardValidCallback(callback)

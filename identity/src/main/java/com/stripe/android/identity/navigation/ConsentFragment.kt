@@ -17,7 +17,6 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
@@ -75,14 +74,16 @@ internal class ConsentFragment(
                 if (verificationPage.isUnsupportedClient()) {
                     Log.e(TAG, "Unsupported client, launching fallback url")
                     fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
-                } else if (verificationPage.isMissingBiometricConsent()) {
+                } else {
                     setLoadingFinishedUI()
                     bindViewData(
                         verificationPage.biometricConsent,
                         verificationPage.requireSelfie()
                     )
-                } else {
-                    navigateToDocSelection()
+
+                    lifecycleScope.launch(identityViewModel.workContext) {
+                        identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+                    }
                 }
             },
             onFailure = {
@@ -94,9 +95,6 @@ internal class ConsentFragment(
             }
         )
 
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
-        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 screenName = SCREEN_NAME_CONSENT

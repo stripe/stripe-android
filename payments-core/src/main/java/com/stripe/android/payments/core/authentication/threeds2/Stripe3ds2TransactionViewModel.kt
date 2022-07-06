@@ -300,7 +300,7 @@ internal sealed class NextStep {
 internal class Stripe3ds2TransactionViewModelFactory(
     private val applicationSupplier: () -> Application,
     owner: SavedStateRegistryOwner,
-    private val argsSupplier: () -> Stripe3ds2TransactionContract.Args,
+    private val argsSupplier: () -> Stripe3ds2TransactionContract.Args
 ) : AbstractSavedStateViewModelFactory(owner, null),
     Injectable<Stripe3ds2TransactionViewModelFactory.FallbackInitializeParam> {
 

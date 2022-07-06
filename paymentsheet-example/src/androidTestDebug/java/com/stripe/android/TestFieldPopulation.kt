@@ -67,6 +67,7 @@ class TestFieldPopulation {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
         authorizationAction = null,
+        merchantCountryCode = "GB",
     )
 
     private val card = TestParameters(
@@ -74,6 +75,7 @@ class TestFieldPopulation {
         customer = Customer.New,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
+        merchantCountryCode = "GB",
         intentType = IntentType.Pay,
         billing = Billing.On,
         shipping = Shipping.Off,

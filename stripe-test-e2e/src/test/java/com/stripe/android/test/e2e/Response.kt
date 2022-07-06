@@ -37,6 +37,6 @@ sealed class Response {
     data class CreatedSetupIntent(
         @field:Json(name = "intent") val intent: String,
         @field:Json(name = "secret") val secret: String,
-        @field:Json(name = "status") val status: String,
+        @field:Json(name = "status") val status: String
     ) : Response()
 }

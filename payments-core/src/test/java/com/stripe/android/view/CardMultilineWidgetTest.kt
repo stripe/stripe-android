@@ -10,7 +10,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.DISCOVER_NO_SPACES
+import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
+import com.stripe.android.CardNumberFixtures.MASTERCARD_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.CustomerSession
@@ -1197,6 +1201,30 @@ internal class CardMultilineWidgetTest {
         assertThat(
             cardMultilineWidget.cardNumberEditText.compoundDrawables[2]
         ).isNotNull()
+    }
+
+    @Test
+    fun `getBrand returns the right brands`() {
+        cardMultilineWidget.setCardNumber(null)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.Unknown)
+
+        cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.Visa)
+
+        cardMultilineWidget.setCardNumber(MASTERCARD_NO_SPACES)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.MasterCard)
+
+        cardMultilineWidget.setCardNumber(AMEX_NO_SPACES)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.AmericanExpress)
+
+        cardMultilineWidget.setCardNumber(DISCOVER_NO_SPACES)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.Discover)
+
+        cardMultilineWidget.setCardNumber(JCB_NO_SPACES)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.JCB)
+
+        cardMultilineWidget.setCardNumber(DINERS_CLUB_14_NO_SPACES)
+        assertThat(cardMultilineWidget.brand).isEqualTo(CardBrand.DinersClub)
     }
 
     internal class WidgetControlGroup(

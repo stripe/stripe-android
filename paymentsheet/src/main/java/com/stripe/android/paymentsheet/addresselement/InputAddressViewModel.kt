@@ -14,6 +14,7 @@ import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -32,18 +33,24 @@ internal class InputAddressViewModel @Inject constructor(
     val _formEnabled = MutableStateFlow(true)
     val formEnabled = _formEnabled
 
-    private val baseFormControllerBuilder = formControllerProvider.get()
-        .viewOnlyFields(emptySet())
-        .viewModelScope(viewModelScope)
-        .stripeIntent(args.stripeIntent)
-        .merchantName(args.config?.merchantDisplayName ?: "")
-
     init {
         viewModelScope.launch {
-            navigator.getResultFlow<ShippingAddress>(ShippingAddress.KEY)
-                ?.collect { shippingAddress ->
-                    _collectedAddress.value = shippingAddress
-                }
+            navigator.getResultFlow<ShippingAddress?>(ShippingAddress.KEY)?.collect {
+                val oldShippingAddress = _collectedAddress.value
+                _collectedAddress.emit(
+                    ShippingAddress(
+                        name = oldShippingAddress?.name ?: it?.name,
+                        company = oldShippingAddress?.company ?: it?.company,
+                        phoneNumber = oldShippingAddress?.phoneNumber ?: it?.phoneNumber,
+                        city = it?.city,
+                        country = it?.country,
+                        line1 = it?.line1,
+                        line2 = it?.line2,
+                        state = it?.state,
+                        postalCode = it?.postalCode
+                    )
+                )
+            }
         }
 
         viewModelScope.launch {
@@ -57,11 +64,15 @@ internal class InputAddressViewModel @Inject constructor(
                         IdentifierSpec.State to shippingAddress.state,
                         IdentifierSpec.PostalCode to shippingAddress.postalCode,
                         IdentifierSpec.Country to shippingAddress.country,
-                        IdentifierSpec.Phone to shippingAddress.phoneNumber,
+                        IdentifierSpec.Phone to shippingAddress.phoneNumber
                     )
                 } ?: emptyMap()
 
-                _formController.value = baseFormControllerBuilder
+                _formController.value = formControllerProvider.get()
+                    .viewOnlyFields(emptySet())
+                    .viewModelScope(viewModelScope)
+                    .stripeIntent(args.stripeIntent)
+                    .merchantName(args.config?.merchantDisplayName ?: "")
                     .formSpec(buildFormSpec(shippingAddress != null))
                     .initialValues(initialValues)
                     .build().formController
@@ -103,7 +114,25 @@ internal class InputAddressViewModel @Inject constructor(
 
     fun clickPrimaryButton() {
         _formEnabled.value = false
-        navigator.dismiss()
+        viewModelScope.launch {
+            formController.value?.let { controller ->
+                controller.formValues.collect {
+                    val result = AddressElementResult.Succeeded(
+                        ShippingAddress(
+                            name = it[IdentifierSpec.Name]?.value,
+                            city = it[IdentifierSpec.City]?.value,
+                            country = it[IdentifierSpec.Country]?.value,
+                            line1 = it[IdentifierSpec.Line1]?.value,
+                            line2 = it[IdentifierSpec.Line2]?.value,
+                            postalCode = it[IdentifierSpec.PostalCode]?.value,
+                            state = it[IdentifierSpec.State]?.value,
+                            phoneNumber = it[IdentifierSpec.Phone]?.value
+                        )
+                    )
+                    navigator.dismiss(result)
+                }
+            }
+        }
     }
 
     internal class Factory(

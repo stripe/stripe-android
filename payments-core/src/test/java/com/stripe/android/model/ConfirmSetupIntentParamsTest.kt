@@ -194,7 +194,7 @@ class ConfirmSetupIntentParamsTest {
                                 "infer_from_client" to true
                             )
                         )
-                    ),
+                    )
                 )
             )
     }
@@ -209,7 +209,7 @@ class ConfirmSetupIntentParamsTest {
             .isEqualTo(
                 mapOf(
                     "client_secret" to CLIENT_SECRET,
-                    "use_stripe_sdk" to false,
+                    "use_stripe_sdk" to false
                 )
             )
     }

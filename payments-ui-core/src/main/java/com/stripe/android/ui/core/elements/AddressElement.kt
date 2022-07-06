@@ -33,7 +33,7 @@ open class AddressElement constructor(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = R.string.address_label_name,
+                label = R.string.address_label_name
             ),
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
@@ -44,9 +44,8 @@ open class AddressElement constructor(
         IdentifierSpec.OneLineAddress,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = R.string.address_label_name,
-            ),
-            initialValue = rawValuesMap[IdentifierSpec.Name]
+                label = R.string.address_label_address
+            )
         )
     )
 
@@ -72,21 +71,17 @@ open class AddressElement constructor(
         }
 
     val fields = otherFields.map { otherFields ->
-        val fieldsList = mutableListOf<SectionFieldElement>()
-        if (addressType != AddressType.Normal) {
-            fieldsList.addAll(listOf(nameElement))
+        when (addressType) {
+            AddressType.Normal -> {
+                listOf(countryElement).plus(otherFields)
+            }
+            AddressType.ShippingCondensed -> {
+                listOf(nameElement, countryElement, addressAutoCompleteElement, phoneNumberElement)
+            }
+            AddressType.ShippingExpanded -> {
+                listOf(nameElement, countryElement).plus(otherFields).plus(phoneNumberElement)
+            }
         }
-        fieldsList.add(countryElement)
-        if (addressType != AddressType.ShippingCondensed) {
-            fieldsList.addAll(otherFields)
-        } else {
-            fieldsList.add(addressAutoCompleteElement)
-        }
-
-        if (addressType != AddressType.Normal) {
-            fieldsList.addAll(listOf(phoneNumberElement))
-        }
-        fieldsList
     }
 
     val controller = AddressController(fields)

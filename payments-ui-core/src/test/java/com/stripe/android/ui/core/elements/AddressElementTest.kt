@@ -138,7 +138,7 @@ class AddressElementTest {
     }
 
     @Test
-    fun `shipping address element should have name and phone number fields`() = runTest {
+    fun `condensed shipping address element should have name and phone number fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             addressFieldElementRepository,
@@ -159,7 +159,7 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             addressFieldElementRepository,
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed
+            addressType = AddressType.ShippingExpanded
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -201,7 +201,7 @@ class AddressElementTest {
     }
 
     @Test
-    fun `shipping address element should have one line address element`() = runTest {
+    fun `condensed shipping address element should have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             addressFieldElementRepository,

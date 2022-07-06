@@ -14,7 +14,9 @@ import java.util.Date
  * secure manner. A Token representing this information is returned to you to use.
  */
 @Parcelize
-data class Token @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+data class Token
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
 
     /**
      * The Token id

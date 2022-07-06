@@ -55,7 +55,7 @@ internal class PassportScanFragment(
                 identityViewModel.documentUploadState.collectLatest {
                     when {
                         it.hasError() -> {
-                            navigateToDefaultErrorFragment()
+                            navigateToDefaultErrorFragment(it.getError())
                         }
                         it.isFrontLoading() -> {
                             continueButton.toggleToLoading()
@@ -98,22 +98,21 @@ internal class PassportScanFragment(
                                                 TAG,
                                                 "fail to submit uploaded files: $throwable"
                                             )
-                                            navigateToDefaultErrorFragment()
+                                            navigateToDefaultErrorFragment(throwable)
                                         }
                                     }
                                 },
                                 onFailure = { throwable ->
                                     Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                                    navigateToDefaultErrorFragment()
+                                    navigateToDefaultErrorFragment(throwable)
                                 }
                             )
                         }
                         else -> {
-                            Log.d(
-                                TAG,
-                                "observeAndUploadForFrontSide reaches unexpected upload state: $it"
-                            )
-                            navigateToDefaultErrorFragment()
+                            "observeAndUploadForFrontSide reaches unexpected upload state: $it".let { msg ->
+                                Log.d(TAG, msg)
+                                navigateToDefaultErrorFragment(msg)
+                            }
                         }
                     }
                 }

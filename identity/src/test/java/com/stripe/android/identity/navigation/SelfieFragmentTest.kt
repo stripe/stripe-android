@@ -158,6 +158,7 @@ internal class SelfieFragmentTest {
             verify(mockIdentityViewModel).resetSelfieUploadedState()
             assertThat(binding.scanningView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.resultView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.padding.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
             assertThat(binding.allowImageCollection.text.toString()).isEqualTo(CONSENT_TEXT)
         }
@@ -197,6 +198,7 @@ internal class SelfieFragmentTest {
 
             assertThat(binding.scanningView.visibility).isEqualTo(View.GONE)
             assertThat(binding.resultView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.padding.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(true)
             assertThat(fragment.selfieResultAdapter.itemCount).isEqualTo(FILTERED_FRAMES.size)
         }

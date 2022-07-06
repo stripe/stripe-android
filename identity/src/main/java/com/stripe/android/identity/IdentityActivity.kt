@@ -1,6 +1,7 @@
 package com.stripe.android.identity
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -19,13 +20,22 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.IdentityActivityBinding
+import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
+import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import javax.inject.Inject
+import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Host activity to perform Identity verification.
@@ -33,7 +43,8 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal class IdentityActivity :
     CameraPermissionCheckingActivity(),
     VerificationFlowFinishable,
-    FallbackUrlLauncher {
+    FallbackUrlLauncher,
+    Injectable<Context> {
     @VisibleForTesting
     internal lateinit var navController: NavController
 
@@ -41,11 +52,9 @@ internal class IdentityActivity :
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
             this,
-            { starterArgs },
-            this,
-            this,
-            this,
-            this
+            { uiContext },
+            { workContext },
+            { subcomponent }
         )
 
     private val binding by lazy {
@@ -71,6 +80,25 @@ internal class IdentityActivity :
 
     private var launchedFallbackUrl: Boolean = false
 
+    lateinit var subcomponent: IdentityActivitySubcomponent
+
+    @Inject
+    lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Builder>
+
+    @Inject
+    @UIContext
+    lateinit var uiContext: CoroutineContext
+
+    @Inject
+    @IOContext
+    lateinit var workContext: CoroutineContext
+
+    override fun fallbackInitialize(arg: Context) {
+        DaggerIdentityActivityFallbackComponent.builder()
+            .context(arg)
+            .build().inject(this)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(KEY_LAUNCHED_FALLBACK_URL, launchedFallbackUrl)
@@ -78,7 +106,21 @@ internal class IdentityActivity :
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportFragmentManager.fragmentFactory = identityViewModel.identityFragmentFactory
+        injectWithFallback(
+            starterArgs.injectorKey,
+            this
+        )
+        subcomponent = subComponentBuilderProvider.get()
+            .args(starterArgs)
+            .cameraPermissionEnsureable(this)
+            .appSettingsOpenable(this)
+            .verificationFlowFinishable(this)
+            .identityViewModelFactory(viewModelFactory as IdentityViewModel.IdentityViewModelFactory)
+            .fallbackUrlLauncher(this)
+            .build()
+
+        supportFragmentManager.fragmentFactory = subcomponent.identityFragmentFactory
+
         super.onCreate(savedInstanceState)
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
@@ -227,8 +269,8 @@ internal class IdentityActivity :
                     )
                 }
             }
-            // Display cross icon on error fragment with failed reason, clicking it finishes the flow with Failed
-            isErrorFragmentWithFailedReason(destination, args) -> {
+            // Display cross icon on error fragment that should fail, clicking it finishes the flow with Failed
+            isErrorFragmentThatShouldFail(destination, args) -> {
                 this.navigationIcon = AppCompatResources.getDrawable(
                     this@IdentityActivity,
                     R.drawable.ic_baseline_close_24
@@ -236,7 +278,7 @@ internal class IdentityActivity :
                 this.setNavigationOnClickListener {
                     val failedReason = requireNotNull(
                         args?.getSerializable(
-                            ErrorFragment.ARG_FAILED_REASON
+                            ErrorFragment.ARG_CAUSE
                         ) as? Throwable
                     ) {
                         "Failed to get failedReason from $args"
@@ -299,11 +341,11 @@ internal class IdentityActivity :
                         VerificationFlowResult.Canceled
                     )
                 }
-                // On error fragment with failed reason, clicking back finishes the flow with Failed
-                isErrorFragmentWithFailedReason(destination, args) -> {
+                // On error fragment that should fail, clicking back finishes the flow with Failed
+                isErrorFragmentThatShouldFail(destination, args) -> {
                     val failedReason = requireNotNull(
                         args?.getSerializable(
-                            ErrorFragment.ARG_FAILED_REASON
+                            ErrorFragment.ARG_CAUSE
                         ) as? Throwable
                     ) {
                         "Failed to get failedReason from $args"
@@ -346,10 +388,14 @@ internal class IdentityActivity :
         private fun isConsentFragment(destination: NavDestination?) =
             destination?.id == R.id.consentFragment
 
-        private fun isErrorFragmentWithFailedReason(
+        /**
+         * Check if this is the final error fragment, which would fail the verification flow when
+         * back button is clicked.
+         */
+        private fun isErrorFragmentThatShouldFail(
             destination: NavDestination?,
             args: Bundle?
         ) = destination?.id == R.id.errorFragment &&
-            args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
+            args?.getBoolean(ErrorFragment.ARG_SHOULD_FAIL, false) == true
     }
 }

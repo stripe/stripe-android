@@ -115,12 +115,12 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var cardBrand: CardBrand = CardBrand.Unknown
 
-    internal val brand: CardBrand
+    /**
+     * A [CardBrand] matching the current card number inputted by the user.
+     */
+    val brand: CardBrand
         @JvmSynthetic
         get() = cardBrand
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-    fun getBrand() = brand
 
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
@@ -504,7 +504,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateCvc()
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // For paymentsheet
     @JvmSynthetic
     fun setCvcIcon(resId: Int?) {
         if (resId != null) {

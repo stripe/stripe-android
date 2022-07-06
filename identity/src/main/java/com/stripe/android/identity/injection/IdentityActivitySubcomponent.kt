@@ -5,13 +5,27 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.FPSTracker
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.ScreenTracker
+import com.stripe.android.identity.navigation.IdentityFragmentFactory
+import com.stripe.android.identity.networking.IdentityModelFetcher
+import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent
-internal interface IdentityViewModelSubcomponent {
-    val viewModel: IdentityViewModel
+internal interface IdentityActivitySubcomponent {
+    val identityFragmentFactory: IdentityFragmentFactory
+    val identityRepository: IdentityRepository
+    val identityModelFetcher: IdentityModelFetcher
+    val identityIO: IdentityIO
+    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
+    val fpsTracker: FPSTracker
+    val screenTracker: ScreenTracker
+    val verificationArgs: IdentityVerificationSheetContract.Args
 
     @Subcomponent.Builder
     interface Builder {
@@ -34,6 +48,6 @@ internal interface IdentityViewModelSubcomponent {
         @BindsInstance
         fun fallbackUrlLauncher(fallbackUrlLauncher: FallbackUrlLauncher): Builder
 
-        fun build(): IdentityViewModelSubcomponent
+        fun build(): IdentityActivitySubcomponent
     }
 }

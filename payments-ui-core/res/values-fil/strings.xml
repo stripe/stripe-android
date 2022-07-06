@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Suburb</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Bayan o Township</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="afterpay_clearpay_message"><![CDATA[Magbayad ng <num_installments/> na walang interes na pagbabayad ng <installment_price/> gamit ang <img/>]]></string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adres para sa billing</string>
   <!-- Used when a required field is blank and submit is clicked. -->
@@ -80,8 +82,6 @@
   <string name="stripe_pay_button_amount">Magbayad ng %s</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Impormasyon ng kard</string>
-  <!-- Payment Method type brand name  -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Direct Debit</string>
   <!-- Title for credit card number entry field -->

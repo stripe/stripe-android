@@ -63,7 +63,8 @@ class TestPaymentSheetScreenshots {
         useBrowser = null,
         authorizationAction = null,
         takeScreenshotOnLpmLoad = true,
-        snapshotReturningCustomer = true
+        snapshotReturningCustomer = true,
+        merchantCountryCode = "GB",
     )
 
     private val colors = PaymentSheet.Colors(

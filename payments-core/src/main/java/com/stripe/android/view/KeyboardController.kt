@@ -15,7 +15,8 @@ class KeyboardController(
     /**
      * Hide virtual keyboard
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // For paymentsheet
     @JvmSynthetic
     fun hide() {
         if (inputMethodManager.isAcceptingText) {

@@ -46,7 +46,7 @@ class GooglePayLauncherContract :
     @Parcelize
     data class PaymentIntentArgs(
         override val clientSecret: String,
-        override val config: GooglePayLauncher.Config,
+        override val config: GooglePayLauncher.Config
     ) : Args()
 
     /**

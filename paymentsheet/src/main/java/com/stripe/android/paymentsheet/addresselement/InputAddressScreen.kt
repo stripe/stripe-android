@@ -3,10 +3,11 @@ package com.stripe.android.paymentsheet.addresselement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -15,16 +16,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
-import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Composable
@@ -44,19 +41,18 @@ internal fun InputAddressScreen(
         Column(
             Modifier
                 .padding(horizontal = 20.dp)
-                .fillMaxHeight()
         ) {
             Text(
-                "Shipping Address",
+                stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
                 style = MaterialTheme.typography.h4,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             formContent()
             if (collectedAddress == null) {
-                Button(
-                    onClick = { onEnterManuallyClick() },
-                    content = { Text(text = "Enter manually") }
-                )
+                Spacer(modifier = Modifier.height(8.dp))
+                EnterManuallyText {
+                    onEnterManuallyClick()
+                }
             }
 
             AddressElementPrimaryButton(isEnabled = primaryButtonEnabled) {

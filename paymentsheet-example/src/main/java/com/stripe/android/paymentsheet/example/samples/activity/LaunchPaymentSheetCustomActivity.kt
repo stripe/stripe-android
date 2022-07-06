@@ -55,7 +55,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                         paymentMethodLabel = paymentMethodLabel,
                         paymentMethodIcon = paymentMethodIcon,
                         onClick = {
-                            flowController.presentShippingAddress()
+                            flowController.presentPaymentOptions()
                         }
                     )
                     BuyButton(

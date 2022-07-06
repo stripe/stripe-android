@@ -68,7 +68,7 @@ class InputAddressScreenTest {
         primaryButtonEnabled: Boolean = true,
         primaryButtonCallback: () -> Unit = {},
         onCloseCallback: () -> Unit = {},
-        onEnterManuallyCallback: () -> Unit = {},
+        onEnterManuallyCallback: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             DefaultPaymentsTheme {
@@ -76,9 +76,9 @@ class InputAddressScreenTest {
                     collectedAddress = collectedAddress,
                     primaryButtonEnabled = primaryButtonEnabled,
                     onPrimaryButtonClick = primaryButtonCallback,
-                    onCloseClick= onCloseCallback,
-                    onEnterManuallyClick= onEnterManuallyCallback,
-                    formContent= {},
+                    onCloseClick = onCloseCallback,
+                    onEnterManuallyClick = onEnterManuallyCallback,
+                    formContent = {}
                 )
             }
         }

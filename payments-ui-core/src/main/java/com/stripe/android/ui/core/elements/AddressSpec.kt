@@ -11,12 +11,15 @@ enum class DisplayField {
     @SerialName("country")
     Country
 }
+
 @Serializable
 enum class AddressType {
     @SerialName("shipping_condensed")
     ShippingCondensed,
+
     @SerialName("shipping_expanded")
     ShippingExpanded,
+
     @SerialName("normal")
     Normal
 }
@@ -37,7 +40,7 @@ data class AddressSpec(
     val showLabel: Boolean = true,
 
     @SerialName("address_type")
-    val type: AddressType = AddressType.Normal,
+    val type: AddressType = AddressType.Normal
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,

@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -17,7 +18,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -46,6 +49,8 @@ internal class AddressElementActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // set a default result in case the user closes the sheet manually
         setResult()
@@ -92,13 +97,14 @@ internal class AddressElementActivity : ComponentActivity() {
                                     InputAddressScreen(viewModel.injector)
                                 }
                                 composable(AddressElementScreen.Autocomplete.route) {
-                                    AutoCompleteScreen(viewModel.injector)
+                                    AutocompleteScreen(viewModel.injector)
                                 }
                             }
                         }
                     }
                 },
-                content = {}
+                content = {},
+                modifier = Modifier.navigationBarsPadding()
             )
         }
     }

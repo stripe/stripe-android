@@ -160,7 +160,7 @@ internal abstract class IdentityDocumentScanFragment(
                     when {
                         it.hasError() -> {
                             Log.e(TAG, "Fail to upload files: ${it.getError()}")
-                            navigateToDefaultErrorFragment()
+                            navigateToDefaultErrorFragment(it.getError())
                         }
                         it.isAnyLoading() -> {
                             continueButton.toggleToLoading()
@@ -207,22 +207,21 @@ internal abstract class IdentityDocumentScanFragment(
                                                 TAG,
                                                 "fail to submit uploaded files: $throwable"
                                             )
-                                            navigateToDefaultErrorFragment()
+                                            navigateToDefaultErrorFragment(throwable)
                                         }
                                     }
                                 },
                                 onFailure = { throwable ->
                                     Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                                    navigateToDefaultErrorFragment()
+                                    navigateToDefaultErrorFragment(throwable)
                                 }
                             )
                         }
                         else -> {
-                            Log.e(
-                                TAG,
-                                "observeAndUploadForBothSides reaches unexpected upload state: $it"
-                            )
-                            navigateToDefaultErrorFragment()
+                            "observeAndUploadForBothSides reaches unexpected upload state: $it".let { msg ->
+                                Log.e(TAG, msg)
+                                navigateToDefaultErrorFragment(msg)
+                            }
                         }
                     }
                 }
