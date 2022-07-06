@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Acquisizione in corso...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Impostazioni app</string>
   <!-- Description of back of driver's license image -->
@@ -37,6 +39,8 @@
   <string name="file_upload_content_id">Carica un\'immagine fronte-retro del tuo documento di identità</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Carica un\'immagine del tuo passaporto</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Maschera per l\'animazione dei selfie</string>
   <!-- Description of front of driver's license image -->
   <string name="front_of_dl">Fronte della patente di guida</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
@@ -73,10 +77,20 @@
   <string name="position_id_front">Posiziona la carta di identità al centro della cornice</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Posiziona il passaporto al centro della cornice</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Posiziona il volto al centro della cornice.</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Scansionato</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="select">Seleziona</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">L\'acquisizione dei selfie è completa</string>
+  <!-- Title of selfie capture screen -->
+  <string name="selfie_captures">Acquisizioni di selfie</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">un selfie acquisito</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="selfie_not_saved_warning">I tuoi selfie non sono stati salvati. Vuoi uscire?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="take_photo">Scatta foto</string>
   <!-- Button to attempt to re-scan identity document image -->
