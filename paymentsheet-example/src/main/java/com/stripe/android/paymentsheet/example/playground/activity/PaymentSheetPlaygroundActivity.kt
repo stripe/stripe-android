@@ -479,7 +479,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                setOf("US", "GB", "AU").contains(it.code.value)
+                setOf("US", "GB", "AU", "FR").contains(it.code.value)
             }.map {
                 /**
                  * Modify this statement to change the default currency associated with each
@@ -488,6 +488,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 when (it.code.value) {
                     "GB" -> {
                         it to "GBP"
+                    }
+                    "FR" -> {
+                        it to "EUR"
                     }
                     "AU" -> {
                         it to "AUD"

@@ -48,7 +48,8 @@ private const val LINK_TAG = "URL"
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddableImage(
     @DrawableRes val id: Int,
-    @StringRes val contentDescription: Int
+    @StringRes val contentDescription: Int,
+    val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null
 )
 
 /**
@@ -64,7 +65,9 @@ fun Html(
     color: Color,
     style: TextStyle,
     modifier: Modifier = Modifier,
-    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+    enabled: Boolean = true,
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
+    imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
 ) {
     val inlineContentMap = imageGetter.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
@@ -76,7 +79,7 @@ fun Html(
             Placeholder(
                 newWidth,
                 MaterialTheme.typography.body1.fontSize,
-                PlaceholderVerticalAlign.AboveBaseline
+                imageAlign
             ),
             children = {
                 Image(
@@ -86,7 +89,8 @@ fun Html(
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
-                    )
+                    ),
+                    colorFilter = value.colorFilter
                 )
             }
         )
@@ -98,18 +102,21 @@ fun Html(
     ClickableText(
         annotatedText,
         modifier = modifier
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item,
+            .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
         inlineContent = inlineContentMap,
         color = color,
         style = style,
         onClick = {
-            annotatedText
-                .getStringAnnotations(LINK_TAG, it, it)
-                .firstOrNull()?.let { annotation ->
-                    val openURL = Intent(Intent.ACTION_VIEW)
-                    openURL.data = Uri.parse(annotation.item)
-                    context.startActivity(openURL)
-                }
+            if (enabled) {
+                // Position is the position of the tag in the string
+                annotatedText
+                    .getStringAnnotations(LINK_TAG, it, it)
+                    .firstOrNull()?.let { annotation ->
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(annotation.item)
+                        context.startActivity(openURL)
+                    }
+            }
         }
     )
 }
@@ -218,8 +225,19 @@ private fun ClickableText(
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
     val pressIndicator = Modifier.pointerInput(onClick) {
         detectTapGestures { pos ->
+            var nonPlaceholderPosition = pos
+            // If the position is in the bounds of a placeholder set the position to the end of the placeholder.
+            layoutResult.value?.placeholderRects?.filterNotNull()?.firstOrNull {
+                pos.x > it.topLeft.x && pos.x < it.topRight.x
+            }?.let {
+                nonPlaceholderPosition = it.topRight.copy(
+                    x = it.topRight.x + 0.1f
+                )
+            }
+
             layoutResult.value?.let { layoutResult ->
-                onClick(layoutResult.getOffsetForPosition(pos))
+                // we need to account for offset and change to an index by subtracting 1.
+                onClick(layoutResult.getOffsetForPosition(nonPlaceholderPosition) - 1)
             }
         }
     }

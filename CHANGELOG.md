@@ -1,6 +1,11 @@
 # CHANGELOG
 
 ## X.X.X
+* This release adds additional support for Afterpay/Clearpay in PaymentSheet.
+
+### PaymentSheet
+* [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/Clearpay support for FR, ES countries and EUR currencies
+
 
 ### PaymentSheet
 * [Fixed] [5215](https://github.com/stripe/stripe-android/pull/5215) Fix issue with us_bank_account appearing in payment sheet when Financial Connections SDK is not available
