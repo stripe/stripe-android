@@ -2,7 +2,7 @@ package com.stripe.android.identity.injection
 
 import android.content.Context
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.IdentityActivity
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -14,14 +14,14 @@ import javax.inject.Singleton
         CoroutineContextModule::class
     ]
 )
-internal interface IdentityViewModelFactoryComponent {
-    fun inject(factory: IdentityViewModel.IdentityViewModelFactory)
+internal interface IdentityActivityFallbackComponent {
+    fun inject(activity: IdentityActivity)
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun context(context: Context): Builder
 
-        fun build(): IdentityViewModelFactoryComponent
+        fun build(): IdentityActivityFallbackComponent
     }
 }

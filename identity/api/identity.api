@@ -5,6 +5,16 @@ public final class com/stripe/android/identity/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/identity/IdentityActivity_MembersInjector : dagger/MembersInjector {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Ldagger/MembersInjector;
+	public fun injectMembers (Lcom/stripe/android/identity/IdentityActivity;)V
+	public synthetic fun injectMembers (Ljava/lang/Object;)V
+	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/identity/IdentityActivity;Ljavax/inject/Provider;)V
+	public static fun injectUiContext (Lcom/stripe/android/identity/IdentityActivity;Lkotlin/coroutines/CoroutineContext;)V
+	public static fun injectWorkContext (Lcom/stripe/android/identity/IdentityActivity;Lkotlin/coroutines/CoroutineContext;)V
+}
+
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
 	public abstract fun present (Ljava/lang/String;Ljava/lang/String;)V
@@ -292,12 +302,12 @@ public final class com/stripe/android/identity/databinding/SelfieScanFragmentBin
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/SelfieScanFragmentBinding;
 }
 
-public final class com/stripe/android/identity/injection/DaggerIdentityVerificationSheetComponent {
-	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityVerificationSheetComponent$Builder;
+public final class com/stripe/android/identity/injection/DaggerIdentityActivityFallbackComponent {
+	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityActivityFallbackComponent$Builder;
 }
 
-public final class com/stripe/android/identity/injection/DaggerIdentityViewModelFactoryComponent {
-	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityViewModelFactoryComponent$Builder;
+public final class com/stripe/android/identity/injection/DaggerIdentityVerificationSheetComponent {
+	public static fun builder ()Lcom/stripe/android/identity/injection/IdentityVerificationSheetComponent$Builder;
 }
 
 public final class com/stripe/android/identity/injection/IdentityCommonModule_Companion_ProvideStripeNetworkClientFactory : dagger/internal/Factory {
@@ -375,21 +385,5 @@ public final class com/stripe/android/identity/viewmodel/IdentityUploadViewModel
 	public fun get ()Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/identity/utils/IdentityIO;)Lcom/stripe/android/identity/viewmodel/IdentityUploadViewModel$FrontBackUploadViewModelFactory;
-}
-
-public final class com/stripe/android/identity/viewmodel/IdentityViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/viewmodel/IdentityViewModel_Factory;
-	public fun get ()Lcom/stripe/android/identity/viewmodel/IdentityViewModel;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/identity/IdentityVerificationSheetContract$Args;Lcom/stripe/android/identity/networking/IdentityRepository;Lcom/stripe/android/identity/networking/IdentityModelFetcher;Lcom/stripe/android/identity/utils/IdentityIO;Lcom/stripe/android/identity/navigation/IdentityFragmentFactory;Lcom/stripe/android/identity/analytics/IdentityAnalyticsRequestFactory;Lcom/stripe/android/identity/analytics/FPSTracker;Lcom/stripe/android/identity/analytics/ScreenTracker;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/identity/viewmodel/IdentityViewModel;
-}
-
-public final class com/stripe/android/identity/viewmodel/IdentityViewModel_IdentityViewModelFactory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
-	public fun injectMembers (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;)V
-	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/identity/viewmodel/IdentityViewModel$IdentityViewModelFactory;Ljavax/inject/Provider;)V
 }
 
