@@ -35,6 +35,7 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
@@ -341,7 +342,8 @@ class PassportUploadFragmentTest {
                     eq(UploadMethod.MANUALCAPTURE)
                 } else {
                     eq(UploadMethod.FILEUPLOAD)
-                }
+                },
+                scanType = eq(IdentityScanState.ScanType.PASSPORT)
             )
             assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)

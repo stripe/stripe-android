@@ -2,6 +2,7 @@ package com.stripe.android.identity.networking
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
@@ -96,7 +97,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: StripeFilePurpose
+        filePurpose: StripeFilePurpose,
+        onSuccessExecutionTimeBlock: (Long) -> Unit
     ): StripeFile = executeRequestWithModelJsonParser(
         request = IdentityFileUploadRequest(
             fileParams = StripeFileParams(
@@ -108,7 +110,8 @@ internal class DefaultIdentityRepository @Inject constructor(
             ),
             verificationId = verificationId
         ),
-        responseJsonParser = stripeFileJsonParser
+        responseJsonParser = stripeFileJsonParser,
+        onSuccessExecutionTimeBlock = onSuccessExecutionTimeBlock
     )
 
     override suspend fun downloadModel(modelUrl: String) = runCatching {
@@ -210,35 +213,42 @@ internal class DefaultIdentityRepository @Inject constructor(
 
     private suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
         request: StripeRequest,
-        responseJsonParser: ModelJsonParser<Response>
-    ): Response = runCatching {
-        stripeNetworkClient.executeRequest(
-            request
-        )
-    }.fold(
-        onSuccess = { response ->
-            if (response.isError) {
-                // TODO(ccen) Parse the response code and throw different exceptions
-                throw APIException(
-                    stripeError = stripeErrorJsonParser.parse(response.responseJson()),
-                    requestId = response.requestId?.value,
-                    statusCode = response.code
-                )
-            } else {
-                responseJsonParser.parse(response.responseJson()) ?: run {
-                    throw APIException(
-                        message = "$responseJsonParser returns null for ${response.responseJson()}"
-                    )
-                }
-            }
-        },
-        onFailure = {
-            throw APIConnectionException(
-                "Failed to execute $request",
-                cause = it
+        responseJsonParser: ModelJsonParser<Response>,
+        onSuccessExecutionTimeBlock: (Long) -> Unit = {}
+    ): Response {
+        val started = Clock.markNow()
+        return runCatching {
+            stripeNetworkClient.executeRequest(
+                request
             )
-        }
-    )
+        }.fold(
+            onSuccess = { response ->
+                if (response.isError) {
+                    // TODO(ccen) Parse the response code and throw different exceptions
+                    throw APIException(
+                        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+                        requestId = response.requestId?.value,
+                        statusCode = response.code
+                    )
+                } else {
+                    responseJsonParser.parse(response.responseJson())?.let { response ->
+                        onSuccessExecutionTimeBlock(started.elapsedSince().inMilliseconds.toLong())
+                        response
+                    } ?: run {
+                        throw APIException(
+                            message = "$responseJsonParser returns null for ${response.responseJson()}"
+                        )
+                    }
+                }
+            },
+            onFailure = {
+                throw APIConnectionException(
+                    "Failed to execute $request",
+                    cause = it
+                )
+            }
+        )
+    }
 
     internal companion object {
         const val SUBMIT = "submit"
