@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.presentation
+package com.stripe.android.financialconnections.features.institutionpicker
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
@@ -37,11 +37,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
             searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret
             )
-        }.execute(
-            retainValue = InstitutionPickerState::featuredInstitutions
-        ) {
-            copy(featuredInstitutions = it)
-        }
+        }.execute { copy(featuredInstitutions = it) }
     }
 
     private fun logErrors() {
@@ -66,11 +62,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 query = query
             )
             test
-        }.execute(retainValue = InstitutionPickerState::searchInstitutions) {
-            copy(
-                searchInstitutions = it,
-            )
-        }
+        }.execute { copy(searchInstitutions = it,) }
     }
 
     fun onInstitutionSelected(institution: Institution) {

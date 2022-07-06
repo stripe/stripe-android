@@ -1,7 +1,5 @@
-package com.stripe.android.financialconnections.di
+package com.stripe.android.financialconnections.features.institutionpicker
 
-import com.stripe.android.financialconnections.presentation.InstitutionPickerState
-import com.stripe.android.financialconnections.presentation.InstitutionPickerViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
