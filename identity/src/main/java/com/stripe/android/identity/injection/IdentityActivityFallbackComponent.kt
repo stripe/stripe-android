@@ -14,7 +14,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class
     ]
 )
-internal interface IdentityActivityComponent {
+internal interface IdentityActivityFallbackComponent {
     fun inject(activity: IdentityActivity)
 
     @Component.Builder
@@ -22,6 +22,6 @@ internal interface IdentityActivityComponent {
         @BindsInstance
         fun context(context: Context): Builder
 
-        fun build(): IdentityActivityComponent
+        fun build(): IdentityActivityFallbackComponent
     }
 }

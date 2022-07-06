@@ -27,7 +27,7 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.databinding.IdentityActivityBinding
-import com.stripe.android.identity.injection.DaggerIdentityActivityComponent
+import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
@@ -94,7 +94,7 @@ internal class IdentityActivity :
     lateinit var workContext: CoroutineContext
 
     override fun fallbackInitialize(arg: Context) {
-        DaggerIdentityActivityComponent.builder()
+        DaggerIdentityActivityFallbackComponent.builder()
             .context(arg)
             .build().inject(this)
     }
