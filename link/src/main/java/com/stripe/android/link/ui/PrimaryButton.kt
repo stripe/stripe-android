@@ -133,12 +133,18 @@ internal fun SecondaryButton(
         enabled = enabled,
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary
+            backgroundColor = MaterialTheme.colors.secondary,
+            disabledBackgroundColor = MaterialTheme.colors.secondary
         )
     ) {
-        Text(
-            text = label,
-            color = MaterialTheme.linkColors.secondaryButtonLabel
-        )
+        CompositionLocalProvider(
+            LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
+        ) {
+            Text(
+                text = label,
+                color = MaterialTheme.linkColors.secondaryButtonLabel
+                    .copy(alpha = LocalContentAlpha.current)
+            )
+        }
     }
 }

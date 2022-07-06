@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.elements.OTPElementColors
 
 private val LinkTeal = Color(0xFF33DDB3)
+private val ActionLightGreen = Color(0xFF1AC59B)
 private val ActionGreen = Color(0xFF05A87F)
 private val ButtonLabel = Color(0xFF1D3944)
 private val ErrorText = Color(0xFFFF2F4C)
@@ -46,9 +47,9 @@ internal data class LinkColors(
     val componentBackground: Color,
     val componentBorder: Color,
     val componentDivider: Color,
-    val clickableHyperlink: Color,
     val buttonLabel: Color,
-    val dialogButtonLabel: Color,
+    val actionLabel: Color,
+    val actionLabelLight: Color,
     val disabledText: Color,
     val closeButton: Color,
     val linkLogo: Color,
@@ -87,9 +88,9 @@ internal object LinkThemeConfig {
         componentBackground = LightComponentBackground,
         componentBorder = LightComponentBorder,
         componentDivider = LightComponentDivider,
-        clickableHyperlink = ActionGreen,
         buttonLabel = ButtonLabel,
-        dialogButtonLabel = ActionGreen,
+        actionLabel = ActionGreen,
+        actionLabelLight = ActionLightGreen,
         disabledText = LightTextDisabled,
         closeButton = LightCloseButton,
         linkLogo = LightLinkLogo,
@@ -114,9 +115,9 @@ internal object LinkThemeConfig {
         componentBackground = DarkComponentBackground,
         componentBorder = DarkComponentBorder,
         componentDivider = DarkComponentDivider,
-        clickableHyperlink = ActionGreen,
         buttonLabel = ButtonLabel,
-        dialogButtonLabel = ActionGreen,
+        actionLabel = ActionGreen,
+        actionLabelLight = ActionLightGreen,
         disabledText = DarkTextDisabled,
         closeButton = DarkCloseButton,
         linkLogo = DarkLinkLogo,
