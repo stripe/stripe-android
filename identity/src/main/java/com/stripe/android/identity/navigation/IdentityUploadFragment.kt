@@ -105,28 +105,32 @@ internal abstract class IdentityUploadFragment(
                 uploadResult(
                     uri = it,
                     uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                    isFront = true
+                    isFront = true,
+                    scanType = frontScanType
                 )
             },
             onBackPhotoTaken = {
                 uploadResult(
                     uri = it,
                     uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                    isFront = false
+                    isFront = false,
+                    scanType = requireNotNull(backScanType) { "null backScanType" }
                 )
             },
             onFrontImageChosen = {
                 uploadResult(
                     uri = it,
                     uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                    isFront = true
+                    isFront = true,
+                    scanType = frontScanType
                 )
             },
             onBackImageChosen = {
                 uploadResult(
                     uri = it,
                     uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                    isFront = false
+                    isFront = false,
+                    scanType = requireNotNull(backScanType) { "null backScanType" }
                 )
             }
         )

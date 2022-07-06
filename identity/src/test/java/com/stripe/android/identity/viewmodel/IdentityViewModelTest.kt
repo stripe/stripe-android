@@ -84,7 +84,7 @@ internal class IdentityViewModelTest {
         )
     }
 
-    val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
+    private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
 
     val viewModel = IdentityViewModel(
         IdentityVerificationSheetContract.Args(
@@ -97,8 +97,8 @@ internal class IdentityViewModelTest {
         mockIdentityRepository,
         mockIdentityModelFetcher,
         mockIdentityIO,
-        mock(),
         mockIdentityAnalyticsRequestFactory,
+        mock(),
         mock(),
         mock(),
         mock(),

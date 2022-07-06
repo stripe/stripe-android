@@ -36,7 +36,6 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import android.content.Context
 
 /**
  * Host activity to perform Identity verification.
