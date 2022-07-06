@@ -190,7 +190,7 @@ internal fun VerificationBody(
                             onClick = onChangeEmailClick
                         ),
                     style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.linkColors.clickableHyperlink
+                    color = MaterialTheme.linkColors.actionLabel
                 )
             }
         }
