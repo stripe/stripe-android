@@ -21,9 +21,9 @@ import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 internal class InstitutionPickerViewModel @Inject constructor(
-    val configuration: FinancialConnectionsSheet.Configuration,
-    val searchInstitutions: SearchInstitutions,
-    val postAuthorizationSession: PostAuthorizationSession,
+    private val configuration: FinancialConnectionsSheet.Configuration,
+    private val searchInstitutions: SearchInstitutions,
+    private val postAuthorizationSession: PostAuthorizationSession,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val logger: Logger,
     initialState: InstitutionPickerState
@@ -61,10 +61,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
         searchJob?.cancel()
         searchJob = suspend {
             delay(SEARCH_DEBOUNCE_MS)
-            searchInstitutions(
+            val test = searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
             )
+            test
         }.execute(retainValue = InstitutionPickerState::searchInstitutions) {
             copy(
                 searchInstitutions = it,
