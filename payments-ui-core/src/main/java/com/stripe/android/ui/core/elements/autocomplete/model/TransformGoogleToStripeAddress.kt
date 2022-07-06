@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements.autocomplete.model
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.RestrictTo
 import java.util.Locale
 
 // Largely duplicated from
@@ -176,7 +177,8 @@ internal fun Address.modifyStripeAddressByCountry(place: Place): Address {
     return newAddress
 }
 
-internal fun Place.transformGoogleToStripeAddress(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Place.transformGoogleToStripeAddress(
     context: Context
 ): com.stripe.android.model.Address {
     var address = Address()

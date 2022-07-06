@@ -7,4 +7,8 @@
     <string name="stripe_paymentsheet_ach_something_went_wrong">Something went wrong when linking your account.\nPlease try again later.</string>
     <string name="stripe_paymentsheet_pay_with_bank_title">Pay with your bank account in just a few steps.</string>
     <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
+
+    <!-- Shipping Address Element -->
+    <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
+    <string name="stripe_paymentsheet_autocomplete_no_results_found">No results found</string>
 </resources>

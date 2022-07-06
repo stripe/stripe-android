@@ -33,7 +33,7 @@ class InputAddressViewModelTest {
         whenever(navigator.getResultFlow<ShippingAddress?>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(null)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(ShippingAddress())
     }
 
     @Test

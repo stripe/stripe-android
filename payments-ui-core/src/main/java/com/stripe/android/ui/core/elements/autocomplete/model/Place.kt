@@ -1,25 +1,30 @@
 package com.stripe.android.ui.core.elements.autocomplete.model
 
 import android.text.SpannableString
+import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-internal data class FindAutocompletePredictionsResponse(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class FindAutocompletePredictionsResponse(
     val autocompletePredictions: List<AutocompletePrediction>
 )
 
-internal data class AutocompletePrediction(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class AutocompletePrediction(
     val primaryText: SpannableString,
     val secondaryText: SpannableString,
     val placeId: String
 )
 
-internal data class FetchPlaceResponse(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class FetchPlaceResponse(
     val place: Place
 )
 
 @Serializable
-internal data class Place(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class Place(
     @SerialName("address_components") val addressComponents: List<AddressComponent>?
 ) {
     enum class Type(val value: String) {
@@ -44,7 +49,8 @@ internal data class Place(
 }
 
 @Serializable
-internal data class AddressComponent(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class AddressComponent(
     @SerialName("short_name") val shortName: String?,
     @SerialName("long_name") val longName: String,
     @SerialName("types") val types: List<String>

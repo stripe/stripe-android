@@ -24,8 +24,21 @@ internal class InputAddressViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            navigator.getResultFlow<ShippingAddress>(ShippingAddress.KEY)?.collect {
-                _collectedAddress.value = it
+            navigator.getResultFlow<ShippingAddress?>(ShippingAddress.KEY)?.collect {
+                val oldShippingAddress = _collectedAddress.value
+                _collectedAddress.emit(
+                    ShippingAddress(
+                        name = oldShippingAddress?.name ?: it?.name,
+                        company = oldShippingAddress?.company ?: it?.company,
+                        phoneNumber = oldShippingAddress?.phoneNumber ?: it?.phoneNumber,
+                        city = it?.city,
+                        country = it?.country,
+                        line1 = it?.line1,
+                        line2 = it?.line2,
+                        state = it?.state,
+                        postalCode = it?.postalCode
+                    )
+                )
             }
         }
     }
