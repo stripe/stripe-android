@@ -14,6 +14,7 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.analytics.AnalyticsState
@@ -42,6 +43,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -161,54 +163,99 @@ class IdentityCameraScanFragmentTest {
         }
     }
 
+    @Test
+    fun `when startScanning update analytics`() {
+        launchTestFragment().onFragment {
+            it.startScanning(IdentityScanState.ScanType.ID_FRONT)
+
+            val updateBlockCaptor: KArgumentCaptor<(AnalyticsState) -> AnalyticsState> =
+                argumentCaptor()
+            verify(mockIdentityViewModel).updateAnalyticsState(
+                updateBlockCaptor.capture()
+            )
+            var analyticsState = updateBlockCaptor.lastValue(AnalyticsState())
+            assertThat(analyticsState.docFrontRetryTimes).isEqualTo(1)
+            assertThat(analyticsState.docBackRetryTimes).isNull()
+            assertThat(analyticsState.selfieRetryTimes).isNull()
+
+            it.startScanning(IdentityScanState.ScanType.ID_FRONT)
+            verify(mockIdentityViewModel, times(2)).updateAnalyticsState(
+                updateBlockCaptor.capture()
+            )
+            analyticsState = updateBlockCaptor.lastValue(analyticsState)
+            assertThat(analyticsState.docFrontRetryTimes).isEqualTo(2)
+            assertThat(analyticsState.docBackRetryTimes).isNull()
+            assertThat(analyticsState.selfieRetryTimes).isNull()
+
+            it.startScanning(IdentityScanState.ScanType.ID_BACK)
+            verify(mockIdentityViewModel, times(3)).updateAnalyticsState(
+                updateBlockCaptor.capture()
+            )
+            analyticsState = updateBlockCaptor.lastValue(analyticsState)
+            assertThat(analyticsState.docFrontRetryTimes).isEqualTo(2)
+            assertThat(analyticsState.docBackRetryTimes).isEqualTo(1)
+            assertThat(analyticsState.selfieRetryTimes).isNull()
+
+            it.startScanning(IdentityScanState.ScanType.SELFIE)
+            verify(mockIdentityViewModel, times(4)).updateAnalyticsState(
+                updateBlockCaptor.capture()
+            )
+            analyticsState = updateBlockCaptor.lastValue(analyticsState)
+            assertThat(analyticsState.docFrontRetryTimes).isEqualTo(2)
+            assertThat(analyticsState.docBackRetryTimes).isEqualTo(1)
+            assertThat(analyticsState.selfieRetryTimes).isEqualTo(1)
+        }
+    }
+
+    private fun launchTestFragment() = launchFragmentInContainer(
+        themeResId = R.style.Theme_MaterialComponents
+    ) {
+        TestFragment(
+            viewModelFactoryFor(mockIdentityScanViewModel),
+            viewModelFactoryFor(mockIdentityViewModel)
+        )
+    }
+
     private fun launchTestFragmentWithFinalResult(
         finalResult: IdentityAggregator.FinalResult,
         testBlock: () -> Unit
-    ) =
-        launchFragmentInContainer(
-            themeResId = R.style.Theme_MaterialComponents
-        ) {
-            TestFragment(
-                viewModelFactoryFor(mockIdentityScanViewModel),
-                viewModelFactoryFor(mockIdentityViewModel)
-            )
-        }.onFragment {
-            val navController = TestNavHostController(
-                ApplicationProvider.getApplicationContext()
-            )
-            navController.setGraph(
-                R.navigation.identity_nav_graph
-            )
-            navController.setCurrentDestination(R.id.IDScanFragment)
-            Navigation.setViewNavController(
-                it.requireView(),
-                navController
-            )
+    ) = launchTestFragment().onFragment {
+        val navController = TestNavHostController(
+            ApplicationProvider.getApplicationContext()
+        )
+        navController.setGraph(
+            R.navigation.identity_nav_graph
+        )
+        navController.setCurrentDestination(R.id.IDScanFragment)
+        Navigation.setViewNavController(
+            it.requireView(),
+            navController
+        )
 
-            finalResultLiveData.postValue(
-                finalResult
+        finalResultLiveData.postValue(
+            finalResult
+        )
+
+        runBlocking {
+            verify(mockFPSTracker).reportAndReset(
+                if (finalResult.result is FaceDetectorOutput) {
+                    eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
+                } else {
+                    eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
+                }
             )
-
-            runBlocking {
-                verify(mockFPSTracker).reportAndReset(
-                    if (finalResult.result is FaceDetectorOutput) {
-                        eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)
-                    } else {
-                        eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
-                    }
-                )
-            }
-
-            val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
-            verify(mockIdentityViewModel).observeForVerificationPage(
-                any(),
-                successCaptor.capture(),
-                any()
-            )
-            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE)
-
-            testBlock()
         }
+
+        val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+        verify(mockIdentityViewModel).observeForVerificationPage(
+            any(),
+            successCaptor.capture(),
+            any()
+        )
+        successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE)
+
+        testBlock()
+    }
 
     internal class TestFragment(
         identityScanViewModelFactory: ViewModelProvider.Factory,
@@ -231,6 +278,9 @@ class IdentityCameraScanFragmentTest {
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View {
+            cameraView = mock<CameraView>().also {
+                whenever(it.viewFinderWindowView).thenReturn(mock())
+            }
             return View(ApplicationProvider.getApplicationContext())
         }
 
