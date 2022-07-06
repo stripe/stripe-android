@@ -127,7 +127,6 @@ private fun InstitutionPickerContent(
                 )
             }
         }
-
     }
 }
 

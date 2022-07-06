@@ -7,7 +7,6 @@ import com.stripe.android.model.BankAccount
 import com.stripe.android.model.Token
 import java.util.Date
 
-
 val financialConnectionsSessionWithNoMoreAccounts = FinancialConnectionsSession(
     id = "las_no_more",
     clientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,

@@ -130,5 +130,4 @@ internal class InstitutionPickerViewModelTest {
             institutionResponse
         )
     }
-
 }
