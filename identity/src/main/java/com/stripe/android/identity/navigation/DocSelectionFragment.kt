@@ -81,7 +81,7 @@ internal class DocSelectionFragment(
                 }
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
         lifecycleScope.launch(identityViewModel.workContext) {
@@ -150,8 +150,10 @@ internal class DocSelectionFragment(
             }
         } ?: run {
             // Not possible for backend to send an empty list of allowed types.
-            Log.e(TAG, "Received an empty idDocumentTypeAllowlist.")
-            navigateToDefaultErrorFragment()
+            "Received an empty idDocumentTypeAllowlist.".let { msg ->
+                Log.e(TAG, msg)
+                navigateToDefaultErrorFragment(msg)
+            }
         }
     }
 
@@ -252,8 +254,10 @@ internal class DocSelectionFragment(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 if (verificationPage.documentCapture.requireLiveCapture) {
-                    Log.e(TAG, "Can't access camera and client has required live capture.")
-                    navigateToDefaultErrorFragment()
+                    "Can't access camera and client has required live capture.".let { msg ->
+                        Log.e(TAG, msg)
+                        navigateToDefaultErrorFragment(msg)
+                    }
                 } else {
                     navigateToUploadFragment(
                         type.toUploadDestinationId(),
@@ -263,7 +267,7 @@ internal class DocSelectionFragment(
                 }
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }
@@ -289,7 +293,7 @@ internal class DocSelectionFragment(
             },
             onFailure = {
                 Log.e(TAG, "failed to observeForVerificationPage: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }

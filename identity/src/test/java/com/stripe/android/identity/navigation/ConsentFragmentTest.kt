@@ -176,7 +176,7 @@ internal class ConsentFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(

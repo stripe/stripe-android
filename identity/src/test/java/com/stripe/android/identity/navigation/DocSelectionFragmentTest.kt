@@ -88,7 +88,7 @@ internal class DocSelectionFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(times: Int = 1) {

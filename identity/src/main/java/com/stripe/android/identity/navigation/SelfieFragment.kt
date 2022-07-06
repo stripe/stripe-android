@@ -198,8 +198,10 @@ internal class SelfieFragment(
                 identityViewModel.selfieUploadState.collectLatest {
                     when {
                         it.hasError() -> {
-                            Log.e(TAG, "Fail to upload files: ${it.getError()}")
-                            navigateToDefaultErrorFragment()
+                            "Fail to upload files: ${it.getError()}".let { msg ->
+                                Log.e(TAG, msg)
+                                navigateToDefaultErrorFragment(msg)
+                            }
                         }
                         it.isAnyLoading() -> {
                             continueButton.toggleToLoading()
@@ -234,15 +236,14 @@ internal class SelfieFragment(
                                     TAG,
                                     "fail to submit uploaded files: $throwable"
                                 )
-                                navigateToDefaultErrorFragment()
+                                navigateToDefaultErrorFragment(throwable)
                             }
                         }
                         else -> {
-                            Log.e(
-                                TAG,
-                                "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it"
-                            )
-                            navigateToDefaultErrorFragment()
+                            "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it".let { msg ->
+                                Log.e(TAG, msg)
+                                navigateToDefaultErrorFragment(msg)
+                            }
                         }
                     }
                 }

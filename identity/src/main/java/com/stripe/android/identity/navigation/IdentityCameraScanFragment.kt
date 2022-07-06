@@ -139,7 +139,7 @@ internal abstract class IdentityCameraScanFragment(
                 },
                 onFailure = {
                     Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                    navigateToDefaultErrorFragment()
+                    navigateToDefaultErrorFragment(it)
                 }
             )
             stopScanning()

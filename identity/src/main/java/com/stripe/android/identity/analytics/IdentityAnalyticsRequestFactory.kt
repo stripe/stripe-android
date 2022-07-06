@@ -198,6 +198,17 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
+    fun genericError(
+        message: String?,
+        stackTrace: String
+    ) = requestFactory.createRequest(
+        eventName = EVENT_GENERIC_ERROR,
+        additionalParams = additionalParamWithEventMetadata(
+            PARAM_MESSAGE to message,
+            PARAM_STACKTRACE to stackTrace
+        )
+    )
+
     fun imageUpload(
         value: Long,
         compressionQuality: Float,
@@ -264,6 +275,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_MODEL_PERFORMANCE = "model_performance"
         const val EVENT_TIME_TO_SCREEN = "time_to_screen"
         const val EVENT_IMAGE_UPLOAD = "image_upload"
+        const val EVENT_GENERIC_ERROR = "generic_error"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
@@ -294,6 +306,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_NETWORK_TIME = "network_time"
         const val PARAM_FROM_SCREEN_NAME = "from_screen_name"
         const val PARAM_TO_SCREEN_NAME = "to_screen_name"
+        const val PARAM_MESSAGE = "message"
         const val PARAM_COMPRESSION_QUALITY = "compression_quality"
         const val PARAM_ID = "id"
         const val PARAM_FILE_NAME = "file_name"

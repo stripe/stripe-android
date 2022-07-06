@@ -269,8 +269,8 @@ internal class IdentityActivity :
                     )
                 }
             }
-            // Display cross icon on error fragment with failed reason, clicking it finishes the flow with Failed
-            isErrorFragmentWithFailedReason(destination, args) -> {
+            // Display cross icon on error fragment that should fail, clicking it finishes the flow with Failed
+            isErrorFragmentThatShouldFail(destination, args) -> {
                 this.navigationIcon = AppCompatResources.getDrawable(
                     this@IdentityActivity,
                     R.drawable.ic_baseline_close_24
@@ -278,7 +278,7 @@ internal class IdentityActivity :
                 this.setNavigationOnClickListener {
                     val failedReason = requireNotNull(
                         args?.getSerializable(
-                            ErrorFragment.ARG_FAILED_REASON
+                            ErrorFragment.ARG_CAUSE
                         ) as? Throwable
                     ) {
                         "Failed to get failedReason from $args"
@@ -341,11 +341,11 @@ internal class IdentityActivity :
                         VerificationFlowResult.Canceled
                     )
                 }
-                // On error fragment with failed reason, clicking back finishes the flow with Failed
-                isErrorFragmentWithFailedReason(destination, args) -> {
+                // On error fragment that should fail, clicking back finishes the flow with Failed
+                isErrorFragmentThatShouldFail(destination, args) -> {
                     val failedReason = requireNotNull(
                         args?.getSerializable(
-                            ErrorFragment.ARG_FAILED_REASON
+                            ErrorFragment.ARG_CAUSE
                         ) as? Throwable
                     ) {
                         "Failed to get failedReason from $args"
@@ -388,10 +388,14 @@ internal class IdentityActivity :
         private fun isConsentFragment(destination: NavDestination?) =
             destination?.id == R.id.consentFragment
 
-        private fun isErrorFragmentWithFailedReason(
+        /**
+         * Check if this is the final error fragment, which would fail the verification flow when
+         * back button is clicked.
+         */
+        private fun isErrorFragmentThatShouldFail(
             destination: NavDestination?,
             args: Bundle?
         ) = destination?.id == R.id.errorFragment &&
-            args?.containsKey(ErrorFragment.ARG_FAILED_REASON) == true
+            args?.getBoolean(ErrorFragment.ARG_SHOULD_FAIL, false) == true
     }
 }
