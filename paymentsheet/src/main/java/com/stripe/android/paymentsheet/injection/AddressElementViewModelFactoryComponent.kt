@@ -8,7 +8,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementViewModel
-import com.stripe.android.paymentsheet.addresselement.AutoCompleteViewModel
+import com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import com.stripe.android.ui.core.injection.FormControllerModule
@@ -32,7 +32,7 @@ import javax.inject.Singleton
 internal interface AddressElementViewModelFactoryComponent {
     fun inject(factory: AddressElementViewModel.Factory)
     fun inject(factory: InputAddressViewModel.Factory)
-    fun inject(factory: AutoCompleteViewModel.Factory)
+    fun inject(factory: AutocompleteViewModel.Factory)
 
     @Component.Builder
     interface Builder {

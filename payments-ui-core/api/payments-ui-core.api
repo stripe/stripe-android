@@ -94,6 +94,32 @@ public final class com/stripe/android/ui/core/elements/AddressSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/ui/core/elements/AddressType : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/ui/core/elements/AddressType$Companion;
+	public static final field Normal Lcom/stripe/android/ui/core/elements/AddressType;
+	public static final field ShippingCondensed Lcom/stripe/android/ui/core/elements/AddressType;
+	public static final field ShippingExpanded Lcom/stripe/android/ui/core/elements/AddressType;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/AddressType;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/AddressType;
+}
+
+public final class com/stripe/android/ui/core/elements/AddressType$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AddressType$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/AddressType;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/AddressType;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/AddressType$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
 }
 
@@ -213,13 +239,6 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public abstract fun getCardScanEnabled ()Z
 	public fun getEnabled ()Z
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
-}
-
-public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
@@ -390,6 +409,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getLine1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getLine2 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getName ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getOneLineAddress ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
@@ -582,6 +602,73 @@ public final class com/stripe/android/ui/core/elements/TranslationId$$serializer
 
 public final class com/stripe/android/ui/core/elements/TranslationId$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion {
+	public final fun create (Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy;
+	public static synthetic fun create$default (Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy;
+	public final fun getPlacesPoweredByGoogleDrawable (ZLcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;)Ljava/lang/Integer;
+	public static synthetic fun getPlacesPoweredByGoogleDrawable$default (Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion;ZLcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;ILjava/lang/Object;)Ljava/lang/Integer;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/model/AddressComponent$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/autocomplete/model/AddressComponent$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/autocomplete/model/AddressComponent;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/autocomplete/model/AddressComponent;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/model/AddressComponent$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/model/Place$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/autocomplete/model/Place;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/autocomplete/model/Place;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/model/Place$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/model/Place$Type : java/lang/Enum {
+	public static final field ADMINISTRATIVE_AREA_LEVEL_1 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field ADMINISTRATIVE_AREA_LEVEL_2 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field ADMINISTRATIVE_AREA_LEVEL_3 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field ADMINISTRATIVE_AREA_LEVEL_4 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field COUNTRY Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field LOCALITY Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field NEIGHBORHOOD Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field POSTAL_CODE Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field POSTAL_TOWN Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field PREMISE Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field ROUTE Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field STREET_NUMBER Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field SUBLOCALITY Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field SUBLOCALITY_LEVEL_1 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field SUBLOCALITY_LEVEL_2 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field SUBLOCALITY_LEVEL_3 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static final field SUBLOCALITY_LEVEL_4 Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/autocomplete/model/Place$Type;
+}
+
+public final class com/stripe/android/ui/core/elements/autocomplete/model/TransformGoogleToStripeAddressKt {
 }
 
 public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {

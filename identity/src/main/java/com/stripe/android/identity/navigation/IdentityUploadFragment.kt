@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -31,6 +32,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.fragmentIdToScreenName
 import com.stripe.android.identity.utils.isNavigatedUpTo
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
@@ -45,7 +47,7 @@ import kotlinx.coroutines.launch
  *
  */
 internal abstract class IdentityUploadFragment(
-    private val identityUploadViewModelFactory: ViewModelProvider.Factory,
+    identityIO: IdentityIO,
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
 
@@ -80,13 +82,58 @@ internal abstract class IdentityUploadFragment(
 
     private var shouldShowChoosePhoto: Boolean = false
 
-    private val identityUploadViewModel: IdentityUploadViewModel by viewModels { identityUploadViewModelFactory }
+    @VisibleForTesting
+    internal var identityUploadViewModelFactory: ViewModelProvider.Factory =
+        IdentityUploadViewModel.FrontBackUploadViewModelFactory(
+            { this },
+            identityIO
+        )
+
+    private val identityUploadViewModel: IdentityUploadViewModel by viewModels {
+        identityUploadViewModelFactory
+    }
 
     protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
 
+    abstract val presentedId: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        identityUploadViewModel.registerActivityResultCaller(this)
+        identityUploadViewModel.registerActivityResultCaller(
+            activityResultCaller = this,
+            onFrontPhotoTaken = {
+                uploadResult(
+                    uri = it,
+                    uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
+                    isFront = true,
+                    scanType = frontScanType
+                )
+            },
+            onBackPhotoTaken = {
+                uploadResult(
+                    uri = it,
+                    uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
+                    isFront = false,
+                    scanType = requireNotNull(backScanType) { "null backScanType" }
+                )
+            },
+            onFrontImageChosen = {
+                uploadResult(
+                    uri = it,
+                    uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                    isFront = true,
+                    scanType = frontScanType
+                )
+            },
+            onBackImageChosen = {
+                uploadResult(
+                    uri = it,
+                    uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                    isFront = false,
+                    scanType = requireNotNull(backScanType) { "null backScanType" }
+                )
+            }
+        )
     }
 
     /**
@@ -157,9 +204,19 @@ internal abstract class IdentityUploadFragment(
         return binding.root
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(presentedId, true)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        maybeResetUploadedState()
+        if (savedInstanceState?.getBoolean(presentedId, false) != true) {
+            maybeResetUploadedState()
+        }
+
+        savedInstanceState?.remove(presentedId)
+
         collectUploadedStateAndUpdateUI()
 
         lifecycleScope.launch(identityViewModel.workContext) {
@@ -206,7 +263,7 @@ internal abstract class IdentityUploadFragment(
                 identityViewModel.documentUploadState.collectLatest { latestState ->
                     if (latestState.hasError()) {
                         Log.e(TAG, "Fail to upload files: ${latestState.getError()}")
-                        navigateToDefaultErrorFragment()
+                        navigateToDefaultErrorFragment(latestState.getError())
                     } else {
                         if (latestState.isFrontHighResUploaded()) {
                             showFrontDone(latestState)
@@ -254,21 +311,9 @@ internal abstract class IdentityUploadFragment(
         if (shouldShowTakePhoto) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
                 if (scanType == frontScanType) {
-                    identityUploadViewModel.takePhotoFront(requireContext()) {
-                        uploadResult(
-                            uri = it,
-                            uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                            isFront = true
-                        )
-                    }
+                    identityUploadViewModel.takePhotoFront(requireContext())
                 } else if (scanType == backScanType) {
-                    identityUploadViewModel.takePhotoBack(requireContext()) {
-                        uploadResult(
-                            uri = it,
-                            uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                            isFront = false
-                        )
-                    }
+                    identityUploadViewModel.takePhotoBack(requireContext())
                 }
                 dialog.dismiss()
             }
@@ -279,21 +324,9 @@ internal abstract class IdentityUploadFragment(
         if (shouldShowChoosePhoto) {
             dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
                 if (scanType == frontScanType) {
-                    identityUploadViewModel.chooseImageFront {
-                        uploadResult(
-                            uri = it,
-                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                            isFront = true
-                        )
-                    }
+                    identityUploadViewModel.chooseImageFront()
                 } else if (scanType == backScanType) {
-                    identityUploadViewModel.chooseImageBack {
-                        uploadResult(
-                            uri = it,
-                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                            isFront = false
-                        )
-                    }
+                    identityUploadViewModel.chooseImageBack()
                 }
                 dialog.dismiss()
             }
@@ -311,7 +344,7 @@ internal abstract class IdentityUploadFragment(
                 onSuccess(it.documentCapture)
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }
@@ -319,7 +352,8 @@ internal abstract class IdentityUploadFragment(
     private fun uploadResult(
         uri: Uri,
         uploadMethod: DocumentUploadParam.UploadMethod,
-        isFront: Boolean
+        isFront: Boolean,
+        scanType: IdentityScanState.ScanType
     ) {
         if (isFront) {
             showFrontUploading()
@@ -331,7 +365,8 @@ internal abstract class IdentityUploadFragment(
                 uri = uri,
                 isFront = isFront,
                 docCapturePage = docCapturePage,
-                uploadMethod = uploadMethod
+                uploadMethod = uploadMethod,
+                scanType = scanType
             )
         }
     }
@@ -388,7 +423,7 @@ internal abstract class IdentityUploadFragment(
                 )
             }.onFailure {
                 Log.d(TAG, "fail to submit uploaded files: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         }
     }
@@ -419,7 +454,7 @@ internal abstract class IdentityUploadFragment(
             },
             onFailure = {
                 Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }

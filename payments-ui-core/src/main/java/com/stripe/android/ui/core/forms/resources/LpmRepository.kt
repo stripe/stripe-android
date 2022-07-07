@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -170,7 +171,11 @@ class LpmRepository @Inject constructor(
             PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
                 "afterpay_clearpay",
                 false,
-                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+                if (isClearpay()) {
+                    R.string.stripe_paymentsheet_payment_method_clearpay
+                } else {
+                    R.string.stripe_paymentsheet_payment_method_afterpay
+                },
                 R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
                 false,
                 AfterpayClearpayRequirement,

@@ -176,7 +176,7 @@ internal class ConsentFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(
@@ -205,7 +205,7 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when not missing biometricConsent navigate to docSelectionFragment`() {
+    fun `when not missing biometricConsent stay on ConsentFragment`() {
         whenever(verificationPageWithTimeAndPolicy.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = emptyList()
@@ -215,7 +215,7 @@ internal class ConsentFragmentTest {
             setUpSuccessVerificationPage()
 
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.docSelectionFragment)
+                .isEqualTo(R.id.consentFragment)
         }
     }
 

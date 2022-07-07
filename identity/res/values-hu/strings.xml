@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Felvétel...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Alkalmazásbeállítások</string>
   <!-- Description of back of driver's license image -->
@@ -37,6 +39,8 @@
   <string name="file_upload_content_id">Töltse fel a személyazonosító igazolványának előlapját és hátlapját</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Töltse fel az útlevele képét</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Szelfi animációhoz maszk</string>
   <!-- Description of front of driver's license image -->
   <string name="front_of_dl">Vezetői engedély előlapja</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
@@ -73,10 +77,20 @@
   <string name="position_id_front">Igazítsa személyazonosító igazolványát a kép közepére</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Igazítsa útlevelét a kép közepére</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Igazítsa az arcát a kép közepére.</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Beolvasva</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="select">Kiválasztás</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">Szelfi felvétel kész</string>
+  <!-- Title of selfie capture screen -->
+  <string name="selfie_captures">Szelfi készítése</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">szelfi rögítve</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="selfie_not_saved_warning">Nincs mentve a szelfi, biztos kilép?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="take_photo">Fénykép készítése</string>
   <!-- Button to attempt to re-scan identity document image -->

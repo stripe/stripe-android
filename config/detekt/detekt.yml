@@ -317,6 +317,7 @@ formatting:
   MaximumLineLength:
     active: true
     maxLineLength: 120
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     ignoreBackTickedIdentifier: false
   ModifierOrdering:
     active: true

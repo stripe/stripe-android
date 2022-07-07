@@ -46,6 +46,7 @@ data class IdentifierSpec(val v1: String) {
 
         // Unique extracting functionality
         val SaveForFutureUse = IdentifierSpec("save_for_future_use")
+        val OneLineAddress = IdentifierSpec("address")
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
@@ -62,6 +63,7 @@ data class IdentifierSpec(val v1: String) {
             PostalCode.v1 -> PostalCode
             SaveForFutureUse.v1 -> SaveForFutureUse
             State.v1 -> State
+            OneLineAddress.v1 -> OneLineAddress
             else -> {
                 Generic(value)
             }

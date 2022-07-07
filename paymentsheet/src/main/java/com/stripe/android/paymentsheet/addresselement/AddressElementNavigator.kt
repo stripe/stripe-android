@@ -18,7 +18,7 @@ internal class AddressElementNavigator @Inject constructor() {
         target: AddressElementScreen
     ) = navigationController?.navigate(target.route)
 
-    fun setResult(key: String, value: Any) =
+    fun setResult(key: String, value: Any?) =
         navigationController?.previousBackStackEntry?.savedStateHandle?.set(key, value)
 
     fun <T> getResultFlow(key: String) =

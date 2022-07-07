@@ -11,9 +11,12 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_GENERIC_ERROR
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_MESSAGE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_STACKTRACE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
@@ -68,16 +71,6 @@ class ErrorFragmentTest {
 
             assertThat(binding.titleText.text).isEqualTo(TEST_ERROR_TITLE)
             assertThat(binding.message1.text).isEqualTo(TEST_ERROR_CONTENT)
-        }
-    }
-
-    @Test
-    fun `bottom button is hidden correctly when not set`() {
-        launchErrorFragment().onFragment {
-            val binding = BaseErrorFragmentBinding.bind(it.requireView())
-
-            assertThat(binding.topButton.visibility).isEqualTo(View.GONE)
-            assertThat(binding.bottomButton.visibility).isEqualTo(View.GONE)
         }
     }
 
@@ -213,16 +206,25 @@ class ErrorFragmentTest {
     ) = launchFragmentInContainer(
         bundleOf(
             ErrorFragment.ARG_ERROR_TITLE to TEST_ERROR_TITLE,
-            ErrorFragment.ARG_ERROR_CONTENT to TEST_ERROR_CONTENT
+            ErrorFragment.ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
+            ErrorFragment.ARG_CAUSE to TEST_CAUSE,
+            ErrorFragment.ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT
         ).also { bundle ->
             navigationDestination?.let {
                 bundle.putInt(ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION, navigationDestination)
-                bundle.putString(ErrorFragment.ARG_GO_BACK_BUTTON_TEXT, TEST_GO_BACK_BUTTON_TEXT)
             }
         },
         themeResId = R.style.Theme_MaterialComponents
     ) {
         ErrorFragment(mock(), viewModelFactoryFor(mockIdentityViewModel))
+    }.onFragment {
+        verify(mockIdentityViewModel).sendAnalyticsRequest(
+            argThat {
+                eventName == EVENT_GENERIC_ERROR &&
+                    (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_MESSAGE] == TEST_CAUSE.message &&
+                    (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_STACKTRACE] == TEST_CAUSE.stackTraceToString()
+            }
+        )
     }
 
     private fun launchErrorFragmentWithFailedReason(
@@ -232,7 +234,8 @@ class ErrorFragmentTest {
             ErrorFragment.ARG_ERROR_TITLE to TEST_ERROR_TITLE,
             ErrorFragment.ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
             ErrorFragment.ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT,
-            ErrorFragment.ARG_FAILED_REASON to throwable
+            ErrorFragment.ARG_SHOULD_FAIL to true,
+            ErrorFragment.ARG_CAUSE to throwable
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
@@ -243,5 +246,6 @@ class ErrorFragmentTest {
         const val TEST_ERROR_TITLE = "test error title"
         const val TEST_ERROR_CONTENT = "test error content"
         const val TEST_GO_BACK_BUTTON_TEXT = "go back"
+        val TEST_CAUSE = IllegalStateException("error message")
     }
 }

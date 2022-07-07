@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Идет съемка...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Настройки приложения</string>
   <!-- Description of back of driver's license image -->
@@ -37,6 +39,8 @@
   <string name="file_upload_content_id">Отправьте изображения лицевой стороны и оборота вашего удостоверения личности</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Отправьте изображение вашего паспорта</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Маска для селфи-анимации</string>
   <!-- Description of front of driver's license image -->
   <string name="front_of_dl">Лицевая сторона водительского удостоверения</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
@@ -73,10 +77,20 @@
   <string name="position_id_front">Поместите удостоверение личности в центр рамки</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Поместите паспорт в центр рамки</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Расположите лицо по центру рамки</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Сканировано</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="select">Выбрать</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">Съемка селфи выполнена</string>
+  <!-- Title of selfie capture screen -->
+  <string name="selfie_captures">Съемка селфи</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">сделан один селфи-снимок</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="selfie_not_saved_warning">Ваши селфи-изображения не были сохранены. Хотите выйти?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="take_photo">Сделать фото</string>
   <!-- Button to attempt to re-scan identity document image -->

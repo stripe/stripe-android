@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Otetaan kuvaa...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Sovelluksen asetukset</string>
   <!-- Description of back of driver's license image -->
@@ -37,6 +39,8 @@
   <string name="file_upload_content_id">Lataa henkilökortin etu- ja takapuolen kuvat</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Lataa kuva passista</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Maski selfieanimaatiota varten</string>
   <!-- Description of front of driver's license image -->
   <string name="front_of_dl">Ajokortin etupuoli</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
@@ -73,10 +77,20 @@
   <string name="position_id_front">Aseta henkilökortti kehyksen keskelle</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Aseta passi kehyksen keskelle</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Aseta kasvosi kuvan keskelle.</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Skannattu</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="select">Valitse</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">Selfien ottaminen suortitettu</string>
+  <!-- Title of selfie capture screen -->
+  <string name="selfie_captures">Selfiet</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">yksi selfie otettu</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="selfie_not_saved_warning">Selfiekuviasi ei ole tallennettu. Haluatko poistua?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="take_photo">Ota kuva</string>
   <!-- Button to attempt to re-scan identity document image -->

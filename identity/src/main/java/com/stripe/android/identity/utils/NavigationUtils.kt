@@ -85,14 +85,16 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                                         .navigate(R.id.action_global_confirmationFragment)
                                 }
                                 else -> {
-                                    Log.e(TAG, "VerificationPage submit failed")
-                                    navigateToDefaultErrorFragment()
+                                    "VerificationPage submit failed".let { msg ->
+                                        Log.e(TAG, msg)
+                                        navigateToDefaultErrorFragment(msg)
+                                    }
                                 }
                             }
                         },
                         onFailure = {
                             Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
-                            navigateToDefaultErrorFragment()
+                            navigateToDefaultErrorFragment(it)
                         }
                     )
                 }
@@ -100,7 +102,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
         },
         onFailure = {
             Log.e(TAG, "Failed to postVerificationPageData: $it")
-            navigateToDefaultErrorFragment()
+            navigateToDefaultErrorFragment(it)
         }
     )
 }
@@ -120,10 +122,20 @@ private fun Fragment.navigateToRequirementErrorFragment(
 }
 
 /**
- * Navigate to [ErrorFragment] with default values.
+ * Navigate to [ErrorFragment] with default values and a cause.
  */
-internal fun Fragment.navigateToDefaultErrorFragment() {
-    findNavController().navigateToErrorFragmentWithDefaultValues(requireContext())
+internal fun Fragment.navigateToDefaultErrorFragment(cause: Throwable) {
+    findNavController().navigateToErrorFragmentWithDefaultValues(requireContext(), cause)
+}
+
+/**
+ * Navigate to [ErrorFragment] with default values and a message.
+ */
+internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
+    findNavController().navigateToErrorFragmentWithDefaultValues(
+        requireContext(),
+        IllegalStateException(message)
+    )
 }
 
 /**
