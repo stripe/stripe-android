@@ -87,6 +87,28 @@ class FormController @Inject constructor(
         map.takeIf { it.values.all { entry -> entry.isComplete } }
     }
 
+    /**
+     * Emits a map of the form values that are complete, empty otherwise.
+     */
+    val formValues = combine(
+        elements.filterNotNull().map { elementsList ->
+            combine(
+                elementsList.map {
+                    it.getFormFieldValueFlow()
+                }
+            ) {
+                it.toList().flatten().toMap()
+            }
+        }.flattenConcat(),
+        hiddenIdentifiers
+    ) { elementsList, hiddenIdentifiers ->
+        elementsList.filter { mapEntry ->
+            !hiddenIdentifiers.contains(mapEntry.key)
+        }
+    }.map { map ->
+        map.filter { it.value.isComplete }
+    }
+
     private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
         combine(elementsList.map { it.getTextFieldIdentifiers() }) {
             it.toList().flatten()
