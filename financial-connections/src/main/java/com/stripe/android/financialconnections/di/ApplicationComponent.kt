@@ -26,8 +26,8 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface ApplicationComponent {
 
-    fun webSubcomponentBuilder() : FinancialConnectionsSheetActivitySubcomponent.Builder
-    fun nativeSubcomponentBuilder() : FinancialConnectionsSheetNativeActivitySubcomponent.Builder
+    fun webSubcomponentBuilder(): FinancialConnectionsSheetActivitySubcomponent.Builder
+    fun nativeSubcomponentBuilder(): FinancialConnectionsSheetNativeActivitySubcomponent.Builder
 
     @Component.Builder
     interface Builder {

@@ -1,9 +1,5 @@
 package com.stripe.android.financialconnections.appinitializer
 
-import android.content.ContentProvider
-import android.content.ContentValues
-import android.database.Cursor
-import android.net.Uri
 import com.airbnb.mvrx.Mavericks
 
 internal class FinancialConnectionsInitializer : InitProvider() {
@@ -11,5 +7,4 @@ internal class FinancialConnectionsInitializer : InitProvider() {
         Mavericks.initialize(context = requireNotNull(context))
         return true
     }
-
 }
