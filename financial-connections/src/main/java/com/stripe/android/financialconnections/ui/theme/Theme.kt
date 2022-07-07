@@ -1,9 +1,14 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -93,15 +98,41 @@ private val Typography = FinancialConnectionsTypography(
     )
 )
 
+private val TextSelectionColors = TextSelectionColors(
+    handleColor = LightColorPalette.textBrand,
+    backgroundColor = LightColorPalette.textBrand.copy(alpha = 0.4f)
+)
+@Immutable
+private object FinancialConnectionsRippleTheme : RippleTheme {
+    @Composable
+    override fun defaultColor() = RippleTheme.defaultRippleColor(
+        contentColor = LightColorPalette.textBrand,
+        lightTheme = MaterialTheme.colors.isLight
+    )
+
+    @Composable
+    override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
+        contentColor = LightColorPalette.textBrand,
+        lightTheme = MaterialTheme.colors.isLight
+    )
+}
+
 @Composable
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
-        LocalFinancialConnectionsColors provides LightColorPalette
+        LocalFinancialConnectionsColors provides LightColorPalette,
     ) {
         MaterialTheme(
             colors = debugColors(),
-            content = content
+            content = {
+                CompositionLocalProvider(
+                    LocalTextSelectionColors provides TextSelectionColors,
+                    LocalRippleTheme provides FinancialConnectionsRippleTheme
+                ) {
+                    content()
+                }
+            }
         )
     }
 }

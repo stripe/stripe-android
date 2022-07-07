@@ -12,17 +12,21 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
-internal fun FinancialConnectionsTopAppBar() {
+internal fun FinancialConnectionsTopAppBar(
+    title: @Composable () -> Unit = {
+        Icon(
+            painter = painterResource(id = R.drawable.stripe_logo),
+            contentDescription = null // decorative element
+        )
+    },
+    navigationIcon: @Composable (() -> Unit)? = null,
+) {
     TopAppBar(
-        title = {
-            Icon(
-                painter = painterResource(id = R.drawable.stripe_logo),
-                contentDescription = null // decorative element
-            )
-        },
+        title = title,
+        navigationIcon = navigationIcon,
         backgroundColor = FinancialConnectionsTheme.colors.textWhite,
         contentColor = FinancialConnectionsTheme.colors.textBrand,
-        elevation = 4.dp
+        elevation = 0.dp
     )
 }
 

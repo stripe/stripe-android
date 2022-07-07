@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.di
 
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
+import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 import javax.inject.Provider

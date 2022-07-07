@@ -22,5 +22,6 @@
     <string name="stripe_consent_requested_data_ownership_desc">Account owner name and mailing address associated with your account</string>
     <string name="stripe_consent_requested_data_learnmore"><annotation clickable="data_access">Learn more about data access</annotation></string>
     <string name="stripe_ok">OK</string>
+    <string name="stripe_institutionpicker_pane_select_bank">Pick your bank</string>
 </resources>
 
