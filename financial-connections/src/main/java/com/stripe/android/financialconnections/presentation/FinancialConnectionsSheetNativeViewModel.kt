@@ -6,7 +6,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.appinitializer.appComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -65,9 +65,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: FinancialConnectionsSheetNativeState
         ): FinancialConnectionsSheetNativeViewModel {
-            return DaggerFinancialConnectionsSheetNativeComponent
-                .builder()
-                .application(viewModelContext.app())
+            return appComponent.nativeSubcomponentBuilder()
                 .configuration(state.configuration)
                 .initialState(state)
                 .build()

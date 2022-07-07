@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
@@ -22,50 +23,40 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Module(
-    includes = [FinancialConnectionsSheetConfigurationModule::class]
-)
-internal object FinancialConnectionsSheetModule {
+@Module
+internal object FinancialConnectionsSheetSharedModule {
 
     @Provides
-    @Singleton
-    fun provideStripeNetworkClient(
-        @IOContext context: CoroutineContext,
-        logger: Logger
-    ): StripeNetworkClient = DefaultStripeNetworkClient(
-        workContext = context,
-        logger = logger
-    )
+    @Named(PUBLISHABLE_KEY)
+    @ActivityScoped
+    fun providesPublishableKey(
+        configuration: FinancialConnectionsSheet.Configuration
+    ): String = configuration.publishableKey
 
     @Provides
-    @Singleton
+    @ActivityScoped
     fun providesApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory()
 
     @Provides
-    @Singleton
+    @ActivityScoped
     fun provideConnectionsRepository(
         repository: FinancialConnectionsApiRepository
     ): FinancialConnectionsRepository = repository
 
     @Provides
-    @Singleton
-    fun provideLocale(): Locale? =
-        LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
-
-    @Provides
-    @Singleton
+    @ActivityScoped
     fun provideEventReporter(
         defaultFinancialConnectionsEventReporter: DefaultFinancialConnectionsEventReporter
     ): FinancialConnectionsEventReporter = defaultFinancialConnectionsEventReporter
 
     @Provides
-    @Singleton
+    @ActivityScoped
     internal fun providesAnalyticsRequestExecutor(
         executor: DefaultAnalyticsRequestExecutor
     ): AnalyticsRequestExecutor = executor
 
     @Provides
-    @Singleton
+    @ActivityScoped
     internal fun provideAnalyticsRequestFactory(
         application: Application,
         @Named(PUBLISHABLE_KEY) publishableKey: String

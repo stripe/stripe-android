@@ -40,6 +40,12 @@
             android:authorities="${applicationId}.financialconnections-init"
             android:exported="false"
             android:multiprocess="true" />
+
+        <provider
+            android:name=".appinitializer.FinancialConnectionsDaggerInitializer"
+            android:authorities="${applicationId}.financialconnections-dagger-init"
+            android:exported="false"
+            android:multiprocess="true" />
     </application>
 
     <!--

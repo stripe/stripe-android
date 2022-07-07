@@ -18,7 +18,7 @@ import javax.inject.Singleton
 )
 internal class FinancialConnectionsSheetNativeModule {
 
-    @Singleton
+    @ActivityScoped
     @Provides
     fun providesNavigationManager() = NavigationManager(
         CoroutineScope(SupervisorJob() + Dispatchers.Default)

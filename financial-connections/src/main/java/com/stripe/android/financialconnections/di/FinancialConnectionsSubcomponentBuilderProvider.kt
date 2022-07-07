@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 /**
- * Wrapper that exposes [FinancialConnectionsSheetNativeComponent]'s registered
+ * Wrapper that exposes [FinancialConnectionsSheetNativeSubcomponent]'s registered
  * subcomponent builders.
  *
  * This will be injected and exposed in

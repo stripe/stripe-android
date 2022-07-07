@@ -1,30 +1,23 @@
 package com.stripe.android.financialconnections.di
 
-import android.app.Application
-import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import dagger.BindsInstance
-import dagger.Component
+import dagger.Subcomponent
 import javax.inject.Singleton
 
-@Singleton
-@Component(
+@ActivityScoped
+@Subcomponent(
     modules = [
-        FinancialConnectionsSheetModule::class,
-        CoroutineContextModule::class,
-        LoggingModule::class
+        FinancialConnectionsSheetSharedModule::class,
     ]
 )
-internal interface FinancialConnectionsSheetComponent {
+internal interface FinancialConnectionsSheetSubcomponent {
     val viewModel: FinancialConnectionsSheetViewModel
 
-    @Component.Builder
+    @Subcomponent.Builder
     interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
 
         @BindsInstance
         fun initialState(initialState: FinancialConnectionsSheetState): Builder
@@ -32,6 +25,6 @@ internal interface FinancialConnectionsSheetComponent {
         @BindsInstance
         fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
 
-        fun build(): FinancialConnectionsSheetComponent
+        fun build(): FinancialConnectionsSheetSubcomponent
     }
 }

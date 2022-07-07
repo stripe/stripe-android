@@ -8,8 +8,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.appinitializer.appComponent
 import com.stripe.android.financialconnections.di.APPLICATION_ID
-import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
@@ -251,9 +251,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: FinancialConnectionsSheetState
         ): FinancialConnectionsSheetViewModel {
-            return DaggerFinancialConnectionsSheetComponent
-                .builder()
-                .application(viewModelContext.app())
+            return appComponent
+                .webSubcomponentBuilder()
                 .initialState(state)
                 .configuration(state.initialArgs.configuration)
                 .build().viewModel
