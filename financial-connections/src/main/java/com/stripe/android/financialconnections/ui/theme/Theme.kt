@@ -117,7 +117,6 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
     )
 }
 
-
 @Composable
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(

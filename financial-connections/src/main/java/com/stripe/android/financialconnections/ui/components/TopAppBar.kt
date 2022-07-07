@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.ui.components
 
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.Icon
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
