@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.BuildConfig
@@ -25,8 +26,8 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface ApplicationComponent {
 
-    fun webSubcomponentBuilder() : FinancialConnectionsSheetSubcomponent.Builder
-    fun nativeSubcomponentBuilder() : FinancialConnectionsSheetNativeSubcomponent.Builder
+    fun webSubcomponentBuilder() : FinancialConnectionsSheetActivitySubcomponent.Builder
+    fun nativeSubcomponentBuilder() : FinancialConnectionsSheetNativeActivitySubcomponent.Builder
 
     @Component.Builder
     interface Builder {
@@ -39,8 +40,8 @@ internal interface ApplicationComponent {
 
 @Module(
     subcomponents = [
-        FinancialConnectionsSheetSubcomponent::class,
-        FinancialConnectionsSheetNativeSubcomponent::class
+        FinancialConnectionsSheetActivitySubcomponent::class,
+        FinancialConnectionsSheetNativeActivitySubcomponent::class
     ],
     includes = [
         LoggingModule::class,
@@ -59,6 +60,10 @@ class ApplicationModule {
     fun providesApplicationId(
         application: Application
     ): String = application.packageName
+
+    @Provides
+    @Singleton
+    fun providesApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory()
 
     @Provides
     @Singleton

@@ -5,15 +5,14 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
-import javax.inject.Singleton
 
 @ActivityScoped
 @Subcomponent(
     modules = [
-        FinancialConnectionsSheetSharedModule::class,
+        FinancialConnectionsSheetSharedActivityModule::class,
     ]
 )
-internal interface FinancialConnectionsSheetSubcomponent {
+internal interface FinancialConnectionsSheetActivitySubcomponent {
     val viewModel: FinancialConnectionsSheetViewModel
 
     @Subcomponent.Builder
@@ -25,6 +24,6 @@ internal interface FinancialConnectionsSheetSubcomponent {
         @BindsInstance
         fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
 
-        fun build(): FinancialConnectionsSheetSubcomponent
+        fun build(): FinancialConnectionsSheetActivitySubcomponent
     }
 }
