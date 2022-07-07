@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>FormController</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>stripe-android</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="payments-ui-core::com.stripe.android.ui.core/FormController///PointingToDeclaration//1608493371">
+  <div class="breadcrumbs"><a href="../../index.html">payments-ui-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.ui.core</a><span class="delimiter">/</span><a href="index.html">FormController</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Form</span><wbr><span><span>Controller</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">class </span><a href="index.html">FormController</a>&nbsp;<span><span class="token annotation">@</span><span data-unresolved-link="javax.inject/Inject///PointingToDeclaration/"><span class="token annotation">Inject</span></span>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;formSpec<span class="token operator">: </span><a href="../../com.stripe.android.ui.core.elements/-layout-spec/index.html">LayoutSpec</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;resourceRepository<span class="token operator">: </span><a href="../../com.stripe.android.ui.core.forms.resources/-resource-repository/index.html">ResourceRepository</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;transformSpecToElement<span class="token operator">: </span><a href="../../com.stripe.android.ui.core.forms/-transform-spec-to-elements/index.html">TransformSpecToElements</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;viewModelScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Controller that manages the user interaction with the payment method data collection form. When all fields are reported as complete, <a href="complete-form-values.html">completeFormValues</a> emits the valid payment method.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">: formSpec A representation of the layout which is used to display the UI fields on screen.</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1112997882%2FConstructors%2F1608493371" anchor-label="FormController" id="1112997882%2FConstructors%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-form-controller.html"><span>Form</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1112997882%2FConstructors%2F1608493371"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="javax.inject/Inject///PointingToDeclaration/"><span class="token annotation">Inject</span></span></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="-form-controller.html"><span class="token function">FormController</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;formSpec<span class="token operator">: </span><a href="../../com.stripe.android.ui.core.elements/-layout-spec/index.html">LayoutSpec</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;resourceRepository<span class="token operator">: </span><a href="../../com.stripe.android.ui.core.forms.resources/-resource-repository/index.html">ResourceRepository</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;transformSpecToElement<span class="token operator">: </span><a href="../../com.stripe.android.ui.core.forms/-transform-spec-to-elements/index.html">TransformSpecToElements</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;viewModelScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="408342936%2FProperties%2F1608493371" anchor-label="completeFormValues" id="408342936%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="complete-form-values.html"><span>complete</span><wbr><span>Form</span><wbr><span><span>Values</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="408342936%2FProperties%2F1608493371"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="408342936%2FProperties%2F1608493371" anchor-label="completeFormValues" id="408342936%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="complete-form-values.html">completeFormValues</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.stripe.android.ui.core.elements/-identifier-spec/index.html">IdentifierSpec</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.stripe.android.ui.core.forms/-form-field-entry/index.html">FormFieldEntry</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="408342936%2FProperties%2F1608493371" anchor-label="completeFormValues" id="408342936%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><p class="paragraph">Emits a map of the form values when the form content is valid, null otherwise.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="445323584%2FProperties%2F1608493371" anchor-label="elements" id="445323584%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="elements.html"><span><span>elements</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="445323584%2FProperties%2F1608493371"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="445323584%2FProperties%2F1608493371" anchor-label="elements" id="445323584%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="elements.html">elements</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.stripe.android.ui.core.elements/-form-element/index.html">FormElement</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-587692669%2FProperties%2F1608493371" anchor-label="hiddenIdentifiers" id="-587692669%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hidden-identifiers.html"><span>hidden</span><wbr><span><span>Identifiers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-587692669%2FProperties%2F1608493371"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-587692669%2FProperties%2F1608493371" anchor-label="hiddenIdentifiers" id="-587692669%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="hidden-identifiers.html">hiddenIdentifiers</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.stripe.android.ui.core.elements/-identifier-spec/index.html">IdentifierSpec</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-587692669%2FProperties%2F1608493371" anchor-label="hiddenIdentifiers" id="-587692669%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><p class="paragraph">List of field identifiers which should not be visible.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1667491837%2FProperties%2F1608493371" anchor-label="lastTextFieldIdentifier" id="-1667491837%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-ui-core:dokkaHtmlPartial/release" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="last-text-field-identifier.html"><span>last</span><wbr><span>Text</span><wbr><span>Field</span><wbr><span><span>Identifier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1667491837%2FProperties%2F1608493371"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1667491837%2FProperties%2F1608493371" anchor-label="lastTextFieldIdentifier" id="-1667491837%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="last-text-field-identifier.html">lastTextFieldIdentifier</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.stripe.android.ui.core.elements/-identifier-spec/index.html">IdentifierSpec</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

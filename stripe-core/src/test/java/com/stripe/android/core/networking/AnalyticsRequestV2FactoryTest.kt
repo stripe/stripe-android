@@ -36,23 +36,23 @@ class AnalyticsRequestV2FactoryTest {
 
     @Test
     fun `verify clientId and origin`() {
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             includeSDKParams = true
         )
 
-        assertThat(requestR.postParameters.toMap()[PARAM_CLIENT_ID]).isEqualTo(CLIENT_ID)
-        assertThat(requestR.headers[AnalyticsRequestV2.HEADER_ORIGIN]).isEqualTo(ORIGIN)
+        assertThat(request.postParameters.toMap()[PARAM_CLIENT_ID]).isEqualTo(CLIENT_ID)
+        assertThat(request.headers[AnalyticsRequestV2.HEADER_ORIGIN]).isEqualTo(ORIGIN)
     }
 
     @Test
     fun `verify SDKParams are included`() {
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             includeSDKParams = true
         )
 
-        requestR.postParameters.toMap().let { paramsMap ->
+        request.postParameters.toMap().let { paramsMap ->
             sdkParamKeys.forEach {
                 assertThat(paramsMap).containsKey(it)
             }
@@ -61,12 +61,12 @@ class AnalyticsRequestV2FactoryTest {
 
     @Test
     fun `SDKParams are not included`() {
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             includeSDKParams = false
         )
 
-        requestR.postParameters.toMap().let { paramsMap ->
+        request.postParameters.toMap().let { paramsMap ->
             sdkParamKeys.forEach {
                 assertThat(paramsMap).doesNotContainKey(it)
             }
@@ -75,42 +75,62 @@ class AnalyticsRequestV2FactoryTest {
 
     @Test
     fun `verify additionalParams`() {
-        val additionalParam1 = "param1"
-        val additionalValue1 = "value1"
-        val additionalParam2 = "param2"
-        val additionalValue2 = "value2"
-        val additionalParam3 = "param3"
-        val additionalValue3 = mapOf(
-            "nestedParam1" to "nestedValue1",
-            "nestedParam3" to "nestedValue3",
-            "nestedParam2" to "nestedValue2"
-        )
-
-        val requestR = factory.createRequestR(
+        val request = factory.createRequest(
             "EVENT_NAME",
             additionalParams = mapOf(
-                additionalParam1 to additionalValue1,
-                additionalParam2 to additionalValue2,
-                additionalParam3 to additionalValue3
+                "param1" to "value1",
+                "param2" to "value2",
+                "param3" to mapOf(
+                    "nestedParam1" to "nestedValue1",
+                    "nestedParam3" to "nestedValue3",
+                    "nestedParam2" to "nestedValue2",
+                    "nestedParam4" to mapOf(
+                        "nestedLv2Param1" to "nestedLv2Value1",
+                        "nestedLv2Param3" to "nestedLv2Value3",
+                        "nestedLv2Param2" to "nestedLv2Value2",
+                        "nestedLv2Param4" to null,
+                        "nestedLv2Param5" to ""
+                    ),
+                    "nestedParam5" to mapOf(
+                        "nestedLv2Param6" to mapOf(
+                            "nestedLvl3Param1" to "nestedLvl3Param2"
+                        )
+                    )
+                ),
+                "param4" to null,
+                "param5" to ""
             ),
             includeSDKParams = true
         )
 
-        requestR.postParameters.toMap().let { paramsMap ->
-            assertThat(paramsMap[additionalParam1]).isEqualTo(additionalValue1)
-            assertThat(paramsMap[additionalParam2]).isEqualTo(additionalValue2)
-            assertThat(paramsMap[additionalParam3]).isEqualTo(
+        request.postParameters.toMap().let { paramsMap ->
+            assertThat(paramsMap["param1"]).isEqualTo("value1")
+            assertThat(paramsMap["param2"]).isEqualTo("value2")
+            assertThat(paramsMap["param3"]).isEqualTo(
                 URLEncoder.encode(
                     """
                     {
                       "nestedParam1": "nestedValue1",
                       "nestedParam2": "nestedValue2",
-                      "nestedParam3": "nestedValue3"
+                      "nestedParam3": "nestedValue3",
+                      "nestedParam4": {
+                        "nestedLv2Param1": "nestedLv2Value1",
+                        "nestedLv2Param2": "nestedLv2Value2",
+                        "nestedLv2Param3": "nestedLv2Value3",
+                        "nestedLv2Param5": ""
+                      },
+                      "nestedParam5": {
+                        "nestedLv2Param6": {
+                          "nestedLvl3Param1": "nestedLvl3Param2"
+                        }
+                      }
                     }
                     """.trimIndent(),
                     Charsets.UTF_8.name()
                 )
             )
+            assertThat(paramsMap.containsKey("param4")).isFalse()
+            assertThat(paramsMap["param5"]).isEqualTo("")
         }
     }
 

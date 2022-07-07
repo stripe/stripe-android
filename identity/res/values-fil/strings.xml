@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Kinukunan...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Mga Setting ng App</string>
   <!-- Description of back of driver's license image -->
@@ -37,6 +39,8 @@
   <string name="file_upload_content_id">Mangyaring i-upload ang mga imahe ng harap at likod ng iyong card ng pagkakakilanlan</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Mangyaring i-upload ang imahe ng iyong pasaporte</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Mask para sa selfie na animasyon</string>
   <!-- Description of front of driver's license image -->
   <string name="front_of_dl">Harap ng lisensya sa pagmamaneho</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
@@ -73,10 +77,20 @@
   <string name="position_id_front">Iposisyon ang iyong kard ng pagkakakilanlan sa gitna ng frame</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Iposisyon ang iyong pasaporte sa gitna ng frame</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Iposisyon ang iyong mukha sa gitna ng frame.</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Na-scan na</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="select">Piliin</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">Kumpleto na ang mga pagkuha ng selfie</string>
+  <!-- Title of selfie capture screen -->
+  <string name="selfie_captures">Mga pagkuha ng selfie</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">nakunan ang isang selfie</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="selfie_not_saved_warning">Hindi pa na-save Ang iyong mga imaheng selfie. Gusto mo bang umalis?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="take_photo">Kumuha ng larawan</string>
   <!-- Button to attempt to re-scan identity document image -->

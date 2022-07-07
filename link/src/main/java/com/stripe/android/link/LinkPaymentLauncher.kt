@@ -18,8 +18,6 @@ import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.NonFallbackInjectable
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
@@ -35,6 +33,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope

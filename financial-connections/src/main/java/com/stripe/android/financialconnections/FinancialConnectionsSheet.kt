@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  * typically as a field initializer of an Activity or Fragment.
  */
 class FinancialConnectionsSheet internal constructor(
-    private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher,
+    private val financialConnectionsSheetLauncher: FinancialConnectionsSheetLauncher
 ) {
 
     /**
@@ -27,7 +27,7 @@ class FinancialConnectionsSheet internal constructor(
     @Parcelize
     data class Configuration(
         val financialConnectionsSessionClientSecret: String,
-        val publishableKey: String,
+        val publishableKey: String
     ) : Parcelable
 
     /**

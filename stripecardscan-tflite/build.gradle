@@ -1,6 +1,10 @@
 configurations.maybeCreate("default")
 artifacts.add("default", file('tensorflow-lite-all-models.aar'))
 
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
 ext {
     artifactId = "stripecardscan-tflite"
     artifactName = "stripecardscan-tflite"

@@ -3,7 +3,7 @@ package com.stripe.android.model
 internal data class CreateFinancialConnectionsSessionParams(
     val clientSecret: String,
     val customerName: String,
-    val customerEmailAddress: String?,
+    val customerEmailAddress: String?
 ) {
     fun toMap(): Map<String, Any> {
         val paymentMethod = PaymentMethodCreateParams.createUSBankAccount(

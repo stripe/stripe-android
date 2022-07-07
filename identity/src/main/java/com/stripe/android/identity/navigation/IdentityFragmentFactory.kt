@@ -6,9 +6,9 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
-import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 
@@ -20,10 +20,10 @@ internal class IdentityFragmentFactory @Inject constructor(
     private val appSettingsOpenable: AppSettingsOpenable,
     private val verificationFlowFinishable: VerificationFlowFinishable,
     private val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory,
-    private val identityUploadViewModelFactory: IdentityUploadViewModel.FrontBackUploadViewModelFactory,
     private val consentFragmentViewModelFactory: ConsentFragmentViewModel.ConsentFragmentViewModelFactory,
     internal val identityViewModelFactory: IdentityViewModel.IdentityViewModelFactory,
-    private val fallbackUrlLauncher: FallbackUrlLauncher
+    private val fallbackUrlLauncher: FallbackUrlLauncher,
+    private val identityIO: IdentityIO
 ) : FragmentFactory() {
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
@@ -49,15 +49,15 @@ internal class IdentityFragmentFactory @Inject constructor(
                 identityViewModelFactory
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
-                identityUploadViewModelFactory,
+                identityIO,
                 identityViewModelFactory
             )
             DriverLicenseUploadFragment::class.java.name -> DriverLicenseUploadFragment(
-                identityUploadViewModelFactory,
+                identityIO,
                 identityViewModelFactory
             )
             PassportUploadFragment::class.java.name -> PassportUploadFragment(
-                identityUploadViewModelFactory,
+                identityIO,
                 identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(

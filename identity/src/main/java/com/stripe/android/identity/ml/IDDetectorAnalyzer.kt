@@ -5,6 +5,7 @@ import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
+import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import org.tensorflow.lite.DataType
@@ -20,7 +21,11 @@ import java.io.File
  *
  * TODO(ccen): reimplement with ImageClassifier
  */
-internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScore: Float) :
+internal class IDDetectorAnalyzer(
+    modelFile: File,
+    private val idDetectorMinScore: Float,
+    private val modelPerformanceTracker: ModelPerformanceTracker
+) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(modelFile)
@@ -29,6 +34,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
         data: AnalyzerInput,
         state: IdentityScanState
     ): AnalyzerOutput {
+        val preprocessStat = modelPerformanceTracker.trackPreprocess()
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
 
         val croppedImage = data.cameraPreviewImage.image.cropCenter(
@@ -48,7 +54,9 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
                 NormalizeOp(NORMALIZE_MEAN, NORMALIZE_STD) // normalize to (-1, 1)
             ).build() // add normalization
         tensorImage = imageProcessor.process(tensorImage)
+        preprocessStat.trackResult()
 
+        val inferenceStat = modelPerformanceTracker.trackInference()
         // inference - input: (1, 224, 224, 3), output: (1, 4), (1, 5)
         val boundingBoxes = Array(1) { FloatArray(OUTPUT_BOUNDING_BOX_TENSOR_SIZE) }
         val categories = Array(1) { FloatArray(OUTPUT_CATEGORY_TENSOR_SIZE) }
@@ -59,6 +67,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
                 OUTPUT_CATEGORY_TENSOR_INDEX to categories
             )
         )
+        inferenceStat.trackResult()
 
         // find the category with highest score and build output
         val resultIndex = requireNotNull(categories[0].indices.maxByOrNull { categories[0][it] })
@@ -93,7 +102,8 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
 
     internal class Factory(
         private val modelFile: File,
-        private val idDetectorMinScore: Float
+        private val idDetectorMinScore: Float,
+        private val modelPerformanceTracker: ModelPerformanceTracker
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -101,7 +111,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
             > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
-            return IDDetectorAnalyzer(modelFile, idDetectorMinScore)
+            return IDDetectorAnalyzer(modelFile, idDetectorMinScore, modelPerformanceTracker)
         }
     }
 
@@ -129,5 +139,7 @@ internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScor
             INDEX_INVALID to Category.INVALID
         )
         val TAG: String = IDDetectorAnalyzer::class.java.simpleName
+
+        const val MODEL_NAME = "id_detector_v2"
     }
 }

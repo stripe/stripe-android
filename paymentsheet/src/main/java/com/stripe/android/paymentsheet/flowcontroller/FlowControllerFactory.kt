@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.ShippingAddressCallback
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import kotlinx.coroutines.CoroutineScope
 
@@ -22,11 +23,13 @@ internal class FlowControllerFactory(
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
+    private val shippingAddressCallback: ShippingAddressCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
 ) {
     constructor(
         activity: ComponentActivity,
         paymentOptionCallback: PaymentOptionCallback,
+        shippingAddressCallback: ShippingAddressCallback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
         activity,
@@ -37,12 +40,14 @@ internal class FlowControllerFactory(
         { activity.window.statusBarColor },
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
+        shippingAddressCallback,
         paymentResultCallback
     )
 
     constructor(
         fragment: Fragment,
         paymentOptionCallback: PaymentOptionCallback,
+        shippingAddressCallback: ShippingAddressCallback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
         fragment,
@@ -53,6 +58,7 @@ internal class FlowControllerFactory(
         { fragment.activity?.window?.statusBarColor },
         PaymentOptionFactory(fragment.resources),
         paymentOptionCallback,
+        shippingAddressCallback,
         paymentResultCallback
     )
 
@@ -66,6 +72,7 @@ internal class FlowControllerFactory(
             statusBarColor = statusBarColor,
             paymentOptionFactory = paymentOptionFactory,
             paymentOptionCallback = paymentOptionCallback,
+            shippingAddressCallback = shippingAddressCallback,
             paymentResultCallback = paymentResultCallback
         )
 }

@@ -62,6 +62,7 @@ dependencies {
     testImplementation "androidx.navigation:navigation-testing:$androidxNavigationVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

@@ -8,6 +8,8 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -24,6 +26,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -43,7 +46,9 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository @Inject constructor(
-    val resources: Resources?
+    val resources: Resources?,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+        DefaultIsFinancialConnectionsAvailable()
 ) {
     private val lpmSerializer = LpmSerializer()
     internal val serverInitializedLatch = CountDownLatch(1)
@@ -110,6 +115,12 @@ class LpmRepository @Inject constructor(
         val parsedSupportedPaymentMethod = lpms
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
+            ?.toMutableList()
+
+        parsedSupportedPaymentMethod?.removeAll {
+            !isFinancialConnectionsAvailable() &&
+                it.code == PaymentMethod.Type.USBankAccount.code
+        }
 
         codeToSupportedPaymentMethod.putAll(
             parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
@@ -211,7 +222,11 @@ class LpmRepository @Inject constructor(
             PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
                 "afterpay_clearpay",
                 false,
-                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+                if (isClearpay()) {
+                    R.string.stripe_paymentsheet_payment_method_clearpay
+                } else {
+                    R.string.stripe_paymentsheet_payment_method_afterpay
+                },
                 R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
                 false,
                 AfterpayClearpayRequirement,

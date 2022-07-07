@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -93,10 +94,12 @@ fun TextFieldSection(
 @Composable
 fun TextField(
     textFieldController: TextFieldController,
-    modifier: Modifier = Modifier,
-    imeAction: ImeAction,
     enabled: Boolean,
-    onTextStateChanged: (TextFieldState?) -> Unit = {}
+    imeAction: ImeAction,
+    modifier: Modifier = Modifier,
+    onTextStateChanged: (TextFieldState?) -> Unit = {},
+    nextFocusDirection: FocusDirection = FocusDirection.Next,
+    previousFocusDirection: FocusDirection = FocusDirection.Previous
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
@@ -120,7 +123,7 @@ fun TextField(
     @Suppress("UNUSED_VALUE")
     processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
         if (!processedIsFull) {
-            focusManager.moveFocus(FocusDirection.Next)
+            focusManager.moveFocus(nextFocusDirection)
         }
         true
     } else {
@@ -143,7 +146,7 @@ fun TextField(
                     event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
                     value.isEmpty()
                 ) {
-                    focusManager.moveFocus(FocusDirection.Previous)
+                    focusManager.moveFocus(previousFocusDirection)
                     true
                 } else {
                     false
@@ -200,7 +203,7 @@ fun TextField(
         ),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(FocusDirection.Next)
+                focusManager.moveFocus(nextFocusDirection)
             },
             onDone = {
                 focusManager.clearFocus(true)
@@ -268,6 +271,9 @@ internal fun TrailingIcon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
+            },
+            modifier = Modifier.clickable {
+                trailingIcon.onClick?.invoke()
             }
         )
     } else {
@@ -275,6 +281,9 @@ internal fun TrailingIcon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {
                 stringResource(trailingIcon.contentDescription)
+            },
+            modifier = Modifier.clickable {
+                trailingIcon.onClick?.invoke()
             }
         )
     }

@@ -3,8 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.stripe.android.core.networking</title>
-<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
-    <script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
 const savedDarkMode = storage ? JSON.parse(storage) : false
 if(savedDarkMode === true){
     document.getElementsByTagName("html")[0].classList.add("theme-dark")
@@ -87,7 +86,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-analytics-request/index.html">AnalyticsRequest</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>params<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>headers<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-stripe-request/index.html">StripeRequest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-analytics-request/index.html">AnalyticsRequest</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>params<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>headers<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-stripe-request/index.html">StripeRequest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Analytics request sent to q.stripe.com, which is a legacy analytics service used mostly by Payment SDK, analytics are saved in a shared DB table with payment-specific schema.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -118,6 +117,36 @@ if(savedDarkMode === true){
             <div>
               <div class="title">
                 <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-analytics-request-factory/index.html">AnalyticsRequestFactory</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;packageManager<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/pm/PackageManager.html">PackageManager</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;packageInfo<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/pm/PackageInfo.html">PackageInfo</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;packageName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;publishableKeyProvider<span class="token operator">: </span><span data-unresolved-link="javax.inject/Provider///PointingToDeclaration/">Provider</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;defaultProductUsageTokens<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptySet()</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="446136365%2FClasslikes%2F1458831206" anchor-label="AnalyticsRequestV2" id="446136365%2FClasslikes%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-analytics-request-v2/index.html"><span>Analytics</span><wbr><span>Request</span><wbr><span><span>V2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="446136365%2FClasslikes%2F1458831206"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-analytics-request-v2/index.html">AnalyticsRequestV2</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>eventName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;clientId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;origin<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>params<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-stripe-request/index.html">StripeRequest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Analytics request sent to r.stripe.com, which is the preferred service for analytics. This is a POST request with <a href="-stripe-request/-mime-type/-form/index.html">MimeType.Form</a> ContentType.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-481793269%2FClasslikes%2F1458831206" anchor-label="AnalyticsRequestV2Factory" id="-481793269%2FClasslikes%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-analytics-request-v2-factory/index.html"><span>Analytics</span><wbr><span>Request</span><wbr><span><span>V2Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-481793269%2FClasslikes%2F1458831206"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-analytics-request-v2-factory/index.html">AnalyticsRequestV2Factory</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;clientId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;origin<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;pluginType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>PLUGIN_NATIVE</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Factory to generate <a href="-analytics-request-v2/index.html">AnalyticsRequestV2</a>, can be optionally configured to add the following standard SDK specific parameters. os_version - Android version sdk_platform - always "android" sdk_version - current SDK version device_type - MANUFACTURER, brand and model app_name - the host application name app_version - the host app version plugin_type - whether SDK is integrated natively or through other wrappers(e.g react native) platform_info - information about current platform</p></div></div></div>
               </div>
             </div>
           </div>
@@ -385,7 +414,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-d-e-f-a-u-l-t_-r-e-t-r-y_-c-o-d-e-s.html">DEFAULT_RETRY_CODES</a></div>
+                <div><a href="-d-e-f-a-u-l-t_-r-e-t-r-y_-c-o-d-e-s.html"><span><span>DEFAULT_RETRY_CODES</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="872897244%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -400,7 +429,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-a-c-c-e-p-t.html">HEADER_ACCEPT</a></div>
+                <div><a href="-h-e-a-d-e-r_-a-c-c-e-p-t.html"><span><span>HEADER_ACCEPT</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="153574003%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -415,7 +444,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-a-c-c-e-p-t_-c-h-a-r-s-e-t.html">HEADER_ACCEPT_CHARSET</a></div>
+                <div><a href="-h-e-a-d-e-r_-a-c-c-e-p-t_-c-h-a-r-s-e-t.html"><span><span>HEADER_ACCEPT_CHARSET</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="473761062%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -430,7 +459,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-a-c-c-e-p-t_-l-a-n-g-u-a-g-e.html">HEADER_ACCEPT_LANGUAGE</a></div>
+                <div><a href="-h-e-a-d-e-r_-a-c-c-e-p-t_-l-a-n-g-u-a-g-e.html"><span><span>HEADER_ACCEPT_LANGUAGE</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-711307024%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -445,7 +474,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-a-u-t-h-o-r-i-z-a-t-i-o-n.html">HEADER_AUTHORIZATION</a></div>
+                <div><a href="-h-e-a-d-e-r_-a-u-t-h-o-r-i-z-a-t-i-o-n.html"><span><span>HEADER_AUTHORIZATION</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1898088186%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -460,7 +489,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-c-o-n-t-e-n-t_-t-y-p-e.html">HEADER_CONTENT_TYPE</a></div>
+                <div><a href="-h-e-a-d-e-r_-c-o-n-t-e-n-t_-t-y-p-e.html"><span><span>HEADER_CONTENT_TYPE</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="687997083%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -475,7 +504,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-i-d-e-m-p-o-t-e-n-c-y_-k-e-y.html">HEADER_IDEMPOTENCY_KEY</a></div>
+                <div><a href="-h-e-a-d-e-r_-i-d-e-m-p-o-t-e-n-c-y_-k-e-y.html"><span><span>HEADER_IDEMPOTENCY_KEY</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1814535342%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -490,7 +519,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-s-t-r-i-p-e_-a-c-c-o-u-n-t.html">HEADER_STRIPE_ACCOUNT</a></div>
+                <div><a href="-h-e-a-d-e-r_-s-t-r-i-p-e_-a-c-c-o-u-n-t.html"><span><span>HEADER_STRIPE_ACCOUNT</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="163151040%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -505,7 +534,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-s-t-r-i-p-e_-l-i-v-e-m-o-d-e.html">HEADER_STRIPE_LIVEMODE</a></div>
+                <div><a href="-h-e-a-d-e-r_-s-t-r-i-p-e_-l-i-v-e-m-o-d-e.html"><span><span>HEADER_STRIPE_LIVEMODE</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1727260062%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -520,7 +549,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-s-t-r-i-p-e_-v-e-r-s-i-o-n.html">HEADER_STRIPE_VERSION</a></div>
+                <div><a href="-h-e-a-d-e-r_-s-t-r-i-p-e_-v-e-r-s-i-o-n.html"><span><span>HEADER_STRIPE_VERSION</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-213208971%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -535,7 +564,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-e-a-d-e-r_-u-s-e-r_-a-g-e-n-t.html">HEADER_USER_AGENT</a></div>
+                <div><a href="-h-e-a-d-e-r_-u-s-e-r_-a-g-e-n-t.html"><span><span>HEADER_USER_AGENT</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="902020906%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -550,7 +579,7 @@ if(savedDarkMode === true){
         <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="-h-t-t-p_-t-o-o_-m-a-n-y_-r-e-q-u-e-s-t-s.html">HTTP_TOO_MANY_REQUESTS</a></div>
+                <div><a href="-h-t-t-p_-t-o-o_-m-a-n-y_-r-e-q-u-e-s-t-s.html"><span><span>HTTP_TOO_MANY_REQUESTS</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-288222805%2FProperties%2F1458831206"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
@@ -565,8 +594,9 @@ if(savedDarkMode === true){
     </div>
   </div>
 </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-        </div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
     </div>
 </div>
 

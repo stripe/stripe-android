@@ -190,7 +190,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     }
 
     private fun confirmSetupIntent(
-        params: ConfirmSetupIntentParams,
+        params: ConfirmSetupIntentParams
     ) {
         paymentLauncher.confirm(params)
     }

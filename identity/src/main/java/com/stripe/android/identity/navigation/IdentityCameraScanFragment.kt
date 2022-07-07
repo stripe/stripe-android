@@ -18,6 +18,8 @@ import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.TYPE_DOCUMENT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.TYPE_SELFIE
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
@@ -30,7 +32,6 @@ import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -67,7 +68,18 @@ internal abstract class IdentityCameraScanFragment(
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
+
+        identityScanViewModel.interimResults.observe(viewLifecycleOwner) {
+            identityViewModel.fpsTracker.trackFrame()
+        }
+
         identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
+            lifecycleScope.launch {
+                identityViewModel.fpsTracker.reportAndReset(
+                    if (finalResult.result is FaceDetectorOutput) TYPE_SELFIE else TYPE_DOCUMENT
+                )
+            }
+
             identityViewModel.observeForVerificationPage(
                 viewLifecycleOwner,
                 onSuccess = { verificationPage ->
@@ -127,7 +139,7 @@ internal abstract class IdentityCameraScanFragment(
                 },
                 onFailure = {
                     Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                    navigateToDefaultErrorFragment()
+                    navigateToDefaultErrorFragment(it)
                 }
             )
             stopScanning()
@@ -143,7 +155,7 @@ internal abstract class IdentityCameraScanFragment(
                             idDetectorModelFile = pageAndModelFiles.idDetectorFile,
                             faceDetectorModelFile = pageAndModelFiles.faceDetectorFile
                         )
-                        lifecycleScope.launch(Dispatchers.Main) {
+                        lifecycleScope.launch(identityViewModel.uiContext) {
                             onCameraReady()
                         }
                     }
@@ -171,43 +183,43 @@ internal abstract class IdentityCameraScanFragment(
     /**
      * Start scanning for the required scan type.
      */
-    protected fun startScanning(scanType: IdentityScanState.ScanType) {
+    internal fun startScanning(scanType: IdentityScanState.ScanType) {
         identityViewModel.updateAnalyticsState { oldState ->
             when (scanType) {
                 IdentityScanState.ScanType.ID_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.ID_BACK -> {
                     oldState.copy(
-                        docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.DL_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.DL_BACK -> {
                     oldState.copy(
-                        docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.PASSPORT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.SELFIE -> {
                     oldState.copy(
                         selfieRetryTimes =
-                        oldState.selfieRetryTimes?.let { it + 1 } ?: 0
+                        oldState.selfieRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
             }
@@ -217,7 +229,9 @@ internal abstract class IdentityCameraScanFragment(
         cameraAdapter.bindToLifecycle(this)
         identityScanViewModel.scanState = null
         identityScanViewModel.scanStatePrevious = null
-        identityScanViewModel.identityScanFlow.startFlow(
+
+        identityViewModel.fpsTracker.start()
+        identityScanViewModel.identityScanFlow?.startFlow(
             context = requireContext(),
             imageStream = cameraAdapter.getImageStream(),
             viewFinder = cameraView.viewFinderWindowView.asRect(),
@@ -231,14 +245,14 @@ internal abstract class IdentityCameraScanFragment(
      * Stop scanning, may start again later.
      */
     protected fun stopScanning() {
-        identityScanViewModel.identityScanFlow.resetFlow()
+        identityScanViewModel.identityScanFlow?.resetFlow()
         cameraAdapter.unbindFromLifecycle(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Cancelling IdentityScanFlow")
-        identityScanViewModel.identityScanFlow.cancelFlow()
+        identityScanViewModel.identityScanFlow?.cancelFlow()
     }
 
     internal companion object {

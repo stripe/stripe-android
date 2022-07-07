@@ -140,25 +140,39 @@
             app:argType="com.stripe.android.identity.states.IdentityScanState$ScanType" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_passportUploadFragment"
-            app:destination="@id/passportUploadFragment" />
+            app:destination="@id/passportUploadFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_IDUploadFragment"
-            app:destination="@id/IDUploadFragment" />
+            app:destination="@id/IDUploadFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_driverLicenseUploadFragment"
-            app:destination="@id/driverLicenseUploadFragment" />
+            app:destination="@id/driverLicenseUploadFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_passportScanFragment"
-            app:destination="@id/passportScanFragment" />
+            app:destination="@id/passportScanFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_IDScanFragment"
-            app:destination="@id/IDScanFragment" />
+            app:destination="@id/IDScanFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_driverLicenseScanFragment"
-            app:destination="@id/driverLicenseScanFragment" />
+            app:destination="@id/driverLicenseScanFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_selfieFragment"
-            app:destination="@id/selfieFragment" />
+            app:destination="@id/selfieFragment"
+            app:popUpTo="@id/docSelectionFragment"
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/selfieFragment"

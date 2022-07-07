@@ -40,6 +40,7 @@ com.stripe.android.payments.bankaccount.navigation
 com.stripe.android.payments.core
 com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
+com.stripe.android.payments.financialconnections
 com.stripe.android.payments.paymentlauncher
 com.stripe.android.view
 com.stripe.android.view.i18n
@@ -53,13 +54,18 @@ com.stripe.android.paymentsheet.forms
 com.stripe.android.ui.core
 com.stripe.android.ui.core.address
 com.stripe.android.ui.core.elements
+com.stripe.android.ui.core.elements.autocomplete
+com.stripe.android.ui.core.elements.autocomplete.model
 com.stripe.android.ui.core.elements.menu
 com.stripe.android.ui.core.forms
 com.stripe.android.ui.core.forms.resources
 com.stripe.android.ui.core.forms.resources.injection
+com.stripe.android.ui.core.injection
 module:paymentsheet
 com.stripe.android.paymentsheet
+com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.ui
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
@@ -69,6 +75,7 @@ com.stripe.android.core.model
 com.stripe.android.core.model.parsers
 com.stripe.android.core.networking
 com.stripe.android.core.storage
+com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification

@@ -5,6 +5,7 @@ import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
+import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import org.tensorflow.lite.DataType
@@ -19,7 +20,8 @@ import java.io.File
  * Analyzer to run FaceDetector.
  */
 internal class FaceDetectorAnalyzer(
-    modelFile: File
+    modelFile: File,
+    private val modelPerformanceTracker: ModelPerformanceTracker
 ) : Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(modelFile)
@@ -28,8 +30,8 @@ internal class FaceDetectorAnalyzer(
         data: AnalyzerInput,
         state: IdentityScanState
     ): AnalyzerOutput {
+        val preprocessStat = modelPerformanceTracker.trackPreprocess()
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
-
         val croppedImage = data.cameraPreviewImage.image.cropCenter(
             maxAspectRatioInSize(
                 data.cameraPreviewImage.image.size(),
@@ -50,7 +52,9 @@ internal class FaceDetectorAnalyzer(
                 )
                 .build()
         tensorImage = imageProcessor.process(tensorImage)
+        preprocessStat.trackResult()
 
+        val inferenceStat = modelPerformanceTracker.trackInference()
         // inference - input: (1, 128, 128, 3), output: (1, 4), (1, 1)
         val boundingBoxes = Array(1) { FloatArray(OUTPUT_BOUNDING_BOX_TENSOR_SIZE) }
         val score = FloatArray(OUTPUT_SCORE_TENSOR_SIZE)
@@ -61,6 +65,7 @@ internal class FaceDetectorAnalyzer(
                 OUTPUT_SCORE_TENSOR_INDEX to score
             )
         )
+        inferenceStat.trackResult()
 
         // FaceDetector outputs (left, top, right, bottom) with absolute value
         // convert them to (left, top, width, height) with fractional value
@@ -78,7 +83,8 @@ internal class FaceDetectorAnalyzer(
     override val statsName: String? = null
 
     internal class Factory(
-        private val modelFile: File
+        private val modelFile: File,
+        private val modelPerformanceTracker: ModelPerformanceTracker
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -86,7 +92,7 @@ internal class FaceDetectorAnalyzer(
             Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
             > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
-            return FaceDetectorAnalyzer(modelFile)
+            return FaceDetectorAnalyzer(modelFile, modelPerformanceTracker)
         }
     }
 
@@ -102,5 +108,7 @@ internal class FaceDetectorAnalyzer(
 
         val INPUT_TENSOR_TYPE: DataType = DataType.FLOAT32
         val TAG: String = FaceDetectorAnalyzer::class.java.simpleName
+
+        const val MODEL_NAME = "face_detector_v1"
     }
 }

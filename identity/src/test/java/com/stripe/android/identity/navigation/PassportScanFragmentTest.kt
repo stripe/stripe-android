@@ -18,10 +18,12 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PASSPORT
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
@@ -37,9 +39,11 @@ import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +61,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PassportScanFragmentTest {
     @get:Rule
@@ -64,11 +69,13 @@ class PassportScanFragmentTest {
 
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(mock())
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
@@ -76,6 +83,8 @@ class PassportScanFragmentTest {
 
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
+
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
@@ -85,10 +94,15 @@ class PassportScanFragmentTest {
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { fpsTracker } doReturn mock()
+        on { screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
+        on { getError() } doReturn mock()
     }
 
     private val frontLoadingDocumentUploadState = mock<DocumentUploadState> {
@@ -116,11 +130,14 @@ class PassportScanFragmentTest {
     @Test
     fun `when started analytics event is sent`() {
         launchPassportScanFragment().onFragment {
+            runBlocking {
+                mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_PASSPORT))
+            }
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE &&
-                        params[PARAM_SCAN_TYPE] == PASSPORT
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_PASSPORT &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCAN_TYPE] == PASSPORT
                 }
             )
         }
@@ -203,6 +220,11 @@ class PassportScanFragmentTest {
                     eq(
                         ClearDataParam.UPLOAD_TO_SELFIE
                     )
+                )
+
+                mockScreenTracker.screenTransitionStart(
+                    eq(SCREEN_NAME_LIVE_CAPTURE_PASSPORT),
+                    any()
                 )
 
                 // selfie required, navigates to selfie

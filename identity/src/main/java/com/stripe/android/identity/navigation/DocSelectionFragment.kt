@@ -15,7 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.identity.R
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -81,13 +81,15 @@ internal class DocSelectionFragment(
                 }
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
-
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_DOC_SELECT)
+        }
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
+                screenName = SCREEN_NAME_DOC_SELECT
             )
         )
     }
@@ -148,8 +150,10 @@ internal class DocSelectionFragment(
             }
         } ?: run {
             // Not possible for backend to send an empty list of allowed types.
-            Log.e(TAG, "Received an empty idDocumentTypeAllowlist.")
-            navigateToDefaultErrorFragment()
+            "Received an empty idDocumentTypeAllowlist.".let { msg ->
+                Log.e(TAG, msg)
+                navigateToDefaultErrorFragment(msg)
+            }
         }
     }
 
@@ -250,8 +254,10 @@ internal class DocSelectionFragment(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 if (verificationPage.documentCapture.requireLiveCapture) {
-                    Log.e(TAG, "Can't access camera and client has required live capture.")
-                    navigateToDefaultErrorFragment()
+                    "Can't access camera and client has required live capture.".let { msg ->
+                        Log.e(TAG, msg)
+                        navigateToDefaultErrorFragment(msg)
+                    }
                 } else {
                     navigateToUploadFragment(
                         type.toUploadDestinationId(),
@@ -261,7 +267,7 @@ internal class DocSelectionFragment(
                 }
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }
@@ -287,7 +293,7 @@ internal class DocSelectionFragment(
             },
             onFailure = {
                 Log.e(TAG, "failed to observeForVerificationPage: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
     }

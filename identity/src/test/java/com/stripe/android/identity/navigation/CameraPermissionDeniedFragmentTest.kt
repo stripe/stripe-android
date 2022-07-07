@@ -13,31 +13,43 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class CameraPermissionDeniedFragmentTest {
+    private val mockScreenTracker = mock<ScreenTracker>()
     private val mockAppSettingsOpenable = mock<AppSettingsOpenable>()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { identityAnalyticsRequestFactory } doReturn
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
             )
+        on { screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     @Test
@@ -135,10 +147,11 @@ class CameraPermissionDeniedFragmentTest {
                 )
             )
 
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
                 }
             )
         }

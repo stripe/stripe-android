@@ -71,9 +71,10 @@ internal class ThemeConfig(context: Context) {
         @ColorInt defaultColor: Int,
         @ColorRes colorIfTransparent: Int
     ): Int {
-        return if (StripeColorUtils.isColorTransparent(defaultColor))
+        return if (StripeColorUtils.isColorTransparent(defaultColor)) {
             ContextCompat.getColor(context, colorIfTransparent)
-        else
+        } else {
             defaultColor
+        }
     }
 }

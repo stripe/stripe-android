@@ -2,8 +2,37 @@
 
 ## X.X.X
 
+## 20.7.0 - 2022-07-06
+* This release adds additional support for Afterpay/Clearpay in PaymentSheet.
+
+### PaymentSheet
+* [ADDED][5221](https://github.com/stripe/stripe-android/pull/5221) Afterpay/Clearpay support for FR, ES countries and EUR currencies
+* [FIXED][5215](https://github.com/stripe/stripe-android/pull/5215) Fix issue with us_bank_account appearing in payment sheet when Financial Connections SDK is not available
+
+### Payments
+* [FIXED][5226](https://github.com/stripe/stripe-android/pull/5226) Persist `GooglePayLauncherViewModel` state across process death
+* [ADDED][5238](https://github.com/stripe/stripe-android/pull/5238) Expose the current card brand in CardFormView, CardInputWidget, and CardMultiLineWidget
+
+### Identity
+* [ADDED][5149](https://github.com/stripe/stripe-android/pull/5149) First release to fully support selfie capture
+
+## 20.6.2 - 2022-06-23
+This release contains several bug fixes for Payments, reduces the size of StripeCardScan, and adds new `rememberFinancialConnections` features for Financial Connections.
+
+* [CHANGED] [5162](https://github.com/stripe/stripe-android/pull/5162) Upgrade `compileSdkVersion` to 32, Kotlin version to 1.6.21, Android Gradle plugin to 7.2.1.
+
 ### Financial Connections
 * [ADDED][5117](https://github.com/stripe/stripe-android/pull/5117) Adds rememberFinancialConnectionsSheet and rememberFinancialConnectionsSheetForToken.
+
+### Payments
+* [FIXED][5195](https://github.com/stripe/stripe-android/pull/5195) Fix focus when navigating across compose fields
+* [FIXED][5196](https://github.com/stripe/stripe-android/pull/5196) Fix PaymentOptionsAddPaymentMethodFragmentTest
+* [FIXED][5183](https://github.com/stripe/stripe-android/pull/5183) Fix Link payment option card in dark mode
+* [FIXED][5148](https://github.com/stripe/stripe-android/pull/5148) Restore selected payment method when user returns to Link
+* [FIXED][5142](https://github.com/stripe/stripe-android/pull/5142) Fix issue with animations running on main thread
+
+### CardScan
+* [CHANGED][5144](https://github.com/stripe/stripe-android/pull/5144) Add a minimal TFLite module to stripecardscan.
 
 ## 20.5.0 - 2022-06-01
 This release contains several bug fixes for Payments and PaymentSheet, deprecates the PaymentSheet's `primaryButtonColor` api in favor of the new [appearance api](https://stripe.com/docs/elements/appearance-api?platform=android), and adds card brand icons to the card details form. 

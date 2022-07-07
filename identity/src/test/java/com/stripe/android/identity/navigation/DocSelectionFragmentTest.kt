@@ -15,8 +15,10 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_DENIED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_GRANTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRIVING_LICENSE_KEY
@@ -33,7 +35,9 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -42,6 +46,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -49,12 +54,16 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class DocSelectionFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val verificationPage = mock<VerificationPage>()
+    private val mockScreenTracker = mock<ScreenTracker>()
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { identityAnalyticsRequestFactory }.thenReturn(
             IdentityAnalyticsRequestFactory(
@@ -62,6 +71,9 @@ internal class DocSelectionFragmentTest {
                 args = mock()
             )
         )
+        on { screenTracker }.thenReturn(mockScreenTracker)
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
     private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
     private val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
@@ -76,7 +88,7 @@ internal class DocSelectionFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(times: Int = 1) {
@@ -113,7 +125,7 @@ internal class DocSelectionFragmentTest {
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_DOC_SELECT
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_DOC_SELECT
                 }
             )
             assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
@@ -193,6 +205,8 @@ internal class DocSelectionFragmentTest {
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
+
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
@@ -236,6 +250,8 @@ internal class DocSelectionFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -282,6 +298,8 @@ internal class DocSelectionFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -337,6 +355,8 @@ internal class DocSelectionFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button)
                     .callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -563,6 +583,9 @@ internal class DocSelectionFragmentTest {
             it.requireView(),
             navController
         )
+        runBlocking {
+            verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_DOC_SELECT))
+        }
         testBlock(DocSelectionFragmentBinding.bind(it.requireView()), navController, it)
     }
 

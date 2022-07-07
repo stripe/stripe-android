@@ -11,7 +11,6 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.identity.injection.DaggerIdentityVerificationSheetComponent
 import com.stripe.android.identity.injection.IdentityVerificationSheetComponent
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 internal class StripeIdentityVerificationSheet private constructor(
     activityResultCaller: ActivityResultCaller,
@@ -70,14 +69,15 @@ internal class StripeIdentityVerificationSheet private constructor(
                 verificationSessionId,
                 ephemeralKeySecret,
                 configuration.brandLogo,
-                injectorKey
+                injectorKey,
+                System.currentTimeMillis()
             )
         )
     }
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
-            is IdentityViewModel.IdentityViewModelFactory -> {
+            is IdentityActivity -> {
                 identityVerificationSheetComponent.inject(injectable)
             }
             else -> {

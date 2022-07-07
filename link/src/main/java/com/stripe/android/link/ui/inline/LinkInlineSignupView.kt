@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
@@ -47,6 +46,7 @@ import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.flow.MutableStateFlow
 

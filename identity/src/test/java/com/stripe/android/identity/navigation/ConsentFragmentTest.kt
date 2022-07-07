@@ -17,8 +17,10 @@ import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT_WITH_SELFIE
@@ -32,7 +34,9 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -41,6 +45,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -49,10 +54,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class ConsentFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
@@ -138,6 +145,8 @@ internal class ConsentFragmentTest {
         )
     }
 
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationArgs }.thenReturn(ARGS)
 
@@ -147,6 +156,11 @@ internal class ConsentFragmentTest {
                 args = ARGS
             )
         )
+
+        on { screenTracker }.thenReturn(mockScreenTracker)
+
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
@@ -162,7 +176,7 @@ internal class ConsentFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(
@@ -191,7 +205,7 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when not missing biometricConsent navigate to docSelectionFragment`() {
+    fun `when not missing biometricConsent stay on ConsentFragment`() {
         whenever(verificationPageWithTimeAndPolicy.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = emptyList()
@@ -201,7 +215,7 @@ internal class ConsentFragmentTest {
             setUpSuccessVerificationPage()
 
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.docSelectionFragment)
+                .isEqualTo(R.id.consentFragment)
         }
     }
 
@@ -220,10 +234,14 @@ internal class ConsentFragmentTest {
         launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
 
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
+            }
+
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
-                        params[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
                 }
             )
             verify(
@@ -294,6 +312,8 @@ internal class ConsentFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+
                 verify(mockIdentityViewModel).postVerificationPageData(
                     collectedDataParam = eq(
                         CollectedDataParam(biometricConsent = true)
@@ -320,6 +340,8 @@ internal class ConsentFragmentTest {
                 ).thenReturn(correctVerificationData)
                 setUpSuccessVerificationPage(verificationPageWithSelfie)
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
 
                 verify(mockIdentityViewModel).postVerificationPageData(
                     collectedDataParam = eq(
@@ -453,7 +475,8 @@ internal class ConsentFragmentTest {
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            presentTime = 0
         )
     }
 }

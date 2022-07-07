@@ -728,7 +728,7 @@ internal class StripeApiRepositoryTest {
 
             create().confirmPaymentIntent(
                 confirmPaymentIntentParams = confirmPaymentIntentParams,
-                options = ApiRequest.Options(apiKey),
+                options = ApiRequest.Options(apiKey)
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1645,7 +1645,7 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create().refreshPaymentIntent(
                     clientSecret,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 )
             )
 

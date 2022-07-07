@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
 import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.setHtmlString
@@ -79,13 +79,17 @@ internal class ConfirmationFragment(
             },
             onFailure = {
                 Log.e(TAG, "Failed to get VerificationPage")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         )
 
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONFIRMATION)
+        }
+
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_CONFIRMATION
+                screenName = SCREEN_NAME_CONFIRMATION
             )
         )
     }

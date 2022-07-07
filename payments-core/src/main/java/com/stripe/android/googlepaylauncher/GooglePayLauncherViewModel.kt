@@ -2,12 +2,15 @@ package com.stripe.android.googlepaylauncher
 
 import android.app.Application
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import androidx.savedstate.SavedStateRegistryOwner
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
@@ -35,6 +38,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LongParameterList")
 internal class GooglePayLauncherViewModel(
     private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
@@ -42,9 +46,17 @@ internal class GooglePayLauncherViewModel(
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
     private val googlePayJsonFactory: GooglePayJsonFactory,
-    private val googlePayRepository: GooglePayRepository
+    private val googlePayRepository: GooglePayRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    var hasLaunched: Boolean = false
+    /**
+     * [hasLaunched] indicates whether Google Pay has already been launched, and must be persisted
+     * across process death in case the Activity and ViewModel are destroyed while the user is
+     * interacting with Google Pay.
+     */
+    var hasLaunched: Boolean
+        get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
+        set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
     private val _googleResult = MutableLiveData<GooglePayLauncher.Result>()
     internal val googlePayResult = _googleResult.distinctUntilChanged()
@@ -67,7 +79,7 @@ internal class GooglePayLauncherViewModel(
                 val paymentIntent = requireNotNull(
                     stripeRepository.retrievePaymentIntent(
                         args.clientSecret,
-                        requestOptions,
+                        requestOptions
                     )
                 ) {
                     "Could not retrieve PaymentIntent."
@@ -81,7 +93,7 @@ internal class GooglePayLauncherViewModel(
                 val setupIntent = requireNotNull(
                     stripeRepository.retrieveSetupIntent(
                         args.clientSecret,
-                        requestOptions,
+                        requestOptions
                     )
                 ) {
                     "Could not retrieve SetupIntent."
@@ -209,11 +221,17 @@ internal class GooglePayLauncherViewModel(
     internal class Factory(
         private val application: Application,
         private val args: GooglePayLauncherContract.Args,
+        owner: SavedStateRegistryOwner,
         private val enableLogging: Boolean = false,
-        private val workContext: CoroutineContext = Dispatchers.IO
-    ) : ViewModelProvider.Factory {
+        private val workContext: CoroutineContext = Dispatchers.IO,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            handle: SavedStateHandle
+        ): T {
             val googlePayEnvironment = args.config.environment
             val logger = Logger.getInstance(enableLogging)
 
@@ -265,8 +283,14 @@ internal class GooglePayLauncherViewModel(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
                     isJcbEnabled = args.config.isJcbEnabled
                 ),
-                googlePayRepository
+                googlePayRepository,
+                handle
             ) as T
         }
+    }
+
+    companion object {
+        @VisibleForTesting
+        const val HAS_LAUNCHED_KEY = "has_launched"
     }
 }

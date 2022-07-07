@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -48,9 +50,6 @@ internal open class PaymentOptionsViewModelTestInjection {
         @InjectorKey injectorKey: String,
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
-        val lpmRepository = mock<LpmRepository>()
-        whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
-
         PaymentOptionsViewModel(
             args,
             prefsRepositoryFactory = {
@@ -62,7 +61,10 @@ internal open class PaymentOptionsViewModelTestInjection {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = injectorKey,
-            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
+            resourceRepository = StaticResourceRepository(
+                mock(),
+                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+            ),
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
@@ -70,20 +72,17 @@ internal open class PaymentOptionsViewModelTestInjection {
         )
     }
 
-    @ExperimentalCoroutinesApi
-    fun createFormViewModel(): FormViewModel = runBlocking {
-        FormViewModel(
-            paymentMethodCode = "",
-            config = mock(),
-            resourceRepository = mock(),
-            transformSpecToElement = mock()
-        )
-    }
-
+    @FlowPreview
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentOptionsViewModel,
-        formViewModel: FormViewModel
+        lpmRepository: LpmRepository = mock(),
+        formViewModel: FormViewModel = FormViewModel(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            config = mock(),
+            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
+            transformSpecToElement = mock()
+        )
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
         val mockSubcomponent = mock<PaymentOptionsViewModelSubcomponent>()

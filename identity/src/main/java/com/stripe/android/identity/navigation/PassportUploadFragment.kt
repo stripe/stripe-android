@@ -7,21 +7,23 @@ import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 
 /**
  * Fragment to upload passport.
  */
 internal open class PassportUploadFragment(
-    identityUploadViewModelFactory: ViewModelProvider.Factory,
+    identityIO: IdentityIO,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityUploadFragment(identityUploadViewModelFactory, identityViewModelFactory) {
+) : IdentityUploadFragment(identityIO, identityViewModelFactory) {
     override val titleRes = R.string.file_upload
     override val contextRes = R.string.file_upload_content_passport
     override val frontTextRes = R.string.passport
     override val frontCheckMarkContentDescription = R.string.passport_selected
     override val frontScanType = IdentityScanState.ScanType.PASSPORT
     override val fragmentId = R.id.passportUploadFragment
+    override val presentedId = "PASSPORT_UPLOAD_PRESENTED"
 
     override fun showFrontDone(latestState: DocumentUploadState) {
         super.showFrontDone(latestState)
@@ -43,7 +45,7 @@ internal open class PassportUploadFragment(
                 )
             }.onFailure {
                 Log.d(TAG, "fail to submit uploaded files: $it")
-                navigateToDefaultErrorFragment()
+                navigateToDefaultErrorFragment(it)
             }
         }
     }

@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
@@ -60,6 +59,7 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
 @Composable
@@ -195,6 +195,7 @@ internal fun WalletBody(
                     enabled = !isProcessing,
                     onIndexSelected = {
                         selectedItemId = paymentDetails[it].id
+                        isWalletExpanded = false
                     },
                     onMenuButtonClick = {
                         showBottomSheetContent {
@@ -277,7 +278,7 @@ internal fun CollapsedPaymentDetails(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(id = R.string.wallet_pay_with),
+            text = stringResource(id = R.string.wallet_collapsed_payment),
             modifier = Modifier.padding(horizontal = HorizontalPadding),
             color = MaterialTheme.linkColors.disabledText
         )
@@ -299,7 +300,7 @@ internal fun CollapsedPaymentDetails(
 }
 
 @Composable
-internal fun ExpandedPaymentDetails(
+private fun ExpandedPaymentDetails(
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
     selectedItemId: String,
     enabled: Boolean,
@@ -381,9 +382,9 @@ internal fun ExpandedPaymentDetails(
                 tint = Color.Unspecified
             )
             Text(
-                text = stringResource(id = R.string.wallet_add_new_payment_method),
+                text = stringResource(id = R.string.wallet_add_payment_method),
                 modifier = Modifier.padding(end = HorizontalPadding, bottom = 4.dp),
-                color = MaterialTheme.colors.onPrimary,
+                color = MaterialTheme.linkColors.actionLabel,
                 style = MaterialTheme.typography.button
             )
         }
@@ -391,7 +392,7 @@ internal fun ExpandedPaymentDetails(
 }
 
 @Composable
-internal fun CardPaymentMethodItem(
+private fun CardPaymentMethodItem(
     cardDetails: ConsumerPaymentDetails.Card,
     enabled: Boolean,
     isSelected: Boolean,
@@ -410,7 +411,7 @@ internal fun CardPaymentMethodItem(
             onClick = null,
             modifier = Modifier.padding(start = 20.dp, end = 6.dp),
             colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colors.primary,
+                selectedColor = MaterialTheme.linkColors.actionLabelLight,
                 unselectedColor = MaterialTheme.linkColors.disabledText
             )
         )
@@ -443,7 +444,7 @@ internal fun CardPaymentMethodItem(
             Icon(
                 imageVector = Icons.Filled.MoreVert,
                 contentDescription = stringResource(R.string.edit),
-                tint = MaterialTheme.colors.primary
+                tint = MaterialTheme.linkColors.actionLabelLight
             )
         }
     }

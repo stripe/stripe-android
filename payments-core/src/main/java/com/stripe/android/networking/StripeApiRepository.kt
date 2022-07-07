@@ -306,7 +306,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     )
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
+        options: ApiRequest.Options
     ): PaymentIntent? {
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
 
@@ -1283,7 +1283,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "type" to "SMS",
-                    "code" to verificationCode,
+                    "code" to verificationCode
                 ).plus(
                     authSessionCookie?.let {
                         mapOf(
@@ -1315,7 +1315,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "request_surface" to "android_payment_element",
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
+                    )
                 ).plus(
                     authSessionCookie?.let {
                         mapOf(
@@ -1444,7 +1444,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options = requestOptions,
                 params = params.toMap()
             ),
-            FinancialConnectionsSessionJsonParser(),
+            FinancialConnectionsSessionJsonParser()
         ) {
             // no-op
         }
@@ -1461,7 +1461,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options = requestOptions,
                 params = params.toMap()
             ),
-            FinancialConnectionsSessionJsonParser(),
+            FinancialConnectionsSessionJsonParser()
         ) {
             // no-op
         }
@@ -1865,7 +1865,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         } ?: params
 
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
-        options: ApiRequest.Options,
+        options: ApiRequest.Options
     ): ConfirmPaymentIntentParams {
         if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
             return this
