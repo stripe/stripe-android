@@ -115,7 +115,7 @@ internal class IdentityActivity :
             .cameraPermissionEnsureable(this)
             .appSettingsOpenable(this)
             .verificationFlowFinishable(this)
-            .identityViewModelFactory(viewModelFactory as IdentityViewModel.IdentityViewModelFactory)
+            .identityViewModelFactory(viewModelFactory)
             .fallbackUrlLauncher(this)
             .build()
 
