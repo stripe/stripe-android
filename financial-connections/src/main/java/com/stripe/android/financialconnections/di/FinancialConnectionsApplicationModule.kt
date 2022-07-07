@@ -11,32 +11,12 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.BuildConfig
-import dagger.BindsInstance
-import dagger.Component
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
-
-@Singleton
-@Component(
-    modules = [ApplicationModule::class]
-)
-internal interface ApplicationComponent {
-
-    fun webSubcomponentBuilder(): FinancialConnectionsSheetActivitySubcomponent.Builder
-    fun nativeSubcomponentBuilder(): FinancialConnectionsSheetNativeActivitySubcomponent.Builder
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun build(): ApplicationComponent
-    }
-}
 
 @Module(
     subcomponents = [
@@ -48,7 +28,7 @@ internal interface ApplicationComponent {
         CoroutineContextModule::class
     ]
 )
-class ApplicationModule {
+internal class FinancialConnectionsApplicationModule {
     @Provides
     @Named(ENABLE_LOGGING)
     @Singleton

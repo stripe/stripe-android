@@ -252,7 +252,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             state: FinancialConnectionsSheetState
         ): FinancialConnectionsSheetViewModel {
             return appComponent
-                .webSubcomponentBuilder()
+                .homeSubcomponentBuilder()
                 .initialState(state)
                 .configuration(state.initialArgs.configuration)
                 .build().viewModel

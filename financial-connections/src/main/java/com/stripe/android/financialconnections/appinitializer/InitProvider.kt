@@ -10,7 +10,7 @@ import android.net.Uri
  * Base class for [ContentProvider]s used for initialization purposes.
  *
  */
-abstract class InitProvider : ContentProvider() {
+internal abstract class InitProvider : ContentProvider() {
     val application: Application
         get() = context!!.applicationContext as Application
 
