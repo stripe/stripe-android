@@ -57,12 +57,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
         searchJob?.cancel()
         searchJob = suspend {
             delay(SEARCH_DEBOUNCE_MS)
-            val test = searchInstitutions(
+            searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
             )
-            test
-        }.execute { copy(searchInstitutions = it,) }
+        }.execute { copy(searchInstitutions = it) }
     }
 
     fun onInstitutionSelected(institution: Institution) {

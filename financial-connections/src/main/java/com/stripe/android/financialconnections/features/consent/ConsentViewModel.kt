@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.presentation
+package com.stripe.android.financialconnections.features.consent
 
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -9,13 +9,10 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
-import com.stripe.android.financialconnections.features.consent.ConsentClickableText
-import com.stripe.android.financialconnections.features.consent.ConsentState
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
-import com.stripe.android.financialconnections.features.consent.ConsentUrlBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

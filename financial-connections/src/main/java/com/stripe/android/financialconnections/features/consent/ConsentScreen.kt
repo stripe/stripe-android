@@ -39,7 +39,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentState
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
-import com.stripe.android.financialconnections.presentation.ConsentViewModel
+import com.stripe.android.financialconnections.features.consent.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.AnnotatedText

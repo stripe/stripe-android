@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.di
 
+import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import dagger.Module
