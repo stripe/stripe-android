@@ -2,6 +2,7 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.Icon
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
@@ -18,10 +19,12 @@ internal fun FinancialConnectionsTopAppBar(
             painter = painterResource(id = R.drawable.stripe_logo),
             contentDescription = null // decorative element
         )
-    }
+    },
+    navigationIcon: @Composable (() -> Unit)? = null,
 ) {
     TopAppBar(
         title = title,
+        navigationIcon = navigationIcon,
         backgroundColor = FinancialConnectionsTheme.colors.textWhite,
         contentColor = FinancialConnectionsTheme.colors.textBrand,
         elevation = 0.dp

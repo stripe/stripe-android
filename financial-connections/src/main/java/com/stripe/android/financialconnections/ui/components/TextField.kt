@@ -20,11 +20,13 @@ internal fun FinancialConnectionsOutlinedTextField(
     value: String,
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
+    leadingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
         shape = RoundedCornerShape(8.dp),
         modifier = modifier.fillMaxWidth(),
+        leadingIcon = leadingIcon,
         value = value,
         colors = outlinedTextFieldColors(
             focusedBorderColor = FinancialConnectionsTheme.colors.textBrand,

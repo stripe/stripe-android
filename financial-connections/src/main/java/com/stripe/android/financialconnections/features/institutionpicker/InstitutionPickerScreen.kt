@@ -22,7 +22,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -141,22 +144,25 @@ private fun FinancialConnectionsSearchRow(
     val focusManager = LocalFocusManager.current
     Row(verticalAlignment = Alignment.CenterVertically) {
         FinancialConnectionsOutlinedTextField(
+            leadingIcon = if (searchMode) {
+                {
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        tint = FinancialConnectionsTheme.colors.textPrimary,
+                        contentDescription = "Back button",
+                        modifier = Modifier.clickable {
+                            onCancelSearchClick()
+                            focusManager.clearFocus()
+                        }
+                    )
+                }
+            } else null,
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
             value = query,
             onValueChange = onQueryChanged,
         )
-        if (searchMode) {
-            FinancialConnectionsTextButton(
-                onClick = {
-                    onCancelSearchClick()
-                    focusManager.clearFocus()
-                }
-            ) {
-                Text(text = "Cancel")
-            }
-        }
     }
 }
 
