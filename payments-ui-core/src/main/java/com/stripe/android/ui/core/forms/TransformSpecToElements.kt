@@ -48,9 +48,7 @@ class TransformSpecToElements(
     private val context: Context,
     private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
 ) {
-    fun transform(
-        list: List<FormItemSpec>
-    ): List<FormElement> =
+    fun transform(list: List<FormItemSpec>): List<FormElement> =
         list.map {
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(

@@ -22,13 +22,13 @@ class InputAddressScreenTest {
     @Test
     fun no_shipping_address_set_should_show_expand_button() {
         setContent()
-        composeTestRule.onNodeWithText("Enter manually").assertExists()
+        composeTestRule.onNodeWithText("Enter address manually").assertExists()
     }
 
     @Test
     fun shipping_address_set_should_not_show_expand_button() {
         setContent(ShippingAddress(name = "skyler"))
-        composeTestRule.onNodeWithText("Enter manually").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Enter address manually").assertDoesNotExist()
     }
 
     @Test
@@ -59,7 +59,7 @@ class InputAddressScreenTest {
     fun clicking_enter_manually_triggers_callback() {
         var counter = 0
         setContent(onEnterManuallyCallback = { counter++ })
-        composeTestRule.onNodeWithText("Enter Manually").performClick()
+        composeTestRule.onNodeWithText("Enter address manually").performClick()
         Truth.assertThat(counter).isEqualTo(1)
     }
 

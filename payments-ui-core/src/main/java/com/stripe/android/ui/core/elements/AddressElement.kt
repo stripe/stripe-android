@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.autocomplete.DefaultIsPlacesAvailable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -23,6 +24,11 @@ open class AddressElement constructor(
     )
 ) : SectionMultiFieldElement(_identifier) {
 
+    private val autocompleteSupportedCountries = setOf(
+        "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IN", "IT", "JP", "MX", "MY",
+        "NO", "NL", "PH", "PL", "RU", "SE", "SG", "TR", "US", "ZA"
+    )
+
     @VisibleForTesting
     val countryElement = CountryElement(
         IdentifierSpec.Country,
@@ -39,14 +45,10 @@ open class AddressElement constructor(
         )
     )
 
-    // TODO make this launch autocomplete.
-    private val addressAutoCompleteElement = SimpleTextElement(
-        IdentifierSpec.OneLineAddress,
-        SimpleTextFieldController(
-            textFieldConfig = SimpleTextFieldConfig(
-                label = R.string.address_label_address
-            )
-        )
+    private val addressAutoCompleteElement = AddressTextFieldElement(
+        identifier = IdentifierSpec.OneLineAddress,
+        config = SimpleTextFieldConfig(label = R.string.address_label_address),
+        onNavigation = (addressType as? AddressType.ShippingCondensed)?.onNavigation
     )
 
     private val phoneNumberElement = PhoneNumberElement(
@@ -70,16 +72,30 @@ open class AddressElement constructor(
             fields
         }
 
-    val fields = otherFields.map { otherFields ->
+    val fields = combine(
+        countryElement.controller.rawFieldValue,
+        otherFields
+    ) { country, otherFields ->
+        val condensed = listOf(nameElement, countryElement, addressAutoCompleteElement, phoneNumberElement)
+        val expanded = listOf(nameElement, countryElement).plus(otherFields).plus(phoneNumberElement)
         when (addressType) {
-            AddressType.Normal -> {
+            is AddressType.ShippingCondensed -> {
+                // If the merchant has supplied Google Places API key, Google Places SDK is
+                // available, and country is supported, use autocomplete
+                val autocompleteSupportsCountry = autocompleteSupportedCountries.contains(country)
+                val autocompleteAvailable = DefaultIsPlacesAvailable().invoke() &&
+                    !addressType.googleApiKey.isNullOrBlank()
+                if (autocompleteSupportsCountry && autocompleteAvailable) {
+                    condensed
+                } else {
+                    expanded
+                }
+            }
+            is AddressType.ShippingExpanded -> {
+                expanded
+            }
+            else -> {
                 listOf(countryElement).plus(otherFields)
-            }
-            AddressType.ShippingCondensed -> {
-                listOf(nameElement, countryElement, addressAutoCompleteElement, phoneNumberElement)
-            }
-            AddressType.ShippingExpanded -> {
-                listOf(nameElement, countryElement).plus(otherFields).plus(phoneNumberElement)
             }
         }
     }
