@@ -24,11 +24,6 @@ open class AddressElement constructor(
     )
 ) : SectionMultiFieldElement(_identifier) {
 
-    private val autocompleteSupportedCountries = setOf(
-        "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IN", "IT", "JP", "MX", "MY",
-        "NO", "NL", "PH", "PL", "RU", "SE", "SG", "TR", "US", "ZA"
-    )
-
     @VisibleForTesting
     val countryElement = CountryElement(
         IdentifierSpec.Country,
@@ -132,5 +127,12 @@ open class AddressElement constructor(
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
+    }
+
+    companion object {
+        private val autocompleteSupportedCountries = setOf(
+            "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IN", "IT", "JP", "MX", "MY",
+            "NO", "NL", "PH", "PL", "RU", "SE", "SG", "TR", "US", "ZA"
+        )
     }
 }

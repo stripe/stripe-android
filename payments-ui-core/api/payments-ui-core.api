@@ -77,6 +77,9 @@ public final class com/stripe/android/ui/core/databinding/ActivityCardScanBindin
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
 }
 
+public final class com/stripe/android/ui/core/elements/AddressElement$Companion {
+}
+
 public final class com/stripe/android/ui/core/elements/AddressSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AddressSpec$$serializer;
