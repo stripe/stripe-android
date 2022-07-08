@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -120,12 +121,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal var addFragmentSelectedLPM
         get() = requireNotNull(
-            resourceRepository.getLpmRepository().fromCode(
-                savedStateHandle.get<PaymentMethodCode>(
-                    SAVE_SELECTED_ADD_LPM
-                ) ?: newPaymentSelection?.paymentMethodCreateParams?.typeCode
-            ) ?: supportedPaymentMethods.first()
-        )
+                resourceRepository.getLpmRepository().fromCode(
+                    savedStateHandle.get<PaymentMethodCode>(
+                        SAVE_SELECTED_ADD_LPM
+                    ) ?: newPaymentSelection?.paymentMethodCreateParams?.typeCode
+                ) ?: supportedPaymentMethods.first()
+            )
         set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.code)
 
     /**
@@ -320,8 +321,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        resourceRepository.getLpmRepository().values()
-                            .map { it.code }.toList()
+                            resourceRepository.getLpmRepository().values()
+                                .map { it.code }.toList()
                         })"
                 )
             )
@@ -417,8 +418,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

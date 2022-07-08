@@ -47,7 +47,9 @@ internal class DefaultFlowControllerInitializerTest {
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
     private val resourceRepository = StaticResourceRepository(
         mock(),
-        LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+        LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply{
+            this.update(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
+        }
     )
 
     private val prefsRepository = FakePrefsRepository()

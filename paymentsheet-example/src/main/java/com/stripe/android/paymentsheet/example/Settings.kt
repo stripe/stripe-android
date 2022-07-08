@@ -32,6 +32,7 @@ class Settings(context: Context) {
          */
         private const val BASE_URL =
             "https://stripe-mobile-payment-sheet-test-playground-v6.glitch.me/"
+//        "https://quaint-ludicrous-skipjack.glitch.me/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.android.paymentsheet.example.metadata.backend_url"

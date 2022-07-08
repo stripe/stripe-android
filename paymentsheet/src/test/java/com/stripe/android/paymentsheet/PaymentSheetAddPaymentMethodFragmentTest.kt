@@ -52,7 +52,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelTestInjection() {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val lpmRepository = LpmRepository(context.resources)
 
     @Before
     fun setup() {
@@ -484,6 +483,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             customerRepositoryPMs = paymentMethods,
             injectorKey = args.injectorKey
         )
+        idleLooper()
+        println("fallback, idle")
 
         // somehow the saveInstanceState for the viewModel needs to be present
 
@@ -501,6 +502,10 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository)
             } else {
+                it.sheetViewModel.resourceRepository.getLpmRepository().update(
+                    stripeIntent.paymentMethodTypes,
+                    null
+                )
                 it.sheetViewModel.updatePaymentMethods(stripeIntent)
                 it.sheetViewModel.setStripeIntent(stripeIntent)
                 idleLooper()
@@ -518,7 +523,16 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
     companion object {
         val lpmRepository =
-            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources)
+            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources).apply {
+                this.update(
+                    listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.USBankAccount.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Bancontact.code
+                    ), null
+                )
+            }
         val Bancontact = lpmRepository.fromCode("bancontact")!!
         val SepaDebit = lpmRepository.fromCode("sepa_debit")!!
     }

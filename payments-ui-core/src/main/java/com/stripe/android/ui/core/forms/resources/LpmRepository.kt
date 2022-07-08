@@ -35,6 +35,7 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
+import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,13 +46,15 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository @Inject constructor(
-    resources: Resources?,
+    val resources: Resources?,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
         DefaultIsFinancialConnectionsAvailable()
 ) {
-    private val lpmSerializer: LpmSerializer = LpmSerializer()
+    private val lpmSerializer = LpmSerializer()
+    internal val serverInitializedLatch = CountDownLatch(1)
 
-    private lateinit var codeToSupportedPaymentMethod: Map<String, SupportedPaymentMethod>
+    private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
+
 
     fun values() = codeToSupportedPaymentMethod.values
 
@@ -59,15 +62,61 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
-    init {
-        initialize(
-            resources?.assets?.open("lpms.json")
-        )
+    /**
+     * This method will read the expected LPMs and their specs as two separate parameters.
+     * Any spec now found from the server will be read from disk json file.
+     *
+     * It is still possible that an lpm that is expected cannot be read successfully from
+     * the json spec on disk or the server spec.
+     *
+     * It is also possible that an LPM is present in the repository that is not present
+     * in the expected LPM list.
+     *
+     * Reading the server spec is all or nothing, any error means none will be read
+     * so it is important that the json on disk is successful.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun update(
+        expectedLpms: List<String>,
+        serverLpmSpecs: String?
+    ) {
+        //TODO: Call analytics if parsing fails for any reason
+
+        update(parseLpms(serverLpmSpecs))
+
+        // If the server does not return specs, or they are not parsed successfully
+        // we will use the LPM on disk if found
+        val lpmsNotParsedFromServerSpec = expectedLpms
+            .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+        if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+            val mapFromDisk: Map<String, SharedDataSpec>? =
+                readFromDisk()
+                    ?.associateBy { it.type }
+                    ?.filterKeys { expectedLpms.contains(it) }
+            codeToSupportedPaymentMethod.putAll(
+                lpmsNotParsedFromServerSpec
+                    .mapNotNull { mapFromDisk?.get(it) }
+                    .mapNotNull { convertToSupportedPaymentMethod(it) }
+                    .associateBy { it.code }
+            )
+        }
+
+        serverInitializedLatch.countDown()
     }
 
+
     @VisibleForTesting
-    fun initialize(inputStream: InputStream?) {
-        val parsedSupportedPaymentMethod = parseLpms(inputStream)
+    fun updateFromDisk() {
+        update(readFromDisk())
+    }
+
+    private fun readFromDisk() =
+        parseLpms(resources?.assets?.open("lpms.json"))
+
+
+    private fun update(lpms: List<SharedDataSpec>?) {
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        val parsedSupportedPaymentMethod = lpms
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
             ?.toMutableList()
@@ -77,14 +126,19 @@ class LpmRepository @Inject constructor(
                 it.code == PaymentMethod.Type.USBankAccount.code
         }
 
-        // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        codeToSupportedPaymentMethod =
+        codeToSupportedPaymentMethod.putAll(
             parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
+        )
     }
 
     private fun parseLpms(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let { string ->
             lpmSerializer.deserializeList(string)
+        }
+
+    private fun parseLpms(string: String?) =
+        string?.let {
+            lpmSerializer.deserializeList(it)
         }
 
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =
@@ -293,8 +347,7 @@ class LpmRepository @Inject constructor(
         /**
          * This is a list of the payment methods that we are allowing in the release
          */
-        @VisibleForTesting
-        internal val exposedPaymentMethods by lazy {
+        val exposedPaymentMethods by lazy {
             listOf(
                 PaymentMethod.Type.Card.code,
                 PaymentMethod.Type.Bancontact.code,

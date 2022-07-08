@@ -49,7 +49,12 @@ class TestHardCodedLpms {
 
         private val lpmRepository = LpmRepository(
             InstrumentationRegistry.getInstrumentation().targetContext.resources
-        )
+        ).apply {
+            update(
+                LpmRepository.exposedPaymentMethods,
+                null
+            )
+        }
     }
 
     @Before

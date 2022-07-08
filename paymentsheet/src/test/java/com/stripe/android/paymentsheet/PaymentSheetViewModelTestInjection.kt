@@ -92,7 +92,9 @@ internal open class PaymentSheetViewModelTestInjection {
             FakePrefsRepository(),
             resourceRepository = StaticResourceRepository(
                 mock(),
-                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
+                    this.update(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
+                }
             ),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
