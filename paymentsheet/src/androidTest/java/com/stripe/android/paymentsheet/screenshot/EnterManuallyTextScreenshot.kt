@@ -8,9 +8,11 @@ import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.addresselement.EnterManuallyText
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
+@Ignore("Flakes on CI, need to investigate.")
 class EnterManuallyTextScreenshot : ScreenshotTest {
     @get:Rule
     val composeTestRule = createComposeRule()
