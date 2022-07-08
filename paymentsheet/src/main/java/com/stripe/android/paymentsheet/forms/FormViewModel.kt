@@ -21,6 +21,8 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +32,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -95,10 +99,36 @@ internal class FormViewModel @Inject internal constructor(
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
-                resourceRepository.waitUntilLoaded()
-                delayedElements.value = transformSpecToElement.transform(
-                    getLpmItems(paymentMethodCode)
-                )
+                // The co-routine scope is needed to do work off the UI thread and so isActive is properly updated
+                CoroutineScope(Dispatchers.IO).launch {
+                    resourceRepository.waitUntilLoaded()
+                    if (isActive) {
+//                        Log.e(
+//                            "MLB",
+//                            "${resourceRepository.getLpmRepository().uuid} is loaded: ${
+//                                resourceRepository.getLpmRepository().isLoaded()
+//                            }"
+//                        )
+                        // When open payment options with returning customer with saved cards, then
+                        // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
+                        // is no longer listening for the resource repository to be ready and so
+                        // the resource repository is not ready!
+                        if (resourceRepository.isLoaded()) {
+                            withContext(Dispatchers.Main) {
+                                delayedElements.value = transformSpecToElement.transform(
+                                    getLpmItems(paymentMethodCode)
+                                )
+                            }
+                        }
+                    } else {
+//                        Log.e(
+//                            "MLB",
+//                            "${resourceRepository.getLpmRepository().uuid} is loaded: ${
+//                                resourceRepository.getLpmRepository().isLoaded()
+//                            }"
+//                        )
+                    }
+                }
             }
             this.elements = delayedElements
         }

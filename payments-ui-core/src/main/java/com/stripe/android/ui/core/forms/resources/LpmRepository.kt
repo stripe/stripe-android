@@ -66,12 +66,17 @@ class LpmRepository @Inject constructor(
         return serverInitializedLatch.count == 0L
     }
 
-    fun waitUntilLoaded() {
-        if (
-            serverInitializedLatch.count > 0 &&
-            !serverInitializedLatch.await(10, TimeUnit.SECONDS)) {
-            throw RuntimeException("Server did not finish loading")
+    fun waitUntilLoaded(): Boolean {
+//        Log.e("MLB", "$uuid waiting until loaded thread: ${Thread.currentThread().id}")
+        var timeoutSeconds = 10
+        while (!isLoaded() && timeoutSeconds > 0) {
+//            Log.e("MLB", "$uuid ...")
+            TimeUnit.SECONDS.sleep(1)
+            timeoutSeconds--
+//            Log.e("MLB", "$uuid whiling... isLoaded ${isLoaded()}")
         }
+//        Log.e("MLB", "$uuid waiting complete")
+        return isLoaded()
     }
 
     /**

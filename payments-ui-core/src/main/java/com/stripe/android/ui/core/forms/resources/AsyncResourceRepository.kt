@@ -45,11 +45,11 @@ class AsyncResourceRepository @Inject constructor(
         )
     }
 
-    override suspend fun waitUntilLoaded() {
+    override suspend fun waitUntilLoaded(): Boolean {
         loadingJobs.joinAll()
         loadingJobs.clear()
 
-        lpmRepository.waitUntilLoaded()
+        return lpmRepository.waitUntilLoaded()
     }
 
     override fun isLoaded() = loadingJobs.isEmpty() && lpmRepository.isLoaded()

@@ -11,9 +11,8 @@ class StaticResourceRepository(
     private val addressRepository: AddressFieldElementRepository,
     private val lpmRepository: LpmRepository = LpmRepository(null)
 ) : ResourceRepository {
-    override suspend fun waitUntilLoaded() {
-        // Nothing to do since everything is pre-loaded
-    }
+    // Nothing to do since everything is pre-loaded
+    override suspend fun waitUntilLoaded() = true
 
     override fun isLoaded() = true
 

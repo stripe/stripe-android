@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -261,8 +262,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         }
                     }
                 }
-                resourceRepository.waitUntilLoaded()
-                _isResourceRepositoryReady.value = true
+//                Log.e("MLB", "Base sheet view Model waiting lpm to load")
+                CoroutineScope(Dispatchers.IO).launch {
+                    resourceRepository.waitUntilLoaded()
+//                    Log.e("MLB", "Base sheet view Model READY thread: ${Thread.currentThread().id}")
+                    _isResourceRepositoryReady.postValue(true)
+                }
             }
         }
     }

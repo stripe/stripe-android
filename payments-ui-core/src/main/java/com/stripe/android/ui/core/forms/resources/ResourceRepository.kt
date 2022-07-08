@@ -12,7 +12,7 @@ interface ResourceRepository {
      * Suspend function that will wait for all resources to be loaded.
      * Must be called before trying to get any of the repositories.
      */
-    suspend fun waitUntilLoaded()
+    suspend fun waitUntilLoaded() : Boolean
 
     fun isLoaded(): Boolean
 
