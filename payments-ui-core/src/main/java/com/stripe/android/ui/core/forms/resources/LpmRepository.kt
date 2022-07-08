@@ -36,6 +36,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,15 +52,22 @@ class LpmRepository @Inject constructor(
         DefaultIsFinancialConnectionsAvailable()
 ) {
     private val lpmSerializer = LpmSerializer()
-    internal val serverInitializedLatch = CountDownLatch(1)
+    private val serverInitializedLatch = CountDownLatch(1)
 
     private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
-
 
     fun values() = codeToSupportedPaymentMethod.values
 
     fun fromCode(code: String?) = code?.let { paymentMethodCode ->
         codeToSupportedPaymentMethod[paymentMethodCode]
+    }
+
+    fun isLoaded() = serverInitializedLatch.count == 0L
+
+    fun waitUntilLoaded() {
+        if (!serverInitializedLatch.await(10, TimeUnit.SECONDS)) {
+            throw RuntimeException("Server did not finish loading")
+        }
     }
 
     /**

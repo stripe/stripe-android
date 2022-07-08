@@ -54,12 +54,10 @@ class AsyncResourceRepository @Inject constructor(
         loadingJobs.joinAll()
         loadingJobs.clear()
 
-        if (!lpmRepository.serverInitializedLatch.await(5, TimeUnit.SECONDS)) {
-            throw RuntimeException("Server did not finish loading")
-        }
+        lpmRepository.waitUntilLoaded()
     }
 
-    override fun isLoaded() = loadingJobs.isEmpty()
+    override fun isLoaded() = loadingJobs.isEmpty() && lpmRepository.isLoaded()
 
     override fun getLpmRepository() = lpmRepository
     override fun getAddressRepository() = addressRepository
