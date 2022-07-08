@@ -24,7 +24,18 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
+ * Dependencies shared between activities should live here.
  *
+ * Components that depend on user-provided configuration should be here so that they can be
+ * recovered after a process kill. The typical component recreation flow would be:
+ *
+ * 1. user-provided config field is saved on[android.app.Activity.onSaveInstanceState]
+ * 2. field is recovered in [android.app.Activity.onRestoreInstanceState]
+ * 3. field is passed as a bound instance to the component using this module.
+ * 4. component gets recreated.
+ *
+ * Each activity implementing this module should be responsible for recovering from process kills
+ * saving and restoring user-provided configuration dependencies.
  */
 @Module(
     includes = [FinancialConnectionsSheetConfigurationModule::class]
