@@ -10,7 +10,7 @@ import dagger.Subcomponent
 @Subcomponent(
     modules = [
         FinancialConnectionsSheetNativeModule::class,
-        FinancialConnectionsSheetSharedActivityModule::class,
+        FinancialConnectionsSheetSharedActivityModule::class
     ]
 )
 internal interface FinancialConnectionsSheetNativeActivitySubcomponent {

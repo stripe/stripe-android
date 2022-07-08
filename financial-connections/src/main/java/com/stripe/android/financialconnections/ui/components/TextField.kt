@@ -34,7 +34,7 @@ internal fun FinancialConnectionsOutlinedTextField(
             disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
             unfocusedLabelColor = FinancialConnectionsTheme.colors.textSecondary,
             focusedLabelColor = FinancialConnectionsTheme.colors.textBrand,
-            cursorColor = FinancialConnectionsTheme.colors.textBrand,
+            cursorColor = FinancialConnectionsTheme.colors.textBrand
         ),
         onValueChange = onValueChange,
         label = label

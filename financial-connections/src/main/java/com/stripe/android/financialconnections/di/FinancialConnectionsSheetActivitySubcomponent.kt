@@ -9,7 +9,7 @@ import dagger.Subcomponent
 @ActivityScoped
 @Subcomponent(
     modules = [
-        FinancialConnectionsSheetSharedActivityModule::class,
+        FinancialConnectionsSheetSharedActivityModule::class
     ]
 )
 internal interface FinancialConnectionsSheetActivitySubcomponent {

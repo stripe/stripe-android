@@ -102,6 +102,7 @@ private val TextSelectionColors = TextSelectionColors(
     handleColor = LightColorPalette.textBrand,
     backgroundColor = LightColorPalette.textBrand.copy(alpha = 0.4f)
 )
+
 @Immutable
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
@@ -121,7 +122,7 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
-        LocalFinancialConnectionsColors provides LightColorPalette,
+        LocalFinancialConnectionsColors provides LightColorPalette
     ) {
         MaterialTheme(
             colors = debugColors(),
