@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
@@ -255,9 +256,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 // If we have been killed and are being restored then we need to re-seed
                 // the lpm repository
                 resourceRepository.getLpmRepository().apply {
+                    Log.e(
+                        "MLB",
+                        "Base sheet view Model Resource repository loaded: ${uuid}, loaded: ${isLoaded()}"
+                    )
                     if (!isLoaded()) {
                         // TODO: This should technically be done in the background
                         stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                            Log.e("MLB", "Base sheet view Model calling update")
                             update(intentPaymentMethodTypes, lpmServerSpec)
                         }
                     }
