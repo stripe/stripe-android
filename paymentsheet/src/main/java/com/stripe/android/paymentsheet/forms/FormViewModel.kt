@@ -46,7 +46,7 @@ import javax.inject.Provider
 internal class FormViewModel @Inject internal constructor(
     paymentMethodCode: PaymentMethodCode,
     config: FormFragmentArguments,
-    private val resourceRepository: ResourceRepository,
+    internal val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElement
 ) : ViewModel() {
     internal class Factory(

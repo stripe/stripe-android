@@ -62,10 +62,14 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
-    fun isLoaded() = serverInitializedLatch.count == 0L
+    fun isLoaded(): Boolean {
+        return serverInitializedLatch.count == 0L
+    }
 
     fun waitUntilLoaded() {
-        if (!serverInitializedLatch.await(10, TimeUnit.SECONDS)) {
+        if (
+            serverInitializedLatch.count > 0 &&
+            !serverInitializedLatch.await(10, TimeUnit.SECONDS)) {
             throw RuntimeException("Server did not finish loading")
         }
     }

@@ -25,10 +25,10 @@ import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -120,6 +120,20 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
          */
         sheetViewModel.processing.observe(viewLifecycleOwner) { processing ->
             formViewModel.setEnabled(!processing)
+        }
+
+        sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
+            if (isReady) {
+                // THis is required in the case of fallback because there are two resource repositories
+                if (!formViewModel.resourceRepository.isLoaded()) {
+                    sheetViewModel.stripeIntent.value?.paymentMethodTypes?.let {
+                        formViewModel.resourceRepository.getLpmRepository().update(
+                            it,
+                            sheetViewModel.lpmServerSpec
+                        )
+                    }
+                }
+            }
         }
     }
 

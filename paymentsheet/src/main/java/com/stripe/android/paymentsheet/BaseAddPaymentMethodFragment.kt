@@ -68,18 +68,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.headerText.value =
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
-        val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            sheetViewModel.addFragmentSelectedLPM
-        ).takeUnless { it == -1 } ?: 0
-
-        if (paymentMethods.size > 1) {
-            setupRecyclerView(
-                viewBinding,
-                paymentMethods,
-                sheetViewModel.addFragmentSelectedLPM
-            )
-        }
-
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             viewBinding.linkInlineSignup.isEnabled = !isProcessing
         }
@@ -122,14 +110,31 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-        if (paymentMethods.isNotEmpty()) {
-            updateLinkInlineSignupVisibility(paymentMethods[selectedPaymentMethodIndex])
-            // If the activity is destroyed and recreated, then the fragment is already present
-            // and doesn't need to be replaced, only the selected payment method needs to be set
-            if (savedInstanceState == null) {
-                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+        sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
+            if (isReady) {
+                val selectedPaymentMethodIndex = paymentMethods.indexOf(
+                    sheetViewModel.addFragmentSelectedLPM
+                ).takeUnless { it == -1 } ?: 0
+
+                if (paymentMethods.size > 1) {
+                    setupRecyclerView(
+                        viewBinding,
+                        paymentMethods,
+                        sheetViewModel.addFragmentSelectedLPM
+                    )
+                }
+
+                if (paymentMethods.isNotEmpty()) {
+                    updateLinkInlineSignupVisibility(paymentMethods[selectedPaymentMethodIndex])
+                    // If the activity is destroyed and recreated, then the fragment is already present
+                    // and doesn't need to be replaced, only the selected payment method needs to be set
+                    if (savedInstanceState == null) {
+                        replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+                    }
+                }
             }
         }
+
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
     }

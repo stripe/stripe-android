@@ -233,6 +233,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         stripeIntentRepository,
                         args.clientSecret
                     )
+                    lpmServerSpec = specs
                     intent
                 }.fold(
                     onSuccess = {

@@ -45,7 +45,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -82,9 +81,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    private val _isResourceRepositoryReady = savedStateHandle.getLiveData<Boolean>(
-        SAVE_RESOURCE_REPOSITORY_READY
-    )
+    // Don't save the resource repository state because it must be re-initialized
+    // with the save server specs when reconstructed.
+    private var _isResourceRepositoryReady = MutableLiveData(false)
+
     internal val isResourceRepositoryReady: LiveData<Boolean> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
@@ -121,12 +121,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal var addFragmentSelectedLPM
         get() = requireNotNull(
-                resourceRepository.getLpmRepository().fromCode(
-                    savedStateHandle.get<PaymentMethodCode>(
-                        SAVE_SELECTED_ADD_LPM
-                    ) ?: newPaymentSelection?.paymentMethodCreateParams?.typeCode
-                ) ?: supportedPaymentMethods.first()
-            )
+            resourceRepository.getLpmRepository().fromCode(
+                savedStateHandle.get<PaymentMethodCode>(
+                    SAVE_SELECTED_ADD_LPM
+                ) ?: newPaymentSelection?.paymentMethodCreateParams?.typeCode
+            ) ?: supportedPaymentMethods.first()
+        )
         set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.code)
 
     /**
@@ -235,6 +235,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }.distinctUntilChanged()
 
+    internal var lpmServerSpec
+        get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
+        set(value) = savedStateHandle.set(LPM_SERVER_SPEC_STRING, value)
+
     init {
         if (_savedSelection.value == null) {
             viewModelScope.launch {
@@ -245,10 +249,20 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             }
         }
 
-        if (_isResourceRepositoryReady.value == null) {
+        if (_isResourceRepositoryReady.value != true) {
             viewModelScope.launch {
+                // If we have been killed and are being restored then we need to re-seed
+                // the lpm repository
+                resourceRepository.getLpmRepository().apply {
+                    if (!isLoaded()) {
+                        // TODO: This should technically be done in the background
+                        stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                            update(intentPaymentMethodTypes, lpmServerSpec)
+                        }
+                    }
+                }
                 resourceRepository.waitUntilLoaded()
-                savedStateHandle[SAVE_RESOURCE_REPOSITORY_READY] = true
+                _isResourceRepositoryReady.value = true
             }
         }
     }
@@ -613,6 +627,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_AMOUNT = "amount"
         internal const val SAVE_SELECTED_ADD_LPM = "selected_add_lpm"
+        internal const val LPM_SERVER_SPEC_STRING = "lpm_server_spec_string"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
