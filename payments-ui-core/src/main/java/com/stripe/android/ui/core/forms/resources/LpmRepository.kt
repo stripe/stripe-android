@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -36,7 +35,6 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -53,7 +51,6 @@ class LpmRepository @Inject constructor(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
         DefaultIsFinancialConnectionsAvailable()
 ) {
-    val uuid = UUID.randomUUID()
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
 
@@ -66,20 +63,15 @@ class LpmRepository @Inject constructor(
     }
 
     fun isLoaded(): Boolean {
-        Log.e("MLB", "$uuid loaded: ${serverInitializedLatch.count == 0L}")
         return serverInitializedLatch.count == 0L
     }
 
     fun waitUntilLoaded(): Boolean {
-//        Log.e("MLB", "$uuid waiting until loaded thread: ${Thread.currentThread().id}")
         var timeoutSeconds = 10
         while (!isLoaded() && timeoutSeconds > 0) {
-//            Log.e("MLB", "$uuid ...")
             TimeUnit.SECONDS.sleep(1)
             timeoutSeconds--
-//            Log.e("MLB", "$uuid whiling... isLoaded ${isLoaded()}")
         }
-//        Log.e("MLB", "$uuid waiting complete")
         return isLoaded()
     }
 
@@ -123,7 +115,6 @@ class LpmRepository @Inject constructor(
         }
 
         serverInitializedLatch.countDown()
-        Log.e("MLB", "$uuid updated")
     }
 
 

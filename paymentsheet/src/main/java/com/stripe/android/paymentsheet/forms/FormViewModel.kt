@@ -99,34 +99,23 @@ internal class FormViewModel @Inject internal constructor(
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
-                // The co-routine scope is needed to do work off the UI thread and so isActive is properly updated
+                // The co-routine scope is needed to do work off the UI thread so that the
+                // repository ready event can be observed in the ComposeFormDataCollection
+                // Fragment and the fragment repository will be update and ready
                 CoroutineScope(Dispatchers.IO).launch {
-                    resourceRepository.waitUntilLoaded()
-                    if (isActive) {
-//                        Log.e(
-//                            "MLB",
-//                            "${resourceRepository.getLpmRepository().uuid} is loaded: ${
-//                                resourceRepository.getLpmRepository().isLoaded()
-//                            }"
-//                        )
+
+                    // If after we complete waiting for the repository things are still
+                    // active, then update the elements
+                    if (resourceRepository.waitUntilLoaded() && isActive) {
                         // When open payment options with returning customer with saved cards, then
                         // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
                         // is no longer listening for the resource repository to be ready and so
                         // the resource repository is not ready!
-                        if (resourceRepository.isLoaded()) {
-                            withContext(Dispatchers.Main) {
-                                delayedElements.value = transformSpecToElement.transform(
-                                    getLpmItems(paymentMethodCode)
-                                )
-                            }
+                        withContext(Dispatchers.Main) {
+                            delayedElements.value = transformSpecToElement.transform(
+                                getLpmItems(paymentMethodCode)
+                            )
                         }
-                    } else {
-//                        Log.e(
-//                            "MLB",
-//                            "${resourceRepository.getLpmRepository().uuid} is loaded: ${
-//                                resourceRepository.getLpmRepository().isLoaded()
-//                            }"
-//                        )
                     }
                 }
             }

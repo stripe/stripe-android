@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
@@ -211,7 +210,6 @@ internal class DefaultFlowController @Inject internal constructor(
             )
 
             // Wait until all required resources are loaded before completing initialization.
-            Log.e("MLB", "${resourceRepository.getLpmRepository().uuid} Default controller wait to load")
             resourceRepository.waitUntilLoaded()
 
             if (isActive) {

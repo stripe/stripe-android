@@ -123,15 +123,10 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             formViewModel.setEnabled(!processing)
         }
 
-        Log.e("MLB", "${formViewModel.resourceRepository.getLpmRepository().uuid} formViewModel loaded")
-
         sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
-            Log.e("MLB", "Base sheet view Model lpm is ready: ${isReady} thread: ${Thread.currentThread().id}")
             if (isReady) {
-                Log.e("MLB", "${formViewModel.resourceRepository.getLpmRepository().uuid} FormViewModel lpm is ready: ${formViewModel.resourceRepository.isLoaded()} intent present: ${sheetViewModel.stripeIntent.value != null}")
                 // THis is required in the case of fallback because there are two resource repositories
                 if (!formViewModel.resourceRepository.isLoaded()) {
-                    Log.e("MLB", "update form resource repository")
                     sheetViewModel.stripeIntent.value?.paymentMethodTypes?.let {
                         formViewModel.resourceRepository.getLpmRepository().update(
                             it,

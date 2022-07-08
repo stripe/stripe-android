@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -83,12 +82,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             !hasTransitionToUnsavedCard && newPaymentSelection != null
 
     init {
-        Log.e(
-            "MLB",
-            "Payment Options View Model: ${resourceRepository.getLpmRepository().uuid} loaded: ${
-                resourceRepository.getLpmRepository().isLoaded()
-            }"
-        )
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
         setupLink(args.stripeIntent, false)
         setStripeIntent(args.stripeIntent)

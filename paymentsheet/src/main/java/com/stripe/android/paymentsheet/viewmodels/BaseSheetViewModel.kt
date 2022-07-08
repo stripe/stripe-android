@@ -47,7 +47,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -255,25 +254,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             viewModelScope.launch {
                 // If we have been killed and are being restored then we need to re-seed
                 // the lpm repository
-                resourceRepository.getLpmRepository().apply {
-                    Log.e(
-                        "MLB",
-                        "Base sheet view Model Resource repository loaded: ${uuid}, loaded: ${isLoaded()}"
-                    )
-                    if (!isLoaded()) {
-                        // TODO: This should technically be done in the background
-                        stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
-                            Log.e("MLB", "Base sheet view Model calling update")
+                stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                    resourceRepository.getLpmRepository().apply {
+                        if (!isLoaded()) {
                             update(intentPaymentMethodTypes, lpmServerSpec)
                         }
                     }
                 }
-//                Log.e("MLB", "Base sheet view Model waiting lpm to load")
-                CoroutineScope(Dispatchers.IO).launch {
-                    resourceRepository.waitUntilLoaded()
-//                    Log.e("MLB", "Base sheet view Model READY thread: ${Thread.currentThread().id}")
-                    _isResourceRepositoryReady.postValue(true)
-                }
+
+                resourceRepository.waitUntilLoaded()
+                Log.e("MLB", "Base Sheet view model is ready")
+                _isResourceRepositoryReady.postValue(true)
             }
         }
     }
