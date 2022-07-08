@@ -18,7 +18,7 @@ internal object TestUtils {
     }
 }
 
-fun testJson() = Json {
+internal fun testJson() = Json {
     coerceInputValues = true
     ignoreUnknownKeys = true
     isLenient = true
