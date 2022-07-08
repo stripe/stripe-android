@@ -13,19 +13,32 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.json.Json
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+/**
+ *
+ */
 @Module(
     includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
-internal object FinancialConnectionsSheetModule {
+internal object FinancialConnectionsSheetSharedModule {
+
+    @Provides
+    @Singleton
+    internal fun providesJson(): Json = Json {
+        coerceInputValues = true
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+    }
 
     @Provides
     @Singleton
@@ -44,7 +57,7 @@ internal object FinancialConnectionsSheetModule {
     @Provides
     @Singleton
     fun provideConnectionsRepository(
-        repository: FinancialConnectionsApiRepository
+        repository: FinancialConnectionsRepositoryImpl
     ): FinancialConnectionsRepository = repository
 
     @Provides

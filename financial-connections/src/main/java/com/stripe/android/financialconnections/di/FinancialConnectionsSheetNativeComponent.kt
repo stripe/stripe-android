@@ -14,7 +14,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         FinancialConnectionsSheetNativeModule::class,
-        FinancialConnectionsSheetModule::class,
+        FinancialConnectionsSheetSharedModule::class,
         LoggingModule::class,
         CoroutineContextModule::class
     ]

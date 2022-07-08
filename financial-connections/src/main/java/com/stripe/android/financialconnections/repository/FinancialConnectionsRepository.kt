@@ -68,27 +68,6 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun searchInstitutions(
-        clientSecret: String,
-        query: String
-    ): InstitutionResponse
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun featuredInstitutions(
-        clientSecret: String
-    ): InstitutionResponse
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     suspend fun postAuthorizationSession(
         clientSecret: String,
         institutionId: String
