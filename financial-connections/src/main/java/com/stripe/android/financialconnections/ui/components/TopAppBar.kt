@@ -19,7 +19,7 @@ internal fun FinancialConnectionsTopAppBar(
             contentDescription = null // decorative element
         )
     },
-    navigationIcon: @Composable (() -> Unit)? = null,
+    navigationIcon: @Composable (() -> Unit)? = null
 ) {
     TopAppBar(
         title = title,

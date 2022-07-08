@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import javax.inject.Inject
 
-class FinancialConnectionsRequestExecutor @Inject constructor(
+internal class FinancialConnectionsRequestExecutor @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val json: Json
 ) {

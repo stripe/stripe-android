@@ -5,7 +5,6 @@ import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
 
-
 internal interface FinancialConnectionsInstitutionsRepository {
 
     suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse
@@ -17,7 +16,9 @@ internal interface FinancialConnectionsInstitutionsRepository {
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory
         ): FinancialConnectionsInstitutionsRepository = FinancialConnectionsInstitutionsRepositoryImpl(
-            publishableKey, requestExecutor, apiRequestFactory
+            publishableKey,
+            requestExecutor,
+            apiRequestFactory
         )
     }
 }

@@ -72,7 +72,7 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = { viewModel.onQueryChanged(it) },
         onInstitutionSelected = { viewModel.onInstitutionSelected(it) },
         onCancelSearchClick = { viewModel.onCancelSearchClick() },
-        onSearchFocused = { viewModel.onSearchFocused() },
+        onSearchFocused = { viewModel.onSearchFocused() }
     )
 }
 
@@ -160,7 +160,7 @@ private fun FinancialConnectionsSearchRow(
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
             value = query,
-            onValueChange = onQueryChanged,
+            onValueChange = onQueryChanged
         )
     }
 }
@@ -181,7 +181,7 @@ private fun SearchInstitutionsList(
                 is Loading -> item {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         CircularProgressIndicator(
                             color = FinancialConnectionsTheme.colors.textBrand
@@ -211,7 +211,7 @@ private fun SearchInstitutionsList(
                                 Text(
                                     text = institution.name,
                                     color = FinancialConnectionsTheme.colors.textPrimary,
-                                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
+                                    style = FinancialConnectionsTheme.typography.bodyEmphasized
                                 )
                                 Text(
                                     text = institution.url ?: "",
@@ -308,7 +308,7 @@ private fun InstitutionPickerPreview() {
             onQueryChanged = {},
             onInstitutionSelected = {},
             onCancelSearchClick = {},
-            onSearchFocused = {},
+            onSearchFocused = {}
         )
     }
 }

@@ -35,6 +35,8 @@ internal class FinancialConnectionsSheetNativeModule {
         requestExecutor: FinancialConnectionsRequestExecutor,
         apiRequestFactory: ApiRequest.Factory
     ) = FinancialConnectionsInstitutionsRepository(
-        publishableKey, requestExecutor, apiRequestFactory
+        publishableKey,
+        requestExecutor,
+        apiRequestFactory
     )
 }

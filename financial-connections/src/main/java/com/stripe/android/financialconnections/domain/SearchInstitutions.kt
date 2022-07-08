@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
-import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
 /**
