@@ -9,12 +9,14 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
 import com.stripe.android.ui.core.DefaultPaymentsTheme
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
+@Ignore("Flakes on CI, need to investigate.")
 class InputAddressScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
