@@ -82,6 +82,7 @@ internal class WalletViewModel @Inject constructor(
                                 when (paymentResult) {
                                     is PaymentResult.Canceled -> {
                                         // no-op, let the user continue their flow
+                                        _isProcessing.value = false
                                     }
                                     is PaymentResult.Failed -> {
                                         onError(paymentResult.throwable)
@@ -92,8 +93,6 @@ internal class WalletViewModel @Inject constructor(
                             },
                             onFailure = ::onError
                         )
-
-                        _isProcessing.value = false
                     }
                 } else {
                     val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
