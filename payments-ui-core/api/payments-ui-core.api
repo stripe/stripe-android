@@ -193,6 +193,7 @@ public final class com/stripe/android/ui/core/elements/Capitalization$$serialize
 }
 
 public final class com/stripe/android/ui/core/elements/Capitalization$Companion {
+	public final fun from (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/Capitalization;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -445,6 +446,7 @@ public final class com/stripe/android/ui/core/elements/KeyboardType$$serializer 
 }
 
 public final class com/stripe/android/ui/core/elements/KeyboardType$Companion {
+	public final fun from (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -696,6 +698,7 @@ public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepos
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Companion {
+	public final fun getExposedPaymentMethods ()Ljava/util/List;
 	public final fun getHardcodedCard ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
 }
 
