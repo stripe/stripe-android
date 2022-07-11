@@ -11,4 +11,6 @@
     <!-- Shipping Address Element -->
     <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
     <string name="stripe_paymentsheet_autocomplete_no_results_found">No results found</string>
+    <string name="stripe_paymentsheet_address_element_shipping_address">Shipping Address</string>
+    <string name="stripe_paymentsheet_address_element_primary_button">Save Address</string>
 </resources>

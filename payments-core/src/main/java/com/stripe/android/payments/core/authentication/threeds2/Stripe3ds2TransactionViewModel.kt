@@ -56,6 +56,11 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
     var hasCompleted: Boolean = savedStateHandle.contains(KEY_HAS_COMPLETED)
 
+    // When the nextActionData object holds a publishable key, it should be used for 3DS2 requests.
+    // That is the case for payments using Link, for example.
+    val threeDS2RequestOptions = args.nextActionData.publishableKey?.takeIf { it.isNotEmpty() }
+        ?.let { ApiRequest.Options(it) } ?: args.requestOptions
+
     suspend fun processChallengeResult(
         challengeResult: ChallengeResult
     ): PaymentFlowResult.Unvalidated {
@@ -107,7 +112,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
             perform3ds2AuthenticationRequest(
                 transaction,
                 stripe3ds2Fingerprint,
-                args.requestOptions,
+                threeDS2RequestOptions,
                 timeout
             )
         }.fold(
@@ -226,7 +231,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 stripeAccountId = args.requestOptions.stripeAccount,
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true,
-                publishableKey = args.publishableKey,
+                publishableKey = threeDS2RequestOptions.apiKey,
                 isInstantApp = isInstantApp
             )
         )
@@ -271,8 +276,8 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 IntentData(
                     args.stripeIntent.clientSecret.orEmpty(),
                     sourceId,
-                    args.requestOptions.apiKey,
-                    args.requestOptions.stripeAccount
+                    threeDS2RequestOptions.apiKey,
+                    threeDS2RequestOptions.stripeAccount
                 )
             )
         )

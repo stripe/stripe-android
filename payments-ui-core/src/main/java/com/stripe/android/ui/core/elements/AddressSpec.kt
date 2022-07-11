@@ -12,6 +12,18 @@ enum class DisplayField {
     Country
 }
 
+@Serializable
+enum class AddressType {
+    @SerialName("shipping_condensed")
+    ShippingCondensed,
+
+    @SerialName("shipping_expanded")
+    ShippingExpanded,
+
+    @SerialName("normal")
+    Normal
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
 data class AddressSpec(
@@ -22,7 +34,13 @@ data class AddressSpec(
     val allowedCountryCodes: Set<String> = supportedBillingCountries,
 
     @SerialName("display_fields")
-    val displayFields: Set<DisplayField> = emptySet()
+    val displayFields: Set<DisplayField> = emptySet(),
+
+    @SerialName("show_label")
+    val showLabel: Boolean = true,
+
+    @SerialName("address_type")
+    val type: AddressType = AddressType.Normal
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
@@ -41,9 +59,10 @@ data class AddressSpec(
                 apiPath,
                 addressRepository,
                 initialValues,
-                countryCodes = allowedCountryCodes
+                countryCodes = allowedCountryCodes,
+                addressType = type
             )
         },
-        label = R.string.billing_details
+        label = if (showLabel) R.string.billing_details else null
     )
 }

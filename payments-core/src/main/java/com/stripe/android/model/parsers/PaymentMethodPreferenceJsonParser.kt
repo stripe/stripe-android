@@ -16,7 +16,7 @@ internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : Strip
         val paymentMethodPreference =
             StripeJsonUtils.mapToJsonObject(StripeJsonUtils.optMap(json, OBJECT_TYPE_PREFERENCE))
 
-        var objectType = StripeJsonUtils.optString(paymentMethodPreference, FIELD_OBJECT)
+        val objectType = StripeJsonUtils.optString(paymentMethodPreference, FIELD_OBJECT)
         if (paymentMethodPreference == null || OBJECT_TYPE_PREFERENCE != objectType) {
             return null
         }

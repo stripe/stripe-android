@@ -25,15 +25,11 @@ import com.stripe.android.identity.utils.isNavigatedUpTo
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
@@ -43,7 +39,6 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class)
 internal class IdentityActivityTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val mockIdentityViewModelFactory = mock<IdentityViewModel.IdentityViewModelFactory>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationArgs }.thenReturn(ARGS)
         on { identityAnalyticsRequestFactory }.thenReturn(
@@ -56,18 +51,6 @@ internal class IdentityActivityTest {
         on { screenTracker }.thenReturn(mock())
         on { uiContext }.thenReturn(testDispatcher)
         on { workContext }.thenReturn(testDispatcher)
-    }
-
-    @Before
-    fun setUpViewModelFactory() {
-        whenever(
-            mockIdentityViewModelFactory.create(
-                any(),
-                eq(IdentityViewModel::class.java)
-            )
-        ).thenReturn(
-            mockIdentityViewModel
-        )
     }
 
     @Test
@@ -336,7 +319,7 @@ internal class IdentityActivityTest {
     fun `when activity is recreated after launchFallbackUrl no fragment is recreated`() {
         injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                viewModelFactory = mockIdentityViewModelFactory
+                viewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(
@@ -356,7 +339,7 @@ internal class IdentityActivityTest {
     fun `when activity is recreated without launchFallbackUrl fragment is recreated`() {
         injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                viewModelFactory = mockIdentityViewModelFactory
+                viewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(
@@ -377,7 +360,7 @@ internal class IdentityActivityTest {
     ) {
         val injectableActivityScenario = injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                viewModelFactory = mockIdentityViewModelFactory
+                viewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(
