@@ -484,7 +484,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             injectorKey = args.injectorKey
         )
         idleLooper()
-        println("fallback, idle")
 
         // somehow the saveInstanceState for the viewModel needs to be present
 

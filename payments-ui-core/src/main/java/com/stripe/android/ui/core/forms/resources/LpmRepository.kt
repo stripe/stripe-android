@@ -62,9 +62,7 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
-    fun isLoaded(): Boolean {
-        return serverInitializedLatch.count == 0L
-    }
+    fun isLoaded() = serverInitializedLatch.count == 0L
 
     fun waitUntilLoaded(): Boolean {
         var timeoutSeconds = 10

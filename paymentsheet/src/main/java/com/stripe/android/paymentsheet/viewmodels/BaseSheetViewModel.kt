@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
@@ -47,6 +46,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -252,19 +252,21 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (_isResourceRepositoryReady.value != true) {
             viewModelScope.launch {
-                // If we have been killed and are being restored then we need to re-seed
-                // the lpm repository
-                stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
-                    resourceRepository.getLpmRepository().apply {
-                        if (!isLoaded()) {
-                            update(intentPaymentMethodTypes, lpmServerSpec)
+                // This work should be done on the background
+                CoroutineScope(workContext).launch {
+                    // If we have been killed and are being restored then we need to re-populate
+                    // the lpm repository
+                    stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                        resourceRepository.getLpmRepository().apply {
+                            if (!isLoaded()) {
+                                update(intentPaymentMethodTypes, lpmServerSpec)
+                            }
                         }
                     }
-                }
 
-                resourceRepository.waitUntilLoaded()
-                Log.e("MLB", "Base Sheet view model is ready")
-                _isResourceRepositoryReady.postValue(true)
+                    resourceRepository.waitUntilLoaded()
+                    _isResourceRepositoryReady.postValue(true)
+                }
             }
         }
     }
