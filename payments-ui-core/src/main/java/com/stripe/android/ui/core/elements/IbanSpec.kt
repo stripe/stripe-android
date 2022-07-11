@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IbanSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_debit[iban]")
 ) : FormItemSpec() {
     fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         IbanElement(
@@ -19,8 +19,4 @@ data class IbanSpec(
             )
         )
     )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Generic("sepa_debit[iban]")
-    }
 }

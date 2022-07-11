@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EmailSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
+    override val apiPath: IdentifierSpec = IdentifierSpec.Email
 ) : FormItemSpec() {
     fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         EmailElement(
@@ -16,8 +16,4 @@ data class EmailSpec(
             initialValue = initialValues[IdentifierSpec.Email]
         )
     )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Email
-    }
 }

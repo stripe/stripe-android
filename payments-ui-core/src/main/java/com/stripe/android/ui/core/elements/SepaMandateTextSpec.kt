@@ -14,16 +14,11 @@ import kotlinx.serialization.Transient
 @Serializable
 internal data class SepaMandateTextSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes
-    val stringResId: Int = DEFAULT_STRING_RES_ID,
+    val stringResId: Int = R.string.sepa_mandate
 ) : FormItemSpec() {
     @Transient
     private val mandateTextSpec = MandateTextSpec(apiPath, stringResId)
     fun transform(merchantName: String): FormElement = mandateTextSpec.transform(merchantName)
-
-    companion object {
-        val DEFAULT_STRING_RES_ID: Int = R.string.sepa_mandate
-        val DEFAULT_API_PATH = IdentifierSpec.Generic("sepa_mandate")
-    }
 }

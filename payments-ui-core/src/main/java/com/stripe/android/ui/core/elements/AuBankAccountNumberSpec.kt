@@ -8,7 +8,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 class AuBankAccountNumberSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic(
+        "au_becs_debit[account_number]"
+    )
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
@@ -21,10 +23,4 @@ class AuBankAccountNumberSpec(
             )
         )
     )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Generic(
-            "au_becs_debit[account_number]"
-        )
-    }
 }

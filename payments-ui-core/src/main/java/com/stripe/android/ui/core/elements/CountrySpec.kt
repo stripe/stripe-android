@@ -13,10 +13,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CountrySpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Country,
 
     @SerialName("allowed_country_codes")
-    val allowedCountryCodes: Set<String> = DEFAULT_ALLOWED_COUNTRY_CODES
+    val allowedCountryCodes: Set<String> = supportedBillingCountries
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>
@@ -29,9 +29,4 @@ data class CountrySpec(
             )
         )
     )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Country
-        val DEFAULT_ALLOWED_COUNTRY_CODES = supportedBillingCountries
-    }
 }

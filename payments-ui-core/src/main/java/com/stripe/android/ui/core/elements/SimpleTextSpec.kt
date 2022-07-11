@@ -19,17 +19,7 @@ enum class Capitalization {
     Words,
 
     @SerialName("sentences")
-    Sentences;
-
-    companion object {
-        fun from(str: String) = when (str) {
-            "none" -> None
-            "characters" -> Characters
-            "words" -> Words
-            "sentences" -> Sentences
-            else -> None
-        }
-    }
+    Sentences
 }
 
 @Suppress("EnumEntryName")
@@ -57,21 +47,7 @@ enum class KeyboardType {
     Password,
 
     @SerialName("number_password")
-    NumberPassword;
-
-    companion object {
-        fun from(str: String) = when (str) {
-            "text" -> Text
-            "ascii" -> Ascii
-            "number" -> Number
-            "phone" -> Phone
-            "uri" -> Uri
-            "email" -> Email
-            "password" -> Password
-            "number_password" -> NumberPassword
-            else -> Text
-        }
-    }
+    NumberPassword,
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -85,15 +61,14 @@ data class SimpleTextSpec(
     val label: Int,
 
     @SerialName("capitalization")
-    val capitalization: Capitalization = DEFAULT_CAPITALIZATION,
+    val capitalization: Capitalization = Capitalization.None,
 
     @SerialName("keyboard_type")
-    val keyboardType: KeyboardType = DEFAULT_KEYBOARD_TYPE,
+    val keyboardType: KeyboardType = KeyboardType.Ascii,
 
     @SerialName("show_optional_label")
-    val showOptionalLabel: Boolean = DEFAULT_SHOW_OPTIONAL_LABEL
+    val showOptionalLabel: Boolean = false
 ) : FormItemSpec() {
-
     fun transform(
         initialValues: Map<IdentifierSpec, String?> = mapOf()
     ) = createSectionElement(
@@ -124,13 +99,4 @@ data class SimpleTextSpec(
             )
         )
     )
-
-    companion object {
-
-        val DEFAULT_CAPITALIZATION = Capitalization.None
-
-        val DEFAULT_KEYBOARD_TYPE = KeyboardType.Ascii
-
-        val DEFAULT_SHOW_OPTIONAL_LABEL = false
-    }
 }

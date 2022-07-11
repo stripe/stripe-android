@@ -22,7 +22,6 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -73,7 +72,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference? {
+    ): PaymentIntent? {
         return null
     }
 
@@ -105,7 +104,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference? {
+    ): SetupIntent? {
         return null
     }
 

@@ -28,10 +28,10 @@ enum class AddressType {
 @Serializable
 data class AddressSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
 
     @SerialName("allowed_country_codes")
-    val allowedCountryCodes: Set<String> = DEFAULT_ALLOWED_COUNTRY_CODES,
+    val allowedCountryCodes: Set<String> = supportedBillingCountries,
 
     @SerialName("display_fields")
     val displayFields: Set<DisplayField> = emptySet(),
@@ -65,9 +65,4 @@ data class AddressSpec(
         },
         label = if (showLabel) R.string.billing_details else null
     )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Generic("billing_details[address]")
-        val DEFAULT_ALLOWED_COUNTRY_CODES = supportedBillingCountries
-    }
 }

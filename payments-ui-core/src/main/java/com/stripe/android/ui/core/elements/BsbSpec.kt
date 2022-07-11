@@ -9,7 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BsbSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic(
+        "au_becs_debit[bsb_number]"
+    )
 ) : FormItemSpec() {
     fun transform(initialValues: Map<IdentifierSpec, String?>): BsbElement =
         BsbElement(
@@ -17,12 +19,6 @@ data class BsbSpec(
             banks,
             initialValues[this.apiPath]
         )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Generic(
-            "au_becs_debit[bsb_number]"
-        )
-    }
 }
 
 private val banks: List<BecsDebitBanks.Bank> = listOf(

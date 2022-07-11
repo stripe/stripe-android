@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MandateTextSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     @StringRes
     val stringResId: Int
 ) : FormItemSpec() {
@@ -24,8 +24,4 @@ data class MandateTextSpec(
             this.stringResId,
             merchantName
         )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Generic("mandate")
-    }
 }

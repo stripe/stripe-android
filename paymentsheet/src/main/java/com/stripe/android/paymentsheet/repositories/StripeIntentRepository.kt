@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -18,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 internal sealed class StripeIntentRepository {
     abstract suspend fun get(
         clientSecret: ClientSecret
-    ): PaymentMethodPreference
+    ): StripeIntent
 
     /**
      * Retrieve the [StripeIntent] from a static source.
@@ -26,8 +25,7 @@ internal sealed class StripeIntentRepository {
     class Static(
         private val stripeIntent: StripeIntent
     ) : StripeIntentRepository() {
-        override suspend fun get(clientSecret: ClientSecret) =
-            PaymentMethodPreference(stripeIntent)
+        override suspend fun get(clientSecret: ClientSecret) = stripeIntent
     }
 
     /**
@@ -67,11 +65,7 @@ internal sealed class StripeIntentRepository {
                             clientSecret.value,
                             requestOptions,
                             expandFields = listOf("payment_method")
-                        )?.let {
-                            PaymentMethodPreference(
-                                it
-                            )
-                        }
+                        )
                     ) {
                         "Could not parse PaymentIntent."
                     }
@@ -90,11 +84,7 @@ internal sealed class StripeIntentRepository {
                             clientSecret.value,
                             requestOptions,
                             expandFields = listOf("payment_method")
-                        )?.let {
-                            PaymentMethodPreference(
-                                it
-                            )
-                        }
+                        )
                     ) {
                         "Could not parse SetupIntent."
                     }

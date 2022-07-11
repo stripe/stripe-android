@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class StaticTextSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_IDENTIFIER_SPEC,
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("static_text"),
     @StringRes val stringResId: Int
 ) : FormItemSpec() {
     fun transform(): FormElement =
@@ -20,8 +20,4 @@ internal data class StaticTextSpec(
             this.apiPath,
             this.stringResId
         )
-
-    companion object {
-        val DEFAULT_IDENTIFIER_SPEC = IdentifierSpec.Generic("static_text")
-    }
 }

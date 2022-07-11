@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CardDetailsSectionSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = DEFAULT_API_PATH
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details")
 ) : FormItemSpec() {
     fun transform(
         context: Context,
@@ -25,8 +25,4 @@ data class CardDetailsSectionSpec(
             viewOnlyFields = viewOnlyFields,
             identifier = apiPath
         )
-
-    companion object {
-        val DEFAULT_API_PATH = IdentifierSpec.Generic("card_details")
-    }
 }
