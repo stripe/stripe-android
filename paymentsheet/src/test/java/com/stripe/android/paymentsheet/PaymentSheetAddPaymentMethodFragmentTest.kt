@@ -530,7 +530,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         PaymentMethod.Type.USBankAccount.code,
                         PaymentMethod.Type.SepaDebit.code,
                         PaymentMethod.Type.Bancontact.code
-                    ), null
+                    ),
+                    null
                 )
             }
         val Bancontact = lpmRepository.fromCode("bancontact")!!

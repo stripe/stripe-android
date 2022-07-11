@@ -84,7 +84,7 @@ class LpmRepository @Inject constructor(
         expectedLpms: List<String>,
         serverLpmSpecs: String?
     ) {
-        //TODO: Call analytics if parsing fails for any reason
+        // TODO: Call analytics if parsing fails for any reason
 
         update(parseLpms(serverLpmSpecs))
 
@@ -108,7 +108,6 @@ class LpmRepository @Inject constructor(
         serverInitializedLatch.countDown()
     }
 
-
     @VisibleForTesting
     fun updateFromDisk() {
         update(readFromDisk())
@@ -116,7 +115,6 @@ class LpmRepository @Inject constructor(
 
     private fun readFromDisk() =
         parseLpms(resources?.assets?.open("lpms.json"))
-
 
     private fun update(lpms: List<SharedDataSpec>?) {
         // By mapNotNull we will not accept any LPMs that are not known by the platform.

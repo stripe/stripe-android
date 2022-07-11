@@ -35,7 +35,7 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "succeeded"
         }
-        """.trimIndent()
+            """.trimIndent()
         )
     }
 
@@ -125,7 +125,7 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
+            """.trimIndent()
         )
     }
 
@@ -194,7 +194,7 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )!!
     }
@@ -252,7 +252,7 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )!!
     }
@@ -310,7 +310,7 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )!!
     }
@@ -343,7 +343,7 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )!!
     }
@@ -422,7 +422,7 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )!!
     }
@@ -494,7 +494,7 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )!!
     }
@@ -571,9 +571,10 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-            """.trimIndent()
+                """.trimIndent()
+            )
         )
-    )
+    }
 
     val PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE by lazy {
         PARSER.parse(
@@ -673,14 +674,14 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_payment_method"
         }
-            """.trimIndent()
+                """.trimIndent()
             )
         )
     }
 
-        val EXPANDED_PAYMENT_METHOD_JSON by lazy {
-            JSONObject(
-                """
+    val EXPANDED_PAYMENT_METHOD_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1GSTxJCRMbs",
             "object": "payment_intent",
@@ -755,13 +756,13 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_action"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_SHIPPING_JSON by lazy {
-            JSONObject(
-                """
+    val PI_WITH_SHIPPING_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1GYda2CRMbs",
             "object": "payment_intent",
@@ -841,24 +842,24 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "succeeded"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_SHIPPING by lazy {
-            PARSER.parse(PI_WITH_SHIPPING_JSON)!!
-        }
-        val PI_OFF_SESSION by lazy {
-            PARSER.parse(
-                PI_WITH_SHIPPING_JSON
-            )!!.copy(
-                setupFutureUsage = StripeIntent.Usage.OffSession
-            )
-        }
+    val PI_WITH_SHIPPING by lazy {
+        PARSER.parse(PI_WITH_SHIPPING_JSON)!!
+    }
+    val PI_OFF_SESSION by lazy {
+        PARSER.parse(
+            PI_WITH_SHIPPING_JSON
+        )!!.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+    }
 
-        val OXXO_REQUIRES_ACTION_JSON by lazy {
-            JSONObject(
-                """
+    val OXXO_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1IcuwoL32KlRo",
             "object": "payment_intent",
@@ -910,17 +911,17 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_action"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val OXXO_REQUIES_ACTION by lazy {
-            requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
-        }
+    val OXXO_REQUIES_ACTION by lazy {
+        requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
+    }
 
-        val ALIPAY_REQUIRES_ACTION_JSON by lazy {
-            JSONObject(
-                """
+    val ALIPAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
           "object": "payment_intent",
@@ -975,17 +976,17 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val ALIPAY_REQUIRES_ACTION by lazy {
-            PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
-        }
+    val ALIPAY_REQUIRES_ACTION by lazy {
+        PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+    }
 
-        val ALIPAY_TEST_MODE_JSON by lazy {
-            JSONObject(
-                """
+    val ALIPAY_TEST_MODE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
           "object": "payment_intent",
@@ -1040,17 +1041,17 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val ALIPAY_TEST_MODE by lazy {
-            PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
-        }
+    val ALIPAY_TEST_MODE by lazy {
+        PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
+    }
 
-        val PI_REQUIRES_BLIK_AUTHORIZE_JSON by lazy {
-            JSONObject(
-                """
+    val PI_REQUIRES_BLIK_AUTHORIZE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1IVmwXFY0qyl6XeWwxGWA04D",
           "object": "payment_intent",
@@ -1110,17 +1111,17 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_REQUIRES_BLIK_AUTHORIZE by lazy {
-            PARSER.parse(PI_REQUIRES_BLIK_AUTHORIZE_JSON)!!
-        }
+    val PI_REQUIRES_BLIK_AUTHORIZE by lazy {
+        PARSER.parse(PI_REQUIRES_BLIK_AUTHORIZE_JSON)!!
+    }
 
-        private val PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON by lazy {
-            JSONObject(
-                """
+    private val PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1IlJH7BNJ02ErVOjm37T3OUt",
           "object": "payment_intent",
@@ -1206,20 +1207,20 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_REQUIRES_WECHAT_PAY_AUTHORIZE by lazy {
-            PARSER.parse(PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
-        }
+    val PI_REQUIRES_WECHAT_PAY_AUTHORIZE by lazy {
+        PARSER.parse(PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+    }
 
-        /**
-         * A sample response of PI from refresh endpoint that has status 'requires_action'
-         */
-        val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON by lazy {
-            JSONObject(
-                """
+    /**
+     * A sample response of PI from refresh endpoint that has status 'requires_action'
+     */
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
           "object": "payment_intent",
@@ -1271,20 +1272,20 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE by lazy {
-            PARSER.parse(PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
-        }
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE by lazy {
+        PARSER.parse(PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+    }
 
-        /**
-         * A sample response of PI from refresh endpoint that has status 'succeeded'
-         */
-        val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON by lazy {
-            JSONObject(
-                """
+    /**
+     * A sample response of PI from refresh endpoint that has status 'succeeded'
+     */
+    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
           "object": "payment_intent",
@@ -1336,17 +1337,17 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "succeeded"
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS by lazy {
-            PARSER.parse(PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON)!!
-        }
+    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS by lazy {
+        PARSER.parse(PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON)!!
+    }
 
-        val PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON by lazy {
-            JSONObject(
-                """
+    val PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3JoznDLu5o3P18Zp0lRzng7p",
           "object": "payment_intent",
@@ -1400,17 +1401,17 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_KLARNA_IN_PAYMENT_METHODS by lazy {
-            PARSER.parse(PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON)!!
-        }
+    val PI_WITH_KLARNA_IN_PAYMENT_METHODS by lazy {
+        PARSER.parse(PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON)!!
+    }
 
-        val PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON by lazy {
-            JSONObject(
-                """
+    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3KTyNsLu5o3P18Zp1aPD6iIX",
           "object": "payment_intent",
@@ -1476,16 +1477,16 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_AFFIRM_IN_PAYMENT_METHODS by lazy {
-            PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
-        }
-        val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON by lazy {
-            JSONObject(
-                """
+    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS by lazy {
+        PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
+    }
+    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON by lazy {
+        JSONObject(
+            """
             {
               "id": "pi_3KcDp1FnkumiFUFx1d5DwGIq",
               "object": "payment_intent",
@@ -1559,39 +1560,39 @@ internal object PaymentIntentFixtures {
               "shipping": null,
               "source": null
             }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS by lazy {
-            PARSER.parse(PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON)!!
-        }
+    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS by lazy {
+        PARSER.parse(PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON)!!
+    }
 
-        val PI_LINK_ACCOUNT_SESSION_JSON by lazy {
-            JSONObject(
-                """
+    val PI_LINK_ACCOUNT_SESSION_JSON by lazy {
+        JSONObject(
+            """
             {
               "client_secret": "test_client_secret",
               "id": "random_id"
             }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val SI_LINK_ACCOUNT_SESSION_JSON by lazy {
-            JSONObject(
-                """
+    val SI_LINK_ACCOUNT_SESSION_JSON by lazy {
+        JSONObject(
+            """
             {
               "client_secret": "test_client_secret",
               "id": "random_id"
             }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON by lazy {
-            JSONObject(
-                """
+    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON by lazy {
+        JSONObject(
+            """
             {
                 "id": "pi_3KbV27Lu5o3P18Zp1e7NOonG",
                 "object": "payment_intent",
@@ -1620,15 +1621,15 @@ internal object PaymentIntentFixtures {
                 "shipping": null,
                 "source": null
             }
-        """.trimIndent()
-            )
-        }
+            """.trimIndent()
+        )
+    }
 
-        val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED by lazy {
-            PARSER.parse(PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
-        }
-        val PI_WITH_CARD_AFTERPAY_AU_BECS by lazy {
-            """
+    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED by lazy {
+        PARSER.parse(PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
+    }
+    val PI_WITH_CARD_AFTERPAY_AU_BECS by lazy {
+        """
             {
               "apple_pay_preference": "enabled",
               "business_name": "AU Mobile Example Account",
@@ -1726,10 +1727,10 @@ internal object PaymentIntentFixtures {
               ]
             }
         """.trimIndent()
-        }
+    }
 
-        val PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS by lazy {
-            """
+    val PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS by lazy {
+        """
             {
               "apple_pay_preference": "enabled",
               "business_name": "AU Mobile Example Account",
@@ -1822,6 +1823,5 @@ internal object PaymentIntentFixtures {
               ]
             }
         """.trimIndent()
-        }
     }
 }

@@ -70,7 +70,7 @@ internal sealed class StripeIntentRepository {
                         )?.let {
                             PaymentMethodPreference(
                                 it
-                        )
+                            )
                         }
                     ) {
                         "Could not parse PaymentIntent."
@@ -93,7 +93,7 @@ internal sealed class StripeIntentRepository {
                         )?.let {
                             PaymentMethodPreference(
                                 it
-                        )
+                            )
                         }
                     ) {
                         "Could not parse SetupIntent."

@@ -63,7 +63,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             injectorKey = injectorKey,
             resourceRepository = StaticResourceRepository(
                 mock(),
-                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply{
+                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
                     this.update(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
                 }
             ),

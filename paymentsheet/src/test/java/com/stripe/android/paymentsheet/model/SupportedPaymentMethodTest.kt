@@ -21,7 +21,7 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply{
+    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
         this.update(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
     }
     private val card = LpmRepository.HardcodedCard
