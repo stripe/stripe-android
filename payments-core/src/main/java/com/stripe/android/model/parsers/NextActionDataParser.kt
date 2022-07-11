@@ -101,7 +101,9 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     parseDirectoryServerEncryption(
                         json.optJSONObject(FIELD_DIRECTORY_SERVER_ENCRYPTION)
                             ?: JSONObject()
-                    )
+                    ),
+                    optString(json, FIELD_THREE_D_SECURE_2_INTENT),
+                    optString(json, FIELD_PUBLISHABLE_KEY)
                 )
                 else -> null
             }
@@ -143,6 +145,9 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_CERTIFICATE = "certificate"
             private const val FIELD_KEY_ID = "key_id"
             private const val FIELD_ROOT_CAS = "root_certificate_authorities"
+
+            private const val FIELD_THREE_D_SECURE_2_INTENT = "three_d_secure_2_intent"
+            private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
 
             private const val FIELD_STRIPE_JS = "stripe_js"
         }

@@ -33,7 +33,7 @@ internal fun InputAddressScreen(
     onEnterManuallyClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.fillMaxHeight()) {
         AddressOptionsAppBar(
             isRootScreen = true,
             onButtonClick = { onCloseClick() }
