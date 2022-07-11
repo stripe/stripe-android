@@ -92,7 +92,8 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethod.Type.Ideal.code,
                 PaymentMethod.Type.SepaDebit.code,
                 PaymentMethod.Type.Sofort.code
-            ), null
+            ),
+            null
         )
     }
     private val prefsRepository = FakePrefsRepository()

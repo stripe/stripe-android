@@ -46,9 +46,9 @@ internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : Strip
             }?.let {
                 PaymentMethodPreference(
                     it,
-                    paymentMethodSpecs?.toString()// formUI string
+                    paymentMethodSpecs?.toString() // formUI string
                 )
-        }
+            }
     }
 
     abstract fun parseStripeIntent(stripeIntentJson: JSONObject): StripeIntentType?

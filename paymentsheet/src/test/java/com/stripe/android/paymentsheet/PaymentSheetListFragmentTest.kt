@@ -330,7 +330,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
 
         val lpmRepository =
-            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources).apply{
+            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources).apply {
                 this.updateFromDisk()
             }
     }
