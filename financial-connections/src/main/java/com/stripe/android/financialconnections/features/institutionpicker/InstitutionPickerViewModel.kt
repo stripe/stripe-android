@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -67,12 +68,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: Institution) {
         suspend {
             // api call
-            postAuthorizationSession(institution.id)
+            val session = postAuthorizationSession(institution.id)
             // navigate to next step
-            nativeAuthFlowCoordinator().emit(Message.OpenWebAuthFlow)
-            // TODO@carlosmuvi use this when next steps available in native.
-//            updateAuthSession(session)
-//            requestNextStep(currentStep = NavigationDirections.institutionPicker)
+            nativeAuthFlowCoordinator().emit(Message.UpdateAuthorizationSession(session))
+            nativeAuthFlowCoordinator().emit(Message.RequestNextStep(NavigationDirections.institutionPicker))
         }.execute {
             copy(selectInstitution = it)
         }

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -17,7 +18,8 @@ import javax.inject.Provider
  */
 internal class FinancialConnectionsSubcomponentBuilderProvider @Inject constructor(
     val consentSubComponentBuilder: Provider<ConsentSubcomponent.Builder>,
-    val institutionPickerSubcomponentBuilder: Provider<InstitutionPickerSubcomponent.Builder>
+    val institutionPickerSubcomponentBuilder: Provider<InstitutionPickerSubcomponent.Builder>,
+    val partnerAuthSubcomponentBuilder: Provider<PartnerAuthSubcomponent.Builder>
     // other subcomponent builder providers will be added here
 )
 

@@ -13,7 +13,6 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <!-- Accepts success and cancel URIs that begin with "stripe-auth://link-accounts” -->
                 <data
                     android:host="link-accounts"

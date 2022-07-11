@@ -39,6 +39,11 @@ internal class GoNext @Inject constructor(
              */
             NavigationDirections.consent.destination ->
                 manifest.nextPane.toNavigationCommand()
+            /**
+             * TODO decide next step properly.
+             */
+            NavigationDirections.partnerAuth.destination ->
+                manifest.nextPane.toNavigationCommand()
             else -> TODO()
         }
         logger.debug("Navigating to next pane: ${nextPane.destination}")
