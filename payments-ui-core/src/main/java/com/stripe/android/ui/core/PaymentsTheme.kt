@@ -119,7 +119,7 @@ object PaymentsThemeDefaults {
         placeholderText = Color(0x993C3C43),
         appBarIcon = Color(0x99000000),
         materialColors = lightColors(
-            primary = Color.Red,
+            primary = Color(0xFF007AFF),
             surface = Color.White,
             onSurface = Color.Black,
             error = Color.Red
