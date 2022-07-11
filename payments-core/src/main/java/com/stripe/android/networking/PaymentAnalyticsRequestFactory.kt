@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider

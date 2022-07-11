@@ -3,7 +3,7 @@ package com.stripe.android.link.analytics
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface LinkEventsReporter {
+internal interface LinkEventsReporter {
     fun onInlineSignupCheckboxChecked()
     fun onSignupFlowPresented()
     fun onSignupStarted(isInline: Boolean = false)
