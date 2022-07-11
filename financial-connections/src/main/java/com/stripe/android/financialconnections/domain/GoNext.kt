@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
@@ -18,6 +19,7 @@ import javax.inject.Inject
  */
 internal class GoNext @Inject constructor(
     private val navigationManager: NavigationManager,
+    private val eventReporter: FinancialConnectionsEventReporter,
     private val logger: Logger
 ) {
 
@@ -41,7 +43,10 @@ internal class GoNext @Inject constructor(
                 manifest.nextPane.toNavigationCommand()
             else -> TODO()
         }
-        logger.debug("Navigating to next pane: ${nextPane.destination}")
+        eventReporter.onPaneLaunched(
+            current = currentPane,
+            next = nextPane
+        )
         navigationManager.navigate(nextPane)
         return nextPane
     }

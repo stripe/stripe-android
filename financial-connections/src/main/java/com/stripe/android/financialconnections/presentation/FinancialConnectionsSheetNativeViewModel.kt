@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.presentation
 
+import androidx.navigation.NavDestination
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory

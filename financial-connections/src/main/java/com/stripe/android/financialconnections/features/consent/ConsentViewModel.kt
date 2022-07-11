@@ -4,6 +4,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -20,11 +21,13 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val eventReporter: FinancialConnectionsEventReporter,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     fun onContinueClick() {
         viewModelScope.launch {
+            eventReporter.onClickAgree(NavigationDirections.consent)
             val manifest: FinancialConnectionsSessionManifest = acceptConsent()
             with(nativeAuthFlowCoordinator()) {
                 emit(UpdateManifest(manifest))
@@ -33,28 +36,34 @@ internal class ConsentViewModel @Inject constructor(
         }
     }
 
-    fun onClickableTextClick(tag: String) {
-        setState {
-            when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-                ConsentClickableText.TERMS ->
-                    copy(viewEffect = OpenUrl(stripeToSUrl))
-                ConsentClickableText.PRIVACY ->
-                    copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy))
-                ConsentClickableText.DISCONNECT ->
-                    copy(viewEffect = OpenUrl(disconnectUrl))
-                ConsentClickableText.DATA ->
-                    copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet)
-                ConsentClickableText.PRIVACY_CENTER ->
-                    copy(viewEffect = OpenUrl(privacyCenterUrl))
-                ConsentClickableText.DATA_ACCESS ->
-                    copy(viewEffect = OpenUrl(dataPolicyUrl))
-                null -> {
-                    logger.error("Unrecognized clickable text: $tag")
-                    this
-                }
+    fun onClickableTextClick(tag: String) =
+        when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
+            ConsentClickableText.TERMS -> {
+                eventReporter.onClickLegalTerms(NavigationDirections.consent)
+                setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }
             }
+            ConsentClickableText.PRIVACY -> {
+                eventReporter.onClickLegalPrivacyPolicy(NavigationDirections.consent)
+                setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
+            }
+            ConsentClickableText.DISCONNECT -> {
+                eventReporter.onClickDisconnect(NavigationDirections.consent)
+                setState { copy(viewEffect = OpenUrl(disconnectUrl)) }
+            }
+            ConsentClickableText.DATA -> {
+                eventReporter.onClickDataRequested(NavigationDirections.consent)
+                setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+            }
+            ConsentClickableText.PRIVACY_CENTER -> {
+                eventReporter.onClickLegalLearnMore(NavigationDirections.consent)
+                setState { copy(viewEffect = OpenUrl(privacyCenterUrl)) }
+            }
+            ConsentClickableText.DATA_ACCESS -> {
+                eventReporter.onClickDataAccessLearnMore(NavigationDirections.consent)
+                setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
+            }
+            null -> logger.error("Unrecognized clickable text: $tag")
         }
-    }
 
     fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
         setState {
