@@ -111,10 +111,11 @@ internal class FormViewModel @Inject internal constructor(
                         // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
                         // is no longer listening for the resource repository to be ready and so
                         // the resource repository is not ready!
+                        val values = transformSpecToElement.transform(
+                            getLpmItems(paymentMethodCode)
+                        )
                         withContext(Dispatchers.Main) {
-                            delayedElements.value = transformSpecToElement.transform(
-                                getLpmItems(paymentMethodCode)
-                            )
+                            delayedElements.value = values
                         }
                     }
                 }

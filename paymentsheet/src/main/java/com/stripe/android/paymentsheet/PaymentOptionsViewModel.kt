@@ -84,7 +84,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
         setupLink(args.stripeIntent, false)
-        setStripeIntent(args.stripeIntent)
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
     }

@@ -146,6 +146,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             },
             false
         )
+
+        viewModel.isResourceRepositoryReady.observe(this){
+            viewModel.setStripeIntent(starterArgs.stripeIntent)
+        }
     }
 
     override fun resetPrimaryButtonState() {
