@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -29,6 +30,7 @@ import javax.inject.Provider
  */
 internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
+    private val linkEventsReporter: LinkEventsReporter,
     private val navigator: Navigator,
     private val logger: Logger,
     val linkAccount: LinkAccount
@@ -52,6 +54,8 @@ internal class VerificationViewModel @Inject constructor(
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
+
+        linkEventsReporter.on2FAStart()
     }
 
     val otpElement = OTPSpec.transform()
@@ -79,9 +83,13 @@ internal class VerificationViewModel @Inject constructor(
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
                     _isProcessing.value = false
+                    linkEventsReporter.on2FAComplete()
                     onVerificationCompleted()
                 },
-                onFailure = ::onError
+                onFailure = {
+                    onError(it)
+                    linkEventsReporter.on2FAFailure()
+                }
             )
         }
     }
@@ -102,6 +110,7 @@ internal class VerificationViewModel @Inject constructor(
     fun onBack() {
         clearError()
         navigator.onBack()
+        linkEventsReporter.on2FACancel()
         linkAccountManager.logout()
     }
 

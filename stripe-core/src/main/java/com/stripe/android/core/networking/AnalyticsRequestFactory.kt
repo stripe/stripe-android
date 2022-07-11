@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.version.StripeSdkVersion
+import java.util.UUID
 import javax.inject.Provider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -16,6 +17,7 @@ open class AnalyticsRequestFactory(
     private val publishableKeyProvider: Provider<String>,
     internal val defaultProductUsageTokens: Set<String> = emptySet()
 ) {
+    private val sessionId = UUID.randomUUID()
 
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
@@ -55,7 +57,8 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
         AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
-        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG
+        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
+        AnalyticsFields.SESSION_ID to sessionId
     )
 
     internal fun appDataParams(): Map<String, Any> {
