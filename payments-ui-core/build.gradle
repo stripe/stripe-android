@@ -15,7 +15,7 @@ configurations {
 }
 
 if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
+    group = 'com.github.stripe.stripe-android'
 }
 
 dependencies {
@@ -113,7 +113,7 @@ android {
 
     testOptions {
         unitTests {
-            returnDefaultValues = true
+            //returnDefaultValues = true
             // Note: without this, all Robolectric tests using assets will fail.
             includeAndroidResources = true
             all {

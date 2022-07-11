@@ -94,6 +94,32 @@ public final class com/stripe/android/ui/core/elements/AddressSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/ui/core/elements/AddressType : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/ui/core/elements/AddressType$Companion;
+	public static final field Normal Lcom/stripe/android/ui/core/elements/AddressType;
+	public static final field ShippingCondensed Lcom/stripe/android/ui/core/elements/AddressType;
+	public static final field ShippingExpanded Lcom/stripe/android/ui/core/elements/AddressType;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/AddressType;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/AddressType;
+}
+
+public final class com/stripe/android/ui/core/elements/AddressType$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AddressType$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/AddressType;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/AddressType;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/AddressType$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
 }
 
@@ -383,6 +409,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getLine1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getLine2 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getName ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getOneLineAddress ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;

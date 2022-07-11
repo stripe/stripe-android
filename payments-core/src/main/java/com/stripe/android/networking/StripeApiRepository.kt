@@ -350,7 +350,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options,
         locale,
         parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
-        analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieve
+        analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
     )
 
     /**
@@ -489,7 +489,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options,
         locale,
         parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
-        analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieve
+        analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
     )
 
     /**

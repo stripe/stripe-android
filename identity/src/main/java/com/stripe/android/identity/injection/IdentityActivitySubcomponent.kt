@@ -1,5 +1,6 @@
 package com.stripe.android.identity.injection
 
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
@@ -12,7 +13,6 @@ import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -43,7 +43,7 @@ internal interface IdentityActivitySubcomponent {
         fun verificationFlowFinishable(verificationFlowFinishable: VerificationFlowFinishable): Builder
 
         @BindsInstance
-        fun identityViewModelFactory(identityViewModelFactory: IdentityViewModel.IdentityViewModelFactory): Builder
+        fun identityViewModelFactory(identityViewModelFactory: ViewModelProvider.Factory): Builder
 
         @BindsInstance
         fun fallbackUrlLauncher(fallbackUrlLauncher: FallbackUrlLauncher): Builder

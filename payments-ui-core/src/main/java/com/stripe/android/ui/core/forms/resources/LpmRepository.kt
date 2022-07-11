@@ -64,14 +64,7 @@ class LpmRepository @Inject constructor(
 
     fun isLoaded() = serverInitializedLatch.count == 0L
 
-    fun waitUntilLoaded(): Boolean {
-        var timeoutSeconds = 10
-        while (!isLoaded() && timeoutSeconds > 0) {
-            TimeUnit.SECONDS.sleep(1)
-            timeoutSeconds--
-        }
-        return isLoaded()
-    }
+    fun waitUntilLoaded() = serverInitializedLatch.await(20, TimeUnit.SECONDS)
 
     /**
      * This method will read the expected LPMs and their specs as two separate parameters.
