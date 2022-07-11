@@ -24,17 +24,13 @@ class AsyncResourceRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : ResourceRepository {
-    private lateinit var lpmRepository: LpmRepository
+    private val lpmRepository: LpmRepository
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
-        loadingJobs.add(
-            CoroutineScope(workContext).launch {
-                lpmRepository = LpmRepository(resources)
-            }
-        )
+        lpmRepository = LpmRepository(resources)
         loadingJobs.add(
             CoroutineScope(workContext).launch {
                 addressRepository = AddressFieldElementRepository(resources)

@@ -113,7 +113,6 @@ android {
 
     testOptions {
         unitTests {
-            //returnDefaultValues = true
             // Note: without this, all Robolectric tests using assets will fail.
             includeAndroidResources = true
             all {
