@@ -51,7 +51,7 @@ internal class FormViewModel @Inject internal constructor(
     paymentMethodCode: PaymentMethodCode,
     config: FormFragmentArguments,
     internal val resourceRepository: ResourceRepository,
-    private val transformSpecToElement: TransformSpecToElement,
+    private val transformSpecToElement: TransformSpecToElement
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,

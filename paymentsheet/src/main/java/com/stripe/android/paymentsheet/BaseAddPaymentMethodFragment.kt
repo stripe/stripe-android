@@ -135,7 +135,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
     }
 
