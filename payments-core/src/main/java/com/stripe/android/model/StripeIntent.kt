@@ -222,12 +222,26 @@ sealed interface StripeIntent : StripeModel {
                 val url: String
             ) : SdkData()
 
+            /**
+             * Contains all parameters needed to perform a 3DS2 authentication.
+             *
+             * @param threeDS2IntentId The id of the PI/SI used to authenticate using 3DS2. When
+             * non-null, indicates that a different PI/SI is used for authentication. That is the
+             * case for payments using Link, for example, which use a global merchant for
+             * authentication since the payment method is added to the consumer's global (not
+             * merchant-specific) account.
+             * @param publishableKey The publishable key that should be used to make 3DS2-related
+             * API calls. It will only be non-null when the 3DS2 calls should be made with a key
+             * different than the original merchant's key.
+             */
             @Parcelize
             data class Use3DS2(
                 val source: String,
                 val serverName: String,
                 val transactionId: String,
-                val serverEncryption: DirectoryServerEncryption
+                val serverEncryption: DirectoryServerEncryption,
+                val threeDS2IntentId: String?,
+                val publishableKey: String?
             ) : SdkData() {
                 @Parcelize
                 data class DirectoryServerEncryption(

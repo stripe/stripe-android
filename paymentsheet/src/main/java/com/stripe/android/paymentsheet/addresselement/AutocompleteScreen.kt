@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -32,7 +31,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -86,18 +84,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                     .navigationBarsPadding()
                     .padding(vertical = 8.dp)
             ) {
-                ClickableText(
-                    text = buildAnnotatedString {
-                        append(
-                            stringResource(
-                                id = R.string.stripe_paymentsheet_enter_address_manually
-                            )
-                        )
-                    },
-                    style = MaterialTheme.typography.body1.copy(
-                        color = MaterialTheme.colors.primary
-                    )
-                ) {
+                EnterManuallyText {
                     viewModel.onEnterAddressManually()
                 }
             }

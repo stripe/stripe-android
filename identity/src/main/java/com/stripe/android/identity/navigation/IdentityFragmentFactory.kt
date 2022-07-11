@@ -2,6 +2,7 @@ package com.stripe.android.identity.navigation
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
@@ -9,7 +10,6 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 
 /**
@@ -21,7 +21,7 @@ internal class IdentityFragmentFactory @Inject constructor(
     private val verificationFlowFinishable: VerificationFlowFinishable,
     private val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory,
     private val consentFragmentViewModelFactory: ConsentFragmentViewModel.ConsentFragmentViewModelFactory,
-    internal val identityViewModelFactory: IdentityViewModel.IdentityViewModelFactory,
+    internal val identityViewModelFactory: ViewModelProvider.Factory,
     private val fallbackUrlLauncher: FallbackUrlLauncher,
     private val identityIO: IdentityIO
 ) : FragmentFactory() {
