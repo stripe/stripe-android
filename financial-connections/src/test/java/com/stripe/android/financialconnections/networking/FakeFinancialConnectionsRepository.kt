@@ -38,17 +38,6 @@ internal class FakeFinancialConnectionsRepository(
         clientSecret: String
     ): FinancialConnectionsSessionManifest = manifest
 
-    override suspend fun searchInstitutions(
-        clientSecret: String,
-        query: String
-    ): InstitutionResponse {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun postAuthorizationSession(
         clientSecret: String,
         institutionId: String
