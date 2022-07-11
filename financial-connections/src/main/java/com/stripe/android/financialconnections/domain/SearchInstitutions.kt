@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.model.InstitutionResponse
-import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import javax.inject.Inject
 
 /**
@@ -10,7 +10,7 @@ import javax.inject.Inject
  * If no input provided, this usecase returns featured institutions.
  */
 internal class SearchInstitutions @Inject constructor(
-    private val repository: FinancialConnectionsRepository
+    private val repository: FinancialConnectionsInstitutionsRepository
 ) {
     suspend operator fun invoke(
         clientSecret: String,

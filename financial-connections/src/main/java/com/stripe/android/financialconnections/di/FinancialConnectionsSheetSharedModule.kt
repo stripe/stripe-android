@@ -13,19 +13,43 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.repository.FinancialConnectionsApiRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.json.Json
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Dependencies shared between activities should live here.
+ *
+ * Components that depend on user-provided configuration should be here so that they can be
+ * recovered after a process kill. The typical component recreation flow would be:
+ *
+ * 1. user-provided config field is saved on[android.app.Activity.onSaveInstanceState]
+ * 2. field is recovered in [android.app.Activity.onRestoreInstanceState]
+ * 3. field is passed as a bound instance to the component using this module.
+ * 4. component gets recreated.
+ *
+ * Each activity implementing this module should be responsible for recovering from process kills
+ * saving and restoring user-provided configuration dependencies.
+ */
 @Module(
     includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
-internal object FinancialConnectionsSheetModule {
+internal object FinancialConnectionsSheetSharedModule {
+
+    @Provides
+    @Singleton
+    internal fun providesJson(): Json = Json {
+        coerceInputValues = true
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+    }
 
     @Provides
     @Singleton
@@ -44,7 +68,7 @@ internal object FinancialConnectionsSheetModule {
     @Provides
     @Singleton
     fun provideConnectionsRepository(
-        repository: FinancialConnectionsApiRepository
+        repository: FinancialConnectionsRepositoryImpl
     ): FinancialConnectionsRepository = repository
 
     @Provides
