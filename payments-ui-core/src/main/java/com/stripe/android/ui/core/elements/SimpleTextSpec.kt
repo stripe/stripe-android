@@ -20,16 +20,6 @@ enum class Capitalization {
 
     @SerialName("sentences")
     Sentences;
-
-    companion object {
-        fun from(str: String) = when (str) {
-            "none" -> None
-            "characters" -> Characters
-            "words" -> Words
-            "sentences" -> Sentences
-            else -> None
-        }
-    }
 }
 
 @Suppress("EnumEntryName")
@@ -58,20 +48,6 @@ enum class KeyboardType {
 
     @SerialName("number_password")
     NumberPassword;
-
-    companion object {
-        fun from(str: String) = when (str) {
-            "text" -> Text
-            "ascii" -> Ascii
-            "number" -> Number
-            "phone" -> Phone
-            "uri" -> Uri
-            "email" -> Email
-            "password" -> Password
-            "number_password" -> NumberPassword
-            else -> Text
-        }
-    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
