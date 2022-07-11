@@ -42,8 +42,8 @@ class FormController @Inject constructor(
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
                 resourceRepository.waitUntilLoaded()
-                delayedElements.value =
-                    transformSpecToElement.transform(formSpec.items)
+                delayedElements.value = transformSpecToElement
+                    .transform(formSpec.items)
             }
             this.elements = delayedElements
         }

@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -104,7 +105,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     }
                 },
                 content = {},
-                modifier = Modifier.navigationBarsPadding()
+                modifier = Modifier.navigationBarsPadding().systemBarsPadding()
             )
         }
     }
