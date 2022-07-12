@@ -45,8 +45,7 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             val scope = rememberCoroutineScope()
 
             var clientSecret by rememberSaveable { mutableStateOf("") }
-            var googlePayReady by rememberSaveable { mutableStateOf(false) }
-            var googlePayLaunched by rememberSaveable { mutableStateOf(false) }
+            var googlePayReady by rememberSaveable { mutableStateOf<Boolean?>(null) }
             var completed by rememberSaveable { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
@@ -74,10 +73,10 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             val googlePayLauncher = GooglePayLauncher.rememberLauncher(
                 config = googlePayConfig,
                 readyCallback = { ready ->
-                    if (!googlePayLaunched) {
+                    if (googlePayReady == null) {
                         googlePayReady = ready
 
-                        if (!googlePayReady) {
+                        if (!ready) {
                             completed = true
                         }
 
@@ -106,11 +105,9 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                 }
             )
 
-            val readyToPay = googlePayReady && clientSecret.isNotBlank()
-
             Scaffold(scaffoldState = scaffoldState) {
                 Column(Modifier.fillMaxWidth()) {
-                    if (!readyToPay) {
+                    if (googlePayReady == null || clientSecret.isBlank()) {
                         LinearProgressIndicator(Modifier.fillMaxWidth())
                     }
 
@@ -123,10 +120,10 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                         modifier = Modifier
                             .wrapContentWidth()
                             .clickable(
-                                enabled = readyToPay && !completed,
+                                enabled = googlePayReady == true &&
+                                    clientSecret.isNotBlank() && !completed,
                                 onClick = {
                                     googlePayLauncher.presentForPaymentIntent(clientSecret)
-                                    googlePayLaunched = true
                                 }
                             )
                     )
