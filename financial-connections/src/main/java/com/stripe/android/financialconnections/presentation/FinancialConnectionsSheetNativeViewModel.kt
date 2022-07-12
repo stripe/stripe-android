@@ -21,7 +21,7 @@ import javax.inject.Inject
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     /**
      * Exposes parent dagger component (activity viewModel scoped so that it survives config changes)
-     * No other dependencies should be exposed
+     * No other dependencies should be exposed from the viewModel
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val goNext: GoNext,
