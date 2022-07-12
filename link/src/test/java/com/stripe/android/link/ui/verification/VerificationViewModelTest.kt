@@ -8,6 +8,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -30,10 +31,17 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 class VerificationViewModelTest {
     private val linkAccountManager = mock<LinkAccountManager>()
+    private val linkEventsReporter = mock<LinkEventsReporter>()
     private val navigator = mock<Navigator>()
     private val logger = Logger.noop()
     private val linkAccount = mock<LinkAccount>().apply {
         whenever(accountStatus).thenReturn(AccountStatus.VerificationStarted)
+    }
+
+    @Test
+    fun `init sends analytics event`() = runTest {
+        createViewModel()
+        verify(linkEventsReporter).on2FAStart()
     }
 
     @Test
@@ -60,27 +68,31 @@ class VerificationViewModelTest {
     }
 
     @Test
-    fun `When onVerificationCodeEntered succeeds then it navigates to Wallet`() = runTest {
-        whenever(linkAccountManager.confirmVerification(any()))
-            .thenReturn(Result.success(mock()))
+    fun `When onVerificationCodeEntered succeeds then it navigates to Wallet and analytics event is sent`() =
+        runTest {
+            whenever(linkAccountManager.confirmVerification(any()))
+                .thenReturn(Result.success(mock()))
 
-        val viewModel = createViewModel()
-        viewModel.onVerificationCodeEntered("code")
+            val viewModel = createViewModel()
+            viewModel.onVerificationCodeEntered("code")
 
-        verify(navigator).navigateTo(LinkScreen.Wallet, true)
-    }
+            verify(navigator).navigateTo(LinkScreen.Wallet, true)
+            verify(linkEventsReporter).on2FAComplete()
+        }
 
     @Test
-    fun `When onVerificationCodeEntered fails then an error message is shown`() = runTest {
-        val errorMessage = "Error message"
-        whenever(linkAccountManager.confirmVerification(any()))
-            .thenReturn(Result.failure(RuntimeException(errorMessage)))
+    fun `When onVerificationCodeEntered fails then an error message is shown and analytics event is sent`() =
+        runTest {
+            val errorMessage = "Error message"
+            whenever(linkAccountManager.confirmVerification(any()))
+                .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
-        val viewModel = createViewModel()
-        viewModel.onVerificationCodeEntered("code")
+            val viewModel = createViewModel()
+            viewModel.onVerificationCodeEntered("code")
 
-        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
-    }
+            assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+            verify(linkEventsReporter).on2FAFailure()
+        }
 
     @Test
     fun `onChangeEmailClicked triggers logout`() = runTest {
@@ -89,8 +101,9 @@ class VerificationViewModelTest {
     }
 
     @Test
-    fun `onBack triggers logout`() = runTest {
+    fun `onBack triggers logout and sends analytics event`() = runTest {
         createViewModel().onBack()
+        verify(linkEventsReporter).on2FACancel()
         verify(linkAccountManager).logout()
     }
 
@@ -130,6 +143,7 @@ class VerificationViewModelTest {
 
     private fun createViewModel() = VerificationViewModel(
         linkAccountManager,
+        linkEventsReporter,
         navigator,
         logger,
         linkAccount

@@ -13,6 +13,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
@@ -98,6 +99,8 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      */
     internal lateinit var linkAccountManager: LinkAccountManager
 
+    internal lateinit var linkEventsReporter: LinkEventsReporter
+
     /**
      * Publicly visible account status, used by PaymentSheet to display the correct UI.
      */
@@ -125,6 +128,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         val component = setupDependencies(stripeIntent, completePayment, selectedPaymentDetails)
         accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
+        linkEventsReporter = component.linkEventsReporter
         return accountStatus.value
     }
 

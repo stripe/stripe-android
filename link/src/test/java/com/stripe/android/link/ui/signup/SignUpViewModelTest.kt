@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -61,6 +62,7 @@ class SignUpViewModelTest {
         )
     )
     private val linkAccountManager = mock<LinkAccountManager>()
+    private val linkEventsReporter = mock<LinkEventsReporter>()
     private val navigator = mock<Navigator>()
 
     @BeforeTest
@@ -71,6 +73,12 @@ class SignUpViewModelTest {
     @AfterTest
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `init sends analytics event`() = runTest(UnconfinedTestDispatcher()) {
+        createViewModel()
+        verify(linkEventsReporter).onSignupFlowPresented()
     }
 
     @Test
@@ -139,6 +147,20 @@ class SignUpViewModelTest {
         }
 
     @Test
+    fun `When lookupConsumer succeeds for new account then analytics event is sent`() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.success(null))
+
+            val viewModel = createViewModel()
+            viewModel.emailController.onRawValueChange("valid@email.com")
+            // Advance past lookup debounce delay
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
+
+            verify(linkEventsReporter).onSignupStarted()
+        }
+
+    @Test
     fun `When lookupConsumer fails then an error message is shown`() =
         runTest(UnconfinedTestDispatcher()) {
             val errorMessage = "Error message"
@@ -161,9 +183,7 @@ class SignUpViewModelTest {
                 .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
             val viewModel = createViewModel()
-            viewModel.emailController.onRawValueChange("email@valid.co")
-            viewModel.phoneController.onRawValueChange("1234567890")
-            viewModel.onSignUpClick()
+            viewModel.performValidSignup()
 
             assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
         }
@@ -183,9 +203,7 @@ class SignUpViewModelTest {
             whenever(linkAccountManager.signUp(any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
-            viewModel.emailController.onRawValueChange("email@valid.co")
-            viewModel.phoneController.onRawValueChange("1234567890")
-            viewModel.onSignUpClick()
+            viewModel.performValidSignup()
 
             verify(navigator).navigateTo(LinkScreen.Verification)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
@@ -206,11 +224,42 @@ class SignUpViewModelTest {
             whenever(linkAccountManager.signUp(any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
-            viewModel.emailController.onRawValueChange("email@valid.co")
-            viewModel.phoneController.onRawValueChange("1234567890")
-            viewModel.onSignUpClick()
+            viewModel.performValidSignup()
 
             verify(navigator).navigateTo(LinkScreen.Wallet, true)
+        }
+
+    @Test
+    fun `When signup succeeds then analytics event is sent`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+
+            val linkAccount = LinkAccount(
+                mockConsumerSessionWithVerificationSession(
+                    ConsumerSession.VerificationSession.SessionType.Sms,
+                    ConsumerSession.VerificationSession.SessionState.Verified
+                )
+            )
+
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.success(linkAccount))
+
+            viewModel.performValidSignup()
+
+            verify(linkEventsReporter).onSignupCompleted()
+        }
+
+    @Test
+    fun `When signup fails then analytics event is sent`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.failure(Exception()))
+
+            viewModel.performValidSignup()
+
+            verify(linkEventsReporter).onSignupFailure()
         }
 
     @Test
@@ -254,9 +303,16 @@ class SignUpViewModelTest {
         args = args,
         customerEmail = prefilledEmail,
         linkAccountManager = linkAccountManager,
+        linkEventsReporter = linkEventsReporter,
         logger = Logger.noop(),
         navigator = navigator
     )
+
+    private fun SignUpViewModel.performValidSignup() {
+        emailController.onRawValueChange("email@valid.co")
+        phoneController.onRawValueChange("1234567890")
+        onSignUpClick()
+    }
 
     private fun mockConsumerSessionWithVerificationSession(
         type: ConsumerSession.VerificationSession.SessionType,
