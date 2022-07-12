@@ -19,20 +19,30 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
 
     val viewModel: FinancialConnectionsSheetNativeViewModel by viewModel()
 
+    @Inject
+    lateinit var navigationManager: NavigationManager
+
+    val activityRetainedComponent: FinancialConnectionsSheetNativeComponent
+        get() = viewModel.activityRetainedComponent
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.activityRetainedComponent.inject(this)
         viewModel.onEach { postInvalidate() }
         setContent {
             FinancialConnectionsTheme {
@@ -81,8 +91,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Composable
     private fun NavigationEffect(navController: NavHostController) {
-        LaunchedEffect(viewModel.navigationManager.commands) {
-            viewModel.navigationManager.commands.collect { command ->
+        LaunchedEffect(navigationManager.commands) {
+            navigationManager.commands.collect { command ->
                 if (command.destination.isNotEmpty()) {
                     navController.navigate(command.destination)
                 }
