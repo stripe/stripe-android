@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Snimanje…</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Postavke aplikacije</string>
   <!-- Description of back of driver's license image -->
@@ -37,6 +39,8 @@
   <string name="file_upload_content_id">Molimo vas učitajte slike prednje i stražnje strane vaše osobne iskaznice</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Molimo učitajte sliku vaše putovnice</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="flash_mask">Maska za selfie animaciju</string>
   <!-- Description of front of driver's license image -->
   <string name="front_of_dl">Prednja strana vozačke dozvole</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
@@ -73,10 +77,20 @@
   <string name="position_id_front">Postavite svoju osobnu iskaznicu u sredinu okvira</string>
   <!-- Instructional text for scanning a passport -->
   <string name="position_passport">Postavite svoju putovnicu u sredinu okvira</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="position_selfie">Postavite svoje lice u središte okvira.</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Skenirano</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="select">Odaberi</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="selfie_capture_complete">Snimanje selfi slika je završeno</string>
+  <!-- Title of selfie capture screen -->
+  <string name="selfie_captures">Snimanje selfie slika</string>
+  <!-- Content description of a captured selfie -->
+  <string name="selfie_item_description">snimljen je jedan selfie</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="selfie_not_saved_warning">Vaše selfie slike nisu pohranjene. Želite li napustiti?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="take_photo">Snimi fotografiju</string>
   <!-- Button to attempt to re-scan identity document image -->

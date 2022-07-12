@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
@@ -37,9 +38,11 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -81,6 +84,8 @@ internal class IdentityViewModelTest {
         )
     }
 
+    private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
+
     val viewModel = IdentityViewModel(
         IdentityVerificationSheetContract.Args(
             verificationSessionId = VERIFICATION_SESSION_ID,
@@ -92,7 +97,7 @@ internal class IdentityViewModelTest {
         mockIdentityRepository,
         mockIdentityModelFetcher,
         mockIdentityIO,
-        mock(),
+        mockIdentityAnalyticsRequestFactory,
         mock(),
         mock(),
         mock(),
@@ -101,13 +106,13 @@ internal class IdentityViewModelTest {
     )
 
     private fun mockUploadSuccess() = runBlocking {
-        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any())).thenReturn(
+        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any())).thenReturn(
             UPLOADED_STRIPE_FILE
         )
     }
 
     private fun mockUploadFailure() = runBlocking {
-        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any())).thenThrow(
+        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any())).thenThrow(
             UPLOADED_FAILURE_EXCEPTION
         )
     }
@@ -162,6 +167,14 @@ internal class IdentityViewModelTest {
             (FaceDetectorTransitioner.Selfie.BEST),
             (FaceDetectorTransitioner.Selfie.LAST)
         ).forEach { selfie ->
+            verify(mockIdentityAnalyticsRequestFactory, times(6)).imageUpload(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
             listOf(true, false).forEach { isHighRes ->
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
@@ -175,6 +188,14 @@ internal class IdentityViewModelTest {
             FINAL_FACE_DETECTOR_RESULT,
             mockVerificationPage,
             IdentityScanState.ScanType.SELFIE
+        )
+        verify(mockIdentityAnalyticsRequestFactory, times(0)).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
         )
 
         listOf(
@@ -283,7 +304,8 @@ internal class IdentityViewModelTest {
             mockUri,
             isFront,
             DOCUMENT_CAPTURE,
-            DocumentUploadParam.UploadMethod.FILEUPLOAD
+            DocumentUploadParam.UploadMethod.FILEUPLOAD,
+            IdentityScanState.ScanType.DL_FRONT
         )
 
         verify(mockIdentityIO).resizeUriAndCreateFileToUpload(
@@ -293,6 +315,15 @@ internal class IdentityViewModelTest {
             eq(if (isFront) FRONT else BACK),
             eq(HIGH_RES_IMAGE_MAX_DIMENSION),
             eq(HIGH_RES_COMPRESSION_QUALITY)
+        )
+
+        verify(mockIdentityAnalyticsRequestFactory).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
         )
 
         if (isFront) {
@@ -467,7 +498,17 @@ internal class IdentityViewModelTest {
             mock(),
             isFront,
             DOCUMENT_CAPTURE,
-            DocumentUploadParam.UploadMethod.FILEUPLOAD
+            DocumentUploadParam.UploadMethod.FILEUPLOAD,
+            IdentityScanState.ScanType.DL_FRONT
+        )
+
+        verify(mockIdentityAnalyticsRequestFactory, times(0)).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
         )
 
         if (isFront) {

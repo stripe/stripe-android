@@ -68,10 +68,16 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         "Canceling source '$sourceId' for '${stripeIntent.javaClass.simpleName}'"
                     )
 
+                    // When the NextActionData is Use3DS2 and has non-null threeDs2IntentId and
+                    // publishableKey, they should be used when calling `source_cancel`
+                    val threeDS2Data =
+                        stripeIntent.nextActionData as? StripeIntent.NextActionData.SdkData.Use3DS2
+
                     requireNotNull(
                         cancelStripeIntentSource(
-                            stripeIntent,
-                            requestOptions,
+                            threeDS2Data?.threeDS2IntentId ?: stripeIntent.id.orEmpty(),
+                            threeDS2Data?.publishableKey?.let { ApiRequest.Options(it) }
+                                ?: requestOptions,
                             sourceId
                         )
                     )
@@ -145,7 +151,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      * transferring the intent's status from requires_action to requires_payment_method.
      */
     protected abstract suspend fun cancelStripeIntentSource(
-        stripeIntent: T,
+        stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
     ): T?
@@ -225,12 +231,12 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     }
 
     override suspend fun cancelStripeIntentSource(
-        stripeIntent: PaymentIntent,
+        stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
     ): PaymentIntent? =
         stripeRepository.cancelPaymentIntentSource(
-            stripeIntent.id.orEmpty(),
+            stripeIntentId,
             sourceId,
             requestOptions
         )
@@ -290,12 +296,12 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     }
 
     override suspend fun cancelStripeIntentSource(
-        stripeIntent: SetupIntent,
+        stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
     ): SetupIntent? =
         stripeRepository.cancelSetupIntentSource(
-            stripeIntent.id.orEmpty(),
+            stripeIntentId,
             sourceId,
             requestOptions
         )

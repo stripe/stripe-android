@@ -1,43 +1,36 @@
 package com.stripe.android.identity.viewmodel
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.camera.AppSettingsOpenable
-import com.stripe.android.camera.CameraPermissionEnsureable
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequestV2
-import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
-import com.stripe.android.identity.injection.DaggerIdentityViewModelFactoryComponent
-import com.stripe.android.identity.injection.IdentityViewModelSubcomponent
+import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
@@ -61,43 +54,53 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
-
-internal class IdentityViewModel @Inject constructor(
+internal class IdentityViewModel constructor(
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
-    val identityRepository: IdentityRepository,
+    private val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
     private val identityIO: IdentityIO,
-    val identityFragmentFactory: IdentityFragmentFactory,
-    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    val fpsTracker: FPSTracker,
-    val screenTracker: ScreenTracker,
-    @UIContext val uiContext: CoroutineContext,
-    @IOContext val workContext: CoroutineContext
+    internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    internal val fpsTracker: FPSTracker,
+    internal val screenTracker: ScreenTracker,
+    private val savedStateHandle: SavedStateHandle,
+    @UIContext internal val uiContext: CoroutineContext,
+    @IOContext internal val workContext: CoroutineContext
 ) : ViewModel() {
 
     /**
      * StateFlow to track the upload status of high/low resolution image of front and back for documents.
      */
-    private val _documentUploadedState = MutableStateFlow(DocumentUploadState())
+    private val _documentUploadedState =
+        MutableStateFlow(
+            savedStateHandle.get<DocumentUploadState>(DOCUMENT_UPLOAD_STATE) ?: run {
+                DocumentUploadState()
+            }
+        )
     val documentUploadState: StateFlow<DocumentUploadState> = _documentUploadedState
 
     /**
      * StateFlow to track the upload status of high/low resolution images of selfies.
      */
-    private val _selfieUploadedState = MutableStateFlow(SelfieUploadState())
+    private val _selfieUploadedState = MutableStateFlow(
+        savedStateHandle.get<SelfieUploadState>(SELFIE_UPLOAD_STATE) ?: run {
+            SelfieUploadState()
+        }
+    )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
     /**
      * StateFlow to track analytics status.
      */
-    private val _analyticsState = MutableStateFlow(AnalyticsState())
+    private val _analyticsState = MutableStateFlow(
+        savedStateHandle.get<AnalyticsState>(ANALYTICS_STATE) ?: run {
+            AnalyticsState()
+        }
+    )
     val analyticsState: StateFlow<AnalyticsState> = _analyticsState
 
     /**
@@ -197,16 +200,14 @@ internal class IdentityViewModel @Inject constructor(
      * Reset document uploaded state to loading state.
      */
     internal fun resetDocumentUploadedState() {
-        _documentUploadedState.update {
-            DocumentUploadState()
-        }
+        _documentUploadedState.updateStateAndSave { DocumentUploadState() }
     }
 
     /**
      * Reset selfie uploaded state to loading state.
      */
     internal fun resetSelfieUploadedState() {
-        _selfieUploadedState.update {
+        _selfieUploadedState.updateStateAndSave {
             SelfieUploadState()
         }
     }
@@ -218,7 +219,8 @@ internal class IdentityViewModel @Inject constructor(
         uri: Uri,
         isFront: Boolean,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
-        uploadMethod: UploadMethod
+        uploadMethod: UploadMethod,
+        scanType: IdentityScanState.ScanType
     ) {
         uploadDocumentImagesAndNotify(
             imageFile =
@@ -235,7 +237,9 @@ internal class IdentityViewModel @Inject constructor(
             ),
             uploadMethod = uploadMethod,
             isHighRes = true,
-            isFront = isFront
+            isFront = isFront,
+            scanType = scanType,
+            compressionQuality = docCapturePage.highResImageCompressionQuality
         )
     }
 
@@ -272,7 +276,8 @@ internal class IdentityViewModel @Inject constructor(
                     verificationPage.documentCapture,
                     isHighRes = true,
                     isFront = isFront,
-                    scores
+                    scores,
+                    targetScanType
                 )
 
                 // upload low res
@@ -282,7 +287,8 @@ internal class IdentityViewModel @Inject constructor(
                     verificationPage.documentCapture,
                     isHighRes = false,
                     isFront = isFront,
-                    scores
+                    scores,
+                    targetScanType
                 )
             }
             is FaceDetectorOutput -> {
@@ -323,7 +329,8 @@ internal class IdentityViewModel @Inject constructor(
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         isHighRes: Boolean,
         isFront: Boolean,
-        scores: List<Float>
+        scores: List<Float>,
+        targetScanType: IdentityScanState.ScanType
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
@@ -367,7 +374,14 @@ internal class IdentityViewModel @Inject constructor(
                 uploadMethod = UploadMethod.AUTOCAPTURE,
                 scores = scores,
                 isHighRes = isHighRes,
-                isFront = isFront
+                isFront = isFront,
+                scanType = targetScanType,
+                compressionQuality =
+                if (isHighRes) {
+                    docCapturePage.highResImageCompressionQuality
+                } else {
+                    docCapturePage.lowResImageCompressionQuality
+                }
             )
         }
     }
@@ -376,7 +390,7 @@ internal class IdentityViewModel @Inject constructor(
      * Update the analytics state.
      */
     internal fun updateAnalyticsState(updateBlock: (AnalyticsState) -> AnalyticsState) {
-        _analyticsState.update(updateBlock)
+        _analyticsState.updateStateAndSave(updateBlock)
     }
 
     /**
@@ -388,18 +402,33 @@ internal class IdentityViewModel @Inject constructor(
         uploadMethod: UploadMethod,
         scores: List<Float>? = null,
         isHighRes: Boolean,
-        isFront: Boolean
+        isFront: Boolean,
+        scanType: IdentityScanState.ScanType,
+        compressionQuality: Float
     ) {
         viewModelScope.launch {
             runCatching {
+                var uploadTime = 0L
                 identityRepository.uploadImage(
                     verificationId = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret,
                     imageFile = imageFile,
-                    filePurpose = filePurpose
-                )
+                    filePurpose = filePurpose,
+                    onSuccessExecutionTimeBlock = { uploadTime = it }
+                ) to uploadTime
             }.fold(
-                onSuccess = { uploadedStripeFile ->
+                onSuccess = { fileTimePair ->
+                    identityRepository.sendAnalyticsRequest(
+                        identityAnalyticsRequestFactory.imageUpload(
+                            value = fileTimePair.second,
+                            compressionQuality = compressionQuality,
+                            scanType = scanType,
+                            id = fileTimePair.first.id,
+                            fileName = fileTimePair.first.filename,
+                            fileSize = imageFile.length() / BYTES_IN_KB
+                        )
+                    )
+
                     updateAnalyticsState { oldState ->
                         if (isFront) {
                             oldState.copy(
@@ -411,12 +440,12 @@ internal class IdentityViewModel @Inject constructor(
                             )
                         }
                     }
-                    _documentUploadedState.update { currentState ->
+                    _documentUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
                             isFront = isFront,
                             newResult = UploadedResult(
-                                uploadedStripeFile,
+                                fileTimePair.first,
                                 scores,
                                 uploadMethod
                             )
@@ -424,7 +453,7 @@ internal class IdentityViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    _documentUploadedState.update { currentState ->
+                    _documentUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
                             isFront = isFront,
@@ -496,7 +525,12 @@ internal class IdentityViewModel @Inject constructor(
                     StripeFilePurpose.fromCode(selfieCapturePage.filePurpose)
                 ),
                 isHighRes = isHighRes,
-                selfie = selfie
+                selfie = selfie,
+                compressionQuality = if (isHighRes) {
+                    selfieCapturePage.highResImageCompressionQuality
+                } else {
+                    selfieCapturePage.lowResImageCompressionQuality
+                }
             )
         }
     }
@@ -505,30 +539,43 @@ internal class IdentityViewModel @Inject constructor(
         imageFile: File,
         filePurpose: StripeFilePurpose,
         isHighRes: Boolean,
-        selfie: FaceDetectorTransitioner.Selfie
+        selfie: FaceDetectorTransitioner.Selfie,
+        compressionQuality: Float
     ) {
         viewModelScope.launch {
             runCatching {
+                var uploadTime = 0L
                 identityRepository.uploadImage(
                     verificationId = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret,
                     imageFile = imageFile,
-                    filePurpose = filePurpose
-                )
+                    filePurpose = filePurpose,
+                    onSuccessExecutionTimeBlock = { uploadTime = it }
+                ) to uploadTime
             }.fold(
-                onSuccess = { uploadedStripeFile ->
-                    _selfieUploadedState.update { currentState ->
+                onSuccess = { fileTimePair ->
+                    identityRepository.sendAnalyticsRequest(
+                        identityAnalyticsRequestFactory.imageUpload(
+                            value = fileTimePair.second,
+                            compressionQuality = compressionQuality,
+                            scanType = IdentityScanState.ScanType.SELFIE,
+                            id = fileTimePair.first.id,
+                            fileName = fileTimePair.first.filename,
+                            fileSize = imageFile.length() / BYTES_IN_KB
+                        )
+                    )
+                    _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
                             isHighRes = isHighRes,
                             newResult = UploadedResult(
-                                uploadedStripeFile
+                                fileTimePair.first
                             ),
                             selfie = selfie
                         )
                     }
                 },
                 onFailure = {
-                    _selfieUploadedState.update { currentState ->
+                    _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
                             selfie = selfie,
@@ -547,7 +594,7 @@ internal class IdentityViewModel @Inject constructor(
     fun observeForVerificationPage(
         owner: LifecycleOwner,
         onSuccess: (VerificationPage) -> Unit,
-        onFailure: (Throwable?) -> Unit
+        onFailure: (Throwable) -> Unit
     ) {
         verificationPage.observe(owner) { resource ->
             when (resource.status) {
@@ -556,7 +603,7 @@ internal class IdentityViewModel @Inject constructor(
                 }
                 Status.ERROR -> {
                     Log.e(TAG, "Fail to get VerificationPage")
-                    onFailure(resource.throwable)
+                    onFailure(requireNotNull(resource.throwable))
                 }
                 Status.LOADING -> {} // no-op
             }
@@ -594,13 +641,18 @@ internal class IdentityViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    _verificationPage.postValue(
-                        Resource.error(
-                            "Failed to retrieve verification page with " +
-                                "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: ${verificationArgs.ephemeralKeySecret}",
-                            it
-                        )
-                    )
+                    "Failed to retrieve verification page with " +
+                        (
+                            "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
+                                "${verificationArgs.ephemeralKeySecret}"
+                            ).let { msg ->
+                            _verificationPage.postValue(
+                                Resource.error(
+                                    msg,
+                                    IllegalStateException(msg, it)
+                                )
+                            )
+                        }
                 }
             )
         }
@@ -695,39 +747,47 @@ internal class IdentityViewModel @Inject constructor(
         }
     }
 
+    private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
+        this.update(function)
+        savedStateHandle.set(
+            when (this) {
+                _documentUploadedState -> DOCUMENT_UPLOAD_STATE
+                _selfieUploadedState -> SELFIE_UPLOAD_STATE
+                _analyticsState -> ANALYTICS_STATE
+                else -> {
+                    throw IllegalStateException("Unexpected state flow: $this")
+                }
+            }, // key
+            this.value // value
+        )
+    }
+
     internal class IdentityViewModelFactory(
-        val context: Context,
-        private val verificationArgsSupplier: () -> IdentityVerificationSheetContract.Args,
-        private val cameraPermissionEnsureable: CameraPermissionEnsureable,
-        private val appSettingsOpenable: AppSettingsOpenable,
-        private val verificationFlowFinishable: VerificationFlowFinishable,
-        private val fallbackUrlLauncher: FallbackUrlLauncher
-    ) : ViewModelProvider.Factory, Injectable<Context> {
-        @Inject
-        lateinit var subComponentBuilderProvider: Provider<IdentityViewModelSubcomponent.Builder>
+        savedStateRegistryOwner: SavedStateRegistryOwner,
+        private val uiContextSupplier: () -> CoroutineContext,
+        private val workContextSupplier: () -> CoroutineContext,
+        private val subcomponentSupplier: () -> IdentityActivitySubcomponent
+    ) : AbstractSavedStateViewModelFactory(savedStateRegistryOwner, null) {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val args = verificationArgsSupplier()
-            injectWithFallback(
-                args.injectorKey,
-                context
-            )
-
-            return subComponentBuilderProvider.get()
-                .args(args)
-                .cameraPermissionEnsureable(cameraPermissionEnsureable)
-                .appSettingsOpenable(appSettingsOpenable)
-                .verificationFlowFinishable(verificationFlowFinishable)
-                .identityViewModelFactory(this)
-                .fallbackUrlLauncher(fallbackUrlLauncher)
-                .build().viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: Context) {
-            DaggerIdentityViewModelFactoryComponent.builder()
-                .context(context)
-                .build().inject(this)
+        override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            handle: SavedStateHandle
+        ): T {
+            val subcomponent = subcomponentSupplier()
+            return IdentityViewModel(
+                subcomponent.verificationArgs,
+                subcomponent.identityRepository,
+                subcomponent.identityModelFetcher,
+                subcomponent.identityIO,
+                subcomponent.identityAnalyticsRequestFactory,
+                subcomponent.fpsTracker,
+                subcomponent.screenTracker,
+                handle,
+                uiContextSupplier(),
+                workContextSupplier()
+            ) as T
         }
     }
 
@@ -735,5 +795,9 @@ internal class IdentityViewModel @Inject constructor(
         val TAG: String = IdentityViewModel::class.java.simpleName
         const val FRONT = "front"
         const val BACK = "back"
+        const val BYTES_IN_KB = 1024
+        private const val DOCUMENT_UPLOAD_STATE = "document_upload_state"
+        private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
+        private const val ANALYTICS_STATE = "analytics_upload_state"
     }
 }

@@ -85,7 +85,7 @@ internal class AddressElementViewModel @Inject internal constructor(
                     when (injectable) {
                         is Factory -> viewModelComponent.inject(injectable)
                         is InputAddressViewModel.Factory -> viewModelComponent.inject(injectable)
-                        is AutoCompleteViewModel.Factory -> viewModelComponent.inject(injectable)
+                        is AutocompleteViewModel.Factory -> viewModelComponent.inject(injectable)
                         else -> {
                             throw IllegalArgumentException(
                                 "invalid Injectable $injectable requested in $this"

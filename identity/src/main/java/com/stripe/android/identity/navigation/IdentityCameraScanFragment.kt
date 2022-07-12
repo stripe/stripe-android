@@ -139,7 +139,7 @@ internal abstract class IdentityCameraScanFragment(
                 },
                 onFailure = {
                     Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                    navigateToDefaultErrorFragment()
+                    navigateToDefaultErrorFragment(it)
                 }
             )
             stopScanning()
@@ -183,43 +183,43 @@ internal abstract class IdentityCameraScanFragment(
     /**
      * Start scanning for the required scan type.
      */
-    protected fun startScanning(scanType: IdentityScanState.ScanType) {
+    internal fun startScanning(scanType: IdentityScanState.ScanType) {
         identityViewModel.updateAnalyticsState { oldState ->
             when (scanType) {
                 IdentityScanState.ScanType.ID_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.ID_BACK -> {
                     oldState.copy(
-                        docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.DL_FRONT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.DL_BACK -> {
                     oldState.copy(
-                        docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.PASSPORT -> {
                     oldState.copy(
                         docFrontRetryTimes =
-                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
                 IdentityScanState.ScanType.SELFIE -> {
                     oldState.copy(
                         selfieRetryTimes =
-                        oldState.selfieRetryTimes?.let { it + 1 } ?: 0
+                        oldState.selfieRetryTimes?.let { it + 1 } ?: 1
                     )
                 }
             }
@@ -231,7 +231,7 @@ internal abstract class IdentityCameraScanFragment(
         identityScanViewModel.scanStatePrevious = null
 
         identityViewModel.fpsTracker.start()
-        identityScanViewModel.identityScanFlow.startFlow(
+        identityScanViewModel.identityScanFlow?.startFlow(
             context = requireContext(),
             imageStream = cameraAdapter.getImageStream(),
             viewFinder = cameraView.viewFinderWindowView.asRect(),
@@ -245,14 +245,14 @@ internal abstract class IdentityCameraScanFragment(
      * Stop scanning, may start again later.
      */
     protected fun stopScanning() {
-        identityScanViewModel.identityScanFlow.resetFlow()
+        identityScanViewModel.identityScanFlow?.resetFlow()
         cameraAdapter.unbindFromLifecycle(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Cancelling IdentityScanFlow")
-        identityScanViewModel.identityScanFlow.cancelFlow()
+        identityScanViewModel.identityScanFlow?.cancelFlow()
     }
 
     internal companion object {

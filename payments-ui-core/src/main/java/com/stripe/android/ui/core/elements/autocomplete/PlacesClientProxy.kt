@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements.autocomplete
 import android.content.Context
 import android.graphics.Typeface
 import android.text.style.StyleSpan
+import androidx.annotation.RestrictTo
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -18,7 +19,8 @@ import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePr
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import kotlinx.coroutines.tasks.await
 
-internal interface PlacesClientProxy {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface PlacesClientProxy {
     suspend fun findAutocompletePredictions(
         query: String?,
         country: String,
@@ -166,11 +168,13 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
     }
 }
 
-internal interface IsPlacesAvailable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface IsPlacesAvailable {
     operator fun invoke(): Boolean
 }
 
-internal class DefaultIsPlacesAvailable : IsPlacesAvailable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultIsPlacesAvailable : IsPlacesAvailable {
     override fun invoke(): Boolean {
         return try {
             Class.forName("com.google.android.libraries.places.api.Places")

@@ -14,7 +14,7 @@ import dagger.Provides
 import javax.inject.Singleton
 
 @Module(
-    subcomponents = [IdentityViewModelSubcomponent::class]
+    subcomponents = [IdentityActivitySubcomponent::class]
 )
 internal abstract class IdentityCommonModule {
     @Binds

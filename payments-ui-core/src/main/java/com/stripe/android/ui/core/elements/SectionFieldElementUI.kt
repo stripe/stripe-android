@@ -17,6 +17,9 @@ internal fun SectionFieldElementUI(
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
         when (val controller = field.sectionFieldErrorController()) {
+            is AddressTextFieldController -> {
+                AddressTextFieldUI(controller)
+            }
             is TextFieldController -> {
                 TextField(
                     textFieldController = controller,

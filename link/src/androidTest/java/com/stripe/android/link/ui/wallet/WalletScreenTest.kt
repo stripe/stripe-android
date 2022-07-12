@@ -97,9 +97,8 @@ internal class WalletScreenTest {
 
         toggleListExpanded()
         onPaymentDetailsItem(secondPaymentMethod).performClick()
-        toggleListExpanded()
 
-        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+        composeTestRule.onNodeWithText("Payment").onParent().onChildren()
             .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
     }
 
@@ -131,7 +130,7 @@ internal class WalletScreenTest {
         )
 
         toggleListExpanded()
-        composeTestRule.onNodeWithText("Add a new payment method").performClick()
+        composeTestRule.onNodeWithText("Add a payment method").performClick()
 
         assertThat(count).isEqualTo(1)
     }
@@ -259,15 +258,14 @@ internal class WalletScreenTest {
 
         toggleListExpanded()
         onPaymentDetailsItem(secondPaymentMethod).performClick()
-        toggleListExpanded()
 
-        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+        composeTestRule.onNodeWithText("Payment").onParent().onChildren()
             .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
 
         val defaultPaymentDetails = paymentDetails.first()
         paymentDetailsFlow.tryEmit(listOf(paymentDetails[2], defaultPaymentDetails))
 
-        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+        composeTestRule.onNodeWithText("Payment").onParent().onChildren()
             .filter(hasText(defaultPaymentDetails.last4, substring = true)).assertCountEquals(1)
     }
 

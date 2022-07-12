@@ -136,4 +136,112 @@ class AddressElementTest {
                 FormFieldEntry("DE89370400440532013000", true)
             )
     }
+
+    @Test
+    fun `condensed shipping address element should have name and phone number fields`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.ShippingCondensed(null) { }
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+    }
+
+    @Test
+    fun `expanded shipping address element should have name and phone number fields`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.ShippingExpanded
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+    }
+
+    @Test
+    fun `normal address element should not have name and phone number fields`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.Normal
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+    }
+
+    @Test
+    fun `normal address element should not have one line address element`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.Normal
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+    }
+
+    @Test
+    fun `condensed shipping address element should have one line address element`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.ShippingCondensed("some key") { }
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isTrue()
+    }
+
+    @Test
+    fun `when google api key not supplied, condensed shipping address element is not one line address element`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.ShippingCondensed(null) { }
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+    }
+
+    @Test
+    fun `expanded shipping address element should not have one line address element`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.ShippingExpanded
+        )
+
+        val identifierSpecs = addressElement.fields.first().map {
+            it.identifier
+        }
+        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+    }
 }

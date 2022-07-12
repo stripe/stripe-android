@@ -1,10 +1,14 @@
 package com.stripe.android.identity.networking
 
+import android.os.Parcelable
 import com.stripe.android.identity.states.FaceDetectorTransitioner
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 /**
  * Indicates the update states of images for selfie.
  */
+@Parcelize
 internal data class SelfieUploadState(
     val firstHighResResult: Resource<UploadedResult> = Resource.loading(),
     val firstLowResResult: Resource<UploadedResult> = Resource.loading(),
@@ -12,8 +16,9 @@ internal data class SelfieUploadState(
     val lastLowResResult: Resource<UploadedResult> = Resource.loading(),
     val bestHighResResult: Resource<UploadedResult> = Resource.loading(),
     val bestLowResResult: Resource<UploadedResult> = Resource.loading()
-) {
+) : Parcelable {
 
+    @IgnoredOnParcel
     private val allResults = listOf(
         firstHighResResult,
         firstLowResResult,

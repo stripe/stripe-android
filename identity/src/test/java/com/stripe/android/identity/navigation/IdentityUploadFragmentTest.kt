@@ -44,6 +44,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -92,6 +93,7 @@ class IdentityUploadFragmentTest {
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
+        on { getError() } doReturn mock()
     }
 
     private val mockScreenTracker = mock<ScreenTracker>()
@@ -144,7 +146,14 @@ class IdentityUploadFragmentTest {
     @Test
     fun `when initialized viewmodel registers activityResultCaller and UI is correct`() {
         launchFragment { binding, _, fragment ->
-            verify(mockFrontBackUploadViewModel).registerActivityResultCaller(same(fragment))
+            val callbackCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            verify(mockFrontBackUploadViewModel).registerActivityResultCaller(
+                same(fragment),
+                callbackCaptor.capture(),
+                callbackCaptor.capture(),
+                callbackCaptor.capture(),
+                callbackCaptor.capture()
+            )
 
             assertThat(binding.selectFront.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
@@ -460,6 +469,17 @@ class IdentityUploadFragmentTest {
 
     private fun verifyFlow(scanType: IdentityScanState.ScanType, isTakePhoto: Boolean) {
         launchFragment { binding, _, fragment ->
+            val frontPhotoTakenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            val backPhotoTakenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            val frontImageChosenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            val backImageChosenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            verify(mockFrontBackUploadViewModel).registerActivityResultCaller(
+                same(fragment),
+                frontPhotoTakenCaptor.capture(),
+                backPhotoTakenCaptor.capture(),
+                frontImageChosenCaptor.capture(),
+                backImageChosenCaptor.capture()
+            )
             // click select front button
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 binding.selectFront.callOnClick()
@@ -521,31 +541,27 @@ class IdentityUploadFragmentTest {
             // dialog dismissed
             assertThat(dialog.isShowing).isFalse()
 
-            // viewmodel triggers
-            val callbackCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
-
             if (isTakePhoto) {
                 if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                     verify(mockFrontBackUploadViewModel).takePhotoFront(
-                        same(fragment.requireContext()),
-                        callbackCaptor.capture()
+                        same(fragment.requireContext())
                     )
+                    frontPhotoTakenCaptor.firstValue(mockUri)
                 } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                     verify(mockFrontBackUploadViewModel).takePhotoBack(
-                        same(fragment.requireContext()),
-                        callbackCaptor.capture()
+                        same(fragment.requireContext())
                     )
+                    backPhotoTakenCaptor.firstValue(mockUri)
                 }
             } else {
                 if (scanType == IdentityScanState.ScanType.ID_FRONT) {
-                    verify(mockFrontBackUploadViewModel).chooseImageFront(callbackCaptor.capture())
+                    verify(mockFrontBackUploadViewModel).chooseImageFront()
+                    frontImageChosenCaptor.firstValue(mockUri)
                 } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
-                    verify(mockFrontBackUploadViewModel).chooseImageBack(callbackCaptor.capture())
+                    verify(mockFrontBackUploadViewModel).chooseImageBack()
+                    backImageChosenCaptor.firstValue(mockUri)
                 }
             }
-
-            // mock photo taken/image chosen
-            callbackCaptor.firstValue(mockUri)
 
             // viewmodel triggers and UI updates
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
@@ -558,7 +574,8 @@ class IdentityUploadFragmentTest {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
                     } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
-                    }
+                    },
+                    scanType = eq(scanType)
                 )
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -573,7 +590,8 @@ class IdentityUploadFragmentTest {
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
                     } else {
                         eq(DocumentUploadParam.UploadMethod.FILEUPLOAD)
-                    }
+                    },
+                    scanType = eq(scanType)
                 )
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.VISIBLE)
@@ -628,10 +646,12 @@ class IdentityUploadFragmentTest {
         themeResId = R.style.Theme_MaterialComponents
     ) {
         TestFragment(
-            viewModelFactoryFor(mockFrontBackUploadViewModel),
+            mock(),
             viewModelFactoryFor(if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel),
             navController
-        )
+        ).also {
+            it.identityUploadViewModelFactory = viewModelFactoryFor(mockFrontBackUploadViewModel)
+        }
     }.onFragment {
         (if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel).let { identityViewModel ->
             runBlocking {
@@ -649,11 +669,11 @@ class IdentityUploadFragmentTest {
     }
 
     internal class TestFragment(
-        identityUploadViewModelFactory: ViewModelProvider.Factory,
+        identityIO: IdentityIO,
         identityViewModelFactory: ViewModelProvider.Factory,
         val navController: TestNavHostController
     ) :
-        IdentityUploadFragment(identityUploadViewModelFactory, identityViewModelFactory) {
+        IdentityUploadFragment(identityIO, identityViewModelFactory) {
         override val titleRes = R.string.file_upload
         override val contextRes = R.string.file_upload_content_id
         override val frontTextRes = R.string.front_of_id
@@ -663,6 +683,7 @@ class IdentityUploadFragmentTest {
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
         override val fragmentId = R.id.IDUploadFragment
+        override val presentedId = "TEST_FRAGMENT_PRENTED"
 
         override fun onCreateView(
             inflater: LayoutInflater,

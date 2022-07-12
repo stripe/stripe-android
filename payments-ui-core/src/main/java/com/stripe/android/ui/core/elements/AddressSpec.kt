@@ -5,11 +5,22 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 enum class DisplayField {
     @SerialName("country")
     Country
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed class AddressType {
+    data class ShippingCondensed(
+        val googleApiKey: String?,
+        val onNavigation: () -> Unit
+    ) : AddressType()
+    object ShippingExpanded : AddressType()
+    object Normal : AddressType()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -22,7 +33,16 @@ data class AddressSpec(
     val allowedCountryCodes: Set<String> = supportedBillingCountries,
 
     @SerialName("display_fields")
-    val displayFields: Set<DisplayField> = emptySet()
+    val displayFields: Set<DisplayField> = emptySet(),
+
+    @SerialName("show_label")
+    val showLabel: Boolean = true,
+
+    /**
+     * This field is not deserialized, this field is used for the Address Element
+     */
+    @Transient
+    val type: AddressType = AddressType.Normal
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
@@ -41,9 +61,10 @@ data class AddressSpec(
                 apiPath,
                 addressRepository,
                 initialValues,
-                countryCodes = allowedCountryCodes
+                countryCodes = allowedCountryCodes,
+                addressType = type
             )
         },
-        label = R.string.billing_details
+        label = if (showLabel) R.string.billing_details else null
     )
 }

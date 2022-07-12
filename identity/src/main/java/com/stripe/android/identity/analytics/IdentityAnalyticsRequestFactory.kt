@@ -198,6 +198,36 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
+    fun genericError(
+        message: String?,
+        stackTrace: String
+    ) = requestFactory.createRequest(
+        eventName = EVENT_GENERIC_ERROR,
+        additionalParams = additionalParamWithEventMetadata(
+            PARAM_MESSAGE to message,
+            PARAM_STACKTRACE to stackTrace
+        )
+    )
+
+    fun imageUpload(
+        value: Long,
+        compressionQuality: Float,
+        scanType: IdentityScanState.ScanType,
+        id: String?,
+        fileName: String?,
+        fileSize: Long
+    ) = requestFactory.createRequest(
+        eventName = EVENT_IMAGE_UPLOAD,
+        additionalParams = additionalParamWithEventMetadata(
+            PARAM_VALUE to value,
+            PARAM_COMPRESSION_QUALITY to compressionQuality,
+            PARAM_SCAN_TYPE to scanType.toParam(),
+            PARAM_ID to id,
+            PARAM_FILE_NAME to fileName,
+            PARAM_FILE_SIZE to fileSize
+        )
+    )
+
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
             IdentityScanState.ScanType.ID_FRONT -> ID
@@ -205,9 +235,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             IdentityScanState.ScanType.PASSPORT -> PASSPORT
             IdentityScanState.ScanType.DL_FRONT -> DRIVER_LICENSE
             IdentityScanState.ScanType.DL_BACK -> DRIVER_LICENSE
-            else -> {
-                throw IllegalArgumentException("Unknown type: $this")
-            }
+            IdentityScanState.ScanType.SELFIE -> SELFIE
         }
 
     private fun IdentityScanState.ScanType.toSide(): String =
@@ -228,6 +256,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val ID = "id"
         const val PASSPORT = "passport"
         const val DRIVER_LICENSE = "driver_license"
+        const val SELFIE = "selfie"
         const val FRONT = "front"
         const val BACK = "back"
 
@@ -245,6 +274,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_AVERAGE_FPS = "average_fps"
         const val EVENT_MODEL_PERFORMANCE = "model_performance"
         const val EVENT_TIME_TO_SCREEN = "time_to_screen"
+        const val EVENT_IMAGE_UPLOAD = "image_upload"
+        const val EVENT_GENERIC_ERROR = "generic_error"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
@@ -275,14 +306,17 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_NETWORK_TIME = "network_time"
         const val PARAM_FROM_SCREEN_NAME = "from_screen_name"
         const val PARAM_TO_SCREEN_NAME = "to_screen_name"
+        const val PARAM_MESSAGE = "message"
+        const val PARAM_COMPRESSION_QUALITY = "compression_quality"
+        const val PARAM_ID = "id"
+        const val PARAM_FILE_NAME = "file_name"
+        const val PARAM_FILE_SIZE = "file_size"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_SELECT = "document_select"
-        const val SCREEN_NAME_LIVE_CAPTURE = "live_capture"
         const val SCREEN_NAME_LIVE_CAPTURE_PASSPORT = "live_capture_passport"
         const val SCREEN_NAME_LIVE_CAPTURE_ID = "live_capture_id"
         const val SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE = "live_capture_driver_license"
-        const val SCREEN_NAME_FILE_UPLOAD = "file_upload"
         const val SCREEN_NAME_FILE_UPLOAD_PASSPORT = "file_upload_passport"
         const val SCREEN_NAME_FILE_UPLOAD_ID = "file_upload_id"
         const val SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE = "file_upload_driver_license"

@@ -9,7 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.cardview.widget.CardView
@@ -53,7 +53,8 @@ internal class SelfieFragment(
     private lateinit var messageView: TextView
     private lateinit var flashMask: View
     private lateinit var scanningView: CardView
-    private lateinit var resultView: LinearLayout
+    private lateinit var resultView: ScrollView
+    private lateinit var padding: View
     private lateinit var capturedImages: RecyclerView
     private lateinit var allowImageCollection: CheckBox
 
@@ -74,6 +75,7 @@ internal class SelfieFragment(
         flashMask = binding.flashMask
         scanningView = binding.scanningView
         resultView = binding.resultView
+        padding = binding.padding
         capturedImages = binding.capturedImages
         allowImageCollection = binding.allowImageCollection
         capturedImages.adapter = selfieResultAdapter
@@ -164,6 +166,7 @@ internal class SelfieFragment(
                 binding.message.text = requireContext().getText(R.string.selfie_capture_complete)
             }
             is IdentityScanState.Finished -> {
+                binding.message.text = requireContext().getText(R.string.selfie_capture_complete)
                 toggleResultViewWithResult(
                     (identityScanState.transitioner as FaceDetectorTransitioner)
                         .filteredFrames.map { it.first.cameraPreviewImage.image.mirrorHorizontally() }
@@ -177,6 +180,7 @@ internal class SelfieFragment(
 
     override fun resetUI() {
         scanningView.visibility = View.VISIBLE
+        padding.visibility = View.VISIBLE
         resultView.visibility = View.GONE
         continueButton.isEnabled = false
         messageView.text = requireContext().getText(R.string.position_selfie)
@@ -194,8 +198,10 @@ internal class SelfieFragment(
                 identityViewModel.selfieUploadState.collectLatest {
                     when {
                         it.hasError() -> {
-                            Log.e(TAG, "Fail to upload files: ${it.getError()}")
-                            navigateToDefaultErrorFragment()
+                            "Fail to upload files: ${it.getError()}".let { msg ->
+                                Log.e(TAG, msg)
+                                navigateToDefaultErrorFragment(msg)
+                            }
                         }
                         it.isAnyLoading() -> {
                             continueButton.toggleToLoading()
@@ -230,15 +236,14 @@ internal class SelfieFragment(
                                     TAG,
                                     "fail to submit uploaded files: $throwable"
                                 )
-                                navigateToDefaultErrorFragment()
+                                navigateToDefaultErrorFragment(throwable)
                             }
                         }
                         else -> {
-                            Log.e(
-                                TAG,
-                                "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it"
-                            )
-                            navigateToDefaultErrorFragment()
+                            "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it".let { msg ->
+                                Log.e(TAG, msg)
+                                navigateToDefaultErrorFragment(msg)
+                            }
                         }
                     }
                 }
@@ -258,6 +263,7 @@ internal class SelfieFragment(
     private fun toggleResultViewWithResult(resultList: List<Bitmap>) {
         scanningView.visibility = View.GONE
         resultView.visibility = View.VISIBLE
+        padding.visibility = View.GONE
         continueButton.isEnabled = true
         selfieResultAdapter.submitList(resultList)
     }

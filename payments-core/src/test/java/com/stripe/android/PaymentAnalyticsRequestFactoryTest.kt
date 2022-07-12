@@ -119,7 +119,8 @@ class PaymentAnalyticsRequestFactoryTest {
                 "app_version" to 0,
                 "product_usage" to ATTRIBUTION.toList(),
                 "source_type" to "card",
-                "is_development" to true
+                "is_development" to true,
+                "session_id" to analyticsRequestFactory.sessionId
             )
         )
     }
@@ -293,7 +294,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 )
             )
         assertThat(analyticsRequest.url)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation&is_development=true")
+            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${analyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation&is_development=true")
     }
 
     @Test
@@ -365,6 +366,7 @@ class PaymentAnalyticsRequestFactoryTest {
             AnalyticsFields.OS_NAME,
             AnalyticsFields.OS_RELEASE,
             AnalyticsFields.PUBLISHABLE_KEY,
+            AnalyticsFields.SESSION_ID,
             PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE,
             PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE,
             PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE
