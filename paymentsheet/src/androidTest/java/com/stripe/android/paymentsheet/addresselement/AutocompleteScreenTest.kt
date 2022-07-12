@@ -93,12 +93,12 @@ class AutocompleteScreenTest {
     fun no_results_found_should_appear() {
         setContent()
         onQueryField().performTextInput("Some text")
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithText("No results found")
                 .fetchSemanticsNodes().size == 1
         }
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(TEST_TAG_ATTRIBUTION_DRAWABLE)
                 .fetchSemanticsNodes().size == 1
@@ -119,7 +119,7 @@ class AutocompleteScreenTest {
             )
         )
         onQueryField().performTextInput("Some text")
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithText("primaryText")
                 .fetchSemanticsNodes().size == 1
