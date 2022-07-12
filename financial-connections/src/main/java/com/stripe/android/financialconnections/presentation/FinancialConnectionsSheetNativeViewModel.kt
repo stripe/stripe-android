@@ -8,46 +8,45 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationManager: NavigationManager,
     val subcomponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider,
     val goNext: GoNext,
     val logger: Logger,
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val getManifest: GetManifest,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
         viewModelScope.launch {
-            nativeAuthFlowCoordinator().collectLatest { message ->
+            nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    is Message.RequestNextStep -> withState { state ->
-                        goNext(
-                            currentPane = message.currentStep,
-                            manifest = state.manifest,
-                            authorizationSession = state.authorizationSession
-                        )
-                    }
+                    is Message.RequestNextStep -> goNext(
+                        currentPane = message.currentStep,
+                        manifest = getManifest(),
+                        authorizationSession = awaitState().authorizationSession
+                    )
                     is Message.UpdateAuthorizationSession -> setState {
                         copy(authorizationSession = message.authorizationSession)
                     }
-                    is Message.UpdateManifest -> setState {
-                        copy(manifest = message.manifest)
-                    }
-                    Message.OpenWebAuthFlow -> setState {
-                        copy(viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+                    Message.OpenWebAuthFlow -> {
+                        val manifest = getManifest()
+                        setState {
+                            copy(viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+                        }
                     }
                 }
             }
@@ -77,7 +76,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 }
 
 internal data class FinancialConnectionsSheetNativeState(
-    val manifest: FinancialConnectionsSessionManifest,
     val authorizationSession: FinancialConnectionsAuthorizationSession?,
     val configuration: FinancialConnectionsSheet.Configuration,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
@@ -88,7 +86,6 @@ internal data class FinancialConnectionsSheetNativeState(
      */
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
-        manifest = args.manifest,
         configuration = args.configuration,
         authorizationSession = null,
         viewEffect = null

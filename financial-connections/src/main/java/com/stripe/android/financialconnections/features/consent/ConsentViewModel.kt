@@ -8,11 +8,10 @@ import com.stripe.android.financialconnections.di.financialConnectionsSubCompone
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateManifest
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
+import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,14 +19,33 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val repository: FinancialConnectionsManifestRepository,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
+    init {
+        viewModelScope.launch {
+            val manifest = repository.getOrFetchManifest()
+            setState {
+                copy(
+                    disconnectUrl = ConsentUrlBuilder.getDisconnectUrl(manifest),
+                    faqUrl = ConsentUrlBuilder.getFAQUrl(manifest),
+                    dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest),
+                    stripeToSUrl = ConsentUrlBuilder.getStripeTOSUrl(manifest),
+                    privacyCenterUrl = ConsentUrlBuilder.getPrivacyCenterUrl(manifest),
+                    title = ConsentTextBuilder.getConsentTitle(manifest),
+                    bullets = ConsentTextBuilder.getBullets(manifest),
+                    requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
+                    requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
+                )
+            }
+        }
+    }
+
     fun onContinueClick() {
         viewModelScope.launch {
-            val manifest: FinancialConnectionsSessionManifest = acceptConsent()
+            acceptConsent()
             with(nativeAuthFlowCoordinator()) {
-                emit(UpdateManifest(manifest))
                 emit(RequestNextStep(currentStep = NavigationDirections.consent))
             }
         }
@@ -53,22 +71,6 @@ internal class ConsentViewModel @Inject constructor(
                     this
                 }
             }
-        }
-    }
-
-    fun onManifestChanged(manifest: FinancialConnectionsSessionManifest) {
-        setState {
-            copy(
-                disconnectUrl = ConsentUrlBuilder.getDisconnectUrl(manifest),
-                faqUrl = ConsentUrlBuilder.getFAQUrl(manifest),
-                dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest),
-                stripeToSUrl = ConsentUrlBuilder.getStripeTOSUrl(manifest),
-                privacyCenterUrl = ConsentUrlBuilder.getPrivacyCenterUrl(manifest),
-                title = ConsentTextBuilder.getConsentTitle(manifest),
-                bullets = ConsentTextBuilder.getBullets(manifest),
-                requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
-                requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
-            )
         }
     }
 

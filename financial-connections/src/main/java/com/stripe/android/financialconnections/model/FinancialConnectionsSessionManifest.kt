@@ -104,7 +104,7 @@ internal data class FinancialConnectionsSessionManifest(
     val accountholderIsLinkConsumer: Boolean? = null,
 
     @SerialName(value = "active_auth_session")
-    val activeAuthSession: FinancialConnectionsAuthorizationSession? = null,
+    val activeAuthSession: String? = null,
 
     @SerialName(value = "active_institution")
     val activeInstitution: FinancialConnectionsInstitution? = null,

@@ -5,12 +5,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 
-internal class AcceptConsent @Inject constructor(
+internal class GetManifest @Inject constructor(
     val repository: FinancialConnectionsManifestRepository,
     val configuration: FinancialConnectionsSheet.Configuration
 ) {
 
     suspend operator fun invoke(): FinancialConnectionsSessionManifest {
-        return repository.markConsentAcquired(configuration.financialConnectionsSessionClientSecret)
+        return repository.getOrFetchManifest()
     }
 }
