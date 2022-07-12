@@ -299,13 +299,12 @@ class GooglePayLauncher internal constructor(
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayLauncher {
+            val context = LocalContext.current
+            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
             val activityResultLauncher = rememberLauncherForActivityResult(
                 GooglePayLauncherContract(),
                 resultCallback::onResult
             )
-
-            val context = LocalContext.current
-            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
 
             return remember {
                 GooglePayLauncher(

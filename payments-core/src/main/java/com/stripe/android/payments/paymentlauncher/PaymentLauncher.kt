@@ -112,11 +112,11 @@ interface PaymentLauncher {
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
         ): PaymentLauncher {
+            val context = LocalContext.current
             val activityResultLauncher = rememberLauncherForActivityResult(
                 PaymentLauncherContract(),
                 callback::onPaymentResult
             )
-            val context = LocalContext.current
 
             return remember {
                 PaymentLauncherFactory(

@@ -397,13 +397,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayPaymentMethodLauncher {
+            val context = LocalContext.current
+            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
             val activityResultLauncher = rememberLauncherForActivityResult(
                 GooglePayPaymentMethodLauncherContract(),
                 resultCallback::onResult
             )
-
-            val context = LocalContext.current
-            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
 
             return remember {
                 GooglePayPaymentMethodLauncher(
@@ -411,7 +410,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                     lifecycleScope = lifecycleScope,
                     activityResultLauncher = activityResultLauncher,
                     config = config,
-                    readyCallback = readyCallback,
+                    readyCallback = readyCallback
                 )
             }
         }
