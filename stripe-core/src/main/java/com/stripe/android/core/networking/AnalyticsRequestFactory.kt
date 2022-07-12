@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.UUID
@@ -17,7 +18,8 @@ open class AnalyticsRequestFactory(
     private val publishableKeyProvider: Provider<String>,
     internal val defaultProductUsageTokens: Set<String> = emptySet()
 ) {
-    private val sessionId = UUID.randomUUID()
+    @VisibleForTesting
+    val sessionId: UUID = UUID.randomUUID()
 
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
