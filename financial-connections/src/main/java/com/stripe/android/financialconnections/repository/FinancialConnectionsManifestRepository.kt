@@ -13,8 +13,16 @@ import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/**
+ * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
+ * of the current flow.
+ */
 internal interface FinancialConnectionsManifestRepository {
 
+    /**
+     * Generates an initial [FinancialConnectionsSessionManifest] to start the AuthFlow, and
+     * caches it locally.
+     */
     @Throws(
         AuthenticationException::class,
         InvalidRequestException::class,
@@ -26,6 +34,10 @@ internal interface FinancialConnectionsManifestRepository {
         applicationId: String
     ): FinancialConnectionsSessionManifest
 
+    /**
+     * Retrieves the current cached [FinancialConnectionsSessionManifest] instance, or fetches
+     * it from backend if no cached version available.
+     */
     @Throws(
         AuthenticationException::class,
         InvalidRequestException::class,
@@ -34,6 +46,10 @@ internal interface FinancialConnectionsManifestRepository {
     )
     suspend fun getOrFetchManifest(): FinancialConnectionsSessionManifest
 
+    /**
+     * Marks the consent pane as completed, and caches the updated [FinancialConnectionsSessionManifest] object
+     * received as result.
+     */
     @Throws(
         AuthenticationException::class,
         InvalidRequestException::class,
