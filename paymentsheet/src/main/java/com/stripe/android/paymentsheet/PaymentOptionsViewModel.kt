@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.os.Bundle
 import android.os.Parcelable
-//import android.util.Log
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -65,7 +64,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
     override val _transition = MutableLiveData<Event<TransitionTarget?>>(null)
-//        savedStateHandle.getLiveData<Event<TransitionTarget?>>("transition_target")
+
+    //        savedStateHandle.getLiveData<Event<TransitionTarget?>>("transition_target")
     internal val transition: LiveData<Event<TransitionTarget?>> = _transition
 
     @VisibleForTesting
@@ -83,14 +83,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
-    private var hasTransitionToUnsavedCard = false
+    internal var hasTransitionToUnsavedLpm
+        get() = savedStateHandle.get<Boolean>("hasTransitionToUnsavedCard")
+        set(value) = savedStateHandle.set("hasTransitionToUnsavedCard", value)
+
     private val shouldTransitionToUnsavedCard: Boolean
-        get() =
-            !hasTransitionToUnsavedCard && newPaymentSelection != null
+        get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
         setupLink(args.stripeIntent, false)
+        if (stripeIntent.value == null) {
+            setStripeIntent(args.stripeIntent)
+        }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
     }
@@ -249,7 +254,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
-            hasTransitionToUnsavedCard = true
+            hasTransitionToUnsavedLpm = true
             transitionTo(
                 // Until we add a flag to the transitionTarget to specify if we want to add the item
                 // to the backstack, we need to use the full sheet.

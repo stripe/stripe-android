@@ -111,7 +111,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
-            if (isReady) {
+            if (isReady == true) {
                 val selectedPaymentMethodIndex = paymentMethods.indexOf(
                     sheetViewModel.addFragmentSelectedLPM
                 ).takeUnless { it == -1 } ?: 0

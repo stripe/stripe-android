@@ -123,7 +123,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         }
 
         sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
-            if (isReady) {
+            if (isReady == true) {
                 // THis is required in the case of fallback because there are two resource repositories
                 if (!formViewModel.resourceRepository.isLoaded()) {
                     sheetViewModel.stripeIntent.value?.paymentMethodTypes?.let {

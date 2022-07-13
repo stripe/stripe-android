@@ -89,9 +89,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable?>(
 
     // Don't save the resource repository state because it must be re-initialized
     // with the save server specs when reconstructed.
-    private var _isResourceRepositoryReady = MutableLiveData(false)
+    private var _isResourceRepositoryReady = MutableLiveData<Boolean>(null)
 
-    internal val isResourceRepositoryReady: LiveData<Boolean> =
+    internal val isResourceRepositoryReady: LiveData<Boolean?> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
     private val _isLinkEnabled = MutableLiveData<Boolean>()
@@ -252,7 +252,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable?>(
             }
         }
 
-        if (_isResourceRepositoryReady.value != true) {
+        if (_isResourceRepositoryReady.value == null) {
             viewModelScope.launch {
                 // This work should be done on the background
                 CoroutineScope(workContext).launch {
@@ -341,8 +341,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable?>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        resourceRepository.getLpmRepository().values()
-                            .map { it.code }.toList()
+                            resourceRepository.getLpmRepository().values()
+                                .map { it.code }.toList()
                         })"
                 )
             )
@@ -438,8 +438,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable?>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

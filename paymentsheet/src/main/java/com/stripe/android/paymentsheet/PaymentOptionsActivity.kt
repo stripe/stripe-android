@@ -108,24 +108,34 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        viewModel.fragmentConfigEvent.observe(this) { event ->
-            val config = event.getContentIfNotHandled()
-            if (config != null) {
-                viewModel.transitionTo(
-                    // It would be nice to see this condition move into the PaymentOptionsListFragment
-                    // where we also jump to a new unsaved card. However this move require
-                    // the transition target to specify when to and when not to add things to the
-                    // backstack.
-                    if (
-                        starterArgs.paymentMethods.isEmpty() &&
-                        !config.isGooglePayReady &&
-                        viewModel.isLinkEnabled.value != true
-                    ) {
-                        PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                    } else {
-                        PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+        // if we are recovering from process kill or activity died, we should leave the fragment
+        // in it's current state.
+        if (!isSelectOrAddFragment()) {
+            viewModel.fragmentConfigEvent.observe(this) { event ->
+                val config = event.getContentIfNotHandled()
+                if (config != null) {
+                    if (viewModel.isResourceRepositoryReady.value == true) {
+                        viewModel.transitionTo(
+                            // It would be nice to see this condition move into the PaymentOptionsListFragment
+                            // where we also jump to a new unsaved card. However this move require
+                            // the transition target to specify when to and when not to add things to the
+                            // backstack.
+                            if (
+                                starterArgs.paymentMethods.isEmpty() &&
+                                !config.isGooglePayReady &&
+                                viewModel.isLinkEnabled.value != true // WHy not use config.isLinkEnabled?
+                            ) {
+                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
+                                    config
+                                )
+                            } else {
+                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
+                                    config
+                                )
+                            }
+                        )
                     }
-                )
+                }
             }
         }
 
@@ -146,11 +156,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             },
             false
         )
-
-        viewModel.isResourceRepositoryReady.observe(this){
-            viewModel.setStripeIntent(starterArgs.stripeIntent)
-        }
     }
+
+    private fun isSelectOrAddFragment() = supportFragmentManager.fragments.firstOrNull()?.let {
+        it.tag == ADD_FULL_FRAGMENT_TAG ||
+            it.tag == ADD_PAYMENT_METHOD_SHEET_TAG ||
+            it.tag == SELECT_SAVED_PAYMENT_METHOD_TAG
+    } ?: false
 
     override fun resetPrimaryButtonState() {
         viewBinding.continueButton.lockVisible = false
@@ -173,6 +185,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                    // Once the add fragment has been opened there is never a scenario that
+                    // we should back to the add fragment from the select list view.
+                    viewModel.hasTransitionToUnsavedLpm = true
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -184,21 +199,27 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     replace(
                         fragmentContainerId,
                         PaymentOptionsAddPaymentMethodFragment::class.java,
-                        fragmentArgs
+                        fragmentArgs,
+                        ADD_FULL_FRAGMENT_TAG
                     )
                 }
                 is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
                         PaymentOptionsListFragment::class.java,
-                        fragmentArgs
+                        fragmentArgs,
+                        SELECT_SAVED_PAYMENT_METHOD_TAG
                     )
                 }
                 is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                    // Once the add fragment has been opened there is never a scenario that
+                    // we should back to the add fragment from the select list view.
+                    viewModel.hasTransitionToUnsavedLpm = true
                     replace(
                         fragmentContainerId,
                         PaymentOptionsAddPaymentMethodFragment::class.java,
-                        fragmentArgs
+                        fragmentArgs,
+                        ADD_PAYMENT_METHOD_SHEET_TAG
                     )
                 }
             }
@@ -224,5 +245,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     internal companion object {
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
+        const val ADD_FULL_FRAGMENT_TAG = "AddFullFragment"
+        const val ADD_PAYMENT_METHOD_SHEET_TAG = "AddPaymentMethodSheet"
+        const val SELECT_SAVED_PAYMENT_METHOD_TAG = "SelectSavedPaymentMethod"
     }
 }
