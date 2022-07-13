@@ -67,9 +67,9 @@ class SupportedPaymentMethodTest {
                             ).contains(lpm)
                         )
                         val actualLine = "${lpm.code}, ${
-                            testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.code)
-                            ).toCsv()
+                        testInput.copy(
+                            intentPMs = testInput.intentPMs.plus(lpm.code)
+                        ).toCsv()
                         }, ${testOutput.toCsv()}\n"
 
                         csvOutput.append(actualLine)

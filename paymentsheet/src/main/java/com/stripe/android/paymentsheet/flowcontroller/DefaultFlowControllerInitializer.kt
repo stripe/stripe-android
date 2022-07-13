@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.util.Log
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -179,7 +178,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private suspend fun retrieveStripeIntent(
         clientSecret: ClientSecret
     ): StripeIntent {
-        Log.e("MLB", "DefaultFlowController: Sheet Updating the lpm repository")
         return stripeIntentValidator.requireValid(
             initializeRepositoryAndGetStripeIntent(
                 resourceRepository,

@@ -342,8 +342,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                            resourceRepository.getLpmRepository().values()
-                                .map { it.code }.toList()
+                        resourceRepository.getLpmRepository().values()
+                            .map { it.code }.toList()
                         })"
                 )
             )
@@ -439,8 +439,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                        it.type != PaymentMethod.Type.USBankAccount
-                    } == true
+                    it.type != PaymentMethod.Type.USBankAccount
+                } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

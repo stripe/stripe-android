@@ -97,6 +97,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             ),
             R.style.StripePaymentSheetDefaultTheme
         ).onFragment { fragment ->
+            fragment.sheetViewModel.resourceRepository.getLpmRepository().updateFromDisk()
             onReady(
                 fragment,
                 FragmentPaymentsheetAddPaymentMethodBinding.bind(

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import android.util.Log
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
