@@ -85,11 +85,7 @@ constructor(
 
     /**
      * Internal list of extra fields related to the error.
+     * Note - value type is ignored and always parsed as string (true -> "true")
      */
-    internal val extraFields: ExtraFields? = null
+    internal val extraFields: Map<String, String>? = null
 ) : StripeModel, Serializable
-
-@Parcelize
-internal data class ExtraFields(
-    val value: Map<String, String>
-) : StripeModel

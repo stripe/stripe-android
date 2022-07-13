@@ -23,7 +23,11 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                     type = optString(errorObject, FIELD_TYPE),
                     docUrl = optString(errorObject, FIELD_DOC_URL),
                     extraFields = errorObject
-                        .optJSONObject(FIELD_EXTRA_FIELDS)?.let { ExtraFieldsParser().parse(it) }
+                        .optJSONObject(FIELD_EXTRA_FIELDS)?.let { extraFieldsJson ->
+                            extraFieldsJson.keys().asSequence()
+                                .map { key -> key to json.getString(key) }
+                                .toMap()
+                        }
                 )
             }
         }.getOrDefault(
@@ -51,16 +55,3 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
     }
 }
 
-private class ExtraFieldsParser : ModelJsonParser<ExtraFields> {
-    override fun parse(json: JSONObject): ExtraFields {
-        return runCatching {
-            ExtraFields(
-                json.keys().asSequence().map { key -> key to json.getString(key) }.toMap()
-            )
-        }.getOrDefault(
-            ExtraFields(
-                emptyMap()
-            )
-        )
-    }
-}
