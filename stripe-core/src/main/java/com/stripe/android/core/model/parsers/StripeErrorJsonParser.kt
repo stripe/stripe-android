@@ -28,11 +28,7 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                         }
                 )
             }
-        }
-            .onFailure {
-                it
-            }
-            .getOrDefault(
+        }.getOrDefault(
             StripeError(
                 message = MALFORMED_RESPONSE_MESSAGE
             )
