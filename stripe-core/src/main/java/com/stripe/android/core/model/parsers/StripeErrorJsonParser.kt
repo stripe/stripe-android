@@ -23,7 +23,7 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                     extraFields = errorObject
                         .optJSONObject(FIELD_EXTRA_FIELDS)?.let { extraFieldsJson ->
                             extraFieldsJson.keys().asSequence()
-                                .map { key -> key to json.getString(key) }
+                                .map { key -> key to extraFieldsJson.getString(key) }
                                 .toMap()
                         }
                 )

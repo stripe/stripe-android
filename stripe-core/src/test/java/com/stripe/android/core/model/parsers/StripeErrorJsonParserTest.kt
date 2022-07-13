@@ -90,7 +90,11 @@ class StripeErrorJsonParserTest {
                     "decline_code": "card_declined",
                     "message": "Your card was declined.",
                     "type": "invalid_request_error",
-                    "extra_fields": { "test_number": 1, "test_boolean": true, "test_string": "hola" }
+                    "extra_fields": {
+                        "test_number": 1, 
+                        "test_boolean": true,
+                        "test_string": "hola" 
+                    }
                 }
             }
             """.trimIndent()
