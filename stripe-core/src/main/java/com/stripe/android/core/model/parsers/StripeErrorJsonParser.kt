@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.StripeModel
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -19,7 +21,9 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                     message = optString(errorObject, FIELD_MESSAGE),
                     param = optString(errorObject, FIELD_PARAM),
                     type = optString(errorObject, FIELD_TYPE),
-                    docUrl = optString(errorObject, FIELD_DOC_URL)
+                    docUrl = optString(errorObject, FIELD_DOC_URL),
+                    extraFields = errorObject
+                        .optJSONObject(FIELD_EXTRA_FIELDS)?.let { ExtraFieldsParser().parse(it) }
                 )
             }
         }.getOrDefault(
@@ -38,10 +42,25 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
         private const val FIELD_CHARGE = "charge"
         private const val FIELD_CODE = "code"
         private const val FIELD_DECLINE_CODE = "decline_code"
+        private const val FIELD_EXTRA_FIELDS = "extra_fields"
         private const val FIELD_DOC_URL = "doc_url"
         private const val FIELD_ERROR = "error"
         private const val FIELD_MESSAGE = "message"
         private const val FIELD_PARAM = "param"
         private const val FIELD_TYPE = "type"
+    }
+}
+
+private class ExtraFieldsParser : ModelJsonParser<ExtraFields> {
+    override fun parse(json: JSONObject): ExtraFields {
+        return runCatching {
+            ExtraFields(
+                json.keys().asSequence().map { key -> key to json.getString(key) }.toMap()
+            )
+        }.getOrDefault(
+            ExtraFields(
+                emptyMap()
+            )
+        )
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.core
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.model.parsers.ExtraFields
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 
@@ -80,5 +81,15 @@ constructor(
      *
      * [doc_url](https://stripe.com/docs/api/errors#errors-doc_url)
      */
-    val docUrl: String? = null
+    val docUrl: String? = null,
+
+    /**
+     * Internal list of extra fields related to the error.
+     */
+    internal val extraFields: ExtraFields? = null
 ) : StripeModel, Serializable
+
+@Parcelize
+internal data class ExtraFields(
+    val value: Map<String, String>
+) : StripeModel
