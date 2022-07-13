@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -62,6 +63,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -113,6 +115,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle = savedStateHandle,
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
+    override val _transition = MutableLiveData<Event<TransitionTarget?>>(Event(null))
+    internal val transition: LiveData<Event<TransitionTarget?>> = _transition
+
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
     )
@@ -537,7 +542,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }
 
-    internal sealed class TransitionTarget {
+    @Parcelize
+    internal sealed class TransitionTarget : Parcelable {
         abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected

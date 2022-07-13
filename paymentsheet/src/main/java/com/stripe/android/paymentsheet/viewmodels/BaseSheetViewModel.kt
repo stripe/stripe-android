@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.os.Parcelable
+//import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
@@ -52,13 +54,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class BaseSheetViewModel<TransitionTargetType>(
+internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable?>(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
@@ -71,6 +74,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val savedStateHandle: SavedStateHandle,
     internal val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : AndroidViewModel(application) {
+    abstract val _transition: MutableLiveData<Event<TransitionTargetType?>>
+
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
@@ -139,9 +144,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _savedSelection =
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
-
-    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
-    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     @VisibleForTesting
     internal val _liveMode = MutableLiveData<Boolean>()
@@ -602,7 +604,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
      * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
      */
-    class Event<out T>(private val content: T) {
+    @Parcelize
+    class Event<out T : Parcelable?>(private val content: T) : Parcelable {
 
         var hasBeenHandled = false
             private set // Allow external read but not write
@@ -623,7 +626,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * Returns the content, even if it's already been handled.
          */
         @TestOnly
-        fun peekContent(): T = content
+        fun peekContent(): T? = content
     }
 
     companion object {

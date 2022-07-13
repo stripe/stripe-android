@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Parcelable
+//import android.util.Log
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -30,6 +32,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -61,6 +64,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle = savedStateHandle,
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
+    override val _transition = MutableLiveData<Event<TransitionTarget?>>(null)
+//        savedStateHandle.getLiveData<Event<TransitionTarget?>>("transition_target")
+    internal val transition: LiveData<Event<TransitionTarget?>> = _transition
+
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
@@ -251,7 +258,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    internal sealed class TransitionTarget {
+    @Parcelize
+    internal sealed class TransitionTarget : Parcelable {
         abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
