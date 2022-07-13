@@ -304,28 +304,6 @@ class LpmSerializerTest {
     }
 
     @Test
-    fun `Verify that a single LPM form item missing a required field makes all erroneous`() {
-        val serializedString =
-            """
-             [
-                {
-                    "type": "card"
-                },
-                {
-                    "type": "au_becs_debit",
-                    "fields": [
-                      {
-                        "type": "text"
-                      }
-                    ]
-                  }
-             ]
-            """.trimIndent()
-
-        assertThat(lpmSerializer.deserializeList(serializedString).size).isEqualTo(0)
-    }
-
-    @Test
     fun `Verify that unknown field in Json spec deserializes - ignoring the field`() {
         val serializedString =
             """

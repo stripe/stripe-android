@@ -46,77 +46,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify failing to read server schema reads from disk`() {
-        lpmRepository.update(
-            listOf("affirm"),
-            """
-          [
-            {
-                "type": "affirm",
-                invalid schema
-              }
-         ]
-            """.trimIndent()
-        )
-        assertThat(lpmRepository.fromCode("affirm")).isNotNull()
-    }
-
-    @Test
-    fun `Verify field not found in schema is read from disk`() {
-        lpmRepository.update(
-            listOf("card", "afterpay_clearpay"),
-            """
-          [
-            {
-                "type": "afterpay_clearpay",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-              }
-         ]
-            """.trimIndent()
-        )
-        assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
-        assertThat(lpmRepository.fromCode("card")).isNotNull()
-    }
-
-    @Test
-    fun `Repository will contain LPMs in ordered and schema`() {
-        lpmRepository.update(
-            listOf("afterpay_clearpay"),
-            """
-          [
-            {
-                "type": "affirm",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-            },
-            {
-                "type": "afterpay_clearpay",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-              }
-         ]
-            """.trimIndent()
-        )
-        assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
-        assertThat(lpmRepository.fromCode("affirm")).isNotNull()
-    }
-
-    @Test
-    fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
-        lpmRepository.updateFromDisk()
+    fun `Verify no fields in the default json are ignored`() {
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
@@ -139,9 +69,8 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
-        assertThat(lpmRepository.fromCode("card")).isNull()
-        lpmRepository.update(
-            emptyList(),
+        assertThat(lpmRepository.fromCode("card")).isNotNull()
+        lpmRepository.initialize(
             """
           [
             {
@@ -154,7 +83,7 @@ class LpmRepositoryTest {
                 ]
               }
          ]
-            """.trimIndent()
+            """.trimIndent().byteInputStream()
         )
         assertThat(lpmRepository.fromCode("card")).isNull()
     }
@@ -163,8 +92,7 @@ class LpmRepositoryTest {
     // of in code here.
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
-        lpmRepository.update(
-            emptyList(),
+        lpmRepository.initialize(
             """
               [
                 {
@@ -186,20 +114,18 @@ class LpmRepositoryTest {
                     ]
                   }
              ]
-            """.trimIndent()
+            """.trimIndent().byteInputStream()
         )
         assertThat(lpmRepository.fromCode("unknown_lpm")).isNull()
     }
 
     @Test
     fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
-        lpmRepository.updateFromDisk()
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
 
-        lpmRepository.update(
-            emptyList(),
+        lpmRepository.initialize(
             """
               [
                 {
@@ -208,7 +134,7 @@ class LpmRepositoryTest {
                     "fields": []
                   }
              ]
-            """.trimIndent()
+            """.trimIndent().byteInputStream()
         )
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements

@@ -62,8 +62,8 @@ class LpmRepository @Inject constructor(
     init {
         initialize(
             resources?.assets?.open("lpms.json")
-            )
-        }
+        )
+    }
 
     @VisibleForTesting
     fun initialize(inputStream: InputStream?) {
