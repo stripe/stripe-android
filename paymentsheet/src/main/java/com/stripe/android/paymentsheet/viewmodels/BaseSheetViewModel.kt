@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
@@ -261,7 +260,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
                         resourceRepository.getLpmRepository().apply {
                             if (!isLoaded()) {
-                                Log.e("MLB", "BaseSheetViewModel")
                                 update(intentPaymentMethodTypes, lpmServerSpec)
                             }
                         }
@@ -342,8 +340,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        resourceRepository.getLpmRepository().values()
-                            .map { it.code }.toList()
+                            resourceRepository.getLpmRepository().values()
+                                .map { it.code }.toList()
                         })"
                 )
             )
@@ -439,8 +437,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

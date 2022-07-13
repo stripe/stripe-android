@@ -233,6 +233,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         stripeIntentRepository,
                         args.clientSecret
                     )
+
+                    // The lpm server specs need to be saved so that upon the
+                    // activity being killed the state can be restored.
                     lpmServerSpec = specs
                     intent
                 }.fold(

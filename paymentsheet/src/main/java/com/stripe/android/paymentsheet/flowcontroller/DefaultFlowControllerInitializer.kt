@@ -5,7 +5,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -26,9 +25,9 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+        (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
@@ -177,13 +176,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
 
     private suspend fun retrieveStripeIntent(
         clientSecret: ClientSecret
-    ): StripeIntent {
-        return stripeIntentValidator.requireValid(
-            initializeRepositoryAndGetStripeIntent(
-                resourceRepository,
-                stripeIntentRepository,
-                clientSecret
-            ).first
-        )
-    }
+    ) = stripeIntentValidator.requireValid(
+        initializeRepositoryAndGetStripeIntent(
+            resourceRepository,
+            stripeIntentRepository,
+            clientSecret
+        ).first
+    )
 }

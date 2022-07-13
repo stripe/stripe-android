@@ -116,6 +116,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     sheetViewModel.addFragmentSelectedLPM
                 ).takeUnless { it == -1 } ?: 0
 
+                // In order to be able to read sheetViewModel.addFragmentSelectedLPM
+                // the repository needs to be set. This might not be set if recovery
+                // from a killed process or don't keep activities event
                 if (paymentMethods.size > 1) {
                     setupRecyclerView(
                         viewBinding,

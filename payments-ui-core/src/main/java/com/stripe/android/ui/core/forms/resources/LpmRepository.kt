@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -36,7 +35,6 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -89,8 +87,6 @@ class LpmRepository constructor(
      * Reading the server spec is all or nothing, any error means none will be read
      * so it is important that the json on disk is successful.
      */
-    private val uuid = UUID.randomUUID()
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(
         expectedLpms: List<String>,
@@ -110,10 +106,6 @@ class LpmRepository constructor(
     ) {
         // TODO: Call analytics if parsing fails for any reason
         if (!isLoaded() || force) {
-            Log.e(
-                "MLB",
-                "   $uuid: Lpm Repo updating latch: ${serverInitializedLatch.count} force: $force"
-            )
             update(parseLpms(serverLpmSpecs))
 
             // If the server does not return specs, or they are not parsed successfully
@@ -134,10 +126,6 @@ class LpmRepository constructor(
             }
 
             serverInitializedLatch.countDown()
-            Log.e(
-                "MLB",
-                "   $uuid: Lpm Repo Updated latch: ${serverInitializedLatch.count} force: $force"
-            )
         }
     }
 

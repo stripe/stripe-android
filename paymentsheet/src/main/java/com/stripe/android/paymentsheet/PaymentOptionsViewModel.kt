@@ -87,7 +87,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
         setupLink(args.stripeIntent, false)
 
-        // After recovering from don't keep activities the stripe intent will be saved
+        // After recovering from don't keep activities the stripe intent will be saved,
+        // calling setStripeIntent would require the repository be initialized, which
+        // would not be the case.
         if (stripeIntent.value == null) {
             setStripeIntent(args.stripeIntent)
         }
@@ -321,6 +323,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     companion object {
-        const val SAVE_STATE_HAS_OPEN_SAVED_LPM = "hasTransitionToUnsavedCard"
+        const val SAVE_STATE_HAS_OPEN_SAVED_LPM = "hasTransitionToUnsavedLpm"
     }
 }
