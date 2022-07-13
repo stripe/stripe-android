@@ -77,8 +77,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     internal var hasTransitionToUnsavedLpm
-        get() = savedStateHandle.get<Boolean>("hasTransitionToUnsavedCard")
-        set(value) = savedStateHandle.set("hasTransitionToUnsavedCard", value)
+        get() = savedStateHandle.get<Boolean>(SAVE_STATE_HAS_OPEN_SAVED_LPM)
+        set(value) = savedStateHandle.set(SAVE_STATE_HAS_OPEN_SAVED_LPM, value)
 
     private val shouldTransitionToUnsavedCard: Boolean
         get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
@@ -86,6 +86,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
         setupLink(args.stripeIntent, false)
+
+        // After recovering from don't keep activities the stripe intent will be saved
         if (stripeIntent.value == null) {
             setStripeIntent(args.stripeIntent)
         }
@@ -316,5 +318,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
+    }
+
+    companion object {
+        const val SAVE_STATE_HAS_OPEN_SAVED_LPM = "hasTransitionToUnsavedCard"
     }
 }

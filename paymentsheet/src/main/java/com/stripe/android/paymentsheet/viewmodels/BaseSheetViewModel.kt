@@ -144,7 +144,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     @VisibleForTesting
-    internal val _liveMode = MutableLiveData<Boolean>()
+    internal val _liveMode
+        get() = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
     internal val liveMode: LiveData<Boolean> = _liveMode
 
     /**
@@ -638,5 +639,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
+        internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
     }
 }
