@@ -46,7 +46,7 @@ class ComposeExampleActivity : AppCompatActivity() {
     fun ComposeScreen() {
         val inProgress by viewModel.inProgress.observeAsState(false)
         val status by viewModel.status.observeAsState("")
-        val paymentLauncher = createPaymentLauncher()
+        val paymentLauncher = rememberPaymentLauncher()
 
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {
             if (inProgress) {
@@ -79,7 +79,7 @@ class ComposeExampleActivity : AppCompatActivity() {
      * Create [PaymentLauncher] in a [Composable]
      */
     @Composable
-    fun createPaymentLauncher(): PaymentLauncher {
+    fun rememberPaymentLauncher(): PaymentLauncher {
         val context = LocalContext.current
         val settings = remember { Settings(context) }
         return PaymentLauncher.rememberLauncher(
