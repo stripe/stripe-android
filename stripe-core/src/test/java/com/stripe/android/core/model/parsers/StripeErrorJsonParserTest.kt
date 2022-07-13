@@ -43,7 +43,7 @@ class StripeErrorJsonParserTest {
             declineCode = "card_declined",
             type = "invalid_request_error",
             extraFields = mapOf(
-                "test_number" to "1"
+                "test_number" to "1",
                 "test_boolean" to "true",
                 "test_string" to "hola"
             )

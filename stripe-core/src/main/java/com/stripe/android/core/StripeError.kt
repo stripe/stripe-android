@@ -2,7 +2,6 @@ package com.stripe.android.core
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.model.parsers.ExtraFields
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 

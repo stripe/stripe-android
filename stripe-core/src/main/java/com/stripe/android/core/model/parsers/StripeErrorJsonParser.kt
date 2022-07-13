@@ -4,8 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.model.StripeJsonUtils.optString
-import com.stripe.android.core.model.StripeModel
-import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -54,4 +52,3 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
         private const val FIELD_TYPE = "type"
     }
 }
-
