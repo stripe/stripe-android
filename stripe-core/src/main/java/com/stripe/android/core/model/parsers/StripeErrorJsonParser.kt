@@ -23,12 +23,16 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                     extraFields = errorObject
                         .optJSONObject(FIELD_EXTRA_FIELDS)?.let { extraFieldsJson ->
                             extraFieldsJson.keys().asSequence()
-                                .map { key -> key to extraFieldsJson.getString(key) }
+                                .map { key -> key to extraFieldsJson.get(key).toString() }
                                 .toMap()
                         }
                 )
             }
-        }.getOrDefault(
+        }
+            .onFailure {
+                it
+            }
+            .getOrDefault(
             StripeError(
                 message = MALFORMED_RESPONSE_MESSAGE
             )
