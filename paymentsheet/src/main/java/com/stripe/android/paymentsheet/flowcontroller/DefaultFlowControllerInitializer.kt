@@ -25,9 +25,9 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-        (GooglePayEnvironment) -> GooglePayRepository,
+    (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,

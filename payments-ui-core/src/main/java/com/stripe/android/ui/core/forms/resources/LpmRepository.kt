@@ -53,12 +53,6 @@ import javax.inject.Singleton
 class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments
 ) {
-    data class LpmRepositoryArguments(
-        val resources: Resources?,
-        val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-            DefaultIsFinancialConnectionsAvailable()
-    )
-
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
 
@@ -394,4 +388,11 @@ class LpmRepository constructor(
             )
         }
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class LpmRepositoryArguments(
+        val resources: Resources?,
+        val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+            DefaultIsFinancialConnectionsAvailable()
+    )
 }

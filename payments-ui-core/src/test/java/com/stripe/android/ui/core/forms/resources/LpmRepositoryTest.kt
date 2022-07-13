@@ -15,19 +15,23 @@ import java.util.Locale
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources,
-        object : IsFinancialConnectionsAvailable {
-            override fun invoke(): Boolean {
-                return true
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return true
+                }
             }
-        }
+        )
     )
 
     @Test
     fun `Test label for afterpay show correctly when clearpay string`() {
         Locale.setDefault(Locale.UK)
         val lpmRepository = LpmRepository(
-            ApplicationProvider.getApplicationContext<Application>().resources
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
         )
         lpmRepository.updateFromDisk()
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
@@ -40,7 +44,9 @@ class LpmRepositoryTest {
     fun `Test label for afterpay show correctly when afterpay string`() {
         Locale.setDefault(Locale.US)
         val lpmRepository = LpmRepository(
-            ApplicationProvider.getApplicationContext<Application>().resources
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
         )
         lpmRepository.updateFromDisk()
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
