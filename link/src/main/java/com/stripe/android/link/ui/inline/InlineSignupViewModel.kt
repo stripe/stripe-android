@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.MERCHANT_NAME
@@ -28,6 +29,7 @@ internal class InlineSignupViewModel @Inject constructor(
     @Named(CUSTOMER_EMAIL) customerEmail: String?,
     @Named(CUSTOMER_PHONE) customerPhone: String?,
     private val linkAccountManager: LinkAccountManager,
+    private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
     private val prefilledEmail =
@@ -74,6 +76,7 @@ internal class InlineSignupViewModel @Inject constructor(
         if (isExpanded.value && !hasExpanded) {
             hasExpanded = true
             watchUserInput()
+            linkEventsReporter.onInlineSignupCheckboxChecked()
         }
     }
 
@@ -125,6 +128,7 @@ internal class InlineSignupViewModel @Inject constructor(
                 } else {
                     userInput.value = null
                     _signUpStatus.value = SignUpState.InputtingPhone
+                    linkEventsReporter.onSignupStarted(true)
                 }
             },
             onFailure = ::onError

@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.inline
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -29,6 +30,7 @@ import kotlin.test.BeforeTest
 @RunWith(RobolectricTestRunner::class)
 class InlineSignupViewModelTest {
     private val linkAccountManager = mock<LinkAccountManager>()
+    private val linkEventsReporter = mock<LinkEventsReporter>()
 
     @BeforeTest
     fun setUp() {
@@ -58,6 +60,7 @@ class InlineSignupViewModelTest {
                 customerEmail = CUSTOMER_EMAIL,
                 customerPhone = CUSTOMER_PHONE,
                 linkAccountManager = linkAccountManager,
+                linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop()
             )
             viewModel.toggleExpanded()
@@ -161,11 +164,38 @@ class InlineSignupViewModelTest {
             assertThat(viewModel.userInput.value).isNull()
         }
 
+    @Test
+    fun `When user checks box then analytics event is sent`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+            viewModel.toggleExpanded()
+
+            verify(linkEventsReporter).onInlineSignupCheckboxChecked()
+        }
+
+    @Test
+    fun `When signup starts then analytics event is sent`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange("valid@email.com")
+
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.success(null))
+
+            // Advance past lookup debounce delay
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            verify(linkEventsReporter).onSignupStarted(true)
+        }
+
     private fun createViewModel() = InlineSignupViewModel(
         merchantName = MERCHANT_NAME,
         customerEmail = CUSTOMER_EMAIL,
         customerPhone = null,
         linkAccountManager = linkAccountManager,
+        linkEventsReporter = linkEventsReporter,
         logger = Logger.noop()
     )
 
