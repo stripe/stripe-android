@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -124,7 +125,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
 
         sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
             if (isReady == true) {
-                // THis is required in the case of fallback because there are two resource repositories
                 if (!formViewModel.resourceRepository.isLoaded()) {
                     sheetViewModel.stripeIntent.value?.paymentMethodTypes?.let {
                         formViewModel.resourceRepository.getLpmRepository().update(

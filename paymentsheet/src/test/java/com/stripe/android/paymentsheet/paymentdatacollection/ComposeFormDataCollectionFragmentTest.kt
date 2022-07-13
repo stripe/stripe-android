@@ -22,11 +22,19 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ComposeFormDataCollectionFragmentTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
-        this.update(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Sofort.code), null)
+    private val lpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+    ).apply {
+        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Sofort.code), null)
     }
-    private val card = LpmRepository.HardcodedCard
-    private val sofort = lpmRepository.fromCode("sofort")!!
+
+    private
+    val card = LpmRepository.HardcodedCard
+
+    private
+    val sofort = lpmRepository.fromCode("sofort")!!
 
     @Test
     fun `card payment method selection has the fields from formFieldValues`() {

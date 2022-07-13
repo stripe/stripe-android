@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -228,6 +229,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // The co-routine scope is needed to do work off the UI thread
             CoroutineScope(workContext).launch {
                 runCatching {
+                    Log.e("MLB", "PaymentSheetVIewModel: Sheet Updating the lpm repository")
                     val (intent, specs) = initializeRepositoryAndGetStripeIntent(
                         resourceRepository,
                         stripeIntentRepository,

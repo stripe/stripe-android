@@ -21,8 +21,12 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
-        this.update(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
+    private val lpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+    ).apply {
+        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
     }
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
@@ -63,9 +67,9 @@ class SupportedPaymentMethodTest {
                             ).contains(lpm)
                         )
                         val actualLine = "${lpm.code}, ${
-                        testInput.copy(
-                            intentPMs = testInput.intentPMs.plus(lpm.code)
-                        ).toCsv()
+                            testInput.copy(
+                                intentPMs = testInput.intentPMs.plus(lpm.code)
+                            ).toCsv()
                         }, ${testOutput.toCsv()}\n"
 
                         csvOutput.append(actualLine)

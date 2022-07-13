@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import android.util.DisplayMetrics
@@ -501,7 +502,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository)
             } else {
-                it.sheetViewModel.resourceRepository.getLpmRepository().update(
+                it.sheetViewModel.resourceRepository.getLpmRepository().forceUpdate(
                     stripeIntent.paymentMethodTypes,
                     null
                 )
@@ -522,8 +523,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
     companion object {
         val lpmRepository =
-            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources).apply {
-                this.update(
+            LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)).apply {
+                this.forceUpdate(
                     listOf(
                         PaymentMethod.Type.Card.code,
                         PaymentMethod.Type.USBankAccount.code,

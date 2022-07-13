@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.util.Log
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -10,6 +11,7 @@ internal suspend fun initializeRepositoryAndGetStripeIntent(
     clientSecret: ClientSecret
 ): Pair<StripeIntent, String?> {
     val value = stripeIntentRepository.get(clientSecret)
+
     resourceRepository.getLpmRepository().update(
         value.intent.paymentMethodTypes,
         value.formUI

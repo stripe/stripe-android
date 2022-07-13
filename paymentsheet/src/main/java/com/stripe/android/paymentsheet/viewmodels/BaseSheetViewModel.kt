@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
@@ -260,6 +261,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
                         resourceRepository.getLpmRepository().apply {
                             if (!isLoaded()) {
+                                Log.e("MLB", "BaseSheetViewModel")
                                 update(intentPaymentMethodTypes, lpmServerSpec)
                             }
                         }

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -35,22 +36,31 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
  * a particular requested LPM.
+ *
+ * This is not injected as a singleton because when the activity is killed
+ * the FormViewModel and SheetViewModel don't share the Dagger graph and the
+ * repository is not a singleton.  Additionally every time you create a new
+ * form view model a new repository is created and thus needs to be initialized.
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository @Inject constructor(
-    val resources: Resources?,
-    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-        DefaultIsFinancialConnectionsAvailable()
+class LpmRepository constructor(
+    private val arguments: LpmRepositoryArguments
 ) {
+    data class LpmRepositoryArguments(
+        val resources: Resources?,
+        val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+            DefaultIsFinancialConnectionsAvailable()
+    )
+
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
 
@@ -62,7 +72,7 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
-    fun isLoaded() = serverInitializedLatch.count == 0L
+    fun isLoaded() = serverInitializedLatch.count <= 0L
 
     fun waitUntilLoaded() = serverInitializedLatch.await(20, TimeUnit.SECONDS)
 
@@ -79,33 +89,56 @@ class LpmRepository @Inject constructor(
      * Reading the server spec is all or nothing, any error means none will be read
      * so it is important that the json on disk is successful.
      */
+    private val uuid = UUID.randomUUID()
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(
         expectedLpms: List<String>,
         serverLpmSpecs: String?
+    ) = internalUpdate(expectedLpms, serverLpmSpecs, false)
+
+    @VisibleForTesting
+    fun forceUpdate(
+        expectedLpms: List<String>,
+        serverLpmSpecs: String?
+    ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
+
+    private fun internalUpdate(
+        expectedLpms: List<String>,
+        serverLpmSpecs: String?,
+        force: Boolean = false
     ) {
         // TODO: Call analytics if parsing fails for any reason
+        if (!isLoaded() || force) {
+            Log.e(
+                "MLB",
+                "   $uuid: Lpm Repo updating latch: ${serverInitializedLatch.count} force: $force"
+            )
+            update(parseLpms(serverLpmSpecs))
 
-        update(parseLpms(serverLpmSpecs))
+            // If the server does not return specs, or they are not parsed successfully
+            // we will use the LPM on disk if found
+            val lpmsNotParsedFromServerSpec = expectedLpms
+                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+                val mapFromDisk: Map<String, SharedDataSpec>? =
+                    readFromDisk()
+                        ?.associateBy { it.type }
+                        ?.filterKeys { expectedLpms.contains(it) }
+                codeToSupportedPaymentMethod.putAll(
+                    lpmsNotParsedFromServerSpec
+                        .mapNotNull { mapFromDisk?.get(it) }
+                        .mapNotNull { convertToSupportedPaymentMethod(it) }
+                        .associateBy { it.code }
+                )
+            }
 
-        // If the server does not return specs, or they are not parsed successfully
-        // we will use the LPM on disk if found
-        val lpmsNotParsedFromServerSpec = expectedLpms
-            .filter { !codeToSupportedPaymentMethod.containsKey(it) }
-        if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-            val mapFromDisk: Map<String, SharedDataSpec>? =
-                readFromDisk()
-                    ?.associateBy { it.type }
-                    ?.filterKeys { expectedLpms.contains(it) }
-            codeToSupportedPaymentMethod.putAll(
-                lpmsNotParsedFromServerSpec
-                    .mapNotNull { mapFromDisk?.get(it) }
-                    .mapNotNull { convertToSupportedPaymentMethod(it) }
-                    .associateBy { it.code }
+            serverInitializedLatch.countDown()
+            Log.e(
+                "MLB",
+                "   $uuid: Lpm Repo Updated latch: ${serverInitializedLatch.count} force: $force"
             )
         }
-
-        serverInitializedLatch.countDown()
     }
 
     @VisibleForTesting
@@ -114,7 +147,7 @@ class LpmRepository @Inject constructor(
     }
 
     private fun readFromDisk() =
-        parseLpms(resources?.assets?.open("lpms.json"))
+        parseLpms(arguments.resources?.assets?.open("lpms.json"))
 
     private fun update(lpms: List<SharedDataSpec>?) {
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
@@ -124,7 +157,7 @@ class LpmRepository @Inject constructor(
             ?.toMutableList()
 
         parsedSupportedPaymentMethod?.removeAll {
-            !isFinancialConnectionsAvailable() &&
+            !arguments.isFinancialConnectionsAvailable() &&
                 it.code == PaymentMethod.Type.USBankAccount.code
         }
 
@@ -335,6 +368,11 @@ class LpmRepository @Inject constructor(
     }
 
     companion object {
+
+        private val singletonHolder = SingletonHolder(::LpmRepository)
+
+        fun getInstance(args: LpmRepositoryArguments) = singletonHolder.getInstance(args)
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(
             "card",
