@@ -12,14 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          ref: master
+          ref: ${{ github.event.pull_request.base.sha }}
       - name: Build in master
-        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-master.apk
+        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
           name: apk
-          path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-master.apk
+          path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
 
   # Checkout PR branch and build the APK
   build-pr:
