@@ -16,7 +16,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
  * [androidx.activity.result.ActivityResultLauncher] into the current activity,
  * so it should be called as part of Compose initialization path.
  *
- * The created FinancialConnectionsSheet is remembered across recompositions. 
+ * The created FinancialConnectionsSheet is remembered across recompositions.
  * Recomposition will always return the value produced by composition.
  */
 @Composable
@@ -43,7 +43,7 @@ fun rememberFinancialConnectionsSheet(
  * [androidx.activity.result.ActivityResultLauncher] into the current activity,
  * so it should be called as part of Compose initialization path.
  *
- * The created FinancialConnectionsSheet is remembered across recompositions. 
+ * The created FinancialConnectionsSheet is remembered across recompositions.
  * Recomposition will always return the value produced by composition.
  */
 @Composable
