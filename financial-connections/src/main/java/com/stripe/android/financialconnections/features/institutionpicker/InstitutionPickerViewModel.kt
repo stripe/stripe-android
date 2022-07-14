@@ -65,20 +65,27 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onInstitutionSelected(institution: Institution) {
+        clearSearch()
         suspend {
             // api call
-            postAuthorizationSession(institution.id)
+            postAuthorizationSession(institution)
             // navigate to next step
             nativeAuthFlowCoordinator().emit(Message.OpenWebAuthFlow)
             // TODO@carlosmuvi use this when next steps available in native.
 //            updateAuthSession(session)
 //            requestNextStep(currentStep = NavigationDirections.institutionPicker)
         }.execute {
-            copy(selectInstitution = it)
+            copy(
+                selectInstitution = it,
+            )
         }
     }
 
     fun onCancelSearchClick() {
+        clearSearch()
+    }
+
+    private fun clearSearch() {
         setState {
             copy(
                 query = "",
@@ -91,6 +98,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onSearchFocused() {
         setState {
             copy(searchMode = true)
+        }
+    }
+
+    fun onSelectAnotherBank() {
+        setState {
+            copy(
+                selectInstitution = Uninitialized
+            )
         }
     }
 

@@ -26,7 +26,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,8 +46,12 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.InstitutionPlannedException
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.features.failure.InstitutionPlannedDowntimeErrorContent
+import com.stripe.android.financialconnections.features.failure.InstitutionUnplannedDowntimeErrorContent
+import com.stripe.android.financialconnections.features.failure.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -61,9 +64,10 @@ internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
     val state by viewModel.collectAsState()
 
-    BackHandler(state.searchMode) {
-        viewModel.onCancelSearchClick()
-    }
+    // when in select institution error, back goes back to bank selection.
+    BackHandler(state.selectInstitution is Fail, viewModel::onSelectAnotherBank)
+    // when in search mode, back closes search.
+    BackHandler(state.searchMode, viewModel::onCancelSearchClick)
 
     InstitutionPickerContent(
         featuredInstitutions = state.featuredInstitutions,
@@ -74,7 +78,8 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = { viewModel.onQueryChanged(it) },
         onInstitutionSelected = { viewModel.onInstitutionSelected(it) },
         onCancelSearchClick = { viewModel.onCancelSearchClick() },
-        onSearchFocused = { viewModel.onSearchFocused() }
+        onSearchFocused = { viewModel.onSearchFocused() },
+        onSelectAnotherBank = { viewModel.onSelectAnotherBank() },
     )
 }
 
@@ -87,6 +92,7 @@ private fun InstitutionPickerContent(
     query: String,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (Institution) -> Unit,
+    onSelectAnotherBank: () -> Unit,
     onCancelSearchClick: () -> Unit,
     onSearchFocused: () -> Unit
 ) {
@@ -115,34 +121,24 @@ private fun InstitutionPickerContent(
                 LoadingContent()
             }
             is Fail -> {
-                val stripeException = selectInstitution.error as? StripeException
-                ErrorContent(stripeException?.stripeError?.message ?: "Unknown")
+                InstitutionPickerErrorContent(
+                    error = selectInstitution.error,
+                    onSelectAnotherBank = onSelectAnotherBank
+                )
             }
         }
-
     }
 }
 
 @Composable
-fun ErrorContent(errorMessage: String) {
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-    ) {
-        Icon(
-            Icons.Filled.Close,
-            tint = FinancialConnectionsTheme.colors.textPrimary,
-            contentDescription = "Back button",
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = errorMessage,
-            style = FinancialConnectionsTheme.typography.subtitle
-        )
-        Text(
-            text = stringResource(R.string.stripe_picker_error_desc),
-            style = FinancialConnectionsTheme.typography.body
-        )
+private fun InstitutionPickerErrorContent(
+    error: Throwable,
+    onSelectAnotherBank: () -> Unit
+) {
+    when (error) {
+        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(error, onSelectAnotherBank)
+        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(error, onSelectAnotherBank)
+        else -> UnclassifiedErrorContent()
     }
 }
 
@@ -197,12 +193,17 @@ private fun LoadingContent() {
         modifier = Modifier
             .padding(horizontal = 16.dp)
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            color = FinancialConnectionsTheme.colors.textBrand,
+            modifier = Modifier
+                .size(36.dp)
+        )
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(R.string.stripe_picker_loading_title),
             style = FinancialConnectionsTheme.typography.subtitle
         )
+        Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(R.string.stripe_picker_loading_desc),
             style = FinancialConnectionsTheme.typography.body
@@ -383,7 +384,8 @@ private fun InstitutionPickerPreview() {
             onQueryChanged = {},
             onInstitutionSelected = {},
             onCancelSearchClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onSelectAnotherBank = {}
         )
     }
 }

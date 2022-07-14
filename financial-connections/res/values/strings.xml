@@ -27,5 +27,12 @@
     <string name="stripe_picker_loading_desc">Please wait while the connection is established</string>
     <string name="stripe_picker_error_title">This institution is currently unavailable</string>
     <string name="stripe_picker_error_desc">Please select another bank or try again</string>
+    <string name="stripe_error_generic_title">Something went wrong</string>
+    <string name="stripe_error_generic_desc">Your account can’t be linked at this time. Please try again later.</string>
+    <string name="stripe_error_unplanned_downtime_title">%1$s is currently unavailable</string>
+    <string name="stripe_error_unplanned_downtime_desc">Please select another bank or try again later.</string>
+    <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
+    <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
+    <string name="stripe_error_cta_select_another_bank">Select another bank</string>
 </resources>
 
