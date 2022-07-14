@@ -1,8 +1,14 @@
 package com.stripe.android.financialconnections
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.os.Message
+import android.util.Log
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.mvrx.MavericksView
@@ -17,6 +23,7 @@ internal class FinancialConnectionsSheetActivity :
     AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
 
     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
+    val webView: WebView by lazy { findViewById<WebView>(R.id.webview) }
 
     private val startForResult = registerForActivityResult(StartActivityForResult()) {
         viewModel.onActivityResult()
@@ -24,8 +31,56 @@ internal class FinancialConnectionsSheetActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WebView.setWebContentsDebuggingEnabled(true)
+        setupWebView()
         viewModel.onEach { postInvalidate() }
         if (savedInstanceState != null) viewModel.onActivityRecreated()
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        with(webView) {
+            settings.javaScriptEnabled = true
+            settings.setSupportMultipleWindows(true)
+            settings.javaScriptCanOpenWindowsAutomatically = true
+            webChromeClient = object : WebChromeClient() {
+                override fun onCreateWindow(
+                    view: WebView?,
+                    isDialog: Boolean,
+                    isUserGesture: Boolean,
+                    resultMsg: Message?
+                ): Boolean {
+                    WebView(context).also { it ->
+                        with(it.settings) {
+                            javaScriptEnabled = true
+                            setSupportMultipleWindows(true)
+                        }
+                        it.webViewClient = object : WebViewClient() {
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: WebResourceRequest?
+                            ): Boolean {
+                                request?.url?.let {
+                                    Log.d("StripeSdk", "webview: $it")
+                                    startActivity(
+                                        CreateBrowserIntentForUrl(
+                                            context = this@FinancialConnectionsSheetActivity,
+                                            uri = it
+                                        )
+                                    )
+                                }
+                                return true
+                            }
+                        }
+                        webView.addView(it)
+                        val transport = resultMsg!!.obj as WebView.WebViewTransport
+                        transport.webView = it
+                        resultMsg.sendToTarget()
+                    }
+                    return true
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -43,6 +98,7 @@ internal class FinancialConnectionsSheetActivity :
      */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        // webView.loadUrl( "javascript:window.location.reload( true )" );
         viewModel.handleOnNewIntent(intent)
     }
 
@@ -53,12 +109,15 @@ internal class FinancialConnectionsSheetActivity :
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> startForResult.launch(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
-                    )
+                    is OpenAuthFlowWithUrl -> {
+                        webView.loadUrl(viewEffect.url)
+//                        startForResult.launch(
+//                            CreateBrowserIntentForUrl(
+//                                context = this,
+//                                uri = Uri.parse(viewEffect.url)
+//                            )
+//                        )
+                    }
                     is FinishWithResult -> finishWithResult(
                         viewEffect.result
                     )

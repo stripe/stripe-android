@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.repository
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -28,7 +29,8 @@ import javax.inject.Named
 internal class FinancialConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
-    private val apiRequestFactory: ApiRequest.Factory
+    private val apiRequestFactory: ApiRequest.Factory,
+    private val logger: Logger
 ) : FinancialConnectionsRepository {
 
     @VisibleForTesting
@@ -96,6 +98,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         )
     }.fold(
         onSuccess = { response ->
+            logger.info(response.body ?: "Unknown body")
             if (response.isError) {
                 throw handleApiError(response)
             } else {

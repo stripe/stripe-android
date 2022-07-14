@@ -23,6 +23,10 @@
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
+                <data
+                    android:host="link-accounts"
+                    android:scheme="stripe-auth"
+                    android:path="/login" />
             </intent-filter>
         </activity>
         <activity

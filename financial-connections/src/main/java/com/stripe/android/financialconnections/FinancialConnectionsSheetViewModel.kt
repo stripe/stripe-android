@@ -207,6 +207,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState { copy(authFlowActive = false) }
         withState { state ->
             when (intent?.data.toString()) {
+                "stripe-auth://link-accounts/login" -> {
+                }
                 state.manifest?.successUrl -> when (state.initialArgs) {
                     is FinancialConnectionsSheetActivityArgs.ForData ->
                         fetchFinancialConnectionsSession(state)
