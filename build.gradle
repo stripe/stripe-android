@@ -58,7 +58,7 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 32
 
-    androidxActivityVersion = '1.4.0'
+    androidxActivityVersion = '1.5.0'
     androidxAnnotationVersion = '1.4.0'
     androidxAppcompatVersion = '1.4.2'
     androidxArchCoreVersion = '2.1.0'
@@ -74,7 +74,7 @@ ext {
     androidxRecyclerviewVersion = '1.2.1'
     androidxSecurityVersion = '1.1.0-alpha03'
 
-    kotlinCoroutinesVersion = '1.6.3'
+    kotlinCoroutinesVersion = '1.6.4'
     kotlinSerializationVersion = '1.3.3'
     accompanistVersion = '0.24.12-rc'
     ktlintVersion = '0.46.1'
