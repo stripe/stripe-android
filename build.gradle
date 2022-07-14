@@ -5,7 +5,7 @@ buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.6.21'
-    ext.dokkaVersion = '1.7.0'
+    ext.dokkaVersion = '1.7.10'
 
     repositories {
         mavenCentral()
@@ -68,7 +68,7 @@ ext {
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.8.0'
     androidxFragmentVersion = '1.5.0'
-    androidxLifecycleVersion = '2.4.1'
+    androidxLifecycleVersion = '2.5.0'
     androidxNavigationVersion = '2.5.0'
     androidxPreferenceVersion = '1.2.0'
     androidxRecyclerviewVersion = '1.2.1'
@@ -84,7 +84,7 @@ ext {
     daggerVersion = '2.42'
     playServicesWalletVersion = '19.1.0'
     placesVersion = '2.6.0'
-    playServicesVersion = '1.6.3'
+    playServicesVersion = '1.6.4'
 
     androidTestVersion = '1.4.0'
     androidTestJunitVersion = '1.1.3'
