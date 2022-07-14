@@ -15,6 +15,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
  * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
  * [androidx.activity.result.ActivityResultLauncher] into the current activity,
  * so it should be called as part of Compose initialization path.
+ *
+ * The created FinancialConnectionsSheet is remembered across recompositions. 
+ * Recomposition will always return the value produced by composition.
  */
 @Composable
 fun rememberFinancialConnectionsSheet(
@@ -39,6 +42,9 @@ fun rememberFinancialConnectionsSheet(
  * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
  * [androidx.activity.result.ActivityResultLauncher] into the current activity,
  * so it should be called as part of Compose initialization path.
+ *
+ * The created FinancialConnectionsSheet is remembered across recompositions. 
+ * Recomposition will always return the value produced by composition.
  */
 @Composable
 fun rememberFinancialConnectionsSheetForToken(
