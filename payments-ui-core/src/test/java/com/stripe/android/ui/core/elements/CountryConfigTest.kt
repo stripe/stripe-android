@@ -41,12 +41,16 @@ class CountryConfigTest {
     }
 
     @Test
-    fun `Flag mode shows only flag when collapsed`() {
+    fun `When collapsed correct label is shown`() {
         assertThat(
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                tinyMode = true
+                tinyMode = true,
+                collapsedLabelMapper = { country ->
+                    CountryConfig.countryCodeToEmoji(country.code.value)
+                },
+                expandedLabelMapper = { country -> country.name }
             ).getSelectedItemLabel(0)
         ).isEqualTo("🇦🇹")
     }
