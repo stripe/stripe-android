@@ -10,8 +10,9 @@ class SimpleDropdownConfig(
 ) : DropdownConfig {
     override val debugLabel = "simple_dropdown"
 
-    override val displayItems: List<String> =
-        items.map { it.displayText }
+    override val rawItems = items.map { it.apiValue }
+
+    override val displayItems = items.map { it.displayText }
 
     override fun getSelectedItemLabel(index: Int) = displayItems[index]
 
@@ -20,10 +21,4 @@ class SimpleDropdownConfig(
             .firstOrNull { it.apiValue == rawValue }
             ?.displayText
             ?: items[0].displayText
-
-    override fun convertToRaw(displayName: String) =
-        items
-            .filter { it.displayText == displayName }
-            .map { it.apiValue }
-            .firstOrNull()
 }

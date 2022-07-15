@@ -25,7 +25,18 @@ class PhoneNumberController internal constructor(
      */
     override val fieldValue: Flow<String> = _fieldValue
 
-    private val countryConfig = CountryConfig(overrideCountryCodes, flagMode = true)
+    private val countryConfig = CountryConfig(
+        overrideCountryCodes,
+        tinyMode = true,
+        expandedLabelMapper = { country ->
+            "${CountryConfig.countryCodeToEmoji(country.code.value)} ${country.name}" +
+                (PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { " $it" } ?: "")
+        },
+        collapsedLabelMapper = { country ->
+            CountryConfig.countryCodeToEmoji(country.code.value) +
+                (PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { "  $it  " } ?: "")
+        }
+    )
     val countryDropdownController = DropdownFieldController(
         countryConfig,
         initiallySelectedCountryCode
