@@ -252,6 +252,9 @@ public final class com/stripe/android/ui/core/elements/ComposableSingletons$Sect
 	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/ui/core/elements/CountryConfig$Companion {
+}
+
 public final class com/stripe/android/ui/core/elements/CountrySpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/CountrySpec$$serializer;
