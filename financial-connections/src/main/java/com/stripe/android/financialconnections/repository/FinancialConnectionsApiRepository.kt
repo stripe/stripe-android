@@ -140,7 +140,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
     }
 
     internal companion object {
-        private const val API_HOST = "https://api.stripe.com"
+        private const val API_HOST = "https://carlosmuvi-api.tunnel.stripe.me"
 
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
         internal const val PARAMS_APPLICATION_ID = "application_id"
