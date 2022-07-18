@@ -43,12 +43,12 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onContinueClick() {
-        viewModelScope.launch {
+        suspend {
             acceptConsent()
             with(nativeAuthFlowCoordinator()) {
                 emit(RequestNextStep(currentStep = NavigationDirections.consent))
             }
-        }
+        }.execute { copy(acceptConsent = it) }
     }
 
     fun onClickableTextClick(tag: String) {
