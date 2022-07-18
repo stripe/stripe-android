@@ -5,7 +5,7 @@ buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.6.21'
-    ext.dokkaVersion = '1.7.0'
+    ext.dokkaVersion = '1.7.10'
 
     repositories {
         mavenCentral()
@@ -18,7 +18,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.10.1"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.11.0"
         classpath 'com.karumi:shot:5.14.1'
         classpath buildLibs.detektGradlePlugin
     }
@@ -58,7 +58,7 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 32
 
-    androidxActivityVersion = '1.4.0'
+    androidxActivityVersion = '1.5.0'
     androidxAnnotationVersion = '1.4.0'
     androidxAppcompatVersion = '1.4.2'
     androidxArchCoreVersion = '2.1.0'
@@ -67,16 +67,16 @@ ext {
     androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.8.0'
-    androidxFragmentVersion = '1.4.1'
-    androidxLifecycleVersion = '2.4.1'
-    androidxNavigationVersion = '2.4.2'
+    androidxFragmentVersion = '1.5.0'
+    androidxLifecycleVersion = '2.5.0'
+    androidxNavigationVersion = '2.5.0'
     androidxPreferenceVersion = '1.2.0'
     androidxRecyclerviewVersion = '1.2.1'
     androidxSecurityVersion = '1.1.0-alpha03'
 
-    kotlinCoroutinesVersion = '1.6.3'
+    kotlinCoroutinesVersion = '1.6.4'
     kotlinSerializationVersion = '1.3.3'
-    accompanistVersion = '0.24.12-rc'
+    accompanistVersion = '0.24.13-rc'
     ktlintVersion = '0.46.1'
     // material 1.6 causes paymentsheet to not render correctly.
     // see here: https://github.com/material-components/material-components-android/issues/2702
@@ -84,7 +84,7 @@ ext {
     daggerVersion = '2.42'
     playServicesWalletVersion = '19.1.0'
     placesVersion = '2.6.0'
-    playServicesVersion = '1.6.3'
+    playServicesVersion = '1.6.4'
 
     androidTestVersion = '1.4.0'
     androidTestJunitVersion = '1.1.3'

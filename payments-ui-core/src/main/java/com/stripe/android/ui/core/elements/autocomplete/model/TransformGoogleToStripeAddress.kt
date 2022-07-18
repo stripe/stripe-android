@@ -54,15 +54,15 @@ internal fun composeAddressLine1(
     addressLine1: AddressLine1,
     address: Address
 ): String {
-    val streetNumber = addressLine1.streetNumber
-    val streetName = addressLine1.route
+    val streetNumber = addressLine1.streetNumber ?: ""
+    val streetName = addressLine1.route ?: ""
     val locality = address.locality
     val countryCode = address.country
 
     return if (countryCode == "JP") {
         val premise = address.addressLine2
         composeJapaneseAddressLine1(context, addressLine1, locality, premise)
-    } else if (streetNumber != null || streetName != null) {
+    } else if (streetNumber.isNotBlank() || streetName.isNotBlank()) {
         // Depending on the country we'll want either
         // "123 King Street" or "King Street 123"
         return if (STREET_NAME_FIRST_COUNTRIES.contains(countryCode)) {
