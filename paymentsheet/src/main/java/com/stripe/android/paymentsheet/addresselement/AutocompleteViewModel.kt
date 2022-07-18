@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.paymentsheet.injection.AutoCompleteViewModelSubcomponent
+import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldIcon
@@ -26,12 +26,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
 
 internal class AutocompleteViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
+    private val autocompleteArgs: Args,
     application: Application
 ) : AndroidViewModel(application) {
     private var client: PlacesClientProxy? = null
@@ -68,11 +70,9 @@ internal class AutocompleteViewModel @Inject constructor(
 
     fun initialize(
         clientProvider: () -> PlacesClientProxy? = {
-            // TODO: Update the PaymentSheet Configuration to include api key
-            // args.config?.googlePlacesApiKey?.let {
-            //     PlacesClientProxy.create(getApplication(), it)
-            // }
-            PlacesClientProxy.create(getApplication(), "")
+            args.googlePlacesApiKey?.let {
+                PlacesClientProxy.create(getApplication(), it)
+            }
         }
     ) {
         client = clientProvider()
@@ -83,7 +83,8 @@ internal class AutocompleteViewModel @Inject constructor(
                 viewModelScope.launch {
                     client?.findAutocompletePredictions(
                         query = it,
-                        country = "US",
+                        country = autocompleteArgs.country
+                            ?: throw IllegalStateException("Country cannot be empty"),
                         limit = MAX_DISPLAYED_RESULTS
                     )?.fold(
                         onSuccess = {
@@ -178,21 +179,27 @@ internal class AutocompleteViewModel @Inject constructor(
 
     internal class Factory(
         private val injector: NonFallbackInjector,
+        private val args: Args,
         private val applicationSupplier: () -> Application
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
         lateinit var subComponentBuilderProvider:
-            Provider<AutoCompleteViewModelSubcomponent.Builder>
+            Provider<AutocompleteViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             injector.inject(this)
             return subComponentBuilderProvider.get()
                 .application(applicationSupplier())
+                .configuration(args)
                 .build().autoCompleteViewModel as T
         }
     }
+
+    data class Args(
+        val country: String?
+    )
 
     companion object {
         const val SEARCH_DEBOUNCE_MS = 1000L

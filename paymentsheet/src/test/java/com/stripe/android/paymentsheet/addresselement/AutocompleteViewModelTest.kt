@@ -44,6 +44,9 @@ class AutocompleteViewModelTest {
         AutocompleteViewModel(
             args,
             navigator,
+            AutocompleteViewModel.Args(
+                "US"
+            ),
             application
         ).apply {
             initialize {

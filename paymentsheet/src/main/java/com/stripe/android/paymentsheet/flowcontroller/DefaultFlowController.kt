@@ -275,7 +275,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     injectorKey = injectorKey,
                     productUsage = productUsage,
                     enableLogging = enableLogging
-                )
+                ),
+                googlePlacesApiKey = ""
             )
         )
     }

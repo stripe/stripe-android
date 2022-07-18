@@ -13,7 +13,7 @@ import javax.inject.Singleton
     subcomponents = [
         AddressElementViewModelSubcomponent::class,
         InputAddressViewModelSubcomponent::class,
-        AutoCompleteViewModelSubcomponent::class,
+        AutocompleteViewModelSubcomponent::class,
         FormControllerSubcomponent::class
     ]
 )

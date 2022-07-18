@@ -36,7 +36,8 @@ internal class AddressElementActivityContract :
     data class Args internal constructor(
         internal val stripeIntent: StripeIntent,
         internal val config: PaymentSheet.Configuration?,
-        internal val injectionParams: InjectionParams? = null
+        internal val injectionParams: InjectionParams? = null,
+        internal val googlePlacesApiKey: String? = null
     ) : ActivityStarter.Args {
 
         companion object {
