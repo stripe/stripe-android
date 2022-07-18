@@ -66,7 +66,9 @@ class LpmRepository constructor(
 
     fun isLoaded() = serverInitializedLatch.count <= 0L
 
-    fun waitUntilLoaded() = serverInitializedLatch.await(20, TimeUnit.SECONDS)
+    fun waitUntilLoaded() {
+        serverInitializedLatch.await(20, TimeUnit.SECONDS)
+    }
 
     /**
      * This method will read the expected LPMs and their specs as two separate parameters.

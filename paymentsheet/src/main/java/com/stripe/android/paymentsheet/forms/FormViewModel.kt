@@ -101,12 +101,13 @@ internal class FormViewModel @Inject internal constructor(
             viewModelScope.launch {
                 // The co-routine scope is needed to do work off the UI thread so that the
                 // repository ready event can be observed in the ComposeFormDataCollection
-                // Fragment and the fragment repository will be update and ready
+                // Fragment and the fragment repository will be updated and ready
                 CoroutineScope(Dispatchers.IO).launch {
 
                     // If after we complete waiting for the repository things are still
                     // active, then update the elements
-                    if (resourceRepository.waitUntilLoaded() && isActive) {
+                    resourceRepository.waitUntilLoaded()
+                    if (resourceRepository.isLoaded() && isActive) {
                         // When open payment options with returning customer with saved cards, then
                         // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
                         // is no longer listening for the resource repository to be ready and so
