@@ -4,28 +4,28 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
-import com.stripe.android.financialconnections.di.FinancialConnectionsSubcomponentBuilderProvider
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
-    val navigationManager: NavigationManager,
-    val subcomponentBuilderProvider: FinancialConnectionsSubcomponentBuilderProvider,
-    val goNext: GoNext,
-    val logger: Logger,
-    val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    /**
+     * Exposes parent dagger component (activity viewModel scoped so that it survives config changes)
+     * No other dependencies should be exposed from the viewModel
+     */
+    val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
+    private val goNext: GoNext,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {

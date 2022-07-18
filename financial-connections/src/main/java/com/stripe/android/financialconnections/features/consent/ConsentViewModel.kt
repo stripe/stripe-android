@@ -4,7 +4,6 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
@@ -12,6 +11,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -88,8 +88,10 @@ internal class ConsentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ConsentState
         ): ConsentViewModel {
-            return viewModelContext.financialConnectionsSubComponentBuilderProvider
-                .consentSubComponentBuilder.get()
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
+                .activityRetainedComponent
+                .consentBuilder
                 .initialState(state)
                 .build()
                 .viewModel
