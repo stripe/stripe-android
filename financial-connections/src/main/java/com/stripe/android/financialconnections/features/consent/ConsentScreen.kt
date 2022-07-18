@@ -167,7 +167,11 @@ private fun ConsentMainContent(
 
                 Spacer(modifier = Modifier.weight(1f))
             }
-            ConsentFooter(state.acceptConsent, onClickableTextClick, onContinueClick)
+            ConsentFooter(
+                acceptConsent = state.acceptConsent,
+                onClickableTextClick = onClickableTextClick,
+                onContinueClick = onContinueClick
+            )
         }
     }
 }
