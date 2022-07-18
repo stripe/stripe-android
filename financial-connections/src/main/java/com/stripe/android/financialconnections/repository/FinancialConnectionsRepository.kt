@@ -36,37 +36,6 @@ internal interface FinancialConnectionsRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun generateFinancialConnectionsSessionManifest(
-        clientSecret: String,
-        applicationId: String
-    ): FinancialConnectionsSessionManifest
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun getFinancialConnectionsSessionManifest(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun markConsentAcquired(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     suspend fun postAuthorizationSession(
         clientSecret: String,
         institutionId: String

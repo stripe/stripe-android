@@ -34,6 +34,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,8 @@ import kotlin.math.min
 @Composable
 internal fun DropDown(
     controller: DropdownFieldController,
-    enabled: Boolean
+    enabled: Boolean,
+    modifier: Modifier = Modifier
 ) {
     val label by controller.label.collectAsState(null)
     val selectedIndex by controller.selectedIndex.collectAsState(0)
@@ -78,7 +80,7 @@ internal fun DropDown(
 
     val inputModeManager = LocalInputModeManager.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentSize(Alignment.TopStart)
             .background(MaterialTheme.paymentsColors.component)
     ) {
@@ -102,7 +104,7 @@ internal fun DropDown(
                         color = currentTextColor
                     )
                     Icon(
-                        Icons.Filled.ArrowDropDown,
+                        painter = painterResource(R.drawable.ic_chevron_down),
                         contentDescription = null,
                         tint = currentTextColor
                     )

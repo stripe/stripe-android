@@ -10,6 +10,9 @@ sealed interface DropdownConfig {
     /** This is the label to describe the field **/
     val label: Int
 
+    /** The list of raw values to use in the parameter map **/
+    val rawItems: List<String?>
+
     /** This is the list of displayable items to show in the drop down **/
     val displayItems: List<String>
 
@@ -22,7 +25,4 @@ sealed interface DropdownConfig {
 
     /** This will convert from a raw value used in the parameter map to a display value **/
     fun convertFromRaw(rawValue: String): String
-
-    /** This will convert the field to a raw value to use in the parameter map **/
-    fun convertToRaw(displayName: String): String?
 }

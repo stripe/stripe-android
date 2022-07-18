@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,14 +22,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
     }
 
     internal sealed interface Message {
-
-        /**
-         * Updates global [FinancialConnectionsSessionManifest] instance.
-         */
-        data class UpdateManifest(
-            val manifest: FinancialConnectionsSessionManifest
-        ) : Message
-
         /**
          * Updates global [FinancialConnectionsAuthorizationSession] instance.
          */
