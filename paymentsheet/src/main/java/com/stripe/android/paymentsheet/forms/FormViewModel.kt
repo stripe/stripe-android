@@ -99,7 +99,7 @@ internal class FormViewModel @Inject internal constructor(
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
-                // The co-routine scope is needed to do work off the UI thread so that the
+                // The coroutine scope is needed to do work off the UI thread so that the
                 // repository ready event can be observed in the ComposeFormDataCollection
                 // Fragment and the fragment repository will be updated and ready
                 CoroutineScope(Dispatchers.IO).launch {
