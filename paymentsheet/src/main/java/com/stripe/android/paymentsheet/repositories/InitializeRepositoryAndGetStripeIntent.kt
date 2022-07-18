@@ -10,7 +10,6 @@ internal suspend fun initializeRepositoryAndGetStripeIntent(
     clientSecret: ClientSecret
 ): Pair<StripeIntent, String?> {
     val value = stripeIntentRepository.get(clientSecret)
-
     resourceRepository.getLpmRepository().update(
         value.intent.paymentMethodTypes,
         value.formUI
