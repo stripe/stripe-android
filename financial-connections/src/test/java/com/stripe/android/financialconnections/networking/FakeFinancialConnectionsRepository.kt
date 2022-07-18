@@ -8,9 +8,7 @@ import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccc
 import com.stripe.android.financialconnections.moreFinancialConnectionsAccountList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
-internal class FakeFinancialConnectionsRepository(
-    private val manifest: FinancialConnectionsSessionManifest
-) : FinancialConnectionsRepository {
+internal class FakeFinancialConnectionsRepository : FinancialConnectionsRepository {
 
     var getFinancialConnectionsSessionResultProvider: () -> FinancialConnectionsSession =
         { financialConnectionsSessionWithNoMoreAccounts }
@@ -23,19 +21,6 @@ internal class FakeFinancialConnectionsRepository(
     override suspend fun getFinancialConnectionsSession(
         clientSecret: String
     ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
-
-    override suspend fun generateFinancialConnectionsSessionManifest(
-        clientSecret: String,
-        applicationId: String
-    ): FinancialConnectionsSessionManifest = manifest
-
-    override suspend fun getFinancialConnectionsSessionManifest(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest = manifest
-
-    override suspend fun markConsentAcquired(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest = manifest
 
     override suspend fun postAuthorizationSession(
         clientSecret: String,

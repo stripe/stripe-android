@@ -35,7 +35,7 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
 
     override suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse {
         val request = apiRequestFactory.createGet(
-            url = FinancialConnectionsRepositoryImpl.featuredInstitutionsUrl,
+            url = featuredInstitutionsUrl,
             options = options,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
@@ -53,7 +53,7 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
         query: String
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
-            url = FinancialConnectionsRepositoryImpl.institutionsUrl,
+            url = institutionsUrl,
             options = options,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
@@ -69,5 +69,11 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
 
     companion object {
         private const val SEARCH_INSTITUTIONS_LIMIT = 8
+
+        internal const val institutionsUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/institutions"
+
+        internal const val featuredInstitutionsUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/featured_institutions"
     }
 }

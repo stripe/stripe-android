@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterialApi::class)
 
-package com.stripe.android.financialconnections.ui
+package com.stripe.android.financialconnections.features.consent
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -34,14 +34,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.consent.ConsentState
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
-import com.stripe.android.financialconnections.features.consent.ConsentViewModel
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -51,14 +48,8 @@ import kotlinx.coroutines.launch
 @ExperimentalMaterialApi
 @Composable
 internal fun ConsentScreen() {
-    // get shared configuration from activity state
-    val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
-    val manifest = activityViewModel.collectAsState { it.manifest }
-
     // update step state when manifest changes
     val viewModel: ConsentViewModel = mavericksViewModel()
-    LaunchedEffect(manifest.value) { viewModel.onManifestChanged(manifest.value) }
-
     val state = viewModel.collectAsState()
 
     // create bottom sheet state.

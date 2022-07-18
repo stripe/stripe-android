@@ -9,13 +9,13 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.di.financialConnectionsSubComponentBuilderProvider
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -102,8 +102,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState
         ): InstitutionPickerViewModel {
-            return viewModelContext.financialConnectionsSubComponentBuilderProvider
-                .institutionPickerSubcomponentBuilder.get()
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
+                .activityRetainedComponent
+                .institutionPickerBuilder
                 .initialState(state)
                 .build()
                 .viewModel
