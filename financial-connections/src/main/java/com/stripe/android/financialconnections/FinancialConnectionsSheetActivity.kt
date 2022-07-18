@@ -9,7 +9,6 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
@@ -25,16 +24,11 @@ internal class FinancialConnectionsSheetActivity :
     val viewModel: FinancialConnectionsSheetViewModel by viewModel()
     val webView: WebView by lazy { findViewById<WebView>(R.id.webview) }
 
-    private val startForResult = registerForActivityResult(StartActivityForResult()) {
-        viewModel.onActivityResult()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WebView.setWebContentsDebuggingEnabled(true)
         setupWebView()
         viewModel.onEach { postInvalidate() }
-        if (savedInstanceState != null) viewModel.onActivityRecreated()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -81,11 +75,6 @@ internal class FinancialConnectionsSheetActivity :
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.onResume()
     }
 
     override fun onBackPressed() {

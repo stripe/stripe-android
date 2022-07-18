@@ -72,61 +72,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState {
             copy(
                 manifest = manifest,
-                authFlowActive = true,
                 viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
             )
-        }
-    }
-
-    /**
-     * Activity recreation changes the lifecycle order:
-     *
-     * If config change happens while in web flow:
-     * - onResume -> onNewIntent -> activityResult -> onResume(again)
-     * If no config change happens:
-     * - onActivityResult -> onNewIntent -> onResume
-     *
-     * (note [handleOnNewIntent] will just get called if user completed the web flow and clicked
-     * the deeplink that redirects back to the app)
-     *
-     * We need to rely on a post-onNewIntent lifecycle callback to figure if the user completed
-     * or cancelled the web flow. [FinancialConnectionsSheetState.activityRecreated] will be used to
-     * figure which lifecycle callback happens after onNewIntent.
-     *
-     * @see onResume (we rely on this on regular flows)
-     * @see onActivityResult (we rely on this on config changes)
-     */
-    fun onActivityRecreated() {
-        setState {
-            copy(
-                activityRecreated = true
-            )
-        }
-    }
-
-    /**
-     *  If activity resumes and we did not receive a callback from the custom tabs,
-     *  then the user hit the back button or closed the custom tabs UI, so return result as
-     *  canceled.
-     */
-    internal fun onResume() {
-        setState {
-            if (authFlowActive && activityRecreated.not()) {
-                copy(viewEffect = FinishWithResult(Canceled))
-            } else this
-        }
-    }
-
-    /**
-     * If activity receives result and we did not receive a callback from the custom tabs,
-     * if activity got recreated and the auth flow is still active then the user hit
-     * the back button or closed the custom tabs UI, so return result as canceled.
-     */
-    internal fun onActivityResult() {
-        setState {
-            if (authFlowActive && activityRecreated) {
-                copy(viewEffect = FinishWithResult(Canceled))
-            } else this
         }
     }
 
@@ -204,7 +151,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        setState { copy(authFlowActive = false) }
         withState { state ->
             when (intent?.data.toString()) {
                 "stripe-auth://link-accounts/login" -> {

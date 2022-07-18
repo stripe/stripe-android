@@ -12,9 +12,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
  */
 internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs,
-    val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
-    @PersistState val authFlowActive: Boolean = false,
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
