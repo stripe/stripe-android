@@ -1,11 +1,9 @@
 package com.stripe.android.financialconnections.networking
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.financialConnectionsSessionWithMoreAccounts
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.moreFinancialConnectionsAccountList
@@ -19,7 +17,6 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         { moreFinancialConnectionsAccountList }
     var postAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
         { ApiKeyFixtures.authorizationSession() }
-
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams

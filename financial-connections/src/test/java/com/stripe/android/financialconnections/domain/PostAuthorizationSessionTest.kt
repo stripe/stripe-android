@@ -77,4 +77,21 @@ internal class PostAuthorizationSessionTest {
         assertThat(exception.institution).isEqualTo(selectedInstitution)
         assertThat(exception.backUpAt).isEqualTo(upTime * 1000)
     }
+
+    @Test
+    fun `invoke - unhandled exception does not map`() = runTest {
+        val unhandledException = APIException(
+            stripeError = StripeError(
+                extraFields = mapOf()
+            ),
+            statusCode = 405,
+            message = "auth error"
+        )
+        repository.postAuthorizationSessionProvider = { throw unhandledException }
+
+        val result: Throwable = kotlin.runCatching { postAuthorizationSession(selectedInstitution) }
+            .exceptionOrNull()!!
+
+        assertThat(result).isEqualTo(unhandledException)
+    }
 }

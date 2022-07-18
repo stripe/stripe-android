@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Usecase called on institution selection. It notifies backend about selection to initiate
@@ -26,14 +27,16 @@ internal class PostAuthorizationSession @Inject constructor(
                 configuration.financialConnectionsSessionClientSecret,
                 institutionId = institution.id
             )
-        } catch (e: Exception) {
+        } catch (
+            @Suppress("SwallowedException") e: StripeException
+        ) {
             throw e.toDomainException(institution)
         }
     }
 
-    private fun Exception.toDomainException(
+    private fun StripeException.toDomainException(
         institution: Institution,
-    ): Exception = (this as? StripeException)?.stripeError?.let {
+    ): StripeException = this.stripeError?.let {
         val institutionUnavailable: String? = it.extraFields?.get("institution_unavailable")
         val availableAt: String? = it.extraFields?.get("expected_to_be_available_at")
         when (institutionUnavailable) {
@@ -45,7 +48,7 @@ internal class PostAuthorizationSession @Inject constructor(
                 else -> InstitutionPlannedException(
                     institution = institution,
                     isToday = true,
-                    backUpAt = (availableAt.toLong() * 1000),
+                    backUpAt = availableAt.toLong().seconds.inWholeMilliseconds,
                     stripeException = this
                 )
             }
