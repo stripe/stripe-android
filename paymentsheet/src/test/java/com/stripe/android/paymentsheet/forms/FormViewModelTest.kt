@@ -63,7 +63,7 @@ internal class FormViewModelTest {
         ApplicationProvider.getApplicationContext(),
         R.style.StripeDefaultTheme
     )
-    val lpmRepository = LpmRepository(context.resources)
+    val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
     private val resourceRepository =
         StaticResourceRepository(
