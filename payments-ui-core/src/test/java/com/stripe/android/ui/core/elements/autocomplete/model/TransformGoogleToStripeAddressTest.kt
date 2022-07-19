@@ -145,6 +145,66 @@ class TransformGoogleToStripeAddressTest {
     }
 
     @Test
+    fun `test US address with null street number`() {
+        val place = parseJson(
+            """
+                {
+                    "address_components": [
+                        {
+                            "long_name" : "South Main Street",
+                            "short_name" : "South Main St",
+                            "types" : [ "route" ]
+                        },
+                        {
+                            "long_name" : "Pioneer Square",
+                            "short_name" : "Pioneer Square",
+                            "types" : [ "neighborhood", "political" ]
+                        },
+                        {
+                            "long_name" : "Seattle",
+                            "short_name" : "Seattle",
+                            "types" : [ "locality", "political" ]
+                        },
+                        {
+                            "long_name" : "King County",
+                            "short_name" : "King County",
+                            "types" : [ "administrative_area_level_2", "political" ]
+                        },
+                        {
+                            "long_name" : "Washington",
+                            "short_name" : "WA",
+                            "types" : [ "administrative_area_level_1", "political" ]
+                        },
+                        {
+                            "long_name" : "United States",
+                            "short_name" : "US",
+                            "types" : [ "country", "political" ]
+                        },
+                        {
+                            "long_name" : "98104",
+                            "short_name" : "98104",
+                            "types" : [ "postal_code" ]
+                        }
+                    ]
+                }
+            """.trimIndent()
+        )
+
+        val stripeAddress = place.transformGoogleToStripeAddress(context)
+
+        assertThat(stripeAddress).isEqualTo(
+            Address(
+                city = "Seattle",
+                country = "US",
+                line1 = "South Main Street",
+                line2 = null,
+                postalCode = "98104",
+                state = "WA"
+            )
+        )
+    }
+
+    @Test
     fun `test should make dependent locality line 2 - BR`() {
         val place = parseJson(
             """

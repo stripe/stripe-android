@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
@@ -28,7 +29,8 @@ import javax.inject.Singleton
 internal class LinkAccountManager @Inject constructor(
     private val args: LinkActivityContract.Args,
     private val linkRepository: LinkRepository,
-    private val cookieStore: CookieStore
+    private val cookieStore: CookieStore,
+    private val linkEventsReporter: LinkEventsReporter
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
@@ -85,7 +87,11 @@ internal class LinkAccountManager @Inject constructor(
         startSession: Boolean = true
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
-            .map { consumerSessionLookup ->
+            .also {
+                if (it.isFailure) {
+                    linkEventsReporter.onAccountLookupFailure()
+                }
+            }.map { consumerSessionLookup ->
                 if (email == null && !consumerSessionLookup.exists) {
                     // Lookup with cookie-only failed, so cookie is invalid
                     cookieStore.updateAuthSessionCookie("")
@@ -124,6 +130,13 @@ internal class LinkAccountManager @Inject constructor(
                 requireNotNull(it) { "Error fetching user account" }
             }
             is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
+                .also {
+                    if (it.isSuccess) {
+                        linkEventsReporter.onSignupCompleted(true)
+                    } else {
+                        linkEventsReporter.onSignupFailure(true)
+                    }
+                }
         }
 
     /**
@@ -157,7 +170,11 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError { clientSecret ->
         linkRepository.startVerification(clientSecret, consumerPublishableKey, cookie())
-            .map { consumerSession ->
+            .also {
+                if (it.isFailure) {
+                    linkEventsReporter.on2FAStartFailure()
+                }
+            }.map { consumerSession ->
                 setAccount(consumerSession)
             }
     }

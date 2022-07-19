@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -38,6 +39,7 @@ internal class SignUpViewModel @Inject constructor(
     args: LinkActivityContract.Args,
     @Named(PREFILLED_EMAIL) private val customerEmail: String?,
     private val linkAccountManager: LinkAccountManager,
+    private val linkEventsReporter: LinkEventsReporter,
     private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
@@ -90,6 +92,8 @@ internal class SignUpViewModel @Inject constructor(
                 }
             }
         )
+
+        linkEventsReporter.onSignupFlowPresented()
     }
 
     fun onSignUpClick() {
@@ -102,8 +106,12 @@ internal class SignUpViewModel @Inject constructor(
             linkAccountManager.signUp(email, phone, country).fold(
                 onSuccess = {
                     onAccountFetched(it)
+                    linkEventsReporter.onSignupCompleted()
                 },
-                onFailure = ::onError
+                onFailure = {
+                    onError(it)
+                    linkEventsReporter.onSignupFailure()
+                }
             )
         }
     }
@@ -116,6 +124,7 @@ internal class SignUpViewModel @Inject constructor(
                     onAccountFetched(it)
                 } else {
                     _signUpStatus.value = SignUpState.InputtingPhone
+                    linkEventsReporter.onSignupStarted()
                 }
             },
             onFailure = ::onError

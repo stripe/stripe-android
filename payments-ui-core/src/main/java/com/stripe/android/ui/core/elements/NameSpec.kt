@@ -11,7 +11,7 @@ data class NameSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Name,
 
-    @SerialName("label_translation_id")
+    @SerialName("translation_id")
     val labelTranslationId: TranslationId = TranslationId.AddressName
 ) : FormItemSpec() {
     @Transient

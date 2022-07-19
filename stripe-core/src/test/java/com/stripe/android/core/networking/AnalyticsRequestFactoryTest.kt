@@ -82,6 +82,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertThat("unknown_generic_x86_robolectric").isEqualTo(params[AnalyticsFields.DEVICE_TYPE])
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
         assertNotNull(params[AnalyticsFields.OS_NAME])
+        assertNotNull(params[AnalyticsFields.SESSION_ID])
     }
 
     @Test

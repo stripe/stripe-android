@@ -33,7 +33,6 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     packageName,
     publishableKeyProvider
 ) {
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,

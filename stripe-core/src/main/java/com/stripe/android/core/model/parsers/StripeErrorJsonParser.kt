@@ -19,7 +19,13 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                     message = optString(errorObject, FIELD_MESSAGE),
                     param = optString(errorObject, FIELD_PARAM),
                     type = optString(errorObject, FIELD_TYPE),
-                    docUrl = optString(errorObject, FIELD_DOC_URL)
+                    docUrl = optString(errorObject, FIELD_DOC_URL),
+                    extraFields = errorObject
+                        .optJSONObject(FIELD_EXTRA_FIELDS)?.let { extraFieldsJson ->
+                            extraFieldsJson.keys().asSequence()
+                                .map { key -> key to extraFieldsJson.get(key).toString() }
+                                .toMap()
+                        }
                 )
             }
         }.getOrDefault(
@@ -38,6 +44,7 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
         private const val FIELD_CHARGE = "charge"
         private const val FIELD_CODE = "code"
         private const val FIELD_DECLINE_CODE = "decline_code"
+        private const val FIELD_EXTRA_FIELDS = "extra_fields"
         private const val FIELD_DOC_URL = "doc_url"
         private const val FIELD_ERROR = "error"
         private const val FIELD_MESSAGE = "message"

@@ -14,7 +14,6 @@ import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -24,14 +23,14 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
-    val _collectedAddress = MutableStateFlow<ShippingAddress?>(null)
+    private val _collectedAddress = MutableStateFlow<ShippingAddress?>(null)
     val collectedAddress: StateFlow<ShippingAddress?> = _collectedAddress
 
-    val _formController = MutableStateFlow<FormController?>(null)
-    val formController = _formController
+    private val _formController = MutableStateFlow<FormController?>(null)
+    val formController: StateFlow<FormController?> = _formController
 
-    val _formEnabled = MutableStateFlow(true)
-    val formEnabled = _formEnabled
+    private val _formEnabled = MutableStateFlow(true)
+    val formEnabled: StateFlow<Boolean> = _formEnabled
 
     init {
         viewModelScope.launch {
@@ -73,25 +72,29 @@ internal class InputAddressViewModel @Inject constructor(
                     .viewModelScope(viewModelScope)
                     .stripeIntent(args.stripeIntent)
                     .merchantName(args.config?.merchantDisplayName ?: "")
-                    .formSpec(buildFormSpec(shippingAddress != null))
+                    .formSpec(buildFormSpec(shippingAddress == null))
                     .initialValues(initialValues)
                     .build().formController
             }
         }
     }
 
-    private fun buildFormSpec(expandedForm: Boolean): LayoutSpec {
+    private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
         return LayoutSpec(
             listOf(
-                if (expandedForm) {
+                if (condensedForm) {
                     AddressSpec(
                         showLabel = false,
-                        type = AddressType.ShippingExpanded
+                        type = AddressType.ShippingCondensed(
+                            googleApiKey = "" // args.config?.googlePlacesApiKey
+                        ) {
+                            navigator.navigateTo(AddressElementScreen.Autocomplete)
+                        }
                     )
                 } else {
                     AddressSpec(
                         showLabel = false,
-                        type = AddressType.ShippingCondensed
+                        type = AddressType.ShippingExpanded
                     )
                 }
             )
