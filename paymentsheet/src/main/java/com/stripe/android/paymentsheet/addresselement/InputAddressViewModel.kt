@@ -14,6 +14,7 @@ import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -86,9 +87,24 @@ internal class InputAddressViewModel @Inject constructor(
                     AddressSpec(
                         showLabel = false,
                         type = AddressType.ShippingCondensed(
-                            googleApiKey = "" // args.config?.googlePlacesApiKey
+                            googleApiKey = args.googlePlacesApiKey
                         ) {
-                            navigator.navigateTo(AddressElementScreen.Autocomplete)
+                            viewModelScope.launch {
+                                val country = _formController
+                                    .value
+                                    ?.formValues
+                                    ?.stateIn(viewModelScope)
+                                    ?.value
+                                    ?.get(IdentifierSpec.Country)
+                                    ?.value
+                                country?.let {
+                                    navigator.navigateTo(
+                                        AddressElementScreen.Autocomplete(
+                                            country = country
+                                        )
+                                    )
+                                }
+                            }
                         }
                     )
                 } else {

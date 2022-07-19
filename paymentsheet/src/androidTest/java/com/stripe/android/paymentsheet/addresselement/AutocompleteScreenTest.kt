@@ -135,6 +135,9 @@ class AutocompleteScreenTest {
                     viewModel = AutocompleteViewModel(
                         args,
                         AddressElementNavigator(),
+                        AutocompleteViewModel.Args(
+                            "US"
+                        ),
                         application
                     ).apply {
                         initialize {
