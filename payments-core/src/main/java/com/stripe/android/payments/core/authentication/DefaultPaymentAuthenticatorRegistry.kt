@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.model.LpmNextActionData
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -37,8 +38,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap
     private val paymentAuthenticatorMap:
-        Map<Class<out StripeIntent.NextActionData>,
-            @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
+    Map<Class<out StripeIntent.NextActionData>,
+        @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
 ) : PaymentAuthenticatorRegistry, Injector {
     @VisibleForTesting
     internal val allAuthenticators = setOf(
@@ -70,17 +71,24 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     ): PaymentAuthenticator<Authenticatable> {
         return when (authenticatable) {
             is StripeIntent -> {
-                if (!authenticatable.requiresAction()) {
-                    return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-                }
-                return (
-                    authenticatable.nextActionData?.let {
-                        paymentAuthenticatorMap
-                            .getOrElse(it::class.java) { noOpIntentAuthenticator }
-                    } ?: run {
-                        noOpIntentAuthenticator
+                // Try the LPM repository to see if LPM next action support was
+                // received from the server for runtime updateable next action support
+                LpmNextActionData.Instance.getNextAction(authenticatable)?.let {
+                    paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
+                } ?: run {
+                    // handle the original SDK hard coded way
+                    if (!authenticatable.requiresAction()) {
+                        return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                     }
-                    ) as PaymentAuthenticator<Authenticatable>
+                    return (
+                        authenticatable.nextActionData?.let {
+                            paymentAuthenticatorMap
+                                .getOrElse(it::class.java) { noOpIntentAuthenticator }
+                        } ?: run {
+                            noOpIntentAuthenticator
+                        }
+                        ) as PaymentAuthenticator<Authenticatable>
+                }
             }
             is Source -> {
                 sourceAuthenticator as PaymentAuthenticator<Authenticatable>

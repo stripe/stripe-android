@@ -136,7 +136,8 @@ data class PaymentIntent internal constructor(
      */
     override val unactivatedPaymentMethods: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData? = null
+    override val nextActionData: StripeIntent.NextActionData? = null,
+    override val nextActionRawString: String? = null
 ) : StripeIntent {
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {

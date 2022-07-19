@@ -48,6 +48,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
             },
+            nextActionRawString = json.optJSONObject(FIELD_NEXT_ACTION).toString(),
             unactivatedPaymentMethods = unactivatedPaymentMethods
         )
     }

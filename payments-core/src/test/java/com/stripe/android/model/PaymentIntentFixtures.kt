@@ -857,8 +857,70 @@ internal object PaymentIntentFixtures {
         )
     }
 
+    val KONBINI_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "id": "pi_1IcuwoL32KlRo",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1IcuwoL32KlRo_secret_KC0YoHfna465TDVW",
+            "confirmation_method": "automatic",
+            "created": 1617638802,
+            "currency": "mxn",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "konbini_display_details": {
+                    "expires_after": 1617944399,
+                    "hosted_voucher_url": "https:\/\/payments.stripe.com\/konbini\/voucher\/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb",
+                    "number": "12345678901234657890123456789012"
+                },
+                "type": "konbini_display_details"
+            },
+            "payment_method": {
+                "id": "pm_1IcuwoL32KlRot01",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": "jrosen@example.com",
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "created": 1617638802,
+                "customer": null,
+                "livemode": false,
+                "konbini": {},
+                "type": "konbini"
+            },
+            "payment_method_types": ["card", "konbini"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+    val KONBINI_REQUIRES_ACTION by lazy {
+        requireNotNull(PARSER.parse(KONBINI_REQUIRES_ACTION_JSON))
+    }
+
     val OXXO_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
+
             """
         {
             "id": "pi_1IcuwoL32KlRo",

@@ -52,6 +52,8 @@ sealed interface StripeIntent : StripeModel {
 
     val nextActionData: NextActionData?
 
+    val nextActionRawString: String?
+
     /**
      * Whether confirmation has succeeded and all required actions have been handled.
      */

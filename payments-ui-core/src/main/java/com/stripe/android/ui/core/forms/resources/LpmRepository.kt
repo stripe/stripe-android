@@ -34,6 +34,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import kotlinx.serialization.SerialName
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -48,21 +49,15 @@ import javax.inject.Singleton
  * repository is not a singleton.  Additionally every time you create a new
  * form view model a new repository is created and thus needs to be initialized.
  */
+
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository constructor(
-    private val arguments: LpmRepositoryArguments
+    private val arguments: LpmRepositoryArguments,
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance
 ) {
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
-
-    private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
-
-    fun values() = codeToSupportedPaymentMethod.values
-
-    fun fromCode(code: String?) = code?.let { paymentMethodCode ->
-        codeToSupportedPaymentMethod[paymentMethodCode]
-    }
 
     fun isLoaded() = serverInitializedLatch.count <= 0L
 
@@ -107,13 +102,13 @@ class LpmRepository constructor(
             // If the server does not return specs, or they are not parsed successfully
             // we will use the LPM on disk if found
             val lpmsNotParsedFromServerSpec = expectedLpms
-                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+                .filter { !lpmInitialFormData.containsKey(it) }
             if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
                 val mapFromDisk: Map<String, SharedDataSpec>? =
                     readFromDisk()
                         ?.associateBy { it.type }
                         ?.filterKeys { expectedLpms.contains(it) }
-                codeToSupportedPaymentMethod.putAll(
+                lpmInitialFormData.putAll(
                     lpmsNotParsedFromServerSpec
                         .mapNotNull { mapFromDisk?.get(it) }
                         .mapNotNull { convertToSupportedPaymentMethod(it) }
@@ -145,7 +140,7 @@ class LpmRepository constructor(
                 it.code == PaymentMethod.Type.USBankAccount.code
         }
 
-        codeToSupportedPaymentMethod.putAll(
+        lpmInitialFormData.putAll(
             parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
         )
     }
@@ -349,6 +344,53 @@ class LpmRepository constructor(
          * description of the values
          */
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
+    }
+
+    enum class PIStatusType{
+        Finished,
+        Canceled,
+        //?
+    }
+
+    data class PiStatusSpec(
+        @SerialName("associated_statuses")
+        val associatedStatuses: List<String>,
+        @SerialName("type")
+        val type: String // finished, canceled
+    )
+
+    @SerialName("redirect_to_hosted_page")
+    data class RedirectNextActionSpec(
+//        val type: String // redirect_to_hosted_page only valid operation
+        @SerialName("associated_statuses")
+        val associatedStatuses: List<String>, // ["requires_action"]
+        @SerialName("hosted_page_path")
+        val hostedPagePath: String // next_action.konbini_display_details.hosted_voucher_url
+    )
+
+    data class NextActionSpec(
+        @SerialName("handle_next_action_specs")
+        val handleNextActionSpec: List<RedirectNextActionSpec>,
+
+        @SerialName("handle_pi_status_specs")
+        val handlePiStatus: List<RedirectNextActionSpec>,
+    )
+
+
+    enum class LpmInitialFormData {
+        Instance;
+
+        private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
+
+        fun values() = codeToSupportedPaymentMethod.values
+
+        fun fromCode(code: String?) = code?.let { paymentMethodCode ->
+            codeToSupportedPaymentMethod[paymentMethodCode]
+        }
+
+        fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
+        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) =
+            codeToSupportedPaymentMethod.putAll(map)
     }
 
     companion object {
