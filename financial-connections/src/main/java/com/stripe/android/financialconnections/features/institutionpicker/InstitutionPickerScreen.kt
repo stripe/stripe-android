@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -136,8 +137,14 @@ private fun InstitutionPickerErrorContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (error) {
-        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(error, onSelectAnotherBank)
-        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(error, onSelectAnotherBank)
+        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
+            error,
+            onSelectAnotherBank
+        )
+        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
+            error,
+            onSelectAnotherBank
+        )
         else -> UnclassifiedErrorContent()
     }
 }
@@ -175,6 +182,7 @@ private fun LoadedContent(
         )
         if (query.isNotEmpty()) {
             SearchInstitutionsList(
+                query = query,
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected
             )
@@ -248,6 +256,7 @@ private fun FinancialConnectionsSearchRow(
 private fun SearchInstitutionsList(
     institutionsProvider: () -> Async<InstitutionResponse>,
     onInstitutionSelected: (Institution) -> Unit,
+    query: String,
 ) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -267,43 +276,64 @@ private fun SearchInstitutionsList(
                     }
                 }
                 is Success -> {
-                    items(institutions().data, key = { it.id }) { institution ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable { onInstitutionSelected(institution) }
-                                .padding(vertical = 8.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(6.dp))
 
+                    if (institutions().data.isEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.stripe_picker_search_no_results, query),
+                                style = FinancialConnectionsTheme.typography.caption,
+                                color = FinancialConnectionsTheme.colors.textSecondary,
+                                textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Column {
-                                Text(
-                                    text = institution.name,
-                                    color = FinancialConnectionsTheme.colors.textPrimary,
-                                    style = FinancialConnectionsTheme.typography.bodyEmphasized
-                                )
-                                Text(
-                                    text = institution.url ?: "",
-                                    color = FinancialConnectionsTheme.colors.textSecondary,
-                                    style = FinancialConnectionsTheme.typography.captionTight,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                        }
+                    } else {
+                        items(institutions().data, key = { it.id }) { institution ->
+                            InstitutionResultTile(onInstitutionSelected, institution)
                         }
                     }
+
                 }
             }
         }
     )
+}
+
+@Composable
+private fun InstitutionResultTile(
+    onInstitutionSelected: (Institution) -> Unit,
+    institution: Institution
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable { onInstitutionSelected(institution) }
+            .padding(vertical = 8.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+            contentDescription = null,
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(6.dp))
+
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Column {
+            Text(
+                text = institution.name,
+                color = FinancialConnectionsTheme.colors.textPrimary,
+                style = FinancialConnectionsTheme.typography.bodyEmphasized
+            )
+            Text(
+                text = institution.url ?: "",
+                color = FinancialConnectionsTheme.colors.textSecondary,
+                style = FinancialConnectionsTheme.typography.captionTight,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
 }
 
 @Composable
@@ -342,45 +372,17 @@ private fun FeaturedInstitutionsGrid(
 
 @Composable
 @Suppress("LongMethod")
-@Preview(
-    showBackground = true
-)
-private fun InstitutionPickerPreview() {
+@Preview(showBackground = true)
+private fun InstitutionPickerPreview(
+    @PreviewParameter(InstitutionPickerStatePreviewParameterProvider::class) state: InstitutionPickerState
+) {
     FinancialConnectionsTheme {
         InstitutionPickerContent(
-            selectInstitution = Uninitialized,
-            featuredInstitutions = Success(
-                InstitutionResponse(
-                    listOf(
-                        Institution(
-                            id = "1",
-                            name = "Very very long institution 1",
-                            url = "institution 1 url",
-                            featured = false,
-                            featuredOrder = null
-                        ),
-                        Institution(
-                            id = "2",
-                            name = "Institution 2",
-                            url = "Institution 2 url",
-                            featured = false,
-                            featuredOrder = null
-                        ),
-                        Institution(
-                            id = "3",
-                            name = "Institution 3",
-                            url = "Institution 3 url",
-                            featured = false,
-                            featuredOrder = null
-                        )
-                    )
-                )
-            ),
-            institutionsProvider = {
-                Loading()
-            },
-            searchMode = true,
-            query = "query",
+            selectInstitution = state.selectInstitution,
+            featuredInstitutions = state.featuredInstitutions,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
             onCancelSearchClick = {},
