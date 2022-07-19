@@ -127,7 +127,7 @@ internal fun ErrorContent(
 
 @Preview
 @Composable
-fun ErrorContentPreview() {
+internal fun ErrorContentPreview() {
     FinancialConnectionsTheme {
         ErrorContent(
             title = "test",
