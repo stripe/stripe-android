@@ -2,6 +2,7 @@ package com.stripe.android.payments.core.authentication
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -74,8 +75,10 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 // Try the LPM repository to see if LPM next action support was
                 // received from the server for runtime updateable next action support
                 LpmNextActionData.Instance.getNextAction(authenticatable)?.let {
+                    Log.e("MLB", "Doing the new path.")
                     paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
                 } ?: run {
+                    Log.e("MLB", "Doing the hard coded path.")
                     // handle the original SDK hard coded way
                     if (!authenticatable.requiresAction()) {
                         return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>

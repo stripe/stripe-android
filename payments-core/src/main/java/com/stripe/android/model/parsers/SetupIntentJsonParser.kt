@@ -27,6 +27,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         )
 
         return SetupIntent(
+            jsonString = json.toString(),
             id = optString(json, FIELD_ID),
             created = json.optLong(FIELD_CREATED),
             clientSecret = optString(json, FIELD_CLIENT_SECRET),
@@ -95,6 +96,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_STATUS = "status"
         private const val FIELD_USAGE = "usage"
         private const val FIELD_PAYMENT_METHOD = "payment_method"
-        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
+        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
+            "unactivated_payment_method_types"
     }
 }

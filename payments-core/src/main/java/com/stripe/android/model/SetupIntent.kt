@@ -15,6 +15,8 @@ import java.util.regex.Pattern
  */
 @Parcelize
 data class SetupIntent internal constructor(
+    override val jsonString: String? = null,
+
     /**
      * Unique identifier for the object.
      */

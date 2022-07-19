@@ -61,6 +61,10 @@ class LpmRepository constructor(
 
     fun isLoaded() = serverInitializedLatch.count <= 0L
 
+    fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
+
+    fun values() = lpmInitialFormData.values()
+
     fun waitUntilLoaded() {
         serverInitializedLatch.await(20, TimeUnit.SECONDS)
     }

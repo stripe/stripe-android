@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.util.Log
 import androidx.annotation.IntDef
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.LpmNextActionData
@@ -38,35 +39,39 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
         return LpmNextActionData.Instance.getTerminalStatus(
             stripeIntent.paymentMethod?.type?.code,
             stripeIntent.status
-        ) ?: when (stripeIntent.status) {
-            StripeIntent.Status.RequiresAction -> {
-                if (isRequireActionSuccessState(intent)) {
-                    Outcome.SUCCEEDED
-                } else {
+        ) ?: run {
+            Log.e("MLB", "Doing the old way.")
+            when (stripeIntent.status) {
+                StripeIntent.Status.RequiresAction -> {
+                    if (isRequireActionSuccessState(intent)) {
+                        Outcome.SUCCEEDED
+                    } else {
+                        Outcome.CANCELED
+                    }
+                }
+                StripeIntent.Status.Canceled -> {
                     Outcome.CANCELED
                 }
-            }
-            StripeIntent.Status.Canceled -> {
-                Outcome.CANCELED
-            }
-            StripeIntent.Status.RequiresPaymentMethod -> {
-                Outcome.FAILED
-            }
-            StripeIntent.Status.Succeeded,
-            StripeIntent.Status.RequiresCapture,
-            StripeIntent.Status.RequiresConfirmation -> {
-                Outcome.SUCCEEDED
-            }
-            StripeIntent.Status.Processing -> {
-                if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
+                StripeIntent.Status.RequiresPaymentMethod -> {
+                    Outcome.FAILED
+                }
+                StripeIntent.Status.Succeeded,
+                StripeIntent.Status.RequiresCapture,
+                StripeIntent.Status.RequiresConfirmation -> {
                     Outcome.SUCCEEDED
-                } else {
+                }
+                StripeIntent.Status.Processing -> {
+                    if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
+                        Outcome.SUCCEEDED
+                    } else {
+                        Outcome.UNKNOWN
+                    }
+                }
+                else -> {
                     Outcome.UNKNOWN
                 }
             }
-            else -> {
-                Outcome.UNKNOWN
-            }
+
         }
     }
 
