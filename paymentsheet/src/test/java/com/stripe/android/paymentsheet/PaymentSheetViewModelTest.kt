@@ -84,8 +84,8 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val lpmRepository = LpmRepository(application.resources).apply {
-        this.update(
+    private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
+        this.forceUpdate(
             listOf(
                 PaymentMethod.Type.Card.code,
                 PaymentMethod.Type.USBankAccount.code,

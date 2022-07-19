@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -81,10 +82,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    private val _isResourceRepositoryReady = savedStateHandle.getLiveData<Boolean>(
-        SAVE_RESOURCE_REPOSITORY_READY
-    )
-    internal val isResourceRepositoryReady: LiveData<Boolean> =
+    // Don't save the resource repository state because it must be re-initialized
+    // with the save server specs when reconstructed.
+    private var _isResourceRepositoryReady = MutableLiveData<Boolean>(null)
+
+    internal val isResourceRepositoryReady: LiveData<Boolean?> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
     private val _isLinkEnabled = MutableLiveData<Boolean>()
@@ -142,7 +144,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     @VisibleForTesting
-    internal val _liveMode = MutableLiveData<Boolean>()
+    internal val _liveMode
+        get() = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
     internal val liveMode: LiveData<Boolean> = _liveMode
 
     /**
@@ -234,6 +237,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }.distinctUntilChanged()
 
+    internal var lpmServerSpec
+        get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
+        set(value) = savedStateHandle.set(LPM_SERVER_SPEC_STRING, value)
+
     init {
         if (_savedSelection.value == null) {
             viewModelScope.launch {
@@ -246,8 +253,21 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (_isResourceRepositoryReady.value == null) {
             viewModelScope.launch {
-                resourceRepository.waitUntilLoaded()
-                savedStateHandle[SAVE_RESOURCE_REPOSITORY_READY] = true
+                // This work should be done on the background
+                CoroutineScope(workContext).launch {
+                    // If we have been killed and are being restored then we need to re-populate
+                    // the lpm repository
+                    stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                        resourceRepository.getLpmRepository().apply {
+                            if (!isLoaded()) {
+                                update(intentPaymentMethodTypes, lpmServerSpec)
+                            }
+                        }
+                    }
+
+                    resourceRepository.waitUntilLoaded()
+                    _isResourceRepositoryReady.postValue(true)
+                }
             }
         }
     }
@@ -612,11 +632,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_AMOUNT = "amount"
         internal const val SAVE_SELECTED_ADD_LPM = "selected_add_lpm"
+        internal const val LPM_SERVER_SPEC_STRING = "lpm_server_spec_string"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
+        internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
     }
 }

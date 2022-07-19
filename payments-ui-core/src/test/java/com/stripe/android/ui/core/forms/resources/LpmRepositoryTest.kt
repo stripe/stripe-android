@@ -15,19 +15,23 @@ import java.util.Locale
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources,
-        object : IsFinancialConnectionsAvailable {
-            override fun invoke(): Boolean {
-                return true
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return true
+                }
             }
-        }
+        )
     )
 
     @Test
     fun `Test label for afterpay show correctly when clearpay string`() {
         Locale.setDefault(Locale.UK)
         val lpmRepository = LpmRepository(
-            ApplicationProvider.getApplicationContext<Application>().resources
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
         )
         lpmRepository.updateFromDisk()
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
@@ -40,7 +44,9 @@ class LpmRepositoryTest {
     fun `Test label for afterpay show correctly when afterpay string`() {
         Locale.setDefault(Locale.US)
         val lpmRepository = LpmRepository(
-            ApplicationProvider.getApplicationContext<Application>().resources
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
         )
         lpmRepository.updateFromDisk()
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
@@ -49,7 +55,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify failing to read server schema reads from disk`() {
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             listOf("affirm"),
             """
           [
@@ -65,7 +71,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify field not found in schema is read from disk`() {
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             listOf("card", "afterpay_clearpay"),
             """
           [
@@ -87,7 +93,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify latest server spec`() {
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             listOf("bancontact", "sofort", "ideal", "sepa_debit", "p24", "eps", "giropay"),
             """
                 [
@@ -114,7 +120,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Repository will contain LPMs in ordered and schema`() {
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             listOf("afterpay_clearpay"),
             """
           [
@@ -169,7 +175,7 @@ class LpmRepositoryTest {
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
         assertThat(lpmRepository.fromCode("card")).isNull()
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             emptyList(),
             """
           [
@@ -192,7 +198,7 @@ class LpmRepositoryTest {
     // of in code here.
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             emptyList(),
             """
               [
@@ -227,7 +233,7 @@ class LpmRepositoryTest {
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
 
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             emptyList(),
             """
               [
@@ -246,7 +252,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that us_bank_account is supported when financial connections sdk available`() {
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             emptyList(),
             """
               [
@@ -263,15 +269,17 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that us_bank_account not supported when financial connections sdk not available`() {
         val lpmRepository = LpmRepository(
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return false
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                object : IsFinancialConnectionsAvailable {
+                    override fun invoke(): Boolean {
+                        return false
+                    }
                 }
-            }
+            )
         )
 
-        lpmRepository.update(
+        lpmRepository.forceUpdate(
             emptyList(),
             """
               [

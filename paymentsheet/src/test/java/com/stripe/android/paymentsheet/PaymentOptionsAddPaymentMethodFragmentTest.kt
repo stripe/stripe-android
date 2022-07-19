@@ -31,8 +31,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewModelTestInjection() {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val lpmRepository = LpmRepository(context.resources).apply {
-        this.update(listOf(PaymentMethod.Type.Card.code), null)
+    private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources)).apply {
+        this.forceUpdate(listOf(PaymentMethod.Type.Card.code), null)
     }
 
     @Before
@@ -97,6 +97,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             ),
             R.style.StripePaymentSheetDefaultTheme
         ).onFragment { fragment ->
+            fragment.sheetViewModel.resourceRepository.getLpmRepository().updateFromDisk()
             onReady(
                 fragment,
                 FragmentPaymentsheetAddPaymentMethodBinding.bind(
