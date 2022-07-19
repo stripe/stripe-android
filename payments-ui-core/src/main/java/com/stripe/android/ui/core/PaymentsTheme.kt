@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import java.lang.Float.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -493,4 +494,27 @@ fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.getRawValueFromDimenResource(resource: Int): Float {
     return resources.getDimension(resource) / resources.displayMetrics.density
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Color.lighten(amount: Float): Color {
+    return modifyBrightness {
+        max(it + amount, 1f)
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Color.darken(amount: Float): Color {
+    return modifyBrightness {
+        max(it - amount, 0f)
+    }
+}
+
+private fun Color.modifyBrightness(transform: (Float) -> Float): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hsl)
+    val hue = hsl[0]
+    val saturation = hsl[1]
+    val lightness = hsl[2]
+    return Color.hsl(hue, saturation, transform(lightness))
 }

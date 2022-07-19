@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
+import com.stripe.android.ui.core.darken
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.elements.annotatedStringResource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -70,15 +70,16 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
 
     Scaffold(
         bottomBar = {
+            val background = if (isSystemInDarkTheme()) {
+                MaterialTheme.paymentsColors.component
+            } else {
+                MaterialTheme.paymentsColors.materialColors.surface.darken(0.07f)
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .background(
-                        color = colorResource(
-                            id = R.color.stripe_paymentsheet_shipping_address_background
-                        )
-                    )
+                    .background(color = background)
                     .fillMaxWidth()
                     .imePadding()
                     .navigationBarsPadding()

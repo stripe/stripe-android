@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
@@ -88,7 +89,8 @@ internal class AddressElementActivity : ComponentActivity() {
                 sheetContent = {
                     PaymentsTheme {
                         Surface(
-                            Modifier.fillMaxWidth()
+                            color = MaterialTheme.colors.background,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             AnimatedNavHost(
                                 navController,
