@@ -15,7 +15,6 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import java.util.UUID
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -71,19 +70,6 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_custom_paymentoption_savedpm_select"
-            }
-        )
-    }
-
-    @Test
-    fun `onPaymentSuccess() should fire analytics request with valid device id`() {
-        completeEventReporter.onPaymentSuccess(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        )
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                val deviceIdValue = requireNotNull(req.params["device_id"]).toString()
-                UUID.fromString(deviceIdValue) != null
             }
         )
     }
