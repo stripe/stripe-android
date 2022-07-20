@@ -23,6 +23,7 @@ object PluginDetector {
         false
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class PluginType(
         val className: String,
         val pluginName: String
