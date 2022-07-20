@@ -26,7 +26,7 @@ class AddressElementViewModelTest {
     private val defaultArgs = AddressElementActivityContract.Args(
         AddressLauncherFixtures.BASIC_CONFIG,
         INJECTOR_KEY,
-        setOf(PRODUCT_USAGE),
+        setOf(PRODUCT_USAGE)
     )
 
     @Test
