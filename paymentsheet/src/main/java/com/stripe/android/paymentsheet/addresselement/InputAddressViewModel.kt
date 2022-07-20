@@ -81,54 +81,54 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
-        return LayoutSpec(
-            listOf(
-                if (condensedForm) {
-                    AddressSpec(
-                        showLabel = false,
-                        type = AddressType.ShippingCondensed(
-                            googleApiKey = args.config?.googlePlacesApiKey
-                        ) {
-                            viewModelScope.launch {
-                                val country = _formController
-                                    .value
-                                    ?.formValues
-                                    ?.stateIn(viewModelScope)
-                                    ?.value
-                                    ?.get(IdentifierSpec.Country)
-                                    ?.value
-                                country?.let {
-                                    navigator.navigateTo(
-                                        AddressElementScreen.Autocomplete(
-                                            country = country
-                                        )
-                                    )
-                                }
-                            }
+        val addressSpec = if (condensedForm) {
+            AddressSpec(
+                showLabel = false,
+                type = AddressType.ShippingCondensed(
+                    googleApiKey = args.config?.googlePlacesApiKey
+                ) {
+                    viewModelScope.launch {
+                        val country = _formController
+                            .value
+                            ?.formValues
+                            ?.stateIn(viewModelScope)
+                            ?.value
+                            ?.get(IdentifierSpec.Country)
+                            ?.value
+                        country?.let {
+                            navigator.navigateTo(
+                                AddressElementScreen.Autocomplete(
+                                    country = country
+                                )
+                            )
                         }
-                    )
-                } else {
-                    AddressSpec(
-                        showLabel = false,
-                        type = AddressType.ShippingExpanded
-                    )
+                    }
                 }
-            )
-        )
-    }
-
-    fun expandAddressForm() {
-        viewModelScope.launch {
-            formController.value?.let { controller ->
-                controller.formValues.collect {
-                    _collectedAddress.value = AddressDetails(
-                        name = it[IdentifierSpec.Name]?.value,
-                        phoneNumber = it[IdentifierSpec.Phone]?.value,
-                        country = it[IdentifierSpec.Country]?.value
-                    )
+            ).apply {
+                args.config?.allowedCountries?.let {
+                    (allowedCountryCodes as? MutableSet<String>)?.retainAll(it)
+                }
+            }
+        } else {
+            AddressSpec(
+                showLabel = false,
+                type = AddressType.ShippingExpanded
+            ).apply {
+                args.config?.allowedCountries?.let {
+                    (allowedCountryCodes as? MutableSet<String>)?.retainAll(it)
                 }
             }
         }
+
+        val addressSpecWithAllowedCountries = args.config?.allowedCountries?.run {
+            addressSpec.copy(allowedCountryCodes = this)
+        }
+
+        return LayoutSpec(
+            listOf(
+                addressSpecWithAllowedCountries ?: addressSpec
+            )
+        )
     }
 
     fun clickPrimaryButton() {
