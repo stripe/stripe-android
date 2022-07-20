@@ -143,7 +143,9 @@ internal class AutocompleteViewModel @Inject constructor(
             onFailure = {
                 navigator.setResult(AddressDetails.KEY, null)
             }
-        )
+        ) ?: run {
+            navigator.setResult(AddressDetails.KEY, AddressDetails())
+        }
         navigator.onBack()
     }
 
