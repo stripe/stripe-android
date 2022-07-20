@@ -7,7 +7,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
@@ -397,6 +399,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayPaymentMethodLauncher {
+            val currentReadyCallback by rememberUpdatedState(readyCallback)
+
             val context = LocalContext.current
             val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
             val activityResultLauncher = rememberLauncherForActivityResult(
@@ -404,13 +408,15 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 resultCallback::onResult
             )
 
-            return remember {
+            return remember(config) {
                 GooglePayPaymentMethodLauncher(
                     context = context,
                     lifecycleScope = lifecycleScope,
                     activityResultLauncher = activityResultLauncher,
                     config = config,
-                    readyCallback = readyCallback
+                    readyCallback = {
+                        currentReadyCallback.onReady(it)
+                    }
                 )
             }
         }

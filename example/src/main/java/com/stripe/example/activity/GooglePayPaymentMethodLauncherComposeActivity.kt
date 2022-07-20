@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,58 +37,76 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val scaffoldState = rememberScaffoldState()
-            val scope = rememberCoroutineScope()
-            var enabled by remember { mutableStateOf(false) }
+            GooglePayPaymentMethodLauncherScreen()
+        }
+    }
 
-            val googlePayLauncher = GooglePayPaymentMethodLauncher.rememberLauncher(
-                config = googlePayConfig,
-                readyCallback = { ready ->
-                    if (ready) {
-                        enabled = true
+    @Composable
+    private fun GooglePayPaymentMethodLauncherScreen() {
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
+        var enabled by remember { mutableStateOf(false) }
+
+        val googlePayLauncher = GooglePayPaymentMethodLauncher.rememberLauncher(
+            config = googlePayConfig,
+            readyCallback = { ready ->
+                if (ready) {
+                    enabled = true
+                }
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("Google Pay ready? $ready")
+                }
+            },
+            resultCallback = { result ->
+                when (result) {
+                    is GooglePayPaymentMethodLauncher.Result.Completed -> {
+                        "Successfully created a PaymentMethod. ${result.paymentMethod}"
                     }
+                    GooglePayPaymentMethodLauncher.Result.Canceled -> {
+                        "Customer cancelled Google Pay."
+                    }
+                    is GooglePayPaymentMethodLauncher.Result.Failed -> {
+                        "Google Pay failed: ${result.errorCode}: ${result.error.message}"
+                    }
+                }.let {
                     scope.launch {
-                        scaffoldState.snackbarHostState.showSnackbar("Google Pay ready? $ready")
-                    }
-                },
-                resultCallback = { result ->
-                    when (result) {
-                        is GooglePayPaymentMethodLauncher.Result.Completed -> {
-                            "Successfully created a PaymentMethod. ${result.paymentMethod}"
-                        }
-                        GooglePayPaymentMethodLauncher.Result.Canceled -> {
-                            "Customer cancelled Google Pay."
-                        }
-                        is GooglePayPaymentMethodLauncher.Result.Failed -> {
-                            "Google Pay failed: ${result.errorCode}: ${result.error.message}"
-                        }
-                    }.let {
-                        scope.launch {
-                            scaffoldState.snackbarHostState.showSnackbar(it)
-                            enabled = false
-                        }
+                        scaffoldState.snackbarHostState.showSnackbar(it)
+                        enabled = false
                     }
                 }
-            )
+            }
+        )
 
-            Scaffold(scaffoldState = scaffoldState) {
-                AndroidView(
-                    factory = { context ->
-                        GooglePayButton(context)
-                    },
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .clickable(
-                            enabled = enabled,
-                            onClick = {
-                                googlePayLauncher.present(
-                                    currencyCode = "EUR",
-                                    amount = 2500
-                                )
-                            }
-                        )
+        GooglePayPaymentMethodLauncherScreen(
+            scaffoldState = scaffoldState,
+            enabled = enabled,
+            onLaunchGooglePay = {
+                googlePayLauncher.present(
+                    currencyCode = "EUR",
+                    amount = 2500
                 )
             }
+        )
+    }
+
+    @Composable
+    private fun GooglePayPaymentMethodLauncherScreen(
+        scaffoldState: ScaffoldState,
+        enabled: Boolean,
+        onLaunchGooglePay: () -> Unit
+    ) {
+        Scaffold(scaffoldState = scaffoldState) {
+            AndroidView(
+                factory = { context ->
+                    GooglePayButton(context)
+                },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clickable(
+                        enabled = enabled,
+                        onClick = onLaunchGooglePay
+                    )
+            )
         }
     }
 }

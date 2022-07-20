@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
@@ -299,6 +301,8 @@ class GooglePayLauncher internal constructor(
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayLauncher {
+            val currentReadyCallback by rememberUpdatedState(readyCallback)
+
             val context = LocalContext.current
             val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
             val activityResultLauncher = rememberLauncherForActivityResult(
@@ -306,11 +310,13 @@ class GooglePayLauncher internal constructor(
                 resultCallback::onResult
             )
 
-            return remember {
+            return remember(config) {
                 GooglePayLauncher(
                     lifecycleScope = lifecycleScope,
                     config = config,
-                    readyCallback = readyCallback,
+                    readyCallback = {
+                        currentReadyCallback.onReady(it)
+                    },
                     activityResultLauncher = activityResultLauncher,
                     googlePayRepositoryFactory = {
                         DefaultGooglePayRepository(

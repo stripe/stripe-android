@@ -118,7 +118,7 @@ interface PaymentLauncher {
                 callback::onPaymentResult
             )
 
-            return remember {
+            return remember(publishableKey, stripeAccountId) {
                 PaymentLauncherFactory(
                     context,
                     activityResultLauncher
