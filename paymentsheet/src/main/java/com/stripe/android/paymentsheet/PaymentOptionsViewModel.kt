@@ -76,15 +76,23 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
-    private var hasTransitionToUnsavedCard = false
+    internal var hasTransitionToUnsavedLpm
+        get() = savedStateHandle.get<Boolean>(SAVE_STATE_HAS_OPEN_SAVED_LPM)
+        set(value) = savedStateHandle.set(SAVE_STATE_HAS_OPEN_SAVED_LPM, value)
+
     private val shouldTransitionToUnsavedCard: Boolean
-        get() =
-            !hasTransitionToUnsavedCard && newPaymentSelection != null
+        get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
         setupLink(args.stripeIntent, false)
-        setStripeIntent(args.stripeIntent)
+
+        // After recovering from don't keep activities the stripe intent will be saved,
+        // calling setStripeIntent would require the repository be initialized, which
+        // would not be the case.
+        if (stripeIntent.value == null) {
+            setStripeIntent(args.stripeIntent)
+        }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
     }
@@ -243,7 +251,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
-            hasTransitionToUnsavedCard = true
+            hasTransitionToUnsavedLpm = true
             transitionTo(
                 // Until we add a flag to the transitionTarget to specify if we want to add the item
                 // to the backstack, we need to use the full sheet.
@@ -312,5 +320,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
+    }
+
+    companion object {
+        const val SAVE_STATE_HAS_OPEN_SAVED_LPM = "hasTransitionToUnsavedLpm"
     }
 }

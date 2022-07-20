@@ -30,12 +30,14 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     // Payment Intents
     PaymentIntentConfirm("payment_intent_confirmation"),
     PaymentIntentRetrieve("payment_intent_retrieval"),
+    PaymentIntentRetrieveOrdered("payment_intent_retrieval_ordered"),
     PaymentIntentCancelSource("payment_intent_cancel_source"),
     PaymentIntentRefresh("payment_intent_refresh"),
 
     // Setup Intents
     SetupIntentConfirm("setup_intent_confirmation"),
     SetupIntentRetrieve("setup_intent_retrieval"),
+    SetupIntentRetrieveOrdered("setup_intent_retrieval_ordered"),
     SetupIntentCancelSource("setup_intent_cancel_source"),
 
     // File

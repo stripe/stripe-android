@@ -22,7 +22,7 @@ abstract class FormControllerModule {
             resourceRepository: ResourceRepository,
             context: Context,
             merchantName: String,
-            stripeIntent: StripeIntent,
+            stripeIntent: StripeIntent?,
             initialValues: Map<IdentifierSpec, String?>,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
