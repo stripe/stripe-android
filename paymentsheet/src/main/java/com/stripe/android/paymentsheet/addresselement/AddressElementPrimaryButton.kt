@@ -16,9 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.getOnBackgroundColor
@@ -26,6 +24,7 @@ import com.stripe.android.ui.core.getOnBackgroundColor
 @Composable
 internal fun AddressElementPrimaryButton(
     isEnabled: Boolean,
+    text: String,
     onButtonClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -53,9 +52,7 @@ internal fun AddressElementPrimaryButton(
                 )
             ) {
                 Text(
-                    text = stringResource(
-                        R.string.stripe_paymentsheet_address_element_primary_button
-                    ),
+                    text = text,
                     color = onBackground.copy(alpha = LocalContentAlpha.current)
                 )
             }

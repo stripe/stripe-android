@@ -54,6 +54,7 @@ class InputAddressScreenTest {
             DefaultPaymentsTheme {
                 InputAddressScreen(
                     primaryButtonEnabled = primaryButtonEnabled,
+                    primaryButtonText = "Save Address",
                     onPrimaryButtonClick = primaryButtonCallback,
                     onCloseClick = onCloseCallback,
                     formContent = {}
