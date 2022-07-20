@@ -17,15 +17,21 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 class InputAddressViewModelTest {
     private val args = mock<AddressElementActivityContract.Args>()
+    private val config = mock<AddressLauncher.Configuration>()
     private val navigator = mock<AddressElementNavigator>()
     private val formcontrollerProvider = mock<Provider<FormControllerSubcomponent.Builder>>()
 
-    private fun createViewModel() =
-        InputAddressViewModel(
+    private fun createViewModel(defaultAddress: AddressDetails? = null): InputAddressViewModel {
+        defaultAddress?.let {
+            whenever(config.defaultValues).thenReturn(defaultAddress)
+        }
+        whenever(args.config).thenReturn(config)
+        return InputAddressViewModel(
             args,
             navigator,
             formcontrollerProvider
         )
+    }
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest {
@@ -43,6 +49,14 @@ class InputAddressViewModelTest {
         whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
+        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+    }
+
+    @Test
+    fun `default address from merchant is parsed`() = runTest {
+        val expectedAddress = AddressDetails(name = "skyler", company = "stripe")
+
+        val viewModel = createViewModel(expectedAddress)
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
     }
 }

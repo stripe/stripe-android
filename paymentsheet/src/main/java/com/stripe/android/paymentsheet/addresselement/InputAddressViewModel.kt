@@ -24,7 +24,7 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
-    private val _collectedAddress = MutableStateFlow<AddressDetails?>(null)
+    private val _collectedAddress = MutableStateFlow<AddressDetails?>(args.config?.defaultValues)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
     private val _formController = MutableStateFlow<FormController?>(null)
@@ -115,20 +115,6 @@ internal class InputAddressViewModel @Inject constructor(
                 }
             )
         )
-    }
-
-    fun expandAddressForm() {
-        viewModelScope.launch {
-            formController.value?.let { controller ->
-                controller.formValues.collect {
-                    _collectedAddress.value = AddressDetails(
-                        name = it[IdentifierSpec.Name]?.value,
-                        phoneNumber = it[IdentifierSpec.Phone]?.value,
-                        country = it[IdentifierSpec.Country]?.value
-                    )
-                }
-            }
-        }
     }
 
     fun clickPrimaryButton() {
