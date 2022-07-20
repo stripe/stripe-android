@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -32,6 +34,7 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
+import com.stripe.android.financialconnections.image.StripeImageLoader
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
@@ -48,21 +51,37 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Inject
     lateinit var navigationManager: NavigationManager
 
+    private lateinit var imageLoader: StripeImageLoader
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        imageLoader = StripeImageLoader(context = this)
         viewModel.activityRetainedComponent.inject(this)
         viewModel.onEach { postInvalidate() }
         onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
         setContent {
             FinancialConnectionsTheme {
-                Column {
-                    Box(modifier = Modifier.weight(1f)) {
-                        val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
-                        if (showCloseDialog.value) CloseDialog(viewModel::onCloseConfirm)
-                        NavHost()
+                ActivityCompositionLocalProvider {
+                    Column {
+                        Box(modifier = Modifier.weight(1f)) {
+                            val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
+                            if (showCloseDialog.value) CloseDialog(viewModel::onCloseConfirm)
+                            NavHost()
+                        }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    internal fun ActivityCompositionLocalProvider(
+        content: @Composable () -> Unit
+    ) {
+        CompositionLocalProvider(
+            LocalImageLoader provides imageLoader
+        ) {
+            content()
         }
     }
 
@@ -175,4 +194,13 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        imageLoader.cancel()
+    }
+}
+
+internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
+    error("CompositionLocal image loader not present")
 }

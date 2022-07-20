@@ -3,7 +3,6 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,9 +54,11 @@ import com.stripe.android.financialconnections.features.common.InstitutionPlanne
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.image.StripeImage
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalImageCache
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -264,7 +265,6 @@ private fun SearchInstitutionsList(
                     }
                 }
                 is Success -> {
-
                     if (institutions().data.isEmpty()) {
                         item {
                             Text(
@@ -300,13 +300,13 @@ private fun InstitutionResultTile(
             .clickable { onInstitutionSelected(institution) }
             .padding(vertical = 8.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-            contentDescription = null,
+        StripeImage(
+            url = "https://www.fillmurray.com/108/108",
+            placeHolder = painterResource(R.drawable.stripe_ic_brandicon_institution),
             modifier = Modifier
                 .size(36.dp)
-                .clip(RoundedCornerShape(6.dp))
-
+                .clip(RoundedCornerShape(6.dp)),
+            contentDescription = ""
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
@@ -351,11 +351,12 @@ private fun FeaturedInstitutionsGrid(
                         .clickable { onInstitutionSelected(institution) }
                         .padding(8.dp)
                 ) {
-                    Text(
-                        text = institution.name,
-                        color = FinancialConnectionsTheme.colors.textPrimary,
-                        style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                        textAlign = TextAlign.Center
+                    StripeImage(
+                        url = "https://www.fillmurray.com/108/108",
+                        placeHolder = painterResource(R.drawable.stripe_ic_brandicon_institution),
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentDescription = ""
                     )
                 }
             }

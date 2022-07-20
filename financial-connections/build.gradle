@@ -40,6 +40,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
     implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+    implementation 'com.jakewharton:disklrucache:2.0.2'
     implementation "com.airbnb.android:showkase-annotation:$showkaseVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
