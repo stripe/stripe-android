@@ -47,7 +47,7 @@ internal class AutocompleteViewModel @Inject constructor(
         get() = _loading
 
     @VisibleForTesting
-    val addressResult = MutableStateFlow<Result<ShippingAddress?>?>(null)
+    val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
 
     val textFieldController = SimpleTextFieldController(
         SimpleTextFieldConfig(
@@ -70,7 +70,7 @@ internal class AutocompleteViewModel @Inject constructor(
 
     fun initialize(
         clientProvider: () -> PlacesClientProxy? = {
-            args.googlePlacesApiKey?.let {
+            args.config?.googlePlacesApiKey?.let {
                 PlacesClientProxy.create(getApplication(), it)
             }
         }
@@ -111,7 +111,7 @@ internal class AutocompleteViewModel @Inject constructor(
                     _loading.value = false
                     val address = it.place.transformGoogleToStripeAddress(getApplication())
                     addressResult.value = Result.success(
-                        ShippingAddress(
+                        AddressDetails(
                             city = address.city,
                             country = address.country,
                             line1 = address.line1,
@@ -138,10 +138,10 @@ internal class AutocompleteViewModel @Inject constructor(
     fun setResultAndGoBack() {
         addressResult.value?.fold(
             onSuccess = {
-                navigator.setResult(ShippingAddress.KEY, it)
+                navigator.setResult(AddressDetails.KEY, it)
             },
             onFailure = {
-                navigator.setResult(ShippingAddress.KEY, null)
+                navigator.setResult(AddressDetails.KEY, null)
             }
         )
         navigator.onBack()
