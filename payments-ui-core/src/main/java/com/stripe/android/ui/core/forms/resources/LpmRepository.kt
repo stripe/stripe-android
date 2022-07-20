@@ -153,10 +153,9 @@ class LpmRepository constructor(
 
     private fun parseLpms(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let { string ->
-            try{
-                 lpmSerializer.deserializeList(string)
-            }
-            catch(e: Exception){
+            try {
+                lpmSerializer.deserializeList(string)
+            } catch (e: Exception) {
                 null
             }
         }

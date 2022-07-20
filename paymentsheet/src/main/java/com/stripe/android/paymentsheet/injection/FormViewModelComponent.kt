@@ -17,7 +17,7 @@ import javax.inject.Singleton
         FormViewModelModule::class,
         CoroutineContextModule::class,
         PaymentSheetCommonModule::class,
-        LoggingModule::class,
+        LoggingModule::class
     ]
 )
 internal interface FormViewModelComponent {

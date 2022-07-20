@@ -81,7 +81,7 @@ internal class FormViewModel @Inject internal constructor(
             DaggerFormViewModelComponent.builder()
                 .context(arg.context)
                 .resources(arg.resource)
-                .productUsage(emptySet()) //Not sure what this should be
+                .productUsage(emptySet()) // Not sure what this should be
                 .build()
                 .inject(this)
         }

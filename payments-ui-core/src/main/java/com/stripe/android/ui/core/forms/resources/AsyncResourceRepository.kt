@@ -26,7 +26,7 @@ class AsyncResourceRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?,
     analyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : ResourceRepository {
     private val lpmRepository: LpmRepository = LpmRepository.getInstance(
         LpmRepository.LpmRepositoryArguments(

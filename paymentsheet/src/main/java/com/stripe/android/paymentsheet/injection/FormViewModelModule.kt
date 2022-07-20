@@ -13,5 +13,4 @@ internal abstract class FormViewModelModule {
     @Binds
     abstract fun bindsResourceRepository(asyncResourceRepository: AsyncResourceRepository):
         ResourceRepository
-
 }
