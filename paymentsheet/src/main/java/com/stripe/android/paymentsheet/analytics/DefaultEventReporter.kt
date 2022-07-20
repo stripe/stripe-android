@@ -14,7 +14,6 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
-    private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext
@@ -84,17 +83,12 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
-            val deviceId = deviceIdRepository.get()
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event,
-                    event.additionalParams.plus(FIELD_DEVICE_ID to deviceId.value)
+                    event.additionalParams
                 )
             )
         }
-    }
-
-    internal companion object {
-        internal const val FIELD_DEVICE_ID = "device_id"
     }
 }

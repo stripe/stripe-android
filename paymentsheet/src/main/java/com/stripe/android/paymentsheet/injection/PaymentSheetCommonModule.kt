@@ -7,9 +7,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
-import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -27,9 +25,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
-
-    @Binds
-    abstract fun bindsDeviceIdRepository(repository: DefaultDeviceIdRepository): DeviceIdRepository
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
