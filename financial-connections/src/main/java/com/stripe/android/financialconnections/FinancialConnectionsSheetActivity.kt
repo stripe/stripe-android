@@ -29,7 +29,6 @@ internal class FinancialConnectionsSheetActivity :
     private val startNativeAuthFlowForResult = registerForActivityResult(StartActivityForResult()) {
         viewModel.onNativeAuthFlowResult()
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.onEach { postInvalidate() }
