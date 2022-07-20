@@ -295,7 +295,6 @@ private fun SearchInstitutionsList(
                             InstitutionResultTile(onInstitutionSelected, institution)
                         }
                     }
-
                 }
             }
         }
