@@ -90,7 +90,6 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             lastPaymentError = lastPaymentError,
             shipping = shipping,
             nextActionData = nextActionData,
-            nextActionRawString = json.optJSONObject(FIELD_NEXT_ACTION)?.toString(),
             unactivatedPaymentMethods = unactivatedPaymentMethods
         )
     }

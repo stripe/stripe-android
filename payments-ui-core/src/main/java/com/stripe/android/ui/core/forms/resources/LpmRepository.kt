@@ -100,7 +100,7 @@ class LpmRepository constructor(
         force: Boolean = false
     ) {
         // TODO: Call analytics if parsing fails for any reason
-        if (!isLoaded() || force) {
+        if (!isLoaded() || force || true) {
             update(parseLpms(serverLpmSpecs))
 
             // If the server does not return specs, or they are not parsed successfully

@@ -260,7 +260,6 @@ sealed interface StripeIntent : StripeModel {
             override fun hashCode(): Int {
                 return 0
             }
-
             override fun equals(other: Any?): Boolean {
                 return this === other
             }

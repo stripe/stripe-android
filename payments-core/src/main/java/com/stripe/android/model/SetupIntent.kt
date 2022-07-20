@@ -93,8 +93,7 @@ data class SetupIntent internal constructor(
      */
     override val unactivatedPaymentMethods: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData?,
-    override val nextActionRawString: String?
+    override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?

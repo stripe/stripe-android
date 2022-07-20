@@ -74,24 +74,25 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             is StripeIntent -> {
                 // Try the LPM repository to see if LPM next action support was
                 // received from the server for runtime updateable next action support
-                LpmNextActionData.Instance.getNextAction(authenticatable)?.let {
-                    Log.e("MLB", "Doing the new path.")
-                    paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
-                } ?: run {
-                    Log.e("MLB", "Doing the hard coded path.")
-                    // handle the original SDK hard coded way
-                    if (!authenticatable.requiresAction()) {
-                        return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-                    }
-                    return (
-                        authenticatable.nextActionData?.let {
-                            paymentAuthenticatorMap
-                                .getOrElse(it::class.java) { noOpIntentAuthenticator }
-                        } ?: run {
-                            noOpIntentAuthenticator
-                        }
-                        ) as PaymentAuthenticator<Authenticatable>
+                if (LpmNextActionData.Instance.requiresLuxeAction(authenticatable)) {
+                    return LpmNextActionData.Instance.getNextAction(authenticatable)?.let {
+                        Log.e("MLB", "Doing the new path.")
+                         paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
+                    } ?: noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                 }
+                Log.e("MLB", "Doing the hard coded path.")
+                // handle the original SDK hard coded way
+                if (!authenticatable.requiresAction()) {
+                    return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
+                }
+                return (
+                    authenticatable.nextActionData?.let {
+                        paymentAuthenticatorMap
+                            .getOrElse(it::class.java) { noOpIntentAuthenticator }
+                    } ?: run {
+                        noOpIntentAuthenticator
+                    }
+                    ) as PaymentAuthenticator<Authenticatable>
             }
             is Source -> {
                 sourceAuthenticator as PaymentAuthenticator<Authenticatable>

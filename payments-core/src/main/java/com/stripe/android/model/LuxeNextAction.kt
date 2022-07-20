@@ -15,7 +15,7 @@ data class RedirectNextActionSpec(
 )
 
 data class LuxeNextAction(
-    val handleNextActionSpec: Map<StripeIntent.Status, RedirectNextActionSpec>,
+    val handleNextActionSpec: Map<StripeIntent.Status, RedirectNextActionSpec?>,
     val handlePiStatus: List<PiStatusSpec>,
 )
 
@@ -29,6 +29,19 @@ enum class LpmNextActionData {
             }?.outcome
         }
 
+    fun requiresLuxeAction(stripeIntent: StripeIntent) = stripeIntent.jsonString?.let {
+        JSONObject(it)
+            .optJSONObject("payment_method")
+            ?.optString("type")
+    }?.let { lpmCode ->
+        codeToNextActionSpec[lpmCode]?.let { luxeNextAction ->
+            luxeNextAction.handleNextActionSpec.containsKey(stripeIntent.status)
+        }
+    } ?: false
+
+    /**
+     * Null returned from this function indicates there is definitively no next action.
+     */
     fun getNextAction(stripeIntent: StripeIntent) = stripeIntent.jsonString?.let {
         JSONObject(it)
             .optJSONObject("payment_method")
@@ -37,7 +50,6 @@ enum class LpmNextActionData {
         codeToNextActionSpec[lpmCode]?.let { luxeNextAction ->
             luxeNextAction.handleNextActionSpec[stripeIntent.status]?.let { redirectNextAction ->
                 stripeIntent.jsonString?.let {
-
                     StripeIntent.NextActionData.RedirectToUrl(
                         returnUrl = getPath(
                             redirectNextAction.returnToUrlPath,
@@ -56,7 +68,11 @@ enum class LpmNextActionData {
     }
 
     private fun getPath(path: String, json: JSONObject): String? {
-        val pathArray = path.split(".")
+        val pathArray = ("[*" + "([A-Za-z_0-9]+)" + "]*").toRegex().findAll(path)
+            .map { it.value }
+            .distinct()
+            .filterNot { it.isEmpty() }
+            .toList()
         var jsonObject: JSONObject? = json
         for (key in pathArray) {
             if (jsonObject == null) {
@@ -85,8 +101,8 @@ enum class LpmNextActionData {
                 handleNextActionSpec = mapOf(
                     StripeIntent.Status.RequiresAction to
                         RedirectNextActionSpec(
-                            hostedPagePath = "next_action.redirect_to_url.url",
-                            returnToUrlPath = "next_action.redirect_to_url.return_url"
+                            hostedPagePath = "next_action[redirect_to_url][url]",
+                            returnToUrlPath = "next_action[redirect_to_url][return_url]"
                         )
                 ),
                 handlePiStatus = listOf(
@@ -101,6 +117,39 @@ enum class LpmNextActionData {
                     PiStatusSpec(
                         associatedStatuses = listOf(StripeIntent.Status.RequiresAction),
                         outcome = StripeIntentResult.Outcome.CANCELED
+                    )
+                )
+            )
+        )
+        put(
+            "konbini",
+            LuxeNextAction(
+                handleNextActionSpec = mapOf(
+                    StripeIntent.Status.RequiresAction to
+                        RedirectNextActionSpec(
+                            hostedPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+                            returnToUrlPath = "next_action[konbini_display_details][return_url]"
+                        )
+                ),
+                handlePiStatus = listOf(
+                    PiStatusSpec(
+                        associatedStatuses = listOf(StripeIntent.Status.RequiresAction),
+                        outcome = StripeIntentResult.Outcome.SUCCEEDED
+                    )
+                )
+            )
+        )
+
+        put(
+            "sepa_debit",
+            LuxeNextAction(
+                handleNextActionSpec = mapOf(
+                    StripeIntent.Status.Processing to null
+                ),
+                handlePiStatus = listOf(
+                    PiStatusSpec(
+                        associatedStatuses = listOf(StripeIntent.Status.Processing),
+                        outcome = StripeIntentResult.Outcome.SUCCEEDED
                     )
                 )
             )
