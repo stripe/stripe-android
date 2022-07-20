@@ -12,7 +12,7 @@ class LuxeNextActionTest {
     @Test
     fun `test get terminal status when intent status requires_action`() {
         assertThat(
-            LpmNextActionData.Instance.getTerminalStatus(
+            LuxeNextActionRepository.Instance.getTerminalStatus(
                 "konbini",
                 StripeIntent.Status.RequiresAction
             )
@@ -22,7 +22,7 @@ class LuxeNextActionTest {
     @Test
     fun `test get terminal status when intent status success`() {
         assertThat(
-            LpmNextActionData.Instance.getTerminalStatus(
+            LuxeNextActionRepository.Instance.getTerminalStatus(
                 "afterpay_clearpay",
                 StripeIntent.Status.Succeeded
             )
@@ -31,7 +31,7 @@ class LuxeNextActionTest {
 
     @Test
     fun `test get next action for konbini`() {
-        val nextAction = LpmNextActionData.Instance.getNextAction(
+        val nextAction = LuxeNextActionRepository.Instance.getNextAction(
             PaymentIntentFixtures.KONBINI_REQUIES_ACTION
         ) as StripeIntent.NextActionData.RedirectToUrl
 
@@ -41,7 +41,7 @@ class LuxeNextActionTest {
 
     @Test
     fun `test get next action for afterpay_clearpay`() {
-        val nextAction = LpmNextActionData.Instance.getNextAction(
+        val nextAction = LuxeNextActionRepository.Instance.getNextAction(
             PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION
         ) as StripeIntent.NextActionData.RedirectToUrl
 

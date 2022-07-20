@@ -5,9 +5,14 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LuxeNextAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PiStatusSpec
+import com.stripe.android.model.RedirectNextActionSpec
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -147,6 +152,7 @@ class LpmRepository constructor(
         lpmInitialFormData.putAll(
             parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
         )
+
     }
 
     private fun parseLpms(inputStream: InputStream?) =

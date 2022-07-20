@@ -14,5 +14,5 @@ data class PaymentIntentResult
 constructor(
     override val intent: PaymentIntent,
     @Outcome private val outcomeFromFlow: Int = 0,
-    override val failureMessage: String? = null
+    override val failureMessage: String? = null,
 ) : StripeIntentResult<PaymentIntent>(outcomeFromFlow)

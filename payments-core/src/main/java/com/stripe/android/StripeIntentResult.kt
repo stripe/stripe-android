@@ -2,8 +2,9 @@ package com.stripe.android
 
 import android.util.Log
 import androidx.annotation.IntDef
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.LpmNextActionData
+import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.StripeIntent
 
 /**
@@ -13,10 +14,12 @@ import com.stripe.android.model.StripeIntent
  * [intent] is a [StripeIntent] retrieved after confirmation/authentication succeeded or failed.
  */
 abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
-    @Outcome private val outcomeFromFlow: Int
+    @Outcome private val outcomeFromFlow: Int,
 ) : StripeModel {
     abstract val intent: T
     abstract val failureMessage: String?
+    @VisibleForTesting
+    internal var luxeNextActionRepository: LuxeNextActionRepository = LuxeNextActionRepository.Instance
 
     @Outcome
     @get:Outcome
@@ -36,7 +39,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     }
 
     private fun getOutcome(stripeIntent: StripeIntent): Int {
-        return LpmNextActionData.Instance.getTerminalStatus(
+        return luxeNextActionRepository.getTerminalStatus(
             stripeIntent.paymentMethod?.type?.code,
             stripeIntent.status
         ) ?: run {

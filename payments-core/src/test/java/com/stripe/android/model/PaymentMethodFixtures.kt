@@ -109,6 +109,14 @@ internal object PaymentMethodFixtures {
         )
     )
 
+    val OXXO_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1IcuwoL32KlRot01",
+        billingDetails = BILLING_DETAILS,
+        created = 1617638802,
+        liveMode = false,
+        type = PaymentMethod.Type.Oxxo,
+    )
+
     val SEPA_DEBIT_JSON = JSONObject(
         """
         {

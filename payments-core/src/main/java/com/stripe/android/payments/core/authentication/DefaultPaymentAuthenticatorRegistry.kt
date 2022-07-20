@@ -15,7 +15,7 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.model.LpmNextActionData
+import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -74,8 +74,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             is StripeIntent -> {
                 // Try the LPM repository to see if LPM next action support was
                 // received from the server for runtime updateable next action support
-                if (LpmNextActionData.Instance.requiresLuxeAction(authenticatable)) {
-                    return LpmNextActionData.Instance.getNextAction(authenticatable)?.let {
+                if (LuxeNextActionRepository.Instance.requiresAction(authenticatable)) {
+                    return LuxeNextActionRepository.Instance.getNextAction(authenticatable)?.let {
                         Log.e("MLB", "Doing the new path.")
                          paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
                     } ?: noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>

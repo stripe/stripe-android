@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -14,6 +15,46 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentIntentResultTest {
+
+    @Test
+    fun `test outcome checks lpm repository first`() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethodFixtures.OXXO_PAYMENT_METHOD,
+            isLiveMode = false,
+            id = "pi_12345",
+            currency = "usd",
+            paymentMethodTypes = listOf(PaymentMethod.Type.Oxxo.code),
+            status = StripeIntent.Status.Processing,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.DisplayOxxoDetails()
+        )
+        val result = PaymentIntentResult(
+            intent = paymentIntent
+        )
+        result.luxeNextActionRepository = LuxeNextActionRepository()
+
+        // Because of the OXXO test below we know this normally returns SUCCESS
+
+        // We will change the status from Success to Cancelled when in the processing state
+        result.luxeNextActionRepository.update(
+            mapOf(
+                "oxxo" to OXXO_LUXE_NEXT_ACTION.copy(
+                    handlePiStatus = listOf(
+                        LuxeNextActionRepository.PiStatusSpec(
+                            associatedStatuses = listOf(StripeIntent.Status.Processing),
+                            outcome = StripeIntentResult.Outcome.CANCELED
+                        )
+                    )
+                )
+            )
+        )
+
+        assertThat(result.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+    }
 
     @Test
     fun `intent should return expected object`() {
@@ -48,11 +89,11 @@ class PaymentIntentResultTest {
             created = 500L,
             amount = 1000L,
             clientSecret = "secret",
-            paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT_PAYMENT_METHOD,
+            paymentMethod = PaymentMethodFixtures.OXXO_PAYMENT_METHOD,
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
-            paymentMethodTypes = listOf(PaymentMethod.Type.USBankAccount.code),
+            paymentMethodTypes = listOf(PaymentMethod.Type.Oxxo.code),
             status = StripeIntent.Status.Processing,
             unactivatedPaymentMethods = emptyList(),
             nextActionData = StripeIntent.NextActionData.DisplayOxxoDetails()
