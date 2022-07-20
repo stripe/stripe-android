@@ -23,8 +23,7 @@ internal class AddressElementViewModel @Inject internal constructor(
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
-            val starterArgs: AddressElementActivityContract.Args,
-            val productUsage: Set<String>
+            val starterArgs: AddressElementActivityContract.Args
         )
 
         @Inject
@@ -37,9 +36,9 @@ internal class AddressElementViewModel @Inject internal constructor(
             val logger = Logger.getInstance(BuildConfig.DEBUG)
             val starterArgs = starterArgsSupplier()
 
-            starterArgs.injectionParams?.injectorKey?.let {
-                WeakMapInjectorRegistry.retrieve(it)
-            }?.let { it as? NonFallbackInjector }?.let {
+            WeakMapInjectorRegistry.retrieve(starterArgs.injectorKey)?.let {
+                it as? NonFallbackInjector
+            }?.let {
                 logger.info(
                     "Injector available, " +
                         "injecting dependencies into ${this::class.java.canonicalName}"
@@ -54,8 +53,7 @@ internal class AddressElementViewModel @Inject internal constructor(
                 fallbackInitialize(
                     FallbackInitializeParam(
                         applicationSupplier(),
-                        starterArgs,
-                        starterArgs.injectionParams?.productUsage ?: emptySet()
+                        starterArgs
                     )
                 )
             }
@@ -73,7 +71,6 @@ internal class AddressElementViewModel @Inject internal constructor(
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
             val viewModelComponent = DaggerAddressElementViewModelFactoryComponent.builder()
                 .context(arg.application)
-                .productUsage(arg.productUsage)
                 .starterArgs(arg.starterArgs)
                 .build()
 

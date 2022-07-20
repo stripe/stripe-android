@@ -368,10 +368,12 @@ class LpmRepository constructor(
     }
 
     companion object {
-
-        private val singletonHolder = SingletonHolder(::LpmRepository)
-
-        fun getInstance(args: LpmRepositoryArguments) = singletonHolder.getInstance(args)
+        @Volatile
+        private var INSTANCE: LpmRepository? = null
+        fun getInstance(args: LpmRepositoryArguments): LpmRepository =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: LpmRepository(args).also { INSTANCE = it }
+            }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(

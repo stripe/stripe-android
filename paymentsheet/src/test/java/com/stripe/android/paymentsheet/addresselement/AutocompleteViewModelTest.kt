@@ -44,6 +44,9 @@ class AutocompleteViewModelTest {
         AutocompleteViewModel(
             args,
             navigator,
+            AutocompleteViewModel.Args(
+                "US"
+            ),
             application
         ).apply {
             initialize {
@@ -72,7 +75,7 @@ class AutocompleteViewModelTest {
             )
         )
         val expectedResult = Result.success(
-            ShippingAddress(
+            AddressDetails(
                 city = null,
                 country = null,
                 line1 = "",
@@ -129,7 +132,7 @@ class AutocompleteViewModelTest {
     fun `onEnterAddressManually sets the current address and navigates back`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
-            ShippingAddress(
+            AddressDetails(
                 city = "city",
                 country = null,
                 line1 = "",
@@ -140,6 +143,19 @@ class AutocompleteViewModelTest {
         )
 
         viewModel.addressResult.value = expectedResult
+        viewModel.onEnterAddressManually()
+
+        verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))
+        verify(navigator).onBack()
+    }
+
+    @Test
+    fun `onEnterAddressManually navigates back with empty address`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+        val expectedResult = Result.success(
+            AddressDetails()
+        )
+
         viewModel.onEnterAddressManually()
 
         verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))

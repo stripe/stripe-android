@@ -22,10 +22,14 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -46,12 +50,18 @@ import com.stripe.android.ui.core.paymentsColors
 const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawable"
 
 @Composable
-internal fun AutocompleteScreen(injector: NonFallbackInjector) {
+internal fun AutocompleteScreen(
+    injector: NonFallbackInjector,
+    country: String?
+) {
     val application = LocalContext.current.applicationContext as Application
     val viewModel: AutocompleteViewModel =
         viewModel<AutocompleteViewModel>(
             factory = AutocompleteViewModel.Factory(
-                injector
+                injector,
+                AutocompleteViewModel.Args(
+                    country = country
+                )
             ) { application }
         ).also {
             it.initialize()
@@ -67,7 +77,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     val query = viewModel.textFieldController.fieldValue.collectAsState(initial = "")
     val attributionDrawable =
         PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
-
+    val focusRequester = remember { FocusRequester() }
     Scaffold(
         bottomBar = {
             val background = if (isSystemInDarkTheme()) {
@@ -113,8 +123,13 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                         textFieldController = viewModel.textFieldController,
                         imeAction = ImeAction.Done,
                         enabled = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
                     )
+                    SideEffect {
+                        focusRequester.requestFocus()
+                    }
                 }
                 if (loading) {
                     Row(
