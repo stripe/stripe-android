@@ -36,17 +36,17 @@ enum class LpmNextActionData {
     }?.let { lpmCode ->
         codeToNextActionSpec[lpmCode]?.let { luxeNextAction ->
             luxeNextAction.handleNextActionSpec[stripeIntent.status]?.let { redirectNextAction ->
-                stripeIntent.nextActionRawString?.let {
-                    val jsonNextAction = JSONObject(it)
+                stripeIntent.jsonString?.let {
+
                     StripeIntent.NextActionData.RedirectToUrl(
                         returnUrl = getPath(
                             redirectNextAction.returnToUrlPath,
-                            jsonNextAction
+                            JSONObject(it)
                         ).toString(),
                         url = Uri.Builder().path(
                             getPath(
                                 redirectNextAction.hostedPagePath,
-                                jsonNextAction
+                                JSONObject(it)
                             ).toString()
                         ).build()
                     )
@@ -56,7 +56,7 @@ enum class LpmNextActionData {
     }
 
     private fun getPath(path: String, json: JSONObject): String? {
-        val pathArray = path.replace("next_action.", "").split(".")
+        val pathArray = path.split(".")
         var jsonObject: JSONObject? = json
         for (key in pathArray) {
             if (jsonObject == null) {
