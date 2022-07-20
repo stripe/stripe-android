@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -247,6 +247,7 @@ private fun FinancialConnectionsSearchRow(
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
             value = query,
+            label = { Text(text = stringResource(id = R.string.stripe_search)) },
             onValueChange = onQueryChanged
         )
     }
@@ -280,7 +281,10 @@ private fun SearchInstitutionsList(
                     if (institutions().data.isEmpty()) {
                         item {
                             Text(
-                                text = stringResource(R.string.stripe_picker_search_no_results, query),
+                                text = stringResource(
+                                    R.string.stripe_picker_search_no_results,
+                                    query
+                                ),
                                 style = FinancialConnectionsTheme.typography.caption,
                                 color = FinancialConnectionsTheme.colors.textSecondary,
                                 textAlign = TextAlign.Center
@@ -353,8 +357,11 @@ private fun FeaturedInstitutionsGrid(
                     modifier = Modifier
                         .height(80.dp)
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(FinancialConnectionsTheme.colors.backgroundContainer)
+                        .border(
+                            width = 1.dp,
+                            color = FinancialConnectionsTheme.colors.borderDefault,
+                            shape = RoundedCornerShape(4.dp)
+                        )
                         .clickable { onInstitutionSelected(institution) }
                         .padding(8.dp)
                 ) {
