@@ -32,7 +32,6 @@ class DefaultEventReporterTest {
     private val eventReporterFactory: (EventReporter.Mode) -> EventReporter = { mode ->
         DefaultEventReporter(
             mode,
-            FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
             testDispatcher
@@ -95,7 +94,6 @@ class DefaultEventReporterTest {
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
             EventReporter.Mode.Complete,
-            FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
             testDispatcher
