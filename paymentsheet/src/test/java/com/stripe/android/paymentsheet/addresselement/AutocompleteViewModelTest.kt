@@ -150,6 +150,19 @@ class AutocompleteViewModelTest {
     }
 
     @Test
+    fun `onEnterAddressManually navigates back with empty address`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+        val expectedResult = Result.success(
+            AddressDetails()
+        )
+
+        viewModel.onEnterAddressManually()
+
+        verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))
+        verify(navigator).onBack()
+    }
+
+    @Test
     fun `when user presses clear text field is cleared`() = runTest {
         val viewModel = createViewModel()
         val trailingIcon = viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope)
