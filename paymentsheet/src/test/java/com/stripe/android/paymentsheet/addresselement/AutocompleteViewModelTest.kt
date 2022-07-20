@@ -75,7 +75,7 @@ class AutocompleteViewModelTest {
             )
         )
         val expectedResult = Result.success(
-            ShippingAddress(
+            AddressDetails(
                 city = null,
                 country = null,
                 line1 = "",
@@ -132,7 +132,7 @@ class AutocompleteViewModelTest {
     fun `onEnterAddressManually sets the current address and navigates back`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
-            ShippingAddress(
+            AddressDetails(
                 city = "city",
                 country = null,
                 line1 = "",

@@ -35,7 +35,7 @@ interface FormControllerSubcomponent {
         fun viewModelScope(viewModelScope: CoroutineScope): Builder
 
         @BindsInstance
-        fun stripeIntent(stripeIntent: StripeIntent): Builder
+        fun stripeIntent(stripeIntent: StripeIntent?): Builder
 
         @BindsInstance
         fun merchantName(merchantName: String): Builder

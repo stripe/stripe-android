@@ -7,22 +7,22 @@ import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal sealed class AddressElementResult(
+internal sealed class AddressLauncherResult(
     val resultCode: Int
 ) : Parcelable {
     @Parcelize
     data class Succeeded(
         // TODO add the real return type here once we iron it out.
-        val address: ShippingAddress
-    ) : AddressElementResult(Activity.RESULT_OK)
+        val address: AddressDetails
+    ) : AddressLauncherResult(Activity.RESULT_OK)
 
     @Parcelize
     data class Failed(
         val error: Throwable
-    ) : AddressElementResult(Activity.RESULT_CANCELED)
+    ) : AddressLauncherResult(Activity.RESULT_CANCELED)
 
     @Parcelize
-    object Canceled : AddressElementResult(Activity.RESULT_CANCELED)
+    object Canceled : AddressLauncherResult(Activity.RESULT_CANCELED)
 
     internal companion object {
         private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
