@@ -1,5 +1,6 @@
 package com.stripe.android.core.utils
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 
 /**
@@ -7,8 +8,10 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PluginDetector {
+    private val TAG = PluginDetector::class.java.simpleName
+
     /**
-     * Loop through all possible [PluginType]s and found the first one that exists in class path,
+     * Loop through all possible [PluginType]s and find the first one that exists in class path,
      * return null if none of the class is found.
      */
     val pluginType: String? =
@@ -19,7 +22,8 @@ object PluginDetector {
     private fun isPlugin(className: String): Boolean = try {
         Class.forName(className)
         true
-    } catch (e: Exception) {
+    } catch (e: ClassNotFoundException) {
+        Log.d(TAG, "$className not found.")
         false
     }
 
