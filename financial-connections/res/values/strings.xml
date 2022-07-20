@@ -22,6 +22,19 @@
     <string name="stripe_consent_requested_data_ownership_desc">Account owner name and mailing address associated with your account</string>
     <string name="stripe_consent_requested_data_learnmore"><annotation clickable="data_access">Learn more about data access</annotation></string>
     <string name="stripe_ok">OK</string>
-    <string name="stripe_institutionpicker_pane_select_bank">Pick your bank</string>
+    <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
+    <string name="stripe_picker_loading_title">Establishing connection</string>
+    <string name="stripe_picker_loading_desc">Please wait while the connection is established</string>
+    <string name="stripe_picker_search_no_results">No results for "%1$s"</string>
+    <string name="stripe_picker_error_title">This institution is currently unavailable</string>
+    <string name="stripe_picker_error_desc">Please select another bank or try again</string>
+    <string name="stripe_error_generic_title">Something went wrong</string>
+    <string name="stripe_error_generic_desc">Your account can’t be linked at this time. Please try again later.</string>
+    <string name="stripe_error_unplanned_downtime_title">%1$s is currently unavailable</string>
+    <string name="stripe_error_unplanned_downtime_desc">Please select another bank or try again later.</string>
+    <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
+    <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
+    <string name="stripe_error_cta_select_another_bank">Select another bank</string>
+    <string name="stripe_search">Search</string>
 </resources>
 

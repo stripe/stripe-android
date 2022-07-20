@@ -29,8 +29,8 @@ internal fun FinancialConnectionsOutlinedTextField(
         leadingIcon = leadingIcon,
         value = value,
         colors = outlinedTextFieldColors(
-            focusedBorderColor = FinancialConnectionsTheme.colors.textBrand,
-            unfocusedBorderColor = FinancialConnectionsTheme.colors.textSecondary,
+            focusedBorderColor = FinancialConnectionsTheme.colors.borderFocus,
+            unfocusedBorderColor = FinancialConnectionsTheme.colors.borderDefault,
             disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
             unfocusedLabelColor = FinancialConnectionsTheme.colors.textSecondary,
             focusedLabelColor = FinancialConnectionsTheme.colors.textBrand,

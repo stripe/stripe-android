@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.features.consent
 
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
+import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.ui.TextResource
 
 internal data class ConsentState(
@@ -13,6 +15,7 @@ internal data class ConsentState(
     val bullets: List<Pair<Int, TextResource>> = emptyList(),
     val requestedDataTitle: TextResource = TextResource.Text(""),
     val requestedDataBullets: List<Pair<TextResource, TextResource>> = emptyList(),
+    val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {
 
