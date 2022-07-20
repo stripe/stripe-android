@@ -37,7 +37,6 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
@@ -48,7 +47,6 @@ import javax.inject.Singleton
  * repository is not a singleton.  Additionally every time you create a new
  * form view model a new repository is created and thus needs to be initialized.
  */
-@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments
@@ -352,10 +350,12 @@ class LpmRepository constructor(
     }
 
     companion object {
-
-        private val singletonHolder = SingletonHolder(::LpmRepository)
-
-        fun getInstance(args: LpmRepositoryArguments) = singletonHolder.getInstance(args)
+        @Volatile
+        private var INSTANCE: LpmRepository? = null
+        fun getInstance(args: LpmRepositoryArguments): LpmRepository =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: LpmRepository(args).also { INSTANCE = it }
+            }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(
