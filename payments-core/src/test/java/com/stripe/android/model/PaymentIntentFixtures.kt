@@ -9,8 +9,9 @@ internal object PaymentIntentFixtures {
 
     const val KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
 
-    private val PI_SUCCEEDED_JSON = JSONObject(
-        """
+    private val PI_SUCCEEDED_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1IRg6VCRMbs6F",
             "object": "payment_intent",
@@ -34,12 +35,18 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "succeeded"
         }
-        """.trimIndent()
-    )
-    val PI_SUCCEEDED = requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
+            """.trimIndent()
+        )
+    }
 
-    val PI_REQUIRES_MASTERCARD_3DS2_JSON = JSONObject(
-        """
+    val PI_SUCCEEDED by lazy {
+        requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
+    }
+
+    val PI_REQUIRES_MASTERCARD_3DS2_JSON by lazy {
+        JSONObject(
+
+            """
         {
             "id": "pi_1ExkUeAWhjPjYwPiXph9ouXa",
             "object": "payment_intent",
@@ -118,14 +125,18 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_REQUIRES_MASTERCARD_3DS2 = PARSER.parse(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
+    val PI_REQUIRES_MASTERCARD_3DS2 by lazy {
+        PARSER.parse(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
+    }
 
-    val PI_REQUIRES_AMEX_3DS2 = PARSER.parse(
-        JSONObject(
-            """
+    val PI_REQUIRES_AMEX_3DS2 by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             "object": "payment_intent",
@@ -183,13 +194,15 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
-        )
-    )!!
+                """.trimIndent()
+            )
+        )!!
+    }
 
-    val PI_REQUIRES_3DS1 = PARSER.parse(
-        JSONObject(
-            """
+    val PI_REQUIRES_3DS1 by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             "object": "payment_intent",
@@ -239,13 +252,15 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
-        )
-    )!!
+                """.trimIndent()
+            )
+        )!!
+    }
 
-    val PI_REQUIRES_REDIRECT = PARSER.parse(
-        JSONObject(
-            """
+    val PI_REQUIRES_REDIRECT by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1EZlvVCRMbs6FrXfKpq2xMmy",
             "object": "payment_intent",
@@ -295,13 +310,15 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
-        )
-    )!!
+                """.trimIndent()
+            )
+        )!!
+    }
 
-    val PI_REQUIRES_PAYMENT_METHOD = PARSER.parse(
-        JSONObject(
-            """
+    val PI_REQUIRES_PAYMENT_METHOD by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             "object": "payment_intent",
@@ -326,13 +343,15 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-            """.trimIndent()
-        )
-    )!!
+                """.trimIndent()
+            )
+        )!!
+    }
 
-    val PI_WITH_LAST_PAYMENT_ERROR = PARSER.parse(
-        JSONObject(
-            """
+    val PI_WITH_LAST_PAYMENT_ERROR by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             "object": "payment_intent",
@@ -403,13 +422,15 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-            """.trimIndent()
-        )
-    )!!
+                """.trimIndent()
+            )
+        )!!
+    }
 
-    val CANCELLED = PARSER.parse(
-        JSONObject(
-            """
+    val CANCELLED by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1FCpMECRMbs6FrXfVulorSf5",
             "object": "payment_intent",
@@ -473,13 +494,15 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-            """.trimIndent()
-        )
-    )!!
+                """.trimIndent()
+            )
+        )!!
+    }
 
-    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PARSER.parse(
-        JSONObject(
-            """
+    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "pi_1FeqH9CRMbs6FrXfcqqpoC2H",
             "object": "payment_intent",
@@ -548,13 +571,15 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-            """.trimIndent()
+                """.trimIndent()
+            )
         )
-    )
+    }
 
-    val PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE = PARSER.parse(
-        JSONObject(
-            """
+    val PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE by lazy {
+        PARSER.parse(
+            JSONObject(
+                """
         {
           "id": "pi_3LGVHaAcAOtNkkj60zU6p2DQ",
           "object": "payment_intent",
@@ -649,12 +674,14 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_payment_method"
         }
-            """.trimIndent()
+                """.trimIndent()
+            )
         )
-    )
+    }
 
-    val EXPANDED_PAYMENT_METHOD_JSON = JSONObject(
-        """
+    val EXPANDED_PAYMENT_METHOD_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1GSTxJCRMbs",
             "object": "payment_intent",
@@ -729,11 +756,13 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_action"
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_WITH_SHIPPING_JSON = JSONObject(
-        """
+    val PI_WITH_SHIPPING_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1GYda2CRMbs",
             "object": "payment_intent",
@@ -813,18 +842,24 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "succeeded"
         }
-        """.trimIndent()
-    )
-    val PI_WITH_SHIPPING = PARSER.parse(PI_WITH_SHIPPING_JSON)!!
+            """.trimIndent()
+        )
+    }
 
-    val PI_OFF_SESSION = PARSER.parse(
-        PI_WITH_SHIPPING_JSON
-    )!!.copy(
-        setupFutureUsage = StripeIntent.Usage.OffSession
-    )
+    val PI_WITH_SHIPPING by lazy {
+        PARSER.parse(PI_WITH_SHIPPING_JSON)!!
+    }
+    val PI_OFF_SESSION by lazy {
+        PARSER.parse(
+            PI_WITH_SHIPPING_JSON
+        )!!.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+    }
 
-    val OXXO_REQUIRES_ACTION_JSON = JSONObject(
-        """
+    val OXXO_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
         {
             "id": "pi_1IcuwoL32KlRo",
             "object": "payment_intent",
@@ -876,12 +911,17 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_action"
         }
-        """.trimIndent()
-    )
-    val OXXO_REQUIES_ACTION = requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
+            """.trimIndent()
+        )
+    }
 
-    val ALIPAY_REQUIRES_ACTION_JSON = JSONObject(
-        """
+    val OXXO_REQUIES_ACTION by lazy {
+        requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
+    }
+
+    val ALIPAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
           "object": "payment_intent",
@@ -936,13 +976,17 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val ALIPAY_REQUIRES_ACTION = PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+    val ALIPAY_REQUIRES_ACTION by lazy {
+        PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+    }
 
-    val ALIPAY_TEST_MODE_JSON = JSONObject(
-        """
+    val ALIPAY_TEST_MODE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
           "object": "payment_intent",
@@ -997,13 +1041,17 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val ALIPAY_TEST_MODE = PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
+    val ALIPAY_TEST_MODE by lazy {
+        PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
+    }
 
-    val PI_REQUIRES_BLIK_AUTHORIZE_JSON = JSONObject(
-        """
+    val PI_REQUIRES_BLIK_AUTHORIZE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1IVmwXFY0qyl6XeWwxGWA04D",
           "object": "payment_intent",
@@ -1063,13 +1111,17 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_REQUIRES_BLIK_AUTHORIZE = PARSER.parse(PI_REQUIRES_BLIK_AUTHORIZE_JSON)!!
+    val PI_REQUIRES_BLIK_AUTHORIZE by lazy {
+        PARSER.parse(PI_REQUIRES_BLIK_AUTHORIZE_JSON)!!
+    }
 
-    private val PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON = JSONObject(
-        """
+    private val PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_1IlJH7BNJ02ErVOjm37T3OUt",
           "object": "payment_intent",
@@ -1155,16 +1207,20 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_REQUIRES_WECHAT_PAY_AUTHORIZE = PARSER.parse(PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+    val PI_REQUIRES_WECHAT_PAY_AUTHORIZE by lazy {
+        PARSER.parse(PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+    }
 
     /**
      * A sample response of PI from refresh endpoint that has status 'requires_action'
      */
-    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON = JSONObject(
-        """
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
           "object": "payment_intent",
@@ -1216,17 +1272,20 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE =
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE by lazy {
         PARSER.parse(PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+    }
 
     /**
      * A sample response of PI from refresh endpoint that has status 'succeeded'
      */
-    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON = JSONObject(
-        """
+    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
           "object": "payment_intent",
@@ -1278,14 +1337,17 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "succeeded"
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS =
+    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS by lazy {
         PARSER.parse(PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON)!!
+    }
 
-    val PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON = JSONObject(
-        """
+    val PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3JoznDLu5o3P18Zp0lRzng7p",
           "object": "payment_intent",
@@ -1339,14 +1401,17 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_WITH_KLARNA_IN_PAYMENT_METHODS =
+    val PI_WITH_KLARNA_IN_PAYMENT_METHODS by lazy {
         PARSER.parse(PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON)!!
+    }
 
-    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON = JSONObject(
-        """
+    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON by lazy {
+        JSONObject(
+            """
         {
           "id": "pi_3KTyNsLu5o3P18Zp1aPD6iIX",
           "object": "payment_intent",
@@ -1412,14 +1477,16 @@ internal object PaymentIntentFixtures {
           "transfer_data": null,
           "transfer_group": null
         }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS =
+    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS by lazy {
         PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
-
-    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON = JSONObject(
-        """
+    }
+    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON by lazy {
+        JSONObject(
+            """
             {
               "id": "pi_3KcDp1FnkumiFUFx1d5DwGIq",
               "object": "payment_intent",
@@ -1493,31 +1560,39 @@ internal object PaymentIntentFixtures {
               "shipping": null,
               "source": null
             }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS = PARSER.parse(PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON)!!
+    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS by lazy {
+        PARSER.parse(PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON)!!
+    }
 
-    val PI_LINK_ACCOUNT_SESSION_JSON = JSONObject(
-        """
+    val PI_LINK_ACCOUNT_SESSION_JSON by lazy {
+        JSONObject(
+            """
             {
               "client_secret": "test_client_secret",
               "id": "random_id"
             }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val SI_LINK_ACCOUNT_SESSION_JSON = JSONObject(
-        """
+    val SI_LINK_ACCOUNT_SESSION_JSON by lazy {
+        JSONObject(
+            """
             {
               "client_secret": "test_client_secret",
               "id": "random_id"
             }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON = JSONObject(
-        """
+    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON by lazy {
+        JSONObject(
+            """
             {
                 "id": "pi_3KbV27Lu5o3P18Zp1e7NOonG",
                 "object": "payment_intent",
@@ -1546,8 +1621,207 @@ internal object PaymentIntentFixtures {
                 "shipping": null,
                 "source": null
             }
-        """.trimIndent()
-    )
+            """.trimIndent()
+        )
+    }
 
-    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED = PARSER.parse(PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
+    val PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED by lazy {
+        PARSER.parse(PI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
+    }
+    val PI_WITH_CARD_AFTERPAY_AU_BECS by lazy {
+        """
+            {
+              "apple_pay_preference": "enabled",
+              "business_name": "AU Mobile Example Account",
+              "experiments": {
+                "miui_payment_element_aa_experiment": "control"
+              },
+              "flags": {
+                "elements_include_payment_intent_id_in_analytics_events": true,
+                "elements_enable_mx_card_installments": false,
+                "elements_enable_br_card_installments": false,
+                "elements_enable_bacs_debit_pm": false
+              },
+              "google_pay_preference": "enabled",
+              "link_consumer_info": null,
+              "link_settings": {
+                "instant_debits_inline_institution": true,
+                "link_bank_onboarding_enabled": false,
+                "link_email_verification_login_enabled": false,
+                "link_financial_incentives_experiment_enabled": true,
+                "link_local_storage_login_enabled": true
+              },
+              "merchant_country": "AU",
+              "merchant_currency": "aud",
+              "merchant_id": "acct_1KaoFxCPXw4rvZpf",
+              "order": null,
+              "ordered_payment_method_types_and_wallets": [
+                "card",
+                "apple_pay",
+                "google_pay",
+                "afterpay_clearpay",
+                "au_becs_debit"
+              ],
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "US",
+                "ordered_payment_method_types": [
+                  "au_becs_debit",
+                  "afterpay_clearpay",
+                  "card"
+                ],
+                "payment_intent": {
+                  "id": "pi_3LABhECPXw4rvZpf0x3iNYAf",
+                  "object": "payment_intent",
+                  "amount": 5099,
+                  "amount_details": {
+                    "tip": {}
+                  },
+                  "automatic_payment_methods": {
+                    "enabled": true
+                  },
+                  "canceled_at": null,
+                  "cancellation_reason": null,
+                  "capture_method": "automatic",
+                  "client_secret": "pi_3LABhECPXw4rvZpf0x3iNYAf_secret_Gmfvx5MS15mcv0jPOF4CAuLV4",
+                  "confirmation_method": "automatic",
+                  "created": 1655120680,
+                  "currency": "aud",
+                  "description": null,
+                  "last_payment_error": null,
+                  "livemode": false,
+                  "next_action": null,
+                  "payment_method": null,
+                  "payment_method_types": [
+                    "card",
+                    "afterpay_clearpay",
+                    "au_becs_debit"
+                  ],
+                  "processing": null,
+                  "receipt_email": null,
+                  "setup_future_usage": null,
+                  "shipping": {
+                    "address": {
+                      "city": "San Francisco",
+                      "country": "US",
+                      "line1": "510 Townsend St",
+                      "line2": null,
+                      "postal_code": "94102",
+                      "state": "California"
+                    },
+                    "carrier": null,
+                    "name": "John Doe",
+                    "phone": null,
+                    "tracking_number": null
+                  },
+                  "source": null,
+                  "status": "requires_payment_method"
+                },
+                "type": "payment_intent"
+              },
+              "shipping_address_settings": {
+                "autocomplete_allowed": false
+              },
+              "unactivated_payment_method_types": [
+                "au_becs_debit"
+              ]
+            }
+        """.trimIndent()
+    }
+
+    val PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS by lazy {
+        """
+            {
+              "apple_pay_preference": "enabled",
+              "business_name": "AU Mobile Example Account",
+              "experiments": {
+                "miui_payment_element_aa_experiment": "control"
+              },
+              "flags": {
+                "elements_include_payment_intent_id_in_analytics_events": true,
+                "elements_enable_mx_card_installments": false,
+                "elements_enable_br_card_installments": false,
+                "elements_enable_bacs_debit_pm": false
+              },
+              "google_pay_preference": "enabled",
+              "link_consumer_info": null,
+              "link_settings": {
+                "instant_debits_inline_institution": true,
+                "link_bank_onboarding_enabled": false,
+                "link_email_verification_login_enabled": false,
+                "link_financial_incentives_experiment_enabled": true,
+                "link_local_storage_login_enabled": true
+              },
+              "merchant_country": "AU",
+              "merchant_currency": "aud",
+              "merchant_id": "acct_1KaoFxCPXw4rvZpf",
+              "order": null,
+              "ordered_payment_method_types_and_wallets": [
+                "card",
+                "apple_pay",
+                "google_pay",
+                "afterpay_clearpay",
+                "au_becs_debit"
+              ],
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "US",
+                "payment_intent": {
+                  "id": "pi_3LABhECPXw4rvZpf0x3iNYAf",
+                  "object": "payment_intent",
+                  "amount": 5099,
+                  "amount_details": {
+                    "tip": {}
+                  },
+                  "automatic_payment_methods": {
+                    "enabled": true
+                  },
+                  "canceled_at": null,
+                  "cancellation_reason": null,
+                  "capture_method": "automatic",
+                  "client_secret": "pi_3LABhECPXw4rvZpf0x3iNYAf_secret_Gmfvx5MS15mcv0jPOF4CAuLV4",
+                  "confirmation_method": "automatic",
+                  "created": 1655120680,
+                  "currency": "aud",
+                  "description": null,
+                  "last_payment_error": null,
+                  "livemode": false,
+                  "next_action": null,
+                  "payment_method": null,
+                  "payment_method_types": [
+                    "card",
+                    "afterpay_clearpay",
+                    "au_becs_debit"
+                  ],
+                  "processing": null,
+                  "receipt_email": null,
+                  "setup_future_usage": null,
+                  "shipping": {
+                    "address": {
+                      "city": "San Francisco",
+                      "country": "US",
+                      "line1": "510 Townsend St",
+                      "line2": null,
+                      "postal_code": "94102",
+                      "state": "California"
+                    },
+                    "carrier": null,
+                    "name": "John Doe",
+                    "phone": null,
+                    "tracking_number": null
+                  },
+                  "source": null,
+                  "status": "requires_payment_method"
+                },
+                "type": "payment_intent"
+              },
+              "shipping_address_settings": {
+                "autocomplete_allowed": false
+              },
+              "unactivated_payment_method_types": [
+                "au_becs_debit"
+              ]
+            }
+        """.trimIndent()
+    }
 }

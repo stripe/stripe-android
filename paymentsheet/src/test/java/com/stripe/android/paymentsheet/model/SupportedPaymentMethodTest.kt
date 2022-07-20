@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -20,7 +21,13 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+    private val lpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+    ).apply {
+        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
+    }
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
 

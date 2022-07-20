@@ -9,7 +9,11 @@ import com.stripe.android.ui.core.address.AddressFieldElementRepository
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StaticResourceRepository(
     private val addressRepository: AddressFieldElementRepository,
-    private val lpmRepository: LpmRepository = LpmRepository(null)
+    private val lpmRepository: LpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            null
+        )
+    )
 ) : ResourceRepository {
     override suspend fun waitUntilLoaded() {
         // Nothing to do since everything is pre-loaded

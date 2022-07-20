@@ -24,17 +24,12 @@ class AsyncResourceRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : ResourceRepository {
-    private lateinit var lpmRepository: LpmRepository
+    private val lpmRepository: LpmRepository = LpmRepository.getInstance(LpmRepository.LpmRepositoryArguments(resources))
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
-        loadingJobs.add(
-            CoroutineScope(workContext).launch {
-                lpmRepository = LpmRepository(resources)
-            }
-        )
         loadingJobs.add(
             CoroutineScope(workContext).launch {
                 addressRepository = AddressFieldElementRepository(resources)
@@ -52,9 +47,11 @@ class AsyncResourceRepository @Inject constructor(
     override suspend fun waitUntilLoaded() {
         loadingJobs.joinAll()
         loadingJobs.clear()
+
+        lpmRepository.waitUntilLoaded()
     }
 
-    override fun isLoaded() = loadingJobs.isEmpty()
+    override fun isLoaded() = loadingJobs.isEmpty() && lpmRepository.isLoaded()
 
     override fun getLpmRepository() = lpmRepository
     override fun getAddressRepository() = addressRepository
