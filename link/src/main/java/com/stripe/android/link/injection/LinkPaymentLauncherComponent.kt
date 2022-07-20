@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
@@ -40,6 +41,7 @@ import kotlin.coroutines.CoroutineContext
 )
 internal abstract class LinkPaymentLauncherComponent {
     abstract val linkAccountManager: LinkAccountManager
+    abstract val linkEventsReporter: LinkEventsReporter
 
     abstract fun inject(factory: LinkActivityViewModel.Factory)
     abstract fun inject(factory: SignUpViewModel.Factory)

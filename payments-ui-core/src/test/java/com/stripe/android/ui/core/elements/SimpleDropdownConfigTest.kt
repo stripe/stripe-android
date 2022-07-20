@@ -49,10 +49,4 @@ class SimpleDropdownConfigTest {
         assertThat(config.convertFromRaw("asn_bank"))
             .isEqualTo("ASN Bank")
     }
-
-    @Test
-    fun `Verify convert to rawValue returns appropriate string`() {
-        assertThat(config.convertToRaw("SNS Bank (De Volksbank)"))
-            .isEqualTo("sns_bank")
-    }
 }

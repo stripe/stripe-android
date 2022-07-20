@@ -69,9 +69,9 @@ internal class AutocompleteViewModel @Inject constructor(
     fun initialize(
         clientProvider: () -> PlacesClientProxy? = {
             // TODO: Update the PaymentSheet Configuration to include api key
-//            args.config?.googlePlacesApiKey?.let {
-//                PlacesClientProxy.create(getApplication(), it)
-//            }
+            // args.config?.googlePlacesApiKey?.let {
+            //     PlacesClientProxy.create(getApplication(), it)
+            // }
             PlacesClientProxy.create(getApplication(), "")
         }
     ) {
@@ -198,32 +198,5 @@ internal class AutocompleteViewModel @Inject constructor(
         const val SEARCH_DEBOUNCE_MS = 1000L
         const val MAX_DISPLAYED_RESULTS = 4
         const val MIN_CHARS_AUTOCOMPLETE = 3
-        val autocompleteSupportedCountries = setOf(
-            "AU",
-            "BE",
-            "BR",
-            "CA",
-            "CH",
-            "DE",
-            "ES",
-            "FR",
-            "GB",
-            "IE",
-            "IN",
-            "IT",
-            "JP",
-            "MX",
-            "MY",
-            "NO",
-            "NL",
-            "PH",
-            "PL",
-            "RU",
-            "SE",
-            "SG",
-            "TR",
-            "US",
-            "ZA"
-        )
     }
 }

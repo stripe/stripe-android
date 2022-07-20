@@ -173,7 +173,8 @@ interface IsPlacesAvailable {
     operator fun invoke(): Boolean
 }
 
-internal class DefaultIsPlacesAvailable : IsPlacesAvailable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultIsPlacesAvailable : IsPlacesAvailable {
     override fun invoke(): Boolean {
         return try {
             Class.forName("com.google.android.libraries.places.api.Places")
