@@ -23,7 +23,7 @@ object PluginDetector {
         Class.forName(className)
         true
     } catch (e: ClassNotFoundException) {
-        Log.d(TAG, "$className not found.")
+        Log.d(TAG, "$className not found: $e")
         false
     }
 
