@@ -1,13 +1,16 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -37,7 +40,6 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
@@ -48,7 +50,6 @@ import javax.inject.Singleton
  * repository is not a singleton.  Additionally every time you create a new
  * form view model a new repository is created and thus needs to be initialized.
  */
-@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments
@@ -102,7 +103,7 @@ class LpmRepository constructor(
     ) {
         // TODO: Call analytics if parsing fails for any reason
         if (!isLoaded() || force) {
-            update(parseLpms(serverLpmSpecs))
+            update(parseServerLpms(serverLpmSpecs))
 
             // If the server does not return specs, or they are not parsed successfully
             // we will use the LPM on disk if found
@@ -152,12 +153,28 @@ class LpmRepository constructor(
 
     private fun parseLpms(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let { string ->
-            lpmSerializer.deserializeList(string)
+            try{
+                 lpmSerializer.deserializeList(string)
+            }
+            catch(e: Exception){
+                null
+            }
         }
 
-    private fun parseLpms(string: String?) =
+    private fun parseServerLpms(string: String?) =
         string?.let {
-            lpmSerializer.deserializeList(it)
+            try {
+                lpmSerializer.deserializeList(it)
+            } catch (e: Exception) {
+                arguments.paymentAnalyticsRequestFactory?.createRequest(
+                    LpmSerializeFailureEvent(),
+                    emptyMap()
+                )?.let { analyticsRequest ->
+                    arguments.analyticsRequestExecutor?.executeAsync(analyticsRequest)
+                }
+                Log.w("STRIPE", "Error parsing LPMs", e)
+                emptyList()
+            }
         }
 
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =

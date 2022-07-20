@@ -27,11 +27,6 @@ internal class LpmSerializer {
     fun deserializeList(str: String) = if (str.isEmpty()) {
         emptyList()
     } else {
-        try {
-            format.decodeFromString<List<SharedDataSpec>>(serializer(), str)
-        } catch (e: Exception) {
-            Log.w("STRIPE", "Error parsing LPMs", e)
-            emptyList()
-        }
+        format.decodeFromString<List<SharedDataSpec>>(serializer(), str)
     }
 }
