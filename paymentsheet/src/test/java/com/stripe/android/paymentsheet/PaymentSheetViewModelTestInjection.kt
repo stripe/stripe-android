@@ -94,7 +94,9 @@ internal open class PaymentSheetViewModelTestInjection {
                 mock(),
                 LpmRepository(
                     LpmRepository.LpmRepositoryArguments(
-                        ApplicationProvider.getApplicationContext<Application>().resources
+                        ApplicationProvider.getApplicationContext<Application>().resources,
+                        analyticsRequestExecutor = mock(),
+                        paymentAnalyticsRequestFactory = mock()
                     )
                 ).apply {
                     this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)

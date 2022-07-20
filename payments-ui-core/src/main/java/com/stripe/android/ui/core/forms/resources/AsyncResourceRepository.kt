@@ -4,6 +4,8 @@ import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -22,9 +24,17 @@ import kotlin.coroutines.CoroutineContext
 class AsyncResourceRepository @Inject constructor(
     private val resources: Resources,
     @IOContext private val workContext: CoroutineContext,
-    private val locale: Locale?
+    private val locale: Locale?,
+    analyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
 ) : ResourceRepository {
-    private val lpmRepository: LpmRepository = LpmRepository.getInstance(LpmRepository.LpmRepositoryArguments(resources))
+    private val lpmRepository: LpmRepository = LpmRepository.getInstance(
+        LpmRepository.LpmRepositoryArguments(
+            resources = resources,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory
+        )
+    )
     private lateinit var addressRepository: AddressFieldElementRepository
 
     private val loadingJobs: MutableList<Job> = mutableListOf()

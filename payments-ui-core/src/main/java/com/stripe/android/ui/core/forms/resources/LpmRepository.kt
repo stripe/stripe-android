@@ -412,6 +412,8 @@ class LpmRepository constructor(
     data class LpmRepositoryArguments(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-            DefaultIsFinancialConnectionsAvailable()
+            DefaultIsFinancialConnectionsAvailable(),
+        val analyticsRequestExecutor: DefaultAnalyticsRequestExecutor? = null,
+        val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory? = null
     )
 }

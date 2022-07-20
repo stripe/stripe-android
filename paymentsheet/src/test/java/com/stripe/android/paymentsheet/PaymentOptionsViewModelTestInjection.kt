@@ -51,7 +51,11 @@ internal open class PaymentOptionsViewModelTestInjection {
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
         val lpmRepository =
-            LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources))
+            LpmRepository(LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                analyticsRequestExecutor = mock(),
+                paymentAnalyticsRequestFactory = mock()
+            ))
         lpmRepository.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         PaymentOptionsViewModel(
             args,

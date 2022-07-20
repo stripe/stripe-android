@@ -322,7 +322,12 @@ class LpmSerializerTest {
              ]
             """.trimIndent()
 
-        assertThat(lpmSerializer.deserializeList(serializedString).size).isEqualTo(0)
+        try {
+            lpmSerializer.deserializeList(serializedString)
+            assert(true)
+        } catch (e: Exception) {
+            assertThat(e).hasMessageThat().startsWith("Fields [api_path, label] are required")
+        }
     }
 
     @Test

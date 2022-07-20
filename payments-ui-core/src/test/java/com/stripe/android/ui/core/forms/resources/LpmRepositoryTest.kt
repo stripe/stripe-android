@@ -9,6 +9,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
@@ -21,7 +22,9 @@ class LpmRepositoryTest {
                 override fun invoke(): Boolean {
                     return true
                 }
-            }
+            },
+            mock(),
+            mock()
         )
     )
 
@@ -30,7 +33,9 @@ class LpmRepositoryTest {
         Locale.setDefault(Locale.UK)
         val lpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                analyticsRequestExecutor = mock(),
+                paymentAnalyticsRequestFactory = mock()
             )
         )
         lpmRepository.updateFromDisk()
@@ -45,7 +50,9 @@ class LpmRepositoryTest {
         Locale.setDefault(Locale.US)
         val lpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                analyticsRequestExecutor = mock(),
+                paymentAnalyticsRequestFactory = mock()
             )
         )
         lpmRepository.updateFromDisk()
@@ -275,7 +282,9 @@ class LpmRepositoryTest {
                     override fun invoke(): Boolean {
                         return false
                     }
-                }
+                },
+                mock(),
+                mock()
             )
         )
 

@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 

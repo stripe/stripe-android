@@ -43,9 +43,6 @@ internal interface AddressElementViewModelFactoryComponent {
         fun starterArgs(starterArgs: AddressElementActivityContract.Args): Builder
 
         @BindsInstance
-        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
         fun build(): AddressElementViewModelFactoryComponent

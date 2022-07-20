@@ -39,11 +39,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
 
-    @After
-    override fun after() {
-        super.after()
-    }
-
     @Before
     fun setup() {
         PaymentConfiguration.init(
@@ -332,7 +327,9 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         val lpmRepository =
             LpmRepository(
                 LpmRepository.LpmRepositoryArguments(
-                    InstrumentationRegistry.getInstrumentation().targetContext.resources
+                    InstrumentationRegistry.getInstrumentation().targetContext.resources,
+                    analyticsRequestExecutor = mock(),
+                    paymentAnalyticsRequestFactory = mock()
                 )
             ).apply {
                 this.updateFromDisk()

@@ -24,7 +24,6 @@ internal class AddressElementViewModel @Inject internal constructor(
         internal data class FallbackInitializeParam(
             val application: Application,
             val starterArgs: AddressElementActivityContract.Args,
-            val enableLogging: Boolean,
             val productUsage: Set<String>
         )
 
@@ -56,7 +55,6 @@ internal class AddressElementViewModel @Inject internal constructor(
                     FallbackInitializeParam(
                         applicationSupplier(),
                         starterArgs,
-                        starterArgs.injectionParams?.enableLogging ?: false,
                         starterArgs.injectionParams?.productUsage ?: emptySet()
                     )
                 )
@@ -75,7 +73,6 @@ internal class AddressElementViewModel @Inject internal constructor(
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
             val viewModelComponent = DaggerAddressElementViewModelFactoryComponent.builder()
                 .context(arg.application)
-                .enableLogging(arg.enableLogging)
                 .productUsage(arg.productUsage)
                 .starterArgs(arg.starterArgs)
                 .build()

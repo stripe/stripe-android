@@ -24,7 +24,9 @@ import org.robolectric.RobolectricTestRunner
 class ComposeFormDataCollectionFragmentTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            analyticsRequestExecutor = mock(),
+            paymentAnalyticsRequestFactory = mock()
         )
     ).apply {
         this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Sofort.code), null)

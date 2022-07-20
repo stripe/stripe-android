@@ -404,7 +404,11 @@ class PaymentOptionsActivityTest {
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel {
         val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                analyticsRequestExecutor = mock(),
+                paymentAnalyticsRequestFactory = mock()
+            )
         ).apply {
             this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         }
