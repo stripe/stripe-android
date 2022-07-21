@@ -52,10 +52,7 @@ class TestHardCodedLpms {
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
-            forceUpdate(
-                LpmRepository.exposedPaymentMethods,
-                null
-            )
+            forceUpdate(LpmRepository.exposedPaymentMethods, null)
         }
     }
 

@@ -103,6 +103,8 @@ class TestAuthorization {
             LpmRepository.LpmRepositoryArguments(
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
-        )
+        ).apply {
+            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+        }
     }
 }
