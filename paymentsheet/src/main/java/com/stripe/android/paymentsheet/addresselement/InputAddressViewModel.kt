@@ -81,38 +81,44 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
+        val addressSpec = if (condensedForm) {
+            AddressSpec(
+                showLabel = false,
+                type = AddressType.ShippingCondensed(
+                    googleApiKey = args.config?.googlePlacesApiKey
+                ) {
+                    viewModelScope.launch {
+                        val country = _formController
+                            .value
+                            ?.formValues
+                            ?.stateIn(viewModelScope)
+                            ?.value
+                            ?.get(IdentifierSpec.Country)
+                            ?.value
+                        country?.let {
+                            navigator.navigateTo(
+                                AddressElementScreen.Autocomplete(
+                                    country = country
+                                )
+                            )
+                        }
+                    }
+                }
+            )
+        } else {
+            AddressSpec(
+                showLabel = false,
+                type = AddressType.ShippingExpanded
+            )
+        }
+
+        val addressSpecWithAllowedCountries = args.config?.allowedCountries?.run {
+            addressSpec.copy(allowedCountryCodes = this)
+        }
+
         return LayoutSpec(
             listOf(
-                if (condensedForm) {
-                    AddressSpec(
-                        showLabel = false,
-                        type = AddressType.ShippingCondensed(
-                            googleApiKey = args.config?.googlePlacesApiKey
-                        ) {
-                            viewModelScope.launch {
-                                val country = _formController
-                                    .value
-                                    ?.formValues
-                                    ?.stateIn(viewModelScope)
-                                    ?.value
-                                    ?.get(IdentifierSpec.Country)
-                                    ?.value
-                                country?.let {
-                                    navigator.navigateTo(
-                                        AddressElementScreen.Autocomplete(
-                                            country = country
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    )
-                } else {
-                    AddressSpec(
-                        showLabel = false,
-                        type = AddressType.ShippingExpanded
-                    )
-                }
+                addressSpecWithAllowedCountries ?: addressSpec
             )
         )
     }
