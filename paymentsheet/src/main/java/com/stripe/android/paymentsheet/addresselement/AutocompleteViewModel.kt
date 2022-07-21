@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
@@ -49,18 +50,12 @@ internal class AutocompleteViewModel @Inject constructor(
     @VisibleForTesting
     val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
 
-    val textFieldController = SimpleTextFieldController(
-        SimpleTextFieldConfig(
-            label = R.string.address_label_address,
-            trailingIcon = MutableStateFlow(
-                TextFieldIcon.Trailing(
-                    idRes = R.drawable.stripe_ic_clear,
-                    isTintable = true,
-                    onClick = { clearQuery() }
-                )
-            )
-        )
+    private val config = SimpleTextFieldConfig(
+        label = R.string.address_label_address,
+        trailingIcon = MutableStateFlow(null)
     )
+
+    val textFieldController = SimpleTextFieldController(config)
 
     private val queryFlow = textFieldController.fieldValue
         .map { it }
@@ -99,6 +94,23 @@ internal class AutocompleteViewModel @Inject constructor(
                 }
             }
         )
+        viewModelScope.launch {
+            queryFlow.collect {
+                if (it.isEmpty()) {
+                    config.trailingIcon.update {
+                        null
+                    }
+                } else {
+                    config.trailingIcon.update {
+                        TextFieldIcon.Trailing(
+                            idRes = R.drawable.stripe_ic_clear,
+                            isTintable = true,
+                            onClick = { clearQuery() }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun selectPrediction(prediction: AutocompletePrediction) {
