@@ -81,6 +81,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onLpmSpecFailure() {
+        fireEvent(
+            PaymentSheetEvent.LpmSerializeFailureEvent()
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

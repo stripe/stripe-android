@@ -7,6 +7,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -33,6 +34,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val resourceRepository: ResourceRepository,
     private val logger: Logger,
+    val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
 
@@ -107,7 +109,8 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                             stripeIntent = stripeIntent,
                             paymentMethods = paymentMethods,
                             savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
-                            isGooglePayReady = isGooglePayReady
+                            isGooglePayReady = isGooglePayReady,
+                            lpmServerSpecString = resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                         )
                     )
                 }
@@ -141,7 +144,8 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                         stripeIntent = stripeIntent,
                         paymentMethods = emptyList(),
                         savedSelection = savedSelection,
-                        isGooglePayReady = isGooglePayReady
+                        isGooglePayReady = isGooglePayReady,
+                        lpmServerSpecString = resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             },
@@ -180,7 +184,8 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         initializeRepositoryAndGetStripeIntent(
             resourceRepository,
             stripeIntentRepository,
-            clientSecret
-        ).first
+            clientSecret,
+            eventReporter
+        )
     )
 }

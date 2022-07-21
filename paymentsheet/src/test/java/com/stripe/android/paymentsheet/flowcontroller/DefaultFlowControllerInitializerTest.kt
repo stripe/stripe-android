@@ -99,7 +99,8 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
                         SavedSelection.None,
-                        isGooglePayReady = false
+                        isGooglePayReady = false,
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             )
@@ -126,7 +127,8 @@ internal class DefaultFlowControllerInitializerTest {
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
                     ),
-                    isGooglePayReady = true
+                    isGooglePayReady = true,
+                    resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                 )
             )
         )
@@ -151,7 +153,8 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
                         SavedSelection.GooglePay,
-                        isGooglePayReady = true
+                        isGooglePayReady = true,
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             )
@@ -176,7 +179,8 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
                         SavedSelection.None,
-                        isGooglePayReady = false
+                        isGooglePayReady = false,
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             )
@@ -201,7 +205,8 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         PAYMENT_METHODS,
                         SavedSelection.PaymentMethod("pm_123456789"),
-                        isGooglePayReady = true
+                        isGooglePayReady = true,
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             )
@@ -236,7 +241,8 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
                         SavedSelection.None,
-                        isGooglePayReady = false
+                        isGooglePayReady = false,
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             )
@@ -266,7 +272,8 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
                         SavedSelection.GooglePay,
-                        isGooglePayReady = true
+                        isGooglePayReady = true,
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
                     )
                 )
             )

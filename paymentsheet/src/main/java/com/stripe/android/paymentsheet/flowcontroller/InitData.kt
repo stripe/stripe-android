@@ -16,5 +16,6 @@ internal data class InitData(
     // the customer's existing payment methods
     val paymentMethods: List<PaymentMethod>,
     val savedSelection: SavedSelection,
-    val isGooglePayReady: Boolean
+    val isGooglePayReady: Boolean,
+    val lpmServerSpecString: String?
 ) : Parcelable

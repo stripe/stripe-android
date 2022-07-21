@@ -56,6 +56,7 @@ class LpmRepository constructor(
 ) {
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
+    var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialize
 
     private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
@@ -96,33 +97,48 @@ class LpmRepository constructor(
         serverLpmSpecs: String?
     ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
 
+    /**
+     * Will add the server specs to the repository and load the ones from disk if
+     * server is not parseable.
+     */
     private fun internalUpdate(
         expectedLpms: List<String>,
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        // TODO: Call analytics if parsing fails for any reason
+        Log.e("MLB", "LpmRepository: Call internal update: spec string length: ${serverLpmSpecs?.length}")
+        Thread.currentThread().stackTrace.forEach {
+            Log.e("MLB", "   $it")
+        }
         if (!isLoaded() || force) {
-            update(parseServerLpms(serverLpmSpecs))
-
-            // If the server does not return specs, or they are not parsed successfully
-            // we will use the LPM on disk if found
-            val lpmsNotParsedFromServerSpec = expectedLpms
-                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
-            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-                val mapFromDisk: Map<String, SharedDataSpec>? =
-                    readFromDisk()
-                        ?.associateBy { it.type }
-                        ?.filterKeys { expectedLpms.contains(it) }
-                codeToSupportedPaymentMethod.putAll(
-                    lpmsNotParsedFromServerSpec
-                        .mapNotNull { mapFromDisk?.get(it) }
-                        .mapNotNull { convertToSupportedPaymentMethod(it) }
-                        .associateBy { it.code }
-                )
+            serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
+            if (!serverLpmSpecs.isNullOrEmpty()) {
+                serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
+                val serverLpmObjects = lpmSerializer.deserializeList(serverLpmSpecs)
+                if (serverLpmObjects.isNotEmpty()) {
+                    serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
+                }
+                update(serverLpmObjects)
+                serverInitializedLatch.countDown()
             }
 
-            serverInitializedLatch.countDown()
+//            // If the server does not return specs, or they are not parsed successfully
+//            // we will use the LPM on disk if found
+//            val lpmsNotParsedFromServerSpec = expectedLpms
+//                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+//            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+//                val mapFromDisk: Map<String, SharedDataSpec>? =
+//                    readFromDisk()
+//                        ?.associateBy { it.type }
+//                        ?.filterKeys { expectedLpms.contains(it) }
+//                codeToSupportedPaymentMethod.putAll(
+//                    lpmsNotParsedFromServerSpec
+//                        .mapNotNull { mapFromDisk?.get(it) }
+//                        .mapNotNull { convertToSupportedPaymentMethod(it) }
+//                        .associateBy { it.code }
+//                )
+//            }
+
         }
     }
 
@@ -157,22 +173,6 @@ class LpmRepository constructor(
                 lpmSerializer.deserializeList(string)
             } catch (e: Exception) {
                 null
-            }
-        }
-
-    private fun parseServerLpms(string: String?) =
-        string?.let {
-            try {
-                lpmSerializer.deserializeList(it)
-            } catch (e: Exception) {
-                arguments.paymentAnalyticsRequestFactory?.createRequest(
-                    LpmSerializeFailureEvent(),
-                    emptyMap()
-                )?.let { analyticsRequest ->
-                    arguments.analyticsRequestExecutor?.executeAsync(analyticsRequest)
-                }
-                Log.w("STRIPE", "Error parsing LPMs", e)
-                emptyList()
             }
         }
 
@@ -407,6 +407,13 @@ class LpmRepository constructor(
                 PaymentMethod.Type.AuBecsDebit.code
             )
         }
+    }
+
+    sealed class ServerSpecState(val serverLpmSpecs: String?) {
+        object Uninitialize : ServerSpecState(null)
+        class NoServerSpec(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+        class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+        class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
