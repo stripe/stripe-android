@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -30,7 +31,11 @@ internal fun InputAddressScreen(
     onCloseClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxHeight()) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .background(MaterialTheme.colors.surface)
+    ) {
         AddressOptionsAppBar(
             isRootScreen = true,
             onButtonClick = { onCloseClick() }
