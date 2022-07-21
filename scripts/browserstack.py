@@ -140,6 +140,7 @@ def executeTests(appUrl, testUrl):
          "networkLogs": True,
          "deviceLogs": True,
          "video": True,
+         "acceptInsecureCerts": True,
 #          "language": "en_US",
          "locale": "en_US",
          "enableSpoonFramework": False,
