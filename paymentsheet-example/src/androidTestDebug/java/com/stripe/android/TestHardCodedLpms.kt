@@ -27,7 +27,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class TestHardCodedLpms {
@@ -50,9 +49,7 @@ class TestHardCodedLpms {
 
         private val lpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources,
-                analyticsRequestExecutor = mock(),
-                paymentAnalyticsRequestFactory = mock()
+                InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
             forceUpdate(

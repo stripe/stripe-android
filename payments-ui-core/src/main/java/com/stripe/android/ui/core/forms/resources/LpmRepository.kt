@@ -1,16 +1,13 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -106,10 +103,6 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        Log.e("MLB", "LpmRepository: Call internal update: spec string length: ${serverLpmSpecs?.length}")
-        Thread.currentThread().stackTrace.forEach {
-            Log.e("MLB", "   $it")
-        }
         if (!isLoaded() || force) {
             serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
             if (!serverLpmSpecs.isNullOrEmpty()) {
@@ -119,26 +112,26 @@ class LpmRepository constructor(
                     serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
                 }
                 update(serverLpmObjects)
-                serverInitializedLatch.countDown()
             }
 
-//            // If the server does not return specs, or they are not parsed successfully
-//            // we will use the LPM on disk if found
-//            val lpmsNotParsedFromServerSpec = expectedLpms
-//                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
-//            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-//                val mapFromDisk: Map<String, SharedDataSpec>? =
-//                    readFromDisk()
-//                        ?.associateBy { it.type }
-//                        ?.filterKeys { expectedLpms.contains(it) }
-//                codeToSupportedPaymentMethod.putAll(
-//                    lpmsNotParsedFromServerSpec
-//                        .mapNotNull { mapFromDisk?.get(it) }
-//                        .mapNotNull { convertToSupportedPaymentMethod(it) }
-//                        .associateBy { it.code }
-//                )
-//            }
+            // If the server does not return specs, or they are not parsed successfully
+            // we will use the LPM on disk if found
+            val lpmsNotParsedFromServerSpec = expectedLpms
+                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+                val mapFromDisk: Map<String, SharedDataSpec>? =
+                    readFromDisk()
+                        ?.associateBy { it.type }
+                        ?.filterKeys { expectedLpms.contains(it) }
+                codeToSupportedPaymentMethod.putAll(
+                    lpmsNotParsedFromServerSpec
+                        .mapNotNull { mapFromDisk?.get(it) }
+                        .mapNotNull { convertToSupportedPaymentMethod(it) }
+                        .associateBy { it.code }
+                )
+            }
 
+            serverInitializedLatch.countDown()
         }
     }
 
@@ -420,8 +413,6 @@ class LpmRepository constructor(
     data class LpmRepositoryArguments(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-            DefaultIsFinancialConnectionsAvailable(),
-        val analyticsRequestExecutor: DefaultAnalyticsRequestExecutor? = null,
-        val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory? = null
+            DefaultIsFinancialConnectionsAvailable()
     )
 }

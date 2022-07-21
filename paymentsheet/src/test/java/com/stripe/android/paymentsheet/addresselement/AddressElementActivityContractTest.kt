@@ -14,8 +14,7 @@ class AddressElementActivityContractTest {
     fun `AddressElementActivityContract args parcelize correctly`() {
         val args = AddressElementActivityContract.Args(
             AddressLauncherFixtures.BASIC_CONFIG,
-            "injectorKey",
-            emptySet()
+            "injectorKey"
         )
 
         val bundle = Bundle()

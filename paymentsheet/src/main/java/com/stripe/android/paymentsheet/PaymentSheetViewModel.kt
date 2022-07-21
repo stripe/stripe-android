@@ -238,10 +238,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lpmServerSpec =
                         resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
 
-
                     // The lpm server specs need to be saved so that upon the
                     // activity being killed the state can be restored.
-
                     intent
                 }.fold(
                     onSuccess = {

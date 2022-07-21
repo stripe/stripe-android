@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,6 +38,11 @@ import org.robolectric.annotation.Config
 internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
+
+    @After
+    override fun after() {
+        super.after()
+    }
 
     @Before
     fun setup() {
@@ -326,9 +332,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         val lpmRepository =
             LpmRepository(
                 LpmRepository.LpmRepositoryArguments(
-                    InstrumentationRegistry.getInstrumentation().targetContext.resources,
-                    analyticsRequestExecutor = mock(),
-                    paymentAnalyticsRequestFactory = mock()
+                    InstrumentationRegistry.getInstrumentation().targetContext.resources
                 )
             ).apply {
                 this.updateFromDisk()

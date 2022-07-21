@@ -194,8 +194,7 @@ internal class DefaultFlowController @Inject internal constructor(
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,
-                configuration,
-//                viewModel.initData.lpmServerSpecString
+                configuration
             )
 
             // Wait until all required resources are loaded before completing initialization.

@@ -1,10 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository

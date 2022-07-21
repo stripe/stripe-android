@@ -23,9 +23,7 @@ import java.io.File
 class SupportedPaymentMethodTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            analyticsRequestExecutor = mock(),
-            paymentAnalyticsRequestFactory = mock()
+            ApplicationProvider.getApplicationContext<Application>().resources
         )
     ).apply {
         this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)

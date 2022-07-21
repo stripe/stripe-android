@@ -109,8 +109,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                             stripeIntent = stripeIntent,
                             paymentMethods = paymentMethods,
                             savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
-                            isGooglePayReady = isGooglePayReady,
-                            lpmServerSpecString = resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                            isGooglePayReady = isGooglePayReady
                         )
                     )
                 }
@@ -144,8 +143,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                         stripeIntent = stripeIntent,
                         paymentMethods = emptyList(),
                         savedSelection = savedSelection,
-                        isGooglePayReady = isGooglePayReady,
-                        lpmServerSpecString = resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                        isGooglePayReady = isGooglePayReady
                     )
                 )
             },

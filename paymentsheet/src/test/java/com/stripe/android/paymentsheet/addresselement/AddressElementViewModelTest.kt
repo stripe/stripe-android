@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -25,8 +24,7 @@ import kotlin.test.assertNotNull
 class AddressElementViewModelTest {
     private val defaultArgs = AddressElementActivityContract.Args(
         AddressLauncherFixtures.BASIC_CONFIG,
-        INJECTOR_KEY,
-        setOf(PRODUCT_USAGE)
+        INJECTOR_KEY
     )
 
     @Test

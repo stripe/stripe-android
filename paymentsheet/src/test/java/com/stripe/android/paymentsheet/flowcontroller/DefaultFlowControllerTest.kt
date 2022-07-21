@@ -533,8 +533,7 @@ internal class DefaultFlowControllerTest {
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
                     ),
-                    isGooglePayReady = false,
-                    resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                    isGooglePayReady = false
                 )
             )
 
@@ -557,8 +556,7 @@ internal class DefaultFlowControllerTest {
                 SavedSelection.PaymentMethod(
                     id = "pm_123456789"
                 ),
-                isGooglePayReady = false,
-                resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                isGooglePayReady = false
             )
         )
 
@@ -584,8 +582,7 @@ internal class DefaultFlowControllerTest {
                 SavedSelection.PaymentMethod(
                     id = "pm_123456789"
                 ),
-                isGooglePayReady = false,
-                resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                isGooglePayReady = false
             )
         )
 
@@ -817,8 +814,7 @@ internal class DefaultFlowControllerTest {
                     stripeIntent,
                     paymentMethods,
                     savedSelection,
-                    isGooglePayReady = false,
-                    resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                    isGooglePayReady = false
                 )
             )
         }

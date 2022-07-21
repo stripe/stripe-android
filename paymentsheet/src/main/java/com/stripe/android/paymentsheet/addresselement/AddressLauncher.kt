@@ -58,8 +58,7 @@ internal class AddressLauncher internal constructor(
         activityResultLauncher.launch(
             AddressElementActivityContract.Args(
                 configuration,
-                injectorKey,
-                emptySet()
+                injectorKey
             )
         )
     }

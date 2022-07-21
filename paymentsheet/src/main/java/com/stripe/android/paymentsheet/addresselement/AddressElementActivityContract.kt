@@ -32,8 +32,7 @@ internal class AddressElementActivityContract :
     @Parcelize
     data class Args internal constructor(
         internal val config: AddressLauncher.Configuration?,
-        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY,
-        val productUsage: Set<String>
+        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
 
         companion object {
