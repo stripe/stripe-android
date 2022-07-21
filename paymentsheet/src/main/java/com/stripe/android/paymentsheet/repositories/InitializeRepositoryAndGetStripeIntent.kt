@@ -23,7 +23,7 @@ internal suspend fun initializeRepositoryAndGetStripeIntent(
             eventReporter.onLpmSpecFailure()
         }
         is LpmRepository.ServerSpecState.ServerParsed,
-        is LpmRepository.ServerSpecState.Uninitialize,
+        is LpmRepository.ServerSpecState.Uninitialized,
         is LpmRepository.ServerSpecState.NoServerSpec -> {
         }
     }

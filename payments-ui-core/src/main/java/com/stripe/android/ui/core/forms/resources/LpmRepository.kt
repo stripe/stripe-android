@@ -53,7 +53,7 @@ class LpmRepository constructor(
 ) {
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
-    var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialize
+    var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
@@ -162,11 +162,7 @@ class LpmRepository constructor(
 
     private fun parseLpms(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let { string ->
-            try {
-                lpmSerializer.deserializeList(string)
-            } catch (e: Exception) {
-                null
-            }
+            lpmSerializer.deserializeList(string)
         }
 
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =
@@ -402,8 +398,9 @@ class LpmRepository constructor(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class ServerSpecState(val serverLpmSpecs: String?) {
-        object Uninitialize : ServerSpecState(null)
+        object Uninitialized : ServerSpecState(null)
         class NoServerSpec(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
         class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
         class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
