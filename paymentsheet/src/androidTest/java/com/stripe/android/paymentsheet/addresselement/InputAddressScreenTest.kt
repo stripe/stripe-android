@@ -22,18 +22,6 @@ class InputAddressScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun no_shipping_address_set_should_show_expand_button() {
-        setContent()
-        composeTestRule.onNodeWithText("Enter address manually").assertExists()
-    }
-
-    @Test
-    fun shipping_address_set_should_not_show_expand_button() {
-        setContent(ShippingAddress(name = "skyler"))
-        composeTestRule.onNodeWithText("Enter address manually").assertDoesNotExist()
-    }
-
-    @Test
     fun clicking_primary_button_triggers_callback_when_enabled() {
         var counter = 0
         setContent(primaryButtonEnabled = true, primaryButtonCallback = { counter++ })
@@ -57,29 +45,17 @@ class InputAddressScreenTest {
         Truth.assertThat(counter).isEqualTo(1)
     }
 
-    @Test
-    fun clicking_enter_manually_triggers_callback() {
-        var counter = 0
-        setContent(onEnterManuallyCallback = { counter++ })
-        composeTestRule.onNodeWithText("Enter address manually").performClick()
-        Truth.assertThat(counter).isEqualTo(1)
-    }
-
     private fun setContent(
-        collectedAddress: ShippingAddress? = null,
         primaryButtonEnabled: Boolean = true,
         primaryButtonCallback: () -> Unit = {},
-        onCloseCallback: () -> Unit = {},
-        onEnterManuallyCallback: () -> Unit = {}
+        onCloseCallback: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             DefaultPaymentsTheme {
                 InputAddressScreen(
-                    collectedAddress = collectedAddress,
                     primaryButtonEnabled = primaryButtonEnabled,
                     onPrimaryButtonClick = primaryButtonCallback,
                     onCloseClick = onCloseCallback,
-                    onEnterManuallyClick = onEnterManuallyCallback,
                     formContent = {}
                 )
             }

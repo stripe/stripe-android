@@ -6,8 +6,6 @@ import com.google.common.truth.Truth
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.ui.core.injection.NonFallbackInjector
-import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -25,13 +23,8 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 class AddressElementViewModelTest {
     private val defaultArgs = AddressElementActivityContract.Args(
-        PaymentIntentFixtures.PI_SUCCEEDED,
-        PaymentSheetFixtures.CONFIG_CUSTOMER,
-        AddressElementActivityContract.Args.InjectionParams(
-            INJECTOR_KEY,
-            setOf(PRODUCT_USAGE),
-            true
-        )
+        AddressLauncherFixtures.BASIC_CONFIG,
+        INJECTOR_KEY
     )
 
     @Test
@@ -77,6 +70,5 @@ class AddressElementViewModelTest {
 
     private companion object {
         const val INJECTOR_KEY = "injectorKey"
-        const val PRODUCT_USAGE = "productUsage"
     }
 }

@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ShippingAddressCallback
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -76,7 +75,6 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerTest {
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
-    private val shippingAddressCallback = mock<ShippingAddressCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
     private val paymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
@@ -770,7 +768,6 @@ internal class DefaultFlowControllerTest {
         { activity.window.statusBarColor },
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
-        shippingAddressCallback,
         paymentResultCallback,
         activityResultCaller,
         INJECTOR_KEY,

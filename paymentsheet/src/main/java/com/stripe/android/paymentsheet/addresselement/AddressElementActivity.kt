@@ -22,8 +22,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -99,8 +100,23 @@ internal class AddressElementActivity : ComponentActivity() {
                                 composable(AddressElementScreen.InputAddress.route) {
                                     InputAddressScreen(viewModel.injector)
                                 }
-                                composable(AddressElementScreen.Autocomplete.route) {
-                                    AutocompleteScreen(viewModel.injector)
+                                composable(
+                                    AddressElementScreen.Autocomplete.route,
+                                    arguments = listOf(
+                                        navArgument(AddressElementScreen.Autocomplete.countryArg) {
+                                            type = NavType.StringType
+                                        }
+                                    )
+                                ) { backStackEntry ->
+                                    val country = backStackEntry
+                                        .arguments
+                                        ?.getString(
+                                            AddressElementScreen.Autocomplete.countryArg
+                                        )
+                                    AutocompleteScreen(
+                                        viewModel.injector,
+                                        country
+                                    )
                                 }
                             }
                         }
@@ -112,7 +128,7 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressElementResult = AddressElementResult.Canceled) {
+    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
         setResult(
             result.resultCode,
             Intent().putExtras(

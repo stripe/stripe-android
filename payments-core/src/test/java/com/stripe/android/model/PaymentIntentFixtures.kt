@@ -948,7 +948,6 @@ internal object PaymentIntentFixtures {
 
     val OXXO_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
