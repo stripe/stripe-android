@@ -61,7 +61,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             )
         ).let { stripeIntent ->
             when {
-                stripeIntent.status == StripeIntent.Status.Succeeded -> {
+                stripeIntent.status == StripeIntent.Status.Succeeded ||
+                    stripeIntent.status == StripeIntent.Status.RequiresCapture -> {
                     createStripeIntentResult(
                         stripeIntent,
                         SUCCEEDED,
@@ -73,11 +74,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         result.clientSecret,
                         requestOptions
                     )
-                    val flowOutcome = if (intent.status == StripeIntent.Status.Succeeded) {
-                        SUCCEEDED
-                    } else {
-                        result.flowOutcome
-                    }
+                    val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
                     createStripeIntentResult(
                         intent,
                         flowOutcome,
@@ -151,6 +148,14 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         return succeededMaybeRefresh || cancelledMaybeRefresh
     }
 
+    private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
+        return when (intent.status) {
+            StripeIntent.Status.Succeeded,
+            StripeIntent.Status.RequiresCapture -> SUCCEEDED
+            else -> originalFlowOutcome
+        }
+    }
+
     protected abstract suspend fun retrieveStripeIntent(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
@@ -181,7 +186,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     )
     private suspend fun refreshStripeIntentUntilTerminalState(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: ApiRequest.Options
     ): T {
         var remainingRetries = MAX_RETRIES
 
@@ -283,37 +288,6 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             clientSecret,
             requestOptions
         )
-        requestOptions: ApiRequest.Options
-    ): PaymentIntent {
-        var remainingRetries = MAX_RETRIES
-
-        var stripeIntent = requireNotNull(
-            stripeRepository.refreshPaymentIntent(
-                clientSecret,
-                requestOptions
-            )
-        )
-        while (stripeIntent.requiresAction() && remainingRetries > 1) {
-            val delayMs = retryDelaySupplier.getDelayMillis(
-                3,
-                remainingRetries
-            )
-            delay(delayMs)
-            stripeIntent = requireNotNull(
-                stripeRepository.refreshPaymentIntent(
-                    clientSecret,
-                    requestOptions
-                )
-            )
-            remainingRetries--
-        }
-
-        if (stripeIntent.requiresAction()) {
-            throw MaxRetryReachedException()
-        } else {
-            return stripeIntent
-        }
-    }
 
     override suspend fun cancelStripeIntentSource(
         stripeIntentId: String,

@@ -80,7 +80,7 @@ internal class SetupIntentFlowResultProcessorTest {
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
             )
 
@@ -122,7 +122,7 @@ internal class SetupIntentFlowResultProcessorTest {
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
             )
 
@@ -165,7 +165,7 @@ internal class SetupIntentFlowResultProcessorTest {
                 processor.processResult(
                     PaymentFlowResult.Unvalidated(
                         clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                        flowOutcome = StripeIntentResult.Outcome.CANCELED
                     )
                 )
             }

@@ -142,7 +142,7 @@ internal object PaymentIntentFixtures {
             },
             "source": null
         }
-        """.trimIndent()
+            """.trimIndent()
         )
     }
 
@@ -249,7 +249,7 @@ internal object PaymentIntentFixtures {
             },
             "source": null
         }
-        """.trimIndent()
+            """.trimIndent()
         )
     }
 
