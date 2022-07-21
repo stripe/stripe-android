@@ -100,7 +100,11 @@ class TestAuthorization {
 
     companion object {
         private val lpmRepository = LpmRepository(
-            InstrumentationRegistry.getInstrumentation().targetContext.resources
-        )
+            LpmRepository.LpmRepositoryArguments(
+                InstrumentationRegistry.getInstrumentation().targetContext.resources
+            )
+        ).apply {
+            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+        }
     }
 }
