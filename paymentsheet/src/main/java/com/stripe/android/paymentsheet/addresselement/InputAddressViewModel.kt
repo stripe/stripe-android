@@ -104,20 +104,12 @@ internal class InputAddressViewModel @Inject constructor(
                         }
                     }
                 }
-            ).apply {
-                args.config?.allowedCountries?.let {
-                    (allowedCountryCodes as? MutableSet<String>)?.retainAll(it)
-                }
-            }
+            )
         } else {
             AddressSpec(
                 showLabel = false,
                 type = AddressType.ShippingExpanded
-            ).apply {
-                args.config?.allowedCountries?.let {
-                    (allowedCountryCodes as? MutableSet<String>)?.retainAll(it)
-                }
-            }
+            )
         }
 
         val addressSpecWithAllowedCountries = args.config?.allowedCountries?.run {
@@ -129,6 +121,20 @@ internal class InputAddressViewModel @Inject constructor(
                 addressSpecWithAllowedCountries ?: addressSpec
             )
         )
+    }
+
+    fun expandAddressForm() {
+        viewModelScope.launch {
+            formController.value?.let { controller ->
+                controller.formValues.collect {
+                    _collectedAddress.value = AddressDetails(
+                        name = it[IdentifierSpec.Name]?.value,
+                        phoneNumber = it[IdentifierSpec.Phone]?.value,
+                        country = it[IdentifierSpec.Country]?.value
+                    )
+                }
+            }
+        }
     }
 
     fun clickPrimaryButton() {
