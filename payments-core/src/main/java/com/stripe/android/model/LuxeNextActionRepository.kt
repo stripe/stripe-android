@@ -19,7 +19,7 @@ class LuxeNextActionRepository {
             }?.outcome
         }
 
-    fun supportsAction(stripeIntent: StripeIntent) =
+    private fun supportsAction(stripeIntent: StripeIntent) =
         getHandleNextActionSpec(stripeIntent)
             ?.containsKey(stripeIntent.status)
             ?: false
@@ -29,51 +29,71 @@ class LuxeNextActionRepository {
      * what the next action should be, or that there is no next action.  The requiresAction
      * method should be called first to determine the difference.
      */
-    fun getNextAction(stripeIntent: StripeIntent) = getHandleNextActionSpec(stripeIntent)
-        ?.get(stripeIntent.status)?.let { redirectNextAction ->
+    internal fun getNextAction(
+        stripeIntent: StripeIntent
+    ) = if (!supportsAction(stripeIntent)) {
+        Result.NotSupported
+    } else {
+        val nextActionForState = getHandleNextActionSpec(stripeIntent)
+            ?.get(stripeIntent.status)
+        if (nextActionForState == null) {
+            Result.NoNextAction
+        } else {
             stripeIntent.jsonString?.let {
-                StripeIntent.NextActionData.RedirectToUrl(
-                    returnUrl = getPath(
-                        redirectNextAction.returnToUrlPath,
-                        JSONObject(it)
-                    ).toString(),
-                    url = Uri.Builder().path(
-                        getPath(
-                            redirectNextAction.hostedPagePath,
-                            JSONObject(it)
-                        ).toString()
-                    ).build()
+                val returnUrl = getPath(
+                    nextActionForState.returnToUrlPath,
+                    JSONObject(it)
                 )
+                val url = Uri.parse(
+                    getPath(
+                        nextActionForState.hostedPagePath,
+                        JSONObject(it)
+                    )
+                )
+                if (nextActionForState.returnToUrlPath == null || returnUrl != null) {
+                    Result.NextAction(
+                        StripeIntent.NextActionData.RedirectToUrl(
+                            returnUrl = returnUrl,
+                            url = url
+                        )
+                    )
+                } else {
+                    Result.NotSupported
+                }
             }
-        }
-
-    private fun getHandleNextActionSpec(stripeIntent: StripeIntent) = stripeIntent.jsonString?.let {
-        JSONObject(it)
-            .optJSONObject("payment_method")
-            ?.optString("type")
-    }?.let { lpmCode ->
-        codeToNextActionSpec[lpmCode]?.handleNextActionSpec
+        } ?: Result.NotSupported
     }
 
-    private fun getPath(path: String, json: JSONObject): String? {
-        val pathArray = ("[*" + "([A-Za-z_0-9]+)" + "]*").toRegex().findAll(path)
-            .map { it.value }
-            .distinct()
-            .filterNot { it.isEmpty() }
-            .toList()
-        var jsonObject: JSONObject? = json
-        for (key in pathArray) {
-            if (jsonObject == null) {
-                break
-            }
-            if (jsonObject.has(key)) {
-                val tempJsonObject = jsonObject.optJSONObject(key)
-                val tempJsonString = jsonObject.get(key)
+    private fun getHandleNextActionSpec(stripeIntent: StripeIntent) =
+        stripeIntent.jsonString?.let {
+            JSONObject(it)
+                .optJSONObject("payment_method")
+                ?.optString("type")
+        }?.let { lpmCode ->
+            codeToNextActionSpec[lpmCode]?.handleNextActionSpec
+        }
 
-                if (tempJsonObject != null) {
-                    jsonObject = tempJsonObject
-                } else if ((tempJsonString as? String) != null) {
-                    return tempJsonString
+    private fun getPath(path: String?, json: JSONObject): String? {
+        if (path != null) {
+            val pathArray = ("[*" + "([A-Za-z_0-9]+)" + "]*").toRegex().findAll(path)
+                .map { it.value }
+                .distinct()
+                .filterNot { it.isEmpty() }
+                .toList()
+            var jsonObject: JSONObject? = json
+            for (key in pathArray) {
+                if (jsonObject == null) {
+                    break
+                }
+                if (jsonObject.has(key)) {
+                    val tempJsonObject = jsonObject.optJSONObject(key)
+                    val tempJsonString = jsonObject.get(key)
+
+                    if (tempJsonObject != null) {
+                        jsonObject = tempJsonObject
+                    } else if ((tempJsonString as? String) != null) {
+                        return tempJsonString
+                    }
                 }
             }
         }
@@ -81,7 +101,6 @@ class LuxeNextActionRepository {
     }
 
     companion object {
-
         @VisibleForTesting
         internal val DEFAULT_DATA = mapOf(
             "afterpay_clearpay" to
@@ -150,11 +169,17 @@ class LuxeNextActionRepository {
 
     data class RedirectNextActionSpec(
         val hostedPagePath: String,
-        val returnToUrlPath: String
+        val returnToUrlPath: String?
     )
 
     data class LuxeNextAction(
         val handleNextActionSpec: Map<StripeIntent.Status, RedirectNextActionSpec?>,
         val handlePiStatus: List<PiStatusSpec>
     )
+
+    sealed class Result {
+        data class NextAction(val nextActionData: StripeIntent.NextActionData) : Result()
+        object NoNextAction : Result()
+        object NotSupported : Result()
+    }
 }

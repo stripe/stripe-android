@@ -4,10 +4,13 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.LUXE_NEXT_ACTION
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LuxeNextActionRepository
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
@@ -175,5 +178,29 @@ class DefaultPaymentAuthenticatorRegistryTest {
         verify(mockPaymentBrowserAuthLauncher).unregister()
         assertNull(registry.paymentRelayLauncher)
         assertNull(registry.paymentBrowserAuthLauncher)
+    }
+
+    fun `verify luxe next action is queried first for next action`() {
+        val stripeIntent = PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION
+        registry.nextActionRepository = LuxeNextActionRepository()
+
+        // This is using the old hard coded path
+        assertThat(registry.getAuthenticator(stripeIntent))
+            .isInstanceOf(WebIntentAuthenticator::class.java)
+
+        registry.nextActionRepository.update(
+            mapOf(
+                "afterpay_clearpay" to
+                    LUXE_NEXT_ACTION.copy(
+                        handleNextActionSpec = mapOf(
+                            StripeIntent.Status.RequiresAction to null
+                        )
+                    )
+            )
+        )
+
+        // This will use the result of the LuxeNextActionRepo
+        assertThat(registry.getAuthenticator(stripeIntent))
+            .isInstanceOf(NoOpIntentAuthenticator::class.java)
     }
 }

@@ -946,6 +946,94 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(AFTERPAY_REQUIRES_ACTION_JSON))
     }
 
+    val AFTERPAY_REQUIRES_ACTION_JSON_NO_RETURN_URL by lazy {
+        JSONObject(
+            """
+        {
+          "id": "pi_3LNLYmLu5o3P18Zp04dCLrZf",
+          "object": "payment_intent",
+          "amount": 5099,
+          "amount_details": {
+            "tip": {}
+          },
+          "automatic_payment_methods": null,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_3LNLYmLu5o3P18Zp04dCLrZf_secret_hbuNP7A9J5qsyxOVdTSUwbOGa",
+          "confirmation_method": "automatic",
+          "created": 1658256860,
+          "currency": "usd",
+          "description": null,
+          "last_payment_error": null,
+          "livemode": false,
+          "next_action": {
+            "redirect_to_url": {
+              "url": "https://hooks.stripe.com/afterpay_clearpay/acct_1HvTI7Lu5o3P18Zp/pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
+            },
+            "type": "redirect_to_url"
+          },
+          "payment_method": {
+            "id": "pm_1LNLZQLu5o3P18ZpXBHpDiPF",
+            "object": "payment_method",
+            "afterpay_clearpay": {},
+            "billing_details": {
+              "address": {
+                "city": "Blackrock",
+                "country": "IE",
+                "line1": "123 Main Street",
+                "line2": "",
+                "postal_code": "T37 F8HK",
+                "state": "Co. Dublin"
+              },
+              "email": "email@email.com",
+              "name": "Jenny Rosen",
+              "phone": null
+            },
+            "created": 1658256900,
+            "customer": null,
+            "livemode": false,
+            "type": "afterpay_clearpay"
+          },
+          "payment_method_options": {
+            "us_bank_account": {
+              "verification_method": "automatic"
+            }
+          },
+          "payment_method_types": [
+            "card",
+            "afterpay_clearpay",
+            "klarna",
+            "us_bank_account",
+            "affirm"
+          ],
+          "processing": null,
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": {
+            "address": {
+              "city": "San Francisco",
+              "country": "US",
+              "line1": "510 Townsend St",
+              "line2": null,
+              "postal_code": "94102",
+              "state": "California"
+            },
+            "carrier": null,
+            "name": "John Doe",
+            "phone": null,
+            "tracking_number": null
+          },
+          "source": null,
+          "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+    val AFTERPAY_REQUIRES_ACTION_NO_RETURN_URL by lazy {
+        requireNotNull(PARSER.parse(AFTERPAY_REQUIRES_ACTION_JSON_NO_RETURN_URL))
+    }
+
     val OXXO_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
             """

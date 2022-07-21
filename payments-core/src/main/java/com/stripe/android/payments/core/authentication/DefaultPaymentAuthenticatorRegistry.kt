@@ -48,6 +48,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         paymentAuthenticatorMap.values
     ).flatten()
 
+    @VisibleForTesting
+    internal var nextActionRepository = LuxeNextActionRepository.Instance
+
     /**
      * [AuthenticationComponent] instance is hold to inject into [Activity]s and [ViewModel]s
      * started by the [PaymentAuthenticator]s.
@@ -73,26 +76,35 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         return when (authenticatable) {
             is StripeIntent -> {
                 // Try the LPM repository to see if LPM next action support was
-                // received from the server for runtime updateable next action support
-                if (LuxeNextActionRepository.Instance.supportsAction(authenticatable)) {
-                    return LuxeNextActionRepository.Instance.getNextAction(authenticatable)?.let {
-                        Log.e("MLB", "Doing the new path.")
-                        paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
-                    } ?: noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-                }
-                Log.e("MLB", "Doing the hard coded path.")
-                // handle the original SDK hard coded way
-                if (!authenticatable.requiresAction()) {
-                    return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-                }
-                return (
-                    authenticatable.nextActionData?.let {
-                        paymentAuthenticatorMap
-                            .getOrElse(it::class.java) { noOpIntentAuthenticator }
-                    } ?: run {
-                        noOpIntentAuthenticator
+                when (val luxeNextActionResult = nextActionRepository.getNextAction(authenticatable)) {
+                    is LuxeNextActionRepository.Result.NextAction -> {
+                        (
+                            paymentAuthenticatorMap
+                                .getOrElse(luxeNextActionResult.nextActionData::class.java) {
+                                    noOpIntentAuthenticator
+                                }
+                            )
+                            as PaymentAuthenticator<Authenticatable>
                     }
-                    ) as PaymentAuthenticator<Authenticatable>
+                    is LuxeNextActionRepository.Result.NoNextAction ->
+                        noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
+                    is LuxeNextActionRepository.Result.NotSupported -> {
+                        Log.e("MLB", "Doing the hard coded path.")
+                        // handle the original SDK hard coded way
+                        if (!authenticatable.requiresAction()) {
+                            return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
+                        } else {
+                            return (
+                                authenticatable.nextActionData?.let {
+                                    paymentAuthenticatorMap
+                                        .getOrElse(it::class.java) { noOpIntentAuthenticator }
+                                } ?: run {
+                                    noOpIntentAuthenticator
+                                }
+                                ) as PaymentAuthenticator<Authenticatable>
+                        }
+                    }
+                }
             }
             is Source -> {
                 sourceAuthenticator as PaymentAuthenticator<Authenticatable>
@@ -132,7 +144,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
-            is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
+            is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(
+                injectable
+            )
             else -> {
                 throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
             }
