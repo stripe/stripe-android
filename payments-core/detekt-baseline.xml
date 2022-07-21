@@ -31,6 +31,7 @@
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
     <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
+    <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
     <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
     <ID>LargeClass:Stripe.kt$Stripe</ID>
     <ID>LargeClass:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
@@ -42,9 +43,9 @@
     <ID>LongMethod:CustomerSessionOperationExecutor.kt$CustomerSessionOperationExecutor$@JvmSynthetic internal suspend fun execute( ephemeralKey: EphemeralKey, operation: EphemeralOperation )</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$@BeforeTest fun setup()</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$private suspend fun setupErrorProxy()</ID>
-    <ID>LongMethod:DefaultCardAccountRangeRepositoryTest.kt$DefaultCardAccountRangeRepositoryTest$@Test fun `repository with real sources returns expected results`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
     <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>
+    <ID>LongMethod:PaymentFlowResultProcessor.kt$PaymentFlowResultProcessor$suspend fun processResult( unvalidatedResult: PaymentFlowResult.Unvalidated ): S</ID>
     <ID>LongMethod:PaymentIntentJsonParser.kt$PaymentIntentJsonParser$override fun parse(json: JSONObject): PaymentIntent?</ID>
     <ID>LongMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
     <ID>LongMethod:SourceParams.kt$SourceParams$ override fun toParamMap(): Map&lt;String, Any></ID>
@@ -53,7 +54,6 @@
     <ID>LongMethod:Stripe3ds2ChallengeResultProcessor.kt$DefaultStripe3ds2ChallengeResultProcessor$override suspend fun process( challengeResult: ChallengeResult ): PaymentFlowResult.Unvalidated</ID>
     <ID>LongMethod:Stripe3ds2TransactionActivity.kt$Stripe3ds2TransactionActivity$public override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$@Test fun getPaymentMethods_whenPopulated_returnsExpectedList()</ID>
-    <ID>LongParameterList:CardNumberEditText.kt$CardNumberEditText$( context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle, // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses internal var workContext: CoroutineContext, private val cardAccountRangeRepository: CardAccountRangeRepository, private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(), private val analyticsRequestExecutor: AnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory )</ID>
     <ID>LongParameterList:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Companion$( paymentMethodCreateParams: PaymentMethodCreateParams, clientSecret: String, savePaymentMethod: Boolean? = null, mandateId: String? = null, mandateData: MandateDataParams? = null, setupFutureUsage: SetupFutureUsage? = null, shipping: Shipping? = null, paymentMethodOptions: PaymentMethodOptionsParams? = null )</ID>
     <ID>LongParameterList:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Companion$( paymentMethodId: String, clientSecret: String, savePaymentMethod: Boolean? = null, paymentMethodOptions: PaymentMethodOptionsParams? = null, mandateId: String? = null, mandateData: MandateDataParams? = null, setupFutureUsage: SetupFutureUsage? = null, shipping: Shipping? = null )</ID>
     <ID>LongParameterList:CustomerSession.kt$CustomerSession$( context: Context, stripeRepository: StripeRepository, publishableKey: String, stripeAccountId: String?, private val workContext: CoroutineContext = createCoroutineDispatcher(), private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(), private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }, ephemeralKeyManagerFactory: EphemeralKeyManager.Factory )</ID>
@@ -107,7 +107,6 @@
     <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
-    <ID>MagicNumber:PaymentFlowResultProcessor.kt$PaymentIntentFlowResultProcessor$3</ID>
     <ID>MagicNumber:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.Card$4</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.114</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.299</ID>
