@@ -74,7 +74,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             is StripeIntent -> {
                 // Try the LPM repository to see if LPM next action support was
                 // received from the server for runtime updateable next action support
-                if (LuxeNextActionRepository.Instance.requiresAction(authenticatable)) {
+                if (LuxeNextActionRepository.Instance.supportsAction(authenticatable)) {
                     return LuxeNextActionRepository.Instance.getNextAction(authenticatable)?.let {
                         Log.e("MLB", "Doing the new path.")
                         paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>

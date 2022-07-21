@@ -19,7 +19,7 @@ class LuxeNextActionRepository {
             }?.outcome
         }
 
-    fun requiresAction(stripeIntent: StripeIntent) =
+    fun supportsAction(stripeIntent: StripeIntent) =
         getHandleNextActionSpec(stripeIntent)
             ?.containsKey(stripeIntent.status)
             ?: false

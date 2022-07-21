@@ -41,7 +41,7 @@ class PaymentIntentResultTest {
         // We will change the status from Success to Cancelled when in the processing state
         result.luxeNextActionRepository.update(
             mapOf(
-                "oxxo" to OXXO_LUXE_NEXT_ACTION.copy(
+                "oxxo" to LUXE_NEXT_ACTION.copy(
                     handlePiStatus = listOf(
                         LuxeNextActionRepository.PiStatusSpec(
                             associatedStatuses = listOf(StripeIntent.Status.Processing),

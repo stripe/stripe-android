@@ -3,7 +3,7 @@ package com.stripe.android
 import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.StripeIntent
 
-val OXXO_LUXE_NEXT_ACTION = LuxeNextActionRepository.LuxeNextAction(
+val LUXE_NEXT_ACTION = LuxeNextActionRepository.LuxeNextAction(
     handleNextActionSpec = mapOf(
         StripeIntent.Status.RequiresAction to
             LuxeNextActionRepository.RedirectNextActionSpec(
