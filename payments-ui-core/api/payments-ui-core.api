@@ -708,12 +708,6 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Comp
 	public final fun getInstance (Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmRepositoryArguments;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 }
 
-public abstract class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
-	public static final field $stable I
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getServerLpmSpecs ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$NoServerSpec : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
@@ -729,9 +723,9 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Serv
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$Uninitialize : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
+public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$Uninitialized : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$Uninitialize;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$Uninitialized;
 }
 
 public abstract class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule {
