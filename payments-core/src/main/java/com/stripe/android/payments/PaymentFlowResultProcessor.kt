@@ -142,11 +142,17 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // PaymentIntent. This could happen if, for example, a payment is approved in a WebView,
         // user closes the sheet, and the approval races with this fetch
         val cancelledMaybeRefresh = flowOutcome == CANCELED &&
-            (stripeIntent.status == StripeIntent.Status.Processing ||  stripeIntent.status == StripeIntent.Status.RequiresAction) &&
+            stripeIntent.status == StripeIntent.Status.Processing &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
+
+        // For similar reasons, the transaction could be unexpectedly stuck in `requires_action` for
+        // a UseStripeSDK next_action. If so, refresh the PaymentIntent.
+        val actionNotProcessedMaybeRefresh =  flowOutcome == CANCELED &&
+            stripeIntent.status == StripeIntent.Status.RequiresAction &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
-
-        return succeededMaybeRefresh || cancelledMaybeRefresh
+        
+        return succeededMaybeRefresh || cancelledMaybeRefresh || cancelledMaybeRefresh
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
