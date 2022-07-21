@@ -18,40 +18,38 @@ class LuxeNextActionRepository {
             }?.outcome
         }
 
-    fun requiresAction(stripeIntent: StripeIntent) = stripeIntent.jsonString?.let {
-        JSONObject(it)
-            .optJSONObject("payment_method")
-            ?.optString("type")
-    }?.let { lpmCode ->
-        codeToNextActionSpec[lpmCode]?.handleNextActionSpec?.containsKey(stripeIntent.status)
-    } ?: false
+    fun requiresAction(stripeIntent: StripeIntent) =
+        getHandleNextActionSpec(stripeIntent)
+            ?.containsKey(stripeIntent.status)
+            ?: false
 
     /**
      * Null returned from this function indicates there is definitively no next action.
      */
-    fun getNextAction(stripeIntent: StripeIntent) = stripeIntent.jsonString?.let {
+    fun getNextAction(stripeIntent: StripeIntent) = getHandleNextActionSpec(stripeIntent)
+        ?.get(stripeIntent.status)?.let { redirectNextAction ->
+            stripeIntent.jsonString?.let {
+                StripeIntent.NextActionData.RedirectToUrl(
+                    returnUrl = getPath(
+                        redirectNextAction.returnToUrlPath,
+                        JSONObject(it)
+                    ).toString(),
+                    url = Uri.Builder().path(
+                        getPath(
+                            redirectNextAction.hostedPagePath,
+                            JSONObject(it)
+                        ).toString()
+                    ).build()
+                )
+            }
+        }
+
+    private fun getHandleNextActionSpec(stripeIntent: StripeIntent) = stripeIntent.jsonString?.let {
         JSONObject(it)
             .optJSONObject("payment_method")
             ?.optString("type")
     }?.let { lpmCode ->
-        codeToNextActionSpec[lpmCode]?.let { luxeNextAction ->
-            luxeNextAction.handleNextActionSpec[stripeIntent.status]?.let { redirectNextAction ->
-                stripeIntent.jsonString?.let {
-                    StripeIntent.NextActionData.RedirectToUrl(
-                        returnUrl = getPath(
-                            redirectNextAction.returnToUrlPath,
-                            JSONObject(it)
-                        ).toString(),
-                        url = Uri.Builder().path(
-                            getPath(
-                                redirectNextAction.hostedPagePath,
-                                JSONObject(it)
-                            ).toString()
-                        ).build()
-                    )
-                }
-            }
-        }
+        codeToNextActionSpec[lpmCode]?.handleNextActionSpec
     }
 
     private fun getPath(path: String, json: JSONObject): String? {
@@ -148,11 +146,11 @@ class LuxeNextActionRepository {
 
     data class RedirectNextActionSpec(
         val hostedPagePath: String,
-        val returnToUrlPath: String,
+        val returnToUrlPath: String
     )
 
     data class LuxeNextAction(
         val handleNextActionSpec: Map<StripeIntent.Status, RedirectNextActionSpec?>,
-        val handlePiStatus: List<PiStatusSpec>,
+        val handlePiStatus: List<PiStatusSpec>
     )
 }

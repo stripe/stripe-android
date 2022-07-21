@@ -5,14 +5,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.LuxeNextAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PiStatusSpec
 import com.stripe.android.model.RedirectNextActionSpec
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -149,7 +145,6 @@ class LpmRepository constructor(
         lpmInitialFormData.putAll(
             parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
         )
-
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -353,10 +348,10 @@ class LpmRepository constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
-    enum class PIStatusType{
+    enum class PIStatusType {
         Finished,
         Canceled,
-        //?
+        // ?
     }
 
     data class PiStatusSpec(
@@ -380,9 +375,8 @@ class LpmRepository constructor(
         val handleNextActionSpec: List<RedirectNextActionSpec>,
 
         @SerialName("handle_pi_status_specs")
-        val handlePiStatus: List<RedirectNextActionSpec>,
+        val handlePiStatus: List<RedirectNextActionSpec>
     )
-
 
     enum class LpmInitialFormData {
         Instance;

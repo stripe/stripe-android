@@ -114,7 +114,7 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         created = 1617638802,
         liveMode = false,
-        type = PaymentMethod.Type.Oxxo,
+        type = PaymentMethod.Type.Oxxo
     )
 
     val SEPA_DEBIT_JSON = JSONObject(

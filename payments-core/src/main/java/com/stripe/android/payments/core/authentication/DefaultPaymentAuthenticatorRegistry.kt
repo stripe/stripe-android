@@ -39,8 +39,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap
     private val paymentAuthenticatorMap:
-    Map<Class<out StripeIntent.NextActionData>,
-        @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
+        Map<Class<out StripeIntent.NextActionData>,
+            @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
 ) : PaymentAuthenticatorRegistry, Injector {
     @VisibleForTesting
     internal val allAuthenticators = setOf(
@@ -77,7 +77,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 if (LuxeNextActionRepository.Instance.requiresAction(authenticatable)) {
                     return LuxeNextActionRepository.Instance.getNextAction(authenticatable)?.let {
                         Log.e("MLB", "Doing the new path.")
-                         paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
+                        paymentAuthenticatorMap[it::class.java] as PaymentAuthenticator<Authenticatable>
                     } ?: noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                 }
                 Log.e("MLB", "Doing the hard coded path.")
