@@ -24,7 +24,9 @@ class LuxeNextActionRepository {
             ?: false
 
     /**
-     * Null returned from this function indicates there is definitively no next action.
+     * Null returned from this function indicates either this class doesn't known
+     * what the next action should be, or that there is no next action.  The requiresAction
+     * method should be called first to determine the difference.
      */
     fun getNextAction(stripeIntent: StripeIntent) = getHandleNextActionSpec(stripeIntent)
         ?.get(stripeIntent.status)?.let { redirectNextAction ->
