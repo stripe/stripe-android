@@ -152,7 +152,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
         
-        return succeededMaybeRefresh || cancelledMaybeRefresh || cancelledMaybeRefresh
+        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
