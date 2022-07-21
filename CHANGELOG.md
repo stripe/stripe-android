@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## X.X.X
+### Payments
+[Fixed][5308](https://github.com/stripe/stripe-android/pull/5308) OXXO so that processing is considered a successful terminal state, similar to Konbini and Boleto.
 
 ## 20.7.0 - 2022-07-06
 * This release adds additional support for Afterpay/Clearpay in PaymentSheet.
