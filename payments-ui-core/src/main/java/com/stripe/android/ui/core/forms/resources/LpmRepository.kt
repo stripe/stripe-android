@@ -53,6 +53,7 @@ class LpmRepository constructor(
 ) {
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
+    var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
@@ -93,14 +94,25 @@ class LpmRepository constructor(
         serverLpmSpecs: String?
     ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
 
+    /**
+     * Will add the server specs to the repository and load the ones from disk if
+     * server is not parseable.
+     */
     private fun internalUpdate(
         expectedLpms: List<String>,
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        // TODO: Call analytics if parsing fails for any reason
         if (!isLoaded() || force) {
-            update(parseLpms(serverLpmSpecs))
+            serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
+            if (!serverLpmSpecs.isNullOrEmpty()) {
+                serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
+                val serverLpmObjects = lpmSerializer.deserializeList(serverLpmSpecs)
+                if (serverLpmObjects.isNotEmpty()) {
+                    serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
+                }
+                update(serverLpmObjects)
+            }
 
             // If the server does not return specs, or they are not parsed successfully
             // we will use the LPM on disk if found
@@ -151,11 +163,6 @@ class LpmRepository constructor(
     private fun parseLpms(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let { string ->
             lpmSerializer.deserializeList(string)
-        }
-
-    private fun parseLpms(string: String?) =
-        string?.let {
-            lpmSerializer.deserializeList(it)
         }
 
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =
@@ -389,6 +396,14 @@ class LpmRepository constructor(
                 PaymentMethod.Type.AuBecsDebit.code
             )
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed class ServerSpecState(val serverLpmSpecs: String?) {
+        object Uninitialized : ServerSpecState(null)
+        class NoServerSpec(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+        class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+        class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -984,6 +984,7 @@ internal class PaymentSheetActivityTest {
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+        whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
