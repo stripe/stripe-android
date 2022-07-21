@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class LuxeNextActionTest {
+class LuxeNextActionRepositoryTest {
 
     @Test
     fun `test get terminal status when intent status requires_action`() {
@@ -57,5 +57,40 @@ class LuxeNextActionTest {
             "https://hooks.stripe.com/afterpay_clearpay/" +
                 "acct_1HvTI7Lu5o3P18Zp/pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
         )
+    }
+
+
+    @Test
+    fun `test requires action if the status is not an expected state`() {
+        // TODO: This should trigger analytics
+        val lpmNextActionRepository = LuxeNextActionRepository()
+        lpmNextActionRepository.update(
+            mapOf(
+                "afterpay_clearpay" to
+                    LuxeNextActionRepository.LuxeNextAction(
+                        handleNextActionSpec = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeNextActionRepository.RedirectNextActionSpec(
+                                    hostedPagePath = "next_action[redirect_to_url][url]",
+                                    returnToUrlPath = "next_action[redirect_to_url][return_url]"
+                                )
+                        ),
+                        handlePiStatus = listOf(
+                            LuxeNextActionRepository.PiStatusSpec(
+                                associatedStatuses = listOf(StripeIntent.Status.Succeeded),
+                                outcome = StripeIntentResult.Outcome.SUCCEEDED
+                            )
+                        )
+                    )
+            )
+        )
+
+        assertThat(
+            lpmNextActionRepository.requiresAction(
+                PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION.copy(
+                    status = StripeIntent.Status.RequiresPaymentMethod
+                )
+            )
+        ).isFalse()
     }
 }

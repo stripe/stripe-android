@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.StripeIntentResult
 import org.json.JSONObject
 
@@ -81,7 +82,8 @@ class LuxeNextActionRepository {
 
     companion object {
 
-        val DEFAULT_DATA = mapOf(
+        @VisibleForTesting
+        internal val DEFAULT_DATA = mapOf(
             "afterpay_clearpay" to
                 LuxeNextAction(
                     handleNextActionSpec = mapOf(
