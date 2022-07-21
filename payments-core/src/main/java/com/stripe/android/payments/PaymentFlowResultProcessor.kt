@@ -143,7 +143,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // user closes the sheet, and the approval races with this fetch
         val cancelledMaybeRefresh = flowOutcome == CANCELED &&
             (stripeIntent.status == StripeIntent.Status.Processing ||  stripeIntent.status == StripeIntent.Status.RequiresAction) &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
+            stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
 
         return succeededMaybeRefresh || cancelledMaybeRefresh
     }
