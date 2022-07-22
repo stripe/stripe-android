@@ -138,7 +138,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // until the PaymentIntent reaches a deterministic state.
         val succeededMaybeRefresh = flowOutcome == SUCCEEDED && stripeIntent.shouldRefresh()
 
-        // For 3DS flow, if the transaction is still unexpectedly processing or requires_action, refresh the
+        // For 3DS flow, if the transaction is still unexpectedly processing, refresh the
         // PaymentIntent. This could happen if, for example, a payment is approved in a WebView,
         // user closes the sheet, and the approval races with this fetch
         val cancelledMaybeRefresh = flowOutcome == CANCELED &&
