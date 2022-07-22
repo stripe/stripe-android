@@ -75,9 +75,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     ): PaymentAuthenticator<Authenticatable> {
         return when (authenticatable) {
             is StripeIntent -> {
-                // Try the LPM repository to see if LPM next action support was
-                when (val luxeNextActionResult = nextActionRepository.getNextAction(authenticatable)) {
-                    is LuxeNextActionRepository.Result.NextAction -> {
+                when (val luxeNextActionResult = nextActionRepository.getAction(authenticatable)) {
+                    is LuxeNextActionRepository.Result.Action -> {
                         (
                             paymentAuthenticatorMap
                                 .getOrElse(luxeNextActionResult.nextActionData::class.java) {
@@ -86,7 +85,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                             )
                             as PaymentAuthenticator<Authenticatable>
                     }
-                    is LuxeNextActionRepository.Result.NoNextAction ->
+                    is LuxeNextActionRepository.Result.NoAction ->
                         noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                     is LuxeNextActionRepository.Result.NotSupported -> {
                         Log.e("MLB", "Doing the hard coded path.")

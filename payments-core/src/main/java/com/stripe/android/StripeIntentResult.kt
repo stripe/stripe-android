@@ -40,9 +40,8 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     }
 
     private fun getOutcome(stripeIntent: StripeIntent): Int {
-        return luxeNextActionRepository.getTerminalStatus(
-            stripeIntent.paymentMethod?.type?.code,
-            stripeIntent.status
+        return luxeNextActionRepository.getPostAuthorizeIntentOutcome(
+            stripeIntent
         ) ?: run {
             Log.e("MLB", "Doing the old way.")
             when (stripeIntent.status) {

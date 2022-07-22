@@ -1154,7 +1154,7 @@ internal object PaymentIntentFixtures {
         )
     }
 
-    val KONBINI_REQUIES_ACTION by lazy {
+    val KONBINI_REQUIRES_ACTION by lazy {
         requireNotNull(PARSER.parse(KONBINI_REQUIRES_ACTION_JSON))
     }
 

@@ -42,11 +42,8 @@ class PaymentIntentResultTest {
         result.luxeNextActionRepository.update(
             mapOf(
                 "oxxo" to LUXE_NEXT_ACTION.copy(
-                    handlePiStatus = listOf(
-                        LuxeNextActionRepository.PiStatusSpec(
-                            associatedStatuses = listOf(StripeIntent.Status.Processing),
-                            outcome = StripeIntentResult.Outcome.CANCELED
-                        )
+                    postAuthorizeIntentStatus = mapOf(
+                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.CANCELED
                     )
                 )
             )

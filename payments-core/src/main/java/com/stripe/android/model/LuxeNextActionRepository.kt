@@ -1,159 +1,89 @@
 package com.stripe.android.model
 
-import android.net.Uri
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.StripeIntentResult
-import org.json.JSONObject
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class LuxeNextActionRepository {
-    private val codeToNextActionSpec = mutableMapOf<String, LuxeNextAction>()
+    private val codeToNextActionSpec = mutableMapOf<String, LuxeAction>()
 
-    fun update(additionalData: Map<String, LuxeNextAction>) {
+    fun update(additionalData: Map<String, LuxeAction>) {
         codeToNextActionSpec.putAll(additionalData)
     }
 
-    fun getTerminalStatus(lpmCode: PaymentMethodCode?, status: StripeIntent.Status?) =
-        codeToNextActionSpec[lpmCode]?.let { luxeNextAction ->
-            luxeNextAction.handlePiStatus.firstOrNull {
-                it.associatedStatuses.contains(status)
-            }?.outcome
+    /**
+     * Given the PaymentIntent retrieved after the returnUrl (not redirectUrl), based on
+     * the Payment Method code and Status of the Intent what is the [StripeIntentResult.Outcome]
+     * of the operation.
+     */
+    fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
+        stripeIntent.getPaymentCodeFromJsonString()?.let { lpmCode ->
+            codeToNextActionSpec[lpmCode]?.postAuthorizeIntentStatus?.get(stripeIntent.status)
         }
-
-    private fun supportsAction(stripeIntent: StripeIntent) =
-        getHandleNextActionSpec(stripeIntent)
-            ?.containsKey(stripeIntent.status)
-            ?: false
 
     /**
-     * Null returned from this function indicates either this class doesn't known
-     * what the next action should be, or that there is no next action.  The requiresAction
-     * method should be called first to determine the difference.
+     * Given the Intent returned from the confirm call, the payment method code and status
+     * will be used to lookup the "instructions" for how to pull a next action from the
+     * payment intent
+     *
+     * Return a [Result] that indicates if there is a next action, no next action, or
+     * if it is not supported by the data in this repository.
      */
-    internal fun getNextAction(
+    internal fun getAction(
         stripeIntent: StripeIntent
-    ) = if (!supportsAction(stripeIntent)) {
-        Result.NotSupported
-    } else {
-        val nextActionForState = getHandleNextActionSpec(stripeIntent)
-            ?.get(stripeIntent.status)
-        if (nextActionForState == null) {
-            Result.NoNextAction
-        } else {
-            stripeIntent.jsonString?.let {
-                val returnUrl = getPath(
-                    nextActionForState.returnToUrlPath,
-                    JSONObject(it)
-                )
-                val url = Uri.parse(
-                    getPath(
-                        nextActionForState.hostedPagePath,
-                        JSONObject(it)
-                    )
-                )
-                if (nextActionForState.returnToUrlPath == null || returnUrl != null) {
-                    Result.NextAction(
-                        StripeIntent.NextActionData.RedirectToUrl(
-                            returnUrl = returnUrl,
-                            url = url
-                        )
-                    )
-                } else {
-                    Result.NotSupported
-                }
-            }
+    ) = stripeIntent.jsonString?.let { stripeIntentJsonString ->
+        stripeIntent.getPaymentCodeFromJsonString()?.let { lpmCode ->
+            getActionCreator(lpmCode, stripeIntent.status)
+                ?.actionCreator?.create(stripeIntentJsonString)
+                ?: Result.NotSupported
         } ?: Result.NotSupported
-    }
+    } ?: Result.NotSupported
 
-    private fun getHandleNextActionSpec(stripeIntent: StripeIntent) =
-        stripeIntent.jsonString?.let {
-            JSONObject(it)
-                .optJSONObject("payment_method")
-                ?.optString("type")
-        }?.let { lpmCode ->
-            codeToNextActionSpec[lpmCode]?.handleNextActionSpec
-        }
-
-    private fun getPath(path: String?, json: JSONObject): String? {
-        if (path != null) {
-            val pathArray = ("[*" + "([A-Za-z_0-9]+)" + "]*").toRegex().findAll(path)
-                .map { it.value }
-                .distinct()
-                .filterNot { it.isEmpty() }
-                .toList()
-            var jsonObject: JSONObject? = json
-            for (key in pathArray) {
-                if (jsonObject == null) {
-                    break
-                }
-                if (jsonObject.has(key)) {
-                    val tempJsonObject = jsonObject.optJSONObject(key)
-                    val tempJsonString = jsonObject.get(key)
-
-                    if (tempJsonObject != null) {
-                        jsonObject = tempJsonObject
-                    } else if ((tempJsonString as? String) != null) {
-                        return tempJsonString
-                    }
-                }
-            }
-        }
-        return null
-    }
+    private fun getActionCreator(lpmCode: PaymentMethodCode?, status: StripeIntent.Status?) =
+        codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus.takeIf { it?.status == status }
 
     companion object {
         @VisibleForTesting
         internal val DEFAULT_DATA = mapOf(
             "afterpay_clearpay" to
-                LuxeNextAction(
-                    handleNextActionSpec = mapOf(
-                        StripeIntent.Status.RequiresAction to
-                            RedirectNextActionSpec(
-                                hostedPagePath = "next_action[redirect_to_url][url]",
-                                returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                            )
-                    ),
-                    handlePiStatus = listOf(
-                        PiStatusSpec(
-                            associatedStatuses = listOf(StripeIntent.Status.Succeeded),
-                            outcome = StripeIntentResult.Outcome.SUCCEEDED
-                        ),
-                        PiStatusSpec(
-                            associatedStatuses = listOf(StripeIntent.Status.RequiresPaymentMethod),
-                            outcome = StripeIntentResult.Outcome.FAILED
-                        ),
-                        PiStatusSpec(
-                            associatedStatuses = listOf(StripeIntent.Status.RequiresAction),
-                            outcome = StripeIntentResult.Outcome.CANCELED
+                LuxeAction(
+                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
+                        StripeIntent.Status.RequiresAction,
+                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
+                            hostedPagePath = "next_action[redirect_to_url][url]",
+                            returnToUrlPath = "next_action[redirect_to_url][return_url]"
                         )
+                    ),
+                    postAuthorizeIntentStatus = mapOf(
+                        StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
+                        StripeIntent.Status.RequiresPaymentMethod to StripeIntentResult.Outcome.FAILED,
+                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
                     )
                 ),
             "konbini" to
-                LuxeNextAction(
-                    handleNextActionSpec = mapOf(
-                        StripeIntent.Status.RequiresAction to
-                            RedirectNextActionSpec(
-                                hostedPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-                                returnToUrlPath = "next_action[konbini_display_details][return_url]"
-                            )
-                    ),
-                    handlePiStatus = listOf(
-                        PiStatusSpec(
-                            associatedStatuses = listOf(StripeIntent.Status.RequiresAction),
-                            outcome = StripeIntentResult.Outcome.SUCCEEDED
+                LuxeAction(
+                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
+                        StripeIntent.Status.RequiresAction,
+                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
+                            hostedPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+                            returnToUrlPath = null
                         )
+                    ),
+                    postAuthorizeIntentStatus = mapOf(
+                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
+                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
                     )
                 ),
 
             "sepa_debit" to
-                LuxeNextAction(
-                    handleNextActionSpec = mapOf(
-                        StripeIntent.Status.Processing to null
+                LuxeAction(
+                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
+                        StripeIntent.Status.Processing,
+                        LuxeActionCreatorForStatus.ActionCreator.NoActionCreator
                     ),
-                    handlePiStatus = listOf(
-                        PiStatusSpec(
-                            associatedStatuses = listOf(StripeIntent.Status.Processing),
-                            outcome = StripeIntentResult.Outcome.SUCCEEDED
-                        )
+                    postAuthorizeIntentStatus = mapOf(
+                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
                     )
                 )
         )
@@ -162,24 +92,22 @@ class LuxeNextActionRepository {
 //            .apply { update(DEFAULT_DATA) }
     }
 
-    data class PiStatusSpec(
-        val associatedStatuses: List<StripeIntent.Status>,
-        @StripeIntentResult.Outcome val outcome: Int
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class LuxeAction(
+        /**
+         * This should be null to use custom next action behavior coded in the SDK
+         */
+        val postConfirmStatusNextStatus: LuxeActionCreatorForStatus?,
+
+        // Int here is @StripeIntentResult.Outcome
+        val postAuthorizeIntentStatus: Map<StripeIntent.Status, Int>
     )
 
-    data class RedirectNextActionSpec(
-        val hostedPagePath: String,
-        val returnToUrlPath: String?
-    )
-
-    data class LuxeNextAction(
-        val handleNextActionSpec: Map<StripeIntent.Status, RedirectNextActionSpec?>,
-        val handlePiStatus: List<PiStatusSpec>
-    )
-
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     sealed class Result {
-        data class NextAction(val nextActionData: StripeIntent.NextActionData) : Result()
-        object NoNextAction : Result()
+        data class Action(val nextActionData: StripeIntent.NextActionData) : Result()
+        object NoAction : Result()
         object NotSupported : Result()
     }
 }

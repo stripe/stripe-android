@@ -8,7 +8,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.RedirectNextActionSpec
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -348,38 +347,7 @@ class LpmRepository constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
-    enum class PIStatusType {
-        Finished,
-        Canceled,
-        // ?
-    }
-
-    data class PiStatusSpec(
-        @SerialName("associated_statuses")
-        val associatedStatuses: List<String>,
-        @SerialName("type")
-        val type: String // finished, canceled
-    )
-
-    @SerialName("redirect_to_hosted_page")
-    data class RedirectNextActionSpec(
-//        val type: String // redirect_to_hosted_page only valid operation
-        @SerialName("associated_statuses")
-        val associatedStatuses: List<String>, // ["requires_action"]
-        @SerialName("hosted_page_path")
-        val hostedPagePath: String // next_action.konbini_display_details.hosted_voucher_url
-    )
-
-    data class NextActionSpec(
-        @SerialName("handle_next_action_specs")
-        val handleNextActionSpec: List<RedirectNextActionSpec>,
-
-        @SerialName("handle_pi_status_specs")
-        val handlePiStatus: List<RedirectNextActionSpec>
-    )
-
-    enum class LpmInitialFormData {
-        Instance;
+    class LpmInitialFormData {
 
         private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
@@ -392,6 +360,10 @@ class LpmRepository constructor(
         fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
         fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) =
             codeToSupportedPaymentMethod.putAll(map)
+
+        companion object {
+            val Instance = LpmInitialFormData()
+        }
     }
 
     companion object {
