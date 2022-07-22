@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package com.stripe.android.financialconnections.ui
 
 import android.content.Intent
@@ -70,6 +68,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun NavHost() {
         val navController = rememberNavController()
@@ -97,7 +96,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         super.onNewIntent(intent)
         viewModel.handleOnNewIntent(intent)
     }
-
 
     override fun onResume() {
         super.onResume()
