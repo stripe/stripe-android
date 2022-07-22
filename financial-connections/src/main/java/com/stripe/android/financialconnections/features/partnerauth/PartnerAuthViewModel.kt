@@ -63,11 +63,12 @@ internal class PartnerAuthViewModel @Inject constructor(
     ) {
         kotlin.runCatching {
             val session = authorizeAuthorizationSession(authSession.id)
-            setState { copy(title = "Session authorized! ${session.nextPane}") }
+            setState { copy(title = "Session authorized! Start polling accounts.") }
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
-            nativeAuthFlowCoordinator().emit(
-                RequestNextStep(currentStep = NavigationDirections.partnerAuth)
-            )
+            // TODO@carlosmuvi start polling until accounts ready, then navigate to next pane.
+//            nativeAuthFlowCoordinator().emit(
+//                RequestNextStep(currentStep = NavigationDirections.partnerAuth)
+//            )
         }.onFailure {
             logger.error("failed authorizing session", it)
             setState { copy(title = "Failed authorizing session!") }
