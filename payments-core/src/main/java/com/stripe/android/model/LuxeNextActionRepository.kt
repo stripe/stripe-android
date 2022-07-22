@@ -89,7 +89,7 @@ class LuxeNextActionRepository {
         )
 
         val Instance: LuxeNextActionRepository = LuxeNextActionRepository()
-//            .apply { update(DEFAULT_DATA) }
+            .apply { update(DEFAULT_DATA) }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

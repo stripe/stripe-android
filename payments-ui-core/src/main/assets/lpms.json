@@ -1,5 +1,17 @@
 [
   {
+    "type": "konbini",
+    "async": false,
+    "fields": [
+      {
+        "type": "name"
+      },
+      {
+        "type": "email"
+      }
+    ]
+  },
+  {
     "type": "afterpay_clearpay",
     "async": false,
     "fields": [
