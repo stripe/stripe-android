@@ -213,13 +213,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 refreshStripeIntent(
                     clientSecret = clientSecret,
                     requestOptions = requestOptions,
-                    expandFields = listOf()
+                    expandFields = EXPAND_PAYMENT_METHOD
                 )
             } else {
                 retrieveStripeIntent(
                     clientSecret = clientSecret,
                     requestOptions = requestOptions,
-                    expandFields = listOf()
+                    expandFields = EXPAND_PAYMENT_METHOD
                 )
             }
         )
@@ -234,13 +234,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     refreshStripeIntent(
                         clientSecret = clientSecret,
                         requestOptions = requestOptions,
-                        expandFields = listOf()
+                        expandFields = EXPAND_PAYMENT_METHOD
                     )
                 } else {
                     retrieveStripeIntent(
                         clientSecret = clientSecret,
                         requestOptions = requestOptions,
-                        expandFields = listOf()
+                        expandFields = EXPAND_PAYMENT_METHOD
                     )
                 }
             )
