@@ -221,20 +221,30 @@ internal class PaymentIntentFlowResultProcessorTest {
     @Test
     fun `3ds2 canceled with processing intent should succeed`() =
         runTest {
+            val initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.Processing
+            )
+            val refreshedIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.Succeeded
+            )
             runCanceledFlow(
-                initialIntent = PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2,
-                refreshedIntent = PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED
+                initialIntent = initialIntent,
+                refreshedIntent = refreshedIntent
             )
         }
 
     @Test
     fun `3ds2 canceled with requires capture intent should succeed`() =
         runTest {
+            val initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.Processing
+            )
+            val refreshedIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.RequiresCapture
+            )
             runCanceledFlow(
-                initialIntent = PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2,
-                refreshedIntent = PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED.copy(
-                    status = StripeIntent.Status.RequiresCapture
-                )
+                initialIntent = initialIntent,
+                refreshedIntent = refreshedIntent
             )
         }
 
@@ -242,30 +252,33 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `3ds2 canceled with succeeded intent should succeed`() =
         runTest {
             runCanceledFlow(
-                initialIntent = PaymentIntentFixtures.PI_VISA_3DS2_SUCCEEDED
+                initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                    status = StripeIntent.Status.Succeeded
+                )
             )
         }
 
     @Test
     fun `3ds2 canceled reaches max retry with processing intent should fail`() =
         runTest(testDispatcher) {
+            val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.RequiresAction
+            )
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2
+                intent
             )
 
             val clientSecret = requireNotNull(
-                PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2.clientSecret
+                intent.clientSecret
             )
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            assertFailsWith<MaxRetryReachedException> {
-                processor.processResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.CANCELED
-                    )
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            }
+            )
 
             verify(
                 mockStripeRepository,
@@ -275,6 +288,16 @@ internal class PaymentIntentFlowResultProcessorTest {
                 eq(requestOptions),
                 eq(emptyList())
             )
+
+            assertThat(result)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        intent,
+                        StripeIntentResult.Outcome.CANCELED,
+                        "We are unable to authenticate your payment method. " +
+                            "Please choose a different payment method and try again."
+                    )
+                )
         }
 
     private suspend fun runCanceledFlow(
