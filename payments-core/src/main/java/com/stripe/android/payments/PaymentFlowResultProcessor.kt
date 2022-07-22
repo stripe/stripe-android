@@ -147,11 +147,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
         // For similar reasons, the transaction could be unexpectedly stuck in `requires_action` for
         // a UseStripeSDK next_action. If so, refresh the PaymentIntent.
-        val actionNotProcessedMaybeRefresh =  flowOutcome == CANCELED &&
+        val actionNotProcessedMaybeRefresh = flowOutcome == CANCELED &&
             stripeIntent.status == StripeIntent.Status.RequiresAction &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
-        
+
         return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh
     }
 
