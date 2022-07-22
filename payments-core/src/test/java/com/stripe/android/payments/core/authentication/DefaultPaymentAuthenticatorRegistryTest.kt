@@ -181,13 +181,14 @@ class DefaultPaymentAuthenticatorRegistryTest {
         assertNull(registry.paymentBrowserAuthLauncher)
     }
 
+    @Test
     fun `verify luxe next action is queried first for next action and returns no next action`() {
         val stripeIntent = PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION
         registry.nextActionRepository = LuxeNextActionRepository()
 
         // This is using the old hard coded path
         assertThat(registry.getAuthenticator(stripeIntent))
-            .isInstanceOf(WebIntentAuthenticator::class.java)
+            .isEqualTo(redirectToUrlAuthenticator)
 
         registry.nextActionRepository.update(
             mapOf(
@@ -203,34 +204,35 @@ class DefaultPaymentAuthenticatorRegistryTest {
 
         // This will use the result of the LuxeNextActionRepo
         assertThat(registry.getAuthenticator(stripeIntent))
-            .isInstanceOf(NoOpIntentAuthenticator::class.java)
+            .isEqualTo(noOpIntentAuthenticator)
     }
 
+    @Test
     fun `verify luxe next action is queried first for next action and returns next action`() {
         val stripeIntent = PaymentIntentFixtures.KONBINI_REQUIRES_ACTION
         registry.nextActionRepository = LuxeNextActionRepository()
 
         // This is using the old hard coded path
         assertThat(registry.getAuthenticator(stripeIntent))
-            .isInstanceOf(WebIntentAuthenticator::class.java)
+            .isInstanceOf(NoOpIntentAuthenticator::class.java)
 
-//        registry.nextActionRepository.update(
-//            mapOf(
-//                "konbini" to
-//                    LUXE_NEXT_ACTION.copy(
-//                        postConfirmStatusNextStatus = LuxeNextActionRepository.ActionCreatorForStatus(
-//                            StripeIntent.Status.RequiresAction,
-//                            LuxeNextActionRepository.ActionCreator.RedirectActionCreator(
-//                                hostedPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-//                                returnToUrlPath = null
-//                            )
-//                        )
-//                    ),
-//            )
-//        )
+        registry.nextActionRepository.update(
+            mapOf(
+                "konbini" to
+                    LUXE_NEXT_ACTION.copy(
+                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
+                            StripeIntent.Status.RequiresAction,
+                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
+                                hostedPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+                                returnToUrlPath = null
+                            )
+                        )
+                    )
+            )
+        )
 
         // This will use the result of the LuxeNextActionRepo
         assertThat(registry.getAuthenticator(stripeIntent))
-            .isInstanceOf(WebIntentAuthenticator::class.java)
+            .isEqualTo(redirectToUrlAuthenticator)
     }
 }

@@ -50,6 +50,7 @@ internal class WebIntentAuthenticator @Inject constructor(
         var shouldCancelSource = false
         var shouldCancelIntentOnUserNavigation = true
 
+        // Move this to the StripeIntent
         val nextActionData =
             (nextActionRepository.getAction(authenticatable) as? LuxeNextActionRepository.Result.Action)
                 ?.nextActionData ?: authenticatable.nextActionData

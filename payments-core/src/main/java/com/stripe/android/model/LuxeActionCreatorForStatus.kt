@@ -52,7 +52,7 @@ data class LuxeActionCreatorForStatus(
             var pathIndex = 0
             while (pathIndex < pathArray.size &&
                 jsonObject != null &&
-                jsonObject.get(pathArray[pathIndex]) !is String
+                jsonObject.opt(pathArray[pathIndex]) !is String
             ) {
                 val key = pathArray[pathIndex]
                 if (jsonObject.has(key)) {
@@ -64,7 +64,7 @@ data class LuxeActionCreatorForStatus(
                 }
                 pathIndex++
             }
-            return jsonObject?.get(pathArray[pathArray.size - 1]) as? String
+            return jsonObject?.opt(pathArray[pathArray.size - 1]) as? String
         }
 
         object NoActionCreator : ActionCreator() {
