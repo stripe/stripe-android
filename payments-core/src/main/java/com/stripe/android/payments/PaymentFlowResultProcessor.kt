@@ -71,6 +71,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 }
                 shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
                     val intent = refreshStripeIntentUntilTerminalState(
+                        stripeIntent,
                         result.clientSecret,
                         requestOptions
                     )
@@ -163,6 +164,17 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
     }
 
+    /**
+     * https://livegrep.corp.stripe.com/view/stripe-internal/pay-server/lib/payment_flows/private/commands/refresh_payment_intent.rb#L23
+     * The refresh endpoint will safely send the intent data if it isn't in requires_action,
+     * but if it is in requires_action it will try to refresh and fail as refresh is only
+     * implemented on wechat_pay and upi
+     */
+    private fun shouldCallRefreshIntent(stripeIntent: StripeIntent): Boolean {
+        return stripeIntent.paymentMethod?.type == PaymentMethod.Type.WeChatPay ||
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi
+    }
+
     protected abstract suspend fun retrieveStripeIntent(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
@@ -192,17 +204,26 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         InvalidRequestException::class
     )
     private suspend fun refreshStripeIntentUntilTerminalState(
+        originalIntent: StripeIntent,
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ): T {
         var remainingRetries = MAX_RETRIES
 
         var stripeIntent = requireNotNull(
-            refreshStripeIntent(
-                clientSecret = clientSecret,
-                requestOptions = requestOptions,
-                expandFields = listOf()
-            )
+            if (shouldCallRefreshIntent(originalIntent)) {
+                refreshStripeIntent(
+                    clientSecret = clientSecret,
+                    requestOptions = requestOptions,
+                    expandFields = listOf()
+                )
+            } else {
+                retrieveStripeIntent(
+                    clientSecret = clientSecret,
+                    requestOptions = requestOptions,
+                    expandFields = listOf()
+                )
+            }
         )
         while (shouldRetry(stripeIntent) && remainingRetries > 1) {
             val delayMs = retryDelaySupplier.getDelayMillis(
@@ -213,11 +234,19 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 delay(delayMs)
             }
             stripeIntent = requireNotNull(
-                refreshStripeIntent(
-                    clientSecret = clientSecret,
-                    requestOptions = requestOptions,
-                    expandFields = listOf()
-                )
+                if (shouldCallRefreshIntent(originalIntent)) {
+                    refreshStripeIntent(
+                        clientSecret = clientSecret,
+                        requestOptions = requestOptions,
+                        expandFields = listOf()
+                    )
+                } else {
+                    retrieveStripeIntent(
+                        clientSecret = clientSecret,
+                        requestOptions = requestOptions,
+                        expandFields = listOf()
+                    )
+                }
             )
             remainingRetries--
         }
