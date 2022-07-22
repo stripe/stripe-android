@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
 import javax.inject.Inject
@@ -71,6 +72,42 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getAuthorizationSessionAccounts(
+        clientSecret: String,
+        sessionId: String,
+    ): PartnerAccountsList {
+        val request = apiRequestFactory.createGet(
+            url = accountsSessionUrl(sessionId),
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            PartnerAccountsList.serializer()
+        )
+    }
+
+    override suspend fun completeAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+        publicToken: String?
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = authorizeSessionUrl(sessionId),
+            options = options,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "public_token" to publicToken
+            ).filter { it.value != null }
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
+        )
+    }
+
     internal companion object {
         internal const val listAccountsUrl: String =
             "$API_HOST/v1/link_account_sessions/list_accounts"
@@ -80,5 +117,11 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
         internal const val authorizationSessionUrl: String =
             "$API_HOST/v1/connections/auth_sessions"
+
+        internal fun authorizeSessionUrl(authSessionId: String): String =
+            "$API_HOST/v1/connections/auth_sessions/$authSessionId/authorized"
+
+        internal fun accountsSessionUrl(authSessionId: String): String =
+            "$API_HOST/v1/connections/auth_sessions/$authSessionId/accounts"
     }
 }

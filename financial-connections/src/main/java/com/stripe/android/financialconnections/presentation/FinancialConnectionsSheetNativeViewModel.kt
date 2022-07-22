@@ -1,8 +1,14 @@
 package com.stripe.android.financialconnections.presentation
 
+import android.content.Intent
+import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
@@ -11,9 +17,11 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,7 +53,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     Message.OpenWebAuthFlow -> {
                         val manifest = getManifest()
                         setState {
-                            copy(viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+                            copy(viewEffect = OpenUrl(manifest.hostedAuthUrl))
                         }
                     }
                 }
@@ -57,8 +65,37 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    fun handleOnNewIntent(intent: Intent?) {
+        viewModelScope.launch {
+            when (val data = intent?.data.toString()) {
+                SUCCESS_URL -> setState { copy(webAuthFlow = Success(data)) }
+                else -> setState { copy(webAuthFlow = Fail(WebAuthFlowFailedException(data))) }
+            }
+        }
+    }
+
+    fun openPartnerAuthFlowInBrowser(url: String) {
+        setState {
+            copy(
+                webAuthFlow = Loading(),
+                viewEffect = OpenUrl(url)
+            )
+        }
+    }
+
+    fun onResume() {
+        setState {
+            if (webAuthFlow is Loading) {
+                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+            } else this
+        }
+    }
+
     companion object :
         MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
+
+        // TODO@carlosmuvi: temporary redirect url for native.
+        private const val SUCCESS_URL = "stripe-auth://link-accounts/login"
 
         override fun create(
             viewModelContext: ViewModelContext,
@@ -76,6 +113,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 }
 
 internal data class FinancialConnectionsSheetNativeState(
+    val webAuthFlow: Async<String>,
     val authorizationSession: FinancialConnectionsAuthorizationSession?,
     val configuration: FinancialConnectionsSheet.Configuration,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
@@ -86,6 +124,7 @@ internal data class FinancialConnectionsSheetNativeState(
      */
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
+        webAuthFlow = Uninitialized,
         configuration = args.configuration,
         authorizationSession = null,
         viewEffect = null
@@ -96,7 +135,7 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     /**
      * Open the Web AuthFlow.
      */
-    data class OpenAuthFlowWithUrl(
+    data class OpenUrl(
         val url: String
     ) : FinancialConnectionsSheetNativeViewEffect
 }

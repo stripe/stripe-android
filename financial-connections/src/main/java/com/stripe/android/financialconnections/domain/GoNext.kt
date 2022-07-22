@@ -39,6 +39,12 @@ internal class GoNext @Inject constructor(
              */
             NavigationDirections.consent.destination ->
                 manifest.nextPane.toNavigationCommand()
+            /**
+             * after partner auth, auth completion receives an updated [FinancialConnectionsAuthorizationSession],
+             * source of truth for navigation.
+             */
+            NavigationDirections.partnerAuth.destination ->
+                authorizationSession!!.nextPane.toNavigationCommand()
             else -> TODO()
         }
         logger.debug("Navigating to next pane: ${nextPane.destination}")

@@ -11,10 +11,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -68,12 +71,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
         clearSearch()
         suspend {
             // api call
-            postAuthorizationSession(institution)
+            val session = postAuthorizationSession(institution)
             // navigate to next step
-            nativeAuthFlowCoordinator().emit(Message.OpenWebAuthFlow)
-            // TODO@carlosmuvi use this when next steps available in native.
-//            updateAuthSession(session)
-//            requestNextStep(currentStep = NavigationDirections.institutionPicker)
+            nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
+            nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = institutionPicker))
         }.execute {
             copy(
                 selectInstitution = it,
