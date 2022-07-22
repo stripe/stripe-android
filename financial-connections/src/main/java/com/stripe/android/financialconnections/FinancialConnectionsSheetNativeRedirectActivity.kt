@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
 /**
- * This Activity handles redirects from the ChromeCustomTab hosting the AuthFlow.
+ * This Activity handles redirects from the Institution authorization flow hand-off from native.
  * It'll process the result url in [Intent.getData] and pass them back to the opening activity,
  * [FinancialConnectionsSheetNativeActivity].
  */
