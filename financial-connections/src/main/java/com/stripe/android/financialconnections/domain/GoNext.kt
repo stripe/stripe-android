@@ -56,10 +56,10 @@ internal class GoNext @Inject constructor(
     private fun NextPane.toNavigationCommand(): NavigationCommand = when (this) {
         NextPane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
         NextPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
-        NextPane.ACCOUNT_PICKER,
+        NextPane.CONSENT -> NavigationDirections.consent
+        NextPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
         NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT,
         NextPane.AUTH_OPTIONS,
-        NextPane.CONSENT -> NavigationDirections.consent
         NextPane.LINK_CONSENT,
         NextPane.LINK_LOGIN,
         NextPane.MANUAL_ENTRY,
