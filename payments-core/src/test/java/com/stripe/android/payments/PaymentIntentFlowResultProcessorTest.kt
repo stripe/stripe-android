@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -282,11 +283,11 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                times(PaymentFlowResultProcessor.MAX_RETRIES)
+                times(PaymentFlowResultProcessor.MAX_RETRIES + 1)
             ).retrievePaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions),
-                eq(emptyList())
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
             )
 
             assertThat(result)
@@ -319,7 +320,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             )
         )
 
-        verify(mockStripeRepository, times(1)).retrievePaymentIntent(
+        verify(mockStripeRepository, atLeastOnce()).retrievePaymentIntent(
             eq(clientSecret),
             eq(requestOptions),
             eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
