@@ -11,6 +11,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -61,16 +62,32 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onViewEffectLaunched() {
-        setState { copy(viewEffect = null) }
-    }
-
+    /**
+     * When authorization flow finishes, it will redirect to a URL scheme stripe-auth://link-accounts
+     * captured by [com.stripe.android.financialconnections.FinancialConnectionsSheetNativeRedirectActivity]
+     * that will launch this activity in `singleTask` mode.
+     *
+     * @param intent the new intent with the redirect URL in the intent data
+     */
     fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
             when (val data = intent?.data.toString()) {
                 SUCCESS_URL -> setState { copy(webAuthFlow = Success(data)) }
                 else -> setState { copy(webAuthFlow = Fail(WebAuthFlowFailedException(data))) }
             }
+        }
+    }
+
+    /**
+     *  If activity resumes and we did not receive a callback from the AuthFlow,
+     *  then the user hit the back button or closed the custom tabs UI, so return result as
+     *  canceled.
+     */
+    fun onResume() {
+        setState {
+            if (webAuthFlow is Loading) {
+                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+            } else this
         }
     }
 
@@ -83,12 +100,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onResume() {
-        setState {
-            if (webAuthFlow is Loading) {
-                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-            } else this
-        }
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
     }
 
     companion object :

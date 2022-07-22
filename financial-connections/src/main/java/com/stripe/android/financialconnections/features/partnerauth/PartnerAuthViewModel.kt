@@ -11,21 +11,19 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.domain.AuthorizeAuthorizationSession
+import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class PartnerAuthViewModel @Inject constructor(
-    val authorizeAuthorizationSession: AuthorizeAuthorizationSession,
+    val completeAuthorizationSession: CompleteAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     val repository: FinancialConnectionsRepository,
@@ -62,7 +60,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         authSession: FinancialConnectionsAuthorizationSession
     ) {
         kotlin.runCatching {
-            val session = authorizeAuthorizationSession(authSession.id)
+            val session = completeAuthorizationSession(authSession.id)
             setState { copy(title = "Session authorized! Start polling accounts.") }
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
             // TODO@carlosmuvi start polling until accounts ready, then navigate to next pane.

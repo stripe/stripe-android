@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
-internal class AuthorizeAuthorizationSession @Inject constructor(
+internal class CompleteAuthorizationSession @Inject constructor(
     val repository: FinancialConnectionsRepository,
     val configuration: FinancialConnectionsSheet.Configuration
 ) {
