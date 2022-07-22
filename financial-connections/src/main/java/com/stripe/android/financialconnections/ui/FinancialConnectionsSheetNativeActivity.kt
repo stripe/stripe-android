@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
@@ -84,7 +85,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 PartnerAuthScreen()
             }
             composable(NavigationDirections.accountPicker.destination) {
-                PartnerAuthScreen()
+                AccountPickerScreen()
             }
         }
     }

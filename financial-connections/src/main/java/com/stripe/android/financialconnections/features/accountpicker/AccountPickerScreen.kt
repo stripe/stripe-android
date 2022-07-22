@@ -9,7 +9,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
-internal fun PartnerAuthScreen() {
+internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
     Column {
