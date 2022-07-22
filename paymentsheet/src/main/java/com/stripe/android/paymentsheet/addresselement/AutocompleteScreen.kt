@@ -107,6 +107,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 .fillMaxHeight()
                 .systemBarsPadding()
                 .padding(paddingValues)
+                .background(MaterialTheme.colors.surface)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()

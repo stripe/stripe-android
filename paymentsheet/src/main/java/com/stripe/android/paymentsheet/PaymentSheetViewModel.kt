@@ -228,15 +228,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // The co-routine scope is needed to do work off the UI thread
             CoroutineScope(workContext).launch {
                 runCatching {
-                    val (intent, specs) = initializeRepositoryAndGetStripeIntent(
+                    val intent = initializeRepositoryAndGetStripeIntent(
                         resourceRepository,
                         stripeIntentRepository,
-                        args.clientSecret
+                        args.clientSecret,
+                        eventReporter
                     )
+
+                    lpmServerSpec =
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
 
                     // The lpm server specs need to be saved so that upon the
                     // activity being killed the state can be restored.
-                    lpmServerSpec = specs
                     intent
                 }.fold(
                     onSuccess = {

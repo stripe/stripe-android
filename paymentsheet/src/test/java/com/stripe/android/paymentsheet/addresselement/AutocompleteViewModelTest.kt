@@ -210,4 +210,17 @@ class AutocompleteViewModelTest {
 
         assertThat(viewModel.predictions.value?.size).isEqualTo(null)
     }
+
+    @Test
+    fun `when address is empty trailing icon is null`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("")
+
+        assertThat(viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope).value).isNull()
+
+        viewModel.textFieldController.onRawValueChange("a")
+
+        assertThat(viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope).value).isNotNull()
+    }
 }

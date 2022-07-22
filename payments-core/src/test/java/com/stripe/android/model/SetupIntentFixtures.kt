@@ -449,4 +449,184 @@ internal object SetupIntentFixtures {
     )
 
     val SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED = PARSER.parse(SI_WITH_US_BANK_ACCOUNT_VERIFY_COMPLETED_JSON)!!
+
+    val SI_3DS2_SUCCEEDED_JSON = JSONObject(
+        """
+            {
+                "id": "seti_1L9F4bLu5o3P18Zp0IGLYrNZ",
+                "object": "setup_intent",
+                "application": null,
+                "cancellation_reason": null,
+                "client_secret": "seti_1L9F4bLu5o3P18Zp0IGLYrNZ_secret_Lqwy13NMvtzx88afOLNndJRei6rkl8H",
+                "created": 1654895333,
+                "customer": "cus_LqvlPQBk2QUmXl",
+                "description": null,
+                "flow_directions": null,
+                "last_setup_error": null,
+                "latest_attempt": "setatt_1L9F4oLu5o3P18Zp8eQa9Mn2",
+                "livemode": false,
+                "mandate": null,
+                "metadata": {},
+                "next_action": null,
+                "on_behalf_of": null,
+                "payment_method": {
+                    "id": "pm_1L9F4oLu5o3P18ZpahIpZYFz",
+                    "object": "payment_method",
+                    "billing_details": {
+                        "address": {
+                            "city": null,
+                            "country": "IE",
+                            "line1": null,
+                            "line2": null,
+                            "postal_code": null,
+                            "state": null
+                        },
+                        "email": null,
+                        "name": null,
+                        "phone": null
+                    },
+                    "card": {
+                        "brand": "visa",
+                        "checks": {
+                            "address_line1_check": null,
+                            "address_postal_code_check": null,
+                            "cvc_check": "pass"
+                        },
+                        "country": "IE",
+                        "exp_month": 6,
+                        "exp_year": 2066,
+                        "fingerprint": "UrRvw6ZlmgRswqMC",
+                        "funding": "credit",
+                        "generated_from": null,
+                        "last4": "3220",
+                        "networks": {
+                            "available": [
+                                "visa"
+                            ],
+                            "preferred": null
+                        },
+                        "three_d_secure_usage": {
+                            "supported": true
+                        },
+                        "wallet": null
+                    },
+                    "created": 1654895346,
+                    "customer": "cus_LqvlPQBk2QUmXl",
+                    "livemode": false,
+                    "metadata": {},
+                    "type": "card"
+                },
+                "payment_method_options": {
+                    "card": {
+                        "mandate_options": null,
+                        "network": null,
+                        "request_three_d_secure": "automatic"
+                    },
+                    "us_bank_account": {
+                        "verification_method": "automatic"
+                    }
+                },
+                "payment_method_types": [
+                    "card",
+                    "us_bank_account",
+                    "link"
+                ],
+                "single_use_mandate": null,
+                "status": "succeeded",
+                "usage": "off_session"
+            }
+        """.trimIndent()
+    )
+
+    val SI_3DS2_SUCCEEDED = PARSER.parse(SI_3DS2_SUCCEEDED_JSON)!!
+
+    val SI_3DS2_PROCESSING_JSON = JSONObject(
+        """
+            {
+                "id": "seti_1L9F4bLu5o3P18Zp0IGLYrNZ",
+                "object": "setup_intent",
+                "application": null,
+                "cancellation_reason": null,
+                "client_secret": "seti_1L9F4bLu5o3P18Zp0IGLYrNZ_secret_Lqwy13NMvtzx88afOLNndJRei6rkl8H",
+                "created": 1654895333,
+                "customer": "cus_LqvlPQBk2QUmXl",
+                "description": null,
+                "flow_directions": null,
+                "last_setup_error": null,
+                "latest_attempt": "setatt_1L9F4oLu5o3P18Zp8eQa9Mn2",
+                "livemode": false,
+                "mandate": null,
+                "metadata": {},
+                "next_action": null,
+                "on_behalf_of": null,
+                "payment_method": {
+                    "id": "pm_1L9F4oLu5o3P18ZpahIpZYFz",
+                    "object": "payment_method",
+                    "billing_details": {
+                        "address": {
+                            "city": null,
+                            "country": "IE",
+                            "line1": null,
+                            "line2": null,
+                            "postal_code": null,
+                            "state": null
+                        },
+                        "email": null,
+                        "name": null,
+                        "phone": null
+                    },
+                    "card": {
+                        "brand": "visa",
+                        "checks": {
+                            "address_line1_check": null,
+                            "address_postal_code_check": null,
+                            "cvc_check": "pass"
+                        },
+                        "country": "IE",
+                        "exp_month": 6,
+                        "exp_year": 2066,
+                        "fingerprint": "UrRvw6ZlmgRswqMC",
+                        "funding": "credit",
+                        "generated_from": null,
+                        "last4": "3220",
+                        "networks": {
+                            "available": [
+                                "visa"
+                            ],
+                            "preferred": null
+                        },
+                        "three_d_secure_usage": {
+                            "supported": true
+                        },
+                        "wallet": null
+                    },
+                    "created": 1654895346,
+                    "customer": "cus_LqvlPQBk2QUmXl",
+                    "livemode": false,
+                    "metadata": {},
+                    "type": "card"
+                },
+                "payment_method_options": {
+                    "card": {
+                        "mandate_options": null,
+                        "network": null,
+                        "request_three_d_secure": "automatic"
+                    },
+                    "us_bank_account": {
+                        "verification_method": "automatic"
+                    }
+                },
+                "payment_method_types": [
+                    "card",
+                    "us_bank_account",
+                    "link"
+                ],
+                "single_use_mandate": null,
+                "status": "processing",
+                "usage": "off_session"
+            }
+        """.trimIndent()
+    )
+
+    val SI_3DS2_PROCESSING = PARSER.parse(SI_3DS2_PROCESSING_JSON)!!
 }

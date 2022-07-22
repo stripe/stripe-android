@@ -16,7 +16,6 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -69,8 +68,7 @@ constructor(
         publishableKeyProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext,
-        RetryDelaySupplier()
+        workContext
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,

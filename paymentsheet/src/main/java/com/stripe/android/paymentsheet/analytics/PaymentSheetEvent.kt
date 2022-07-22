@@ -127,6 +127,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    class LpmSerializeFailureEvent : PaymentSheetEvent() {
+        override val additionalParams: Map<String, Any>
+            get() = emptyMap()
+        override val eventName: String = "luxe_serialize_failure"
+    }
+
     internal companion object {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?

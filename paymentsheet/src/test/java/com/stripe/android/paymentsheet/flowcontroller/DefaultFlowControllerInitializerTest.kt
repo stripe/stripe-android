@@ -13,6 +13,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.FakeCustomerRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -41,6 +42,7 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerInitializerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
+    private val eventReporter = mock<EventReporter>()
 
     private val stripeIntentRepository =
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
@@ -406,6 +408,7 @@ internal class DefaultFlowControllerInitializerTest {
             customerRepo,
             resourceRepository,
             Logger.noop(),
+            eventReporter,
             testDispatcher
         )
     }
