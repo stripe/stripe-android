@@ -259,7 +259,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `3ds2 canceled reaches max retry with processing intent should fail`() =
+    fun `3ds2 canceled reaches max retry with processing intent should cancel`() =
         runTest(testDispatcher) {
             val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                 status = StripeIntent.Status.RequiresAction
@@ -294,8 +294,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     PaymentIntentResult(
                         intent,
                         StripeIntentResult.Outcome.CANCELED,
-                        "We are unable to authenticate your payment method. " +
-                            "Please choose a different payment method and try again."
+                        null
                     )
                 )
         }

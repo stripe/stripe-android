@@ -6,9 +6,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -22,7 +22,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -152,28 +151,25 @@ internal class SetupIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `3ds2 canceled reaches max retry with processing intent should fail`() =
-        runTest {
+    fun `3ds2 canceled reaches max retry with processing intent should cancel`() =
+        runTest(testDispatcher) {
+            val intent = SetupIntentFixtures.SI_3DS2_PROCESSING.copy(
+                status = StripeIntent.Status.RequiresAction
+            )
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_3DS2_PROCESSING
+                intent
             )
 
-            val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
+            val clientSecret = requireNotNull(
+                intent.clientSecret
+            )
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            assertFailsWith<MaxRetryReachedException> {
-                processor.processResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.CANCELED
-                    )
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            }
-
-            verify(mockStripeRepository).retrieveSetupIntent(
-                eq(clientSecret),
-                eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
             )
 
             verify(
@@ -184,5 +180,14 @@ internal class SetupIntentFlowResultProcessorTest {
                 eq(requestOptions),
                 eq(emptyList())
             )
+
+            assertThat(result)
+                .isEqualTo(
+                    SetupIntentResult(
+                        intent,
+                        StripeIntentResult.Outcome.CANCELED,
+                        null
+                    )
+                )
         }
 }
