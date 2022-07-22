@@ -91,6 +91,6 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 }
 
-data class PartnerAuthState(
+internal data class PartnerAuthState(
     val title: String = ""
 ) : MavericksState
