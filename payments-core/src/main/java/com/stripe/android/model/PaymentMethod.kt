@@ -263,7 +263,7 @@ constructor(
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = false
         ),
         Alipay(
             "alipay",

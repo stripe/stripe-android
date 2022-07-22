@@ -34,7 +34,6 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import kotlinx.serialization.SerialName
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

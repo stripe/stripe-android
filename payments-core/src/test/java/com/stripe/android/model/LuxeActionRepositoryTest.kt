@@ -57,7 +57,6 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test get next action when return url not required and not found`() {
-        // TODO: What is the proper handling of this if the path to the next action is not found?
         val lpmNextActionRepository = LuxeNextActionRepository()
         lpmNextActionRepository.update(
             mapOf(
@@ -76,7 +75,6 @@ class LuxeActionRepositoryTest {
                     )
             )
         )
-
 
         val actionResult =
             lpmNextActionRepository.getAction(
@@ -105,7 +103,6 @@ class LuxeActionRepositoryTest {
             ),
             status = StripeIntent.Status.Processing
         )
-        // TODO: This should trigger analytics?
         val lpmNextActionRepository = LuxeNextActionRepository()
         lpmNextActionRepository.update(
             mapOf(
@@ -126,7 +123,6 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test requires action if the status is expected and there is a next action`() {
-        // TODO: This should trigger analytics?
         val afterpayIntentRequiresAction = AFTERPAY_REQUIRES_ACTION.copy(
             status = StripeIntent.Status.RequiresAction
         )
@@ -163,7 +159,6 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test requires action if the returnUrl is expected and there is not one`() {
-        // TODO: This should trigger analytics?
         val afterpayIntentRequiresAction =
             PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION_NO_RETURN_URL.copy(
                 status = StripeIntent.Status.RequiresAction
@@ -195,7 +190,6 @@ class LuxeActionRepositoryTest {
             AFTERPAY_REQUIRES_ACTION.copy(
                 status = StripeIntent.Status.RequiresPaymentMethod
             )
-        // TODO: This should trigger analytics?
         val lpmNextActionRepository = LuxeNextActionRepository()
         lpmNextActionRepository.update(
             mapOf(

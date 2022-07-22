@@ -38,9 +38,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap
-    private val paymentAuthenticatorMap:
-        Map<Class<out StripeIntent.NextActionData>,
-            @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
+    private val paymentAuthenticatorMap: Map<Class<out StripeIntent.NextActionData>,
+        @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
 ) : PaymentAuthenticatorRegistry, Injector {
     @VisibleForTesting
     internal val allAuthenticators = setOf(
@@ -88,20 +87,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                     is LuxeNextActionRepository.Result.NoAction ->
                         noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                     is LuxeNextActionRepository.Result.NotSupported -> {
-                        Log.e("MLB", "Doing the hard coded path.")
-                        // handle the original SDK hard coded way
-                        if (!authenticatable.requiresAction()) {
-                            return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-                        } else {
-                            return (
-                                authenticatable.nextActionData?.let {
-                                    paymentAuthenticatorMap
-                                        .getOrElse(it::class.java) { noOpIntentAuthenticator }
-                                } ?: run {
-                                    noOpIntentAuthenticator
-                                }
-                                ) as PaymentAuthenticator<Authenticatable>
-                        }
+                        doDefaultNextAction(authenticatable)
                     }
                 }
             }
@@ -111,6 +97,26 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             else -> {
                 error("No suitable PaymentAuthenticator for $authenticatable")
             }
+        }
+    }
+
+    private fun <Authenticatable> doDefaultNextAction(
+        authenticatable: StripeIntent
+    ): PaymentAuthenticator<Authenticatable> {
+        Log.e("MLB", "Doing the hard coded path.")
+        // TODO(michelleb): Trigger analytics
+        // handle the original SDK hard coded way
+        return if (!authenticatable.requiresAction()) {
+            noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
+        } else {
+            (
+                authenticatable.nextActionData?.let {
+                    paymentAuthenticatorMap
+                        .getOrElse(it::class.java) { noOpIntentAuthenticator }
+                } ?: run {
+                    noOpIntentAuthenticator
+                }
+                ) as PaymentAuthenticator<Authenticatable>
         }
     }
 
@@ -143,9 +149,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
-            is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(
-                injectable
-            )
+            is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
             else -> {
                 throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
             }

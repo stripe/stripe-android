@@ -92,7 +92,6 @@ class LuxeNextActionRepository {
 //            .apply { update(DEFAULT_DATA) }
     }
 
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class LuxeAction(
         /**
