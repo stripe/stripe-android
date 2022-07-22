@@ -95,8 +95,11 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        // TODO: Call analytics if parsing fails for any reason
-        if (!isLoaded() || force) {
+        val newSpecsToLoad =
+            expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
+
+        if (!isLoaded() || force || newSpecsToLoad) {
+            // TODO: Call analytics if parsing fails for any reason
             update(parseLpms(serverLpmSpecs))
 
             // If the server does not return specs, or they are not parsed successfully
