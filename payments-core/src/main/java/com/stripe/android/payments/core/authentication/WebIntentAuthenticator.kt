@@ -1,5 +1,6 @@
 package com.stripe.android.payments.core.authentication
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -8,6 +9,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -35,6 +37,9 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : PaymentAuthenticator<StripeIntent> {
 
+    @VisibleForTesting
+    internal var nextActionRepository = LuxeNextActionRepository.Instance
+
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
@@ -45,7 +50,11 @@ internal class WebIntentAuthenticator @Inject constructor(
         var shouldCancelSource = false
         var shouldCancelIntentOnUserNavigation = true
 
-        when (val nextActionData = authenticatable.nextActionData) {
+        val nextActionData =
+            (nextActionRepository.getAction(authenticatable) as? LuxeNextActionRepository.Result.Action)
+                ?.nextActionData ?: authenticatable.nextActionData
+
+        when (nextActionData) {
             // can only triggered when `use_stripe_sdk=true`
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
                 authUrl = nextActionData.url
