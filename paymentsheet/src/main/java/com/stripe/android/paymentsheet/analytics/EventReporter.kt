@@ -18,6 +18,8 @@ internal interface EventReporter {
 
     fun onPaymentFailure(paymentSelection: PaymentSelection?)
 
+    fun onLpmSpecFailure()
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");

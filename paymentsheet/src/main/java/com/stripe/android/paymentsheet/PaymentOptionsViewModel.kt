@@ -95,6 +95,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
+
+        // If we are not recovering from don't keep activities than the resources
+        // repository is loaded, and we should save off the LPM repository server specs so
+        // it can be restored after don't keep activities or process killed.
+        if (resourceRepository.getLpmRepository().isLoaded()) {
+            lpmServerSpec =
+                resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+        }
     }
 
     override fun onFatal(throwable: Throwable) {

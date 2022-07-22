@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -25,11 +26,16 @@ import com.stripe.android.ui.core.injection.NonFallbackInjector
 @Composable
 internal fun InputAddressScreen(
     primaryButtonEnabled: Boolean,
+    primaryButtonText: String,
     onPrimaryButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxHeight()) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .background(MaterialTheme.colors.surface)
+    ) {
         AddressOptionsAppBar(
             isRootScreen = true,
             onButtonClick = { onCloseClick() }
@@ -44,7 +50,10 @@ internal fun InputAddressScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             formContent()
-            AddressElementPrimaryButton(isEnabled = primaryButtonEnabled) {
+            AddressElementPrimaryButton(
+                isEnabled = primaryButtonEnabled,
+                text = primaryButtonText
+            ) {
                 onPrimaryButtonClick()
             }
         }
@@ -74,9 +83,12 @@ internal fun InputAddressScreen(
     } else {
         formController?.let {
             val completeValues by it.completeFormValues.collectAsState(null)
-
+            val buttonText = viewModel.args.config?.buttonTitle ?: stringResource(
+                R.string.stripe_paymentsheet_address_element_primary_button
+            )
             InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,
+                primaryButtonText = buttonText,
                 onPrimaryButtonClick = { viewModel.clickPrimaryButton() },
                 onCloseClick = { viewModel.navigator.dismiss() },
                 formContent = {
