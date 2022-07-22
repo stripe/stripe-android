@@ -20,9 +20,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -230,9 +228,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 MAX_RETRIES,
                 remainingRetries
             )
-            CoroutineScope(workContext).launch {
-                delay(delayMs)
-            }
+            delay(delayMs)
             stripeIntent = requireNotNull(
                 if (shouldCallRefreshIntent(originalIntent)) {
                     refreshStripeIntent(

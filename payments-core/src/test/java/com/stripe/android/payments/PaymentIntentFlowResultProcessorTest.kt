@@ -183,7 +183,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `refresh reaches max retry user confirms the payment`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )
@@ -248,7 +248,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `3ds2 canceled reaches max retry with processing intent should fail`() =
-        runTest {
+        runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 PaymentIntentFixtures.PI_PROCESSING_VISA_3DS2
             )
