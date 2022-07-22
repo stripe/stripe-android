@@ -24,7 +24,27 @@
           "v1": "billing_details[address]"
         }
       }
-    ]
+    ],
+    "next_action_spec": {
+      "handle_next_action_specs": [
+        {
+          "associated_statuses": ["requires_action"],
+          "type": "redirect_to_hosted_page",
+          "hosted_page_path": "next_action[redirect_to_url][url]",
+          "return_url_path": "next_action[redirect_to_url][return_url]"
+        }
+      ],
+      "handle_pi_status_specs": [
+        {
+          "associated_statuses": ["succeeded"],
+          "outcome": "finished"
+        },
+        {
+          "associated_statuses": ["requires_action"],
+          "outcome": "canceled"
+        }
+      ]
+    }
   },
   {
     "type": "affirm",

@@ -378,6 +378,20 @@ class LpmSerializerTest {
     }
 
     companion object {
+
+        val FormUiSpecJsonString = """
+            "type": "new_lpm",
+                "async": true,
+                "fields": [
+                  {
+                    "type": "billing_address",
+                    "allowed_country_codes": [
+                      "AT", "BE"
+                    ]
+                  }
+                ]
+        """.trimIndent()
+
         val JSON_ALL_FIELDS = """
                 [
                   {
@@ -486,4 +500,54 @@ class LpmSerializerTest {
                ]
         """.trimIndent()
     }
+
+    @Test
+    fun `Verify serialize redirect url next action and success-finished pi status`() {
+        val serializedString = """
+              {
+                ${FormUiSpecJsonString},
+                "next_action_spec": {
+                  "handle_next_action_specs": [
+                    {
+                      "associated_statuses": ["requires_action"],
+                      "type": "redirect_to_hosted_page",
+                      "hosted_page_path": "next_action[redirect_to_url][url]",
+                      "return_url_path": "next_action[redirect_to_url][return_url]"
+                    }
+                  ],
+                  "handle_pi_status_specs": [
+                    {
+                      "associated_statuses": ["succeeded"],
+                      "outcome": "finished"
+                    }
+                  ]
+                }
+              }
+            """.trimIndent()
+
+
+        val result = lpmSerializer.deserialize(serializedString)
+        assertThat(result.isSuccess).isTrue()
+        result.onSuccess {
+            assertThat(it.nextActionSpec?.handleNextActionSpec).isEqualTo(
+                listOf(
+                    RedirectNextActionSpec(
+                        listOf("requires_action"),
+                        hostedPagePath = "next_action[redirect_to_url][url]",
+                        returnUrlPath = "next_action[redirect_to_url][return_url]"
+                    )
+                )
+            )
+
+            assertThat(it.nextActionSpec?.handlePiStatus).isEqualTo(
+                listOf(
+                    PiStatusSpec(
+                        listOf("succeeded"),
+                        outcome = PIStatusType.Finished
+                    )
+                )
+            )
+        }
+    }
+
 }
