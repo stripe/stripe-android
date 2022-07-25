@@ -103,7 +103,10 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        if (!isLoaded() || force) {
+        // If the expectedLpms is different form last time, we still need to reload.
+        var lpmsNotParsedFromServerSpec = expectedLpms
+            .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+        if (!isLoaded() || force || lpmsNotParsedFromServerSpec.isNotEmpty()) {
             serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
             if (!serverLpmSpecs.isNullOrEmpty()) {
                 serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
@@ -116,7 +119,7 @@ class LpmRepository constructor(
 
 //            // If the server does not return specs, or they are not parsed successfully
 //            // we will use the LPM on disk if found
-//            val lpmsNotParsedFromServerSpec = expectedLpms
+//            lpmsNotParsedFromServerSpec = expectedLpms
 //                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
 //            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
 //                val mapFromDisk: Map<String, SharedDataSpec>? =
