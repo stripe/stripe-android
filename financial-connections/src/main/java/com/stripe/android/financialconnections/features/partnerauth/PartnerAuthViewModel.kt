@@ -40,7 +40,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 is Loading -> setState { copy(title = "Web flow in progress...") }
                 is Success -> {
                     setState { copy(title = "Web AuthFlow completed! Completing session") }
-                    authorizeSession(authSession)
+                    completeAuthorizationSession(authSession)
                 }
                 is Fail -> {
                     when (val error = webStatus.error) {
@@ -56,7 +56,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun authorizeSession(
+    private suspend fun completeAuthorizationSession(
         authSession: FinancialConnectionsAuthorizationSession
     ) {
         kotlin.runCatching {

@@ -344,12 +344,12 @@ public final class com/stripe/android/financialconnections/domain/AcceptConsent_
 	public static fun newInstance (Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)Lcom/stripe/android/financialconnections/domain/AcceptConsent;
 }
 
-public final class com/stripe/android/financialconnections/domain/AuthorizeAuthorizationSession_Factory : dagger/internal/Factory {
+public final class com/stripe/android/financialconnections/domain/CompleteAuthorizationSession_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/domain/AuthorizeAuthorizationSession_Factory;
-	public fun get ()Lcom/stripe/android/financialconnections/domain/AuthorizeAuthorizationSession;
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/domain/CompleteAuthorizationSession_Factory;
+	public fun get ()Lcom/stripe/android/financialconnections/domain/CompleteAuthorizationSession;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/financialconnections/repository/FinancialConnectionsRepository;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)Lcom/stripe/android/financialconnections/domain/AuthorizeAuthorizationSession;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/repository/FinancialConnectionsRepository;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)Lcom/stripe/android/financialconnections/domain/CompleteAuthorizationSession;
 }
 
 public final class com/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken_Factory : dagger/internal/Factory {
@@ -474,7 +474,7 @@ public final class com/stripe/android/financialconnections/features/partnerauth/
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/financialconnections/domain/AuthorizeAuthorizationSession;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/financialconnections/domain/NativeAuthFlowCoordinator;Lcom/stripe/android/financialconnections/repository/FinancialConnectionsRepository;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/domain/CompleteAuthorizationSession;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/financialconnections/domain/NativeAuthFlowCoordinator;Lcom/stripe/android/financialconnections/repository/FinancialConnectionsRepository;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel;
 }
 
 public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForData$Creator : android/os/Parcelable$Creator {
