@@ -25,86 +25,74 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.util.UUID
 
-//@Serializable(with = FieldTypeAsStringSerializer::class)
-internal enum class FieldType {
+@Serializable
+internal enum class FieldType(
+    val serializedValue: String,
+    val identifierSpec: IdentifierSpec,
+    @StringRes val defaultLabel: Int,
+) {
     @SerialName("addressLine1")
-    AddressLine1 {
-        override val serializedValue: String
-            get() = "addressLine1"
-        override val identifierSpec: IdentifierSpec
-            get() = IdentifierSpec.Line1
-        override val defaultLabel: Int
-            get() = R.string.address_label_address_line1
-        override val capitalization: KeyboardCapitalization
-            get() = KeyboardCapitalization.Words
-    },
+    AddressLine1(
+        "addressLine1",
+        IdentifierSpec.Line1,
+        R.string.address_label_address_line1,
+    ),
 
     @SerialName("addressLine2")
-    AddressLine2 {
-        override val serializedValue: String
-            get() = "addressLine2"
-        override val identifierSpec: IdentifierSpec
-            get() = IdentifierSpec.Line2
-        override val defaultLabel: Int
-            get() = R.string.address_label_address_line2
-        override val capitalization: KeyboardCapitalization
-            get() = KeyboardCapitalization.Words
-    },
+    AddressLine2(
+        "addressLine2",
+        IdentifierSpec.Line2,
+        R.string.address_label_address_line2,
+    ),
 
     @SerialName("locality")
-    Locality2 {
-        override val serializedValue: String
-            get() = "locality"
-        override val identifierSpec: IdentifierSpec
-            get() = IdentifierSpec.City
-        override val defaultLabel: Int
-            get() = R.string.address_label_city
-        override val capitalization: KeyboardCapitalization
-            get() = KeyboardCapitalization.Words
-    },
+    Locality(
+        "locality",
+        IdentifierSpec.City,
+        R.string.address_label_city,
+    ),
+
+    @SerialName("dependentLocality")
+    DependentLocality(
+        "dependentLocality",
+        IdentifierSpec.City,
+        R.string.address_label_city,
+    ),
 
     @SerialName("postalCode")
-    PostalCode {
-        override val serializedValue: String
-            get() = "postalCode"
-        override val identifierSpec: IdentifierSpec
-            get() = IdentifierSpec.PostalCode
-        override val defaultLabel: Int
-            get() = R.string.address_label_postal_code
-        override val capitalization: KeyboardCapitalization
-            get() = KeyboardCapitalization.None
+    PostalCode(
+        "postalCode",
+        IdentifierSpec.PostalCode,
+        R.string.address_label_postal_code,
+    ) {
+        override fun capitalization() = KeyboardCapitalization.None
+    },
+
+    @SerialName("sortingCode")
+    SortingCode(
+        "sortingCode",
+        IdentifierSpec.PostalCode,
+        R.string.address_label_postal_code,
+    ) {
+        override fun capitalization() = KeyboardCapitalization.None
     },
 
     @SerialName("administrativeArea")
-    AdministrativeArea {
-        override val serializedValue: String
-            get() = "administrativeArea"
-        override val identifierSpec: IdentifierSpec
-            get() = IdentifierSpec.State
-        override val defaultLabel: Int
-            get() = NameType.State.stringResId
-        override val capitalization: KeyboardCapitalization
-            get() = KeyboardCapitalization.Words
-    },
+    AdministrativeArea(
+        "administrativeArea",
+        IdentifierSpec.State,
+        NameType.State.stringResId,
+    ),
+
 
     @SerialName("name")
-    Name {
-        override val serializedValue: String
-            get() = "name"
-        override val identifierSpec: IdentifierSpec
-            get() = IdentifierSpec.Name
-        override val defaultLabel: Int
-            get() = R.string.address_label_name
-        override val capitalization: KeyboardCapitalization
-            get() = KeyboardCapitalization.Words
-    };
+    Name(
+        "name",
+        IdentifierSpec.Name,
+        R.string.address_label_name
+    );
 
-    abstract val serializedValue: String
-    abstract val identifierSpec: IdentifierSpec
-
-    //    @StringRes
-    abstract val defaultLabel: Int
-    abstract val capitalization: KeyboardCapitalization
+    open fun capitalization() = KeyboardCapitalization.Words
 
     companion object {
         fun from(value: String) = values().firstOrNull {
@@ -252,7 +240,7 @@ internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFi
                 SimpleTextFieldController(
                     SimpleTextFieldConfig(
                         label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                        capitalization = it.capitalization,
+                        capitalization = it.capitalization(),
                         keyboard = getKeyboard(addressField.schema)
                     ),
                     showOptionalLabel = !addressField.required
