@@ -117,22 +117,22 @@ class LpmRepository constructor(
                 update(serverLpmObjects)
             }
 
-//            // If the server does not return specs, or they are not parsed successfully
-//            // we will use the LPM on disk if found
-//            lpmsNotParsedFromServerSpec = expectedLpms
-//                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
-//            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-//                val mapFromDisk: Map<String, SharedDataSpec>? =
-//                    readFromDisk()
-//                        ?.associateBy { it.type }
-//                        ?.filterKeys { expectedLpms.contains(it) }
-//                codeToSupportedPaymentMethod.putAll(
-//                    lpmsNotParsedFromServerSpec
-//                        .mapNotNull { mapFromDisk?.get(it) }
-//                        .mapNotNull { convertToSupportedPaymentMethod(it) }
-//                        .associateBy { it.code }
-//                )
-//            }
+            // If the server does not return specs, or they are not parsed successfully
+            // we will use the LPM on disk if found
+            lpmsNotParsedFromServerSpec = expectedLpms
+                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+                val mapFromDisk: Map<String, SharedDataSpec>? =
+                    readFromDisk()
+                        ?.associateBy { it.type }
+                        ?.filterKeys { expectedLpms.contains(it) }
+                codeToSupportedPaymentMethod.putAll(
+                    lpmsNotParsedFromServerSpec
+                        .mapNotNull { mapFromDisk?.get(it) }
+                        .mapNotNull { convertToSupportedPaymentMethod(it) }
+                        .associateBy { it.code }
+                )
+            }
 
             serverInitializedLatch.countDown()
         }
