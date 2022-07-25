@@ -96,6 +96,7 @@ ext {
     espressoVersion = '3.4.0'
     jsonVersion = '20220320'
     uiautomator = '2.2.0'
+    showkaseVersion = '1.0.0-beta13'
 
     group_name = GROUP
     version_name = VERSION_NAME

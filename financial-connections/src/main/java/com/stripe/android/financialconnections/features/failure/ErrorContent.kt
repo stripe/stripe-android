@@ -125,14 +125,10 @@ internal fun ErrorContent(
     }
 }
 
-@Preview
 @Composable
+@Preview(group = "Errors", name = "unclassified error")
 internal fun ErrorContentPreview() {
     FinancialConnectionsTheme {
-        ErrorContent(
-            title = "test",
-            content = "test",
-            iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution)
-        )
+        UnclassifiedErrorContent()
     }
 }

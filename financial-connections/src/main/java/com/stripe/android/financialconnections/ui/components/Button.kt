@@ -65,7 +65,7 @@ internal fun FinancialConnectionsButton(
 }
 
 @Composable
-@Preview
+@Preview(group = "Components", name = "Button - loading")
 internal fun FinancialConnectionsButtonDisabledPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsButton(
@@ -78,7 +78,7 @@ internal fun FinancialConnectionsButtonDisabledPreview() {
 }
 
 @Composable
-@Preview
+@Preview(group = "Components", name = "Button - idle")
 internal fun FinancialConnectionsButtonPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsButton(

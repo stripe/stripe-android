@@ -32,7 +32,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
@@ -316,31 +318,20 @@ private fun ConsentBullet(
 }
 
 @Composable
-@Preview(
-    showBackground = true
-)
-private fun ContentPreview() {
+@Preview(group = "Consent Pane", name = "canonical")
+internal fun ContentPreview(
+    state: ConsentState = ConsentStates.canonical()
+) {
     FinancialConnectionsTheme {
-        FinancialConnectionsScaffold {
-            ConsentContent(
-                bottomSheetState = rememberModalBottomSheetState(
-                    initialValue = ModalBottomSheetValue.Expanded
-                ),
-                state = ConsentState(
-                    title = TextResource.Text("Body"),
-                    bullets = listOf(
-                        R.drawable.stripe_ic_check to TextResource.Text("Text")
-                    ),
-                    requestedDataBullets = listOf(
-                        TextResource.Text("Requested data") to
-                            TextResource.Text("Requested data")
-                    ),
-                    requestedDataTitle = TextResource.Text("Body")
-                ),
-                onContinueClick = {},
-                onConfirmModalClick = {},
-                onClickableTextClick = {}
-            )
-        }
+        ConsentContent(
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+            state = state,
+            onContinueClick = {},
+            onConfirmModalClick = {},
+            onClickableTextClick = {}
+        )
     }
 }
