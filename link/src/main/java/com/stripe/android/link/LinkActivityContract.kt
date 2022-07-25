@@ -26,8 +26,6 @@ class LinkActivityContract :
      * Arguments for launching [LinkActivity] to confirm a payment with Link.
      *
      * @param stripeIntent The Stripe Intent that is being processed
-     * @param completePayment Whether the payment should be completed, or the selected payment
-     *                          method should be returned as a result.
      * @param merchantName The customer-facing business name.
      * @param customerEmail Email of the customer, used to pre-fill the form.
      * @param customerPhone Phone number of the customer, used to pre-fill the form.
@@ -38,7 +36,6 @@ class LinkActivityContract :
     @Parcelize
     data class Args internal constructor(
         internal val stripeIntent: StripeIntent,
-        internal val completePayment: Boolean,
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
