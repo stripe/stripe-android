@@ -316,31 +316,20 @@ private fun ConsentBullet(
 }
 
 @Composable
-@Preview(
-    showBackground = true
-)
-private fun ContentPreview() {
+@Preview(group = "Consent Pane", name = "canonical")
+internal fun ContentPreview(
+    state: ConsentState = ConsentStates.canonical()
+) {
     FinancialConnectionsTheme {
-        FinancialConnectionsScaffold {
-            ConsentContent(
-                bottomSheetState = rememberModalBottomSheetState(
-                    initialValue = ModalBottomSheetValue.Expanded
-                ),
-                state = ConsentState(
-                    title = TextResource.Text("Body"),
-                    bullets = listOf(
-                        R.drawable.stripe_ic_check to TextResource.Text("Text")
-                    ),
-                    requestedDataBullets = listOf(
-                        TextResource.Text("Requested data") to
-                            TextResource.Text("Requested data")
-                    ),
-                    requestedDataTitle = TextResource.Text("Body")
-                ),
-                onContinueClick = {},
-                onConfirmModalClick = {},
-                onClickableTextClick = {}
-            )
-        }
+        ConsentContent(
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+            state = state,
+            onContinueClick = {},
+            onConfirmModalClick = {},
+            onClickableTextClick = {}
+        )
     }
 }

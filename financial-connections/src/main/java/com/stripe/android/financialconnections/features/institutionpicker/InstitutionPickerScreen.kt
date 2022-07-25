@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
@@ -38,7 +40,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -377,10 +378,114 @@ private fun FeaturedInstitutionsGrid(
 }
 
 @Composable
-@Suppress("LongMethod")
-@Preview(showBackground = true)
-private fun InstitutionPickerPreview(
-    @PreviewParameter(InstitutionPickerStatePreviewParameterProvider::class) state: InstitutionPickerState
+@Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
+internal fun SearchModeSearchingInstitutions(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
+) {
+    FinancialConnectionsTheme {
+        InstitutionPickerContent(
+            selectInstitution = state.selectInstitution,
+            featuredInstitutions = state.featuredInstitutions,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
+            onQueryChanged = {},
+            onInstitutionSelected = {},
+            onCancelSearchClick = {},
+            onSearchFocused = {},
+            onSelectAnotherBank = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "Institutions Pane", name = "searchModeWithResults")
+internal fun SearchModeWithResults(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResults()
+) {
+    FinancialConnectionsTheme {
+        InstitutionPickerContent(
+            selectInstitution = state.selectInstitution,
+            featuredInstitutions = state.featuredInstitutions,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
+            onQueryChanged = {},
+            onInstitutionSelected = {},
+            onCancelSearchClick = {},
+            onSearchFocused = {},
+            onSelectAnotherBank = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "Institutions Pane", name = "searchModeSelectingInstitutions")
+internal fun SearchModeSelectingInstitutions(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeSelectingInstitutions()
+) {
+    FinancialConnectionsTheme {
+        InstitutionPickerContent(
+            selectInstitution = state.selectInstitution,
+            featuredInstitutions = state.featuredInstitutions,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
+            onQueryChanged = {},
+            onInstitutionSelected = {},
+            onCancelSearchClick = {},
+            onSearchFocused = {},
+            onSelectAnotherBank = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "Institutions Pane", name = "searchModeNoResults")
+internal fun SearchModeNoResults(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
+) {
+    FinancialConnectionsTheme {
+        InstitutionPickerContent(
+            selectInstitution = state.selectInstitution,
+            featuredInstitutions = state.featuredInstitutions,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
+            onQueryChanged = {},
+            onInstitutionSelected = {},
+            onCancelSearchClick = {},
+            onSearchFocused = {},
+            onSelectAnotherBank = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "Institutions Pane", name = "searchModeNoQuery")
+internal fun SearchModeNoQuery(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoQuery()
+) {
+    FinancialConnectionsTheme {
+        InstitutionPickerContent(
+            selectInstitution = state.selectInstitution,
+            featuredInstitutions = state.featuredInstitutions,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
+            onQueryChanged = {},
+            onInstitutionSelected = {},
+            onCancelSearchClick = {},
+            onSearchFocused = {},
+            onSelectAnotherBank = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "Institutions Pane", name = "noSearchMode")
+internal fun NoSearchMode(
+    state: InstitutionPickerState = InstitutionPickerStates.noSearchMode()
 ) {
     FinancialConnectionsTheme {
         InstitutionPickerContent(

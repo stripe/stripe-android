@@ -31,8 +31,8 @@ internal fun FinancialConnectionsTopAppBar(
 }
 
 @Composable
-@Preview
-private fun FinancialConnectionsTopAppBarPreview() {
+@Preview(group = "Components", name = "TopAppBar - idle")
+internal fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsTopAppBar()
     }

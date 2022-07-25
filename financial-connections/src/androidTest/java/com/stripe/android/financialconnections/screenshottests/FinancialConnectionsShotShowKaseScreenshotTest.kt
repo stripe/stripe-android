@@ -1,0 +1,8 @@
+package com.stripe.android.financialconnections.screenshottests
+
+import com.airbnb.android.showkase.annotation.ShowkaseScreenshot
+import com.airbnb.android.showkase.screenshot.testing.shot.ShotShowkaseScreenshotTest
+import com.stripe.android.financialconnections.FinancialConnectionsShowkaseRootModule
+
+@ShowkaseScreenshot(rootShowkaseClass = FinancialConnectionsShowkaseRootModule::class)
+abstract class FinancialConnectionsShotShowkaseScreenshotTest: ShotShowkaseScreenshotTest()

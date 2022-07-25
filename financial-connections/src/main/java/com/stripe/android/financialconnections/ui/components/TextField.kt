@@ -42,8 +42,8 @@ internal fun FinancialConnectionsOutlinedTextField(
 }
 
 @Composable
-@Preview(showBackground = true)
-private fun FinancialConnectionsOutlinedTextFieldPreview() {
+@Preview(group = "Components", name = "TextField - idle")
+internal fun FinancialConnectionsOutlinedTextFieldPreview() {
     FinancialConnectionsTheme {
         Column {
             FinancialConnectionsOutlinedTextField(value = "test", onValueChange = {})
