@@ -200,8 +200,12 @@ internal class PaymentMethodsUITest {
         get() = composeTestRule.onNodeWithTag(TEST_TAG_LIST)
 
     companion object {
-        val lpmRepository =
-            LpmRepository(InstrumentationRegistry.getInstrumentation().targetContext.resources)
+        private val lpmRepository =
+            LpmRepository(
+                LpmRepository.LpmRepositoryArguments(
+                    InstrumentationRegistry.getInstrumentation().targetContext.resources
+                )
+            )
         val USBankAccount = lpmRepository.fromCode("us_bank_account")!!
         val Eps = lpmRepository.fromCode("eps")!!
         val Sofort = lpmRepository.fromCode("sofort")!!
