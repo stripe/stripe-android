@@ -25,14 +25,14 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.util.UUID
 
-@Serializable
+@Serializable//(with = FieldTypeAsStringSerializer::class)
 internal enum class FieldType(
     val serializedValue: String,
     val identifierSpec: IdentifierSpec,
     @StringRes val defaultLabel: Int,
 ) {
-    @SerialName("addressLine1")
-    AddressLine1(
+    //    @SerialName("addressLine1")
+    addressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
         R.string.address_label_address_line1,
@@ -45,22 +45,22 @@ internal enum class FieldType(
         R.string.address_label_address_line2,
     ),
 
-    @SerialName("locality")
-    Locality(
+    //    @SerialName("locality")
+    locality(
         "locality",
         IdentifierSpec.City,
         R.string.address_label_city,
     ),
 
-    @SerialName("dependentLocality")
-    DependentLocality(
+    //    @SerialName("dependentLocality")
+    dependentLocality(
         "dependentLocality",
         IdentifierSpec.City,
         R.string.address_label_city,
     ),
 
-    @SerialName("postalCode")
-    PostalCode(
+    //    @SerialName("postalCode")
+    postalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
         R.string.address_label_postal_code,
@@ -68,8 +68,8 @@ internal enum class FieldType(
         override fun capitalization() = KeyboardCapitalization.None
     },
 
-    @SerialName("sortingCode")
-    SortingCode(
+    //    @SerialName("sortingCode")
+    sortingCode(
         "sortingCode",
         IdentifierSpec.PostalCode,
         R.string.address_label_postal_code,
@@ -77,15 +77,15 @@ internal enum class FieldType(
         override fun capitalization() = KeyboardCapitalization.None
     },
 
-    @SerialName("administrativeArea")
-    AdministrativeArea(
+    //    @SerialName("administrativeArea")
+    administrativeArea(
         "administrativeArea",
         IdentifierSpec.State,
         NameType.State.stringResId,
     ),
 
 
-    @SerialName("name")
+    //    @SerialName("name")
     Name(
         "name",
         IdentifierSpec.Name,
