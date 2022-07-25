@@ -32,36 +32,42 @@ internal enum class FieldType(
     @StringRes val defaultLabel: Int,
     val capitalization: KeyboardCapitalization
 ) {
+    @SerialName("addressLine1")
     AddressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
         R.string.address_label_address_line1,
         KeyboardCapitalization.Words
     ),
+    @SerialName("addressLine2")
     AddressLine2(
         "addressLine2",
         IdentifierSpec.Line2,
         R.string.address_label_address_line2,
         KeyboardCapitalization.Words
     ),
+    @SerialName("locality")
     Locality(
         "locality",
         IdentifierSpec.City,
         R.string.address_label_city,
         KeyboardCapitalization.Words
     ),
+    @SerialName("postalCode")
     PostalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
         R.string.address_label_postal_code,
         KeyboardCapitalization.None
     ),
+    @SerialName("administrativeArea")
     AdministrativeArea(
         "administrativeArea",
         IdentifierSpec.State,
         NameType.State.stringResId,
         KeyboardCapitalization.Words
     ),
+    @SerialName("name")
     Name(
         "name",
         IdentifierSpec.Name,
