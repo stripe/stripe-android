@@ -163,7 +163,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             if (config != null) {
                 // We only want to do this if the loading fragment is shown.  Otherwise this causes
                 // a new fragment to be created if the activity was destroyed and recreated.
-                if (supportFragmentManager.fragments.firstOrNull() is PaymentSheetLoadingFragment) {
+                // If hyperion is an added dependency it is loaded on top of the
+                // PaymentSheetLoadingFragment
+                if (supportFragmentManager.fragments
+                        .filterIsInstance<PaymentSheetLoadingFragment>()
+                        .isNotEmpty()
+                ) {
                     val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                         viewModel.updateSelection(null)
                         PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
