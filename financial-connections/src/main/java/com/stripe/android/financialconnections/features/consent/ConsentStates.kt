@@ -1,12 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.model.Institution
-import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.ui.TextResource
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
@@ -17,7 +12,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val count: Int
         get() = super.count
 
-    //TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
+    // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
         fun canonical() = ConsentState(
             title = TextResource.StringId(

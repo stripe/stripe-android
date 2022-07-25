@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
@@ -38,7 +40,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -379,7 +380,7 @@ private fun FeaturedInstitutionsGrid(
 @Composable
 @Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
 internal fun SearchModeSearchingInstitutions(
-     state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
 ) {
     FinancialConnectionsTheme {
         InstitutionPickerContent(
@@ -418,7 +419,6 @@ internal fun SearchModeWithResults(
     }
 }
 
-
 @Composable
 @Preview(group = "Institutions Pane", name = "searchModeSelectingInstitutions")
 internal fun SearchModeSelectingInstitutions(
@@ -440,7 +440,6 @@ internal fun SearchModeSelectingInstitutions(
     }
 }
 
-
 @Composable
 @Preview(group = "Institutions Pane", name = "searchModeNoResults")
 internal fun SearchModeNoResults(
@@ -461,7 +460,6 @@ internal fun SearchModeNoResults(
         )
     }
 }
-
 
 @Composable
 @Preview(group = "Institutions Pane", name = "searchModeNoQuery")
@@ -504,4 +502,3 @@ internal fun NoSearchMode(
         )
     }
 }
-

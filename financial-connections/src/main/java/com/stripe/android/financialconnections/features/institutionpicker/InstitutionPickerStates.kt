@@ -18,7 +18,7 @@ internal class InstitutionPickerStates :
         noSearchMode(),
     )
 
-    //TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
+    // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
         // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(

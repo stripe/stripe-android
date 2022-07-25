@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.airbnb.android.showkase.models.Showkase
-import com.airbnb.mvrx.Mavericks
-import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.getBrowserIntent
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
