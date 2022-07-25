@@ -214,23 +214,25 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
 
 internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
     val countryAddressElements = this
-        .filterNot { it.type == FieldType.SortingCode  ||
-            it.type == FieldType.DependentLocality }
-        .mapNotNull { addressField ->
-        addressField.type?.let {
-            SimpleTextElement(
-                addressField.type.identifierSpec,
-                SimpleTextFieldController(
-                    SimpleTextFieldConfig(
-                        label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                        capitalization = it.capitalization(),
-                        keyboard = getKeyboard(addressField.schema)
-                    ),
-                    showOptionalLabel = !addressField.required
-                )
-            )
+        .filterNot {
+            it.type == FieldType.SortingCode ||
+                it.type == FieldType.DependentLocality
         }
-    }
+        .mapNotNull { addressField ->
+            addressField.type?.let {
+                SimpleTextElement(
+                    addressField.type.identifierSpec,
+                    SimpleTextFieldController(
+                        SimpleTextFieldConfig(
+                            label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                            capitalization = it.capitalization(),
+                            keyboard = getKeyboard(addressField.schema)
+                        ),
+                        showOptionalLabel = !addressField.required
+                    )
+                )
+            }
+        }
 
     // Put it in a single row
     return combineCityAndPostal(countryAddressElements)

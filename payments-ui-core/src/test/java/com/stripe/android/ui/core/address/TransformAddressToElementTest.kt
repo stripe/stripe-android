@@ -142,8 +142,10 @@ class TransformAddressToElementTest {
             val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
             val invalidNameType = schemaList?.filter { addressSchema ->
                 addressSchema.required &&
-                    (addressSchema.type == FieldType.SortingCode ||
-                        addressSchema.type == FieldType.DependentLocality)
+                    (
+                        addressSchema.type == FieldType.SortingCode ||
+                            addressSchema.type == FieldType.DependentLocality
+                        )
             }
             invalidNameType?.forEach { println(it.type?.name) }
             assertThat(invalidNameType).isEmpty()

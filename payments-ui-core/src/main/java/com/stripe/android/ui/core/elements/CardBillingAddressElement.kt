@@ -35,7 +35,7 @@ class CardBillingAddressElement(
             when (countryCode) {
                 "US", "GB", "CA" -> {
                     FieldType.values()
-                        .filterNot { it.identifierSpec == IdentifierSpec.PostalCode}
+                        .filterNot { it == FieldType.PostalCode }
                         .map { it.identifierSpec }
                 }
                 else -> {
