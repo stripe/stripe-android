@@ -166,8 +166,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 // If hyperion is an added dependency it is loaded on top of the
                 // PaymentSheetLoadingFragment
                 if (supportFragmentManager.fragments
-                        .filterIsInstance<PaymentSheetLoadingFragment>()
-                        .isNotEmpty()
+                    .filterIsInstance<PaymentSheetLoadingFragment>()
+                    .isNotEmpty()
                 ) {
                     val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                         viewModel.updateSelection(null)

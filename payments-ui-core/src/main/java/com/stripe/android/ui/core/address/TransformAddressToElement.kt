@@ -23,41 +23,41 @@ import java.util.UUID
 internal enum class FieldType(
     val serializedValue: String,
     val identifierSpec: IdentifierSpec,
-    @StringRes val defaultLabel: Int,
+    @StringRes val defaultLabel: Int
 ) {
     @SerialName("addressLine1")
     AddressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
-        R.string.address_label_address_line1,
+        R.string.address_label_address_line1
     ),
 
     @SerialName("addressLine2")
     AddressLine2(
         "addressLine2",
         IdentifierSpec.Line2,
-        R.string.address_label_address_line2,
+        R.string.address_label_address_line2
     ),
 
     @SerialName("locality")
     Locality(
         "locality",
         IdentifierSpec.City,
-        R.string.address_label_city,
+        R.string.address_label_city
     ),
 
     @SerialName("dependentLocality")
     DependentLocality(
         "dependentLocality",
         IdentifierSpec.City,
-        R.string.address_label_city,
+        R.string.address_label_city
     ),
 
     @SerialName("postalCode")
     PostalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
-        R.string.address_label_postal_code,
+        R.string.address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
     },
@@ -66,7 +66,7 @@ internal enum class FieldType(
     SortingCode(
         "sortingCode",
         IdentifierSpec.PostalCode,
-        R.string.address_label_postal_code,
+        R.string.address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
     },
@@ -75,9 +75,8 @@ internal enum class FieldType(
     AdministrativeArea(
         "administrativeArea",
         IdentifierSpec.State,
-        NameType.State.stringResId,
+        NameType.State.stringResId
     ),
-
 
     @SerialName("name")
     Name(
