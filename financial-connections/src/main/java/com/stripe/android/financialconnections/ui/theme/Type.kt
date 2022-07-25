@@ -27,8 +27,8 @@ internal data class FinancialConnectionsTypography(
 )
 
 @Composable
-@Preview(showBackground = true)
-private fun TypePreview() {
+@Preview(group = "Components", name = "Type")
+internal fun TypePreview() {
     FinancialConnectionsTheme {
         Column {
             Text(
