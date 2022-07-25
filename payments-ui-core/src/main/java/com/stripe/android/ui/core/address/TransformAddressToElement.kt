@@ -49,7 +49,7 @@ internal enum class FieldType(
     @SerialName("dependentLocality")
     DependentLocality(
         "dependentLocality",
-        IdentifierSpec.City,
+        IdentifierSpec.DependentLocality,
         R.string.address_label_city
     ),
 
@@ -65,7 +65,7 @@ internal enum class FieldType(
     @SerialName("sortingCode")
     SortingCode(
         "sortingCode",
-        IdentifierSpec.PostalCode,
+        IdentifierSpec.SortingCode,
         R.string.address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
@@ -213,7 +213,10 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
 internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
-    val countryAddressElements = this.mapNotNull { addressField ->
+    val countryAddressElements = this
+        .filterNot { it.type == FieldType.SortingCode  ||
+            it.type == FieldType.DependentLocality }
+        .mapNotNull { addressField ->
         addressField.type?.let {
             SimpleTextElement(
                 addressField.type.identifierSpec,

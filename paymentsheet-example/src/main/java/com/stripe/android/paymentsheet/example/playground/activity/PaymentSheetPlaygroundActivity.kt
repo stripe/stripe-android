@@ -381,7 +381,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 city = "Blackrock",
                 state = "Co. Dublin",
                 postalCode = "T37 F8HK",
-                country = "IE",
+                country = "GF",
             ),
             email = "email@email.com",
             name = "Jenny Rosen",
