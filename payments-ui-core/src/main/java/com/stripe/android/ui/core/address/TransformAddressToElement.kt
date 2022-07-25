@@ -167,7 +167,7 @@ internal class FieldSchema(
     @SerialName("isNumeric")
     val isNumeric: Boolean = false,
     @SerialName("examples")
-    val examples: List<String> = emptyList(),
+    val examples: ArrayList<String> = arrayListOf(),
     @SerialName("nameType")
     val nameType: NameType // label,
 )
@@ -186,7 +186,7 @@ private val format = Json { ignoreUnknownKeys = true }
 
 internal fun parseAddressesSchema(inputStream: InputStream?) =
     getJsonStringFromInputStream(inputStream)?.let {
-        format.decodeFromString<List<CountryAddressSchema>>(
+        format.decodeFromString<ArrayList<CountryAddressSchema>>(
             it
         )
     }
