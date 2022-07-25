@@ -25,14 +25,14 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.util.UUID
 
-@Serializable//(with = FieldTypeAsStringSerializer::class)
+@Serializable
 internal enum class FieldType(
     val serializedValue: String,
     val identifierSpec: IdentifierSpec,
     @StringRes val defaultLabel: Int,
 ) {
-    //    @SerialName("addressLine1")
-    addressLine1(
+    @SerialName("addressLine1")
+    AddressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
         R.string.address_label_address_line1,
@@ -45,22 +45,22 @@ internal enum class FieldType(
         R.string.address_label_address_line2,
     ),
 
-    //    @SerialName("locality")
-    locality(
+    @SerialName("locality")
+    Locality(
         "locality",
         IdentifierSpec.City,
         R.string.address_label_city,
     ),
 
-    //    @SerialName("dependentLocality")
-    dependentLocality(
+    @SerialName("dependentLocality")
+    DependentLocality(
         "dependentLocality",
         IdentifierSpec.City,
         R.string.address_label_city,
     ),
 
-    //    @SerialName("postalCode")
-    postalCode(
+    @SerialName("postalCode")
+    PostalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
         R.string.address_label_postal_code,
@@ -68,8 +68,8 @@ internal enum class FieldType(
         override fun capitalization() = KeyboardCapitalization.None
     },
 
-    //    @SerialName("sortingCode")
-    sortingCode(
+    @SerialName("sortingCode")
+    SortingCode(
         "sortingCode",
         IdentifierSpec.PostalCode,
         R.string.address_label_postal_code,
@@ -85,7 +85,7 @@ internal enum class FieldType(
     ),
 
 
-    //    @SerialName("name")
+    @SerialName("name")
     Name(
         "name",
         IdentifierSpec.Name,
@@ -215,19 +215,6 @@ internal fun parseAddressesSchema(inputStream: InputStream?) =
             it
         )
     }
-
-private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("FieldType", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: FieldType?) {
-        encoder.encodeString(value?.serializedValue ?: "")
-    }
-
-    override fun deserialize(decoder: Decoder): FieldType? {
-        return FieldType.from(decoder.decodeString())
-    }
-}
 
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
