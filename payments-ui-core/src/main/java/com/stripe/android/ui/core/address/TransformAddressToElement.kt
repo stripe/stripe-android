@@ -77,8 +77,8 @@ internal enum class FieldType(
         override fun capitalization() = KeyboardCapitalization.None
     },
 
-    //    @SerialName("administrativeArea")
-    administrativeArea(
+    @SerialName("administrativeArea")
+    AdministrativeArea(
         "administrativeArea",
         IdentifierSpec.State,
         NameType.State.stringResId,
