@@ -143,21 +143,39 @@ internal class AutocompleteViewModel @Inject constructor(
         }
     }
 
-    fun onEnterAddressManually() {
-        setResultAndGoBack()
+    fun onBackPressed() {
+        val result = if (queryFlow.value.isNotBlank()) {
+            AddressDetails(
+                line1 = queryFlow.value
+            )
+        } else {
+            null
+        }
+        setResultAndGoBack(result)
     }
 
-    fun setResultAndGoBack() {
-        addressResult.value?.fold(
-            onSuccess = {
-                navigator.setResult(AddressDetails.KEY, it)
-            },
-            onFailure = {
-                navigator.setResult(AddressDetails.KEY, null)
-            }
-        ) ?: run {
-            navigator.setResult(AddressDetails.KEY, AddressDetails())
+    fun onEnterAddressManually() {
+        setResultAndGoBack(
+            AddressDetails(
+                line1 = queryFlow.value
+            )
+        )
+    }
+
+    private fun setResultAndGoBack(addressDetails: AddressDetails? = null) {
+        if (addressDetails != null) {
+            navigator.setResult(AddressDetails.KEY, addressDetails)
+        } else {
+            addressResult.value?.fold(
+                onSuccess = {
+                    navigator.setResult(AddressDetails.KEY, it)
+                },
+                onFailure = {
+                    navigator.setResult(AddressDetails.KEY, null)
+                }
+            )
         }
+
         navigator.onBack()
     }
 
