@@ -200,7 +200,7 @@ class PaymentIntentJsonParserTest {
                             StripeIntent.Status.RequiresAction,
                             LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
                                 redirectPagePath = "next_action[llamapay_redirect_to_url][url]",
-                                returnToUrlPath = "next_action[llamapay_redirect_to_url][return_url]",
+                                returnToUrlPath = "next_action[llamapay_redirect_to_url][return_url]"
                             )
                         )
                     )

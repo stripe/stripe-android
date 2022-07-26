@@ -52,35 +52,6 @@ class LuxeNextActionRepository {
         codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus.takeIf { it?.status == status }
 
     companion object {
-        @VisibleForTesting
-        internal val DEFAULT_DATA = mapOf(
-            "afterpay_clearpay" to
-                LuxeAction(
-                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                        StripeIntent.Status.RequiresAction,
-                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                            redirectPagePath = "next_action[redirect_to_url][url]",
-                            returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                        )
-                    ),
-                    postAuthorizeIntentStatus = mapOf(
-                        StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
-                        StripeIntent.Status.RequiresPaymentMethod to StripeIntentResult.Outcome.FAILED,
-                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
-                    )
-                ),
-            "sepa_debit" to
-                LuxeAction(
-                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                        StripeIntent.Status.Processing,
-                        LuxeActionCreatorForStatus.ActionCreator.NoActionCreator
-                    ),
-                    postAuthorizeIntentStatus = mapOf(
-                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                )
-        )
-
         val Instance: LuxeNextActionRepository = LuxeNextActionRepository()
     }
 
