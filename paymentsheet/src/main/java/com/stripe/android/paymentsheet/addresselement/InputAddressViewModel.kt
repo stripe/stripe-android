@@ -10,6 +10,7 @@ import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AddressType
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.PhoneNumberState
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,11 +82,13 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
+        val phoneNumberState = parsePhoneNumberConfig(args.config?.phone)
         val addressSpec = if (condensedForm) {
             AddressSpec(
                 showLabel = false,
                 type = AddressType.ShippingCondensed(
-                    googleApiKey = args.config?.googlePlacesApiKey
+                    googleApiKey = args.config?.googlePlacesApiKey,
+                    phoneNumberState = phoneNumberState
                 ) {
                     viewModelScope.launch {
                         val country = _formController
@@ -108,7 +111,9 @@ internal class InputAddressViewModel @Inject constructor(
         } else {
             AddressSpec(
                 showLabel = false,
-                type = AddressType.ShippingExpanded
+                type = AddressType.ShippingExpanded(
+                    phoneNumberState = phoneNumberState
+                )
             )
         }
 
@@ -159,6 +164,20 @@ internal class InputAddressViewModel @Inject constructor(
             injector.inject(this)
             return subComponentBuilderProvider.get()
                 .build().inputAddressViewModel as T
+        }
+    }
+
+    internal companion object {
+        // This mapping is required to prevent merchants from depending on ui-core
+        fun parsePhoneNumberConfig(
+            configuration: AddressLauncher.AdditionalFieldsConfiguration?
+        ): PhoneNumberState {
+            return when (configuration) {
+                AddressLauncher.AdditionalFieldsConfiguration.HIDDEN -> PhoneNumberState.HIDDEN
+                AddressLauncher.AdditionalFieldsConfiguration.OPTIONAL -> PhoneNumberState.OPTIONAL
+                AddressLauncher.AdditionalFieldsConfiguration.REQUIRED -> PhoneNumberState.REQUIRED
+                null -> PhoneNumberState.OPTIONAL
+            }
         }
     }
 }

@@ -92,7 +92,7 @@ internal class AddressLauncher internal constructor(
          * Configuration for the field that collects a phone number.
          * Defaults to HIDDEN
          */
-        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.HIDDEN,
+        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL,
 
         /**
          * Configuration for a "Remember this shipping destination" checkbox.
@@ -114,7 +114,7 @@ internal class AddressLauncher internal constructor(
             var defaultValues: AddressDetails? = null
             var allowedCountries: Set<String> = emptySet()
             var buttonTitle: String? = null
-            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.HIDDEN
+            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL
             var shouldShowCheckBox: Boolean = false
             var googlePlacesApiKey: String? = null
 

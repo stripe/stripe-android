@@ -102,26 +102,44 @@ public final class com/stripe/android/ui/core/elements/AddressTextFieldUIKt {
 
 public final class com/stripe/android/ui/core/elements/AddressType$Normal : com/stripe/android/ui/core/elements/AddressType {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AddressType$Normal;
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/PhoneNumberState;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)Lcom/stripe/android/ui/core/elements/AddressType$Normal;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$Normal;Lcom/stripe/android/ui/core/elements/PhoneNumberState;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$Normal;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/ui/core/elements/AddressType$ShippingCondensed : com/stripe/android/ui/core/elements/AddressType {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
+	public final fun component2 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public final fun component3 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGoogleApiKey ()Ljava/lang/String;
 	public final fun getOnNavigation ()Lkotlin/jvm/functions/Function0;
+	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/ui/core/elements/AddressType$ShippingExpanded : com/stripe/android/ui/core/elements/AddressType {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;
+	public fun <init> (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;Lcom/stripe/android/ui/core/elements/PhoneNumberState;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
@@ -525,6 +543,32 @@ public final class com/stripe/android/ui/core/elements/PhoneNumberController$Com
 }
 
 public final class com/stripe/android/ui/core/elements/PhoneNumberElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberState : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/ui/core/elements/PhoneNumberState$Companion;
+	public static final field HIDDEN Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public static final field OPTIONAL Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public static final field REQUIRED Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberState$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/PhoneNumberState$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/PhoneNumberState;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/PhoneNumberState$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
