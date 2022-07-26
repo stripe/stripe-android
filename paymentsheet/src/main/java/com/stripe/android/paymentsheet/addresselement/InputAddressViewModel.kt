@@ -73,11 +73,30 @@ internal class InputAddressViewModel @Inject constructor(
                     .viewModelScope(viewModelScope)
                     .stripeIntent(null)
                     .merchantName("")
-                    .formSpec(buildFormSpec(shippingAddress == null))
+                    .formSpec(buildFormSpec(shippingAddress?.line1 == null))
                     .initialValues(initialValues)
                     .build().formController
             }
         }
+    }
+
+    private suspend fun getCurrentAddress(): AddressDetails? {
+        return _formController.value
+            ?.formValues
+            ?.stateIn(viewModelScope)
+            ?.value
+            ?.let {
+                AddressDetails(
+                    name = it[IdentifierSpec.Name]?.value,
+                    city = it[IdentifierSpec.City]?.value,
+                    country = it[IdentifierSpec.Country]?.value,
+                    line1 = it[IdentifierSpec.Line1]?.value,
+                    line2 = it[IdentifierSpec.Line2]?.value,
+                    postalCode = it[IdentifierSpec.PostalCode]?.value,
+                    state = it[IdentifierSpec.State]?.value,
+                    phoneNumber = it[IdentifierSpec.Phone]?.value
+                )
+            }
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
@@ -88,17 +107,14 @@ internal class InputAddressViewModel @Inject constructor(
                     googleApiKey = args.config?.googlePlacesApiKey
                 ) {
                     viewModelScope.launch {
-                        val country = _formController
-                            .value
-                            ?.formValues
-                            ?.stateIn(viewModelScope)
-                            ?.value
-                            ?.get(IdentifierSpec.Country)
-                            ?.value
-                        country?.let {
+                        val address = getCurrentAddress()
+                        address?.let {
+                            _collectedAddress.emit(it)
+                        }
+                        address?.country?.let {
                             navigator.navigateTo(
                                 AddressElementScreen.Autocomplete(
-                                    country = country
+                                    country = it
                                 )
                             )
                         }
