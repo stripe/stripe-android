@@ -487,7 +487,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
      * accordingly.
      */
-    fun onLinkLaunched() {
+    private fun onLinkLaunched() {
         setContentVisible(false)
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
@@ -495,9 +495,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Method called with the result of launching the Link UI to collect a payment.
      */
-    fun onLinkActivityResult(result: LinkActivityResult) {
-        setContentVisible(true)
-        onPaymentResult(result.convertToPaymentResult())
+    private fun onLinkActivityResult(result: LinkActivityResult) {
+        val paymentResult = result.convertToPaymentResult()
+        if (paymentResult is PaymentResult.Completed) {
+            // If payment was completed, don't show the Payment Sheet.
+            prefsRepository.savePaymentSelection(PaymentSelection.Link)
+            _paymentSheetResult.value = PaymentSheetResult.Completed
+        } else {
+            setContentVisible(true)
+            onPaymentResult(paymentResult)
+        }
     }
 
     override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {

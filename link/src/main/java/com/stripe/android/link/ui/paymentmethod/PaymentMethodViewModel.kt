@@ -15,6 +15,7 @@ import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -25,6 +26,7 @@ import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,9 +50,10 @@ internal class PaymentMethodViewModel @Inject constructor(
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
-    private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: StateFlow<Boolean> = _isProcessing
-    val isEnabled: Flow<Boolean> = _isProcessing.map { !it }
+    private val _primaryButtonState = MutableStateFlow(PrimaryButtonState.Enabled)
+    val primaryButtonState: StateFlow<PrimaryButtonState> = _primaryButtonState
+
+    val isEnabled: Flow<Boolean> = _primaryButtonState.map { !it.isBlocking }
 
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
@@ -84,6 +87,8 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
         clearError()
+        setState(PrimaryButtonState.Processing)
+
         val paymentMethodCreateParams =
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
@@ -92,8 +97,6 @@ internal class PaymentMethodViewModel @Inject constructor(
             )
 
         viewModelScope.launch {
-            _isProcessing.value = true
-
             linkAccountManager.createPaymentDetails(
                 paymentMethod,
                 paymentMethodCreateParams,
@@ -130,18 +133,22 @@ internal class PaymentMethodViewModel @Inject constructor(
                     when (paymentResult) {
                         is PaymentResult.Canceled -> {
                             // no-op, let the user continue their flow
+                            setState(PrimaryButtonState.Enabled)
                         }
                         is PaymentResult.Failed -> {
                             onError(paymentResult.throwable)
                         }
-                        is PaymentResult.Completed ->
-                            navigator.dismiss(LinkActivityResult.Completed)
+                        is PaymentResult.Completed -> {
+                            setState(PrimaryButtonState.Completed)
+                            viewModelScope.launch {
+                                delay(PrimaryButtonState.COMPLETED_DELAY_MS)
+                                navigator.dismiss(LinkActivityResult.Completed)
+                            }
+                        }
                     }
                 },
                 onFailure = ::onError
             )
-
-            _isProcessing.value = false
         }
     }
 
@@ -151,8 +158,13 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private fun onError(error: Throwable) = error.getErrorMessage().let {
         logger.error("Error: ", error)
-        _isProcessing.value = false
+        setState(PrimaryButtonState.Enabled)
         _errorMessage.value = it
+    }
+
+    private fun setState(state: PrimaryButtonState) {
+        _primaryButtonState.value = state
+        navigator.backNavigationEnabled = !state.isBlocking
     }
 
     internal class Factory(
