@@ -23,7 +23,7 @@ class LuxeNextActionRepository {
      * of the operation.
      */
     internal fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
-    // This handles the case where the next action is not understood so
+        // This handles the case where the next action is not understood so
         // the PI is still in the requires action state.
         if (stripeIntent.requiresAction() && stripeIntent.nextActionData != null) {
             StripeIntentResult.Outcome.FAILED
@@ -69,24 +69,6 @@ class LuxeNextActionRepository {
                         StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
                     )
                 ),
-//            "konbini" to
-//                LuxeAction(
-//                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-//                        StripeIntent.Status.RequiresAction,
-//                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-//                            redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-//                            returnToUrlPath = null
-//                        )
-//                    ),
-//                    postAuthorizeIntentStatus = mapOf(
-//                        StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
-//                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED,
-//                        // If the next action is not understood and not processed, we will also
-//                        // see a status of requires_action.  WHen you close the next action status is requires_action
-////                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
-//                    )
-//                ),
-
             "sepa_debit" to
                 LuxeAction(
                     postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
@@ -100,7 +82,6 @@ class LuxeNextActionRepository {
         )
 
         val Instance: LuxeNextActionRepository = LuxeNextActionRepository()
-//            .apply { update(DEFAULT_DATA) }
     }
 
     internal data class LuxeAction(

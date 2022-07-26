@@ -39,7 +39,7 @@ class LuxeActionRepositoryTest {
                             StripeIntent.Status.RequiresPaymentMethod to StripeIntentResult.Outcome.FAILED,
                             StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
                         )
-                    ),
+                    )
             )
         )
         assertThat(
@@ -60,13 +60,13 @@ class LuxeActionRepositoryTest {
                             StripeIntent.Status.RequiresAction,
                             LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
                                 redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-                                returnToUrlPath = "next_action[konbini_display_details][return_url]",
+                                returnToUrlPath = "next_action[konbini_display_details][return_url]"
                             )
                         ),
                         postAuthorizeIntentStatus = mapOf(
-                            StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
+                            StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED
                         )
-                    ),
+                    )
             )
         )
 

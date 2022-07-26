@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.net.Uri
-import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
 internal data class LuxeActionCreatorForStatus(

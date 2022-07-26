@@ -1,6 +1,5 @@
 package com.stripe.android.model.parsers
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
@@ -75,7 +74,6 @@ class PaymentIntentJsonParser(
                 is LuxeNextActionRepository.Result.Action -> luxeNextActionResult.nextActionData
                 is LuxeNextActionRepository.Result.NoAction -> null
                 is LuxeNextActionRepository.Result.NotSupported -> {
-                    Log.e("MLB", "Doing it the old way.")
                     NextActionDataParser().parse(it)
                 }
             }
