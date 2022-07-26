@@ -23,7 +23,6 @@ class PaymentOptionsAdapterTest {
         mutableListOf<PaymentOptionsAdapter.Item.SavedPaymentMethod>()
     private val paymentMethods = PaymentMethodFixtures.createCards(6)
     private var addCardClicks = 0
-    private var linkClicks = 0
 
     @Test
     fun `item count when Google Pay is enabled should return expected value`() {
@@ -398,9 +397,6 @@ class PaymentOptionsAdapterTest {
             },
             addCardClickListener = {
                 addCardClicks++
-            },
-            linkClickListener = {
-                linkClicks++
             }
         )
     }

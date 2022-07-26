@@ -43,16 +43,12 @@ internal const val progressIndicatorTestTag = "CircularProgressIndicator"
 internal fun primaryButtonLabel(
     args: LinkActivityContract.Args,
     resources: Resources
-) = if (args.completePayment) {
-    when (args.stripeIntent) {
-        is PaymentIntent -> Amount(
-            requireNotNull(args.stripeIntent.amount),
-            requireNotNull(args.stripeIntent.currency)
-        ).buildPayButtonLabel(resources)
-        is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
-    }
-} else {
-    resources.getString(R.string.stripe_continue_button_label)
+) = when (args.stripeIntent) {
+    is PaymentIntent -> Amount(
+        requireNotNull(args.stripeIntent.amount),
+        requireNotNull(args.stripeIntent.currency)
+    ).buildPayButtonLabel(resources)
+    is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
 }
 
 @Composable

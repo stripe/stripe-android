@@ -49,7 +49,7 @@ class LinkPaymentLauncherTest {
         runTest {
             launch {
                 val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-                linkPaymentLauncher.setup(stripeIntent, true, null, this)
+                linkPaymentLauncher.setup(stripeIntent, null, this)
                 linkPaymentLauncher.present(mockHostActivityLauncher)
 
                 verify(mockHostActivityLauncher).launch(

@@ -130,8 +130,7 @@ internal abstract class BasePaymentMethodsListFragment(
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,
-            addCardClickListener = ::transitionToAddPaymentMethod,
-            linkClickListener = sheetViewModel::launchLink
+            addCardClickListener = ::transitionToAddPaymentMethod
         ).also {
             viewBinding.recycler.adapter = it
         }

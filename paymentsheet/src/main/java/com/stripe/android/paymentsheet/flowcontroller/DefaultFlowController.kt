@@ -22,6 +22,9 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -92,11 +95,14 @@ internal class DefaultFlowController @Inject internal constructor(
     @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
-    private var googlePayActivityLauncher:
+    private val googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+    private val linkActivityResultLauncher:
+        ActivityResultLauncher<LinkActivityContract.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -151,6 +157,11 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultCaller.registerForActivityResult(
                 GooglePayPaymentMethodLauncherContract(),
                 ::onGooglePayResult
+            )
+        linkActivityResultLauncher =
+            activityResultCaller.registerForActivityResult(
+                LinkActivityContract(),
+                ::onLinkActivityResult
             )
     }
 
@@ -251,11 +262,10 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         }
 
-        val paymentSelection = viewModel.paymentSelection
-        if (paymentSelection == PaymentSelection.GooglePay) {
-            launchGooglePay(initData)
-        } else {
-            confirmPaymentSelection(paymentSelection, initData)
+        when (val paymentSelection = viewModel.paymentSelection) {
+            PaymentSelection.GooglePay -> launchGooglePay(initData)
+            PaymentSelection.Link -> launchLink(initData)
+            else -> confirmPaymentSelection(paymentSelection, initData)
         }
     }
 
@@ -332,6 +342,9 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
+    private fun onLinkActivityResult(result: LinkActivityResult) =
+        onPaymentResult(result.convertToPaymentResult())
+
     private suspend fun dispatchResult(
         result: FlowControllerInitializer.InitResult,
         callback: PaymentSheet.FlowController.ConfigCallback
@@ -353,16 +366,14 @@ internal class DefaultFlowController @Inject internal constructor(
         eventReporter.onInit(initData.config)
 
         when (val savedString = initData.savedSelection) {
-            SavedSelection.GooglePay -> {
-                PaymentSelection.GooglePay
-            }
-            is SavedSelection.PaymentMethod -> {
+            SavedSelection.GooglePay -> PaymentSelection.GooglePay
+            SavedSelection.Link -> PaymentSelection.Link
+            is SavedSelection.PaymentMethod ->
                 initData.paymentMethods.firstOrNull {
                     it.id == savedString.id
                 }?.let {
                     PaymentSelection.Saved(it)
                 }
-            }
             else -> null
         }.let {
             viewModel.paymentSelection = it
@@ -406,10 +417,26 @@ internal class DefaultFlowController @Inject internal constructor(
     internal fun onPaymentResult(paymentResult: PaymentResult) {
         lifecycleScope.launch {
             paymentResultCallback.onPaymentSheetResult(
-                withContext(uiContext) {
-                    createPaymentSheetResult(paymentResult)
-                }
+                paymentResult.convertToPaymentSheetResult()
             )
+        }
+    }
+
+    private fun launchLink(initData: InitData) {
+        val config = requireNotNull(initData.config)
+
+        lifecycleScope.launch {
+            val linkLauncher = linkPaymentLauncherFactory.create(
+                merchantName = config.merchantDisplayName,
+                customerEmail = config.defaultBillingDetails?.email,
+                customerPhone = config.defaultBillingDetails?.phone
+            )
+            linkLauncher.setup(
+                stripeIntent = initData.stripeIntent,
+                selectedPaymentDetails = null,
+                coroutineScope = lifecycleScope
+            )
+            linkLauncher.present(linkActivityResultLauncher)
         }
     }
 
@@ -442,25 +469,16 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    private fun createPaymentSheetResult(
-        paymentResult: PaymentResult
-    ): PaymentSheetResult = when (paymentResult) {
-        is PaymentResult.Completed -> {
-            PaymentSheetResult.Completed
-        }
-        is PaymentResult.Canceled -> {
-            PaymentSheetResult.Canceled
-        }
-        is PaymentResult.Failed -> {
-            PaymentSheetResult.Failed(
-                paymentResult.throwable
-            )
-        }
-        else -> {
-            PaymentSheetResult.Failed(
-                RuntimeException("Failed to complete payment.")
-            )
-        }
+    private fun PaymentResult.convertToPaymentSheetResult() = when (this) {
+        is PaymentResult.Completed -> PaymentSheetResult.Completed
+        is PaymentResult.Canceled -> PaymentSheetResult.Canceled
+        is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
+    }
+
+    private fun LinkActivityResult.convertToPaymentResult() = when (this) {
+        is LinkActivityResult.Completed -> PaymentResult.Completed
+        is LinkActivityResult.Canceled -> PaymentResult.Canceled
+        is LinkActivityResult.Failed -> PaymentResult.Failed(error)
     }
 
     class GooglePayException(

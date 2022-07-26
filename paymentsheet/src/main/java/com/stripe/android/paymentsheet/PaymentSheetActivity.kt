@@ -111,6 +111,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
         super.onCreate(savedInstanceState)
+        viewModel.registerFromActivity(this)
 
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -354,6 +355,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Intent()
                 .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
     }
 
     internal companion object {

@@ -20,6 +20,10 @@ sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object Link : PaymentSelection()
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Saved(
         val paymentMethod: PaymentMethod
     ) : PaymentSelection()
@@ -66,7 +70,7 @@ sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Link(val linkPaymentDetails: LinkPaymentDetails) : New() {
+        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails) : New() {
             @IgnoredOnParcel
             override val customerRequestedSave = CustomerRequestedSave.NoRequest
 

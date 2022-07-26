@@ -204,7 +204,7 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -239,7 +239,7 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
         }
 
@@ -269,7 +269,7 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.GooglePay)
         }
 
