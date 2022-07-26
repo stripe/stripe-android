@@ -28,7 +28,7 @@ import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -55,8 +55,7 @@ internal class TransformSpecToElementTest {
     fun beforeTest() {
         transformSpecToElements =
             TransformSpecToElements(
-                resourceRepository = StaticResourceRepository(
-                    mock(),
+                addressResourceRepository = StaticAddressResourceRepository(
                     mock()
                 ),
                 initialValues = mapOf(),
@@ -187,8 +186,7 @@ internal class TransformSpecToElementTest {
     fun `Setting card number to view only returns the correct elements`() {
         transformSpecToElements =
             TransformSpecToElements(
-                resourceRepository = StaticResourceRepository(
-                    mock(),
+                addressResourceRepository = StaticAddressResourceRepository(
                     mock()
                 ),
                 initialValues = mapOf(),

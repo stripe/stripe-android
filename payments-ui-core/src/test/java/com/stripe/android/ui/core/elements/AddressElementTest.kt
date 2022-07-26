@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -17,7 +17,7 @@ import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
-    private val addressFieldElementRepository = AddressFieldElementRepository(
+    private val addressRepository = AddressRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
     private val countryDropdownFieldController = DropdownFieldController(
@@ -26,7 +26,7 @@ class AddressElementTest {
 
     init {
         // We want to use fields that are easy to set in error
-        addressFieldElementRepository.add(
+        addressRepository.add(
             "US",
             listOf(
                 EmailElement(
@@ -35,7 +35,7 @@ class AddressElementTest {
                 )
             )
         )
-        addressFieldElementRepository.add(
+        addressRepository.add(
             "JP",
             listOf(
                 IbanElement(
@@ -53,7 +53,7 @@ class AddressElementTest {
             // ZZ does not have state and US does
             val addressElement = AddressElement(
                 IdentifierSpec.Generic("address"),
-                addressFieldElementRepository,
+                addressRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )
             var emailController =
@@ -94,7 +94,7 @@ class AddressElementTest {
     fun `verify flow of form field values`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
@@ -141,7 +141,7 @@ class AddressElementTest {
     fun `condensed shipping address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(null, PhoneNumberState.REQUIRED) { }
         )
@@ -157,7 +157,7 @@ class AddressElementTest {
     fun `hidden phone number field is not shown`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(null, PhoneNumberState.HIDDEN) { }
         )
@@ -172,7 +172,7 @@ class AddressElementTest {
     fun `optional phone number field is shown`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(null, PhoneNumberState.OPTIONAL) { }
         )
@@ -187,7 +187,7 @@ class AddressElementTest {
     fun `expanded shipping address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.REQUIRED
@@ -205,7 +205,7 @@ class AddressElementTest {
     fun `expanded shipping address element should hide phone number when state is hidden`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.HIDDEN
@@ -222,7 +222,7 @@ class AddressElementTest {
     fun `expanded shipping address element should show phone number when state is optional`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.OPTIONAL
@@ -239,7 +239,7 @@ class AddressElementTest {
     fun `normal address element should not have name and phone number fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal()
         )
@@ -255,7 +255,7 @@ class AddressElementTest {
     fun `normal address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal()
         )
@@ -270,7 +270,7 @@ class AddressElementTest {
     fun `condensed shipping address element should have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(
                 "some key",
@@ -288,7 +288,7 @@ class AddressElementTest {
     fun `when google api key not supplied, condensed shipping address element is not one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(
                 null,
@@ -306,7 +306,7 @@ class AddressElementTest {
     fun `expanded shipping address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            addressFieldElementRepository,
+            addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.OPTIONAL

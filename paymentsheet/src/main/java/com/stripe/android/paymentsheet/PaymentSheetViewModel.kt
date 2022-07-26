@@ -59,6 +59,8 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -95,7 +97,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    resourceRepository: ResourceRepository,
+    lpmResourceRepository: ResourceRepository<LpmRepository>,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -112,7 +115,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository,
+    lpmResourceRepository = lpmResourceRepository,
+    addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
@@ -235,14 +239,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             CoroutineScope(workContext).launch {
                 runCatching {
                     val intent = initializeRepositoryAndGetStripeIntent(
-                        resourceRepository,
+                        lpmResourceRepository,
                         stripeIntentRepository,
                         args.clientSecret,
                         eventReporter
                     )
 
                     lpmServerSpec =
-                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                        lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
 
                     // The lpm server specs need to be saved so that upon the
                     // activity being killed the state can be restored.
@@ -294,7 +298,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     getSupportedSavedCustomerPMs(
                         stripeIntent,
                         config,
-                        resourceRepository.getLpmRepository()
+                        lpmResourceRepository.getRepository()
                     ).mapNotNull {
                         // The SDK is only able to parse customer LPMs
                         // that are hard coded in the SDK.

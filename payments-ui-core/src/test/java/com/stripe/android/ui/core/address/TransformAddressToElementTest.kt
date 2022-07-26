@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.address
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository.Companion.supportedCountries
+import com.stripe.android.ui.core.address.AddressRepository.Companion.supportedCountries
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KeyboardType

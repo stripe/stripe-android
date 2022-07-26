@@ -53,6 +53,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.validate
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -86,7 +88,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     // even though unused this forces Dagger to initialize it here.
-    private val resourceRepository: ResourceRepository,
+    private val lpmResourceRepository: ResourceRepository<LpmRepository>,
+    private val addressResourceRepository: ResourceRepository<AddressRepository>,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
@@ -111,6 +114,8 @@ internal class DefaultFlowController @Inject internal constructor(
     lateinit var flowControllerComponent: FlowControllerComponent
 
     private var paymentLauncher: PaymentLauncher? = null
+
+    private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
@@ -209,7 +214,7 @@ internal class DefaultFlowController @Inject internal constructor(
             )
 
             // Wait until all required resources are loaded before completing initialization.
-            resourceRepository.waitUntilLoaded()
+            resourceRepositories.forEach { it.waitUntilLoaded() }
 
             if (isActive) {
                 dispatchResult(result, callback)

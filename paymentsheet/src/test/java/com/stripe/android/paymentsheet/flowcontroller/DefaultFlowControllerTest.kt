@@ -816,6 +816,7 @@ internal class DefaultFlowControllerTest {
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentLauncherAssistedFactory,
         mock(),
+        mock(),
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
         ENABLE_LOGGING,

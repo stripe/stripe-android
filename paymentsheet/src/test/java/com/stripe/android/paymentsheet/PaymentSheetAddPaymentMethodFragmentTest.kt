@@ -501,7 +501,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository)
             } else {
-                it.sheetViewModel.resourceRepository.getLpmRepository().forceUpdate(
+                it.sheetViewModel.lpmResourceRepository.getRepository().forceUpdate(
                     stripeIntent.paymentMethodTypes,
                     null
                 )

@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AddressFieldElementRepository @Inject constructor(
+class AddressRepository @Inject constructor(
     val resources: Resources?
 ) {
     private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()

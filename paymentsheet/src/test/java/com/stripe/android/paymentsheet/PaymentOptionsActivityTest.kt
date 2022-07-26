@@ -24,9 +24,10 @@ import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -408,6 +409,9 @@ class PaymentOptionsActivityTest {
         ).apply {
             this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         }
+        val addressRepository = AddressRepository(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
         return PaymentOptionsViewModel(
             args = args,
             prefsRepositoryFactory = { FakePrefsRepository() },
@@ -417,11 +421,11 @@ class PaymentOptionsActivityTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = StaticResourceRepository(
-                AddressFieldElementRepository(
-                    ApplicationProvider.getApplicationContext<Context>().resources
-                ),
+            lpmResourceRepository = StaticLpmResourceRepository(
                 lpmRepository
+            ),
+            addressResourceRepository = StaticAddressResourceRepository(
+                addressRepository
             ),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
