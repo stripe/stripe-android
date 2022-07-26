@@ -69,7 +69,7 @@ internal fun primaryButtonLabel(
 
 @Composable
 @Preview
-internal fun PrimaryButton() {
+private fun PrimaryButton() {
     DefaultLinkTheme {
         PrimaryButton(
             label = "Testing",
