@@ -20,9 +20,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -71,6 +69,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 }
                 shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
                     val intent = refreshStripeIntentUntilTerminalState(
+                        stripeIntent,
                         result.clientSecret,
                         requestOptions
                     )
@@ -145,7 +144,14 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
 
-        return succeededMaybeRefresh || cancelledMaybeRefresh
+        // For similar reasons, the transaction could be unexpectedly stuck in `requires_action` for
+        // a UseStripeSDK next_action. If so, refresh the PaymentIntent.
+        val actionNotProcessedMaybeRefresh = flowOutcome == CANCELED &&
+            stripeIntent.status == StripeIntent.Status.RequiresAction &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
+            stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
+
+        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
@@ -154,6 +160,17 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             StripeIntent.Status.RequiresCapture -> SUCCEEDED
             else -> originalFlowOutcome
         }
+    }
+
+    /**
+     * https://livegrep.corp.stripe.com/view/stripe-internal/pay-server/lib/payment_flows/private/commands/refresh_payment_intent.rb#L23
+     * The refresh endpoint will safely send the intent data if it isn't in requires_action,
+     * but if it is in requires_action it will try to refresh and fail as refresh is only
+     * implemented on wechat_pay and upi
+     */
+    private fun shouldCallRefreshIntent(stripeIntent: StripeIntent): Boolean {
+        return stripeIntent.paymentMethod?.type == PaymentMethod.Type.WeChatPay ||
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi
     }
 
     protected abstract suspend fun retrieveStripeIntent(
@@ -185,37 +202,52 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         InvalidRequestException::class
     )
     private suspend fun refreshStripeIntentUntilTerminalState(
+        originalIntent: StripeIntent,
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ): T {
         var remainingRetries = MAX_RETRIES
 
         var stripeIntent = requireNotNull(
-            refreshStripeIntent(
-                clientSecret = clientSecret,
-                requestOptions = requestOptions,
-                expandFields = listOf()
-            )
+            if (shouldCallRefreshIntent(originalIntent)) {
+                refreshStripeIntent(
+                    clientSecret = clientSecret,
+                    requestOptions = requestOptions,
+                    expandFields = EXPAND_PAYMENT_METHOD
+                )
+            } else {
+                retrieveStripeIntent(
+                    clientSecret = clientSecret,
+                    requestOptions = requestOptions,
+                    expandFields = EXPAND_PAYMENT_METHOD
+                )
+            }
         )
         while (shouldRetry(stripeIntent) && remainingRetries > 1) {
             val delayMs = retryDelaySupplier.getDelayMillis(
                 MAX_RETRIES,
                 remainingRetries
             )
-            CoroutineScope(workContext).launch {
-                delay(delayMs)
-            }
+            delay(delayMs)
             stripeIntent = requireNotNull(
-                refreshStripeIntent(
-                    clientSecret = clientSecret,
-                    requestOptions = requestOptions,
-                    expandFields = listOf()
-                )
+                if (shouldCallRefreshIntent(originalIntent)) {
+                    refreshStripeIntent(
+                        clientSecret = clientSecret,
+                        requestOptions = requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                } else {
+                    retrieveStripeIntent(
+                        clientSecret = clientSecret,
+                        requestOptions = requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                }
             )
             remainingRetries--
         }
 
-        if (shouldRetry(stripeIntent)) {
+        if (shouldThrowException(stripeIntent)) {
             throw MaxRetryReachedException()
         } else {
             return stripeIntent
@@ -243,6 +275,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
         return requiresAction || isCardPaymentProcessing
+    }
+
+    private fun shouldThrowException(stripeIntent: StripeIntent): Boolean {
+        val requiresAction = stripeIntent.requiresAction()
+        val is3ds2 = stripeIntent.nextActionData is StripeIntent.NextActionData.SdkData.Use3DS2
+        return requiresAction && !is3ds2
     }
 
     internal companion object {

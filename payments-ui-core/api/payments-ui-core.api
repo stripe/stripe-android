@@ -412,6 +412,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getCardNumber ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCity ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCountry ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getDependentLocality ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getEmail ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getLine1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getLine2 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
@@ -420,6 +421,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getPhone ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getSortingCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getState ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }

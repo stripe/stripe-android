@@ -9,11 +9,13 @@ on:
 jobs:
   # Checkout base branch and build the APK
   build-base:
+    name: Build base
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.base_ref }}
       - name: Build base branch
         run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
       - name: Upload APK
@@ -24,9 +26,11 @@ jobs:
 
   # Checkout PR branch and build the APK
   build-pr:
+    name: Build PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Build PR branch
         run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
       - name: Upload APK
@@ -40,7 +44,7 @@ jobs:
     needs: [ build-base, build-pr ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Download APKs
         uses: actions/download-artifact@v1
         with:
