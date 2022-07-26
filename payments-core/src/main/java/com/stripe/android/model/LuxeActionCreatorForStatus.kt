@@ -1,25 +1,18 @@
 package com.stripe.android.model
 
 import android.net.Uri
-import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
-data class LuxeActionCreatorForStatus(
+internal data class LuxeActionCreatorForStatus(
     val status: StripeIntent.Status,
     val actionCreator: ActionCreator
 ) {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    sealed class ActionCreator {
+    internal sealed class ActionCreator {
         fun create(stripeIntentJsonString: String) =
             create(JSONObject(stripeIntentJsonString))
 
         internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
-
-        /**
-         * The returnToUrlPath cannot be null because otherwise it will trigger the web flow
-         * which we do not want.
-         */
-        data class RedirectActionCreator(
+        internal data class RedirectActionCreator(
             val redirectPagePath: String,
             val returnToUrlPath: String?
         ) : ActionCreator() {

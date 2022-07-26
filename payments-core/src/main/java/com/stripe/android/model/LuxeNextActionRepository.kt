@@ -7,20 +7,30 @@ import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class LuxeNextActionRepository {
+
     private val codeToNextActionSpec = mutableMapOf<String, LuxeAction>()
 
-    fun update(additionalData: Map<String, LuxeAction>) {
+    internal fun update(additionalData: Map<String, LuxeAction>) {
         codeToNextActionSpec.putAll(additionalData)
     }
+
+    @VisibleForTesting
+    internal fun isPresent(code: PaymentMethodCode) = codeToNextActionSpec.contains(code)
 
     /**
      * Given the PaymentIntent retrieved after the returnUrl (not redirectUrl), based on
      * the Payment Method code and Status of the Intent what is the [StripeIntentResult.Outcome]
      * of the operation.
      */
-    fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
-        codeToNextActionSpec[stripeIntent.paymentMethod?.code]
-            ?.postAuthorizeIntentStatus?.get(stripeIntent.status)
+    internal fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
+        // This handles the case where the next action is not understood so
+        // the PI is still in the requires action state.
+        if (stripeIntent.requiresAction() && stripeIntent.nextActionData == null) {
+            StripeIntentResult.Outcome.FAILED
+        } else {
+            codeToNextActionSpec[stripeIntent.paymentMethod?.code]
+                ?.postAuthorizeIntentStatus?.get(stripeIntent.status)
+        }
 
     /**
      * Given the Intent returned from the confirm call, the payment method code and status
@@ -93,8 +103,7 @@ class LuxeNextActionRepository {
             .apply { update(DEFAULT_DATA) }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    data class LuxeAction(
+    internal data class LuxeAction(
         /**
          * This should be null to use custom next action behavior coded in the SDK
          */
@@ -104,8 +113,7 @@ class LuxeNextActionRepository {
         val postAuthorizeIntentStatus: Map<StripeIntent.Status, Int>
     )
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    sealed class Result {
+    internal sealed class Result {
         data class Action(val nextActionData: StripeIntent.NextActionData) : Result()
         object NoAction : Result()
         object NotSupported : Result()

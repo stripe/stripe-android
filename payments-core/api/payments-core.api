@@ -3048,68 +3048,8 @@ public final class com/stripe/android/model/ListPaymentMethodsParams$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/LuxeActionCreatorForStatus {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/model/LuxeActionCreatorForStatus$Companion;
-	public fun <init> (Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator;)V
-	public final fun component1 ()Lcom/stripe/android/model/StripeIntent$Status;
-	public final fun component2 ()Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator;
-	public final fun copy (Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator;)Lcom/stripe/android/model/LuxeActionCreatorForStatus;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/LuxeActionCreatorForStatus;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator;ILjava/lang/Object;)Lcom/stripe/android/model/LuxeActionCreatorForStatus;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getActionCreator ()Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator;
-	public final fun getStatus ()Lcom/stripe/android/model/StripeIntent$Status;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator$NoActionCreator : com/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator$NoActionCreator;
-	public synthetic fun create$payments_core_release (Lorg/json/JSONObject;)Lcom/stripe/android/model/LuxeNextActionRepository$Result;
-}
-
-public final class com/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator$RedirectActionCreator : com/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator$RedirectActionCreator;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator$RedirectActionCreator;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/LuxeActionCreatorForStatus$ActionCreator$RedirectActionCreator;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getRedirectPagePath ()Ljava/lang/String;
-	public final fun getReturnToUrlPath ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/model/LuxeActionCreatorForStatus$Companion {
-}
-
 public final class com/stripe/android/model/LuxeNextActionRepository$Companion {
 	public final fun getInstance ()Lcom/stripe/android/model/LuxeNextActionRepository;
-}
-
-public final class com/stripe/android/model/LuxeNextActionRepository$Result$Action : com/stripe/android/model/LuxeNextActionRepository$Result {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/model/StripeIntent$NextActionData;)V
-	public final fun component1 ()Lcom/stripe/android/model/StripeIntent$NextActionData;
-	public final fun copy (Lcom/stripe/android/model/StripeIntent$NextActionData;)Lcom/stripe/android/model/LuxeNextActionRepository$Result$Action;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/LuxeNextActionRepository$Result$Action;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/LuxeNextActionRepository$Result$Action;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getNextActionData ()Lcom/stripe/android/model/StripeIntent$NextActionData;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/model/LuxeNextActionRepository$Result$NoAction : com/stripe/android/model/LuxeNextActionRepository$Result {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/model/LuxeNextActionRepository$Result$NoAction;
-}
-
-public final class com/stripe/android/model/LuxeNextActionRepository$Result$NotSupported : com/stripe/android/model/LuxeNextActionRepository$Result {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/model/LuxeNextActionRepository$Result$NotSupported;
 }
 
 public final class com/stripe/android/model/MandateDataParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {

@@ -48,7 +48,8 @@ constructor(
     @JvmField val liveMode: Boolean,
 
     /**
-     * The code of the PaymentMethod.
+     * The code of the PaymentMethod. This is useful when the PaymentMethodType is not
+     * hard coded in the SDK.
      *
      * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
      */

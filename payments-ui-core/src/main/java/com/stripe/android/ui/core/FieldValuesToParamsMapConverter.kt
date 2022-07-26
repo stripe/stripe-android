@@ -92,16 +92,18 @@ class FieldValuesToParamsMapConverter {
 
         @VisibleForTesting
         internal fun addPath(map: MutableMap<String, Any?>, keys: List<String>, value: String?) {
-            val key = keys[0]
-            if (keys.size == 1) {
-                map[key] = value
-            } else {
-                var mapValueOfKey = map[key] as? MutableMap<String, Any?>
-                if (mapValueOfKey == null) {
-                    mapValueOfKey = mutableMapOf()
-                    map[key] = mapValueOfKey
+            if (keys.isNotEmpty()) {
+                val key = keys[0]
+                if (keys.size == 1) {
+                    map[key] = value
+                } else {
+                    var mapValueOfKey = map[key] as? MutableMap<String, Any?>
+                    if (mapValueOfKey == null) {
+                        mapValueOfKey = mutableMapOf()
+                        map[key] = mapValueOfKey
+                    }
+                    addPath(mapValueOfKey, keys.subList(1, keys.size), value)
                 }
-                addPath(mapValueOfKey, keys.subList(1, keys.size), value)
             }
         }
 

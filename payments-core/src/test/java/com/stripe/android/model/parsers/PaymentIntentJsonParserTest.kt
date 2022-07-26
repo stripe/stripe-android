@@ -184,7 +184,7 @@ class PaymentIntentJsonParserTest {
     fun `verify luxe next action is queried first for next action and returns next action`() {
         val luxeNextActionRepository = LuxeNextActionRepository()
         var stripeIntent = PaymentIntentJsonParser(luxeNextActionRepository).parse(
-            PaymentIntentFixtures.KONBINI_REQUIRES_ACTION_JSON
+            PaymentIntentFixtures.LLAMAPAY_REQUIRES_ACTION_JSON
         )
 
         // This is using the old hard coded path
@@ -194,13 +194,13 @@ class PaymentIntentJsonParserTest {
 
         luxeNextActionRepository.update(
             mapOf(
-                "konbini" to
+                "llamapay" to
                     LUXE_NEXT_ACTION.copy(
                         postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
                             StripeIntent.Status.RequiresAction,
                             LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-                                returnToUrlPath = null
+                                redirectPagePath = "next_action[llamapay_redirect_to_url][url]",
+                                returnToUrlPath = "next_action[llamapay_redirect_to_url][return_url]"
                             )
                         )
                     )
@@ -208,7 +208,7 @@ class PaymentIntentJsonParserTest {
         )
 
         stripeIntent = PaymentIntentJsonParser(luxeNextActionRepository).parse(
-            PaymentIntentFixtures.KONBINI_REQUIRES_ACTION_JSON
+            PaymentIntentFixtures.LLAMAPAY_REQUIRES_ACTION_JSON
         )
 
         // This will use the result of the LuxeNextActionRepo
@@ -218,10 +218,10 @@ class PaymentIntentJsonParserTest {
         assertThat(stripeIntent?.nextActionData).isEqualTo(
             StripeIntent.NextActionData.RedirectToUrl(
                 Uri.parse(
-                    "https://payments.stripe.com/konbini/voucher/" +
-                        "test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"
+                    "https://hooks.stripe.com/llamapay/acct_1HvTI7Lu5o3P18Zp/" +
+                        "pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
                 ),
-                null
+                "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example"
             )
         )
     }

@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.util.Log
 import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.model.StripeModel
@@ -20,7 +19,8 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     abstract val failureMessage: String?
 
     @VisibleForTesting
-    internal var luxeNextActionRepository: LuxeNextActionRepository = LuxeNextActionRepository.Instance
+    internal var luxeNextActionRepository: LuxeNextActionRepository =
+        LuxeNextActionRepository.Instance
 
     @Outcome
     @get:Outcome
@@ -43,10 +43,11 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
         return luxeNextActionRepository.getPostAuthorizeIntentOutcome(
             stripeIntent
         ) ?: run {
-            Log.e("MLB", "Doing the old way.")
             when (stripeIntent.status) {
                 StripeIntent.Status.RequiresAction -> {
-                    if (isRequireActionSuccessState(intent)) {
+                    if (stripeIntent.nextActionData == null) {
+                        Outcome.FAILED
+                    } else if (isRequireActionSuccessState(intent)) {
                         Outcome.SUCCEEDED
                     } else {
                         Outcome.CANCELED
