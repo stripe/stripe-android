@@ -1311,6 +1311,65 @@ internal object PaymentIntentFixtures {
     val OXXO_REQUIES_ACTION by lazy {
         requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
     }
+
+    val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+
+            """
+        {
+            "id": "pi_1IcuwoL32KlRo",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1IcuwoL32KlRo_secret_KC0YoHfna465TDVW",
+            "confirmation_method": "automatic",
+            "created": 1617638802,
+            "currency": "mxn",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+              "next_action": {
+                "llamapay_redirect_to_url": {
+                  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+                  "url": "https://hooks.stripe.com/llamapay/acct_1HvTI7Lu5o3P18Zp/pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
+                },
+                "type": "redirect_to_url"
+              },
+            "payment_method": {
+                "id": "pm_1IcuwoL32KlRot01",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": "jrosen@example.com",
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "created": 1617638802,
+                "customer": null,
+                "livemode": false,
+                "konbini": {},
+                "type": "llamapay"
+            },
+            "payment_method_types": ["card", "llamapay"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+
     val KONBINI_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
 
