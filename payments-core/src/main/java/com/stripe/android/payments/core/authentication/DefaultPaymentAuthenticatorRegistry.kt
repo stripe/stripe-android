@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.authentication
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -15,7 +14,6 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -38,17 +36,15 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap
-    private val paymentAuthenticatorMap: Map<Class<out StripeIntent.NextActionData>,
-        @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
+    private val paymentAuthenticatorMap:
+        Map<Class<out StripeIntent.NextActionData>,
+            @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
 ) : PaymentAuthenticatorRegistry, Injector {
     @VisibleForTesting
     internal val allAuthenticators = setOf(
         listOf(noOpIntentAuthenticator, sourceAuthenticator),
         paymentAuthenticatorMap.values
     ).flatten()
-
-    @VisibleForTesting
-    internal var nextActionRepository = LuxeNextActionRepository.Instance
 
     /**
      * [AuthenticationComponent] instance is hold to inject into [Activity]s and [ViewModel]s
@@ -74,22 +70,17 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     ): PaymentAuthenticator<Authenticatable> {
         return when (authenticatable) {
             is StripeIntent -> {
-                when (val luxeNextActionResult = nextActionRepository.getAction(authenticatable)) {
-                    is LuxeNextActionRepository.Result.Action -> {
-                        (
-                            paymentAuthenticatorMap
-                                .getOrElse(luxeNextActionResult.nextActionData::class.java) {
-                                    noOpIntentAuthenticator
-                                }
-                            )
-                            as PaymentAuthenticator<Authenticatable>
-                    }
-                    is LuxeNextActionRepository.Result.NoAction ->
-                        noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-                    is LuxeNextActionRepository.Result.NotSupported -> {
-                        doDefaultNextAction(authenticatable)
-                    }
+                if (!authenticatable.requiresAction()) {
+                    return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                 }
+                return (
+                    authenticatable.nextActionData?.let {
+                        paymentAuthenticatorMap
+                            .getOrElse(it::class.java) { noOpIntentAuthenticator }
+                    } ?: run {
+                        noOpIntentAuthenticator
+                    }
+                    ) as PaymentAuthenticator<Authenticatable>
             }
             is Source -> {
                 sourceAuthenticator as PaymentAuthenticator<Authenticatable>
@@ -97,26 +88,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             else -> {
                 error("No suitable PaymentAuthenticator for $authenticatable")
             }
-        }
-    }
-
-    private fun <Authenticatable> doDefaultNextAction(
-        authenticatable: StripeIntent
-    ): PaymentAuthenticator<Authenticatable> {
-        Log.e("MLB", "Doing the hard coded path.")
-        // TODO(michelleb): Trigger analytics
-        // handle the original SDK hard coded way
-        return if (!authenticatable.requiresAction()) {
-            noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
-        } else {
-            (
-                authenticatable.nextActionData?.let {
-                    paymentAuthenticatorMap
-                        .getOrElse(it::class.java) { noOpIntentAuthenticator }
-                } ?: run {
-                    noOpIntentAuthenticator
-                }
-                ) as PaymentAuthenticator<Authenticatable>
         }
     }
 

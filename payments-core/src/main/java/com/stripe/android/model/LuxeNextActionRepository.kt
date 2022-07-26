@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.StripeIntentResult
+import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class LuxeNextActionRepository {
@@ -18,9 +19,8 @@ class LuxeNextActionRepository {
      * of the operation.
      */
     fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
-        stripeIntent.getPaymentCodeFromJsonString()?.let { lpmCode ->
-            codeToNextActionSpec[lpmCode]?.postAuthorizeIntentStatus?.get(stripeIntent.status)
-        }
+        codeToNextActionSpec[stripeIntent.paymentMethod?.code]
+            ?.postAuthorizeIntentStatus?.get(stripeIntent.status)
 
     /**
      * Given the Intent returned from the confirm call, the payment method code and status
@@ -31,14 +31,12 @@ class LuxeNextActionRepository {
      * if it is not supported by the data in this repository.
      */
     internal fun getAction(
-        stripeIntent: StripeIntent
-    ) = stripeIntent.jsonString?.let { stripeIntentJsonString ->
-        stripeIntent.getPaymentCodeFromJsonString()?.let { lpmCode ->
-            getActionCreator(lpmCode, stripeIntent.status)
-                ?.actionCreator?.create(stripeIntentJsonString)
-                ?: Result.NotSupported
-        } ?: Result.NotSupported
-    } ?: Result.NotSupported
+        lpmCode: PaymentMethodCode?,
+        status: StripeIntent.Status?,
+        stripeIntentJson: JSONObject
+    ) = getActionCreator(lpmCode, status)
+        ?.actionCreator?.create(stripeIntentJson)
+        ?: Result.NotSupported
 
     private fun getActionCreator(lpmCode: PaymentMethodCode?, status: StripeIntent.Status?) =
         codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus.takeIf { it?.status == status }
@@ -51,7 +49,7 @@ class LuxeNextActionRepository {
                     postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
                         StripeIntent.Status.RequiresAction,
                         LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                            hostedPagePath = "next_action[redirect_to_url][url]",
+                            redirectPagePath = "next_action[redirect_to_url][url]",
                             returnToUrlPath = "next_action[redirect_to_url][return_url]"
                         )
                     ),
@@ -66,7 +64,7 @@ class LuxeNextActionRepository {
                     postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
                         StripeIntent.Status.RequiresAction,
                         LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                            hostedPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+                            redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
                             returnToUrlPath = null
                         )
                     ),

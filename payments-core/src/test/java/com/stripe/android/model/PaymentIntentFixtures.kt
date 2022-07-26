@@ -1071,9 +1071,7 @@ internal object PaymentIntentFixtures {
         )
     }
 
-    val AFTERPAY_REQUIRES_ACTION_JSON by lazy {
-        JSONObject(
-            """
+    val AFTERPAY_REQUIRES_ACTION_JSON_STRING = """
         {
           "id": "pi_3LNLYmLu5o3P18Zp04dCLrZf",
           "object": "payment_intent",
@@ -1153,7 +1151,11 @@ internal object PaymentIntentFixtures {
           "source": null,
           "status": "requires_action"
         }
-            """.trimIndent()
+    """.trimIndent()
+
+    val AFTERPAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            AFTERPAY_REQUIRES_ACTION_JSON_STRING
         )
     }
     val AFTERPAY_REQUIRES_ACTION by lazy {

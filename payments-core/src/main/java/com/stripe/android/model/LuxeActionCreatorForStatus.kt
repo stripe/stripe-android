@@ -11,15 +11,17 @@ data class LuxeActionCreatorForStatus(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     sealed class ActionCreator {
-        abstract fun create(stripeIntentJsonString: String): LuxeNextActionRepository.Result
+        fun create(stripeIntentJsonString: String) =
+            create(JSONObject(stripeIntentJsonString))
+
+        abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
         data class RedirectActionCreator(
-            val hostedPagePath: String,
+            val redirectPagePath: String,
             val returnToUrlPath: String?
         ) : ActionCreator() {
-            override fun create(stripeIntentJsonString: String): LuxeNextActionRepository.Result {
-                val stripeIntentJson = JSONObject(stripeIntentJsonString)
+            override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
                 val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
-                val url = getPath(hostedPagePath, stripeIntentJson)
+                val url = getPath(redirectPagePath, stripeIntentJson)
                 return if ((returnToUrlPath == null || returnUrl != null) &&
                     (url != null)
                 ) {
@@ -35,6 +37,13 @@ data class LuxeActionCreatorForStatus(
             }
         }
 
+        object NoActionCreator : ActionCreator() {
+            override fun create(stripeIntentJson: JSONObject) =
+                LuxeNextActionRepository.Result.NoAction
+        }
+    }
+
+    companion object {
         /**
          * This function will take a path string like: next_action\[redirect]\[url] and
          * find that key path in the json object.
@@ -65,11 +74,6 @@ data class LuxeActionCreatorForStatus(
                 pathIndex++
             }
             return jsonObject?.opt(pathArray[pathArray.size - 1]) as? String
-        }
-
-        object NoActionCreator : ActionCreator() {
-            override fun create(stripeIntentJsonString: String) =
-                LuxeNextActionRepository.Result.NoAction
         }
     }
 }

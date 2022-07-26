@@ -27,7 +27,6 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         )
 
         return SetupIntent(
-            jsonString = json.toString(),
             id = optString(json, FIELD_ID),
             created = json.optLong(FIELD_CREATED),
             clientSecret = optString(json, FIELD_CLIENT_SECRET),
