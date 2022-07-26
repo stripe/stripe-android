@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.LuxeActionCreatorForStatus
 import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.StripeIntent
