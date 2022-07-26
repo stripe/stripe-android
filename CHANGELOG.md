@@ -3,7 +3,7 @@
 ## X.X.X
 
 ### PaymentSheet
-[FIXED][5321](https://github.com/stripe/stripe-android/pull/5321)
+[FIXED][5321](https://github.com/stripe/stripe-android/pull/5321) Fixed issue with forever loading and mochi library.
 
 ### Payments
 [FIXED][5308](https://github.com/stripe/stripe-android/pull/5308) OXXO so that processing is considered a successful terminal state, similar to Konbini and Boleto.
