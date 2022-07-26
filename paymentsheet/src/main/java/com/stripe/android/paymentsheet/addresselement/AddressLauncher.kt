@@ -2,7 +2,10 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -12,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * A drop-in class that presents a bottom sheet to collect a customer's address.
  */
-internal class AddressLauncher internal constructor(
+class AddressLauncher internal constructor(
     private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
 ) {
     @InjectorKey
@@ -69,7 +72,7 @@ internal class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    internal data class Configuration @JvmOverloads constructor(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Configuration for the look and feel of the UI
          */
@@ -181,6 +184,22 @@ internal class AddressLauncher internal constructor(
              * The field is displayed and the customer is required to fill it in.
              */
             REQUIRED
+        }
+    }
+
+    companion object {
+        @Composable
+        fun rememberLauncher(
+            callback: AddressLauncherResultCallback
+        ): AddressLauncher {
+            val activityResultLauncher = rememberLauncherForActivityResult(
+                contract = AddressElementActivityContract(),
+                onResult = callback::onAddressLauncherResult
+            )
+
+            return remember {
+                AddressLauncher(activityResultLauncher)
+            }
         }
     }
 }

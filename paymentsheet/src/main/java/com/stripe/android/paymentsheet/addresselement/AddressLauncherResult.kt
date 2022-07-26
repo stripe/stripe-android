@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal sealed class AddressLauncherResult(
+sealed class AddressLauncherResult(
     val resultCode: Int
 ) : Parcelable {
     @Parcelize

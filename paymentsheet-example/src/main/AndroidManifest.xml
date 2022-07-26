@@ -20,6 +20,10 @@
             android:name="com.stripe.android.paymentsheet.example.metadata.backend_url"
             android:value="${BACKEND_URL}" />
 
+        <meta-data
+            android:name="com.stripe.android.paymentsheet.example.metadata.google_places_api_key"
+            android:value="${GOOGLE_PLACES_API_KEY}" />
+
         <!-- Enables the Google Payment API -->
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
