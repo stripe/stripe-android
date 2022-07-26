@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.paymentsColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -38,7 +39,7 @@ fun AddressOptionsAppBar(
                     if (isRootScreen) R.string.stripe_paymentsheet_close
                     else R.string.stripe_paymentsheet_back
                 ),
-                tint = MaterialTheme.colors.onSurface
+                tint = MaterialTheme.paymentsColors.appBarIcon
             )
         }
     }

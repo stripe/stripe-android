@@ -21,7 +21,7 @@ internal class PaymentOptionFactory(
             PaymentSelection.Link -> {
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
-                    label = "Link"
+                    label = resources.getString(R.string.link)
                 )
             }
             is PaymentSelection.Saved -> {

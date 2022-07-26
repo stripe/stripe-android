@@ -34,7 +34,6 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -104,31 +103,38 @@ internal fun DropDown(
                         color = currentTextColor
                     )
                     Icon(
-                        painter = painterResource(R.drawable.ic_chevron_down),
+                        Icons.Filled.ArrowDropDown,
                         contentDescription = null,
+                        modifier = Modifier.height(24.dp),
                         tint = currentTextColor
                     )
                 }
             } else {
-                Column(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        top = 4.dp,
-                        bottom = 8.dp
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
-                    label?.let {
-                        FormLabel(stringResource(it), enabled = enabled)
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Text(
-                            selectedItemLabel,
-                            modifier = Modifier.fillMaxWidth(.9f),
-                            color = currentTextColor
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            top = 4.dp,
+                            bottom = 8.dp
                         )
+                    ) {
+                        label?.let {
+                            FormLabel(stringResource(it), enabled = enabled)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(.9f),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Text(
+                                selectedItemLabel,
+                                color = currentTextColor
+                            )
+                        }
+                    }
+                    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                         Icon(
                             Icons.Filled.ArrowDropDown,
                             contentDescription = null,

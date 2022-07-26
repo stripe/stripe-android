@@ -15,12 +15,34 @@ enum class DisplayField {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed class AddressType {
+    abstract val phoneNumberState: PhoneNumberState
+
     data class ShippingCondensed(
         val googleApiKey: String?,
+        override val phoneNumberState: PhoneNumberState,
         val onNavigation: () -> Unit
     ) : AddressType()
-    object ShippingExpanded : AddressType()
-    object Normal : AddressType()
+
+    data class ShippingExpanded(
+        override val phoneNumberState: PhoneNumberState
+    ) : AddressType()
+
+    data class Normal(
+        override val phoneNumberState: PhoneNumberState =
+            PhoneNumberState.HIDDEN
+    ) : AddressType()
+}
+
+@Serializable
+enum class PhoneNumberState {
+    @SerialName("hidden")
+    HIDDEN,
+
+    @SerialName("optional")
+    OPTIONAL,
+
+    @SerialName("required")
+    REQUIRED
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -42,7 +64,7 @@ data class AddressSpec(
      * This field is not deserialized, this field is used for the Address Element
      */
     @Transient
-    val type: AddressType = AddressType.Normal
+    val type: AddressType = AddressType.Normal()
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,

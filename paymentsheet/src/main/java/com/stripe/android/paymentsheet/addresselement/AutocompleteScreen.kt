@@ -107,12 +107,13 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 .fillMaxHeight()
                 .systemBarsPadding()
                 .padding(paddingValues)
+                .background(MaterialTheme.colors.surface)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AddressOptionsAppBar(false) {
-                    viewModel.setResultAndGoBack()
+                    viewModel.onBackPressed()
                 }
                 Box(
                     modifier = Modifier

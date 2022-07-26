@@ -7,7 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -28,6 +28,7 @@ import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.ui.core.PaymentsTheme
 import kotlinx.coroutines.launch
 
@@ -54,6 +55,7 @@ internal class AddressElementActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        starterArgs.config?.appearance?.parseAppearance()
 
         // set a default result in case the user closes the sheet manually
         setResult()
@@ -90,8 +92,8 @@ internal class AddressElementActivity : ComponentActivity() {
                 sheetContent = {
                     PaymentsTheme {
                         Surface(
-                            color = MaterialTheme.colors.background,
-                            modifier = Modifier.fillMaxWidth()
+                            color = MaterialTheme.colors.surface,
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             AnimatedNavHost(
                                 navController,
