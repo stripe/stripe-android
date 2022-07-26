@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit
  * form view model a new repository is created and thus needs to be initialized.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository internal constructor(
+class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance
 ) {
@@ -356,7 +356,8 @@ class LpmRepository internal constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
-    internal class LpmInitialFormData {
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    class LpmInitialFormData {
 
         private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 

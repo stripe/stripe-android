@@ -25,7 +25,7 @@ class LuxeNextActionRepository {
     internal fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
         // This handles the case where the next action is not understood so
         // the PI is still in the requires action state.
-        if (stripeIntent.requiresAction() && stripeIntent.nextActionData != null) {
+        if (stripeIntent.requiresAction() && stripeIntent.nextActionData == null) {
             StripeIntentResult.Outcome.FAILED
         } else {
             codeToNextActionSpec[stripeIntent.paymentMethod?.code]
