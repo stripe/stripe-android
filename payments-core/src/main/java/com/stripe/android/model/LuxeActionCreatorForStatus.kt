@@ -16,13 +16,12 @@ data class LuxeActionCreatorForStatus(
         internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
         data class RedirectActionCreator(
             val redirectPagePath: String,
-            val returnToUrlPath: String?
+            val returnToUrlPath: String
         ) : ActionCreator() {
             override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
                 val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
                 val url = getPath(redirectPagePath, stripeIntentJson)
-                return if ((returnToUrlPath == null || returnUrl != null) &&
-                    (url != null)
+                return if ((returnUrl != null) && (url != null)
                 ) {
                     LuxeNextActionRepository.Result.Action(
                         StripeIntent.NextActionData.RedirectToUrl(

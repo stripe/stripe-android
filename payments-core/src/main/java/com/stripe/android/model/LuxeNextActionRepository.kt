@@ -59,20 +59,21 @@ class LuxeNextActionRepository {
                         StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
                     )
                 ),
-            "konbini" to
-                LuxeAction(
-                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                        StripeIntent.Status.RequiresAction,
-                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                            redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-                            returnToUrlPath = null
-                        )
-                    ),
-                    postAuthorizeIntentStatus = mapOf(
-                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
-                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                ),
+            // konbini is not supported because it does not share a path to the returnUrl
+//            "konbini" to
+//                LuxeAction(
+//                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
+//                        StripeIntent.Status.RequiresAction,
+//                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
+//                            redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+//                            returnToUrlPath = null
+//                        )
+//                    ),
+//                    postAuthorizeIntentStatus = mapOf(
+//                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
+//                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
+//                    )
+//                ),
 
             "sepa_debit" to
                 LuxeAction(
