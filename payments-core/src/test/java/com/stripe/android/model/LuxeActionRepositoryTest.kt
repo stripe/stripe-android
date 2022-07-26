@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
-import androidx.annotation.VisibleForTesting
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DEFAULT_DATA
 import com.stripe.android.LUXE_NEXT_ACTION
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.LuxeActionCreatorForStatus.Companion.getPath
@@ -264,36 +264,5 @@ class LuxeActionRepositoryTest {
                 JSONObject()
             )
         ).isEqualTo(Result.NotSupported)
-    }
-
-    companion object {
-        @VisibleForTesting
-        internal val DEFAULT_DATA = mapOf(
-            "afterpay_clearpay" to
-                LuxeNextActionRepository.LuxeAction(
-                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                        StripeIntent.Status.RequiresAction,
-                        LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                            redirectPagePath = "next_action[redirect_to_url][url]",
-                            returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                        )
-                    ),
-                    postAuthorizeIntentStatus = mapOf(
-                        StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
-                        StripeIntent.Status.RequiresPaymentMethod to StripeIntentResult.Outcome.FAILED,
-                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
-                    )
-                ),
-            "sepa_debit" to
-                LuxeNextActionRepository.LuxeAction(
-                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                        StripeIntent.Status.Processing,
-                        LuxeActionCreatorForStatus.ActionCreator.NoActionCreator
-                    ),
-                    postAuthorizeIntentStatus = mapOf(
-                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                )
-        )
     }
 }
