@@ -14,6 +14,11 @@ data class LuxeActionCreatorForStatus(
             create(JSONObject(stripeIntentJsonString))
 
         internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
+
+        /**
+         * The returnToUrlPath cannot be null because otherwise it will trigger the web flow
+         * which we do not want.
+         */
         data class RedirectActionCreator(
             val redirectPagePath: String,
             val returnToUrlPath: String?
@@ -21,12 +26,10 @@ data class LuxeActionCreatorForStatus(
             override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
                 val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
                 val url = getPath(redirectPagePath, stripeIntentJson)
-                return if ((returnToUrlPath == null || returnUrl != null) &&
-                    (url != null)
-                ) {
+                return if (url != null) {
                     LuxeNextActionRepository.Result.Action(
                         StripeIntent.NextActionData.RedirectToUrl(
-                            returnUrl = returnUrl,
+                            returnUrl = returnUrl ?: "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
                             url = Uri.parse(url)
                         )
                     )

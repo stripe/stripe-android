@@ -26,7 +26,7 @@ internal class PaymentBrowserAuthContract :
     ): Intent {
         val defaultReturnUrl = DefaultReturnUrl.create(context)
         val shouldUseBrowser =
-            input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp
+            input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp || input.returnUrl == null
 
         val statusBarColor = when (context) {
             is Activity -> context.window?.statusBarColor

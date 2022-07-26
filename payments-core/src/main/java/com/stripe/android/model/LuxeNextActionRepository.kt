@@ -69,8 +69,11 @@ class LuxeNextActionRepository {
                         )
                     ),
                     postAuthorizeIntentStatus = mapOf(
-                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
-                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
+                        StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
+                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED,
+                        // If the next action is not understood and not processed, we will also
+                        // see a status of requires_action
+//                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
                     )
                 ),
 
