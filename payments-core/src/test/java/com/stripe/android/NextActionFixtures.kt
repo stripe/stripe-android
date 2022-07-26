@@ -8,7 +8,7 @@ val LUXE_NEXT_ACTION = LuxeNextActionRepository.LuxeAction(
     postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
         StripeIntent.Status.RequiresAction,
         LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-            hostedPagePath = "next_action[oxxo_display_details][hosted_voucher_url]",
+            redirectPagePath = "next_action[oxxo_display_details][hosted_voucher_url]",
             returnToUrlPath = "next_action[oxxo_display_details][return_url]"
         )
     ),
