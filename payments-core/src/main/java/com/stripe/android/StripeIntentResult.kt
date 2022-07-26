@@ -46,7 +46,10 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             Log.e("MLB", "Doing the old way.")
             when (stripeIntent.status) {
                 StripeIntent.Status.RequiresAction -> {
-                    if (isRequireActionSuccessState(intent)) {
+                    if(stripeIntent.nextActionData == null){
+                        Outcome.FAILED
+                    }
+                    else if (isRequireActionSuccessState(intent)) {
                         Outcome.SUCCEEDED
                     } else {
                         Outcome.CANCELED

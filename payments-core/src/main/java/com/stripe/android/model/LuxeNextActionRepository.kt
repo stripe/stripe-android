@@ -19,8 +19,14 @@ class LuxeNextActionRepository {
      * of the operation.
      */
     fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
-        codeToNextActionSpec[stripeIntent.paymentMethod?.code]
-            ?.postAuthorizeIntentStatus?.get(stripeIntent.status)
+        // This handles the case where the next action is not understood so
+        // the PI is still in the requires action state.
+        if (stripeIntent.requiresAction() && stripeIntent.nextActionData != null) {
+            StripeIntentResult.Outcome.FAILED
+        } else {
+            codeToNextActionSpec[stripeIntent.paymentMethod?.code]
+                ?.postAuthorizeIntentStatus?.get(stripeIntent.status)
+        }
 
     /**
      * Given the Intent returned from the confirm call, the payment method code and status
@@ -59,7 +65,6 @@ class LuxeNextActionRepository {
                         StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
                     )
                 ),
-            // konbini is not supported because it does not share a path to the returnUrl
 //            "konbini" to
 //                LuxeAction(
 //                    postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
@@ -70,8 +75,11 @@ class LuxeNextActionRepository {
 //                        )
 //                    ),
 //                    postAuthorizeIntentStatus = mapOf(
-//                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
-//                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
+//                        StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
+//                        StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED,
+//                        // If the next action is not understood and not processed, we will also
+//                        // see a status of requires_action.  WHen you close the next action status is requires_action
+////                        StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
 //                    )
 //                ),
 
