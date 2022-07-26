@@ -8,13 +8,12 @@ data class LuxeActionCreatorForStatus(
     val status: StripeIntent.Status,
     val actionCreator: ActionCreator
 ) {
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     sealed class ActionCreator {
         fun create(stripeIntentJsonString: String) =
             create(JSONObject(stripeIntentJsonString))
 
-        abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
+        internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
         data class RedirectActionCreator(
             val redirectPagePath: String,
             val returnToUrlPath: String?
@@ -43,7 +42,7 @@ data class LuxeActionCreatorForStatus(
         }
     }
 
-    companion object {
+    internal companion object {
         /**
          * This function will take a path string like: next_action\[redirect]\[url] and
          * find that key path in the json object.
