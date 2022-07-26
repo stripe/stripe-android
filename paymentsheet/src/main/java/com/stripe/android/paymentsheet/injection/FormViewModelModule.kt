@@ -22,5 +22,11 @@ internal abstract class FormViewModelModule {
         @Singleton
         fun provideLocale() =
             LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
+
+        @Provides
+        @Singleton
+        fun providesSurfaceType(): AsyncResourceRepository.SurfaceType {
+            return AsyncResourceRepository.SurfaceType.Payments
+        }
     }
 }

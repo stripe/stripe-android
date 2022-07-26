@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.forms.resources.injection
+package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import android.content.res.Resources
@@ -10,7 +10,7 @@ import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-abstract class ResourceRepositoryModule {
+abstract class AddressLauncherResourceRepositoryModule {
     @Binds
     abstract fun bindsResourceRepository(asyncResourceRepository: AsyncResourceRepository):
         ResourceRepository
@@ -26,7 +26,7 @@ abstract class ResourceRepositoryModule {
         @Provides
         @Singleton
         fun providesSurfaceType(): AsyncResourceRepository.SurfaceType {
-            return AsyncResourceRepository.SurfaceType.Payments
+            return AsyncResourceRepository.SurfaceType.Address
         }
     }
 }

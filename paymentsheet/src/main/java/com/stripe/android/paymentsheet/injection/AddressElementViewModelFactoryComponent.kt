@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.addresselement.AddressElementViewModel
 import com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import com.stripe.android.ui.core.injection.FormControllerModule
 import dagger.BindsInstance
 import dagger.Component
@@ -21,7 +20,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         LoggingModule::class,
-        ResourceRepositoryModule::class,
+        AddressLauncherResourceRepositoryModule::class,
         AddressElementViewModelModule::class,
         FormControllerModule::class
     ]
