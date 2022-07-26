@@ -708,20 +708,6 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Comp
 	public final fun getInstance (Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmRepositoryArguments;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
 }
 
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData$Companion;
-	public fun <init> ()V
-	public final fun containsKey (Ljava/lang/String;)Z
-	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
-	public final fun putAll (Ljava/util/Map;)V
-	public final fun values ()Ljava/util/Collection;
-}
-
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData$Companion {
-	public final fun getInstance ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData;
-}
-
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$NoServerSpec : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V

@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit
  * form view model a new repository is created and thus needs to be initialized.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository constructor(
+class LpmRepository internal constructor(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance
 ) {
@@ -100,7 +100,8 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        val newSpecsToLoad = expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
+        val newSpecsToLoad =
+            expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
 
         if (!isLoaded() || force || newSpecsToLoad) {
             serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
@@ -355,7 +356,7 @@ class LpmRepository constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
-    class LpmInitialFormData {
+    internal class LpmInitialFormData {
 
         private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
@@ -369,7 +370,7 @@ class LpmRepository constructor(
         fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) =
             codeToSupportedPaymentMethod.putAll(map)
 
-        companion object {
+        internal companion object {
             val Instance = LpmInitialFormData()
         }
     }
