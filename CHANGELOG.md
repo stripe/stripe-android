@@ -3,11 +3,13 @@
 ## X.X.X
 
 ### PaymentSheet
-[FIXED][5321](https://github.com/stripe/stripe-android/pull/5321) Fixed issue with forever loading and mochi library.
+* [FIXED][5321](https://github.com/stripe/stripe-android/pull/5321) Fixed issue with forever loading and mochi library.
 
 ### Payments
-[FIXED][5308](https://github.com/stripe/stripe-android/pull/5308) OXXO so that processing is considered a successful terminal state, similar to Konbini and Boleto.
-[FIXED][5138](https://github.com/stripe/stripe-android/pull/5138) Fixed an issue where PaymentSheet will show a failure even when 3DS2 Payment/SetupIntent is successful
+* [FIXED][5308](https://github.com/stripe/stripe-android/pull/5308) OXXO so that processing is considered a successful terminal state, similar to Konbini and Boleto.
+* [FIXED][5138](https://github.com/stripe/stripe-android/pull/5138) Fixed an issue where PaymentSheet will show a failure even when 3DS2 Payment/SetupIntent is successful.
+* [ADDED][5274](https://github.com/stripe/stripe-android/pull/5274) Create `rememberLauncher` method enabling usage of `GooglePayLauncher`, `GooglePayPaymentMethodLauncher` and `PaymentLauncher` in Compose.
+* [DEPRECATED][5274](https://github.com/stripe/stripe-android/pull/5274) Deprecate `PaymentLauncher.createForCompose` in favor of  `PaymentLauncher.rememberLauncher`.
 
 ## 20.7.0 - 2022-07-06
 * This release adds additional support for Afterpay/Clearpay in PaymentSheet.
