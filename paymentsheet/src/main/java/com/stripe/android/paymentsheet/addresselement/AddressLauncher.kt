@@ -54,9 +54,13 @@ internal class AddressLauncher internal constructor(
     )
 
     @JvmOverloads
-    fun present(configuration: Configuration = Configuration()) {
+    fun present(
+        publishableKey: String,
+        configuration: Configuration = Configuration()
+    ) {
         activityResultLauncher.launch(
             AddressElementActivityContract.Args(
+                publishableKey,
                 configuration,
                 injectorKey
             )

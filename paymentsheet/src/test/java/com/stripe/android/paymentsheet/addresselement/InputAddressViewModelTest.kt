@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,7 +14,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
@@ -40,6 +43,7 @@ class InputAddressViewModelTest {
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }
+    private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(defaultAddress: AddressDetails? = null): InputAddressViewModel {
         defaultAddress?.let {
@@ -49,6 +53,7 @@ class InputAddressViewModelTest {
         return InputAddressViewModel(
             args,
             navigator,
+            eventReporter,
             formControllerProvider
         )
     }
@@ -88,5 +93,28 @@ class InputAddressViewModelTest {
 
         val viewModel = createViewModel(expectedAddress)
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+    }
+
+    @Test
+    fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            AddressDetails(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US"
+            )
+        )
+        viewModel.dismissWithAddress(
+            AddressDetails(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US"
+            )
+        )
+        verify(eventReporter).onCompleted(
+            country = eq("US"),
+            autocompleteResultSelected = eq(true),
+            editDistance = eq(0)
+        )
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
@@ -34,11 +35,11 @@ import javax.inject.Provider
 internal class AutocompleteViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
+    private val placesClient: PlacesClientProxy?,
     private val autocompleteArgs: Args,
+    private val eventReporter: AddressLauncherEventReporter,
     application: Application
 ) : AndroidViewModel(application) {
-    private var client: PlacesClientProxy? = null
-
     private val _predictions = MutableStateFlow<List<AutocompletePrediction>?>(null)
     val predictions: StateFlow<List<AutocompletePrediction>?>
         get() = _predictions
@@ -63,20 +64,13 @@ internal class AutocompleteViewModel @Inject constructor(
 
     private val debouncer = Debouncer()
 
-    fun initialize(
-        clientProvider: () -> PlacesClientProxy? = {
-            args.config?.googlePlacesApiKey?.let {
-                PlacesClientProxy.create(getApplication(), it)
-            }
-        }
-    ) {
-        client = clientProvider()
+    init {
         debouncer.startWatching(
             coroutineScope = viewModelScope,
             queryFlow = queryFlow,
             onValidQuery = {
                 viewModelScope.launch {
-                    client?.findAutocompletePredictions(
+                    placesClient?.findAutocompletePredictions(
                         query = it,
                         country = autocompleteArgs.country
                             ?: throw IllegalStateException("Country cannot be empty"),
@@ -111,12 +105,15 @@ internal class AutocompleteViewModel @Inject constructor(
                 }
             }
         }
+        autocompleteArgs.country?.let { country ->
+            eventReporter.onShow(country)
+        }
     }
 
     fun selectPrediction(prediction: AutocompletePrediction) {
         viewModelScope.launch {
             _loading.value = true
-            client?.fetchPlace(
+            placesClient?.fetchPlace(
                 placeId = prediction.placeId
             )?.fold(
                 onSuccess = {
