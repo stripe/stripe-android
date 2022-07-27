@@ -67,7 +67,6 @@ private fun WalletBodyPreview() {
     DefaultLinkTheme {
         Surface {
             WalletBody(
-                isProcessing = false,
                 paymentDetails = listOf(
                     ConsumerPaymentDetails.Card(
                         "id1",
@@ -88,6 +87,7 @@ private fun WalletBodyPreview() {
                 ),
                 initiallySelectedId = null,
                 primaryButtonLabel = "Pay $10.99",
+                primaryButtonState = PrimaryButtonState.Enabled,
                 errorMessage = null,
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
@@ -114,14 +114,15 @@ internal fun WalletBody(
     )
 
     val paymentDetails by viewModel.paymentDetails.collectAsState()
-    val isProcessing by viewModel.isProcessing.collectAsState()
+    val primaryButtonState by viewModel.primaryButtonState.collectAsState()
+
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     WalletBody(
-        isProcessing = isProcessing,
         paymentDetails = paymentDetails,
         initiallySelectedId = viewModel.initiallySelectedId,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+        primaryButtonState = primaryButtonState,
         errorMessage = errorMessage,
         onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
         onEditPaymentMethod = viewModel::editPaymentMethod,
@@ -134,10 +135,10 @@ internal fun WalletBody(
 
 @Composable
 internal fun WalletBody(
-    isProcessing: Boolean,
     paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
     initiallySelectedId: String?,
     primaryButtonLabel: String,
+    primaryButtonState: PrimaryButtonState,
     errorMessage: ErrorMessage?,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -192,7 +193,7 @@ internal fun WalletBody(
                 ExpandedPaymentDetails(
                     paymentDetails = paymentDetails,
                     selectedItemId = selectedItemId,
-                    enabled = !isProcessing,
+                    enabled = !primaryButtonState.isBlocking,
                     onIndexSelected = {
                         selectedItemId = paymentDetails[it].id
                         isWalletExpanded = false
@@ -222,7 +223,7 @@ internal fun WalletBody(
             } else {
                 CollapsedPaymentDetails(
                     selectedPaymentMethod = paymentDetails.first { it.id == selectedItemId },
-                    enabled = !isProcessing,
+                    enabled = !primaryButtonState.isBlocking,
                     onClick = {
                         isWalletExpanded = true
                     }
@@ -234,17 +235,13 @@ internal fun WalletBody(
             }
             PrimaryButton(
                 label = primaryButtonLabel,
-                state = if (isProcessing) {
-                    PrimaryButtonState.Processing
-                } else {
-                    PrimaryButtonState.Enabled
-                },
+                state = primaryButtonState,
                 icon = R.drawable.stripe_ic_lock
             ) {
                 onPrimaryButtonClick(paymentDetails.first { it.id == selectedItemId })
             }
             SecondaryButton(
-                enabled = !isProcessing,
+                enabled = !primaryButtonState.isBlocking,
                 label = stringResource(id = R.string.wallet_pay_another_way),
                 onClick = onPayAnotherWayClick
             )
