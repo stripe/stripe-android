@@ -16,7 +16,7 @@ open class AddressElement constructor(
     _identifier: IdentifierSpec,
     private val addressFieldRepository: AddressFieldElementRepository,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    private val addressType: AddressType = AddressType.Normal,
+    private val addressType: AddressType = AddressType.Normal(),
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
@@ -48,7 +48,10 @@ open class AddressElement constructor(
 
     private val phoneNumberElement = PhoneNumberElement(
         IdentifierSpec.Phone,
-        PhoneNumberController(rawValuesMap[IdentifierSpec.Phone] ?: "")
+        PhoneNumberController(
+            initialPhoneNumber = rawValuesMap[IdentifierSpec.Phone] ?: "",
+            showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL
+        )
     )
 
     private val otherFields = countryElement.controller.rawFieldValue
@@ -71,9 +74,9 @@ open class AddressElement constructor(
         countryElement.controller.rawFieldValue,
         otherFields
     ) { country, otherFields ->
-        val condensed = listOf(nameElement, countryElement, addressAutoCompleteElement, phoneNumberElement)
-        val expanded = listOf(nameElement, countryElement).plus(otherFields).plus(phoneNumberElement)
-        when (addressType) {
+        val condensed = listOf(nameElement, countryElement, addressAutoCompleteElement)
+        val expanded = listOf(nameElement, countryElement).plus(otherFields)
+        val baseElements = when (addressType) {
             is AddressType.ShippingCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
                 // available, and country is supported, use autocomplete
@@ -92,6 +95,12 @@ open class AddressElement constructor(
             else -> {
                 listOf(countryElement).plus(otherFields)
             }
+        }
+
+        if (addressType.phoneNumberState != PhoneNumberState.HIDDEN) {
+            baseElements.plus(phoneNumberElement)
+        } else {
+            baseElements
         }
     }
 

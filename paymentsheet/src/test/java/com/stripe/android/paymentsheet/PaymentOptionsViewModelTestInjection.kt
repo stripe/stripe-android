@@ -50,6 +50,9 @@ internal open class PaymentOptionsViewModelTestInjection {
         @InjectorKey injectorKey: String,
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
+        val lpmRepository =
+            LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources))
+        lpmRepository.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         PaymentOptionsViewModel(
             args,
             prefsRepositoryFactory = {
@@ -63,7 +66,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             injectorKey = injectorKey,
             resourceRepository = StaticResourceRepository(
                 mock(),
-                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+                lpmRepository
             ),
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)

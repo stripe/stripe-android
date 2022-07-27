@@ -8,12 +8,12 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Browser
-import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -89,7 +89,11 @@ class TestCustomers {
 
     companion object {
         private val lpmRepository = LpmRepository(
-            InstrumentationRegistry.getInstrumentation().targetContext.resources
-        )
+            LpmRepository.LpmRepositoryArguments(
+                InstrumentationRegistry.getInstrumentation().targetContext.resources
+            )
+        ).apply {
+            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+        }
     }
 }

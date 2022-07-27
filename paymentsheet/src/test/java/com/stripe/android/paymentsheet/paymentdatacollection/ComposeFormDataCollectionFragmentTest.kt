@@ -6,13 +6,14 @@ import androidx.fragment.app.testing.launchFragment
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment.Companion.EXTRA_CONFIG
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -21,9 +22,19 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ComposeFormDataCollectionFragmentTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
-    private val card = LpmRepository.HardcodedCard
-    private val sofort = lpmRepository.fromCode("sofort")!!
+    private val lpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+    ).apply {
+        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Sofort.code), null)
+    }
+
+    private
+    val card = LpmRepository.HardcodedCard
+
+    private
+    val sofort = lpmRepository.fromCode("sofort")!!
 
     @Test
     fun `card payment method selection has the fields from formFieldValues`() {

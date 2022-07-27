@@ -26,9 +26,12 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -53,12 +56,15 @@ import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -150,6 +156,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @VisibleForTesting
     internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
+    private var linkActivityResultLauncher:
+        ActivityResultLauncher<LinkActivityContract.Args>? = null
+
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -222,15 +231,36 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      */
     internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
         viewModelScope.launch {
-            runCatching {
-                stripeIntentRepository.get(args.clientSecret)
-            }.fold(
-                onSuccess = ::onStripeIntentFetchResponse,
-                onFailure = {
-                    setStripeIntent(null)
-                    onFatal(it)
-                }
-            )
+            // The co-routine scope is needed to do work off the UI thread
+            CoroutineScope(workContext).launch {
+                runCatching {
+                    val intent = initializeRepositoryAndGetStripeIntent(
+                        resourceRepository,
+                        stripeIntentRepository,
+                        args.clientSecret,
+                        eventReporter
+                    )
+
+                    lpmServerSpec =
+                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+
+                    // The lpm server specs need to be saved so that upon the
+                    // activity being killed the state can be restored.
+                    intent
+                }.fold(
+                    onSuccess = {
+                        withContext(Dispatchers.Main) {
+                            onStripeIntentFetchResponse(it)
+                        }
+                    },
+                    onFailure = {
+                        withContext(Dispatchers.Main) {
+                            setStripeIntent(null)
+                            onFatal(it)
+                        }
+                    }
+                )
+            }
         }
         true
     } else {
@@ -244,7 +274,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             onSuccess = {
                 savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
                 updatePaymentMethods(stripeIntent)
-                setupLink(stripeIntent, true)
+                setupLink(stripeIntent)
                 resetViewState()
             },
             onFailure = ::onFatal
@@ -366,8 +396,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
-        super.registerFromActivity(activityResultCaller)
+    /**
+     * Used to set up any dependencies that require a reference to the current Activity.
+     * Must be called from the Activity's `onCreate`.
+     */
+    fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
+        linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
+            LinkActivityContract(),
+            ::onLinkActivityResult
+        )
+
         paymentLauncher = paymentLauncherFactory.create(
             { lazyPaymentConfig.get().publishableKey },
             { lazyPaymentConfig.get().stripeAccountId },
@@ -378,8 +416,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    override fun unregisterFromActivity() {
-        super.unregisterFromActivity()
+    /**
+     * Used to clean up any dependencies that require a reference to the current Activity.
+     * Must be called from the Activity's `onDestroy`.
+     */
+    fun unregisterFromActivity() {
+        linkActivityResultLauncher = null
         paymentLauncher = null
     }
 
@@ -397,20 +439,71 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun onLinkLaunched() {
-        super.onLinkLaunched()
+    override fun setupLink(stripeIntent: StripeIntent) {
+        if (LINK_ENABLED &&
+            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
+        ) {
+            viewModelScope.launch {
+                when (
+                    linkLauncher.setup(
+                        stripeIntent,
+                        (newPaymentSelection as? PaymentSelection.New.LinkInline)
+                            ?.linkPaymentDetails,
+                        this
+                    )
+                ) {
+                    AccountStatus.Verified -> launchLink()
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> {
+                        linkVerificationCallback = { success ->
+                            linkVerificationCallback = null
+                            _showLinkVerificationDialog.value = false
+
+                            if (success) {
+                                launchLink()
+                            }
+                        }
+                        _showLinkVerificationDialog.value = true
+                    }
+                    AccountStatus.SignedOut -> {}
+                }
+                _isLinkEnabled.value = true
+            }
+        } else {
+            _isLinkEnabled.value = false
+        }
+    }
+
+    fun launchLink() {
+        linkActivityResultLauncher?.let { activityResultLauncher ->
+            linkLauncher.present(
+                activityResultLauncher
+            )
+            onLinkLaunched()
+        }
+    }
+
+    /**
+     * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
+     * accordingly.
+     */
+    fun onLinkLaunched() {
+        setContentVisible(false)
         startProcessing(CheckoutIdentifier.SheetBottomBuy)
     }
 
-    override fun onLinkActivityResult(result: LinkActivityResult) {
-        super.onLinkActivityResult(result)
+    /**
+     * Method called with the result of launching the Link UI to collect a payment.
+     */
+    fun onLinkActivityResult(result: LinkActivityResult) {
+        setContentVisible(true)
         onPaymentResult(result.convertToPaymentResult())
     }
 
     override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(PaymentSelection.New.Link(it))
+            updateSelection(PaymentSelection.New.LinkInline(it))
             checkout(CheckoutIdentifier.SheetBottomBuy)
         } ?: run {
             // Link PaymentDetails creationg failed, fallback to regular checkout.
@@ -425,7 +518,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 stripeIntentRepository.get(args.clientSecret)
             }.fold(
                 onSuccess = {
-                    processPayment(it, paymentResult)
+                    processPayment(it.intent, paymentResult)
                 },
                 onFailure = ::onFatal
             )
@@ -443,6 +536,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         PaymentSelection.Saved(it)
                     }
                     PaymentSelection.GooglePay -> selection.value
+                    PaymentSelection.Link -> selection.value
                     is PaymentSelection.Saved -> selection.value
                     null -> null
                 }?.let {
@@ -514,7 +608,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun LinkActivityResult.convertToPaymentResult() =
         when (this) {
-            is LinkActivityResult.Success -> PaymentResult.Completed
+            is LinkActivityResult.Completed -> PaymentResult.Completed
             is LinkActivityResult.Canceled -> PaymentResult.Canceled
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }

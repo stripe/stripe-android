@@ -122,6 +122,10 @@ class LauncherActivity : AppCompatActivity() {
                 SofortPaymentMethodActivity::class.java
             ),
             Item(
+                "iDEAL Payment Example",
+                IDEALPaymentMethodActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.upi_example),
                 UpiPaymentActivity::class.java
             ),

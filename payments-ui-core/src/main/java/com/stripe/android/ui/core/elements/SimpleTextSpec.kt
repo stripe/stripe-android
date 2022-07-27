@@ -19,7 +19,7 @@ enum class Capitalization {
     Words,
 
     @SerialName("sentences")
-    Sentences
+    Sentences;
 }
 
 @Suppress("EnumEntryName")
@@ -47,7 +47,7 @@ enum class KeyboardType {
     Password,
 
     @SerialName("number_password")
-    NumberPassword,
+    NumberPassword;
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

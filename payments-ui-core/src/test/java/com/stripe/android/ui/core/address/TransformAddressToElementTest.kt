@@ -136,6 +136,23 @@ class TransformAddressToElementTest {
     }
 
     @Test
+    fun `Make sure sorting code and dependent locality is never required`() {
+        // Sorting code and dependent locality are not actually sent to the server.
+        supportedCountries.forEach { countryCode ->
+            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
+            val invalidNameType = schemaList?.filter { addressSchema ->
+                addressSchema.required &&
+                    (
+                        addressSchema.type == FieldType.SortingCode ||
+                            addressSchema.type == FieldType.DependentLocality
+                        )
+            }
+            invalidNameType?.forEach { println(it.type?.name) }
+            assertThat(invalidNameType).isEmpty()
+        }
+    }
+
+    @Test
     fun `Make sure all country code json files are serializable`() {
         supportedCountries.forEach { countryCode ->
             val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")

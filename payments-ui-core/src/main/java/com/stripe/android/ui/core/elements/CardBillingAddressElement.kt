@@ -25,7 +25,7 @@ class CardBillingAddressElement(
     identifier,
     addressFieldRepository,
     rawValuesMap,
-    AddressType.Normal,
+    AddressType.Normal(),
     countryCodes,
     countryDropdownFieldController
 ) {

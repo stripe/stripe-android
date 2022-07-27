@@ -15,7 +15,7 @@ configurations {
 }
 
 if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
+    group = 'com.github.stripe.stripe-android'
 }
 
 dependencies {

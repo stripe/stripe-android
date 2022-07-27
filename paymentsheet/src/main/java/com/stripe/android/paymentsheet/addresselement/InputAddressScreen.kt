@@ -1,12 +1,11 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -26,14 +25,17 @@ import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Composable
 internal fun InputAddressScreen(
-    collectedAddress: ShippingAddress?,
     primaryButtonEnabled: Boolean,
+    primaryButtonText: String,
     onPrimaryButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
-    onEnterManuallyClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxHeight()) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .background(MaterialTheme.colors.surface)
+    ) {
         AddressOptionsAppBar(
             isRootScreen = true,
             onButtonClick = { onCloseClick() }
@@ -48,14 +50,10 @@ internal fun InputAddressScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             formContent()
-            if (collectedAddress == null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                EnterManuallyText {
-                    onEnterManuallyClick()
-                }
-            }
-
-            AddressElementPrimaryButton(isEnabled = primaryButtonEnabled) {
+            AddressElementPrimaryButton(
+                isEnabled = primaryButtonEnabled,
+                text = primaryButtonText
+            ) {
                 onPrimaryButtonClick()
             }
         }
@@ -72,27 +70,24 @@ internal fun InputAddressScreen(
         )
     )
     val formController by viewModel.formController.collectAsState()
-
     if (formController == null) {
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
             CircularProgressIndicator()
         }
     } else {
         formController?.let {
             val completeValues by it.completeFormValues.collectAsState(null)
-            val collectedAddress by viewModel.collectedAddress.collectAsState()
-
+            val buttonText = viewModel.args.config?.buttonTitle ?: stringResource(
+                R.string.stripe_paymentsheet_address_element_primary_button
+            )
             InputAddressScreen(
-                collectedAddress = collectedAddress,
                 primaryButtonEnabled = completeValues != null,
+                primaryButtonText = buttonText,
                 onPrimaryButtonClick = { viewModel.clickPrimaryButton() },
                 onCloseClick = { viewModel.navigator.dismiss() },
-                onEnterManuallyClick = { viewModel.expandAddressForm() },
                 formContent = {
                     FormUI(
                         it.hiddenIdentifiers,
@@ -100,7 +95,12 @@ internal fun InputAddressScreen(
                         it.elements,
                         it.lastTextFieldIdentifier
                     ) {
-                        CircularProgressIndicator()
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
             )

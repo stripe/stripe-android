@@ -1596,7 +1596,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params!!["type"], "payment_intent")
             assertEquals(apiRequest.params!!["client_secret"], clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered)
         }
 
     @Test
@@ -1626,7 +1626,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params!!["type"], "setup_intent")
             assertEquals(apiRequest.params!!["client_secret"], clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieveOrdered)
         }
 
     @Test

@@ -100,13 +100,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 linkAccount.email,
                 args.stripeIntent
             ).fold(
-                onSuccess = { paymentDetails ->
-                    if (args.completePayment) {
-                        completePayment(paymentDetails)
-                    } else {
-                        navigator.dismiss(LinkActivityResult.Success.Selected(paymentDetails))
-                    }
-                },
+                onSuccess = ::completePayment,
                 onFailure = ::onError
             )
         }
@@ -141,7 +135,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             onError(paymentResult.throwable)
                         }
                         is PaymentResult.Completed ->
-                            navigator.dismiss(LinkActivityResult.Success.Completed)
+                            navigator.dismiss(LinkActivityResult.Completed)
                     }
                 },
                 onFailure = ::onError

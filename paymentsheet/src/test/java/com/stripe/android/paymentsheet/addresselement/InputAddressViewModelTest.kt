@@ -17,32 +17,46 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 class InputAddressViewModelTest {
     private val args = mock<AddressElementActivityContract.Args>()
+    private val config = mock<AddressLauncher.Configuration>()
     private val navigator = mock<AddressElementNavigator>()
     private val formcontrollerProvider = mock<Provider<FormControllerSubcomponent.Builder>>()
 
-    private fun createViewModel() =
-        InputAddressViewModel(
+    private fun createViewModel(defaultAddress: AddressDetails? = null): InputAddressViewModel {
+        defaultAddress?.let {
+            whenever(config.defaultValues).thenReturn(defaultAddress)
+        }
+        whenever(args.config).thenReturn(config)
+        return InputAddressViewModel(
             args,
             navigator,
             formcontrollerProvider
         )
+    }
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest {
-        val flow = MutableStateFlow<ShippingAddress?>(null)
-        whenever(navigator.getResultFlow<ShippingAddress?>(any())).thenReturn(flow)
+        val flow = MutableStateFlow<AddressDetails?>(null)
+        whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(ShippingAddress())
+        assertThat(viewModel.collectedAddress.value).isEqualTo(AddressDetails())
     }
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest {
-        val expectedAddress = ShippingAddress(name = "skyler", company = "stripe")
-        val flow = MutableStateFlow<ShippingAddress?>(expectedAddress)
-        whenever(navigator.getResultFlow<ShippingAddress?>(any())).thenReturn(flow)
+        val expectedAddress = AddressDetails(name = "skyler", company = "stripe")
+        val flow = MutableStateFlow<AddressDetails?>(expectedAddress)
+        whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
+        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+    }
+
+    @Test
+    fun `default address from merchant is parsed`() = runTest {
+        val expectedAddress = AddressDetails(name = "skyler", company = "stripe")
+
+        val viewModel = createViewModel(expectedAddress)
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
     }
 }

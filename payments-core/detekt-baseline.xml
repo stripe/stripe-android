@@ -31,6 +31,7 @@
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
     <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
+    <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
     <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
     <ID>LargeClass:Stripe.kt$Stripe</ID>
     <ID>LargeClass:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
@@ -42,9 +43,9 @@
     <ID>LongMethod:CustomerSessionOperationExecutor.kt$CustomerSessionOperationExecutor$@JvmSynthetic internal suspend fun execute( ephemeralKey: EphemeralKey, operation: EphemeralOperation )</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$@BeforeTest fun setup()</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$private suspend fun setupErrorProxy()</ID>
-    <ID>LongMethod:DefaultCardAccountRangeRepositoryTest.kt$DefaultCardAccountRangeRepositoryTest$@Test fun `repository with real sources returns expected results`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
     <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>
+    <ID>LongMethod:PaymentFlowResultProcessor.kt$PaymentFlowResultProcessor$suspend fun processResult( unvalidatedResult: PaymentFlowResult.Unvalidated ): S</ID>
     <ID>LongMethod:PaymentIntentJsonParser.kt$PaymentIntentJsonParser$override fun parse(json: JSONObject): PaymentIntent?</ID>
     <ID>LongMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
     <ID>LongMethod:SourceParams.kt$SourceParams$ override fun toParamMap(): Map&lt;String, Any></ID>
@@ -53,7 +54,6 @@
     <ID>LongMethod:Stripe3ds2ChallengeResultProcessor.kt$DefaultStripe3ds2ChallengeResultProcessor$override suspend fun process( challengeResult: ChallengeResult ): PaymentFlowResult.Unvalidated</ID>
     <ID>LongMethod:Stripe3ds2TransactionActivity.kt$Stripe3ds2TransactionActivity$public override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$@Test fun getPaymentMethods_whenPopulated_returnsExpectedList()</ID>
-    <ID>LongParameterList:CardNumberEditText.kt$CardNumberEditText$( context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle, // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses internal var workContext: CoroutineContext, private val cardAccountRangeRepository: CardAccountRangeRepository, private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(), private val analyticsRequestExecutor: AnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory )</ID>
     <ID>LongParameterList:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Companion$( paymentMethodCreateParams: PaymentMethodCreateParams, clientSecret: String, savePaymentMethod: Boolean? = null, mandateId: String? = null, mandateData: MandateDataParams? = null, setupFutureUsage: SetupFutureUsage? = null, shipping: Shipping? = null, paymentMethodOptions: PaymentMethodOptionsParams? = null )</ID>
     <ID>LongParameterList:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Companion$( paymentMethodId: String, clientSecret: String, savePaymentMethod: Boolean? = null, paymentMethodOptions: PaymentMethodOptionsParams? = null, mandateId: String? = null, mandateData: MandateDataParams? = null, setupFutureUsage: SetupFutureUsage? = null, shipping: Shipping? = null )</ID>
     <ID>LongParameterList:CustomerSession.kt$CustomerSession$( context: Context, stripeRepository: StripeRepository, publishableKey: String, stripeAccountId: String?, private val workContext: CoroutineContext = createCoroutineDispatcher(), private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(), private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }, ephemeralKeyManagerFactory: EphemeralKeyManager.Factory )</ID>
@@ -61,7 +61,6 @@
     <ID>LongParameterList:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry.Companion$( context: Context, stripeRepository: StripeRepository, analyticsRequestExecutor: AnalyticsRequestExecutor, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, enableLogging: Boolean, workContext: CoroutineContext, uiContext: CoroutineContext, threeDs1IntentReturnUrlMap: MutableMap&lt;String, String>, publishableKeyProvider: () -> String, productUsage: Set&lt;String>, isInstantApp: Boolean )</ID>
     <ID>LongParameterList:GooglePayJsonFactory.kt$GooglePayJsonFactory$( /** * Details about the authorization of the transaction based upon whether the user agrees to * the transaction or not. Includes total price and price status. */ transactionInfo: TransactionInfo, /** * Configure additional fields to be returned for a requested billing address. */ billingAddressParameters: BillingAddressParameters? = null, /** * Specify shipping address restrictions. */ shippingAddressParameters: ShippingAddressParameters? = null, /** * Set to true to request an email address. */ isEmailRequired: Boolean = false, /** * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet. * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant” message is displayed in the payment sheet. */ merchantInfo: MerchantInfo? = null, /** * Set to false if you don't support credit cards */ allowCreditCards: Boolean? = null )</ID>
     <ID>LongParameterList:GooglePayLauncher.kt$GooglePayLauncher$( lifecycleScope: CoroutineScope, private val config: Config, private val readyCallback: ReadyCallback, private val activityResultLauncher: ActivityResultLauncher&lt;GooglePayLauncherContract.Args>, private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, analyticsRequestExecutor: AnalyticsRequestExecutor )</ID>
-    <ID>LongParameterList:GooglePayLauncherViewModel.kt$GooglePayLauncherViewModel$( private val paymentsClient: PaymentsClient, private val requestOptions: ApiRequest.Options, private val args: GooglePayLauncherContract.Args, private val stripeRepository: StripeRepository, private val paymentController: PaymentController, private val googlePayJsonFactory: GooglePayJsonFactory, private val googlePayRepository: GooglePayRepository )</ID>
     <ID>LongParameterList:GooglePayPaymentMethodLauncher.kt$GooglePayPaymentMethodLauncher$( @Assisted lifecycleScope: CoroutineScope, @Assisted private val config: Config, @Assisted private val readyCallback: ReadyCallback, @Assisted private val activityResultLauncher: ActivityResultLauncher&lt;GooglePayPaymentMethodLauncherContract.Args>, @Assisted private val skipReadyCheck: Boolean, context: Context, private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository, @Named(PRODUCT_USAGE) private val productUsage: Set&lt;String>, @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String, @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?, // Default value for the following parameters is used only when instantiating from the public // constructors instead of dependency injection. @Named(ENABLE_LOGGING) private val enableLogging: Boolean = BuildConfig.DEBUG, @IOContext private val ioContext: CoroutineContext = Dispatchers.IO, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory( context, PaymentConfiguration.getInstance(context).publishableKey, setOf(PRODUCT_USAGE_TOKEN) ), analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(), stripeRepository: StripeRepository = StripeApiRepository( context, publishableKeyProvider, logger = Logger.getInstance(enableLogging), workContext = ioContext, productUsageTokens = setOf(PRODUCT_USAGE_TOKEN), paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory ) )</ID>
     <ID>LongParameterList:GooglePayPaymentMethodLauncherViewModel.kt$GooglePayPaymentMethodLauncherViewModel$( private val paymentsClient: PaymentsClient, private val requestOptions: ApiRequest.Options, private val args: GooglePayPaymentMethodLauncherContract.Args, private val stripeRepository: StripeRepository, private val googlePayJsonFactory: GooglePayJsonFactory, private val googlePayRepository: GooglePayRepository, private val savedStateHandle: SavedStateHandle )</ID>
     <ID>LongParameterList:PaymentLauncherModule.kt$PaymentLauncherModule$( context: Context, stripeRepository: StripeRepository, @Named(ENABLE_LOGGING) enableLogging: Boolean, @IOContext workContext: CoroutineContext, @UIContext uiContext: CoroutineContext, threeDs1IntentReturnUrlMap: MutableMap&lt;String, String>, defaultAnalyticsRequestExecutor: DefaultAnalyticsRequestExecutor, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String, @Named(PRODUCT_USAGE) productUsage: Set&lt;String>, @Named(IS_INSTANT_APP) isInstantApp: Boolean )</ID>
@@ -107,7 +106,6 @@
     <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
-    <ID>MagicNumber:PaymentFlowResultProcessor.kt$PaymentIntentFlowResultProcessor$3</ID>
     <ID>MagicNumber:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.Card$4</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.114</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.299</ID>
@@ -137,7 +135,6 @@
     <ID>MaxLineLength:BecsDebitMandateAcceptanceFactoryTest.kt$BecsDebitMandateAcceptanceFactoryTest$.</ID>
     <ID>MaxLineLength:BecsDebitMandateAcceptanceTextViewTest.kt$BecsDebitMandateAcceptanceTextViewTest$.</ID>
     <ID>MaxLineLength:CardFormView.kt$CardFormView$*</ID>
-    <ID>MaxLineLength:CardFormView.kt$CardFormView$return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })).toSet()</ID>
     <ID>MaxLineLength:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth</ID>
     <ID>MaxLineLength:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$touchX &lt; frameStart + peekCardWidth</ID>
     <ID>MaxLineLength:CardNumberEditText.kt$CardNumberEditText.CardNumberTextWatcher$// TODO (michelleb-stripe) Should set error message to incomplete, then in focus change if it isn't complete it will update it.</ID>
@@ -153,10 +150,6 @@
     <ID>MaxLineLength:EphemeralKeyManager.kt$EphemeralKeyManager$ Received an invalid ephemeral key. See https://stripe.com/docs/mobile/android/basic for more details.</ID>
     <ID>MaxLineLength:EphemeralKeyManagerTest.kt$EphemeralKeyManagerTest$"Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."</ID>
     <ID>MaxLineLength:GooglePayConfig.kt$GooglePayConfig$*</ID>
-    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayLauncher.BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full</ID>
-    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayLauncher.BillingAddressConfig.Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min</ID>
-    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full</ID>
-    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$*</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$* [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.BillingAddressParameters$*</ID>
@@ -237,14 +230,7 @@
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"</ID>
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
     <ID>MaximumLineLength:com.stripe.android.PaymentRelayContract.kt:9</ID>
-    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:10</ID>
-    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:19</ID>
-    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:20</ID>
-    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:9</ID>
     <ID>MaximumLineLength:com.stripe.android.payments.PaymentFlowFailureMessageFactory.kt:39</ID>
-    <ID>MaximumLineLength:com.stripe.android.utils.InjectableActivityScenario.kt:107</ID>
-    <ID>MaximumLineLength:com.stripe.android.utils.InjectableActivityScenario.kt:95</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardFormView.kt:83</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:101</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:171</ID>
     <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:196</ID>
@@ -273,6 +259,7 @@
     <ID>TooManyFunctions:PaymentAnalyticsRequestFactory.kt$PaymentAnalyticsRequestFactory : AnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:PaymentController.kt$PaymentController</ID>
     <ID>TooManyFunctions:PaymentFlowActivity.kt$PaymentFlowActivity : StripeActivity</ID>
+    <ID>TooManyFunctions:PaymentFlowResultProcessor.kt$PaymentFlowResultProcessor&lt;T : StripeIntent, out S : StripeIntentResult&lt;T>></ID>
     <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder : ObjectBuilder</ID>
     <ID>TooManyFunctions:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$Companion</ID>
     <ID>TooManyFunctions:PaymentMethodsActivity.kt$PaymentMethodsActivity : AppCompatActivity</ID>

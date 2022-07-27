@@ -84,7 +84,6 @@ class PaymentMethodViewModelTest {
     fun before() {
         linkAccountManager = mock()
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
-        whenever(args.completePayment).thenReturn(true)
     }
 
     @Test
@@ -174,31 +173,6 @@ class PaymentMethodViewModelTest {
         }
 
     @Test
-    fun `startPayment returns PaymentMethodCreateParams when PaymentDetails creation succeeds and completePayment is false`() =
-        runTest {
-            whenever(args.completePayment).thenReturn(false)
-
-            val linkPaymentDetails = createLinkPaymentDetails()
-            whenever(
-                linkAccountManager.createPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull()
-                )
-            ).thenReturn(Result.success(linkPaymentDetails))
-
-            createViewModel().startPayment(cardFormFieldValues)
-
-            val paramsCaptor = argumentCaptor<LinkActivityResult>()
-            verify(navigator).dismiss(paramsCaptor.capture())
-
-            assertThat(paramsCaptor.firstValue).isEqualTo(
-                LinkActivityResult.Success.Selected(linkPaymentDetails)
-            )
-        }
-
-    @Test
     fun `startPayment dismisses Link on success`() = runTest {
         whenever(
             linkAccountManager.createPaymentDetails(
@@ -224,7 +198,7 @@ class PaymentMethodViewModelTest {
 
         createViewModel().startPayment(cardFormFieldValues)
 
-        verify(navigator).dismiss(LinkActivityResult.Success.Completed)
+        verify(navigator).dismiss(LinkActivityResult.Completed)
     }
 
     @Test

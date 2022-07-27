@@ -58,7 +58,6 @@ class WalletViewModelTest {
     @Before
     fun before() {
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
-        whenever(args.completePayment).thenReturn(true)
         val mockLinkAccount = mock<LinkAccount>().apply {
             whenever(clientSecret).thenReturn(CLIENT_SECRET)
         }
@@ -145,28 +144,7 @@ class WalletViewModelTest {
         }
 
     @Test
-    fun `onSelectedPaymentDetails returns PaymentMethodCreateParams when completePayment is false`() {
-        whenever(args.completePayment).thenReturn(false)
-        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
-
-        createViewModel().onSelectedPaymentDetails(paymentDetails)
-
-        val paramsCaptor = argumentCaptor<LinkActivityResult>()
-        verify(navigator).dismiss(paramsCaptor.capture())
-
-        val selected =
-            (paramsCaptor.firstValue as LinkActivityResult.Success.Selected).paymentDetails
-        assertThat(selected.paymentDetails).isEqualTo(paymentDetails)
-        assertThat(selected.paymentMethodCreateParams).isEqualTo(
-            PaymentMethodCreateParams.createLink(
-                paymentDetails.id,
-                CLIENT_SECRET
-            )
-        )
-    }
-
-    @Test
-    fun `onSelectedPaymentDetails starts payment confirmation when completePayment is true`() {
+    fun `onSelectedPaymentDetails starts payment confirmation`() {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
         createViewModel().onSelectedPaymentDetails(paymentDetails)
@@ -253,7 +231,7 @@ class WalletViewModelTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
         createViewModel().onSelectedPaymentDetails(paymentDetails)
 
-        verify(navigator).dismiss(LinkActivityResult.Success.Completed)
+        verify(navigator).dismiss(LinkActivityResult.Completed)
     }
 
     @Test
