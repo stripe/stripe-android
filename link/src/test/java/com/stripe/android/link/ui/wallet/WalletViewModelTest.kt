@@ -19,6 +19,7 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -26,9 +27,15 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,14 +64,19 @@ class WalletViewModelTest {
 
     @Before
     fun before() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
-        whenever(args.completePayment).thenReturn(true)
         val mockLinkAccount = mock<LinkAccount>().apply {
             whenever(clientSecret).thenReturn(CLIENT_SECRET)
         }
         linkAccountManager = mock<LinkAccountManager>().apply {
             whenever(linkAccount).thenReturn(MutableStateFlow(mockLinkAccount))
         }
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -145,28 +157,7 @@ class WalletViewModelTest {
         }
 
     @Test
-    fun `onSelectedPaymentDetails returns PaymentMethodCreateParams when completePayment is false`() {
-        whenever(args.completePayment).thenReturn(false)
-        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
-
-        createViewModel().onSelectedPaymentDetails(paymentDetails)
-
-        val paramsCaptor = argumentCaptor<LinkActivityResult>()
-        verify(navigator).dismiss(paramsCaptor.capture())
-
-        val selected =
-            (paramsCaptor.firstValue as LinkActivityResult.Success.Selected).paymentDetails
-        assertThat(selected.paymentDetails).isEqualTo(paymentDetails)
-        assertThat(selected.paymentMethodCreateParams).isEqualTo(
-            PaymentMethodCreateParams.createLink(
-                paymentDetails.id,
-                CLIENT_SECRET
-            )
-        )
-    }
-
-    @Test
-    fun `onSelectedPaymentDetails starts payment confirmation when completePayment is true`() {
+    fun `onSelectedPaymentDetails starts payment confirmation`() {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
 
         createViewModel().onSelectedPaymentDetails(paymentDetails)
@@ -251,9 +242,14 @@ class WalletViewModelTest {
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
-        createViewModel().onSelectedPaymentDetails(paymentDetails)
+        val viewModel = createViewModel()
+        viewModel.onSelectedPaymentDetails(paymentDetails)
 
-        verify(navigator).dismiss(LinkActivityResult.Success.Completed)
+        assertThat(viewModel.primaryButtonState.value).isEqualTo(PrimaryButtonState.Completed)
+
+        advanceTimeBy(PrimaryButtonState.COMPLETED_DELAY_MS + 1)
+
+        verify(navigator).dismiss(LinkActivityResult.Completed)
     }
 
     @Test

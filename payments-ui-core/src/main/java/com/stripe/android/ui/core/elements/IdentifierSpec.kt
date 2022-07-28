@@ -38,7 +38,12 @@ data class IdentifierSpec(val v1: String) {
 
         val City = IdentifierSpec("billing_details[address][city]")
 
+        // FieldValuesToParamsMapConverter will ignore this in the parameter list
+        val DependentLocality = IdentifierSpec("")
+
         val PostalCode = IdentifierSpec("billing_details[address][postal_code]")
+
+        val SortingCode = IdentifierSpec("")
 
         val State = IdentifierSpec("billing_details[address][state]")
 

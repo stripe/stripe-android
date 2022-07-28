@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
@@ -23,36 +24,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.Amount
 
-internal enum class PrimaryButtonState {
-    Enabled,
-    Disabled,
-    Processing
+/**
+ * Represent the possible states for the primary button on a Link screen.
+ *
+ * @property isBlocking Whether being in this state should block user interaction with all other
+ *                      UI elements.
+ */
+internal enum class PrimaryButtonState(val isBlocking: Boolean) {
+    Enabled(false),
+    Disabled(false),
+    Processing(true),
+    Completed(true);
+
+    companion object {
+        // The delay between showing the [Completed] state and dismissing the screen.
+        const val COMPLETED_DELAY_MS = 1000L
+    }
 }
 
 internal const val progressIndicatorTestTag = "CircularProgressIndicator"
+internal const val completedIconTestTag = "CompletedIcon"
 
 internal fun primaryButtonLabel(
     args: LinkActivityContract.Args,
     resources: Resources
-) = if (args.completePayment) {
-    when (args.stripeIntent) {
-        is PaymentIntent -> Amount(
-            requireNotNull(args.stripeIntent.amount),
-            requireNotNull(args.stripeIntent.currency)
-        ).buildPayButtonLabel(resources)
-        is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
+) = when (args.stripeIntent) {
+    is PaymentIntent -> Amount(
+        requireNotNull(args.stripeIntent.amount),
+        requireNotNull(args.stripeIntent.currency)
+    ).buildPayButtonLabel(resources)
+    is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
+}
+
+@Composable
+@Preview
+private fun PrimaryButton() {
+    DefaultLinkTheme {
+        PrimaryButton(
+            label = "Testing",
+            state = PrimaryButtonState.Enabled,
+            icon = R.drawable.stripe_ic_lock,
+            onButtonClick = { }
+        )
     }
-} else {
-    resources.getString(R.string.stripe_continue_button_label)
 }
 
 @Composable
@@ -62,10 +87,9 @@ internal fun PrimaryButton(
     @DrawableRes icon: Int? = null,
     onButtonClick: () -> Unit
 ) {
-    val isEnabled = state == PrimaryButtonState.Enabled
-
     CompositionLocalProvider(
-        LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
+        LocalContentAlpha provides
+            if (state == PrimaryButtonState.Disabled) ContentAlpha.disabled else ContentAlpha.high
     ) {
         Box(
             modifier = Modifier
@@ -73,20 +97,20 @@ internal fun PrimaryButton(
                 .padding(vertical = 16.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
-            TextButton(
+            Button(
                 onClick = onButtonClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = isEnabled,
+                enabled = state == PrimaryButtonState.Enabled,
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,
                     disabledBackgroundColor = MaterialTheme.colors.primary
                 )
             ) {
-                if (state == PrimaryButtonState.Processing) {
-                    CircularProgressIndicator(
+                when (state) {
+                    PrimaryButtonState.Processing -> CircularProgressIndicator(
                         modifier = Modifier
                             .size(18.dp)
                             .semantics {
@@ -95,15 +119,27 @@ internal fun PrimaryButton(
                         color = MaterialTheme.linkColors.buttonLabel,
                         strokeWidth = 2.dp
                     )
-                } else {
-                    Text(
+                    PrimaryButtonState.Completed -> Icon(
+                        painter = painterResource(id = R.drawable.ic_link_complete),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .semantics {
+                                testTag = completedIconTestTag
+                            },
+                        tint = MaterialTheme.linkColors.buttonLabel
+                    )
+                    else -> Text(
                         text = label,
                         color = MaterialTheme.linkColors.buttonLabel
                             .copy(alpha = LocalContentAlpha.current)
                     )
                 }
             }
-            if (icon != null && state != PrimaryButtonState.Processing) {
+            // Show icon only when button label is visible
+            if (icon != null &&
+                state in setOf(PrimaryButtonState.Enabled, PrimaryButtonState.Disabled)
+            ) {
                 Icon(
                     painter = painterResource(id = icon),
                     contentDescription = null,

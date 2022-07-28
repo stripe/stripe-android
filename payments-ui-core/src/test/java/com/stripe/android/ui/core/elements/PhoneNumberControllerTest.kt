@@ -52,6 +52,25 @@ internal class PhoneNumberControllerTest {
     }
 
     @Test
+    fun `any input is marked complete if field is optional`() {
+        val phoneNumberController = PhoneNumberController(showOptionalLabel = true)
+
+        val isComplete = mutableListOf<Boolean>()
+        phoneNumberController.isComplete.asLiveData().observeForever {
+            isComplete.add(it)
+        }
+        assertThat(isComplete.last()).isTrue()
+
+        phoneNumberController.onValueChange("1")
+        idleLooper()
+        assertThat(isComplete.last()).isTrue()
+
+        phoneNumberController.onValueChange("")
+        idleLooper()
+        assertThat(isComplete.last()).isTrue()
+    }
+
+    @Test
     fun `when initial number is in E164 format then initial country is set`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "+491234567890"

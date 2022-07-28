@@ -16,6 +16,12 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_PHONE
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -45,6 +51,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.ActivityScenarioFactory
+import dagger.assisted.Assisted
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -90,6 +97,10 @@ internal class DefaultFlowControllerTest {
     private val googlePayActivityLauncher =
         mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>>()
     val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+    private val linkActivityResultLauncher =
+        mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+    val linkPaymentLauncher = mock<LinkPaymentLauncher>()
 
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
@@ -138,6 +149,13 @@ internal class DefaultFlowControllerTest {
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
+
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<LinkActivityContract>(),
+                any()
+            )
+        ).thenReturn(linkActivityResultLauncher)
 
         whenever(
             activityResultCaller.registerForActivityResult(
@@ -593,6 +611,25 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @Test
+    fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = runTest {
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.Link,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+            )
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ -> }
+
+        flowController.confirm()
+
+        verify(linkPaymentLauncher).present(any())
+    }
+
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -750,12 +787,14 @@ internal class DefaultFlowControllerTest {
 
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
-        savedSelection: SavedSelection = SavedSelection.None
+        savedSelection: SavedSelection = SavedSelection.None,
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
     ): DefaultFlowController {
         return createFlowController(
             FakeFlowControllerInitializer(
                 paymentMethods,
-                savedSelection
+                savedSelection,
+                stripeIntent = stripeIntent
             )
         )
     }
@@ -780,7 +819,8 @@ internal class DefaultFlowControllerTest {
         testDispatcher,
         ENABLE_LOGGING,
         PRODUCT_USAGE,
-        createGooglePayPaymentMethodLauncherFactory()
+        createGooglePayPaymentMethodLauncherFactory(),
+        createLinkPaymentLauncherFactory()
     )
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
@@ -793,6 +833,17 @@ internal class DefaultFlowControllerTest {
                 skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 return googlePayPaymentMethodLauncher
+            }
+        }
+
+    private fun createLinkPaymentLauncherFactory() =
+        object : LinkPaymentLauncherFactory {
+            override fun create(
+                @Assisted(MERCHANT_NAME) merchantName: String,
+                @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
+                @Assisted(CUSTOMER_PHONE) customerPhone: String?
+            ): LinkPaymentLauncher {
+                return linkPaymentLauncher
             }
         }
 

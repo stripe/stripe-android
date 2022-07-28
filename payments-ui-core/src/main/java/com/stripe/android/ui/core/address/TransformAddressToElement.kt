@@ -12,62 +12,80 @@ import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.util.UUID
 
-@Serializable(with = FieldTypeAsStringSerializer::class)
+@Serializable
 internal enum class FieldType(
     val serializedValue: String,
     val identifierSpec: IdentifierSpec,
-    @StringRes val defaultLabel: Int,
-    val capitalization: KeyboardCapitalization
+    @StringRes val defaultLabel: Int
 ) {
+    @SerialName("addressLine1")
     AddressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
-        R.string.address_label_address_line1,
-        KeyboardCapitalization.Words
+        R.string.address_label_address_line1
     ),
+
+    @SerialName("addressLine2")
     AddressLine2(
         "addressLine2",
         IdentifierSpec.Line2,
-        R.string.address_label_address_line2,
-        KeyboardCapitalization.Words
+        R.string.address_label_address_line2
     ),
+
+    @SerialName("locality")
     Locality(
         "locality",
         IdentifierSpec.City,
-        R.string.address_label_city,
-        KeyboardCapitalization.Words
+        R.string.address_label_city
     ),
+
+    @SerialName("dependentLocality")
+    DependentLocality(
+        "dependentLocality",
+        IdentifierSpec.DependentLocality,
+        R.string.address_label_city
+    ),
+
+    @SerialName("postalCode")
     PostalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
-        R.string.address_label_postal_code,
-        KeyboardCapitalization.None
-    ),
+        R.string.address_label_postal_code
+    ) {
+        override fun capitalization() = KeyboardCapitalization.None
+    },
+
+    @SerialName("sortingCode")
+    SortingCode(
+        "sortingCode",
+        IdentifierSpec.SortingCode,
+        R.string.address_label_postal_code
+    ) {
+        override fun capitalization() = KeyboardCapitalization.None
+    },
+
+    @SerialName("administrativeArea")
     AdministrativeArea(
         "administrativeArea",
         IdentifierSpec.State,
-        NameType.State.stringResId,
-        KeyboardCapitalization.Words
+        NameType.State.stringResId
     ),
+
+    @SerialName("name")
     Name(
         "name",
         IdentifierSpec.Name,
-        R.string.address_label_name,
-        KeyboardCapitalization.Words
+        R.string.address_label_name
     );
+
+    open fun capitalization() = KeyboardCapitalization.Words
 
     companion object {
         fun from(value: String) = values().firstOrNull {
@@ -167,7 +185,7 @@ internal class FieldSchema(
     @SerialName("isNumeric")
     val isNumeric: Boolean = false,
     @SerialName("examples")
-    val examples: List<String> = emptyList(),
+    val examples: ArrayList<String> = arrayListOf(),
     @SerialName("nameType")
     val nameType: NameType // label,
 )
@@ -186,43 +204,35 @@ private val format = Json { ignoreUnknownKeys = true }
 
 internal fun parseAddressesSchema(inputStream: InputStream?) =
     getJsonStringFromInputStream(inputStream)?.let {
-        format.decodeFromString<List<CountryAddressSchema>>(
+        format.decodeFromString<ArrayList<CountryAddressSchema>>(
             it
         )
     }
-
-private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("FieldType", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: FieldType?) {
-        encoder.encodeString(value?.serializedValue ?: "")
-    }
-
-    override fun deserialize(decoder: Decoder): FieldType? {
-        return FieldType.from(decoder.decodeString())
-    }
-}
 
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
 internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
-    val countryAddressElements = this.mapNotNull { addressField ->
-        addressField.type?.let {
-            SimpleTextElement(
-                addressField.type.identifierSpec,
-                SimpleTextFieldController(
-                    SimpleTextFieldConfig(
-                        label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                        capitalization = it.capitalization,
-                        keyboard = getKeyboard(addressField.schema)
-                    ),
-                    showOptionalLabel = !addressField.required
-                )
-            )
+    val countryAddressElements = this
+        .filterNot {
+            it.type == FieldType.SortingCode ||
+                it.type == FieldType.DependentLocality
         }
-    }
+        .mapNotNull { addressField ->
+            addressField.type?.let {
+                SimpleTextElement(
+                    addressField.type.identifierSpec,
+                    SimpleTextFieldController(
+                        SimpleTextFieldConfig(
+                            label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                            capitalization = it.capitalization(),
+                            keyboard = getKeyboard(addressField.schema)
+                        ),
+                        showOptionalLabel = !addressField.required
+                    )
+                )
+            }
+        }
 
     // Put it in a single row
     return combineCityAndPostal(countryAddressElements)
