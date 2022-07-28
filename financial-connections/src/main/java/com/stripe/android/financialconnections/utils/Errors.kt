@@ -23,7 +23,7 @@ internal suspend fun <T> retryOnException(
             } else {
                 throw exception
             }
-        } ?: requireNotNull(result.getOrNull())
+        } ?: return requireNotNull(result.getOrNull())
     }
     return block()
 }

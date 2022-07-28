@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
+import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
@@ -30,6 +31,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     val repository: FinancialConnectionsRepository,
     val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
+    val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
     val logger: Logger
 ) : MavericksViewModel<PartnerAuthState>(PartnerAuthState()) {
 
@@ -76,7 +78,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             setState { copy(title = "Session authorized! Start polling accounts.") }
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
-            // TODO@carlosmuvi start polling until accounts ready, then navigate to next pane.
+            val accounts = pollAuthorizationSessionAccounts(session = authSession)
+            setState { copy(title = "Polling completed! accounts: ${accounts.data.joinToString { it.name }}") }
+            // TODO@carlosmuvi update next step from accounts response, and navigate to next pane.
 //            nativeAuthFlowCoordinator().emit(
 //                RequestNextStep(currentStep = NavigationDirections.partnerAuth)
 //            )

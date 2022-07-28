@@ -74,11 +74,11 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getAuthorizationSessionAccounts(
+    override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String,
     ): PartnerAccountsList {
-        val request = apiRequestFactory.createGet(
+        val request = apiRequestFactory.createPost(
             url = accountsSessionUrl,
             options = options,
             params = mapOf(

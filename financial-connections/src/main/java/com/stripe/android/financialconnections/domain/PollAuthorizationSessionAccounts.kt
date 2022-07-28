@@ -2,31 +2,31 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import javax.inject.Inject
 
 /**
- * Polls OAuth results from backend after user finishes authorization on web browser.
+ * Polls accounts from backend after authorization session completes.
  *
  * Will retry upon 202 backend responses every [POLLING_TIME_MS] up to [MAX_TRIES]
  */
-internal class PollAuthorizationSessionOAuthResults @Inject constructor(
+internal class PollAuthorizationSessionAccounts @Inject constructor(
     private val repository: FinancialConnectionsRepository,
     private val configuration: FinancialConnectionsSheet.Configuration
 ) {
 
     suspend operator fun invoke(
         session: FinancialConnectionsAuthorizationSession,
-    ): MixedOAuthParams {
+    ): PartnerAccountsList {
         return retryOnException(
             times = MAX_TRIES,
             delayMilliseconds = POLLING_TIME_MS,
             retryCondition = { exception -> exception.shouldRetry }
         ) {
-            repository.postAuthorizationSessionOAuthResults(
+            repository.postAuthorizationSessionAccounts(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 sessionId = session.id
             )

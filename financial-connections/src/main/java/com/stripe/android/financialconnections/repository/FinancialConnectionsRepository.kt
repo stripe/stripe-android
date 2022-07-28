@@ -55,7 +55,7 @@ internal interface FinancialConnectionsRepository {
         publicToken: String? = null
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 
-    suspend fun getAuthorizationSessionAccounts(
+    suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String
     ): PartnerAccountsList
