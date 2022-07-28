@@ -79,9 +79,10 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         sessionId: String,
     ): PartnerAccountsList {
         val request = apiRequestFactory.createGet(
-            url = accountsSessionUrl(sessionId),
+            url = accountsSessionUrl,
             options = options,
             params = mapOf(
+                PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
             )
         )
@@ -115,9 +116,10 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         publicToken: String?
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
-            url = authorizeSessionUrl(sessionId),
+            url = authorizeSessionUrl,
             options = options,
             params = mapOf(
+                PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "public_token" to publicToken
             ).filter { it.value != null }
@@ -141,10 +143,10 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         internal const val authorizationSessionOAuthResultsUrl: String =
             "$API_HOST/v1/connections/auth_sessions/oauth_results"
 
-        internal fun authorizeSessionUrl(authSessionId: String): String =
-            "$API_HOST/v1/connections/auth_sessions/$authSessionId/authorized"
+        internal const val authorizeSessionUrl: String =
+            "$API_HOST/v1/connections/auth_sessions/authorized"
 
-        internal fun accountsSessionUrl(authSessionId: String): String =
-            "$API_HOST/v1/connections/auth_sessions/$authSessionId/accounts"
+        internal const val accountsSessionUrl: String =
+            "$API_HOST/v1/connections/auth_sessions/accounts"
     }
 }

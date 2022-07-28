@@ -8,6 +8,5 @@ internal data class MixedOAuthParams(
     @SerialName(value = "state") val state: String,
     @SerialName(value = "code") val code: String?,
     @SerialName(value = "status") val status: String?,
-    @SerialName(value = "error") val error: String?,
     @SerialName(value = "member_guid") val memberGuid: String?,
 )
