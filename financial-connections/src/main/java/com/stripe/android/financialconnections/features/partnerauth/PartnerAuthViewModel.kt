@@ -71,7 +71,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching {
             val session = completeAuthorizationSession(
                 authorizationSessionId = authSession.id,
-                publicToken = oAuthParams.member_guid
+                publicToken = oAuthParams.memberGuid
             )
             setState { copy(title = "Session authorized! Start polling accounts.") }
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
