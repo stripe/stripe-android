@@ -14,9 +14,11 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
+import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -27,6 +29,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     val repository: FinancialConnectionsRepository,
+    val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     val logger: Logger
 ) : MavericksViewModel<PartnerAuthState>(PartnerAuthState()) {
 
@@ -39,8 +42,13 @@ internal class PartnerAuthViewModel @Inject constructor(
                 is Uninitialized,
                 is Loading -> setState { copy(title = "Web flow in progress...") }
                 is Success -> {
-                    setState { copy(title = "Web AuthFlow completed! Completing session") }
-                    completeAuthorizationSession(authSession)
+                    setState { copy(title = "Web AuthFlow completed! waiting for oauth results") }
+                    val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
+                    setState { copy(title = "OAuth results received! completing session") }
+                    completeAuthorizationSession(
+                        oAuthParams = oAuthResults,
+                        authSession = authSession
+                    )
                 }
                 is Fail -> {
                     when (val error = webStatus.error) {
@@ -57,10 +65,14 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     private suspend fun completeAuthorizationSession(
+        oAuthParams: MixedOAuthParams,
         authSession: FinancialConnectionsAuthorizationSession
     ) {
         kotlin.runCatching {
-            val session = completeAuthorizationSession(authSession.id)
+            val session = completeAuthorizationSession(
+                authorizationSessionId = authSession.id,
+                publicToken = oAuthParams.member_guid
+            )
             setState { copy(title = "Session authorized! Start polling accounts.") }
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
             // TODO@carlosmuvi start polling until accounts ready, then navigate to next pane.

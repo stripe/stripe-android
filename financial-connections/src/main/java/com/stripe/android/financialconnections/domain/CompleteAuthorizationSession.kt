@@ -11,11 +11,13 @@ internal class CompleteAuthorizationSession @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        authorizationSessionId: String
+        authorizationSessionId: String,
+        publicToken: String?
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession {
         return repository.completeAuthorizationSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            sessionId = authorizationSessionId
+            sessionId = authorizationSessionId,
+            publicToken = publicToken
         )
     }
 }
