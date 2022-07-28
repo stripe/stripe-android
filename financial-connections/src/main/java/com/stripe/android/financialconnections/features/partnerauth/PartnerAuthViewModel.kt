@@ -52,7 +52,8 @@ internal class PartnerAuthViewModel @Inject constructor(
                 }
                 is Fail -> {
                     when (val error = webStatus.error) {
-                        is WebAuthFlowCancelledException -> setState { copy(title = "Web flow was cancelled") }
+                        is WebAuthFlowCancelledException ->
+                            setState { copy(title = "Web flow was cancelled") }
                         is WebAuthFlowFailedException -> setState { copy(title = "Web flow failed! ${error.url}") }
                         else -> setState {
                             logger.error("error finishing web flow", error)
