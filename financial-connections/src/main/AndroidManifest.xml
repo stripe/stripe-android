@@ -23,23 +23,12 @@
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".FinancialConnectionsSheetNativeRedirectActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
 
                 <!--TODO@carlosmuvi use proper deeplink back to app -->
                 <data
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/login" />
-
             </intent-filter>
         </activity>
         <activity
