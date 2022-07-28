@@ -27,6 +27,7 @@ import com.stripe.android.ui.core.injection.NonFallbackInjector
 internal fun InputAddressScreen(
     primaryButtonEnabled: Boolean,
     primaryButtonText: String,
+    title: String,
     onPrimaryButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
@@ -45,7 +46,7 @@ internal fun InputAddressScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Text(
-                stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
+                title,
                 style = MaterialTheme.typography.h4,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -83,9 +84,13 @@ internal fun InputAddressScreen(
             val buttonText = viewModel.args.config?.buttonTitle ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_primary_button
             )
+            val titleText = viewModel.args.config?.title ?: stringResource(
+                R.string.stripe_paymentsheet_address_element_shipping_address
+            )
             InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,
                 primaryButtonText = buttonText,
+                title = titleText,
                 onPrimaryButtonClick = { viewModel.clickPrimaryButton() },
                 onCloseClick = { viewModel.navigator.dismiss() },
                 formContent = {
