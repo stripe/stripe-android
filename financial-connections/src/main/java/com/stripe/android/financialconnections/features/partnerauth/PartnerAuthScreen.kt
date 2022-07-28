@@ -12,7 +12,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun PartnerAuthScreen() {
     // activity view model
