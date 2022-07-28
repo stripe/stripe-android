@@ -29,15 +29,21 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
     )
     suspend fun <Response> execute(
         request: StripeRequest,
-        responseSerializer: KSerializer<Response>
+        responseSerializer: KSerializer<Response>,
     ): Response = runCatching {
         stripeNetworkClient.executeRequest(request)
     }.fold(
         onSuccess = { response ->
-            if (response.isError) {
-                throw handleApiError(response)
-            } else {
-                json.decodeFromString(
+            when {
+                /**
+                 * HTTP_ACCEPTED (202) means the processing hasn't been completed, and API
+                 * attaches an error body with it.
+                 *
+                 * Mapping 202s as API errors allow upper layers to customize handling.
+                 */
+                response.code == HttpURLConnection.HTTP_ACCEPTED -> throw handleApiError(response)
+                response.isError -> throw handleApiError(response)
+                else -> json.decodeFromString(
                     responseSerializer,
                     requireNotNull(response.body)
                 )
@@ -61,6 +67,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         val responseCode = response.code
         val stripeError = StripeErrorJsonParser().parse(response.responseJson())
         throw when (responseCode) {
+            HttpURLConnection.HTTP_ACCEPTED,
             HttpURLConnection.HTTP_BAD_REQUEST,
             HttpURLConnection.HTTP_NOT_FOUND -> InvalidRequestException(
                 stripeError,

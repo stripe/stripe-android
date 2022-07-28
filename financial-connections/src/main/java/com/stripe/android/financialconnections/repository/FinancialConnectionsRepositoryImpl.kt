@@ -7,8 +7,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_ID
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -71,6 +74,62 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getAuthorizationSessionAccounts(
+        clientSecret: String,
+        sessionId: String,
+    ): PartnerAccountsList {
+        val request = apiRequestFactory.createGet(
+            url = accountsSessionUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_ID to sessionId,
+                PARAMS_CLIENT_SECRET to clientSecret,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            PartnerAccountsList.serializer()
+        )
+    }
+
+    override suspend fun postAuthorizationSessionOAuthResults(
+        clientSecret: String,
+        sessionId: String
+    ): MixedOAuthParams {
+        val request = apiRequestFactory.createPost(
+            url = authorizationSessionOAuthResultsUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_ID to sessionId,
+                PARAMS_CLIENT_SECRET to clientSecret,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            MixedOAuthParams.serializer()
+        )
+    }
+
+    override suspend fun completeAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+        publicToken: String?
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = authorizeSessionUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_ID to sessionId,
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "public_token" to publicToken
+            ).filter { it.value != null }
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
+        )
+    }
+
     internal companion object {
         internal const val listAccountsUrl: String =
             "$API_HOST/v1/link_account_sessions/list_accounts"
@@ -80,5 +139,14 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
         internal const val authorizationSessionUrl: String =
             "$API_HOST/v1/connections/auth_sessions"
+
+        internal const val authorizationSessionOAuthResultsUrl: String =
+            "$API_HOST/v1/connections/auth_sessions/oauth_results"
+
+        internal const val authorizeSessionUrl: String =
+            "$API_HOST/v1/connections/auth_sessions/authorized"
+
+        internal const val accountsSessionUrl: String =
+            "$API_HOST/v1/connections/auth_sessions/accounts"
     }
 }

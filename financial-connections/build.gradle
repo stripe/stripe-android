@@ -74,6 +74,9 @@ dependencies {
     androidTestImplementation "com.airbnb.android:showkase-screenshot-testing-shot:$showkaseVersion"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation "com.google.truth:truth:$truthVersion"
+
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
 

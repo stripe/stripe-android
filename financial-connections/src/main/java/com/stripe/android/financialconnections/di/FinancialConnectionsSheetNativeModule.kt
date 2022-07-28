@@ -1,8 +1,10 @@
 package com.stripe.android.financialconnections.di
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
@@ -17,7 +19,9 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         ConsentSubcomponent::class,
-        InstitutionPickerSubcomponent::class
+        InstitutionPickerSubcomponent::class,
+        PartnerAuthSubcomponent::class,
+        AccountPickerSubcomponent::class
     ]
 )
 internal class FinancialConnectionsSheetNativeModule {

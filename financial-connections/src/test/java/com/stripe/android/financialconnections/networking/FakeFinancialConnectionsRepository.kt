@@ -6,6 +6,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.moreFinancialConnectionsAccountList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
@@ -17,6 +19,10 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         { moreFinancialConnectionsAccountList }
     var postAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
         { ApiKeyFixtures.authorizationSession() }
+    var getAuthorizationSessionAccounts: () -> PartnerAccountsList =
+        { TODO() }
+    var postAuthorizationSessionOAuthResults: () -> MixedOAuthParams =
+        { TODO() }
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
@@ -30,4 +36,22 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         clientSecret: String,
         institutionId: String
     ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
+
+    override suspend fun completeAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+        publicToken: String?
+    ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
+
+    override suspend fun getAuthorizationSessionAccounts(
+        clientSecret: String,
+        sessionId: String
+    ): PartnerAccountsList = getAuthorizationSessionAccounts()
+
+    override suspend fun postAuthorizationSessionOAuthResults(
+        clientSecret: String,
+        sessionId: String
+    ): MixedOAuthParams {
+        return postAuthorizationSessionOAuthResults()
+    }
 }

@@ -8,6 +8,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 
 internal interface FinancialConnectionsRepository {
     @Throws(
@@ -40,4 +42,26 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String,
         institutionId: String
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun completeAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+        publicToken: String? = null
+    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+
+    suspend fun getAuthorizationSessionAccounts(
+        clientSecret: String,
+        sessionId: String
+    ): PartnerAccountsList
+
+    suspend fun postAuthorizationSessionOAuthResults(
+        clientSecret: String,
+        sessionId: String
+    ): MixedOAuthParams
 }

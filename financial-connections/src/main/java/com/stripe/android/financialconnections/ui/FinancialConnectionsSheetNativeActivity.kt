@@ -1,7 +1,6 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package com.stripe.android.financialconnections.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -19,12 +18,14 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import javax.inject.Inject
@@ -56,7 +57,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> startActivity(
+                    is OpenUrl -> startActivity(
                         CreateBrowserIntentForUrl(
                             context = this,
                             uri = Uri.parse(viewEffect.url)
@@ -68,6 +69,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun NavHost() {
         val navController = rememberNavController()
@@ -82,7 +84,23 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             composable(NavigationDirections.partnerAuth.destination) {
                 PartnerAuthScreen()
             }
+            composable(NavigationDirections.accountPicker.destination) {
+                AccountPickerScreen()
+            }
         }
+    }
+
+    /**
+     * Handles new intents in the form of the redirect from the custom tab hosted auth flow
+     */
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        viewModel.handleOnNewIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
     }
 
     @Composable

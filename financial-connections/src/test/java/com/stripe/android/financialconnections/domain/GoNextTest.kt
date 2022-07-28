@@ -43,11 +43,27 @@ internal class GoNextTest {
         // When
         goNext(
             currentPane = NavigationDirections.institutionPicker,
-            manifest = sessionManifest().copy(nextPane = NextPane.ACCOUNT_PICKER),
+            manifest = sessionManifest().copy(nextPane = NextPane.CONSENT),
             authorizationSession = authorizationSession().copy(nextPane = expectedNextStep)
         )
 
         // Then
         verify(navigationManager).navigate(NavigationDirections.partnerAuth)
+    }
+
+    @Test
+    fun `invoke - when current step is partner auth, navigates to authorizationSession nextPane`() {
+        // Given
+        val expectedNextStep = NextPane.ACCOUNT_PICKER
+
+        // When
+        goNext(
+            currentPane = NavigationDirections.partnerAuth,
+            manifest = sessionManifest().copy(nextPane = NextPane.CONSENT),
+            authorizationSession = authorizationSession().copy(nextPane = expectedNextStep)
+        )
+
+        // Then
+        verify(navigationManager).navigate(NavigationDirections.accountPicker)
     }
 }
