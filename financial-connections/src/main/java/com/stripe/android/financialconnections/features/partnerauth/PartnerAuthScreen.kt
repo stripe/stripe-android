@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
