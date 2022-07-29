@@ -100,7 +100,8 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        val newSpecsToLoad = expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
+        val newSpecsToLoad =
+            expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
 
         if (!isLoaded() || force || newSpecsToLoad) {
             serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
@@ -355,6 +356,7 @@ class LpmRepository constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     class LpmInitialFormData {
 
         private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
@@ -369,7 +371,7 @@ class LpmRepository constructor(
         fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) =
             codeToSupportedPaymentMethod.putAll(map)
 
-        companion object {
+        internal companion object {
             val Instance = LpmInitialFormData()
         }
     }

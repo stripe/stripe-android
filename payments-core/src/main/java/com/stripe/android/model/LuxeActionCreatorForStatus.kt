@@ -1,27 +1,25 @@
 package com.stripe.android.model
 
 import android.net.Uri
-import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
-data class LuxeActionCreatorForStatus(
+internal data class LuxeActionCreatorForStatus(
     val status: StripeIntent.Status,
     val actionCreator: ActionCreator
 ) {
+    internal sealed class ActionCreator {
+        fun create(stripeIntentJsonString: String) =
+            create(JSONObject(stripeIntentJsonString))
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    sealed class ActionCreator {
-        abstract fun create(stripeIntentJsonString: String): LuxeNextActionRepository.Result
-        data class RedirectActionCreator(
-            val hostedPagePath: String,
-            val returnToUrlPath: String?
+        internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
+        internal data class RedirectActionCreator(
+            val redirectPagePath: String,
+            val returnToUrlPath: String
         ) : ActionCreator() {
-            override fun create(stripeIntentJsonString: String): LuxeNextActionRepository.Result {
-                val stripeIntentJson = JSONObject(stripeIntentJsonString)
+            override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
                 val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
-                val url = getPath(hostedPagePath, stripeIntentJson)
-                return if ((returnToUrlPath == null || returnUrl != null) &&
-                    (url != null)
+                val url = getPath(redirectPagePath, stripeIntentJson)
+                return if ((returnUrl != null) && (url != null)
                 ) {
                     LuxeNextActionRepository.Result.Action(
                         StripeIntent.NextActionData.RedirectToUrl(
@@ -35,6 +33,13 @@ data class LuxeActionCreatorForStatus(
             }
         }
 
+        object NoActionCreator : ActionCreator() {
+            override fun create(stripeIntentJson: JSONObject) =
+                LuxeNextActionRepository.Result.NoAction
+        }
+    }
+
+    internal companion object {
         /**
          * This function will take a path string like: next_action\[redirect]\[url] and
          * find that key path in the json object.
@@ -65,11 +70,6 @@ data class LuxeActionCreatorForStatus(
                 pathIndex++
             }
             return jsonObject?.opt(pathArray[pathArray.size - 1]) as? String
-        }
-
-        object NoActionCreator : ActionCreator() {
-            override fun create(stripeIntentJsonString: String) =
-                LuxeNextActionRepository.Result.NoAction
         }
     }
 }

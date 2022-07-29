@@ -25,6 +25,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -133,16 +134,11 @@ class AutocompleteViewModelTest {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
             AddressDetails(
-                city = "city",
-                country = null,
-                line1 = "",
-                line2 = null,
-                postalCode = null,
-                state = null
+                line1 = "Some query"
             )
         )
 
-        viewModel.addressResult.value = expectedResult
+        viewModel.textFieldController.onRawValueChange("Some query")
         viewModel.onEnterAddressManually()
 
         verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))
@@ -153,7 +149,9 @@ class AutocompleteViewModelTest {
     fun `onEnterAddressManually navigates back with empty address`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
-            AddressDetails()
+            AddressDetails(
+                line1 = ""
+            )
         )
 
         viewModel.onEnterAddressManually()
@@ -222,5 +220,25 @@ class AutocompleteViewModelTest {
         viewModel.textFieldController.onRawValueChange("a")
 
         assertThat(viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope).value).isNotNull()
+    }
+
+    @Test
+    fun `when query is not empty then return line1 on back`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("a")
+        viewModel.onBackPressed()
+
+        verify(viewModel.navigator).setResult(eq(AddressDetails.KEY), eq(AddressDetails(line1 = "a")))
+    }
+
+    @Test
+    fun `when query is empty then do nothing on back`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("")
+        viewModel.onBackPressed()
+
+        verify(viewModel.navigator, never()).setResult(any(), any())
     }
 }

@@ -33,7 +33,7 @@ internal class LpmSerializer {
         emptyList()
     } else {
         try {
-            format.decodeFromString<List<SharedDataSpec>>(serializer(), str)
+            format.decodeFromString<ArrayList<SharedDataSpec>>(serializer(), str)
         } catch (e: Exception) {
             Log.w("STRIPE", "Error parsing LPMs", e)
             emptyList()

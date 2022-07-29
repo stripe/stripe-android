@@ -113,7 +113,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AddressOptionsAppBar(false) {
-                    viewModel.setResultAndGoBack()
+                    viewModel.onBackPressed()
                 }
                 Box(
                     modifier = Modifier

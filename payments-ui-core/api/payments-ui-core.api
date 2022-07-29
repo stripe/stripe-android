@@ -412,6 +412,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getCardNumber ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCity ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getCountry ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getDependentLocality ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getEmail ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getLine1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getLine2 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
@@ -420,6 +421,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getPhone ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getSortingCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getState ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
@@ -710,16 +712,11 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Comp
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData {
 	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData$Companion;
 	public fun <init> ()V
 	public final fun containsKey (Ljava/lang/String;)Z
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
 	public final fun putAll (Ljava/util/Map;)V
 	public final fun values ()Ljava/util/Collection;
-}
-
-public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData$Companion {
-	public final fun getInstance ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$NoServerSpec : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {

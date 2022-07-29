@@ -6,14 +6,11 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
-import org.json.JSONObject
 
 /**
  * An interface for methods available in [PaymentIntent] and [SetupIntent]
  */
 sealed interface StripeIntent : StripeModel {
-    val jsonString: String?
-
     /**
      * Unique identifier for the object.
      */
@@ -70,13 +67,6 @@ sealed interface StripeIntent : StripeModel {
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
-
-    fun getPaymentCodeFromJsonString() =
-        jsonString?.let {
-            JSONObject(it)
-                .optJSONObject("payment_method")
-                ?.optString("type")
-        }
 
     /**
      * Type of the next action to perform.
@@ -268,6 +258,7 @@ sealed interface StripeIntent : StripeModel {
             override fun hashCode(): Int {
                 return 0
             }
+
             override fun equals(other: Any?): Boolean {
                 return this === other
             }

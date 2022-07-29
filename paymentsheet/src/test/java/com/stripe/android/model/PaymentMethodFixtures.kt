@@ -44,9 +44,10 @@ internal object PaymentMethodFixtures {
         created = 1550757934255L,
         liveMode = true,
         type = PaymentMethod.Type.Card,
-        customerId = "cus_AQsHpvKfKwJDrF",
         billingDetails = BILLING_DETAILS,
-        card = CARD
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD,
+        code = "card"
     )
 //
 //    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -398,17 +399,18 @@ internal object PaymentMethodFixtures {
         val id = "pm_" + UUID.randomUUID().toString()
             .replace("-", "")
         return PaymentMethod(
-            type = PaymentMethod.Type.Card,
-            liveMode = false,
+            id = id,
             created = ThreadLocalRandom.current().nextLong(
                 createdOrigin ?: 1L,
                 10000000
             ),
-            id = id,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(
                 brand = CardBrand.Visa,
                 last4 = createLast4()
-            )
+            ),
+            code = "card"
         )
     }
 
