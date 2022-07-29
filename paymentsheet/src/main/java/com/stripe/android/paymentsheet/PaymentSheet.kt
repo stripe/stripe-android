@@ -9,6 +9,7 @@ import androidx.annotation.FontRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
@@ -79,17 +80,6 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null
     ) {
         paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
-    }
-
-    /**
-     * Delete all persisted state.
-     *
-     * You must call this method when the user logs out from your app.
-     * This will ensure that any persisted state in PaymentSheet, such as
-     * authentication cookies, is also cleared during logout.
-     */
-    fun reset() {
-        paymentSheetLauncher.reset()
     }
 
     /** Configuration for [PaymentSheet] **/
@@ -790,6 +780,21 @@ class PaymentSheet internal constructor(
                     paymentResultCallback
                 ).create()
             }
+        }
+    }
+
+    companion object {
+        /**
+         * Deletes all persisted state.
+         *
+         * You must call this method when the user logs out from your app.
+         * This will ensure that any persisted state in PaymentSheet, such as
+         * authentication cookies, is also cleared during logout.
+         *
+         * @param context the Application [Context].
+         */
+        fun reset(context: Context) {
+            CookieStore(context).clear()
         }
     }
 }

@@ -10,6 +10,4 @@ internal interface PaymentSheetLauncher {
         setupIntentClientSecret: String,
         configuration: PaymentSheet.Configuration? = null
     )
-
-    fun reset()
 }

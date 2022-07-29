@@ -98,10 +98,6 @@ internal class DefaultPaymentSheetLauncher(
         )
     )
 
-    override fun reset() {
-        paymentSheetLauncherComponent.cookieStore.clear()
-    }
-
     private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
     }

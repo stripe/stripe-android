@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import android.content.Context
 import androidx.annotation.RestrictTo
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -13,6 +14,8 @@ import javax.inject.Singleton
 class CookieStore @Inject internal constructor(
     private val store: EncryptedStore
 ) {
+
+    constructor(context: Context): this(EncryptedStore(context))
 
     /**
      * Clear all local data.

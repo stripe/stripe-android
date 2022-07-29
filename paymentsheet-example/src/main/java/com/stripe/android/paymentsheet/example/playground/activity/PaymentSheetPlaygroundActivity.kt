@@ -147,7 +147,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             )
 
         viewBinding.resetButton.setOnClickListener {
-            paymentSheet.reset()
+            PaymentSheet.reset(this)
+
             setToggles(
                 customer = Toggle.Customer.default.toString(),
                 link = Toggle.Link.default as Boolean,
@@ -304,7 +305,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             stripeSupportedCurrencies.indexOf(currency)
         )
         viewBinding.merchantCountrySpinner.setSelection(
-            countryCurrencyPairs.map{it.first.code.value}.indexOf(merchantCountryCode)
+            countryCurrencyPairs.map { it.first.code.value }.indexOf(merchantCountryCode)
         )
 
         when (mode) {
