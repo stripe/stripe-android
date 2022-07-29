@@ -28,9 +28,9 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+        (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
@@ -46,7 +46,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     ) = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
         runCatching {
-            retrieveStripeIntent(clientSecret)
+            retrieveStripeIntent(
+                clientSecret,
+                merchant_support_async =
+                paymentSheetConfiguration?.allowsDelayedPaymentMethods == true
+            )
         }.fold(
             onSuccess = { stripeIntent ->
                 val isLinkReady = LinkPaymentLauncher.LINK_ENABLED &&
@@ -188,13 +192,15 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     }
 
     private suspend fun retrieveStripeIntent(
-        clientSecret: ClientSecret
+        clientSecret: ClientSecret,
+        merchant_support_async: Boolean
     ) = stripeIntentValidator.requireValid(
         initializeRepositoryAndGetStripeIntent(
             resourceRepository,
             stripeIntentRepository,
             clientSecret,
-            eventReporter
+            eventReporter,
+            merchant_support_async
         )
     )
 }

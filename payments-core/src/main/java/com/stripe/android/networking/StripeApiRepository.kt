@@ -344,11 +344,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: Locale
+        locale: Locale,
+        merchant_support_async: Boolean
     ): PaymentMethodPreference? = retrieveStripeIntentWithOrderedPaymentMethods(
         clientSecret,
         options,
         locale,
+        merchant_support_async,
         parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
         analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
     )
@@ -483,11 +485,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: Locale
+        locale: Locale,
+        merchant_support_async: Boolean
     ): PaymentMethodPreference? = retrieveStripeIntentWithOrderedPaymentMethods(
         clientSecret,
         options,
         locale,
+        merchant_support_async,
         parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
         analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
     )
@@ -1643,6 +1647,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
+        merchant_support_async: Boolean,
         parser: PaymentMethodPreferenceJsonParser<T>,
         analyticsEvent: PaymentAnalyticsEvent
     ): PaymentMethodPreference? {
@@ -1657,7 +1662,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ).plus(
             mapOf(
                 "type" to parser.stripeIntentFieldName,
-                "locale" to locale.toLanguageTag()
+                "locale" to locale.toLanguageTag(),
+                "merchant_support_async" to merchant_support_async
             )
         )
 

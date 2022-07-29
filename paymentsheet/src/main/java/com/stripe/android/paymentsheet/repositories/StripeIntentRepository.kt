@@ -17,7 +17,8 @@ import kotlin.coroutines.CoroutineContext
 
 internal sealed class StripeIntentRepository {
     abstract suspend fun get(
-        clientSecret: ClientSecret
+        clientSecret: ClientSecret,
+        merchant_support_async: Boolean
     ): PaymentMethodPreference
 
     /**
@@ -26,7 +27,7 @@ internal sealed class StripeIntentRepository {
     class Static(
         private val stripeIntent: StripeIntent
     ) : StripeIntentRepository() {
-        override suspend fun get(clientSecret: ClientSecret) =
+        override suspend fun get(clientSecret: ClientSecret, merchant_support_async: Boolean) =
             PaymentMethodPreference(stripeIntent)
     }
 
@@ -51,7 +52,10 @@ internal sealed class StripeIntentRepository {
          * Tries to retrieve the StripeIntent with ordered Payment Methods, falling back to
          * traditional GET if we don't have a locale or the call fails for any reason.
          */
-        override suspend fun get(clientSecret: ClientSecret) = withContext(workContext) {
+        override suspend fun get(
+            clientSecret: ClientSecret,
+            merchant_support_async: Boolean
+        ) = withContext(workContext) {
             when (clientSecret) {
                 is PaymentIntentClientSecret -> {
                     requireNotNull(
@@ -60,7 +64,8 @@ internal sealed class StripeIntentRepository {
                                 stripeRepository.retrievePaymentIntentWithOrderedPaymentMethods(
                                     clientSecret.value,
                                     requestOptions,
-                                    it
+                                    it,
+                                    merchant_support_async
                                 )
                             }.getOrNull()
                         } ?: stripeRepository.retrievePaymentIntent(
@@ -83,7 +88,8 @@ internal sealed class StripeIntentRepository {
                                 stripeRepository.retrieveSetupIntentWithOrderedPaymentMethods(
                                     clientSecret.value,
                                     requestOptions,
-                                    locale
+                                    locale,
+                                    merchant_support_async
                                 )
                             }.getOrNull()
                         } ?: stripeRepository.retrieveSetupIntent(

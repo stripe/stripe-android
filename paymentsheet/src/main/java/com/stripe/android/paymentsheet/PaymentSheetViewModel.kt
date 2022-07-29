@@ -238,7 +238,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         resourceRepository,
                         stripeIntentRepository,
                         args.clientSecret,
-                        eventReporter
+                        eventReporter,
+                        config?.allowsDelayedPaymentMethods == true
                     )
 
                     lpmServerSpec =
@@ -522,7 +523,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                stripeIntentRepository.get(args.clientSecret)
+                stripeIntentRepository.get(
+                    args.clientSecret,
+                    config?.allowsDelayedPaymentMethods == true
+                )
             }.fold(
                 onSuccess = {
                     processPayment(it.intent, paymentResult)
