@@ -40,12 +40,11 @@ internal class GoNext @Inject constructor(
             NavigationDirections.consent.destination ->
                 manifest.nextPane.toNavigationCommand()
             /**
-             * after partner auth, polling for accounts would determine the next step.
-             * To avoid polling in the auth step, navigate directly to account picker and poll there.
-             * If there's no account picker pane required, the account picker step will navigate to
-             * the actual next pane.
+             * Auth session authorization endpoint receives a
+             * fresh [FinancialConnectionsAuthorizationSession], source of truth for navigation.
              */
-            NavigationDirections.partnerAuth.destination -> NavigationDirections.accountPicker
+            NavigationDirections.partnerAuth.destination ->
+                authorizationSession!!.nextPane.toNavigationCommand()
             else -> TODO()
         }
         logger.debug("Navigating to next pane: ${nextPane.destination}")
