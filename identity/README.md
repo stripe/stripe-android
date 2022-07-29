@@ -1,5 +1,5 @@
 # Stripe Android SDK Identity module (Beta)
-The Stripe Identity iOS SDK makes it quick and easy to verify your user's identity in your Android app. We provide a prebuilt UI to collect your user's ID documents, match photo ID with selfies, and validate ID numbers.
+The Stripe Identity Android SDK makes it quick and easy to verify your user's identity in your Android app. We provide a prebuilt UI to collect your user's ID documents, match photo ID with selfies, and validate ID numbers.
 
 > Access to the Identity Android SDK is currently limited to beta users. If you're interested in trying it out, please send an email to <identity-mobile-sdk-beta@stripe.com>. We'll work with you to see how we can help you implement Stripe Identity in your mobile app.
 
@@ -40,4 +40,4 @@ Get started with Stripe Identity's [Android integration guide](https://stripe.co
 
 ### Example
 
-[identity-example](../identity-example) – This example demonstrates how to capture your users' ID documents on iOS and securely send them to Stripe Identity for identity verification.
+[identity-example](../identity-example) – This example demonstrates how to capture your users' ID documents on Android and securely send them to Stripe Identity for identity verification.
