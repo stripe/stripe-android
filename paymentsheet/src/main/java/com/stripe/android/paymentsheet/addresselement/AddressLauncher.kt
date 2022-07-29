@@ -101,6 +101,11 @@ internal class AddressLauncher internal constructor(
         val shouldShowCheckBox: Boolean = false,
 
         /**
+         * Configuration for the title displayed at the top of the screen.
+         * Defaults to "Address"
+         */
+        val title: String? = null,
+        /**
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
@@ -116,6 +121,7 @@ internal class AddressLauncher internal constructor(
             var buttonTitle: String? = null
             var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL
             var shouldShowCheckBox: Boolean = false
+            var title: String? = null
             var googlePlacesApiKey: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
@@ -136,6 +142,9 @@ internal class AddressLauncher internal constructor(
             fun shouldShowCheckBox(shouldShowCheckBox: Boolean) =
                 apply { this.shouldShowCheckBox = shouldShowCheckBox }
 
+            fun title(title: String?) =
+                apply { this.title = title }
+
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 
@@ -146,6 +155,7 @@ internal class AddressLauncher internal constructor(
                 buttonTitle,
                 phone,
                 shouldShowCheckBox,
+                title,
                 googlePlacesApiKey
             )
         }
