@@ -51,9 +51,9 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
-import com.stripe.android.financialconnections.features.failure.InstitutionPlannedDowntimeErrorContent
-import com.stripe.android.financialconnections.features.failure.InstitutionUnplannedDowntimeErrorContent
-import com.stripe.android.financialconnections.features.failure.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
+import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
+import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -120,7 +120,10 @@ private fun InstitutionPickerContent(
                 )
             }
             is Loading -> {
-                LoadingContent()
+                LoadingContent(
+                    R.string.stripe_picker_loading_title,
+                    R.string.stripe_picker_loading_desc
+                )
             }
             is Fail -> {
                 InstitutionPickerErrorContent(
@@ -193,30 +196,6 @@ private fun LoadedContent(
                 onInstitutionSelected = onInstitutionSelected
             )
         }
-    }
-}
-
-@Composable
-private fun LoadingContent() {
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-    ) {
-        CircularProgressIndicator(
-            color = FinancialConnectionsTheme.colors.textBrand,
-            modifier = Modifier
-                .size(36.dp)
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = stringResource(R.string.stripe_picker_loading_title),
-            style = FinancialConnectionsTheme.typography.subtitle
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = stringResource(R.string.stripe_picker_loading_desc),
-            style = FinancialConnectionsTheme.typography.body
-        )
     }
 }
 

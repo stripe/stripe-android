@@ -13,6 +13,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
@@ -20,6 +21,7 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledExc
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -80,10 +82,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
             val accounts = pollAuthorizationSessionAccounts(session = authSession)
             setState { copy(title = "Polling completed! accounts: ${accounts.data.joinToString { it.name }}") }
-            // TODO@carlosmuvi update next step from accounts response, and navigate to next pane.
-//            nativeAuthFlowCoordinator().emit(
-//                RequestNextStep(currentStep = NavigationDirections.partnerAuth)
-//            )
+            nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = NavigationDirections.partnerAuth))
         }.onFailure {
             logger.error("failed authorizing session", it)
             setState { copy(title = "Failed authorizing session!") }

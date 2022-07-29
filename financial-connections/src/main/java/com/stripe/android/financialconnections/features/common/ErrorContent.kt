@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features.failure
+package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
