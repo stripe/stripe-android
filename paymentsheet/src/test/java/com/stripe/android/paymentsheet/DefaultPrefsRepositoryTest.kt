@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
@@ -17,10 +18,11 @@ import kotlin.test.Test
 internal class DefaultPrefsRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private var context = ApplicationProvider.getApplicationContext<Context>()
     private var isGooglePayReady = true
     private var isLinkAvailable = true
     private val prefsRepository = DefaultPrefsRepository(
-        ApplicationProvider.getApplicationContext(),
+        context,
         "cus_123",
         testDispatcher
     )
@@ -81,5 +83,17 @@ internal class DefaultPrefsRepositoryTest {
                 id = "pm_123456789"
             )
         )
+    }
+
+    @Test
+    fun `clear deletes all content`() = runTest {
+        prefsRepository.savePaymentSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        assertThat(prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable))
+            .isEqualTo(SavedSelection.PaymentMethod("pm_123456789"))
+
+        DefaultPrefsRepository.reset(context)
+
+        assertThat(prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable))
+            .isEqualTo(SavedSelection.None)
     }
 }
