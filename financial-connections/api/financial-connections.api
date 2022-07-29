@@ -395,6 +395,14 @@ public final class com/stripe/android/financialconnections/domain/NativeAuthFlow
 	public static fun newInstance ()Lcom/stripe/android/financialconnections/domain/NativeAuthFlowCoordinator;
 }
 
+public final class com/stripe/android/financialconnections/domain/PollAuthorizationSessionAccounts_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/domain/PollAuthorizationSessionAccounts_Factory;
+	public fun get ()Lcom/stripe/android/financialconnections/domain/PollAuthorizationSessionAccounts;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/repository/FinancialConnectionsRepository;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)Lcom/stripe/android/financialconnections/domain/PollAuthorizationSessionAccounts;
+}
+
 public final class com/stripe/android/financialconnections/domain/PollAuthorizationSessionOAuthResults_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/domain/PollAuthorizationSessionOAuthResults_Factory;
@@ -420,11 +428,18 @@ public final class com/stripe/android/financialconnections/domain/SearchInstitut
 }
 
 public final class com/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerState;)Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerState;Lcom/stripe/android/financialconnections/domain/PollAuthorizationSessionAccounts;)Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel;
+}
+
+public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$ErrorContentKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$ErrorContentKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/consent/ComposableSingletons$ConsentScreenKt {
@@ -442,13 +457,6 @@ public final class com/stripe/android/financialconnections/features/consent/Cons
 	public fun get ()Lcom/stripe/android/financialconnections/features/consent/ConsentViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/financialconnections/features/consent/ConsentState;Lcom/stripe/android/financialconnections/domain/AcceptConsent;Lcom/stripe/android/financialconnections/domain/NativeAuthFlowCoordinator;Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/features/consent/ConsentViewModel;
-}
-
-public final class com/stripe/android/financialconnections/features/failure/ComposableSingletons$ErrorContentKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/failure/ComposableSingletons$ErrorContentKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt {

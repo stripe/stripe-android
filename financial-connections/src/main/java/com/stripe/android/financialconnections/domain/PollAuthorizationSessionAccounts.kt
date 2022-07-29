@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -19,7 +18,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        session: FinancialConnectionsAuthorizationSession,
+        sessionId: String,
     ): PartnerAccountsList {
         return retryOnException(
             times = MAX_TRIES,
@@ -28,7 +27,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         ) {
             repository.postAuthorizationSessionAccounts(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
-                sessionId = session.id
+                sessionId = sessionId
             )
         }
     }

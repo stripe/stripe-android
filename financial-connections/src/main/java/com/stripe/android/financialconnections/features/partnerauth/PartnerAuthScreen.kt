@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -16,7 +14,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 
 @Composable
 internal fun PartnerAuthScreen() {
@@ -36,20 +34,21 @@ internal fun PartnerAuthScreen() {
     LaunchedEffect(webAuthFlow.value) {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value, authSession.value!!)
     }
+    PartnerAuthScreenContent(state)
+}
 
-    when (webAuthFlow.value) {
-        Uninitialized, is Loading -> LoadingContent(
-            titleResId = R.string.stripe_picker_loading_title,
-            contentResId = R.string.stripe_picker_loading_desc
-        )
-        is Success -> Column {
-            Text(
-                state.value.title,
-                style = FinancialConnectionsTheme.typography.heading
+@Composable
+private fun PartnerAuthScreenContent(state: State<PartnerAuthState>) {
+    FinancialConnectionsScaffold {
+        when (state.value.authenticationStatus) {
+            Uninitialized, is Loading, is Success -> LoadingContent(
+                titleResId = R.string.stripe_picker_loading_title,
+                contentResId = R.string.stripe_picker_loading_desc
             )
-        }
-        is Fail -> {
-            UnclassifiedErrorContent()
+            is Fail -> {
+                // TODO@carlosmuvi translate error type to specific error screen.
+                UnclassifiedErrorContent()
+            }
         }
     }
 }

@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.domain.CompleteAuthorizationSessi
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
-import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
@@ -33,7 +32,6 @@ internal class PartnerAuthViewModel @Inject constructor(
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     val repository: FinancialConnectionsRepository,
     val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
-    val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
     val logger: Logger
 ) : MavericksViewModel<PartnerAuthState>(PartnerAuthState()) {
 
@@ -44,25 +42,22 @@ internal class PartnerAuthViewModel @Inject constructor(
         viewModelScope.launch {
             when (webStatus) {
                 is Uninitialized,
-                is Loading -> setState { copy(title = "Web flow in progress...") }
+                is Loading -> setState { copy(authenticationStatus = Loading()) }
                 is Success -> {
-                    setState { copy(title = "Web AuthFlow completed! waiting for oauth results") }
+                    logger.debug("Web AuthFlow completed! waiting for oauth results")
                     val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
-                    setState { copy(title = "OAuth results received! completing session") }
+                    logger.debug("OAuth results received! completing session")
                     completeAuthorizationSession(
                         oAuthParams = oAuthResults,
                         authSession = authSession
                     )
                 }
                 is Fail -> {
+                    setState { copy(authenticationStatus = webStatus) }
                     when (val error = webStatus.error) {
-                        is WebAuthFlowCancelledException ->
-                            setState { copy(title = "Web flow was cancelled") }
-                        is WebAuthFlowFailedException -> setState { copy(title = "Web flow failed! ${error.url}") }
-                        else -> setState {
-                            logger.error("error finishing web flow", error)
-                            copy(title = "Web flow failed! unknown")
-                        }
+                        is WebAuthFlowCancelledException -> logger.debug("Web flow was cancelled")
+                        is WebAuthFlowFailedException -> logger.debug("Web flow failed! ${error.url}")
+                        else -> logger.error("error finishing web flow", error)
                     }
                 }
             }
@@ -78,14 +73,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                 authorizationSessionId = authSession.id,
                 publicToken = oAuthParams.memberGuid
             )
-            setState { copy(title = "Session authorized! Start polling accounts.") }
+            logger.debug("Session authorized!")
             nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
-            val accounts = pollAuthorizationSessionAccounts(session = authSession)
-            setState { copy(title = "Polling completed! accounts: ${accounts.data.joinToString { it.name }}") }
             nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = NavigationDirections.partnerAuth))
         }.onFailure {
             logger.error("failed authorizing session", it)
-            setState { copy(title = "Failed authorizing session!") }
+            setState { copy(authenticationStatus = Fail(it)) }
         }
     }
 
@@ -107,5 +100,5 @@ internal class PartnerAuthViewModel @Inject constructor(
 }
 
 internal data class PartnerAuthState(
-    val title: String = ""
+    val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState
