@@ -1585,7 +1585,8 @@ internal class StripeApiRepositoryTest {
             create().retrievePaymentIntentWithOrderedPaymentMethods(
                 clientSecret,
                 DEFAULT_OPTIONS,
-                locale
+                locale,
+                merchant_support_async = true
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1595,6 +1596,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
             assertEquals(apiRequest.params!!["type"], "payment_intent")
             assertEquals(apiRequest.params!!["client_secret"], clientSecret)
+            assertEquals(apiRequest.params!!["merchant_support_async"], true)
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered)
         }
@@ -1615,7 +1617,8 @@ internal class StripeApiRepositoryTest {
             create().retrieveSetupIntentWithOrderedPaymentMethods(
                 clientSecret,
                 DEFAULT_OPTIONS,
-                locale
+                locale,
+                merchant_support_async = false
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1625,6 +1628,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
             assertEquals(apiRequest.params!!["type"], "setup_intent")
             assertEquals(apiRequest.params!!["client_secret"], clientSecret)
+            assertEquals(apiRequest.params!!["merchant_support_async"], false)
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieveOrdered)
         }

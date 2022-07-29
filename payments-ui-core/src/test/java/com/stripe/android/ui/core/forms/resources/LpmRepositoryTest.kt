@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
-import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import org.junit.Test
@@ -224,30 +223,6 @@ class LpmRepositoryTest {
             """.trimIndent()
         )
         assertThat(lpmRepository.fromCode("unknown_lpm")).isNull()
-    }
-
-    @Test
-    fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
-        lpmRepository.updateFromDisk()
-        assertThat(
-            lpmRepository.fromCode("sofort")?.requirement?.piRequirements
-        ).contains(Delayed)
-
-        lpmRepository.forceUpdate(
-            emptyList(),
-            """
-              [
-                {
-                    "type": "sofort",
-                    "async": false,
-                    "fields": []
-                  }
-             ]
-            """.trimIndent()
-        )
-        assertThat(
-            lpmRepository.fromCode("sofort")?.requirement?.piRequirements
-        ).contains(Delayed)
     }
 
     @Test

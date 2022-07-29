@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -26,7 +25,7 @@ class SupportedPaymentMethodTest {
             ApplicationProvider.getApplicationContext<Application>().resources
         )
     ).apply {
-        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
+        this.updateFromDisk()
     }
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
@@ -67,9 +66,9 @@ class SupportedPaymentMethodTest {
                             ).contains(lpm)
                         )
                         val actualLine = "${lpm.code}, ${
-                        testInput.copy(
-                            intentPMs = testInput.intentPMs.plus(lpm.code)
-                        ).toCsv()
+                            testInput.copy(
+                                intentPMs = testInput.intentPMs.plus(lpm.code)
+                            ).toCsv()
                         }, ${testOutput.toCsv()}\n"
 
                         csvOutput.append(actualLine)
@@ -84,7 +83,7 @@ class SupportedPaymentMethodTest {
                             .isEqualTo(baselineLines[index + 1])
                     }
 
-                if (baseline != csvOutput.toString()) {
+                if (baseline.trim() != csvOutput.toString().trim()) {
                     println(csvOutput.toString())
                 }
             }

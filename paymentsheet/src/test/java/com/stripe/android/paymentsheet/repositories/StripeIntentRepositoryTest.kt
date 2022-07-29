@@ -34,24 +34,30 @@ internal class StripeIntentRepositoryTest {
         runTest {
             whenever(
                 stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             ).thenReturn(PaymentMethodPreference(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val locale = Locale.GERMANY
             val paymentMethodPreference =
-                createRepository(locale).get(PaymentIntentClientSecret("client_secret"))
+                createRepository(locale).get(
+                    PaymentIntentClientSecret("client_secret"),
+                    true
+                )
 
             val localeArgumentCaptor: KArgumentCaptor<Locale> = argumentCaptor()
+            val asyncArgumentCaptor: KArgumentCaptor<Boolean> = argumentCaptor()
 
             verify(stripeRepository)
                 .retrievePaymentIntentWithOrderedPaymentMethods(
                     any(),
                     any(),
-                    localeArgumentCaptor.capture()
+                    localeArgumentCaptor.capture(),
+                    asyncArgumentCaptor.capture()
                 )
             verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
             assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
             assertThat(localeArgumentCaptor.firstValue).isEqualTo(locale)
+            assertThat(asyncArgumentCaptor.firstValue).isEqualTo(true)
         }
 
     @Test
@@ -59,17 +65,20 @@ internal class StripeIntentRepositoryTest {
         runTest {
             whenever(
                 stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             ).thenReturn(null)
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
             val paymentMethodPreference =
-                createRepository(Locale.ITALY).get(PaymentIntentClientSecret("client_secret"))
+                createRepository(Locale.ITALY).get(
+                    PaymentIntentClientSecret("client_secret"),
+                    true
+                )
 
             verify(stripeRepository)
-                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
             assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         }
@@ -79,17 +88,20 @@ internal class StripeIntentRepositoryTest {
         runTest {
             whenever(
                 stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             ).thenThrow(RuntimeException())
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
             val paymentMethodPreference =
-                createRepository(Locale.ITALY).get(PaymentIntentClientSecret("client_secret"))
+                createRepository(Locale.ITALY).get(
+                    PaymentIntentClientSecret("client_secret"),
+                    true
+                )
 
             verify(stripeRepository)
-                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
             assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         }
@@ -100,10 +112,10 @@ internal class StripeIntentRepositoryTest {
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
-            createRepository().get(PaymentIntentClientSecret("client_secret"))
+            createRepository().get(PaymentIntentClientSecret("client_secret"), true)
 
             verify(stripeRepository, never())
-                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
         }
 
@@ -112,7 +124,7 @@ internal class StripeIntentRepositoryTest {
         runTest {
             whenever(
                 stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any(), any())
             ).thenReturn(PaymentMethodPreference(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val paymentMethodPreference = StripeIntentRepository.Api(
@@ -120,21 +132,24 @@ internal class StripeIntentRepositoryTest {
                 { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
                 testDispatcher,
                 Locale.US
-            ).get(PaymentIntentClientSecret("client_secret"))
+            ).get(PaymentIntentClientSecret("client_secret"), false)
 
             val localeArgumentCaptor: KArgumentCaptor<Locale> = argumentCaptor()
+            val asyncArgumentCaptor: KArgumentCaptor<Boolean> = argumentCaptor()
 
             verify(stripeRepository)
                 .retrievePaymentIntentWithOrderedPaymentMethods(
                     any(),
                     any(),
-                    localeArgumentCaptor.capture()
+                    localeArgumentCaptor.capture(),
+                    asyncArgumentCaptor.capture()
                 )
             verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
             assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
             val defaultLocale = LocaleListCompat.getAdjustedDefault()[0]
             assertThat(localeArgumentCaptor.firstValue).isEqualTo(defaultLocale)
+            assertThat(asyncArgumentCaptor.firstValue).isEqualTo(false)
         }
 
     private fun createRepository(locale: Locale? = null) = StripeIntentRepository.Api(

@@ -72,7 +72,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: Locale
+        locale: Locale,
+        merchant_support_async: Boolean
     ): PaymentMethodPreference? {
         return null
     }
@@ -104,7 +105,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: Locale
+        locale: Locale,
+        merchant_support_async: Boolean
     ): PaymentMethodPreference? {
         return null
     }

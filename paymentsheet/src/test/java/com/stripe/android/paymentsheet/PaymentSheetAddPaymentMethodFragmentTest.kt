@@ -245,7 +245,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             ).isEqualTo(
                 FormFragmentArguments(
                     lpmRepository.fromCode("bancontact")!!.code,
-                    showCheckbox = false,
+                    showCheckbox = true,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
                     amount = createAmount(),
@@ -267,7 +267,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             ).isEqualTo(
                 FormFragmentArguments(
                     lpmRepository.fromCode("bancontact")!!.code,
-                    showCheckbox = false,
+                    showCheckbox = true,
                     showCheckboxControlledFields = false,
                     merchantName = MERCHANT_DISPLAY_NAME,
                     amount = createAmount(),

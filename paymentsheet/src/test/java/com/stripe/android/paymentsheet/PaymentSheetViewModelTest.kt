@@ -912,59 +912,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
-        val viewModel = createViewModel()
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code
-                )
-            )
-        )
-
-        assertThat(
-            viewModel.supportedPaymentMethods
-        ).containsExactly(
-            lpmRepository.fromCode("card")!!,
-            lpmRepository.fromCode("ideal")!!
-        )
-    }
-
-    @Test
-    fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    allowsDelayedPaymentMethods = true
-                )
-            )
-        )
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code
-                )
-            )
-        )
-
-        assertThat(
-            viewModel.supportedPaymentMethods
-        ).containsExactly(
-            lpmRepository.fromCode("card")!!,
-            lpmRepository.fromCode("ideal")!!,
-            lpmRepository.fromCode("sepa_debit")!!,
-            lpmRepository.fromCode("sofort")!!
-        )
-    }
-
-    @Test
     fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
         val viewModel = createViewModel()
         viewModel.updateSelection(
