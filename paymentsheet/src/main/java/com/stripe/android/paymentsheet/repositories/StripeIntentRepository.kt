@@ -18,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 internal sealed class StripeIntentRepository {
     abstract suspend fun get(
         clientSecret: ClientSecret,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference
 
     /**
@@ -27,7 +27,7 @@ internal sealed class StripeIntentRepository {
     class Static(
         private val stripeIntent: StripeIntent
     ) : StripeIntentRepository() {
-        override suspend fun get(clientSecret: ClientSecret, merchant_support_async: Boolean) =
+        override suspend fun get(clientSecret: ClientSecret, merchantSupportAsync: Boolean) =
             PaymentMethodPreference(stripeIntent)
     }
 
@@ -54,7 +54,7 @@ internal sealed class StripeIntentRepository {
          */
         override suspend fun get(
             clientSecret: ClientSecret,
-            merchant_support_async: Boolean
+            merchantSupportAsync: Boolean
         ) = withContext(workContext) {
             when (clientSecret) {
                 is PaymentIntentClientSecret -> {
@@ -65,7 +65,7 @@ internal sealed class StripeIntentRepository {
                                     clientSecret.value,
                                     requestOptions,
                                     it,
-                                    merchant_support_async
+                                    merchantSupportAsync
                                 )
                             }.getOrNull()
                         } ?: stripeRepository.retrievePaymentIntent(
@@ -89,7 +89,7 @@ internal sealed class StripeIntentRepository {
                                     clientSecret.value,
                                     requestOptions,
                                     locale,
-                                    merchant_support_async
+                                    merchantSupportAsync
                                 )
                             }.getOrNull()
                         } ?: stripeRepository.retrieveSetupIntent(

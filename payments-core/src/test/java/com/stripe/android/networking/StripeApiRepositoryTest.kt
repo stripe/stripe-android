@@ -1586,7 +1586,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret,
                 DEFAULT_OPTIONS,
                 locale,
-                merchant_support_async = true
+                merchantSupportAsync = true
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1618,7 +1618,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret,
                 DEFAULT_OPTIONS,
                 locale,
-                merchant_support_async = false
+                merchantSupportAsync = false
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())

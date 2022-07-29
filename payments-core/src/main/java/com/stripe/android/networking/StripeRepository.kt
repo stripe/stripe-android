@@ -90,7 +90,7 @@ abstract class StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference?
 
     @Throws(
@@ -153,7 +153,7 @@ abstract class StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference?
 
     @Throws(

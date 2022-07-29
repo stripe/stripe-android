@@ -11,9 +11,9 @@ internal suspend fun initializeRepositoryAndGetStripeIntent(
     stripeIntentRepository: StripeIntentRepository,
     clientSecret: ClientSecret,
     eventReporter: EventReporter,
-    merchant_support_async: Boolean
+    merchantSupportAsync: Boolean
 ): StripeIntent {
-    val value = stripeIntentRepository.get(clientSecret, merchant_support_async)
+    val value = stripeIntentRepository.get(clientSecret, merchantSupportAsync)
     resourceRepository.getLpmRepository().update(
         value.intent.paymentMethodTypes,
         value.formUI

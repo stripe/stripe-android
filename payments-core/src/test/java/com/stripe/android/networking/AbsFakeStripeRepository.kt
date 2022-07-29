@@ -73,7 +73,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference? {
         return null
     }
@@ -106,7 +106,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference? {
         return null
     }

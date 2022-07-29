@@ -345,12 +345,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference? = retrieveStripeIntentWithOrderedPaymentMethods(
         clientSecret,
         options,
         locale,
-        merchant_support_async,
+        merchantSupportAsync,
         parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
         analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
     )
@@ -486,12 +486,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean
+        merchantSupportAsync: Boolean
     ): PaymentMethodPreference? = retrieveStripeIntentWithOrderedPaymentMethods(
         clientSecret,
         options,
         locale,
-        merchant_support_async,
+        merchantSupportAsync,
         parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
         analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
     )
@@ -1643,11 +1643,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
     }
 
+    @Suppress("LongParameterList")
     private suspend fun <T : StripeIntent> retrieveStripeIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        merchant_support_async: Boolean,
+        merchantSupportAsync: Boolean,
         parser: PaymentMethodPreferenceJsonParser<T>,
         analyticsEvent: PaymentAnalyticsEvent
     ): PaymentMethodPreference? {
@@ -1663,7 +1664,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             mapOf(
                 "type" to parser.stripeIntentFieldName,
                 "locale" to locale.toLanguageTag(),
-                "merchant_support_async" to merchant_support_async
+                "merchant_support_async" to merchantSupportAsync
             )
         )
 
