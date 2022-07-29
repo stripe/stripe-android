@@ -14,6 +14,7 @@ import javax.inject.Inject
  *
  * @see [FinancialConnectionsSessionManifest.nextPane]
  * @see [FinancialConnectionsAuthorizationSession.nextPane]
+ * @see [com.stripe.android.financialconnections.model.PartnerAccountsList.nextPane]
  *
  */
 internal class GoNext @Inject constructor(
