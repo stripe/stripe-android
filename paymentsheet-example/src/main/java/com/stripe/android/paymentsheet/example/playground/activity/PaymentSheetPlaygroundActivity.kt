@@ -146,7 +146,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 countryCurrencyPairs.map { it.first }
             )
 
-        viewBinding.resetDefaultsButton.setOnClickListener {
+        viewBinding.resetButton.setOnClickListener {
+            paymentSheet.reset()
             setToggles(
                 customer = Toggle.Customer.default.toString(),
                 link = Toggle.Link.default as Boolean,

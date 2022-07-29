@@ -81,6 +81,17 @@ class PaymentSheet internal constructor(
         paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
     }
 
+    /**
+     * Delete all persisted state.
+     *
+     * You must call this method when the user logs out from your app.
+     * This will ensure that any persisted state in PaymentSheet, such as
+     * authentication cookies, is also cleared during logout.
+     */
+    fun reset() {
+        paymentSheetLauncher.reset()
+    }
+
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration @JvmOverloads constructor(

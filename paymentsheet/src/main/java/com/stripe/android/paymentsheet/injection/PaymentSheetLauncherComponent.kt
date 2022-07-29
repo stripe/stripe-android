@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -26,6 +27,8 @@ import javax.inject.Singleton
     ]
 )
 internal interface PaymentSheetLauncherComponent {
+    val cookieStore: CookieStore
+
     fun inject(factory: PaymentSheetViewModel.Factory)
     fun inject(factory: FormViewModel.Factory)
 

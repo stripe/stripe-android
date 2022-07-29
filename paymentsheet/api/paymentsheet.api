@@ -71,6 +71,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public final fun presentWithSetupIntent (Ljava/lang/String;)V
 	public final fun presentWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
 	public static synthetic fun presentWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
+	public final fun reset ()V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Address : android/os/Parcelable {
