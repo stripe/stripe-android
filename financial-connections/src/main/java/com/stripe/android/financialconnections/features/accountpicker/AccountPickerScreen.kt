@@ -44,8 +44,8 @@ private fun AccountPickerContent(state: AccountPickerState) {
     FinancialConnectionsScaffold {
         when (val accounts = state.accounts) {
             Uninitialized, is Loading -> LoadingContent(
-                R.string.stripe_picker_loading_title,
-                R.string.stripe_picker_loading_desc
+                R.string.stripe_account_picker_loading_title,
+                R.string.stripe_account_picker_loading_desc
             )
             is Success -> AccountPickerLoaded(accounts())
             is Fail -> UnclassifiedErrorContent()
