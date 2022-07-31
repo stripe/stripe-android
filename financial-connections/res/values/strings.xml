@@ -45,5 +45,6 @@
     </plurals>
     <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
+    <string name="stripe_account_picker_dropdown_hint">Choose one</string>
 </resources>
 

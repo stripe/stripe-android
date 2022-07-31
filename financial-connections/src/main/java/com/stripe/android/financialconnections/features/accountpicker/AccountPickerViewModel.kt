@@ -13,6 +13,8 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -34,11 +36,15 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     fun onAccountClicked(account: PartnerAccount) {
-        withState {
-            if (it.selectedIds.contains(account.id)) {
-                setState { copy(selectedIds = selectedIds - account.id) }
-            } else {
-                setState { copy(selectedIds = selectedIds + account.id) }
+        withState { state ->
+            when (state.selectionMode) {
+                SelectionMode.DROPDOWN,
+                SelectionMode.RADIO -> setState { copy(selectedIds = setOf(account.id)) }
+                SelectionMode.CHECKBOXES -> if (state.selectedIds.contains(account.id)) {
+                    setState { copy(selectedIds = selectedIds - account.id) }
+                } else {
+                    setState { copy(selectedIds = selectedIds + account.id) }
+                }
             }
         }
     }
@@ -82,9 +88,11 @@ internal class AccountPickerViewModel @Inject constructor(
 internal data class AccountPickerState(
     val accounts: Async<PartnerAccountsList> = Uninitialized,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
+    val selectionMode: SelectionMode = SelectionMode.DROPDOWN,
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
 
-    val isLoading: Boolean
-        get() = selectAccounts is Loading || accounts is Loading
+    enum class SelectionMode {
+        DROPDOWN, RADIO, CHECKBOXES
+    }
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,9 +18,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -36,11 +47,10 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -72,7 +82,8 @@ private fun AccountPickerContent(
                 accounts = accounts(),
                 selectedIds = state.selectedIds,
                 onAccountClicked = onAccountClicked,
-                onSelectAccounts = onSelectAccounts
+                onSelectAccounts = onSelectAccounts,
+                selectionMode = state.selectionMode
             )
             is Fail -> UnclassifiedErrorContent()
         }
@@ -84,6 +95,7 @@ private fun AccountPickerContent(
 private fun AccountPickerLoaded(
     loading: Boolean,
     accounts: PartnerAccountsList,
+    selectionMode: AccountPickerState.SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAccounts: () -> Unit
@@ -99,18 +111,22 @@ private fun AccountPickerLoaded(
             text = stringResource(R.string.stripe_account_picker_multiselect_account),
             style = FinancialConnectionsTheme.typography.subtitle
         )
-        Spacer(modifier = Modifier.size(24.dp))
-        LazyColumn(
-            contentPadding = PaddingValues(top = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(accounts.data, key = { it.id }) { account ->
-                MultiSelectAccount(
-                    selected = selectedIds.contains(account.id),
-                    onAccountClicked = onAccountClicked,
-                    account = account
-                )
-            }
+        when (selectionMode) {
+            AccountPickerState.SelectionMode.DROPDOWN -> DropdownContent(
+                accounts = accounts,
+                selectedIds = selectedIds,
+                onAccountClicked = onAccountClicked
+            )
+            AccountPickerState.SelectionMode.RADIO -> SingleSelectContent(
+                accounts = accounts,
+                selectedIds = selectedIds,
+                onAccountClicked = onAccountClicked
+            )
+            AccountPickerState.SelectionMode.CHECKBOXES -> MultiSelectContent(
+                accounts = accounts,
+                selectedIds = selectedIds,
+                onAccountClicked = onAccountClicked
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
         FinancialConnectionsButton(
@@ -129,11 +145,133 @@ private fun AccountPickerLoaded(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun MultiSelectAccount(
+private fun DropdownContent(
+    accounts: PartnerAccountsList,
+    selectedIds: Set<String>,
+    onAccountClicked: (PartnerAccount) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedOptionText: String? = remember(selectedIds) {
+        accounts.data
+            .firstOrNull { selectedIds.contains(it.id) }
+            ?.let { "${it.name} ${it.numbers}" }
+    }
+    Spacer(modifier = Modifier.size(12.dp))
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        FinancialConnectionsOutlinedTextField(
+            readOnly = true,
+            value = selectedOptionText
+                ?: stringResource(id = R.string.stripe_account_picker_dropdown_hint),
+            onValueChange = { },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            modifier = Modifier.background(
+                color = FinancialConnectionsTheme.colors.backgroundSurface
+            ),
+            onDismissRequest = {
+                expanded = false
+            }
+        ) {
+            accounts.data.forEach { selectedAccount ->
+                DropdownMenuItem(
+                    onClick = {
+                        onAccountClicked(selectedAccount)
+                        expanded = false
+                    }
+                ) {
+                    val numbers =
+                        Text(
+                            text = "${selectedAccount.name} ${selectedAccount.numbers}",
+                            color = FinancialConnectionsTheme.colors.textPrimary,
+                            style = FinancialConnectionsTheme.typography.bodyEmphasized
+                        )
+                }
+            }
+        }
+    }
+}
+
+private val PartnerAccount.numbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
+
+@Composable
+private fun SingleSelectContent(
+    accounts: PartnerAccountsList,
+    selectedIds: Set<String>,
+    onAccountClicked: (PartnerAccount) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(accounts.data, key = { it.id }) { account ->
+            AccountItem(
+                selected = selectedIds.contains(account.id),
+                onAccountClicked = onAccountClicked,
+                account = account
+            ) {
+                RadioButton(
+                    selected = selectedIds.contains(account.id),
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = FinancialConnectionsTheme.colors.textBrand,
+                        unselectedColor = FinancialConnectionsTheme.colors.borderDefault,
+                        disabledColor = FinancialConnectionsTheme.colors.textDisabled
+                    ),
+                    onClick = null
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MultiSelectContent(
+    accounts: PartnerAccountsList,
+    selectedIds: Set<String>,
+    onAccountClicked: (PartnerAccount) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(accounts.data, key = { it.id }) { account ->
+            AccountItem(
+                selected = selectedIds.contains(account.id),
+                onAccountClicked = onAccountClicked,
+                account = account
+            ) {
+                Checkbox(
+                    checked = selectedIds.contains(account.id),
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = FinancialConnectionsTheme.colors.textBrand,
+                        checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
+                        uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
+                    ),
+                    onCheckedChange = null
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
-    account: PartnerAccount
+    account: PartnerAccount,
+    selectorContent: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -150,20 +288,11 @@ private fun MultiSelectAccount(
             .clickable { onAccountClicked(account) }
             .padding(12.dp)
     ) {
-
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(
-                checked = selected,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = FinancialConnectionsTheme.colors.textBrand,
-                    checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
-                    uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
-                ),
-                onCheckedChange = null
-            )
+            selectorContent()
             Spacer(modifier = Modifier.size(16.dp))
             Column {
                 Text(
@@ -186,45 +315,44 @@ private fun MultiSelectAccount(
 @Preview(
     showBackground = true,
     group = "Account Picker Pane",
-    name = "One account selected"
+    name = "Multiselect - account selected"
 )
 @Composable
-internal fun AccountPickerPreview() {
+internal fun AccountPickerPreviewMultiSelect() {
     FinancialConnectionsTheme {
         AccountPickerContent(
-            AccountPickerState(
-                selectedIds = setOf("id1"),
-                accounts = Success(
-                    PartnerAccountsList(
-                        data = listOf(
-                            PartnerAccount(
-                                authorization = "Authorization",
-                                category = FinancialConnectionsAccount.Category.CASH,
-                                id = "id1",
-                                name = "Account 1",
-                                balanceAmount = 1000,
-                                displayableAccountNumbers = "1234",
-                                currency = "$",
-                                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                                supportedPaymentMethodTypes = emptyList(),
-                            ),
-                            PartnerAccount(
-                                authorization = "Authorization",
-                                category = FinancialConnectionsAccount.Category.CASH,
-                                id = "id2",
-                                name = "Account 2",
-                                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                                supportedPaymentMethodTypes = emptyList()
-                            )
-                        ),
-                        hasMore = false,
-                        nextPane = FinancialConnectionsSessionManifest.NextPane.ACCOUNT_PICKER,
-                        url = ""
-                    )
-                )
-            ),
-            onAccountClicked = {},
-            onSelectAccounts = {}
+            AccountPickerStates.multiSelect(),
+            onAccountClicked = {}
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    group = "Account Picker Pane",
+    name = "Single select - account selected"
+)
+@Composable
+internal fun AccountPickerPreviewSingleSelect() {
+    FinancialConnectionsTheme {
+        AccountPickerContent(
+            AccountPickerStates.singleSelect(),
+            onAccountClicked = {}
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    group = "Account Picker Pane",
+    name = "Dropdown - account selected"
+)
+@Composable
+internal fun AccountPickerPreviewDropdown() {
+    FinancialConnectionsTheme {
+        AccountPickerContent(
+            AccountPickerStates.dropdown(),
+            onAccountClicked = {}
         )
     }
 }
