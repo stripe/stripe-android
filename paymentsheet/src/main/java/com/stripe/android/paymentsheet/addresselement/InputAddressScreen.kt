@@ -91,7 +91,7 @@ internal fun InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,
                 primaryButtonText = buttonText,
                 title = titleText,
-                onPrimaryButtonClick = { viewModel.clickPrimaryButton() },
+                onPrimaryButtonClick = { viewModel.clickPrimaryButton(completeValues) },
                 onCloseClick = { viewModel.navigator.dismiss() },
                 formContent = {
                     FormUI(
