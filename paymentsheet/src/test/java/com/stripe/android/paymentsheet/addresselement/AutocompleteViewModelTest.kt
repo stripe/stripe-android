@@ -5,6 +5,7 @@ import android.text.SpannableString
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
@@ -40,20 +41,19 @@ class AutocompleteViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val mockClient = mock<PlacesClientProxy>()
+    private val mockEventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel() =
         AutocompleteViewModel(
             args,
             navigator,
+            mockClient,
             AutocompleteViewModel.Args(
                 "US"
             ),
+            mockEventReporter,
             application
-        ).apply {
-            initialize {
-                mockClient
-            }
-        }
+        )
 
     @BeforeTest
     fun setUp() {
@@ -240,5 +240,11 @@ class AutocompleteViewModelTest {
         viewModel.onBackPressed()
 
         verify(viewModel.navigator, never()).setResult(any(), any())
+    }
+
+    @Test
+    fun `initializing ViewModel emits onShow event`() {
+        createViewModel()
+        verify(mockEventReporter).onShow(eq("US"))
     }
 }
