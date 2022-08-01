@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## X.X.X
+## 20.8.0 - 2022-08-01
 
 ### PaymentSheet
 * [FIXED][5321](https://github.com/stripe/stripe-android/pull/5321) Fixed issue with forever loading and mochi library.
