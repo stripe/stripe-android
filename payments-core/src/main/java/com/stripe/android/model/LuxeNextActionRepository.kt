@@ -23,7 +23,7 @@ class LuxeNextActionRepository {
      * of the operation.
      */
     internal fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
-        // This handles the case where the next action is not understood so
+    // This handles the case where the next action is not understood so
         // the PI is still in the requires action state.
         if (stripeIntent.requiresAction() && stripeIntent.nextActionData == null) {
             StripeIntentResult.Outcome.FAILED
@@ -55,11 +55,11 @@ class LuxeNextActionRepository {
         val Instance: LuxeNextActionRepository = LuxeNextActionRepository()
     }
 
-    internal data class LuxeAction(
+    data class LuxeAction(
         /**
          * This should be null to use custom next action behavior coded in the SDK
          */
-        val postConfirmStatusNextStatus: LuxeActionCreatorForStatus?,
+        val postConfirmStatusNextStatus: Map<StripeIntent.Status, ActionCreator>,
 
         // Int here is @StripeIntentResult.Outcome
         val postAuthorizeIntentStatus: Map<StripeIntent.Status, Int>

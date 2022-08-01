@@ -529,17 +529,17 @@ class LpmSerializerTest {
         val result = lpmSerializer.deserialize(serializedString)
         assertThat(result.isSuccess).isTrue()
         result.onSuccess {
-            assertThat(it.nextActionSpec?.handleNextActionSpec).isEqualTo(
+            assertThat(it.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
                 listOf(
-                    RedirectNextActionSpec(
+                    ConfirmResponseStatusSpecs.RedirectNextActionSpec(
                         listOf("requires_action"),
-                        hostedPagePath = "next_action[redirect_to_url][url]",
+                        urlPath = "next_action[redirect_to_url][url]",
                         returnUrlPath = "next_action[redirect_to_url][return_url]"
                     )
                 )
             )
 
-            assertThat(it.nextActionSpec?.handlePiStatus).isEqualTo(
+            assertThat(it.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
                 listOf(
                     PiStatusSpec(
                         listOf("succeeded"),

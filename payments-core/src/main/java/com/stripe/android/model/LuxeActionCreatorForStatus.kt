@@ -3,40 +3,36 @@ package com.stripe.android.model
 import android.net.Uri
 import org.json.JSONObject
 
-internal data class LuxeActionCreatorForStatus(
-    val status: StripeIntent.Status,
-    val actionCreator: ActionCreator
-) {
-    internal sealed class ActionCreator {
-        fun create(stripeIntentJsonString: String) =
-            create(JSONObject(stripeIntentJsonString))
 
-        internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
-        internal data class RedirectActionCreator(
-            val redirectPagePath: String,
-            val returnToUrlPath: String
-        ) : ActionCreator() {
-            override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
-                val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
-                val url = getPath(redirectPagePath, stripeIntentJson)
-                return if ((returnUrl != null) && (url != null)
-                ) {
-                    LuxeNextActionRepository.Result.Action(
-                        StripeIntent.NextActionData.RedirectToUrl(
-                            returnUrl = returnUrl,
-                            url = Uri.parse(url)
-                        )
+sealed class ActionCreator {
+    internal fun create(stripeIntentJsonString: String) =
+        create(JSONObject(stripeIntentJsonString))
+
+    internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
+    data class RedirectActionCreator(
+        val redirectPagePath: String,
+        val returnToUrlPath: String
+    ) : ActionCreator() {
+        override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
+            val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
+            val url = getPath(redirectPagePath, stripeIntentJson)
+            return if ((returnUrl != null) && (url != null)
+            ) {
+                LuxeNextActionRepository.Result.Action(
+                    StripeIntent.NextActionData.RedirectToUrl(
+                        returnUrl = returnUrl,
+                        url = Uri.parse(url)
                     )
-                } else {
-                    LuxeNextActionRepository.Result.NotSupported
-                }
+                )
+            } else {
+                LuxeNextActionRepository.Result.NotSupported
             }
         }
+    }
 
-        object NoActionCreator : ActionCreator() {
-            override fun create(stripeIntentJson: JSONObject) =
-                LuxeNextActionRepository.Result.NoAction
-        }
+    object NoActionCreator : ActionCreator() {
+        override fun create(stripeIntentJson: JSONObject) =
+            LuxeNextActionRepository.Result.NoAction
     }
 
     internal companion object {
