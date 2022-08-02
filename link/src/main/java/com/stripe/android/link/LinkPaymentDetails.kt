@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
@@ -40,7 +39,7 @@ sealed class LinkPaymentDetails(
     class New(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         override val paymentMethodCreateParams: PaymentMethodCreateParams,
-        @get:VisibleForTesting val originalParams: PaymentMethodCreateParams
+        val originalParams: PaymentMethodCreateParams
     ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams) {
 
         /**
