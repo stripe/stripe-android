@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import android.content.res.Resources
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import dagger.BindsInstance
@@ -12,7 +13,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
         FormViewModelModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        CoreCommonModule::class
     ]
 )
 internal interface FormViewModelComponent {

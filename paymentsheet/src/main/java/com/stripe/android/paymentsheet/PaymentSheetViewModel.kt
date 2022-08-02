@@ -444,14 +444,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                when (
-                    linkLauncher.setup(
-                        stripeIntent,
-                        (newPaymentSelection as? PaymentSelection.New.LinkInline)
-                            ?.linkPaymentDetails,
-                        this
-                    )
-                ) {
+                when (linkLauncher.setup(stripeIntent, this)) {
                     AccountStatus.Verified -> launchLink()
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {

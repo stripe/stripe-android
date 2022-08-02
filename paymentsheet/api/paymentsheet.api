@@ -1193,14 +1193,6 @@ public final class com/stripe/android/paymentsheet/injection/FlowControllerModul
 	public static fun provideViewModel (Landroidx/lifecycle/ViewModelStoreOwner;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FormViewModelModule_Companion_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FormViewModelModule_Companion_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale ()Ljava/util/Locale;
-}
-
 public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideDummyInjectorKeyFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)V
 	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideDummyInjectorKeyFactory;
@@ -1231,14 +1223,6 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public fun get ()Ljava/lang/Boolean;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideEnabledLogging ()Z
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale ()Ljava/util/Locale;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
