@@ -13,6 +13,7 @@ class AddressElementActivityContractTest {
     @Test
     fun `AddressElementActivityContract args parcelize correctly`() {
         val args = AddressElementActivityContract.Args(
+            "publishableKey",
             AddressLauncherFixtures.BASIC_CONFIG,
             "injectorKey"
         )

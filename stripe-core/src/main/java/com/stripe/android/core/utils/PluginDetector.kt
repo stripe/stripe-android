@@ -32,7 +32,7 @@ object PluginDetector {
         val className: String,
         val pluginName: String
     ) {
-        ReactNative("com.facebook.proguard.annotations.DoNotStrip", "react-native"),
+        ReactNative("com.facebook.react.bridge.NativeModule", "react-native"),
         Flutter("io.flutter.embedding.engine.FlutterEngine", "flutter"),
         Cordova("org.apache.cordova.CordovaActivity", "cordova"),
         Unity("com.unity3d.player.UnityPlayerActivity", "unity")
