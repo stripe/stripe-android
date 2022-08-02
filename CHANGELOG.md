@@ -3,12 +3,15 @@
 ## X.X.X
 
 ### PaymentSheet
+
 * [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `reset` method to `PaymentSheet`, that clears any persisted state.
 
 ## 20.8.0 - 2022-08-01
+
 This release contains several bug fixes for Payments, PaymentSheet, deprecates `createForCompose`, and adds new `rememberLauncher` features for Payments
 
 ### PaymentSheet
+
 * [FIXED][5321](https://github.com/stripe/stripe-android/pull/5321) Fixed issue with forever loading
   and mochi library.
 * [FIXED][5253](https://github.com/stripe/stripe-android/pull/5253) Setting setup_future_usage on
@@ -28,7 +31,7 @@ This release contains several bug fixes for Payments, PaymentSheet, deprecates `
 
 ## 20.7.0 - 2022-07-06
 
-* This release adds additional support for Afterpay/Clearpay in PaymentSheet.
+This release adds additional support for Afterpay/Clearpay in PaymentSheet.
 
 ### PaymentSheet
 
