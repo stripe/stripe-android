@@ -37,7 +37,6 @@ internal class WalletViewModel @Inject constructor(
     private val logger: Logger
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
-    val initiallySelectedId = args.selectedPaymentDetails?.paymentDetails?.id
 
     private val _paymentDetails =
         MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
@@ -148,7 +147,7 @@ internal class WalletViewModel @Inject constructor(
                                 true
                             } ?: false
 
-                    if (initialSetup && args.selectedPaymentDetails is LinkPaymentDetails.New) {
+                    if (initialSetup && args.prefilledCardParams != null) {
                         // User is returning and had previously added a new payment method
                         navigator.navigateTo(
                             LinkScreen.PaymentMethod(true),
