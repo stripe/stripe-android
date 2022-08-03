@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
-import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -15,7 +15,7 @@ import javax.inject.Singleton
     modules = [
         FinancialConnectionsSheetModule::class,
         CoroutineContextModule::class,
-        CoreCommonModule::class
+        LoggingModule::class
     ]
 )
 internal interface FinancialConnectionsSheetComponent {

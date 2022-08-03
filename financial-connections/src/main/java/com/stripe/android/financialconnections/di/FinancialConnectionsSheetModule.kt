@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import androidx.core.os.LocaleListCompat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -16,6 +17,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsAp
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import dagger.Module
 import dagger.Provides
+import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -44,6 +46,11 @@ internal object FinancialConnectionsSheetModule {
     fun provideConnectionsRepository(
         repository: FinancialConnectionsApiRepository
     ): FinancialConnectionsRepository = repository
+
+    @Provides
+    @Singleton
+    fun provideLocale(): Locale? =
+        LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
 
     @Provides
     @Singleton

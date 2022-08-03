@@ -271,6 +271,14 @@ public final class com/stripe/android/financialconnections/di/FinancialConnectio
 	public static fun provideEventReporter (Lcom/stripe/android/financialconnections/analytics/DefaultFinancialConnectionsEventReporter;)Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEventReporter;
 }
 
+public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetModule_ProvideLocaleFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetModule_ProvideLocaleFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/util/Locale;
+	public static fun provideLocale ()Ljava/util/Locale;
+}
+
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetModule_ProvideStripeNetworkClientFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetModule_ProvideStripeNetworkClientFactory;

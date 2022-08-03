@@ -128,22 +128,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/core/injection/CoreCommonModule_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/core/injection/CoreCommonModule;)V
-	public static fun create (Lcom/stripe/android/core/injection/CoreCommonModule;)Lcom/stripe/android/core/injection/CoreCommonModule_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale (Lcom/stripe/android/core/injection/CoreCommonModule;)Ljava/util/Locale;
-}
-
-public final class com/stripe/android/core/injection/CoreCommonModule_ProvideLoggerFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/core/injection/CoreCommonModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/core/injection/CoreCommonModule;Ljavax/inject/Provider;)Lcom/stripe/android/core/injection/CoreCommonModule_ProvideLoggerFactory;
-	public fun get ()Lcom/stripe/android/core/Logger;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideLogger (Lcom/stripe/android/core/injection/CoreCommonModule;Z)Lcom/stripe/android/core/Logger;
-}
-
 public final class com/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/core/injection/CoroutineContextModule;)V
 	public static fun create (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lcom/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory;
@@ -164,6 +148,14 @@ public final class com/stripe/android/core/injection/InjectWithFallbackKt {
 }
 
 public final class com/stripe/android/core/injection/InjectorKt {
+}
+
+public final class com/stripe/android/core/injection/LoggingModule_ProvideLoggerFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/core/injection/LoggingModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/core/injection/LoggingModule;Ljavax/inject/Provider;)Lcom/stripe/android/core/injection/LoggingModule_ProvideLoggerFactory;
+	public fun get ()Lcom/stripe/android/core/Logger;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideLogger (Lcom/stripe/android/core/injection/LoggingModule;Z)Lcom/stripe/android/core/Logger;
 }
 
 public final class com/stripe/android/core/injection/NamedConstantsKt {

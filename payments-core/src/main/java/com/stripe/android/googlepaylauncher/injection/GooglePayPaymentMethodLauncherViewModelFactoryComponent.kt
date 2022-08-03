@@ -1,10 +1,10 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -27,7 +27,7 @@ import javax.inject.Singleton
         GooglePayPaymentMethodLauncherModule::class,
         StripeRepositoryModule::class,
         CoroutineContextModule::class,
-        CoreCommonModule::class
+        LoggingModule::class
     ]
 )
 internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
