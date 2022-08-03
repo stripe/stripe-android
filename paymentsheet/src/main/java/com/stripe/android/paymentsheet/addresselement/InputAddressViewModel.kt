@@ -13,6 +13,7 @@ import com.stripe.android.ui.core.elements.AddressType
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.PhoneNumberState
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -146,14 +147,20 @@ internal class InputAddressViewModel @Inject constructor(
         )
     }
 
-    fun clickPrimaryButton() {
+    fun clickPrimaryButton(completedFormValues: Map<IdentifierSpec, FormFieldEntry>?) {
         _formEnabled.value = false
-        viewModelScope.launch {
-            val address = getCurrentAddress()
-            address?.let {
-                dismissWithAddress(it)
-            }
-        }
+        dismissWithAddress(
+            AddressDetails(
+                name = completedFormValues?.get(IdentifierSpec.Name)?.value,
+                city = completedFormValues?.get(IdentifierSpec.City)?.value,
+                country = completedFormValues?.get(IdentifierSpec.Country)?.value,
+                line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
+                line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
+                postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
+                state = completedFormValues?.get(IdentifierSpec.State)?.value,
+                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value
+            )
+        )
     }
 
     @VisibleForTesting
