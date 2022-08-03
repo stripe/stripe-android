@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import androidx.core.os.LocaleListCompat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -64,10 +63,5 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @Singleton
-        fun provideLocale() =
-            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
     }
 }
