@@ -406,11 +406,12 @@ abstract class StripeRepository {
     ): ConsumerSessionLookup?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Suppress("LongParameterList")
     abstract suspend fun consumerSignUp(
         email: String,
         phoneNumber: String,
         country: String,
-        locale: Locale,
+        locale: Locale?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?

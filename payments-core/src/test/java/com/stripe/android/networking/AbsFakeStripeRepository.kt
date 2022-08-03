@@ -296,7 +296,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         email: String,
         phoneNumber: String,
         country: String,
-        locale: Locale,
+        locale: Locale?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {

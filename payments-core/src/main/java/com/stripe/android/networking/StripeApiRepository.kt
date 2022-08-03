@@ -1202,7 +1202,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         email: String,
         phoneNumber: String,
         country: String,
-        locale: Locale,
+        locale: Locale?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
@@ -1214,14 +1214,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "request_surface" to "android_payment_element",
                     "email_address" to email.lowercase(),
                     "phone_number" to phoneNumber,
-                    "country" to country,
-                    "locale" to locale.toLanguageTag()
+                    "country" to country
                 ).plus(
                     authSessionCookie?.let {
                         mapOf(
                             "cookies" to
                                 mapOf("verification_session_client_secrets" to listOf(it))
                         )
+                    } ?: emptyMap()
+                ).plus(
+                    locale?.let {
+                        mapOf("locale" to it.toLanguageTag())
                     } ?: emptyMap()
                 )
             ),

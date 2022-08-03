@@ -72,7 +72,7 @@ internal class LinkApiRepository @Inject constructor(
                 email,
                 phone,
                 country,
-                locale ?: Locale.US,
+                locale,
                 authSessionCookie,
                 ApiRequest.Options(
                     publishableKeyProvider(),
