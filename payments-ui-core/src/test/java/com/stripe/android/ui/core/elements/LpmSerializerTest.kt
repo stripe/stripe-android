@@ -50,7 +50,7 @@ class LpmSerializerTest {
             PostConfirmStatusSpecAssociation(
                 requires_action = PostConfirmHandlingPiStatusSpecs.CanceledSpec,
                 processing = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
-                succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
+                succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec
             )
         )
     }
