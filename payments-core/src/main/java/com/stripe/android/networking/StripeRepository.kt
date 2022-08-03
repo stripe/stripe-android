@@ -410,6 +410,7 @@ abstract class StripeRepository {
         email: String,
         phoneNumber: String,
         country: String,
+        locale: Locale,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?

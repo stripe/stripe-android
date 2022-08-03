@@ -96,6 +96,7 @@ class LinkApiRepositoryTest {
             eq(email),
             eq(phone),
             eq(country),
+            eq(Locale.US),
             eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
@@ -104,7 +105,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `consumerSignUp returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.consumerSignUp(any(), any(), any(), anyOrNull(), any()))
+        whenever(stripeRepository.consumerSignUp(any(), any(), any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
         val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
@@ -115,7 +116,7 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `consumerSignUp catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.consumerSignUp(any(), any(), any(), anyOrNull(), any()))
+        whenever(stripeRepository.consumerSignUp(any(), any(), any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
