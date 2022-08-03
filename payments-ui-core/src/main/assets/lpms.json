@@ -4,8 +4,7 @@
     "async": false,
     "fields": [
       {
-        "type": "afterpay_header",
-        "api_path": null
+        "type": "afterpay_header"
       },
       {
         "type": "name",
@@ -23,8 +22,7 @@
         "type": "billing_address",
         "api_path": {
           "v1": "billing_details[address]"
-        },
-        "allowed_country_codes": null
+        }
       }
     ],
     "next_action_spec": {
@@ -48,8 +46,7 @@
     "async": false,
     "fields": [
       {
-        "type": "affirm_header",
-        "api_path": null
+        "type": "affirm_header"
       }
     ],
     "next_action_spec": {
@@ -73,8 +70,7 @@
     "async": false,
     "fields": [
       {
-        "type": "klarna_header",
-        "api_path": null
+        "type": "klarna_header"
       },
       {
         "type": "email",
@@ -248,12 +244,10 @@
         "type": "billing_address",
         "api_path": {
           "v1": "billing_details[address]"
-        },
-        "allowed_country_codes": null
+        }
       },
       {
-        "type": "sepa_mandate",
-        "api_path": null
+        "type": "sepa_mandate"
       }
     ],
     "next_action_spec": {
@@ -433,8 +427,6 @@
   {
     "type": "paypal",
     "async": false,
-    "fields": [
-    ],
     "next_action_spec": {
       "confirm_response_status_specs": {
         "requires_action": {
@@ -481,8 +473,7 @@
         }
       },
       {
-        "type": "au_becs_mandate",
-        "api_path": null
+        "type": "au_becs_mandate"
       }
     ],
     "next_action_spec": {
