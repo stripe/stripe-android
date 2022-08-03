@@ -19,7 +19,7 @@ sealed class LuxePostConfirmActionCreator {
         override fun create(stripeIntentJson: JSONObject): LuxePostConfirmActionRepository.Result {
             val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
             val url = getPath(redirectPagePath, stripeIntentJson)
-            return if ((returnUrl != null) && (url != null)) {
+            return if ((url != null)) {
                 LuxePostConfirmActionRepository.Result.Action(
                     StripeIntent.NextActionData.RedirectToUrl(
                         returnUrl = returnUrl,

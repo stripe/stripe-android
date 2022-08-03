@@ -23,7 +23,7 @@
           "type": "finished"
         },
         "requires_action": {
-          "type": "canceled"
+          "type": "finished"
         }
       }
     }
