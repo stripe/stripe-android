@@ -1,13 +1,18 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.model.ActionCreator
-import com.stripe.android.model.LuxeNextActionRepository
+import com.stripe.android.model.LuxeActionCreator
+import com.stripe.android.model.LuxeConfirmResponseActionRepository
 import com.stripe.android.model.StripeIntent
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonContentPolymorphicSerializer
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
-@Serializable
+@Serializable(with = ConfirmResponseStatusSpecsSerializer::class)
 sealed class ConfirmResponseStatusSpecs {
     @Serializable
     @SerialName("redirect_to_url")
@@ -27,7 +32,19 @@ sealed class ConfirmResponseStatusSpecs {
     object CanceledSpec : ConfirmResponseStatusSpecs()
 }
 
-@Serializable
+object ConfirmResponseStatusSpecsSerializer :
+    JsonContentPolymorphicSerializer<ConfirmResponseStatusSpecs>(ConfirmResponseStatusSpecs::class) {
+    override fun selectDeserializer(element: JsonElement): DeserializationStrategy<out ConfirmResponseStatusSpecs> {
+        return when (element.jsonObject["type"]?.jsonPrimitive?.content) {
+            "finished" -> ConfirmResponseStatusSpecs.FinishedSpec.serializer()
+            "canceled" -> ConfirmResponseStatusSpecs.CanceledSpec.serializer()
+            "redirect_to_url" -> ConfirmResponseStatusSpecs.RedirectNextActionSpec.serializer()
+            else -> ConfirmResponseStatusSpecs.CanceledSpec.serializer()
+        }
+    }
+}
+
+@Serializable(with = PostConfirmHandlingPiStatusSpecsSerializer::class)
 sealed class PostConfirmHandlingPiStatusSpecs {
 
     @Serializable
@@ -39,23 +56,36 @@ sealed class PostConfirmHandlingPiStatusSpecs {
     object CanceledSpec : PostConfirmHandlingPiStatusSpecs()
 }
 
+object PostConfirmHandlingPiStatusSpecsSerializer :
+    JsonContentPolymorphicSerializer<PostConfirmHandlingPiStatusSpecs>(
+        PostConfirmHandlingPiStatusSpecs::class
+    ) {
+    override fun selectDeserializer(element: JsonElement): DeserializationStrategy<out PostConfirmHandlingPiStatusSpecs> {
+        return when (element.jsonObject["type"]?.jsonPrimitive?.content) {
+            "finished" -> PostConfirmHandlingPiStatusSpecs.FinishedSpec.serializer()
+            "canceled" -> PostConfirmHandlingPiStatusSpecs.CanceledSpec.serializer()
+            else -> PostConfirmHandlingPiStatusSpecs.CanceledSpec.serializer()
+        }
+    }
+}
+
 fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
     mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
 
 @Serializable
 data class ConfirmStatusSpecAssociation(
     @SerialName("requires_payment_method")
-    val requires_payment_method: ConfirmResponseStatusSpecs?,
+    val requires_payment_method: ConfirmResponseStatusSpecs? = null,
     @SerialName("requires_confirmation")
-    val requires_confirmation: ConfirmResponseStatusSpecs?,
+    val requires_confirmation: ConfirmResponseStatusSpecs? = null,
     @SerialName("requires_action")
-    val requires_action: ConfirmResponseStatusSpecs?,
+    val requires_action: ConfirmResponseStatusSpecs? = null,
     @SerialName("processing")
-    val processing: ConfirmResponseStatusSpecs?,
+    val processing: ConfirmResponseStatusSpecs? = null,
     @SerialName("succeeded")
-    val succeeded: ConfirmResponseStatusSpecs?,
+    val succeeded: ConfirmResponseStatusSpecs? = null,
     @SerialName("canceled")
-    val canceled: ConfirmResponseStatusSpecs?
+    val canceled: ConfirmResponseStatusSpecs? = null
 ) {
     fun getMap() =
         mapOf(
@@ -71,17 +101,17 @@ data class ConfirmStatusSpecAssociation(
 @Serializable
 data class PostConfirmStatusSpecAssociation(
     @SerialName("requires_payment_method")
-    val requires_payment_method: PostConfirmHandlingPiStatusSpecs?,
+    val requires_payment_method: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("requires_confirmation")
-    val requires_confirmation: PostConfirmHandlingPiStatusSpecs?,
+    val requires_confirmation: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("requires_action")
-    val requires_action: PostConfirmHandlingPiStatusSpecs?,
+    val requires_action: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("processing")
-    val processing: PostConfirmHandlingPiStatusSpecs?,
+    val processing: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("succeeded")
-    val succeeded: PostConfirmHandlingPiStatusSpecs?,
+    val succeeded: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("canceled")
-    val canceled: PostConfirmHandlingPiStatusSpecs?
+    val canceled: PostConfirmHandlingPiStatusSpecs? = null
 ) {
     fun getMap() = mapOf(
         StripeIntent.Status.RequiresPaymentMethod to requires_payment_method,
@@ -97,11 +127,44 @@ data class PostConfirmStatusSpecAssociation(
 @SerialName("next_action_spec")
 data class NextActionSpec(
     @SerialName("confirm_response_status_specs")
-    val confirmResponseStatusSpecs: ConfirmStatusSpecAssociation?,
+    val confirmResponseStatusSpecs: ConfirmStatusSpecAssociation? = null,
 
     @SerialName("post_confirm_handling_pi_status_specs")
-    val postConfirmHandlingPiStatusSpecs: PostConfirmStatusSpecAssociation?
+    val postConfirmHandlingPiStatusSpecs: PostConfirmStatusSpecAssociation? = null
 )
+
+fun NextActionSpec?.transform() =
+    if (this == null) {
+        // LUXE does not support the next action, it should be entirely handled by the SDK both
+        // the next action and the status to outcome check
+        LuxeConfirmResponseActionRepository.LuxeAction(
+            postConfirmStatusNextStatus = emptyMap(),
+            postAuthorizeIntentStatus = emptyMap()
+        )
+    } else {
+        val statusOutcomeMap = mutableMapOf<StripeIntent.Status, Int>()
+        postConfirmHandlingPiStatusSpecs?.let {
+            statusOutcomeMap.putAll(
+                it.getMap()
+                    .mapValues { entry -> mapToOutcome(entry.value) }
+                    .filterNotNullValues()
+            )
+        }
+        confirmResponseStatusSpecs?.let {
+            statusOutcomeMap.putAll(
+                it.getMap()
+                    .mapValues { mapToOutcome(it.value) }
+                    .filterNotNullValues()
+            )
+        }
+
+        LuxeConfirmResponseActionRepository.LuxeAction(
+            postConfirmStatusNextStatus = confirmResponseStatusSpecs?.let {
+                it.getMap().mapValues { status -> getNextActionFromSpec(status.value) }
+            } ?: emptyMap(),
+            postAuthorizeIntentStatus = statusOutcomeMap
+        )
+    }
 
 fun mapToOutcome(spec: PostConfirmHandlingPiStatusSpecs?) = when (spec) {
     PostConfirmHandlingPiStatusSpecs.CanceledSpec -> StripeIntentResult.Outcome.CANCELED
@@ -116,53 +179,19 @@ fun mapToOutcome(spec: ConfirmResponseStatusSpecs?) = when (spec) {
     null -> null
 }
 
-fun getNextAction(confirmResponseStatusSpecs: ConfirmResponseStatusSpecs) =
+fun getNextActionFromSpec(confirmResponseStatusSpecs: ConfirmResponseStatusSpecs) =
     when (confirmResponseStatusSpecs) {
         is ConfirmResponseStatusSpecs.RedirectNextActionSpec -> {
-            ActionCreator.RedirectActionCreator(
+            LuxeActionCreator.RedirectActionCreator(
                 confirmResponseStatusSpecs.urlPath,
                 confirmResponseStatusSpecs.returnUrlPath
             )
         }
         is ConfirmResponseStatusSpecs.CanceledSpec -> {
-            ActionCreator.NoActionCreator
+            LuxeActionCreator.NoActionCreator
         }
         is ConfirmResponseStatusSpecs.FinishedSpec -> {
-            ActionCreator.NoActionCreator
+            LuxeActionCreator.NoActionCreator
         }
     }
 
-fun transform(spec: NextActionSpec?) {
-    if (spec == null) {
-        // LUXE does not support the next action, it should be entirely handled by the SDK both
-        // the next action and the status to outcome check
-        LuxeNextActionRepository.LuxeAction(
-            postConfirmStatusNextStatus = emptyMap(),
-            postAuthorizeIntentStatus = emptyMap()
-        )
-    } else {
-        val statusOutcomeMap = mutableMapOf<StripeIntent.Status, Int>()
-        spec.postConfirmHandlingPiStatusSpecs?.let {
-            statusOutcomeMap.plus(
-                it.getMap()
-                    .mapValues { entry -> mapToOutcome(entry.value) }
-                    .filterNotNullValues()
-            )
-        }
-        spec.confirmResponseStatusSpecs?.let {
-            statusOutcomeMap.plus(
-                it.getMap()
-                    .mapValues {
-                        mapToOutcome(it.value)
-                    }
-            )
-        }
-
-        LuxeNextActionRepository.LuxeAction(
-            postConfirmStatusNextStatus = spec.confirmResponseStatusSpecs?.let {
-                it.getMap().mapValues { status -> getNextAction(status.value) }
-            } ?: emptyMap(),
-            postAuthorizeIntentStatus = statusOutcomeMap
-        )
-    }
-}

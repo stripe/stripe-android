@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LuxeConfirmResponseActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
@@ -34,6 +35,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -50,8 +52,11 @@ import java.util.concurrent.TimeUnit
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments,
-    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
+    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val lpmNextActionData: LuxeConfirmResponseActionRepository = LuxeConfirmResponseActionRepository.Instance
 ) {
+
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
@@ -129,6 +134,13 @@ class LpmRepository constructor(
                         .mapNotNull { convertToSupportedPaymentMethod(it) }
                         .associateBy { it.code }
                 )
+                mapFromDisk
+                    ?.mapValues { it.value.nextActionSpec.transform() }
+                    ?.let {
+                        lpmNextActionData.update(
+                            it
+                        )
+                    }
             }
 
             serverInitializedLatch.countDown()
@@ -144,20 +156,32 @@ class LpmRepository constructor(
         parseLpms(arguments.resources?.assets?.open("lpms.json"))
 
     private fun update(lpms: List<SharedDataSpec>?) {
-        // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        val parsedSupportedPaymentMethod = lpms
+        val parsedSharedData = lpms
             ?.filter { exposedPaymentMethods.contains(it.type) }
+            ?.filterNot {
+                !arguments.isFinancialConnectionsAvailable() &&
+                    it.type == PaymentMethod.Type.USBankAccount.code
+            }
+
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        parsedSharedData
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
             ?.toMutableList()
+            ?.let {
+                lpmInitialFormData.putAll(
+                    it.associateBy { it.code } ?: emptyMap()
+                )
+            }
 
-        parsedSupportedPaymentMethod?.removeAll {
-            !arguments.isFinancialConnectionsAvailable() &&
-                it.code == PaymentMethod.Type.USBankAccount.code
-        }
-
-        lpmInitialFormData.putAll(
-            parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
-        )
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        parsedSharedData
+            ?.associate { it.type to it.nextActionSpec.transform() }
+            ?.toMutableMap()
+            ?.let {
+                lpmNextActionData.update(
+                    it
+                )
+            }
     }
 
     private fun parseLpms(inputStream: InputStream?) =

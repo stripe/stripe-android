@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DEFAULT_DATA
 import com.stripe.android.LUXE_NEXT_ACTION
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.model.LuxeActionCreatorForStatus.Companion.getPath
-import com.stripe.android.model.LuxeNextActionRepository.Result
+import com.stripe.android.model.LuxeActionCreator.Companion.getPath
+import com.stripe.android.model.LuxeConfirmResponseActionRepository.Result
 import com.stripe.android.model.PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION
 import com.stripe.android.model.PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION_JSON
 import com.stripe.android.model.PaymentIntentFixtures.KONBINI_REQUIRES_ACTION
@@ -22,17 +22,17 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test get terminal status when intent status for lpm is found in the luxe repo`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 "afterpay_clearpay" to
-                    LuxeNextActionRepository.LuxeAction(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[redirect_to_url][url]",
-                                returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                            )
+                    LuxeConfirmResponseActionRepository.LuxeAction(
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[redirect_to_url][url]",
+                                    returnToUrlPath = "next_action[redirect_to_url][return_url]"
+                                )
                         ),
                         postAuthorizeIntentStatus = mapOf(
                             StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
@@ -51,17 +51,17 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test get terminal status when status is requires_action but next action data not supported`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 "konbini" to
-                    LuxeNextActionRepository.LuxeAction(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-                                returnToUrlPath = "next_action[konbini_display_details][return_url]"
-                            )
+                    LuxeConfirmResponseActionRepository.LuxeAction(
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+                                    returnToUrlPath = "next_action[konbini_display_details][return_url]"
+                                )
                         ),
                         postAuthorizeIntentStatus = mapOf(
                             StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED
@@ -84,7 +84,7 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test get terminal status when the LPM is not known to LUXE`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(DEFAULT_DATA)
         assertThat(
             lpmNextActionRepository.getPostAuthorizeIntentOutcome(
@@ -98,7 +98,7 @@ class LuxeActionRepositoryTest {
         val afterpayProcessingIntent = AFTERPAY_REQUIRES_ACTION.copy(
             status = StripeIntent.Status.Processing
         )
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(DEFAULT_DATA)
         assertThat(
             lpmNextActionRepository.getPostAuthorizeIntentOutcome(
@@ -110,17 +110,17 @@ class LuxeActionRepositoryTest {
     @Ignore("Ignored because konbini does not have a return url")
     fun `test get next action when return url not required and not found`() {
         val konbiniPaymentMethodCode = "konbini"
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 konbiniPaymentMethodCode to
-                    LuxeNextActionRepository.LuxeAction(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
-                                returnToUrlPath = ""
-                            )
+                    LuxeConfirmResponseActionRepository.LuxeAction(
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[konbini_display_details][hosted_voucher_url]",
+                                    returnToUrlPath = ""
+                                )
                         ),
                         postAuthorizeIntentStatus = mapOf(
                             StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED
@@ -147,14 +147,14 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test requires action if the status legitimately has no next action`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 PaymentMethod.Type.SepaDebit.code to
                     LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.Processing,
-                            LuxeActionCreatorForStatus.ActionCreator.NoActionCreator
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.Processing to
+                                LuxeActionCreator.NoActionCreator
                         )
                     )
             )
@@ -171,17 +171,17 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test requires action if the status is expected and there is a next action`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 PaymentMethod.Type.AfterpayClearpay.code to
                     LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[redirect_to_url][url]",
-                                returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                            )
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[redirect_to_url][url]",
+                                    returnToUrlPath = "next_action[redirect_to_url][return_url]"
+                                )
                         )
                     )
             )
@@ -207,17 +207,17 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test requires action if the returnUrl is expected and there is not one`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 PaymentMethod.Type.AfterpayClearpay.code to
                     LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[redirect_to_url][url]",
-                                returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                            )
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[redirect_to_url][url]",
+                                    returnToUrlPath = "next_action[redirect_to_url][return_url]"
+                                )
                         )
                     )
             )
@@ -241,17 +241,17 @@ class LuxeActionRepositoryTest {
 
     @Test
     fun `test requires action if the status is not an expected state`() {
-        val lpmNextActionRepository = LuxeNextActionRepository()
+        val lpmNextActionRepository = LuxeConfirmResponseActionRepository()
         lpmNextActionRepository.update(
             mapOf(
                 PaymentMethod.Type.AfterpayClearpay.code to
                     LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[redirect_to_url][url]",
-                                returnToUrlPath = "next_action[redirect_to_url][return_url]"
-                            )
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[redirect_to_url][url]",
+                                    returnToUrlPath = "next_action[redirect_to_url][return_url]"
+                                )
                         )
                     )
             )

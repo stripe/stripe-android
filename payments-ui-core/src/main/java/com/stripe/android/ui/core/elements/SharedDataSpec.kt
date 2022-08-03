@@ -18,5 +18,5 @@ internal data class SharedDataSpec(
     val fields: ArrayList<FormItemSpec> = arrayListOf(EmptyFormSpec),
 
     @SerialName("next_action_spec")
-    val nextActionSpec: NextActionSpec?
+    val nextActionSpec: NextActionSpec? = null
 )

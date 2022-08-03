@@ -3,9 +3,9 @@ package com.stripe.android.model.parsers
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LUXE_NEXT_ACTION
+import com.stripe.android.model.LuxeActionCreator
 import com.stripe.android.model.Address
-import com.stripe.android.model.LuxeActionCreatorForStatus
-import com.stripe.android.model.LuxeNextActionRepository
+import com.stripe.android.model.LuxeConfirmResponseActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -147,7 +147,7 @@ class PaymentIntentJsonParserTest {
 
     @Test
     fun `verify luxe next action is queried first for next action and returns no next action`() {
-        val luxeNextActionRepository = LuxeNextActionRepository()
+        val luxeNextActionRepository = LuxeConfirmResponseActionRepository()
         var stripeIntent = PaymentIntentJsonParser(luxeNextActionRepository).parse(
             PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION_JSON
         )
@@ -161,9 +161,9 @@ class PaymentIntentJsonParserTest {
             mapOf(
                 "afterpay_clearpay" to
                     LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.NoActionCreator
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.NoActionCreator
                         )
                     )
             )
@@ -182,7 +182,7 @@ class PaymentIntentJsonParserTest {
 
     @Test
     fun `verify luxe next action is queried first for next action and returns next action`() {
-        val luxeNextActionRepository = LuxeNextActionRepository()
+        val luxeNextActionRepository = LuxeConfirmResponseActionRepository()
         var stripeIntent = PaymentIntentJsonParser(luxeNextActionRepository).parse(
             PaymentIntentFixtures.LLAMAPAY_REQUIRES_ACTION_JSON
         )
@@ -196,12 +196,12 @@ class PaymentIntentJsonParserTest {
             mapOf(
                 "llamapay" to
                     LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusNextStatus = LuxeActionCreatorForStatus(
-                            StripeIntent.Status.RequiresAction,
-                            LuxeActionCreatorForStatus.ActionCreator.RedirectActionCreator(
-                                redirectPagePath = "next_action[llamapay_redirect_to_url][url]",
-                                returnToUrlPath = "next_action[llamapay_redirect_to_url][return_url]"
-                            )
+                        postConfirmStatusNextStatus = mapOf(
+                            StripeIntent.Status.RequiresAction to
+                                LuxeActionCreator.RedirectActionCreator(
+                                    redirectPagePath = "next_action[llamapay_redirect_to_url][url]",
+                                    returnToUrlPath = "next_action[llamapay_redirect_to_url][return_url]"
+                                )
                         )
                     )
             )

@@ -6,11 +6,12 @@ import com.stripe.android.StripeIntentResult
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class LuxeNextActionRepository {
+class LuxeConfirmResponseActionRepository {
 
     private val codeToNextActionSpec = mutableMapOf<String, LuxeAction>()
 
-    internal fun update(additionalData: Map<String, LuxeAction>) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    fun update(additionalData: Map<String, LuxeAction>) {
         codeToNextActionSpec.putAll(additionalData)
     }
 
@@ -45,21 +46,24 @@ class LuxeNextActionRepository {
         status: StripeIntent.Status?,
         stripeIntentJson: JSONObject
     ) = getActionCreator(lpmCode, status)
-        ?.actionCreator?.create(stripeIntentJson)
+        ?.create(stripeIntentJson)
         ?: Result.NotSupported
 
     private fun getActionCreator(lpmCode: PaymentMethodCode?, status: StripeIntent.Status?) =
-        codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus.takeIf { it?.status == status }
+        codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus
+            ?.filter { it.key == status }
+            ?.map { it.value }
+            ?.firstOrNull()
 
     companion object {
-        val Instance: LuxeNextActionRepository = LuxeNextActionRepository()
+        val Instance: LuxeConfirmResponseActionRepository = LuxeConfirmResponseActionRepository()
     }
 
     data class LuxeAction(
         /**
          * This should be null to use custom next action behavior coded in the SDK
          */
-        val postConfirmStatusNextStatus: Map<StripeIntent.Status, ActionCreator>,
+        val postConfirmStatusNextStatus: Map<StripeIntent.Status, LuxeActionCreator>,
 
         // Int here is @StripeIntentResult.Outcome
         val postAuthorizeIntentStatus: Map<StripeIntent.Status, Int>

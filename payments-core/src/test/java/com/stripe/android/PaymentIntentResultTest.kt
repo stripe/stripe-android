@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.LuxeNextActionRepository
+import com.stripe.android.model.LuxeConfirmResponseActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -34,7 +34,7 @@ class PaymentIntentResultTest {
         val result = PaymentIntentResult(
             intent = paymentIntent
         )
-        result.luxeNextActionRepository = LuxeNextActionRepository()
+        result.luxeNextActionRepository = LuxeConfirmResponseActionRepository()
 
         // Because of the OXXO test below we know this normally returns SUCCESS
 

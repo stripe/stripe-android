@@ -248,6 +248,9 @@ class LpmSerializerTest {
             """.trimIndent()
 
             val result = lpmSerializer.deserialize(serializedString)
+            result.onFailure {
+                println(it.message)
+            }
             assertThat(result.isSuccess).isTrue()
             result.onSuccess { sharedDataSpec ->
                 val fieldItemSpec = sharedDataSpec.fields[0]
@@ -381,15 +384,15 @@ class LpmSerializerTest {
 
         val FormUiSpecJsonString = """
             "type": "new_lpm",
-                "async": true,
-                "fields": [
-                  {
-                    "type": "billing_address",
-                    "allowed_country_codes": [
-                      "AT", "BE"
-                    ]
-                  }
+            "async": true,
+            "fields": [
+              {
+                "type": "billing_address",
+                "allowed_country_codes": [
+                  "AT", "BE"
                 ]
+              }
+            ]
         """.trimIndent()
 
         val JSON_ALL_FIELDS = """
@@ -507,32 +510,35 @@ class LpmSerializerTest {
               {
                 ${FormUiSpecJsonString},
                 "next_action_spec": {
-                  "handle_next_action_specs": [
-                    {
-                      "associated_statuses": ["requires_action"],
-                      "type": "redirect_to_hosted_page",
-                      "hosted_page_path": "next_action[redirect_to_url][url]",
-                      "return_url_path": "next_action[redirect_to_url][return_url]"
+                    "confirm_response_status_specs": {
+                        "requires_action": {
+                            "type": "redirect_to_url",
+                            "url_path": "next_action[redirect_to_url][url]",
+                            "return_url_path": "next_action[redirect_to_url][return_url]"
+                        }
+                    },
+                    "post_confirm_handling_pi_status_specs": {
+                        "succeeded": {
+                            "type": "finished"
+                        },
+                        "requires_action": {
+                            "type": "canceled"
+                        }
                     }
-                  ],
-                  "handle_pi_status_specs": [
-                    {
-                      "associated_statuses": ["succeeded"],
-                      "outcome": "finished"
-                    }
-                  ]
                 }
               }
             """.trimIndent()
 
-
         val result = lpmSerializer.deserialize(serializedString)
+        result.onFailure {
+            println(it.message)
+        }
         assertThat(result.isSuccess).isTrue()
         result.onSuccess {
             assertThat(it.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
-                listOf(
+                ConfirmStatusSpecAssociation(
+                    requires_action =
                     ConfirmResponseStatusSpecs.RedirectNextActionSpec(
-                        listOf("requires_action"),
                         urlPath = "next_action[redirect_to_url][url]",
                         returnUrlPath = "next_action[redirect_to_url][return_url]"
                     )
@@ -540,14 +546,11 @@ class LpmSerializerTest {
             )
 
             assertThat(it.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
-                listOf(
-                    PiStatusSpec(
-                        listOf("succeeded"),
-                        outcome = PIStatusType.Finished
-                    )
+                PostConfirmStatusSpecAssociation(
+                    succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
+                    requires_action = PostConfirmHandlingPiStatusSpecs.CanceledSpec
                 )
             )
         }
     }
-
 }

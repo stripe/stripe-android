@@ -1,38 +1,40 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
-
-sealed class ActionCreator {
+sealed class LuxeActionCreator {
     internal fun create(stripeIntentJsonString: String) =
         create(JSONObject(stripeIntentJsonString))
 
-    internal abstract fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result
-    data class RedirectActionCreator(
+    internal abstract fun create(stripeIntentJson: JSONObject): LuxeConfirmResponseActionRepository.Result
+
+    data class RedirectActionCreator
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val redirectPagePath: String,
         val returnToUrlPath: String
-    ) : ActionCreator() {
-        override fun create(stripeIntentJson: JSONObject): LuxeNextActionRepository.Result {
+    ) : LuxeActionCreator() {
+        override fun create(stripeIntentJson: JSONObject): LuxeConfirmResponseActionRepository.Result {
             val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
             val url = getPath(redirectPagePath, stripeIntentJson)
-            return if ((returnUrl != null) && (url != null)
-            ) {
-                LuxeNextActionRepository.Result.Action(
+            return if ((returnUrl != null) && (url != null)) {
+                LuxeConfirmResponseActionRepository.Result.Action(
                     StripeIntent.NextActionData.RedirectToUrl(
                         returnUrl = returnUrl,
                         url = Uri.parse(url)
                     )
                 )
             } else {
-                LuxeNextActionRepository.Result.NotSupported
+                LuxeConfirmResponseActionRepository.Result.NotSupported
             }
         }
     }
 
-    object NoActionCreator : ActionCreator() {
+    object NoActionCreator : LuxeActionCreator() {
         override fun create(stripeIntentJson: JSONObject) =
-            LuxeNextActionRepository.Result.NoAction
+            LuxeConfirmResponseActionRepository.Result.NoAction
     }
 
     internal companion object {

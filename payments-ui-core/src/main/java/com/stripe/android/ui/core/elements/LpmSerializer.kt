@@ -20,11 +20,6 @@ internal class LpmSerializer {
         format.decodeFromString<SharedDataSpec>(serializer(), str)
     }.onFailure { }
 
-
-    fun deserializeNextAction(str: String) = runCatching {
-        format.decodeFromString<PiStatusSpec>(serializer(), str)
-    }.onFailure { }
-
     /**
      * Any error in parsing an LPM (say a missing required field) will result in none of the
      * LPMs being read.
