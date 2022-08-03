@@ -29,7 +29,8 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        LinkPaymentLauncherModule::class,
+        LinkActivityContractArgsModule::class,
+        LinkCommonModule::class,
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         LoggingModule::class,

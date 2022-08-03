@@ -19,3 +19,8 @@ const val CUSTOMER_EMAIL = "customerEmail"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CUSTOMER_PHONE = "customerPhone"
+
+/**
+ * Identifies the Stripe Intent being processed by Link.
+ */
+internal const val LINK_INTENT = "linkIntent"

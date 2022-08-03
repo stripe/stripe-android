@@ -5,20 +5,13 @@ import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        SignedInViewModelSubcomponent::class,
-        SignUpViewModelSubcomponent::class,
-        FormControllerSubcomponent::class
-    ]
-)
-internal interface LinkPaymentLauncherModule {
+@Module
+internal interface LinkCommonModule {
     @Binds
     @Singleton
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
@@ -28,7 +21,6 @@ internal interface LinkPaymentLauncherModule {
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
     companion object {
-
         @Provides
         @Singleton
         fun provideLocale() =
