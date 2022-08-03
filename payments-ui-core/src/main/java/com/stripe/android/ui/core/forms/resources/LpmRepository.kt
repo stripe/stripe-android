@@ -169,14 +169,13 @@ class LpmRepository constructor(
             ?.toMutableList()
             ?.let {
                 lpmInitialFormData.putAll(
-                    it.associateBy { it.code } ?: emptyMap()
+                    it.associateBy { it.code }
                 )
             }
 
-        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        // Here nextActionSpec if null will convert to an explicit internal next action and status.
         parsedSharedData
             ?.associate { it.type to it.nextActionSpec.transform() }
-            ?.toMutableMap()
             ?.let {
                 lpmPostConfirmData.update(
                     it

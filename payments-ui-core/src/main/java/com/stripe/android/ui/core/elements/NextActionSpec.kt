@@ -83,7 +83,7 @@ data class ConfirmStatusSpecAssociation(
     @SerialName("processing")
     val processing: ConfirmResponseStatusSpecs? = null,
     @SerialName("succeeded")
-    val succeeded: ConfirmResponseStatusSpecs? = null,
+    val succeeded: ConfirmResponseStatusSpecs? = ConfirmResponseStatusSpecs.FinishedSpec,
     @SerialName("canceled")
     val canceled: ConfirmResponseStatusSpecs? = null
 ) {
