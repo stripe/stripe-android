@@ -4,37 +4,37 @@ import android.net.Uri
 import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
-sealed class LuxeActionCreator {
+sealed class LuxePostConfirmActionCreator {
     internal fun create(stripeIntentJsonString: String) =
         create(JSONObject(stripeIntentJsonString))
 
-    internal abstract fun create(stripeIntentJson: JSONObject): LuxeConfirmResponseActionRepository.Result
+    internal abstract fun create(stripeIntentJson: JSONObject): LuxePostConfirmActionRepository.Result
 
     data class RedirectActionCreator
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         val redirectPagePath: String,
         val returnToUrlPath: String
-    ) : LuxeActionCreator() {
-        override fun create(stripeIntentJson: JSONObject): LuxeConfirmResponseActionRepository.Result {
+    ) : LuxePostConfirmActionCreator() {
+        override fun create(stripeIntentJson: JSONObject): LuxePostConfirmActionRepository.Result {
             val returnUrl = getPath(returnToUrlPath, stripeIntentJson)
             val url = getPath(redirectPagePath, stripeIntentJson)
             return if ((returnUrl != null) && (url != null)) {
-                LuxeConfirmResponseActionRepository.Result.Action(
+                LuxePostConfirmActionRepository.Result.Action(
                     StripeIntent.NextActionData.RedirectToUrl(
                         returnUrl = returnUrl,
                         url = Uri.parse(url)
                     )
                 )
             } else {
-                LuxeConfirmResponseActionRepository.Result.NotSupported
+                LuxePostConfirmActionRepository.Result.NotSupported
             }
         }
     }
 
-    object NoActionCreator : LuxeActionCreator() {
+    object NoActionCreator : LuxePostConfirmActionCreator() {
         override fun create(stripeIntentJson: JSONObject) =
-            LuxeConfirmResponseActionRepository.Result.NoAction
+            LuxePostConfirmActionRepository.Result.NoAction
     }
 
     internal companion object {

@@ -1,45 +1,45 @@
 package com.stripe.android
 
-import com.stripe.android.model.LuxeActionCreator
-import com.stripe.android.model.LuxeConfirmResponseActionRepository
+import com.stripe.android.model.LuxePostConfirmActionCreator
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
 
-internal val LUXE_NEXT_ACTION = LuxeConfirmResponseActionRepository.LuxeAction(
-    postConfirmStatusNextStatus = mapOf(
+internal val LUXE_NEXT_ACTION = LuxePostConfirmActionRepository.LuxeAction(
+    postConfirmStatusToAction = mapOf(
         StripeIntent.Status.RequiresAction to
-            LuxeActionCreator.RedirectActionCreator(
+            LuxePostConfirmActionCreator.RedirectActionCreator(
                 redirectPagePath = "next_action[oxxo_display_details][hosted_voucher_url]",
                 returnToUrlPath = "next_action[oxxo_display_details][return_url]"
             )
     ),
-    postAuthorizeIntentStatus = mapOf(
+    postConfirmActionIntentStatus = mapOf(
         StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
     )
 )
 
 internal val DEFAULT_DATA = mapOf(
     "afterpay_clearpay" to
-        LuxeConfirmResponseActionRepository.LuxeAction(
-            postConfirmStatusNextStatus = mapOf(
+        LuxePostConfirmActionRepository.LuxeAction(
+            postConfirmStatusToAction = mapOf(
                 StripeIntent.Status.RequiresAction to
-                    LuxeActionCreator.RedirectActionCreator(
+                    LuxePostConfirmActionCreator.RedirectActionCreator(
                         redirectPagePath = "next_action[redirect_to_url][url]",
                         returnToUrlPath = "next_action[redirect_to_url][return_url]"
                     )
             ),
-            postAuthorizeIntentStatus = mapOf(
+            postConfirmActionIntentStatus = mapOf(
                 StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED,
                 StripeIntent.Status.RequiresPaymentMethod to StripeIntentResult.Outcome.FAILED,
                 StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
             )
         ),
     "sepa_debit" to
-        LuxeConfirmResponseActionRepository.LuxeAction(
-            postConfirmStatusNextStatus = mapOf(
+        LuxePostConfirmActionRepository.LuxeAction(
+            postConfirmStatusToAction = mapOf(
                 StripeIntent.Status.Processing to
-                    LuxeActionCreator.NoActionCreator
+                    LuxePostConfirmActionCreator.NoActionCreator
             ),
-            postAuthorizeIntentStatus = mapOf(
+            postConfirmActionIntentStatus = mapOf(
                 StripeIntent.Status.Processing to StripeIntentResult.Outcome.SUCCEEDED
             )
         )

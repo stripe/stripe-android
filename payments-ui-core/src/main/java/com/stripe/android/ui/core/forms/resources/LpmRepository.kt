@@ -6,7 +6,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.LuxeConfirmResponseActionRepository
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
@@ -54,7 +54,7 @@ class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
     @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val lpmNextActionData: LuxeConfirmResponseActionRepository = LuxeConfirmResponseActionRepository.Instance
+    internal val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
 
     private val lpmSerializer = LpmSerializer()
@@ -137,7 +137,7 @@ class LpmRepository constructor(
                 mapFromDisk
                     ?.mapValues { it.value.nextActionSpec.transform() }
                     ?.let {
-                        lpmNextActionData.update(
+                        lpmPostConfirmData.update(
                             it
                         )
                     }
@@ -178,7 +178,7 @@ class LpmRepository constructor(
             ?.associate { it.type to it.nextActionSpec.transform() }
             ?.toMutableMap()
             ?.let {
-                lpmNextActionData.update(
+                lpmPostConfirmData.update(
                     it
                 )
             }

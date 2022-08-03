@@ -1,8 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.model.LuxeActionCreator
-import com.stripe.android.model.LuxeConfirmResponseActionRepository
+import com.stripe.android.model.LuxePostConfirmActionCreator
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
@@ -137,9 +137,9 @@ fun NextActionSpec?.transform() =
     if (this == null) {
         // LUXE does not support the next action, it should be entirely handled by the SDK both
         // the next action and the status to outcome check
-        LuxeConfirmResponseActionRepository.LuxeAction(
-            postConfirmStatusNextStatus = emptyMap(),
-            postAuthorizeIntentStatus = emptyMap()
+        LuxePostConfirmActionRepository.LuxeAction(
+            postConfirmStatusToAction = emptyMap(),
+            postConfirmActionIntentStatus = emptyMap()
         )
     } else {
         val statusOutcomeMap = mutableMapOf<StripeIntent.Status, Int>()
@@ -158,11 +158,11 @@ fun NextActionSpec?.transform() =
             )
         }
 
-        LuxeConfirmResponseActionRepository.LuxeAction(
-            postConfirmStatusNextStatus = confirmResponseStatusSpecs?.let {
+        LuxePostConfirmActionRepository.LuxeAction(
+            postConfirmStatusToAction = confirmResponseStatusSpecs?.let {
                 it.getMap().mapValues { status -> getNextActionFromSpec(status.value) }
             } ?: emptyMap(),
-            postAuthorizeIntentStatus = statusOutcomeMap
+            postConfirmActionIntentStatus = statusOutcomeMap
         )
     }
 
@@ -182,16 +182,16 @@ fun mapToOutcome(spec: ConfirmResponseStatusSpecs?) = when (spec) {
 fun getNextActionFromSpec(confirmResponseStatusSpecs: ConfirmResponseStatusSpecs) =
     when (confirmResponseStatusSpecs) {
         is ConfirmResponseStatusSpecs.RedirectNextActionSpec -> {
-            LuxeActionCreator.RedirectActionCreator(
+            LuxePostConfirmActionCreator.RedirectActionCreator(
                 confirmResponseStatusSpecs.urlPath,
                 confirmResponseStatusSpecs.returnUrlPath
             )
         }
         is ConfirmResponseStatusSpecs.CanceledSpec -> {
-            LuxeActionCreator.NoActionCreator
+            LuxePostConfirmActionCreator.NoActionCreator
         }
         is ConfirmResponseStatusSpecs.FinishedSpec -> {
-            LuxeActionCreator.NoActionCreator
+            LuxePostConfirmActionCreator.NoActionCreator
         }
     }
 

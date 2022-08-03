@@ -6,17 +6,17 @@ import com.stripe.android.StripeIntentResult
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class LuxeConfirmResponseActionRepository {
+class LuxePostConfirmActionRepository {
 
-    private val codeToNextActionSpec = mutableMapOf<String, LuxeAction>()
+    private val lpmToConfirmActionSpec = mutableMapOf<String, LuxeAction>()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     fun update(additionalData: Map<String, LuxeAction>) {
-        codeToNextActionSpec.putAll(additionalData)
+        lpmToConfirmActionSpec.putAll(additionalData)
     }
 
     @VisibleForTesting
-    internal fun isPresent(code: PaymentMethodCode) = codeToNextActionSpec.contains(code)
+    internal fun isPresent(code: PaymentMethodCode) = lpmToConfirmActionSpec.contains(code)
 
     /**
      * Given the PaymentIntent retrieved after the returnUrl (not redirectUrl), based on
@@ -29,8 +29,8 @@ class LuxeConfirmResponseActionRepository {
         if (stripeIntent.requiresAction() && stripeIntent.nextActionData == null) {
             StripeIntentResult.Outcome.FAILED
         } else {
-            codeToNextActionSpec[stripeIntent.paymentMethod?.code]
-                ?.postAuthorizeIntentStatus?.get(stripeIntent.status)
+            lpmToConfirmActionSpec[stripeIntent.paymentMethod?.code]
+                ?.postConfirmActionIntentStatus?.get(stripeIntent.status)
         }
 
     /**
@@ -50,27 +50,27 @@ class LuxeConfirmResponseActionRepository {
         ?: Result.NotSupported
 
     private fun getActionCreator(lpmCode: PaymentMethodCode?, status: StripeIntent.Status?) =
-        codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus
+        lpmToConfirmActionSpec[lpmCode]?.postConfirmStatusToAction
             ?.filter { it.key == status }
             ?.map { it.value }
             ?.firstOrNull()
 
     companion object {
-        val Instance: LuxeConfirmResponseActionRepository = LuxeConfirmResponseActionRepository()
+        val Instance: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository()
     }
 
     data class LuxeAction(
         /**
          * This should be null to use custom next action behavior coded in the SDK
          */
-        val postConfirmStatusNextStatus: Map<StripeIntent.Status, LuxeActionCreator>,
+        val postConfirmStatusToAction: Map<StripeIntent.Status, LuxePostConfirmActionCreator>,
 
         // Int here is @StripeIntentResult.Outcome
-        val postAuthorizeIntentStatus: Map<StripeIntent.Status, Int>
+        val postConfirmActionIntentStatus: Map<StripeIntent.Status, Int>
     )
 
     internal sealed class Result {
-        data class Action(val nextActionData: StripeIntent.NextActionData) : Result()
+        data class Action(val postConfirmAction: StripeIntent.NextActionData) : Result()
         object NoAction : Result()
         object NotSupported : Result()
     }

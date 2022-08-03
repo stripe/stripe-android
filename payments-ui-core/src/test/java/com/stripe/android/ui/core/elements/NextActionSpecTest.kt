@@ -2,8 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.model.LuxeActionCreator
-import com.stripe.android.model.LuxeConfirmResponseActionRepository
+import com.stripe.android.model.LuxePostConfirmActionCreator
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
 import org.junit.Test
 
@@ -14,9 +14,9 @@ class NextActionSpecTest {
         assertThat(
             luxeNextAction.transform()
         ).isEqualTo(
-            LuxeConfirmResponseActionRepository.LuxeAction(
-                postConfirmStatusNextStatus = emptyMap(),
-                postAuthorizeIntentStatus = emptyMap()
+            LuxePostConfirmActionRepository.LuxeAction(
+                postConfirmStatusToAction = emptyMap(),
+                postConfirmActionIntentStatus = emptyMap()
             )
         )
     }
@@ -29,9 +29,9 @@ class NextActionSpecTest {
                 postConfirmHandlingPiStatusSpecs = null
             ).transform()
         ).isEqualTo(
-            LuxeConfirmResponseActionRepository.LuxeAction(
-                postConfirmStatusNextStatus = emptyMap(),
-                postAuthorizeIntentStatus = emptyMap()
+            LuxePostConfirmActionRepository.LuxeAction(
+                postConfirmStatusToAction = emptyMap(),
+                postConfirmActionIntentStatus = emptyMap()
             )
         )
     }
@@ -46,11 +46,11 @@ class NextActionSpecTest {
         ).transform()
 
         assertThat(
-            nextActionSpec.postConfirmStatusNextStatus[StripeIntent.Status.RequiresAction]
-        ).isInstanceOf(LuxeActionCreator.NoActionCreator::class.java)
+            nextActionSpec.postConfirmStatusToAction[StripeIntent.Status.RequiresAction]
+        ).isInstanceOf(LuxePostConfirmActionCreator.NoActionCreator::class.java)
 
         assertThat(
-            nextActionSpec.postAuthorizeIntentStatus
+            nextActionSpec.postConfirmActionIntentStatus
         ).isEqualTo(
             mapOf(
                 StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED
@@ -68,9 +68,9 @@ class NextActionSpecTest {
                 )
             ).transform()
         ).isEqualTo(
-            LuxeConfirmResponseActionRepository.LuxeAction(
-                postConfirmStatusNextStatus = emptyMap(),
-                postAuthorizeIntentStatus = mapOf(
+            LuxePostConfirmActionRepository.LuxeAction(
+                postConfirmStatusToAction = emptyMap(),
+                postConfirmActionIntentStatus = mapOf(
                     StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.CANCELED
                 )
             )
@@ -89,11 +89,11 @@ class NextActionSpecTest {
         ).transform()
 
         assertThat(
-            nextActionSpec.postConfirmStatusNextStatus[StripeIntent.Status.RequiresAction]
-        ).isInstanceOf(LuxeActionCreator.NoActionCreator::class.java)
+            nextActionSpec.postConfirmStatusToAction[StripeIntent.Status.RequiresAction]
+        ).isInstanceOf(LuxePostConfirmActionCreator.NoActionCreator::class.java)
 
         assertThat(
-            nextActionSpec.postAuthorizeIntentStatus
+            nextActionSpec.postConfirmActionIntentStatus
         ).isEqualTo(
             mapOf(
                 StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED

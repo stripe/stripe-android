@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.LuxeConfirmResponseActionRepository
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -34,15 +34,15 @@ class PaymentIntentResultTest {
         val result = PaymentIntentResult(
             intent = paymentIntent
         )
-        result.luxeNextActionRepository = LuxeConfirmResponseActionRepository()
+        result.luxePostConfirmActionRepository = LuxePostConfirmActionRepository()
 
         // Because of the OXXO test below we know this normally returns SUCCESS
 
         // We will change the status from Success to Cancelled when in the processing state
-        result.luxeNextActionRepository.update(
+        result.luxePostConfirmActionRepository.update(
             mapOf(
                 "oxxo" to LUXE_NEXT_ACTION.copy(
-                    postAuthorizeIntentStatus = mapOf(
+                    postConfirmActionIntentStatus = mapOf(
                         StripeIntent.Status.Processing to StripeIntentResult.Outcome.CANCELED
                     )
                 )
