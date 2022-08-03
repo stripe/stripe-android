@@ -508,7 +508,7 @@ class LpmSerializerTest {
     fun `Verify serialize redirect url next action and success-finished pi status`() {
         val serializedString = """
               {
-                ${FormUiSpecJsonString},
+                $FormUiSpecJsonString,
                 "next_action_spec": {
                     "confirm_response_status_specs": {
                         "requires_action": {
@@ -527,7 +527,7 @@ class LpmSerializerTest {
                     }
                 }
               }
-            """.trimIndent()
+        """.trimIndent()
 
         val result = lpmSerializer.deserialize(serializedString)
         result.onFailure {

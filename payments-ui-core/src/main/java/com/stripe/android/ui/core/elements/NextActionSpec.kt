@@ -94,7 +94,7 @@ data class ConfirmStatusSpecAssociation(
             StripeIntent.Status.RequiresAction to requires_action,
             StripeIntent.Status.Processing to processing,
             StripeIntent.Status.Succeeded to succeeded,
-            StripeIntent.Status.Canceled to canceled,
+            StripeIntent.Status.Canceled to canceled
         ).filterNotNullValues()
 }
 
@@ -119,7 +119,7 @@ data class PostConfirmStatusSpecAssociation(
         StripeIntent.Status.RequiresAction to requires_action,
         StripeIntent.Status.Processing to processing,
         StripeIntent.Status.Succeeded to succeeded,
-        StripeIntent.Status.Canceled to canceled,
+        StripeIntent.Status.Canceled to canceled
     ).filterNotNullValues()
 }
 
@@ -194,4 +194,3 @@ fun getNextActionFromSpec(confirmResponseStatusSpecs: ConfirmResponseStatusSpecs
             LuxePostConfirmActionCreator.NoActionCreator
         }
     }
-

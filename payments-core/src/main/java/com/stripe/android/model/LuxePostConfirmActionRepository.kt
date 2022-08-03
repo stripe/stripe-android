@@ -24,7 +24,7 @@ class LuxePostConfirmActionRepository {
      * of the operation.
      */
     internal fun getPostAuthorizeIntentOutcome(stripeIntent: StripeIntent) =
-    // This handles the case where the next action is not understood so
+        // This handles the case where the next action is not understood so
         // the PI is still in the requires action state.
         if (stripeIntent.requiresAction() && stripeIntent.nextActionData == null) {
             StripeIntentResult.Outcome.FAILED

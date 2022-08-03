@@ -3,8 +3,8 @@ package com.stripe.android.model.parsers
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LUXE_NEXT_ACTION
-import com.stripe.android.model.LuxePostConfirmActionCreator
 import com.stripe.android.model.Address
+import com.stripe.android.model.LuxePostConfirmActionCreator
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
