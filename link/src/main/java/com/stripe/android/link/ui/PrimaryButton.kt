@@ -103,6 +103,7 @@ internal fun PrimaryButton(
                     .fillMaxWidth()
                     .height(56.dp),
                 enabled = state == PrimaryButtonState.Enabled,
+                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -39,6 +40,7 @@ import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.isOnRootScreen
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.cardedit.CardEditBody
@@ -95,7 +97,8 @@ internal class LinkActivity : ComponentActivity() {
                         Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                     },
                     modifier = Modifier.fillMaxHeight(),
-                    sheetState = sheetState
+                    sheetState = sheetState,
+                    scrimColor = MaterialTheme.linkColors.sheetScrim
                 ) {
                     navController = rememberNavController()
 
