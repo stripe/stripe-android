@@ -53,7 +53,8 @@ class NextActionSpecTest {
             nextActionSpec.postConfirmActionIntentStatus
         ).isEqualTo(
             mapOf(
-                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED
+                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
+                StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED
             )
         )
     }
@@ -96,7 +97,8 @@ class NextActionSpecTest {
             nextActionSpec.postConfirmActionIntentStatus
         ).isEqualTo(
             mapOf(
-                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED
+                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
+                StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED
             )
         )
     }
