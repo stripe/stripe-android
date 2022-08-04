@@ -12,4 +12,8 @@
     <string name="require_matching_selfie">Require matching selfie</string>
     <string name="use_native">Use native SDK</string>
     <string name="use_web">Use web redirect</string>
+
+    <string name="classic_example">classic Activity example</string>
+    <string name="compose_example">Compose Activity example</string>
+
 </resources>
