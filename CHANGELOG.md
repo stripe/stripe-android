@@ -34,7 +34,7 @@ and adds new `rememberLauncher` features for Payments
   Deprecate `PaymentLauncher.createForCompose` in favor of  `PaymentLauncher.rememberLauncher`.
 
 ### Identity
-* [ADDED]
+* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose
 
 ## 20.7.0 - 2022-07-06
 
