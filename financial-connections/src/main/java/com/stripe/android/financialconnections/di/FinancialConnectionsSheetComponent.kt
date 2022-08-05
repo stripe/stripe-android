@@ -13,6 +13,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        FinancialConnectionsSheetModule::class,
         FinancialConnectionsSheetSharedModule::class,
         CoroutineContextModule::class,
         LoggingModule::class

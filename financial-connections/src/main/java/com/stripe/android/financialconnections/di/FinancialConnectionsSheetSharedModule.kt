@@ -11,11 +11,8 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
-import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import dagger.Module
@@ -73,22 +70,6 @@ internal object FinancialConnectionsSheetSharedModule {
     fun provideConnectionsRepository(
         repository: FinancialConnectionsRepositoryImpl
     ): FinancialConnectionsRepository = repository
-
-    @Singleton
-    @Provides
-    fun providesFinancialConnectionsManifestRepository(
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
-        requestExecutor: FinancialConnectionsRequestExecutor,
-        configuration: FinancialConnectionsSheet.Configuration,
-        apiRequestFactory: ApiRequest.Factory,
-        logger: Logger
-    ) = FinancialConnectionsManifestRepository(
-        publishableKey,
-        requestExecutor,
-        configuration,
-        apiRequestFactory,
-        logger
-    )
 
     @Provides
     @Singleton
