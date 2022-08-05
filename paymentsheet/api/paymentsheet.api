@@ -258,7 +258,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Creator :
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Companion {
-	public final fun reset (Landroid/content/Context;)V
+	public final fun resetCustomer (Landroid/content/Context;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : android/os/Parcelable {

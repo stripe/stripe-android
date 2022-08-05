@@ -4,7 +4,7 @@
 
 ### PaymentSheet
 
-* [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `reset` method to 
+* [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `resetCustomer` method to 
   `PaymentSheet`, that clears any persisted authentication state.
 
 ## 20.8.0 - 2022-08-01

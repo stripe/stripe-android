@@ -793,7 +793,7 @@ class PaymentSheet internal constructor(
          *
          * @param context the Application [Context].
          */
-        fun reset(context: Context) {
+        fun resetCustomer(context: Context) {
             CookieStore(context).clear()
         }
     }
