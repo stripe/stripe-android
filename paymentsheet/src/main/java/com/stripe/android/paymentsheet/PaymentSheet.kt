@@ -785,10 +785,10 @@ class PaymentSheet internal constructor(
 
     companion object {
         /**
-         * Deletes all persisted state.
+         * Deletes all persisted authentication state associated with a customer.
          *
          * You must call this method when the user logs out from your app.
-         * This will ensure that any persisted state in PaymentSheet, such as
+         * This will ensure that any persisted authentication state in PaymentSheet, such as
          * authentication cookies, is also cleared during logout.
          *
          * @param context the Application [Context].
