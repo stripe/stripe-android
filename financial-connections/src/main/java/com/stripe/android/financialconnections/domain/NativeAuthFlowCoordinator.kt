@@ -33,7 +33,7 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
          * Request navigation to Next available Pane
          */
         data class RequestNextStep(
-            val currentStep: NavigationCommand
+            val currentStep: NavigationCommand,
         ) : Message
 
         object OpenWebAuthFlow : Message

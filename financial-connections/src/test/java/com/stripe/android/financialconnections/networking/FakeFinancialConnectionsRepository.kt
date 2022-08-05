@@ -43,7 +43,7 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         publicToken: String?
     ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
 
-    override suspend fun getAuthorizationSessionAccounts(
+    override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String
     ): PartnerAccountsList = getAuthorizationSessionAccounts()
