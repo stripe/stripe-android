@@ -147,7 +147,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             )
 
         viewBinding.resetButton.setOnClickListener {
-            PaymentSheet.reset(this)
+            PaymentSheet.resetCustomer(this)
 
             setToggles(
                 customer = Toggle.Customer.default.toString(),
