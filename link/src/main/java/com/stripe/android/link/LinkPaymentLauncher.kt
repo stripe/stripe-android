@@ -233,6 +233,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     }
 
     companion object {
-        const val LINK_ENABLED = false
+        const val LINK_ENABLED = true
     }
 }
