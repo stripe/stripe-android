@@ -54,13 +54,7 @@ internal class DefaultPrefsRepository(
         return "customer[$customerId]"
     }
 
-    companion object {
+    private companion object {
         private const val PREF_FILE = "DefaultPrefsRepository"
-
-        fun reset(context: Context) =
-            with(context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE).edit()) {
-                clear()
-                apply()
-            }
     }
 }

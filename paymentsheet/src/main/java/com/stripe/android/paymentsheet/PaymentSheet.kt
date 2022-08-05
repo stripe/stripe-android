@@ -795,7 +795,6 @@ class PaymentSheet internal constructor(
          */
         fun reset(context: Context) {
             CookieStore(context).clear()
-            DefaultPrefsRepository.reset(context)
         }
     }
 }
