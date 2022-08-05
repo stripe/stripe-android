@@ -23,9 +23,11 @@ public abstract interface class com/stripe/android/identity/IdentityVerification
 public final class com/stripe/android/identity/IdentityVerificationSheet$Companion {
 	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;Lcom/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback;)Lcom/stripe/android/identity/IdentityVerificationSheet;
 	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;Lcom/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback;)Lcom/stripe/android/identity/IdentityVerificationSheet;
+	public final fun rememberIdentityVerificationSheet (Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;Lcom/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/identity/IdentityVerificationSheet;
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$Configuration {
+	public static final field $stable I
 	public fun <init> (Landroid/net/Uri;)V
 	public final fun component1 ()Landroid/net/Uri;
 	public final fun copy (Landroid/net/Uri;)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
@@ -41,10 +43,12 @@ public abstract interface class com/stripe/android/identity/IdentityVerification
 }
 
 public abstract class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult : android/os/Parcelable {
+	public static final field $stable I
 	public final synthetic fun toBundle ()Landroid/os/Bundle;
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Canceled : com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult {
+	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Canceled;
 	public fun describeContents ()I
@@ -60,6 +64,7 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Completed : com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult {
+	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Completed;
 	public fun describeContents ()I
@@ -75,6 +80,7 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Failed : com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult {
+	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/Throwable;)V
 	public fun describeContents ()I
@@ -383,6 +389,7 @@ public final class com/stripe/android/identity/networking/UploadedResult$Creator
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {
+	public static final field $stable I
 	public fun <init> (Landroid/net/Uri;Ljava/lang/String;)V
 	public final fun component1 ()Landroid/net/Uri;
 	public final fun component2 ()Ljava/lang/String;
