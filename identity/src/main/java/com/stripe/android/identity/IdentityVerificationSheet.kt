@@ -105,7 +105,7 @@ interface IdentityVerificationSheet {
          * result to [identityVerificationCallback].
          */
         @Composable
-        fun createForCompose(
+        fun rememberIdentityVerificationSheet(
             configuration: Configuration,
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet {

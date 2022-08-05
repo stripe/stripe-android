@@ -114,7 +114,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     mutableStateOf<LoadingState>(LoadingState.Idle)
                 }
                 var vsId by remember { mutableStateOf("") }
-                val identityVerificationSheet = IdentityVerificationSheet.createForCompose(
+                val identityVerificationSheet = IdentityVerificationSheet.rememberIdentityVerificationSheet(
                     configuration = IdentityVerificationSheet.Configuration(
                         // Or use webImage by
                         // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
