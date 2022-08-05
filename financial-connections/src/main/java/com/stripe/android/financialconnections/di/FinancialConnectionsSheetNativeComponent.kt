@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -20,7 +20,7 @@ import javax.inject.Singleton
     modules = [
         FinancialConnectionsSheetNativeModule::class,
         FinancialConnectionsSheetSharedModule::class,
-        LoggingModule::class,
+        CoreCommonModule::class,
         CoroutineContextModule::class
     ]
 )
