@@ -268,14 +268,6 @@ public final class com/stripe/android/link/injection/LinkActivityContractArgsMod
 	public static fun provideStripeIntent (Lcom/stripe/android/link/LinkActivityContract$Args;)Lcom/stripe/android/model/StripeIntent;
 }
 
-public final class com/stripe/android/link/injection/LinkCommonModule_Companion_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/link/injection/LinkCommonModule_Companion_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale ()Ljava/util/Locale;
-}
-
 public final class com/stripe/android/link/injection/LinkPaymentLauncherFactory_Impl : com/stripe/android/link/injection/LinkPaymentLauncherFactory {
 	public static fun create (Lcom/stripe/android/link/LinkPaymentLauncher_Factory;)Ljavax/inject/Provider;
 	public fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/link/LinkPaymentLauncher;

@@ -138,11 +138,11 @@ internal class WalletViewModel @Inject constructor(
         viewModelScope.launch {
             linkAccountManager.listPaymentDetails().fold(
                 onSuccess = { response ->
+                    setState(PrimaryButtonState.Enabled)
                     val hasSavedCards =
                         response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
                             .takeIf { it.isNotEmpty() }?.let {
                                 _paymentDetails.value = it
-                                setState(PrimaryButtonState.Enabled)
                                 true
                             } ?: false
 
