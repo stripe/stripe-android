@@ -78,7 +78,7 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<LinkPaymentDetails>
+    ): Result<LinkPaymentDetails.New>
 
     /**
      * Update an existing payment method in the consumer account.

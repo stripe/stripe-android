@@ -25,7 +25,6 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -115,7 +114,6 @@ class VerificationViewModelTest {
 
         whenever(mockBuilder.linkAccount(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever((mockSubComponent.verificationViewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
         val mockSavedStateRegistry = mock<SavedStateRegistry>()
@@ -128,7 +126,7 @@ class VerificationViewModelTest {
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as VerificationViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
+                factory.viewModel = vmToBeReturned
             }
         }
 
@@ -145,7 +143,8 @@ class VerificationViewModelTest {
         linkAccountManager,
         linkEventsReporter,
         navigator,
-        logger,
-        linkAccount
-    )
+        logger
+    ).apply {
+        init(this@VerificationViewModelTest.linkAccount)
+    }
 }

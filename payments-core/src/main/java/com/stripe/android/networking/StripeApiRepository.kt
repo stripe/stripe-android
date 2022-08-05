@@ -1202,6 +1202,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         email: String,
         phoneNumber: String,
         country: String,
+        locale: Locale?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
@@ -1220,6 +1221,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
                             "cookies" to
                                 mapOf("verification_session_client_secrets" to listOf(it))
                         )
+                    } ?: emptyMap()
+                ).plus(
+                    locale?.let {
+                        mapOf("locale" to it.toLanguageTag())
                     } ?: emptyMap()
                 )
             ),

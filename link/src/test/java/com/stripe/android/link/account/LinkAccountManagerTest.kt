@@ -3,13 +3,13 @@ package com.stripe.android.link.account
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -27,7 +27,6 @@ import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LinkAccountManagerTest {
-    private val args = mock<LinkActivityContract.Args>()
     private val linkRepository = mock<LinkRepository>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
     private val cookieStore = mock<CookieStore>().apply {
@@ -49,9 +48,8 @@ class LinkAccountManagerTest {
         val cookie = "cookie"
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(cookie)
         whenever(cookieStore.getNewUserEmail()).thenReturn("email")
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(isNull(), eq(cookie))
     }
@@ -61,9 +59,8 @@ class LinkAccountManagerTest {
         val email = "email"
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
         whenever(cookieStore.getNewUserEmail()).thenReturn(email)
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(eq(email), isNull())
     }
@@ -71,9 +68,8 @@ class LinkAccountManagerTest {
     @Test
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(EMAIL, null)
     }
@@ -82,9 +78,8 @@ class LinkAccountManagerTest {
     fun `When customerEmail has signed out then it is not looked up`() = runSuspendTest {
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
         whenever(cookieStore.isEmailLoggedOut(EMAIL)).thenReturn(true)
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.SignedOut)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.SignedOut)
 
         verifyNoInteractions(linkRepository)
     }
@@ -572,8 +567,16 @@ class LinkAccountManagerTest {
             .thenReturn(Result.success(consumerSessionLookup))
     }
 
-    private fun accountManager() =
-        LinkAccountManager(args, linkRepository, cookieStore, linkEventsReporter)
+    private fun accountManager(
+        customerEmail: String? = null,
+        stripeIntent: StripeIntent = mock()
+    ) = LinkAccountManager(
+        customerEmail,
+        stripeIntent,
+        linkRepository,
+        cookieStore,
+        linkEventsReporter
+    )
 
     companion object {
         const val EMAIL = "email@stripe.com"
