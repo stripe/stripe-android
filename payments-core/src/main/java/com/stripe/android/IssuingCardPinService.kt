@@ -54,6 +54,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                                 listener
                             )
                         } ?: logMissingListener()
+                    else -> {}
                 }
             }
 

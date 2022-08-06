@@ -4,7 +4,7 @@ import java.time.Duration
 buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
-    ext.kotlinVersion = '1.6.21'
+    ext.kotlinVersion = '1.7.0'
     ext.dokkaVersion = '1.7.10'
 
     repositories {
@@ -63,7 +63,7 @@ ext {
     androidxAppcompatVersion = '1.4.2'
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
-    androidxComposeVersion = '1.2.0-rc02'
+    androidxComposeVersion = '1.2.0'
     androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.8.0'
