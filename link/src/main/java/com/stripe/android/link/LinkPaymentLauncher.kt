@@ -35,7 +35,6 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -65,7 +64,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository,
-    lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>
 ) : NonFallbackInjectable {
     private var stripeIntent: StripeIntent? = null
@@ -79,7 +77,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .analyticsRequestFactory(paymentAnalyticsRequestFactory)
         .analyticsRequestExecutor(analyticsRequestExecutor)
         .stripeRepository(stripeRepository)
-        .lpmResourceRepository(lpmResourceRepository)
         .addressResourceRepository(addressResourceRepository)
         .enableLogging(enableLogging)
         .publishableKeyProvider(publishableKeyProvider)

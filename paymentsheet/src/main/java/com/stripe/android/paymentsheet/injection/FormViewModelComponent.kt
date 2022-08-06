@@ -12,13 +12,14 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        FormViewModelModule::class,
         CoroutineContextModule::class,
         ResourceRepositoryModule::class,
         CoreCommonModule::class
     ]
 )
 internal interface FormViewModelComponent {
+    val formViewModelSubcomponentBuilder: FormViewModelSubcomponent.Builder
+
     fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
