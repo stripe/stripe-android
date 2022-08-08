@@ -15,11 +15,8 @@ internal data class ClearDataParam(
     val idDocumentFront: Boolean = false,
     @SerialName("id_document_back")
     val idDocumentBack: Boolean = false,
-    // TODO(IDPROD-3944) - verify with server change
     @SerialName("face")
-    val face: Boolean? = null,
-    @SerialName("training_consent")
-    val trainingConsent: Boolean? = null,
+    val face: Boolean? = null
 ) {
     internal companion object {
         private const val CLEAR_DATA_PARAM = "clear_data"
@@ -40,11 +37,27 @@ internal data class ClearDataParam(
             idDocumentBack = true
         )
 
+        internal val CONSENT_TO_DOC_SELECT_WITH_SELFIE = ClearDataParam(
+            biometricConsent = false,
+            idDocumentType = true,
+            idDocumentFront = true,
+            idDocumentBack = true,
+            face = true
+        )
+
         internal val DOC_SELECT_TO_UPLOAD = ClearDataParam(
             biometricConsent = false,
             idDocumentType = false,
             idDocumentFront = true,
             idDocumentBack = true
+        )
+
+        internal val DOC_SELECT_TO_UPLOAD_WITH_SELFIE = ClearDataParam(
+            biometricConsent = false,
+            idDocumentType = false,
+            idDocumentFront = true,
+            idDocumentBack = true,
+            face = true
         )
 
         internal val UPLOAD_TO_CONFIRM = ClearDataParam(
@@ -54,13 +67,20 @@ internal data class ClearDataParam(
             idDocumentBack = false
         )
 
+        internal val UPLOAD_TO_SELFIE = ClearDataParam(
+            biometricConsent = false,
+            idDocumentType = false,
+            idDocumentFront = false,
+            idDocumentBack = false,
+            face = true
+        )
+
         internal val SELFIE_TO_CONFIRM = ClearDataParam(
             biometricConsent = false,
             idDocumentType = false,
             idDocumentFront = false,
             idDocumentBack = false,
-            face = false,
-            trainingConsent = false
+            face = false
         )
     }
 }

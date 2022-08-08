@@ -6,7 +6,6 @@
     <string name="inline_sign_up_header">Save my info for secure 1-click checkout</string>
 
     <string name="sign_up_header">Secure 1-click checkout</string>
-    <string name="sign_up_header_new_user">Save your info for secure 1-click checkout</string>
     <string name="sign_up_message">Pay faster at %1$s and thousands of merchants.</string>
     <string name="sign_up_terms">By joining Link, you agree to the &lt;a href=\"https://link.co/terms\"&gt;Terms&lt;/a&gt; and &lt;a href=\"https://link.co/privacy\"&gt;Privacy Policy&lt;/a&gt;.</string>
     <string name="sign_up">Join Link</string>
@@ -20,15 +19,15 @@
     <string name="verification_change_email">Change email</string>
     <string name="verification_resend">Resend code</string>
 
-    <string name="wallet_pay_with">Pay with</string>
-    <string name="wallet_expanded_title">Select a saved payment</string>
+    <string name="wallet_collapsed_payment">Payment</string>
+    <string name="wallet_expanded_title">Payment methods</string>
     <string name="wallet_expand_accessibility">Change selection</string>
     <string name="wallet_default">Default</string>
     <string name="wallet_update_card">Update card</string>
     <string name="wallet_remove_card">Remove card</string>
     <string name="wallet_remove_confirmation">Are you sure you want to remove this card?</string>
 
-    <string name="wallet_add_new_payment_method">Add a new payment method</string>
+    <string name="wallet_add_payment_method">Add a payment method</string>
     <string name="wallet_pay_another_way">Pay another way</string>
 
     <string name="pm_add_new_card">Add a new card</string>

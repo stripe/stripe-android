@@ -23,7 +23,6 @@ class PaymentOptionsAdapterTest {
         mutableListOf<PaymentOptionsAdapter.Item.SavedPaymentMethod>()
     private val paymentMethods = PaymentMethodFixtures.createCards(6)
     private var addCardClicks = 0
-    private var linkClicks = 0
 
     @Test
     fun `item count when Google Pay is enabled should return expected value`() {
@@ -379,7 +378,7 @@ class PaymentOptionsAdapterTest {
         fragmentConfig: FragmentConfig = CONFIG,
         paymentMethods: List<PaymentMethod> = this.paymentMethods,
         showGooglePay: Boolean = true,
-        showLink: Boolean = false,
+        showLink: Boolean = false
     ): PaymentOptionsAdapter {
         return createAdapter().also {
             it.setItems(fragmentConfig, paymentMethods, showGooglePay, showLink)
@@ -398,9 +397,6 @@ class PaymentOptionsAdapterTest {
             },
             addCardClickListener = {
                 addCardClicks++
-            },
-            linkClickListener = {
-                linkClicks++
             }
         )
     }

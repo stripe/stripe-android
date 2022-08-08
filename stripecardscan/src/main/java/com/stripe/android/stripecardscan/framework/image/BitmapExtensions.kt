@@ -29,7 +29,6 @@ internal fun Bitmap.toImageFormat(
     format: ImageFormat,
     imageSettings: Pair<Double, Size>
 ): Pair<ByteArray, Rect> {
-
     // Size and crop the image per the settings.
     val maxImageSize = imageSettings.second
 

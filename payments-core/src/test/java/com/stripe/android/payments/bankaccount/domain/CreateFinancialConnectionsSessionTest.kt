@@ -269,7 +269,7 @@ class CreateFinancialConnectionsSessionTest {
             stripeRepository.createPaymentIntentFinancialConnectionsSession(
                 any(),
                 any(),
-                any(),
+                any()
             )
         ).thenAnswer { session() }
     }
@@ -281,7 +281,7 @@ class CreateFinancialConnectionsSessionTest {
             stripeRepository.createSetupIntentFinancialConnectionsSession(
                 any(),
                 any(),
-                any(),
+                any()
             )
         ).thenAnswer { session() }
     }

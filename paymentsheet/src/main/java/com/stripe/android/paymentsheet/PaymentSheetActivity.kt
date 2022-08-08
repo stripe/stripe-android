@@ -111,6 +111,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
         super.onCreate(savedInstanceState)
+        viewModel.registerFromActivity(this)
 
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -161,10 +162,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
-
                 // We only want to do this if the loading fragment is shown.  Otherwise this causes
                 // a new fragment to be created if the activity was destroyed and recreated.
-                if (supportFragmentManager.fragments.firstOrNull() is PaymentSheetLoadingFragment) {
+                // If hyperion is an added dependency it is loaded on top of the
+                // PaymentSheetLoadingFragment
+                if (supportFragmentManager.fragments
+                    .filterIsInstance<PaymentSheetLoadingFragment>()
+                    .isNotEmpty()
+                ) {
                     val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                         viewModel.updateSelection(null)
                         PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
@@ -279,8 +284,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupGooglePayButton()
         val dividerText = resources.getString(
             if (viewModel.supportedPaymentMethods.size == 1 &&
-                viewModel.supportedPaymentMethods.map { it.type.code }.contains(
-                        LpmRepository.HardcodedCard.type.code
+                viewModel.supportedPaymentMethods.map { it.code }.contains(
+                        LpmRepository.HardcodedCard.code
                     )
             ) {
                 R.string.stripe_paymentsheet_or_pay_with_card
@@ -350,6 +355,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Intent()
                 .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
     }
 
     internal companion object {

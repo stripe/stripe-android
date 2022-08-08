@@ -10,10 +10,10 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -34,9 +34,10 @@ import kotlin.test.assertNotNull
 class LinkActivityViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
         StripeIntentFixtures.PI_SUCCEEDED,
-        true,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
+        CUSTOMER_PHONE,
+        null,
         LinkActivityContract.Args.InjectionParams(
             INJECTOR_KEY,
             setOf(PRODUCT_USAGE),
@@ -146,5 +147,6 @@ class LinkActivityViewModelTest {
 
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
+        const val CUSTOMER_PHONE = "1234567890"
     }
 }

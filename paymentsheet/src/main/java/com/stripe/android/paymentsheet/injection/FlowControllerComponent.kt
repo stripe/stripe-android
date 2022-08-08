@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -29,7 +29,7 @@ import javax.inject.Singleton
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
-        LoggingModule::class,
+        CoreCommonModule::class,
         ResourceRepositoryModule::class
     ]
 )

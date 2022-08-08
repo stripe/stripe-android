@@ -1,18 +1,16 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.content.Intent
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.StripeIntentFixtures
-import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.completedIconTestTag
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import org.junit.Rule
 import org.junit.Test
@@ -21,34 +19,28 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class PaymentMethodScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidIntentComposeRule<LinkActivity> {
-        PaymentConfiguration.init(it, "publishable_key")
-        Intent(it, LinkActivity::class.java).apply {
-            putExtra(
-                LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    StripeIntentFixtures.PI_SUCCEEDED,
-                    true,
-                    "Merchant, Inc"
-                )
-            )
-        }
-    }
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val primaryButtonLabel = "Pay $10.99"
     private val secondaryButtonLabel = "Cancel"
 
     @Test
     fun primary_button_shows_progress_indicator_when_processing() {
-        setContent(isProcessing = true)
+        setContent(primaryButtonState = PrimaryButtonState.Processing)
         onProgressIndicator().assertExists()
+    }
+
+    @Test
+    fun primary_button_shows_checkmark_when_completed() {
+        setContent(primaryButtonState = PrimaryButtonState.Completed)
+        onCompletedIcon().assertExists()
     }
 
     @Test
     fun buttons_are_disabled_when_processing() {
         var count = 0
         setContent(
-            isProcessing = true,
+            primaryButtonState = PrimaryButtonState.Processing,
             onPayButtonClick = {
                 count++
             },
@@ -67,14 +59,13 @@ internal class PaymentMethodScreenTest {
     fun primary_button_does_not_trigger_event_when_disabled() {
         var count = 0
         setContent(
-            isProcessing = false,
-            payButtonEnabled = false,
+            primaryButtonState = PrimaryButtonState.Processing,
             onPayButtonClick = {
                 count++
             }
         )
 
-        onPrimaryButton().performClick()
+        onProgressIndicator().performClick()
 
         assertThat(count).isEqualTo(0)
     }
@@ -101,18 +92,16 @@ internal class PaymentMethodScreenTest {
     }
 
     private fun setContent(
-        isProcessing: Boolean = false,
-        payButtonEnabled: Boolean = false,
+        primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
         onPayButtonClick: () -> Unit = {},
         onSecondaryButtonClick: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             PaymentMethodBody(
-                isProcessing = isProcessing,
                 primaryButtonLabel = primaryButtonLabel,
+                primaryButtonState = primaryButtonState,
                 secondaryButtonLabel = secondaryButtonLabel,
-                primaryButtonEnabled = payButtonEnabled,
                 errorMessage = errorMessage,
                 onPrimaryButtonClick = onPayButtonClick,
                 onSecondaryButtonClick = onSecondaryButtonClick,
@@ -124,4 +113,5 @@ internal class PaymentMethodScreenTest {
     private fun onPrimaryButton() = composeTestRule.onNodeWithText(primaryButtonLabel)
     private fun onSecondaryButton() = composeTestRule.onNodeWithText(secondaryButtonLabel)
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
+    private fun onCompletedIcon() = composeTestRule.onNodeWithTag(completedIconTestTag, true)
 }

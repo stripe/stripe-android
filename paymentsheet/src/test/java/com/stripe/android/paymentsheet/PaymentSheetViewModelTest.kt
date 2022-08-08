@@ -84,7 +84,18 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val lpmRepository = LpmRepository(application.resources)
+    private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
+        this.forceUpdate(
+            listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.USBankAccount.code,
+                PaymentMethod.Type.Ideal.code,
+                PaymentMethod.Type.SepaDebit.code,
+                PaymentMethod.Type.Sofort.code
+            ),
+            null
+        )
+    }
     private val prefsRepository = FakePrefsRepository()
     private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
 
@@ -390,7 +401,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On checkout clear the previous view state error`() {
-
         val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
@@ -457,7 +467,7 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentResult() should update ViewState and save preferences`() =
         runTest {
             val viewModel = createViewModel(
-                stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT),
+                stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT)
             )
 
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -487,7 +497,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(
                     SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
                 )
@@ -535,7 +545,7 @@ internal class PaymentSheetViewModelTest {
                         PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
                     )
                 )
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(
                     SavedSelection.PaymentMethod(
                         PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
@@ -565,6 +575,7 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentResult() should update emit API errors`() =
         runTest {
             viewModel.maybeFetchStripeIntent()
+            idleLooper()
 
             val viewStateList = mutableListOf<PaymentSheetViewState>()
             viewModel.viewState.observeForever {
@@ -593,6 +604,7 @@ internal class PaymentSheetViewModelTest {
             viewState = it
         }
         viewModel.maybeFetchStripeIntent()
+        idleLooper()
         assertThat(viewState)
             .isEqualTo(
                 PaymentSheetViewState.Reset(null)
@@ -637,6 +649,7 @@ internal class PaymentSheetViewModelTest {
             result = it
         }
         viewModel.maybeFetchStripeIntent()
+        idleLooper()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo("Could not parse PaymentIntent.")
     }
@@ -655,6 +668,7 @@ internal class PaymentSheetViewModelTest {
             result = it
         }
         viewModel.maybeFetchStripeIntent()
+        idleLooper()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
@@ -675,6 +689,7 @@ internal class PaymentSheetViewModelTest {
             result = it
         }
         viewModel.maybeFetchStripeIntent()
+        idleLooper()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentSheet cannot set up a PaymentIntent in status 'succeeded'.\n" +
@@ -684,7 +699,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
-
         var result: PaymentSheetResult? = null
         viewModel.paymentSheetResult.observeForever {
             result = it
@@ -722,11 +736,10 @@ internal class PaymentSheetViewModelTest {
     }
 
     fun `Verify PI off_session excludes LPMs requiring mandate`() {
-
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -735,7 +748,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OneTime,
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -748,7 +761,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify SetupIntent excludes LPMs requiring mandate`() {
         viewModel.setStripeIntent(
             SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -756,7 +769,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodTypes = listOf("sepa_debit")
             )
         )
 
@@ -816,6 +829,8 @@ internal class PaymentSheetViewModelTest {
             }
         }
 
+        idleLooper()
+
         assertThat(configs)
             .hasSize(1)
     }
@@ -837,6 +852,7 @@ internal class PaymentSheetViewModelTest {
             .isFalse()
 
         viewModel.maybeFetchStripeIntent()
+        idleLooper()
         assertThat(isEnabled)
             .isTrue()
 

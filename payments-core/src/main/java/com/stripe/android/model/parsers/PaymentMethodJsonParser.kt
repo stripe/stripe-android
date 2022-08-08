@@ -269,7 +269,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         json.optJSONObject(FIELD_NETWORKS)?.getJSONArray(FIELD_NETWORKS_SUPPORTED)
                     ).orEmpty().map { it.toString() }
                 ) else null,
-                routingNumber = StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER),
+                routingNumber = StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER)
             )
         }
 

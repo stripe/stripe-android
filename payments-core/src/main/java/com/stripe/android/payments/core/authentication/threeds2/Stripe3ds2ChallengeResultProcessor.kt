@@ -139,7 +139,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private suspend fun complete3ds2Auth(
         challengeResult: ChallengeResult,
         requestOptions: ApiRequest.Options,
-        remainingRetries: Int = MAX_RETRIES,
+        remainingRetries: Int = MAX_RETRIES
     ): Boolean {
         return runCatching {
             // complete3ds2Auth() result can be ignored
@@ -183,7 +183,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         challengeResult: ChallengeResult,
         requestOptions: ApiRequest.Options,
         remainingRetries: Int,
-        error: Throwable,
+        error: Throwable
     ): Boolean {
         logger.error(
             "3DS2 challenge completion request failed. Remaining retries: $remainingRetries",

@@ -110,7 +110,7 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
         left,
         top,
         left + scaledSize.width,
-        top + scaledSize.height,
+        top + scaledSize.height
     )
 }
 
@@ -148,7 +148,7 @@ fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
         left,
         top,
         left + scaledSize.width,
-        top + scaledSize.height,
+        top + scaledSize.height
     )
 }
 
@@ -165,7 +165,7 @@ fun Size.scaleCentered(x: Float, y: Float): Rect {
         left,
         top,
         left + newSize.width,
-        top + newSize.height,
+        top + newSize.height
     )
 }
 
@@ -298,7 +298,7 @@ fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
     this.left + relativeX,
     this.top + relativeY,
     this.right + relativeX,
-    this.bottom + relativeY,
+    this.bottom + relativeY
 )
 
 /**
@@ -310,7 +310,7 @@ fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
     this.left + relativeX,
     this.top + relativeY,
     this.right + relativeX,
-    this.bottom + relativeY,
+    this.bottom + relativeY
 )
 
 @CheckResult
@@ -346,7 +346,7 @@ fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF
         regionOfInterest.left * toSize.width / this.width,
         regionOfInterest.top * toSize.height / this.height,
         regionOfInterest.right * toSize.width / this.width,
-        regionOfInterest.bottom * toSize.height / this.height,
+        regionOfInterest.bottom * toSize.height / this.height
     )
 }
 

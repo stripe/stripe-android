@@ -53,15 +53,14 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
         showCheckboxControlledFields = false
     )
 
-    if (!stripeIntent.paymentMethodTypes.contains(type.code)) {
+    if (!stripeIntent.paymentMethodTypes.contains(code)) {
         return null
     }
 
     return when (stripeIntent) {
         is PaymentIntent -> {
-            if ((stripeIntent.isSetupFutureUsageSet())) {
-                if (supportsPaymentIntentSfuSet(stripeIntent, config)
-                ) {
+            if (stripeIntent.isLpmLevelSetupFutureUsageSet(code)) {
+                if (supportsPaymentIntentSfuSet(stripeIntent, config)) {
                     merchantRequestedSave
                 } else {
                     null
@@ -97,7 +96,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
  */
 private fun SupportedPaymentMethod.supportsSetupIntent(
     config: PaymentSheet.Configuration?
-) = requirement.confirmPMFromCustomer == true &&
+) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 
 /**
@@ -109,7 +108,7 @@ private fun SupportedPaymentMethod.supportsSetupIntent(
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
-) = requirement.confirmPMFromCustomer == true &&
+) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
 
@@ -136,7 +135,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
 ) = config?.customer != null &&
-    requirement.confirmPMFromCustomer == true &&
+    requirement.getConfirmPMFromCustomer(code) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 
@@ -204,5 +203,5 @@ internal fun getPMsToAdd(
     ) != null
 }?.filterNot { supportedPaymentMethod ->
     stripeIntent.isLiveMode &&
-        stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.type.code)
+        stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.code)
 } ?: emptyList()

@@ -1,0 +1,15 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('tensorflow-lite-all-models.aar'))
+
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
+ext {
+    artifactId = "stripecardscan-tflite"
+    artifactName = "stripecardscan-tflite"
+    artifactDescrption = "Minimalized TensorFlow Lite implementation for stripecardscan"
+    artifactPath = "$buildDir/../tensorflow-lite-all-models.aar"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

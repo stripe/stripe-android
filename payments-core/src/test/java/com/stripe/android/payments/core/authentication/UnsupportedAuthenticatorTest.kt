@@ -89,7 +89,7 @@ class UnsupportedAuthenticatorTest {
 
     private companion object {
         private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
 }

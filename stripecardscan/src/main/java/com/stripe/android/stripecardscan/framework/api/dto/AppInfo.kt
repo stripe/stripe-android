@@ -11,14 +11,14 @@ internal data class AppInfo(
     @SerialName("app_package_name") val appPackageName: String?,
     @SerialName("sdk_version") val sdkVersion: String,
     @SerialName("build") val build: String,
-    @SerialName("is_debug_build") val isDebugBuild: Boolean,
+    @SerialName("is_debug_build") val isDebugBuild: Boolean
 ) {
     companion object {
         internal fun fromAppDetails(appDetails: AppDetails): AppInfo = AppInfo(
             appPackageName = appDetails.appPackageName,
             sdkVersion = appDetails.sdkVersion,
             build = appDetails.sdkVersion,
-            isDebugBuild = appDetails.isDebugBuild,
+            isDebugBuild = appDetails.isDebugBuild
         )
     }
 }

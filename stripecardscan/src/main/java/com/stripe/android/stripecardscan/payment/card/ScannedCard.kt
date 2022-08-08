@@ -8,5 +8,5 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class ScannedCard(
-    val pan: String,
+    val pan: String
 ) : Parcelable

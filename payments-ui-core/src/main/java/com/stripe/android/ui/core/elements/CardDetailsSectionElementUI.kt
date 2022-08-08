@@ -22,7 +22,6 @@ fun CardDetailsSectionElementUI(
     controller: CardDetailsSectionController,
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
-
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -37,7 +36,7 @@ fun CardDetailsSectionElementUI(
                 }
         )
         if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
-            ScanCardButtonUI {
+            ScanCardButtonUI(enabled = enabled) {
                 controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
                     it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
                         ?: CardScanSheetResult.Failed(

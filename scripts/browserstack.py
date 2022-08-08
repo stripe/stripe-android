@@ -90,6 +90,22 @@ def uploadApk(apkFile):
         print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
+def uploadAppLiveApk(apkFile):
+    # print step description
+    print("UPLOADING the file: {file}...".format(file=apkFile), end='')
+    url = "https://api-cloud.browserstack.com/app-live/upload"
+    files = { 'file': (os.path.basename(apkFile), open(apkFile, 'rb')), }
+    response = requests.post(url, files=files, auth=(user, authKey))
+    if(response.status_code == 200):
+        appUrl = response.json()["app_url"]
+
+        # print result
+        print("DONE\nRESULT app url: " + appUrl)
+        return appUrl
+    else:
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
+        return None
+
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#upload-a-test-suite
 def uploadEspressoApk(espressoApkFile):
     # print step description
@@ -124,10 +140,36 @@ def executeTests(appUrl, testUrl):
          "networkLogs": True,
          "deviceLogs": True,
          "video": True,
+         "acceptInsecureCerts": True,
 #          "language": "en_US",
          "locale": "en_US",
          "enableSpoonFramework": False,
-         "project": "Mobile Payments"
+         "project": "Mobile Payments",
+         "shards": {
+            "numberOfShards": 4,
+            "mapping": [
+                {
+                   "name": "Shard 1",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers", "com.stripe.android.TestCustomers"]
+                },
+                {
+                   "name": "Shard 2",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestFieldPopulation", "com.stripe.android.TestGooglePay"]
+                },
+                {
+                   "name": "Shard 3",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestHardCodedLpms"]
+                },
+                {
+                   "name": "Shard 4",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestMultiStepFieldsReloaded"]
+                },
+            ]
+         }
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
@@ -181,6 +223,8 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--apk", help="The app under test resulting from ./gradlew assemble")
     parser.add_argument("-e", "--espresso", help="The espresso test suite resulting from ./gradlew assembleDebugAndroidTest")
 
+    parser.add_argument("-u", "--upload", help="Upload a file to browserstack for app live testing")
+
     parser.add_argument("-l", "--list", help="List apps and test apps", action="store_true")
 
     parser.add_argument("-d", "--delete", help="Delete a test suite id.  Pass in the test suite id (no bs://)")
@@ -204,6 +248,11 @@ if __name__ == "__main__":
        if(args.force or (confirm("Are you sure you want to delete the test suite: " + args.delete) == True)):
           deleteTestSuite(args.delete)
        sys.exit(0)
+
+    elif(args.upload != None):
+        appUrl = uploadAppLiveApk(args.upload)
+        print("Uploaded app live apk url: " + appUrl)
+        sys.exit(0)
 
     elif(args.test):
        if(args.espresso == None or args.apk == None):# or args.name == None):

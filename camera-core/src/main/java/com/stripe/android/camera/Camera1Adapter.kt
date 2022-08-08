@@ -1,4 +1,5 @@
 @file:Suppress("deprecation")
+
 /*
  * camera1 is deprecated, but still our best option for android 5.0
  *
@@ -38,8 +39,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
 import com.stripe.android.camera.framework.util.retrySync
@@ -68,7 +67,7 @@ internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CameraPreviewImage<ImageType>(
     val image: ImageType,
-    val viewBounds: Rect,
+    val viewBounds: Rect
 )
 
 /**
@@ -144,6 +143,7 @@ class Camera1Adapter(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPreviewFrame(bytes: ByteArray?, camera: Camera) {
         // this method may be called after the camera has closed if there was still an image in
         // flight. In this case, swallow the error. Ideally, we would be able to tell whether the
@@ -172,8 +172,8 @@ class Camera1Adapter(
                             previewView.top,
                             previewView.width,
                             previewView.height
-                        ),
-                    ),
+                        )
+                    )
                 )
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
@@ -186,7 +186,6 @@ class Camera1Adapter(
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     override fun onPause() {
         super.onPause()
 
@@ -201,8 +200,7 @@ class Camera1Adapter(
         stopCameraThread()
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun onResume() {
+    override fun onResume() {
         startCameraThread()
 
         mainThreadHandler.post {
@@ -462,6 +460,7 @@ class Camera1Adapter(
             }
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onAutoFocus(success: Boolean, camera: Camera) {}
 
         /**

@@ -12,6 +12,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class Navigator @Inject constructor() {
+    var backNavigationEnabled = true
     var navigationController: NavHostController? = null
     var onDismiss: ((LinkActivityResult) -> Unit)? = null
 
@@ -40,13 +41,17 @@ internal class Navigator @Inject constructor() {
     /**
      * Behaves like a back button, popping the back stack and dismissing the Activity if this was
      * the last screen.
+     * Only performs any action if [backNavigationEnabled] is true.
      */
-    fun onBack() =
-        navigationController?.let { navController ->
-            if (!navController.popBackStack()) {
-                dismiss()
+    fun onBack() {
+        if (backNavigationEnabled) {
+            navigationController?.let { navController ->
+                if (!navController.popBackStack()) {
+                    dismiss()
+                }
             }
         }
+    }
 
     /**
      * Dismisses the Link Activity with the given [result].

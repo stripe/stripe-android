@@ -20,11 +20,12 @@ class CardBillingAddressElement(
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
-    ),
+    )
 ) : AddressElement(
     identifier,
     addressFieldRepository,
     rawValuesMap,
+    AddressType.Normal(),
     countryCodes,
     countryDropdownFieldController
 ) {

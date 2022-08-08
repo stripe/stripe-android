@@ -7,8 +7,11 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
@@ -20,9 +23,27 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+    private val lpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+    ).apply {
+        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
+    }
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
+
+    @Test
+    fun `If the intent has SFU set on top level or on LPM`() {
+        assertThat(
+            LpmRepository.HardcodedCard
+                .getSpecWithFullfilledRequirements(
+                    PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
+                    CONFIG_CUSTOMER
+                )?.showCheckbox
+        ).isFalse()
+    }
+
     /**
      * To create a baseline for a payment method, create a new file <payment_method>-support.csv,
      * comment out the assert in this test, and copy the output into the new csv file
@@ -31,7 +52,7 @@ class SupportedPaymentMethodTest {
     fun `Test supported payment method baseline`() {
         lpmRepository.values()
             .forEach { lpm ->
-                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
+                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.code}-support.csv").file)
                 val baseline = resource.readText()
                 val baselineLines = baseline.split("\n")
 
@@ -58,9 +79,9 @@ class SupportedPaymentMethodTest {
                                 lpmRepository
                             ).contains(lpm)
                         )
-                        val actualLine = "${lpm.type.code}, ${
+                        val actualLine = "${lpm.code}, ${
                         testInput.copy(
-                            intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                            intentPMs = testInput.intentPMs.plus(lpm.code)
                         ).toCsv()
                         }, ${testOutput.toCsv()}\n"
 
@@ -148,7 +169,7 @@ class SupportedPaymentMethodTest {
                             listOf(
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
-                                    intentPMs = setOf(card.type.code),
+                                    intentPMs = setOf(card.code),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
                                     allowsDelayedPayment = delayed
@@ -156,8 +177,8 @@ class SupportedPaymentMethodTest {
                                 PaymentIntentTestInput(
                                     hasCustomer = customer,
                                     intentPMs = setOf(
-                                        card.type.code,
-                                        eps.type.code
+                                        card.code,
+                                        eps.code
                                     ),
                                     intentSetupFutureUsage = usage,
                                     intentHasShipping = hasShipping,
@@ -181,7 +202,7 @@ class SupportedPaymentMethodTest {
     @Serializable
     internal data class SetupIntentTestInput(
         val lpmTypeFormCode: String,
-        val intentLpms: List<String>,
+        val intentLpms: List<String>
     )
 
     @Serializable
@@ -209,12 +230,12 @@ class SupportedPaymentMethodTest {
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     shipping = null,
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.code).toList()
                 )
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.code).toList()
                 )
         }
 
@@ -242,7 +263,7 @@ class SupportedPaymentMethodTest {
                 formExists: Boolean,
                 formShowsSaveCheckbox: Boolean?, // null if no form
                 formShowsCheckboxControlledFields: Boolean?, // null if let form decide
-                supportsAdding: Boolean,
+                supportsAdding: Boolean
             ) = TestOutput(
                 supportCustomerSavedCard = supportCustomerSavedCard,
                 formExists = formExists,

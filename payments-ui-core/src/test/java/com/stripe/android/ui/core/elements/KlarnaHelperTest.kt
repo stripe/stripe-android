@@ -24,7 +24,7 @@ class KlarnaHelperTest {
             "ES" to R.string.klarna_buy_now_pay_later,
             "SE" to R.string.klarna_buy_now_pay_later,
             "GB" to R.string.klarna_pay_later,
-            "US" to R.string.klarna_pay_later,
+            "US" to R.string.klarna_pay_later
         )
 
         for (entry in testMap) {

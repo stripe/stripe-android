@@ -8,11 +8,11 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.utils.ContextUtils.packageInfo
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -33,21 +33,20 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     packageName,
     publishableKeyProvider
 ) {
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,
         publishableKey: String,
-        defaultProductUsageTokens: Set<String> = emptySet(),
+        defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
         context,
         { publishableKey },
-        defaultProductUsageTokens,
+        defaultProductUsageTokens
     )
 
     internal constructor(
         context: Context,
-        publishableKeyProvider: Provider<String>,
+        publishableKeyProvider: Provider<String>
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
@@ -60,7 +59,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal constructor(
         context: Context,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
@@ -83,7 +82,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createTokenCreation(
         productUsageTokens: Set<String>,
-        tokenType: Token.Type,
+        tokenType: Token.Type
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.TokenCreate,
@@ -94,12 +93,12 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
-        paymentMethodType: PaymentMethod.Type?,
-        productUsageTokens: Set<String>,
+        paymentMethodCode: PaymentMethodCode?,
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentMethodCreate,
-            sourceType = paymentMethodType?.code,
+            sourceType = paymentMethodCode,
             productUsageTokens = productUsageTokens
         )
     }
@@ -107,7 +106,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createSourceCreation(
         @Source.SourceType sourceType: String,
-        productUsageTokens: Set<String> = emptySet(),
+        productUsageTokens: Set<String> = emptySet()
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SourceCreate,
@@ -119,7 +118,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAddSource(
         productUsageTokens: Set<String> = emptySet(),
-        @Source.SourceType sourceType: String,
+        @Source.SourceType sourceType: String
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerAddSource,
@@ -130,7 +129,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDeleteSource(
-        productUsageTokens: Set<String>,
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerDeleteSource,
@@ -140,7 +139,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createAttachPaymentMethod(
-        productUsageTokens: Set<String>,
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerAttachPaymentMethod,
@@ -160,7 +159,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentIntentConfirmation(
-        paymentMethodType: String? = null,
+        paymentMethodType: String? = null
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentIntentConfirm,
@@ -170,7 +169,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createSetupIntentConfirmation(
-        paymentMethodType: String?,
+        paymentMethodType: String?
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SetupIntentConfirm,

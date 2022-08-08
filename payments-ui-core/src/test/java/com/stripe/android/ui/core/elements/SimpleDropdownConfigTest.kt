@@ -19,7 +19,7 @@ class SimpleDropdownConfigTest {
             DropdownItemSpec(displayText = "RegioBank", apiValue = "regiobank"),
             DropdownItemSpec(displayText = "SNS Bank (De Volksbank)", apiValue = "sns_bank"),
             DropdownItemSpec(displayText = "Triodos Bank", apiValue = "triodos_bank"),
-            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot"),
+            DropdownItemSpec(displayText = "Van Lanschot", apiValue = "van_lanschot")
         )
     )
 
@@ -48,11 +48,5 @@ class SimpleDropdownConfigTest {
     fun `Verify convert from value returns appropriate string`() {
         assertThat(config.convertFromRaw("asn_bank"))
             .isEqualTo("ASN Bank")
-    }
-
-    @Test
-    fun `Verify convert to rawValue returns appropriate string`() {
-        assertThat(config.convertToRaw("SNS Bank (De Volksbank)"))
-            .isEqualTo("sns_bank")
     }
 }

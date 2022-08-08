@@ -1,18 +1,14 @@
 package com.stripe.android.link.ui.cardedit
 
-import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.LinkActivity
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.StripeIntentFixtures
-import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import org.junit.Rule
@@ -22,19 +18,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class CardEditScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidIntentComposeRule<LinkActivity> {
-        PaymentConfiguration.init(it, "publishable_key")
-        Intent(it, LinkActivity::class.java).apply {
-            putExtra(
-                LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    StripeIntentFixtures.PI_SUCCEEDED,
-                    true,
-                    "Merchant, Inc"
-                )
-            )
-        }
-    }
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun when_default_show_default_label() {

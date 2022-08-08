@@ -12,9 +12,19 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.CONSENT_TO_DOC_SELECT_WITH_SELFIE
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -24,14 +34,19 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
@@ -39,10 +54,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class ConsentFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
@@ -84,6 +101,27 @@ internal class ConsentFragmentTest {
         )
     }
 
+    private val verificationPageWithSelfie = mock<VerificationPage>().also {
+        whenever(it.biometricConsent).thenReturn(
+            VerificationPageStaticContentConsentPage(
+                acceptButtonText = CONSENT_ACCEPT_TEXT,
+                title = CONSENT_TITLE,
+                privacyPolicy = null,
+                timeEstimate = null,
+                body = CONSENT_BODY,
+                declineButtonText = CONSENT_DECLINE_TEXT
+            )
+        )
+        whenever(it.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = listOf(
+                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
+                )
+            )
+        )
+        whenever(it.selfieCapture).thenReturn(mock())
+    }
+
     private val correctVerificationData = mock<VerificationPageData>().also {
         whenever(it.requirements).thenReturn(
             VerificationPageDataRequirements(
@@ -107,18 +145,27 @@ internal class ConsentFragmentTest {
         )
     }
 
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.verificationArgs).thenReturn(
-            IdentityVerificationSheetContract.Args(
-                verificationSessionId = VERIFICATION_SESSION_ID,
-                ephemeralKeySecret = EPHEMERAL_KEY,
-                brandLogo = BRAND_LOGO,
-                injectorKey = DUMMY_INJECTOR_KEY
+    private val mockScreenTracker = mock<ScreenTracker>()
+
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { verificationArgs }.thenReturn(ARGS)
+
+        on { identityAnalyticsRequestFactory }.thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = ARGS
             )
         )
+
+        on { screenTracker }.thenReturn(mockScreenTracker)
+
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
+
+    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
     private fun setUpErrorVerificationPage() {
         val failureCaptor: KArgumentCaptor<(Throwable?) -> Unit> = argumentCaptor()
@@ -129,7 +176,7 @@ internal class ConsentFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     private fun setUpSuccessVerificationPage(
@@ -158,7 +205,7 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when not missing biometricConsent navigate to docSelectionFragment`() {
+    fun `when not missing biometricConsent stay on ConsentFragment`() {
         whenever(verificationPageWithTimeAndPolicy.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = emptyList()
@@ -168,39 +215,17 @@ internal class ConsentFragmentTest {
             setUpSuccessVerificationPage()
 
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.docSelectionFragment)
+                .isEqualTo(R.id.consentFragment)
         }
     }
 
     @Test
-    fun `when not unsupported_client navigate to errorFragment with failed reason`() {
+    fun `when not unsupported_client launch fallbackUrl`() {
         whenever(verificationPageWithTimeAndPolicy.unsupportedClient).thenReturn(true)
-        launchConsentFragment { _, navController, fragment ->
+        whenever(verificationPageWithTimeAndPolicy.fallbackUrl).thenReturn(FALLBACK_URL)
+        launchConsentFragment { _, _, _ ->
             setUpSuccessVerificationPage()
-
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.errorFragment)
-
-            requireNotNull(navController.backStack.last().arguments).let { args ->
-                assertThat(
-                    args[ErrorFragment.ARG_ERROR_TITLE]
-                ).isEqualTo(fragment.getString(R.string.error))
-
-                assertThat(
-                    args[ErrorFragment.ARG_ERROR_CONTENT]
-                ).isEqualTo(fragment.getString(R.string.unexpected_error_try_again))
-
-                assertThat(
-                    args[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT]
-                ).isEqualTo(fragment.getString(R.string.go_back))
-
-                assertThat(
-                    args[ErrorFragment.ARG_FAILED_REASON]
-                ).isInstanceOf(IllegalStateException::class.java)
-                assertThat(
-                    (args[ErrorFragment.ARG_FAILED_REASON] as IllegalStateException).message
-                ).isEqualTo("Unsupported client")
-            }
+            verify(mockFallbackUrlLauncher).launchFallbackUrl(eq(FALLBACK_URL))
         }
     }
 
@@ -209,6 +234,16 @@ internal class ConsentFragmentTest {
         launchConsentFragment { binding, _, _ ->
             setUpSuccessVerificationPage()
 
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_CONSENT))
+            }
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_CONSENT
+                }
+            )
             verify(
                 mockConsentFragmentViewModel
             ).loadUriIntoImageView(
@@ -268,17 +303,52 @@ internal class ConsentFragmentTest {
     }
 
     @Test
-    fun `when accepted and postVerificationData success transitions to docSelectionFragment`() {
-        runBlocking {
-            whenever(
-                mockIdentityViewModel.postVerificationPageData(any(), any())
-            ).thenReturn(correctVerificationData)
-
-            launchConsentFragment { binding, navController, _ ->
+    fun `when accepted and postVerificationData success transitions to docSelectionFragment without selfie`() {
+        launchConsentFragment { binding, navController, _ ->
+            runBlocking {
+                whenever(
+                    mockIdentityViewModel.postVerificationPageData(any(), any())
+                ).thenReturn(correctVerificationData)
                 setUpSuccessVerificationPage()
-
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    collectedDataParam = eq(
+                        CollectedDataParam(biometricConsent = true)
+                    ),
+                    clearDataParam = eq(CONSENT_TO_DOC_SELECT)
+                )
+                assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
+                assertThat(binding.agree.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
+                    View.VISIBLE
+                )
+                assertThat(binding.decline.isEnabled).isFalse()
+                assertThat(navController.currentDestination?.id)
+                    .isEqualTo(R.id.docSelectionFragment)
+            }
+        }
+    }
+
+    @Test
+    fun `when accepted and postVerificationData success transitions to docSelectionFragment with selfie`() {
+        launchConsentFragment { binding, navController, _ ->
+            runBlocking {
+                whenever(
+                    mockIdentityViewModel.postVerificationPageData(any(), any())
+                ).thenReturn(correctVerificationData)
+                setUpSuccessVerificationPage(verificationPageWithSelfie)
+                binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    collectedDataParam = eq(
+                        CollectedDataParam(biometricConsent = true)
+                    ),
+                    clearDataParam = eq(CONSENT_TO_DOC_SELECT_WITH_SELFIE)
+                )
                 assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
                 assertThat(binding.agree.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
                     View.VISIBLE
@@ -365,6 +435,7 @@ internal class ConsentFragmentTest {
         ConsentFragment(
             viewModelFactoryFor(mockIdentityViewModel),
             viewModelFactoryFor(mockConsentFragmentViewModel),
+            mockFallbackUrlLauncher
         )
     }.onFragment {
         val navController = TestNavHostController(
@@ -396,6 +467,16 @@ internal class ConsentFragmentTest {
 
         const val VERIFICATION_SESSION_ID = "id_5678"
         const val EPHEMERAL_KEY = "eak_5678"
+
+        const val FALLBACK_URL = "https://link/to/fallback"
         val BRAND_LOGO = mock<Uri>()
+
+        val ARGS = IdentityVerificationSheetContract.Args(
+            verificationSessionId = VERIFICATION_SESSION_ID,
+            ephemeralKeySecret = EPHEMERAL_KEY,
+            brandLogo = BRAND_LOGO,
+            injectorKey = DUMMY_INJECTOR_KEY,
+            presentTime = 0
+        )
     }
 }

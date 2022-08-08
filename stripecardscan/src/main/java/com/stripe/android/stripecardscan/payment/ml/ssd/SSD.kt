@@ -142,7 +142,7 @@ internal fun extractPredictions(
  */
 internal fun determineLayoutAndFilter(
     detectedBoxes: List<DetectionBox>,
-    verticalOffset: Float,
+    verticalOffset: Float
 ): List<DetectionBox> {
     if (detectedBoxes.isEmpty()) {
         return detectedBoxes

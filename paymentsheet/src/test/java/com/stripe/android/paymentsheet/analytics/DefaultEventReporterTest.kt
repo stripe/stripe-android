@@ -15,7 +15,6 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import java.util.UUID
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -32,7 +31,6 @@ class DefaultEventReporterTest {
     private val eventReporterFactory: (EventReporter.Mode) -> EventReporter = { mode ->
         DefaultEventReporter(
             mode,
-            FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
             testDispatcher
@@ -77,25 +75,11 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentSuccess() should fire analytics request with valid device id`() {
-        completeEventReporter.onPaymentSuccess(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        )
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                val deviceIdValue = requireNotNull(req.params["device_id"]).toString()
-                UUID.fromString(deviceIdValue) != null
-            }
-        )
-    }
-
-    @Test
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
             EventReporter.Mode.Complete,
-            FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
             testDispatcher

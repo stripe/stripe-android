@@ -9,6 +9,7 @@ import android.webkit.WebViewClient
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.core.Logger
+import com.stripe.android.payments.DefaultReturnUrl
 
 internal class PaymentAuthWebViewClient(
     private val logger: Logger,
@@ -161,7 +162,8 @@ internal class PaymentAuthWebViewClient(
 
     // pre-defined return URLs
     private fun isPredefinedReturnUrl(uri: Uri): Boolean {
-        return "stripejs://use_stripe_sdk/return_url" == uri.toString()
+        return "stripejs://use_stripe_sdk/return_url" == uri.toString() ||
+            uri.toString().startsWith(DefaultReturnUrl.PREFIX)
     }
 
     /**

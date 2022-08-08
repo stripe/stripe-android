@@ -101,7 +101,7 @@ class PrimaryButtonTest {
     @Test
     fun `onStartProcessing() should update label`() {
         primaryButton.updateState(
-            PrimaryButton.State.StartProcessing,
+            PrimaryButton.State.StartProcessing
         )
         assertThat(
             primaryButton.externalLabel

@@ -79,7 +79,7 @@ internal open class PaymentSheetViewModelTestInjection {
         stripeIntent: StripeIntent,
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -92,7 +92,13 @@ internal open class PaymentSheetViewModelTestInjection {
             FakePrefsRepository(),
             resourceRepository = StaticResourceRepository(
                 mock(),
-                LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+                LpmRepository(
+                    LpmRepository.LpmRepositoryArguments(
+                        ApplicationProvider.getApplicationContext<Application>().resources
+                    )
+                ).apply {
+                    this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
+                }
             ),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,

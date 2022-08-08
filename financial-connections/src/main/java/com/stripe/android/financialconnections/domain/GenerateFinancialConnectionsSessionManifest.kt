@@ -9,7 +9,7 @@ import javax.inject.Inject
  * as well as the success and cancel callback URLs to verify.
  */
 internal class GenerateFinancialConnectionsSessionManifest @Inject constructor(
-    private val financialConnectionsRepository: FinancialConnectionsRepository,
+    private val financialConnectionsRepository: FinancialConnectionsRepository
 ) {
 
     suspend operator fun invoke(

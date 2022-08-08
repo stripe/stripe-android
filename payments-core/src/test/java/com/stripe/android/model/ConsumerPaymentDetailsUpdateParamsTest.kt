@@ -9,7 +9,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
     fun updateCard_withPaymentMethodCreateParams_generatesCorrectParameters() {
         val id = "payment_details_id"
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            type = PaymentMethod.Type.Card,
+            code = PaymentMethod.Type.Card.code,
+            requiresMandate = false,
             overrideParamMap = mapOf(
                 "ignored" to "none",
                 "card" to mapOf(
@@ -67,7 +68,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
     fun updateCard_withAllParams_generatesCorrectParameters() {
         val id = "payment_details_id"
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            type = PaymentMethod.Type.Card,
+            code = PaymentMethod.Type.Card.code,
+            requiresMandate = false,
             overrideParamMap = mapOf(
                 "ignored" to "none",
                 "card" to mapOf(

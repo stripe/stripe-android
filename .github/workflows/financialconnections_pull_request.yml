@@ -7,26 +7,31 @@ on:
       - 'payments-model/**'
       - 'dependencies.gradle'
 jobs:
-  build-master:
+  # Checkout base branch and build the APK
+  build-base:
+    name: Build base
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          ref: master
-      - name: Build in master
-        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-master.apk
+          ref: ${{ github.base_ref }}
+      - name: Build base branch
+        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
           name: apk
-          path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-master.apk
+          path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
 
   # Checkout PR branch and build the APK
   build-pr:
+    name: Build PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Build from PR
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build PR branch
         run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
@@ -36,10 +41,10 @@ jobs:
 
   # Execute Diffuse only when the two APKs are built successfully
   diffuse:
-    needs: [ build-master, build-pr ]
+    needs: [ build-base, build-pr ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Download APKs
         uses: actions/download-artifact@v1
         with:
@@ -48,7 +53,7 @@ jobs:
         id: diffuse
         uses: usefulness/diffuse-action@v1
         with:
-          old-file-path: apk/financial-connections-example-release-master.apk
+          old-file-path: apk/financial-connections-example-release-base.apk
           new-file-path: apk/financial-connections-example-release-pr.apk
 
       # Post comment with output

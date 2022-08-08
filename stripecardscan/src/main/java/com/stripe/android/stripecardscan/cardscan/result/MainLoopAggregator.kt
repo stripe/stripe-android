@@ -25,7 +25,7 @@ internal class MainLoopAggregator(
     >(
     listener = listener,
     initialState = MainLoopState.Initial(),
-    statsName = null, // TODO: when we want to collect this in scan stats, give this a name
+    statsName = null // TODO: when we want to collect this in scan stats, give this a name
 ) {
 
     internal data class FinalResult(
@@ -35,12 +35,12 @@ internal class MainLoopAggregator(
     internal data class InterimResult(
         val analyzerResult: SSDOcr.Prediction,
         val frame: SSDOcr.Input,
-        val state: MainLoopState,
+        val state: MainLoopState
     )
 
     override suspend fun aggregateResult(
         frame: SSDOcr.Input,
-        result: SSDOcr.Prediction,
+        result: SSDOcr.Prediction
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
         val currentState = previousState.consumeTransition(result)
@@ -50,7 +50,7 @@ internal class MainLoopAggregator(
         val interimResult = InterimResult(
             analyzerResult = result,
             frame = frame,
-            state = currentState,
+            state = currentState
         )
 
         return if (currentState is MainLoopState.Finished) {

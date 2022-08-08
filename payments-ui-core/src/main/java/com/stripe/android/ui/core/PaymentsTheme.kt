@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import java.lang.Float.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -56,7 +57,7 @@ data class PaymentsColors(
 data class PaymentsShapes(
     val cornerRadius: Float,
     val borderStrokeWidth: Float,
-    val borderStrokeWidthSelected: Float,
+    val borderStrokeWidthSelected: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -87,13 +88,13 @@ data class PrimaryButtonStyle(
 data class PrimaryButtonColors(
     val background: Color,
     val onBackground: Color,
-    val border: Color,
+    val border: Color
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonShape(
     val cornerRadius: Float,
-    val borderStrokeWidth: Float,
+    val borderStrokeWidth: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -176,7 +177,7 @@ object PaymentsThemeDefaults {
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
-            borderStrokeWidth = 0.0f,
+            borderStrokeWidth = 0.0f
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
@@ -210,14 +211,13 @@ fun PaymentsShapes.toComposeShapes(): PaymentsComposeShapes {
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTypography.toComposeTypography(): Typography {
-
     val fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = TextStyle.Default.copy(
         fontFamily = fontFamily,
         fontSize = (xLargeFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightBold),
+        fontWeight = FontWeight(fontWeightBold)
     )
 
     // h5 is our medium headline label.
@@ -243,7 +243,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     val body1 = TextStyle.Default.copy(
         fontFamily = fontFamily,
         fontSize = (mediumFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightNormal),
+        fontWeight = FontWeight(fontWeightNormal)
     )
 
     // subtitle1 is our only subtitle size. Used for labeling fields.
@@ -353,11 +353,18 @@ val MaterialTheme.paymentsShapes: PaymentsShapes
 
 @Composable
 @ReadOnlyComposable
-fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke {
-    val width = if (isSelected) paymentsShapes.borderStrokeWidthSelected else paymentsShapes.borderStrokeWidth
-    val color = if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
-    return BorderStroke(width.dp, color)
-}
+internal fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
+    if (isSelected) paymentsShapes.borderStrokeWidthSelected.dp else paymentsShapes.borderStrokeWidth.dp
+
+@Composable
+@ReadOnlyComposable
+internal fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
+    if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
+
+@Composable
+@ReadOnlyComposable
+fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke =
+    BorderStroke(getBorderStrokeWidth(isSelected), getBorderStrokeColor(isSelected))
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
@@ -381,6 +388,7 @@ fun Context.isSystemDarkTheme(): Boolean {
     return resources.configuration.uiMode and
         UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
 }
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.convertDpToPx(dp: Dp): Float {
     return dp.value * resources.displayMetrics.density
@@ -486,4 +494,27 @@ fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.getRawValueFromDimenResource(resource: Int): Float {
     return resources.getDimension(resource) / resources.displayMetrics.density
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Color.lighten(amount: Float): Color {
+    return modifyBrightness {
+        max(it + amount, 1f)
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Color.darken(amount: Float): Color {
+    return modifyBrightness {
+        max(it - amount, 0f)
+    }
+}
+
+private fun Color.modifyBrightness(transform: (Float) -> Float): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hsl)
+    val hue = hsl[0]
+    val saturation = hsl[1]
+    val lightness = hsl[2]
+    return Color.hsl(hue, saturation, transform(lightness))
 }

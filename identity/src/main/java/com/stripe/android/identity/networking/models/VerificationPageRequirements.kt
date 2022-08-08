@@ -24,9 +24,5 @@ internal data class VerificationPageRequirements(
 
         @SerialName("face")
         FACE,
-
-        // TODO(IDPROD-3944) - verify with server change
-        @SerialName("training_consent")
-        TRAININGCONSENT
     }
 }

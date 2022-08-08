@@ -6,6 +6,7 @@ import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_FRONT
 
@@ -19,6 +20,8 @@ internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
+    override val frontScanType: IdentityScanState.ScanType = DL_FRONT
+
     override val fragmentId = R.id.driverLicenseScanFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

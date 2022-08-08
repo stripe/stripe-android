@@ -104,7 +104,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
         }
 
@@ -287,12 +287,12 @@ internal class PaymentOptionsViewModelTest {
         private val NEW_REQUEST_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
             CardBrand.Visa,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
         private val NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
             CardBrand.Visa,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,

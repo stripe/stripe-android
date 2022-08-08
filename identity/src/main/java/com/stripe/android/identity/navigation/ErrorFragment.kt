@@ -4,12 +4,14 @@ import android.content.Context
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult.Failed
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
@@ -18,8 +20,9 @@ import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
  * Fragment to show generic error.
  */
 internal class ErrorFragment(
-    private val verificationFlowFinishable: VerificationFlowFinishable
-) : BaseErrorFragment() {
+    private val verificationFlowFinishable: VerificationFlowFinishable,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : BaseErrorFragment(identityViewModelFactory) {
     override fun onCustomizingViews() {
         val args = requireNotNull(arguments)
         title.text = args[ARG_ERROR_TITLE] as String
@@ -28,33 +31,44 @@ internal class ErrorFragment(
 
         topButton.visibility = View.GONE
 
-        if (args.getInt(ARG_GO_BACK_BUTTON_DESTINATION) == UNSET_DESTINATION &&
-            !args.containsKey(ARG_FAILED_REASON)
-        ) {
-            bottomButton.visibility = View.GONE
-        } else {
-            bottomButton.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
-            bottomButton.visibility = View.VISIBLE
+        val cause = requireNotNull(args.getSerializable(ARG_CAUSE) as? Throwable) {
+            "cause of error is null"
+        }
 
-            // If this is final destination, clicking bottom button and pressBack would end flow
-            (args.getSerializable(ARG_FAILED_REASON) as? Throwable)?.let { failedReason ->
-                bottomButton.setOnClickListener {
-                    verificationFlowFinishable.finishWithResult(
-                        Failed(failedReason)
-                    )
-                }
-            } ?: run {
-                bottomButton.setOnClickListener {
-                    val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int
-                    if (destination == UNEXPECTED_DESTINATION) {
-                        findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
-                    } else {
-                        findNavController().let { navController ->
-                            var shouldContinueNavigateUp = true
-                            while (shouldContinueNavigateUp && navController.currentDestination?.id != destination) {
-                                shouldContinueNavigateUp =
-                                    navController.navigateUpAndSetArgForUploadFragment()
-                            }
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.genericError(
+                message = cause.message,
+                stackTrace = cause.stackTraceToString()
+            )
+        )
+
+        bottomButton.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
+        bottomButton.visibility = View.VISIBLE
+
+        // If ARG_SHOULD_FAIL is true, clicking bottom button and pressBack would end flow with Failed
+        if (args.getBoolean(ARG_SHOULD_FAIL, false)) {
+            identityViewModel.screenTracker.screenTransitionStart(
+                SCREEN_NAME_ERROR
+            )
+            bottomButton.setOnClickListener {
+                verificationFlowFinishable.finishWithResult(
+                    Failed(cause)
+                )
+            }
+        } else {
+            bottomButton.setOnClickListener {
+                identityViewModel.screenTracker.screenTransitionStart(
+                    SCREEN_NAME_ERROR
+                )
+                val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int
+                if (destination == UNEXPECTED_DESTINATION) {
+                    findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
+                } else {
+                    findNavController().let { navController ->
+                        var shouldContinueNavigateUp = true
+                        while (shouldContinueNavigateUp && navController.currentDestination?.id != destination) {
+                            shouldContinueNavigateUp =
+                                navController.navigateUpAndSetArgForUploadFragment()
                         }
                     }
                 }
@@ -69,8 +83,10 @@ internal class ErrorFragment(
         // if set, shows go_back button, clicking it would navigate to the destination.
         const val ARG_GO_BACK_BUTTON_TEXT = "goBackButtonText"
         const val ARG_GO_BACK_BUTTON_DESTINATION = "goBackButtonDestination"
-        const val ARG_FAILED_REASON = "failedReason"
-        private const val UNSET_DESTINATION = 0
+
+        // if set to true, clicking bottom button and pressBack would end flow with Failed
+        const val ARG_SHOULD_FAIL = "shouldFail"
+        const val ARG_CAUSE = "cause"
 
         // Indicates the server returns a requirementError that doesn't match with current Fragment.
         //  E.g ConsentFragment->DocSelectFragment could only have BIOMETRICCONSENT error but not IDDOCUMENTFRONT error.
@@ -90,25 +106,31 @@ internal class ErrorFragment(
                     ARG_ERROR_TITLE to requirementError.title,
                     ARG_ERROR_CONTENT to requirementError.body,
                     ARG_GO_BACK_BUTTON_DESTINATION to
-                        if (requirementError.requirement.matchesFromFragment(fromFragment))
+                        if (requirementError.requirement.matchesFromFragment(fromFragment)) {
                             fromFragment
-                        else
-                            UNEXPECTED_DESTINATION,
+                        } else {
+                            UNEXPECTED_DESTINATION
+                        },
                     ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText,
-                    // TODO(ccen) build continue button after backend behavior is finalized
-                    // ARG_CONTINUE_BUTTON_TEXT to requirementError.continueButtonText,
+                    ARG_SHOULD_FAIL to false,
+                    ARG_CAUSE to IllegalStateException("VerificationPageDataRequirementError: $requirementError")
                 )
             )
         }
 
-        fun NavController.navigateToErrorFragmentWithDefaultValues(context: Context) {
+        fun NavController.navigateToErrorFragmentWithDefaultValues(
+            context: Context,
+            cause: Throwable
+        ) {
             navigate(
                 R.id.action_global_errorFragment,
                 bundleOf(
                     ARG_ERROR_TITLE to context.getString(R.string.error),
                     ARG_ERROR_CONTENT to context.getString(R.string.unexpected_error_try_again),
                     ARG_GO_BACK_BUTTON_DESTINATION to R.id.consentFragment,
-                    ARG_GO_BACK_BUTTON_TEXT to context.getString(R.string.go_back)
+                    ARG_GO_BACK_BUTTON_TEXT to context.getString(R.string.go_back),
+                    ARG_SHOULD_FAIL to false,
+                    ARG_CAUSE to cause
                 )
             )
         }
@@ -128,7 +150,8 @@ internal class ErrorFragment(
                     ARG_ERROR_TITLE to context.getString(R.string.error),
                     ARG_ERROR_CONTENT to context.getString(R.string.unexpected_error_try_again),
                     ARG_GO_BACK_BUTTON_TEXT to context.getString(R.string.go_back),
-                    ARG_FAILED_REASON to failedReason
+                    ARG_SHOULD_FAIL to true,
+                    ARG_CAUSE to failedReason
                 )
             )
         }

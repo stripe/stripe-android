@@ -2,14 +2,15 @@ package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -27,9 +29,11 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
-    private val args: LinkActivityContract.Args,
+    @Named(CUSTOMER_EMAIL) private val customerEmail: String?,
+    @Named(LINK_INTENT) private val stripeIntent: StripeIntent,
     private val linkRepository: LinkRepository,
-    private val cookieStore: CookieStore
+    private val cookieStore: CookieStore,
+    private val linkEventsReporter: LinkEventsReporter
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     var linkAccount: StateFlow<LinkAccount?> = _linkAccount
@@ -49,17 +53,17 @@ internal class LinkAccountManager @Inject constructor(
                     cookieStore.getAuthSessionCookie()?.let {
                         lookupConsumer(null).getOrNull()?.accountStatus
                     }
-                    // If the user recently signed up on this device, use their email
+                        // If the user recently signed up on this device, use their email
                         ?: cookieStore.getNewUserEmail()?.let {
                             lookupConsumer(it).getOrNull()?.accountStatus
                         }
                         // If a customer email was passed in, lookup the account,
                         // unless the user has logged out of this account
-                        ?: args.customerEmail?.let {
+                        ?: customerEmail?.let {
                             if (hasUserLoggedOut(it)) {
                                 AccountStatus.SignedOut
                             } else {
-                                lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+                                lookupConsumer(customerEmail).getOrNull()?.accountStatus
                             }
                         } ?: AccountStatus.SignedOut
                     )
@@ -86,7 +90,11 @@ internal class LinkAccountManager @Inject constructor(
         startSession: Boolean = true
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, cookie())
-            .map { consumerSessionLookup ->
+            .also {
+                if (it.isFailure) {
+                    linkEventsReporter.onAccountLookupFailure()
+                }
+            }.map { consumerSessionLookup ->
                 if (email == null && !consumerSessionLookup.exists) {
                     // Lookup with cookie-only failed, so cookie is invalid
                     cookieStore.updateAuthSessionCookie("")
@@ -125,6 +133,13 @@ internal class LinkAccountManager @Inject constructor(
                 requireNotNull(it) { "Error fetching user account" }
             }
             is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
+                .also {
+                    if (it.isSuccess) {
+                        linkEventsReporter.onSignupCompleted(true)
+                    } else {
+                        linkEventsReporter.onSignupFailure(true)
+                    }
+                }
         }
 
     /**
@@ -158,7 +173,11 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError { clientSecret ->
         linkRepository.startVerification(clientSecret, consumerPublishableKey, cookie())
-            .map { consumerSession ->
+            .also {
+                if (it.isFailure) {
+                    linkEventsReporter.on2FAStartFailure()
+                }
+            }.map { consumerSession ->
                 setAccount(consumerSession)
             }
     }
@@ -190,12 +209,13 @@ internal class LinkAccountManager @Inject constructor(
     suspend fun createPaymentDetails(
         paymentMethod: SupportedPaymentMethod,
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
+    ): Result<LinkPaymentDetails.New> =
         linkAccount.value?.let { account ->
             createPaymentDetails(
-                paymentMethod.createParams(paymentMethodCreateParams, account.email),
-                args.stripeIntent,
-                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+                paymentMethod,
+                paymentMethodCreateParams,
+                account.email,
+                stripeIntent
             )
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")
@@ -205,14 +225,16 @@ internal class LinkAccountManager @Inject constructor(
      * Create a new payment method in the signed in consumer account.
      */
     suspend fun createPaymentDetails(
-        paymentDetails: ConsumerPaymentDetailsCreateParams,
-        stripeIntent: StripeIntent,
-        extraConfirmationParams: Map<String, Any>?
+        paymentMethod: SupportedPaymentMethod,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        userEmail: String,
+        stripeIntent: StripeIntent
     ) = retryingOnAuthError { clientSecret ->
         linkRepository.createPaymentDetails(
-            paymentDetails,
+            paymentMethod,
+            paymentMethodCreateParams,
+            userEmail,
             stripeIntent,
-            extraConfirmationParams,
             clientSecret,
             consumerPublishableKey
         )

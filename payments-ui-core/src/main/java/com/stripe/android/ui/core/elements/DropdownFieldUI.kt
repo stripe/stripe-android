@@ -60,6 +60,7 @@ import kotlin.math.min
 internal fun DropDown(
     controller: DropdownFieldController,
     enabled: Boolean,
+    modifier: Modifier = Modifier
 ) {
     val label by controller.label.collectAsState(null)
     val selectedIndex by controller.selectedIndex.collectAsState(0)
@@ -78,7 +79,7 @@ internal fun DropDown(
 
     val inputModeManager = LocalInputModeManager.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentSize(Alignment.TopStart)
             .background(MaterialTheme.paymentsColors.component)
     ) {
@@ -90,7 +91,7 @@ internal fun DropDown(
                 }
                 .clickable(
                     enabled = enabled,
-                    onClickLabel = stringResource(R.string.change),
+                    onClickLabel = stringResource(R.string.change)
                 ) {
                     expanded = true
                 }
@@ -104,29 +105,36 @@ internal fun DropDown(
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null,
+                        modifier = Modifier.height(24.dp),
                         tint = currentTextColor
                     )
                 }
             } else {
-                Column(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        top = 4.dp,
-                        bottom = 8.dp
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
-                    label?.let {
-                        FormLabel(stringResource(it), enabled = enabled)
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Text(
-                            selectedItemLabel,
-                            modifier = Modifier.fillMaxWidth(.9f),
-                            color = currentTextColor
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            top = 4.dp,
+                            bottom = 8.dp
                         )
+                    ) {
+                        label?.let {
+                            FormLabel(stringResource(it), enabled = enabled)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(.9f),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Text(
+                                selectedItemLabel,
+                                color = currentTextColor
+                            )
+                        }
+                    }
+                    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                         Icon(
                             Icons.Filled.ArrowDropDown,
                             contentDescription = null,

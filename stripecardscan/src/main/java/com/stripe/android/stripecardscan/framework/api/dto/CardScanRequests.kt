@@ -27,7 +27,7 @@ internal data class CardScanRequest internal constructor(
         }
 
     override val headers = mapOf(
-        HEADER_AUTHORIZATION to "Bearer $stripePublishableKey",
+        HEADER_AUTHORIZATION to "Bearer $stripePublishableKey"
     )
 
     override var postHeaders: Map<String, String>? = mapOf(

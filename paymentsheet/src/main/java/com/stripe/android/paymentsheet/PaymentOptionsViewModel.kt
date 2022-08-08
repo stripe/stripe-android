@@ -9,16 +9,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -30,6 +33,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -71,22 +75,38 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
-    override var newLpm = args.newLpm
+    override var newPaymentSelection = args.newLpm
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
-    private var hasTransitionToUnsavedCard = false
+    internal var hasTransitionToUnsavedLpm
+        get() = savedStateHandle.get<Boolean>(SAVE_STATE_HAS_OPEN_SAVED_LPM)
+        set(value) = savedStateHandle.set(SAVE_STATE_HAS_OPEN_SAVED_LPM, value)
+
     private val shouldTransitionToUnsavedCard: Boolean
-        get() =
-            !hasTransitionToUnsavedCard && newLpm != null
+        get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
-        setupLink(args.stripeIntent, false)
-        setStripeIntent(args.stripeIntent)
+        setupLink(args.stripeIntent)
+
+        // After recovering from don't keep activities the stripe intent will be saved,
+        // calling setStripeIntent would require the repository be initialized, which
+        // would not be the case.
+        if (stripeIntent.value == null) {
+            setStripeIntent(args.stripeIntent)
+        }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
+
+        // If we are not recovering from don't keep activities than the resources
+        // repository is loaded, and we should save off the LPM repository server specs so
+        // it can be restored after don't keep activities or process killed.
+        if (resourceRepository.getLpmRepository().isLoaded()) {
+            lpmServerSpec =
+                resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+        }
     }
 
     override fun onFatal(throwable: Throwable) {
@@ -125,7 +145,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved -> {
+                is PaymentSelection.Saved ->
                     // We don't want the USBankAccount selection to close the payment sheet right
                     // away, the user needs to accept a mandate
                     if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
@@ -133,38 +153,38 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             paymentSelection
                         )
                     }
-                }
-                is PaymentSelection.GooglePay -> processExistingPaymentMethod(paymentSelection)
+                is PaymentSelection.GooglePay,
+                is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
         }
     }
 
-    override fun onLinkLaunched() {
-        super.onLinkLaunched()
-        _processing.value = true
-    }
-
-    override fun onLinkActivityResult(result: LinkActivityResult) {
-        when (result) {
-            is LinkActivityResult.Success.Selected -> {
-                onLinkPaymentDetailsCollected(result.paymentDetails)
-            }
-            else -> {
-                if (result is LinkActivityResult.Failed) {
-                    _error.value = result.error.localizedMessage
+    override fun setupLink(stripeIntent: StripeIntent) {
+        if (LINK_ENABLED &&
+            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
+        ) {
+            viewModelScope.launch {
+                when (linkLauncher.setup(stripeIntent, this)) {
+                    AccountStatus.Verified,
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> {
+                        // If account exists, select link by default
+                        savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
+                    }
+                    AccountStatus.SignedOut -> {}
                 }
-
-                super.onLinkActivityResult(result)
-                _processing.value = false
+                _isLinkEnabled.value = true
             }
+        } else {
+            _isLinkEnabled.value = false
         }
     }
 
     override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(it.convertToPaymentSelection())
+            updateSelection(PaymentSelection.New.LinkInline(it))
             onUserSelection()
         } ?: run {
             // Creating Link PaymentDetails failed, fallback to regular checkout.
@@ -243,7 +263,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
-            hasTransitionToUnsavedCard = true
+            hasTransitionToUnsavedLpm = true
             transitionTo(
                 // Until we add a flag to the transitionTarget to specify if we want to add the item
                 // to the backstack, we need to use the full sheet.
@@ -312,5 +332,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
+    }
+
+    companion object {
+        const val SAVE_STATE_HAS_OPEN_SAVED_LPM = "hasTransitionToUnsavedLpm"
     }
 }

@@ -15,13 +15,14 @@ configurations {
 }
 
 if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
+    group = 'com.github.stripe.stripe-android'
 }
 
 dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
     compileOnly project(":stripecardscan")
+    compileOnly "com.google.android.libraries.places:places:$placesVersion"
 
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
@@ -42,13 +43,15 @@ dependencies {
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
-    implementation "com.google.accompanist:accompanist-flowlayout:$flowlayoutVersion"
+    implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$playServicesVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
@@ -64,6 +67,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation "com.google.android.libraries.places:places:$placesVersion"
     testImplementation project(':stripecardscan')
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"

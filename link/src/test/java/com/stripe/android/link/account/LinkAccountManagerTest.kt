@@ -3,12 +3,13 @@ package com.stripe.android.link.account
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -26,8 +27,8 @@ import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LinkAccountManagerTest {
-    private val args = mock<LinkActivityContract.Args>()
     private val linkRepository = mock<LinkRepository>()
+    private val linkEventsReporter = mock<LinkEventsReporter>()
     private val cookieStore = mock<CookieStore>().apply {
         whenever(getAuthSessionCookie()).thenReturn("cookie")
     }
@@ -47,9 +48,8 @@ class LinkAccountManagerTest {
         val cookie = "cookie"
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(cookie)
         whenever(cookieStore.getNewUserEmail()).thenReturn("email")
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(isNull(), eq(cookie))
     }
@@ -59,9 +59,8 @@ class LinkAccountManagerTest {
         val email = "email"
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
         whenever(cookieStore.getNewUserEmail()).thenReturn(email)
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(eq(email), isNull())
     }
@@ -69,9 +68,8 @@ class LinkAccountManagerTest {
     @Test
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(EMAIL, null)
     }
@@ -80,9 +78,8 @@ class LinkAccountManagerTest {
     fun `When customerEmail has signed out then it is not looked up`() = runSuspendTest {
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
         whenever(cookieStore.isEmailLoggedOut(EMAIL)).thenReturn(true)
-        whenever(args.customerEmail).thenReturn(EMAIL)
 
-        assertThat(accountManager().accountStatus.first()).isEqualTo(AccountStatus.SignedOut)
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.SignedOut)
 
         verifyNoInteractions(linkRepository)
     }
@@ -150,6 +147,16 @@ class LinkAccountManagerTest {
     }
 
     @Test
+    fun `lookupConsumer sends analytics event when call fails`() = runSuspendTest {
+        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(Exception()))
+
+        accountManager().lookupConsumer(EMAIL, false)
+
+        verify(linkEventsReporter).onAccountLookupFailure()
+    }
+
+    @Test
     fun `When cookie is invalid it is deleted after consumer lookup`() = runSuspendTest {
         mockNonexistentAccountLookup()
         val accountManager = accountManager()
@@ -160,24 +167,54 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `signInWithUserInput sends correct parameters and starts session`() = runSuspendTest {
-        val accountManager = accountManager()
+    fun `signInWithUserInput sends correct parameters and starts session for existing user`() =
+        runSuspendTest {
+            val accountManager = accountManager()
 
-        accountManager.signInWithUserInput(UserInput.SignIn(EMAIL))
+            accountManager.signInWithUserInput(UserInput.SignIn(EMAIL))
 
-        verify(linkRepository).lookupConsumer(eq(EMAIL), anyOrNull())
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
+            verify(linkRepository).lookupConsumer(eq(EMAIL), anyOrNull())
+            assertThat(accountManager.linkAccount.value).isNotNull()
+        }
 
     @Test
-    fun `signUp sends correct parameters and starts session`() = runSuspendTest {
-        val accountManager = accountManager()
+    fun `signInWithUserInput sends correct parameters and starts session for new user`() =
+        runSuspendTest {
+            val accountManager = accountManager()
+            val phone = "phone"
+            val country = "country"
 
-        accountManager.signInWithUserInput(UserInput.SignIn(EMAIL))
+            accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country))
 
-        verify(linkRepository).lookupConsumer(eq(EMAIL), anyOrNull())
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
+            verify(linkRepository).consumerSignUp(eq(EMAIL), eq(phone), eq(country), anyOrNull())
+            assertThat(accountManager.linkAccount.value).isNotNull()
+        }
+
+    @Test
+    fun `signInWithUserInput for new user sends analytics event when call succeeds`() =
+        runSuspendTest {
+            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
+
+            verify(linkEventsReporter).onSignupCompleted(true)
+        }
+
+    @Test
+    fun `signInWithUserInput for new user sends analytics event when call fails`() =
+        runSuspendTest {
+            whenever(
+                linkRepository.consumerSignUp(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
+                .thenReturn(Result.failure(Exception()))
+
+            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
+
+            verify(linkEventsReporter).onSignupFailure(true)
+        }
 
     @Test
     fun `signUp stores email when successfully signed up`() = runSuspendTest {
@@ -245,6 +282,18 @@ class LinkAccountManagerTest {
         val keyCaptor = argumentCaptor<String>()
         verify(linkRepository).startVerification(anyOrNull(), keyCaptor.capture(), anyOrNull())
         assertThat(keyCaptor.firstValue).isEqualTo(PUBLISHABLE_KEY)
+    }
+
+    @Test
+    fun `startVerification sends analytics event when call fails`() = runSuspendTest {
+        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(Exception()))
+
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession)
+        accountManager.startVerification()
+
+        verify(linkEventsReporter).on2FAStartFailure()
     }
 
     @Test
@@ -346,6 +395,7 @@ class LinkAccountManagerTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
                 anyOrNull()
             )
         ).thenReturn(
@@ -353,10 +403,17 @@ class LinkAccountManagerTest {
             Result.success(mock())
         )
 
-        accountManager.createPaymentDetails(mock(), mock(), mock())
+        accountManager.createPaymentDetails(mock(), mock(), "", mock())
 
         verify(linkRepository, times(2))
-            .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            .createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
 
         assertThat(accountManager.linkAccount.value).isNotNull()
@@ -374,6 +431,7 @@ class LinkAccountManagerTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
                 anyOrNull()
             )
         ).thenReturn(
@@ -381,10 +439,17 @@ class LinkAccountManagerTest {
             Result.success(mock())
         )
 
-        accountManager.createPaymentDetails(mock(), mock(), mock())
+        accountManager.createPaymentDetails(mock(), mock(), "", mock())
 
         verify(linkRepository)
-            .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            .createPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
         verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
     }
 
@@ -502,7 +567,16 @@ class LinkAccountManagerTest {
             .thenReturn(Result.success(consumerSessionLookup))
     }
 
-    private fun accountManager() = LinkAccountManager(args, linkRepository, cookieStore)
+    private fun accountManager(
+        customerEmail: String? = null,
+        stripeIntent: StripeIntent = mock()
+    ) = LinkAccountManager(
+        customerEmail,
+        stripeIntent,
+        linkRepository,
+        cookieStore,
+        linkEventsReporter
+    )
 
     companion object {
         const val EMAIL = "email@stripe.com"

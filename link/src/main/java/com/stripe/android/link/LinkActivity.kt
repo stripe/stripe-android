@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -39,6 +40,7 @@ import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.isOnRootScreen
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.cardedit.CardEditBody
@@ -74,7 +76,6 @@ internal class LinkActivity : ComponentActivity() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         setContent {
-
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
             val coroutineScope = rememberCoroutineScope()
@@ -89,7 +90,6 @@ internal class LinkActivity : ComponentActivity() {
             }
 
             DefaultLinkTheme {
-
                 ModalBottomSheetLayout(
                     sheetContent = bottomSheetContent ?: {
                         // Must have some content at startup or bottom sheet crashes when
@@ -98,6 +98,7 @@ internal class LinkActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxHeight(),
                     sheetState = sheetState,
+                    scrimColor = MaterialTheme.linkColors.sheetScrim
                 ) {
                     navController = rememberNavController()
 
@@ -114,7 +115,6 @@ internal class LinkActivity : ComponentActivity() {
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
-
                             composable(LinkScreen.Loading.route) {
                                 Box(
                                     modifier = Modifier
@@ -167,11 +167,21 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(LinkScreen.PaymentMethod.route) {
+                            composable(
+                                LinkScreen.PaymentMethod.route,
+                                arguments = listOf(
+                                    navArgument(LinkScreen.PaymentMethod.loadArg) {
+                                        type = NavType.BoolType
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val loadFromArgs = backStackEntry.arguments
+                                    ?.getBoolean(LinkScreen.PaymentMethod.loadArg) ?: false
                                 linkAccount?.let { account ->
                                     PaymentMethodBody(
                                         account,
-                                        viewModel.injector
+                                        viewModel.injector,
+                                        loadFromArgs
                                     )
                                 }
                             }
@@ -223,7 +233,8 @@ internal class LinkActivity : ComponentActivity() {
                     }
                     window.decorView.rootView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
-            })
+            }
+        )
     }
 
     override fun onDestroy() {

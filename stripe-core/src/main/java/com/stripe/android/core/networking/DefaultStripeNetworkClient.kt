@@ -40,7 +40,6 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
         retryResponseCodes: Iterable<Int>,
         requester: () -> StripeResponse<BodyType>
     ): StripeResponse<BodyType> = withContext(workContext) {
-
         val stripeResponse = requester()
 
         if (retryResponseCodes.contains(stripeResponse.code) && remainingRetries > 0) {

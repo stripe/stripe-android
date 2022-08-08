@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 
 @Composable
@@ -11,19 +12,26 @@ internal fun SectionFieldElementUI(
     modifier: Modifier = Modifier,
     hiddenIdentifiers: List<IdentifierSpec>? = null,
     lastTextFieldIdentifier: IdentifierSpec?,
+    nextFocusDirection: FocusDirection = FocusDirection.Down,
+    previousFocusDirection: FocusDirection = FocusDirection.Up
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
         when (val controller = field.sectionFieldErrorController()) {
+            is AddressTextFieldController -> {
+                AddressTextFieldUI(controller)
+            }
             is TextFieldController -> {
                 TextField(
                     textFieldController = controller,
                     enabled = enabled,
-                    modifier = modifier,
                     imeAction = if (lastTextFieldIdentifier == field.identifier) {
                         ImeAction.Done
                     } else {
                         ImeAction.Next
-                    }
+                    },
+                    modifier = modifier,
+                    nextFocusDirection = nextFocusDirection,
+                    previousFocusDirection = previousFocusDirection
                 )
             }
             is DropdownFieldController -> {
@@ -62,7 +70,7 @@ internal fun SectionFieldElementUI(
                     controller
                 )
             }
-            is SaveForFutureUseController -> {}
+            else -> {}
         }
     }
 }

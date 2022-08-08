@@ -108,7 +108,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             WindowManager.LayoutParams.FLAG_SECURE +
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_SECURE +
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
 
         // Hide both the navigation bar and the status bar. Allow system gestures to show the
@@ -276,7 +276,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             activity = this,
             previewView = previewFrame,
             minimumResolution = minimumAnalysisResolution,
-            cameraErrorListener = cameraErrorListener,
+            cameraErrorListener = cameraErrorListener
         )
 
     protected abstract val previewFrame: ViewGroup
@@ -287,7 +287,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      * A stream of images from the camera is available to be processed.
      */
     protected abstract suspend fun onCameraStreamAvailable(
-        cameraStream: Flow<CameraPreviewImage<Bitmap>>,
+        cameraStream: Flow<CameraPreviewImage<Bitmap>>
     )
 
     companion object {

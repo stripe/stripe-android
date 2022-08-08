@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -57,15 +59,20 @@ data class PaymentMethodRequirements(
 
     /**
      * This indicates if the payment method can be confirmed when attached to a customer
-     * and only the Payment Method id is available.
+     * and only the Payment Method id is available.  This also implies that the PaymentMethod
+     * is internally supported in the SDK so it can be parsed in the customer repository requests.
      *  - Null means that it is not supported, or that it is attached as a different type
      *  - false means that it is supported by the payment method, but not currently enabled
      *  (likely because of a lack of mandate support)
      *  - true means that a PM of this type attached to a customer can be confirmed
      */
     @SerialName("confirm_pm_from_customer")
-    val confirmPMFromCustomer: Boolean?,
-)
+    private val confirmPMFromCustomer: Boolean?
+) {
+    // Confirming from a customer assumes that we can parse the PaymentMethod
+    fun getConfirmPMFromCustomer(code: PaymentMethodCode) =
+        (PaymentMethod.Type.fromCode(code) != null) && (confirmPMFromCustomer == true)
+}
 
 internal val CardRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),

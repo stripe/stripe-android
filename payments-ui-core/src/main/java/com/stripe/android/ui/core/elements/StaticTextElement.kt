@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 data class StaticTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
-    override val controller: InputController? = null,
+    override val controller: InputController? = null
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         MutableStateFlow(emptyList())

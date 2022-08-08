@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmptyFormElement(
     override val identifier: IdentifierSpec = IdentifierSpec.Generic("empty_form"),
-    override val controller: Controller? = null,
+    override val controller: Controller? = null
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         MutableStateFlow(emptyList())

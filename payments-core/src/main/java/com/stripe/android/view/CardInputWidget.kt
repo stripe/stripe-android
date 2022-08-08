@@ -148,7 +148,10 @@ class CardInputWidget @JvmOverloads constructor(
             return cvcEditText.cvc
         }
 
-    private val brand: CardBrand
+    /**
+     * A [CardBrand] matching the current card number inputted by the user.
+     */
+    val brand: CardBrand
         get() {
             return cardNumberEditText.cardBrand
         }
@@ -698,7 +701,8 @@ class CardInputWidget @JvmOverloads constructor(
             )
 
             errorColorInt = getColor(
-                R.styleable.CardInputView_cardTextErrorColor, errorColorInt
+                R.styleable.CardInputView_cardTextErrorColor,
+                errorColorInt
             )
             cardHintText = getString(R.styleable.CardInputView_cardHintText)
             shouldRequestFocus = getBoolean(

@@ -41,7 +41,12 @@ class StripeErrorJsonParserTest {
             charge = "charge_value",
             message = "Your card was declined.",
             declineCode = "card_declined",
-            type = "invalid_request_error"
+            type = "invalid_request_error",
+            extraFields = mapOf(
+                "test_number" to "1",
+                "test_boolean" to "true",
+                "test_string" to "hola"
+            )
         )
         assertThat(StripeErrorJsonParser().parse(RAW_ERROR_WITH_ALL_FIELDS))
             .isEqualTo(expected)
@@ -84,7 +89,12 @@ class StripeErrorJsonParserTest {
                     "charge": "charge_value",
                     "decline_code": "card_declined",
                     "message": "Your card was declined.",
-                    "type": "invalid_request_error"
+                    "type": "invalid_request_error",
+                    "extra_fields": {
+                        "test_number": 1, 
+                        "test_boolean": true,
+                        "test_string": "hola" 
+                    }
                 }
             }
             """.trimIndent()

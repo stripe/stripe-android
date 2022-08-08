@@ -87,7 +87,7 @@ internal class PaymentSheetActivityTest {
         PaymentSheetContract.Args(
             PaymentIntentClientSecret("client_secret"),
             PaymentSheetFixtures.CONFIG_CUSTOMER,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
     )
 
@@ -984,6 +984,7 @@ internal class PaymentSheetActivityTest {
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+        whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),

@@ -62,7 +62,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
             options = options,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret
-            ),
+            )
         )
         return executeRequest(financialConnectionsRequest, FinancialConnectionsSession.serializer())
     }
@@ -79,7 +79,7 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
                 PARAMS_HIDE_CLOSE_BUTTON to true,
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_APPLICATION_ID to applicationId
-            ),
+            )
         )
         return executeRequest(
             financialConnectionsRequest,

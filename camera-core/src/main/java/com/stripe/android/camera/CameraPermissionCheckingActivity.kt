@@ -46,14 +46,14 @@ abstract class CameraPermissionCheckingActivity :
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun ensureCameraPermission(
         onCameraReady: () -> Unit,
-        onUserDeniedCameraPermission: () -> Unit,
+        onUserDeniedCameraPermission: () -> Unit
     ) {
         this.onCameraReady = onCameraReady
         this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
         when {
             ContextCompat.checkSelfPermission(
                 this,
-                Manifest.permission.CAMERA,
+                Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED -> {
                 mainScope.launch { permissionStat.trackResult("success") }
                 mainScope.launch {
@@ -62,11 +62,11 @@ abstract class CameraPermissionCheckingActivity :
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
-                Manifest.permission.CAMERA,
+                Manifest.permission.CAMERA
             ) -> showPermissionRationaleDialog()
             storage.getBoolean(
                 PERMISSION_RATIONALE_SHOWN,
-                false,
+                false
             ) -> showPermissionDeniedDialog()
             else -> requestCameraPermission()
         }
@@ -136,7 +136,7 @@ abstract class CameraPermissionCheckingActivity :
         ActivityCompat.requestPermissions(
             this,
             arrayOf(Manifest.permission.CAMERA),
-            PERMISSION_REQUEST_CODE,
+            PERMISSION_REQUEST_CODE
         )
     }
 

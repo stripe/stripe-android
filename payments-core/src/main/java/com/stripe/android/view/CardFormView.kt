@@ -24,6 +24,7 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
@@ -80,7 +81,10 @@ class CardFormView @JvmOverloads constructor(
 
     private val invalidFields: Set<Fields>
         get() {
-            return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })).toSet()
+            return (
+                cardMultilineWidget.invalidFields.toList() +
+                    listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })
+                ).toSet()
         }
 
     private val cardValidTextWatcher = object : StripeTextWatcher() {
@@ -96,6 +100,14 @@ class CardFormView @JvmOverloads constructor(
         Standard(0),
         Borderless(1)
     }
+
+    /**
+     * A [CardBrand] matching the current card number inputted by the user.
+     */
+    val brand: CardBrand
+        get() {
+            return cardMultilineWidget.brand
+        }
 
     /**
      * Retrieve a [CardParams] representing the card details if all these fields are valid:

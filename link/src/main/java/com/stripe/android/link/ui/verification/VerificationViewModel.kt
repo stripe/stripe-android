@@ -1,20 +1,21 @@
 package com.stripe.android.link.ui.verification
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.NonFallbackInjectable
-import com.stripe.android.link.injection.NonFallbackInjector
-import com.stripe.android.link.injection.SignedInViewModelSubcomponent
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,17 +23,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * ViewModel that handles user verification confirmation logic.
  */
 internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
+    private val linkEventsReporter: LinkEventsReporter,
     private val navigator: Navigator,
-    private val logger: Logger,
-    val linkAccount: LinkAccount
+    private val logger: Logger
 ) : ViewModel() {
+    lateinit var linkAccount: LinkAccount
 
     private val _isProcessing = MutableStateFlow(false)
     val isProcessing: StateFlow<Boolean> = _isProcessing
@@ -48,12 +49,6 @@ internal class VerificationViewModel @Inject constructor(
         navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
     }
 
-    init {
-        if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
-            startVerification()
-        }
-    }
-
     val otpElement = OTPSpec.transform()
 
     private val otpCode: StateFlow<String?> =
@@ -63,7 +58,15 @@ internal class VerificationViewModel @Inject constructor(
             formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
         }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    init {
+    @VisibleForTesting
+    internal fun init(linkAccount: LinkAccount) {
+        this.linkAccount = linkAccount
+        if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
+            startVerification()
+        }
+
+        linkEventsReporter.on2FAStart()
+
         viewModelScope.launch {
             otpCode.collect { code ->
                 code?.let { onVerificationCodeEntered(code) }
@@ -79,9 +82,13 @@ internal class VerificationViewModel @Inject constructor(
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
                     _isProcessing.value = false
+                    linkEventsReporter.on2FAComplete()
                     onVerificationCompleted()
                 },
-                onFailure = ::onError
+                onFailure = {
+                    onError(it)
+                    linkEventsReporter.on2FAFailure()
+                }
             )
         }
     }
@@ -102,6 +109,7 @@ internal class VerificationViewModel @Inject constructor(
     fun onBack() {
         clearError()
         navigator.onBack()
+        linkEventsReporter.on2FACancel()
         linkAccountManager.logout()
     }
 
@@ -122,20 +130,19 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val linkAccount: LinkAccount,
+        private val account: LinkAccount,
         private val injector: NonFallbackInjector
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<SignedInViewModelSubcomponent.Builder>
+        lateinit var viewModel: VerificationViewModel
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             injector.inject(this)
-            return subComponentBuilderProvider.get()
-                .linkAccount(linkAccount)
-                .build().verificationViewModel as T
+            return viewModel.apply {
+                init(account)
+            } as T
         }
     }
 }

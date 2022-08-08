@@ -120,13 +120,51 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/require_matching_selfie"
-        android:enabled="false"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/separator2"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/require_id_number" />
+
+    <View
+        android:id="@+id/separator2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/item_vertical_margin"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toTopOf="@id/vs_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/require_matching_selfie" />
+
+    <TextView
+        android:id="@+id/vs_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:textIsSelectable="true"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/result_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separator2"
+        tools:text="vs12345" />
+
+    <TextView
+        android:id="@+id/result_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toTopOf="@+id/progress_circular"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/require_id_number" />
+        app:layout_constraintTop_toBottomOf="@id/vs_view"
+        tools:text="Canceled" />
+
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress_circular"

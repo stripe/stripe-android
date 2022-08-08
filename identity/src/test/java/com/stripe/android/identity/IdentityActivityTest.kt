@@ -10,57 +10,47 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.camera.AppSettingsOpenable
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SHEET_CLOSED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SHEET_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_VERIFICATION_CANCELED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_VERIFICATION_FAILED
 import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.InjectableActivityScenario
 import com.stripe.android.identity.utils.injectableActivityScenario
 import com.stripe.android.identity.utils.isNavigatedUpTo
-import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
-import com.stripe.android.identity.viewmodel.IdentityScanViewModel
-import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import org.junit.Before
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestApplication::class)
 internal class IdentityActivityTest {
-    private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
-    private val mockAppSettingsOpenable = mock<AppSettingsOpenable>()
-    private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
-    private val mockIdentityViewModelFactory = mock<IdentityViewModel.IdentityViewModelFactory>()
-
-    private val testIdentityFragmentFactory = IdentityFragmentFactory(
-        mockCameraPermissionEnsureable,
-        mockAppSettingsOpenable,
-        mockVerificationFlowFinishable,
-        IdentityScanViewModel.IdentityScanViewModelFactory(),
-        IdentityUploadViewModel.FrontBackUploadViewModelFactory(mock()),
-        ConsentFragmentViewModel.ConsentFragmentViewModelFactory(mock(), mock()),
-        mockIdentityViewModelFactory
-    )
-
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationArgs }.thenReturn(ARGS)
-        on { identityFragmentFactory }.thenReturn(testIdentityFragmentFactory)
-    }
-
-    @Before
-    fun setUpViewModelFactory() {
-        whenever(mockIdentityViewModelFactory.create(IdentityViewModel::class.java)).thenReturn(
-            mockIdentityViewModel
+        on { identityAnalyticsRequestFactory }.thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = ARGS
+            )
         )
+        on { verificationPage }.thenReturn(mock())
+        on { screenTracker }.thenReturn(mock())
+        on { uiContext }.thenReturn(testDispatcher)
+        on { workContext }.thenReturn(testDispatcher)
     }
 
     @Test
@@ -76,6 +66,14 @@ internal class IdentityActivityTest {
             )
 
             navUpButton.callOnClick()
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_SHEET_CLOSED }
+            )
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_VERIFICATION_CANCELED }
+            )
 
             assertThat(injectableActivityScenario.getResult().resultCode).isEqualTo(Activity.RESULT_OK)
             assertThat(
@@ -102,6 +100,14 @@ internal class IdentityActivityTest {
 
             identityActivity.onBackPressed()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_SHEET_CLOSED }
+            )
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_VERIFICATION_CANCELED }
+            )
+
             assertThat(injectableActivityScenario.getResult().resultCode).isEqualTo(Activity.RESULT_OK)
             assertThat(
                 injectableActivityScenario.getResult().resultData.extras?.get(
@@ -120,7 +126,8 @@ internal class IdentityActivityTest {
             navController.navigate(
                 R.id.errorFragment,
                 bundleOf(
-                    ErrorFragment.ARG_FAILED_REASON to failedReason
+                    ErrorFragment.ARG_SHOULD_FAIL to true,
+                    ErrorFragment.ARG_CAUSE to failedReason
                 )
             )
 
@@ -135,6 +142,14 @@ internal class IdentityActivityTest {
             )
 
             navUpButton.callOnClick()
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_SHEET_CLOSED }
+            )
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_VERIFICATION_FAILED }
+            )
 
             assertThat(injectableActivityScenario.getResult().resultCode).isEqualTo(Activity.RESULT_OK)
 
@@ -155,7 +170,8 @@ internal class IdentityActivityTest {
             navController.navigate(
                 R.id.errorFragment,
                 bundleOf(
-                    ErrorFragment.ARG_FAILED_REASON to failedReason
+                    ErrorFragment.ARG_SHOULD_FAIL to true,
+                    ErrorFragment.ARG_CAUSE to failedReason
                 )
             )
 
@@ -170,6 +186,14 @@ internal class IdentityActivityTest {
             )
 
             identityActivity.onBackPressed()
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_SHEET_CLOSED }
+            )
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_VERIFICATION_FAILED }
+            )
 
             assertThat(injectableActivityScenario.getResult().resultCode).isEqualTo(Activity.RESULT_OK)
 
@@ -291,13 +315,52 @@ internal class IdentityActivityTest {
         }
     }
 
+    @Test
+    fun `when activity is recreated after launchFallbackUrl no fragment is recreated`() {
+        injectableActivityScenario<IdentityActivity> {
+            injectActivity {
+                viewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
+            }
+        }.launch(
+            IdentityVerificationSheetContract().createIntent(
+                context = ApplicationProvider.getApplicationContext(),
+                input = ARGS
+            )
+        ).onActivity {
+            verify(mockIdentityViewModel).retrieveAndBufferVerificationPage()
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
+            it.launchFallbackUrl("fallback")
+        }.recreate().onActivity {
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun `when activity is recreated without launchFallbackUrl fragment is recreated`() {
+        injectableActivityScenario<IdentityActivity> {
+            injectActivity {
+                viewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
+            }
+        }.launch(
+            IdentityVerificationSheetContract().createIntent(
+                context = ApplicationProvider.getApplicationContext(),
+                input = ARGS
+            )
+        ).onActivity {
+            verify(mockIdentityViewModel).retrieveAndBufferVerificationPage()
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
+        }.recreate().onActivity {
+            assertThat(it.supportFragmentManager.fragments.size).isEqualTo(1)
+        }
+    }
+
     private fun testActivity(
         testBlock:
             (IdentityActivity, Toolbar, ImageButton, NavController, InjectableActivityScenario<IdentityActivity>) -> Unit
     ) {
         val injectableActivityScenario = injectableActivityScenario<IdentityActivity> {
             injectActivity {
-                viewModelFactory = mockIdentityViewModelFactory
+                viewModelFactory = viewModelFactoryFor(mockIdentityViewModel)
             }
         }.launch(
             IdentityVerificationSheetContract().createIntent(
@@ -313,6 +376,10 @@ internal class IdentityActivityTest {
                 outViews,
                 NAV_UP_BUTTON_CONTENT_DESCRIPTION,
                 View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION
+            )
+
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat { eventName == EVENT_SHEET_PRESENTED }
             )
 
             testBlock(
@@ -334,7 +401,8 @@ internal class IdentityActivityTest {
             VERIFICATION_SESSION_ID,
             EAK,
             BRAND_LOGO,
-            DUMMY_INJECTOR_KEY
+            DUMMY_INJECTOR_KEY,
+            0
         )
     }
 }

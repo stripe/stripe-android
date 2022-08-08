@@ -91,7 +91,8 @@ internal fun DropdownMenuContent(
                     delayMillis = OutTransitionDuration - 1
                 )
             }
-        }, label = "menu-scale"
+        },
+        label = "menu-scale"
     ) {
         if (it) {
             // Menu is expanded.
@@ -111,7 +112,8 @@ internal fun DropdownMenuContent(
                 // Expanded to dismissed.
                 tween(durationMillis = OutTransitionDuration)
             }
-        }, label = "menu-alpha"
+        },
+        label = "menu-alpha"
     ) {
         if (it) {
             // Menu is expanded.

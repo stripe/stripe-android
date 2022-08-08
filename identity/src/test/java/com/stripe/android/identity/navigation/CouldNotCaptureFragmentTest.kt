@@ -10,17 +10,50 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
+import com.stripe.android.identity.viewModelFactoryFor
+import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CouldNotCaptureFragmentTest {
+    private val mockScreenTracker = mock<ScreenTracker>()
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+
+        on { screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
+    }
+
     @Test
     fun `ID_FRONT navigates to IDUploadFragment when requireLiveCapture true`() {
         testClickingFileUpload(ScanType.ID_FRONT, true, R.id.IDUploadFragment)
@@ -111,6 +144,7 @@ internal class CouldNotCaptureFragmentTest {
             requireLiveCapture
         ) { fileUpload, _, navController ->
             fileUpload.callOnClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
                 [ARG_SHOULD_SHOW_CHOOSE_PHOTO]
@@ -128,6 +162,7 @@ internal class CouldNotCaptureFragmentTest {
     ) {
         launchCameraPermissionDeniedFragment(scanType, true) { _, retry, navController ->
             retry.callOnClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(destination)
 
@@ -149,7 +184,7 @@ internal class CouldNotCaptureFragmentTest {
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        CouldNotCaptureFragment()
+        CouldNotCaptureFragment(viewModelFactoryFor(mockIdentityViewModel))
     }.onFragment {
         val binding: BaseErrorFragmentBinding = BaseErrorFragmentBinding.bind(it.requireView())
         val navController = TestNavHostController(
@@ -177,6 +212,16 @@ internal class CouldNotCaptureFragmentTest {
             assertThat(binding.topButton.text).isEqualTo(it.getString(R.string.file_upload))
             assertThat(binding.message2.text).isEqualTo(it.getString(R.string.could_not_capture_body2))
         }
+
+        runBlocking {
+            verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_ERROR))
+        }
+        verify(mockIdentityViewModel).sendAnalyticsRequest(
+            argThat {
+                eventName == EVENT_SCREEN_PRESENTED &&
+                    (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_ERROR
+            }
+        )
 
         testBlock(binding.topButton, binding.bottomButton, navController)
     }

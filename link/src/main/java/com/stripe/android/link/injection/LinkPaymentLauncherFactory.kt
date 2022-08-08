@@ -10,6 +10,7 @@ import dagger.assisted.AssistedFactory
 interface LinkPaymentLauncherFactory {
     fun create(
         @Assisted(MERCHANT_NAME) merchantName: String,
-        @Assisted(CUSTOMER_EMAIL) customerEmail: String?
+        @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
+        @Assisted(CUSTOMER_PHONE) customerPhone: String?
     ): LinkPaymentLauncher
 }

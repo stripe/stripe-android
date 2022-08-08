@@ -5,14 +5,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.NonFallbackInjectable
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,18 +27,18 @@ import javax.inject.Named
 internal class InlineSignupViewModel @Inject constructor(
     @Named(MERCHANT_NAME) val merchantName: String,
     @Named(CUSTOMER_EMAIL) customerEmail: String?,
+    @Named(CUSTOMER_PHONE) customerPhone: String?,
     private val linkAccountManager: LinkAccountManager,
+    private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
+    private val prefilledPhone =
+        customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
 
-    val emailController = SimpleTextFieldController.createEmailSectionController(
-        prefilledEmail
-    )
-
-    val phoneController: PhoneNumberController =
-        PhoneNumberController.createPhoneNumberController()
+    val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
+    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -74,6 +76,7 @@ internal class InlineSignupViewModel @Inject constructor(
         if (isExpanded.value && !hasExpanded) {
             hasExpanded = true
             watchUserInput()
+            linkEventsReporter.onInlineSignupCheckboxChecked()
         }
     }
 
@@ -125,6 +128,7 @@ internal class InlineSignupViewModel @Inject constructor(
                 } else {
                     userInput.value = null
                     _signUpStatus.value = SignUpState.InputtingPhone
+                    linkEventsReporter.onSignupStarted(true)
                 }
             },
             onFailure = ::onError

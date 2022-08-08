@@ -19,7 +19,7 @@ enum class Capitalization {
     Words,
 
     @SerialName("sentences")
-    Sentences
+    Sentences;
 }
 
 @Suppress("EnumEntryName")
@@ -47,16 +47,18 @@ enum class KeyboardType {
     Password,
 
     @SerialName("number_password")
-    NumberPassword,
+    NumberPassword;
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 data class SimpleTextSpec(
+    @SerialName("api_path")
     override val apiPath: IdentifierSpec,
 
     @SerialName("label")
-    @StringRes val label: Int,
+    @StringRes
+    val label: Int,
 
     @SerialName("capitalization")
     val capitalization: Capitalization = Capitalization.None,

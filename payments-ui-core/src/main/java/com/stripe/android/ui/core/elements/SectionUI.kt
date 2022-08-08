@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
@@ -62,10 +63,11 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
 fun SectionCard(
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
+    border: BorderStroke = MaterialTheme.getBorderStroke(isSelected),
     content: @Composable () -> Unit
 ) {
     Card(
-        border = MaterialTheme.getBorderStroke(isSelected),
+        border = border,
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = MaterialTheme.paymentsColors.component,

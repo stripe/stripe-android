@@ -29,7 +29,7 @@ class FetcherTest {
                 modelVersion = "sample_resource",
                 modelHash = "0dcf3e387c68dfea8dd72a183f1f765478ebaa4d8544cfc09a16e87a795d8ccf",
                 modelHashAlgorithm = "SHA-256",
-                assetFileName = "sample_resource.tflite",
+                assetFileName = "sample_resource.tflite"
             ),
             actual = ResourceFetcherImpl().fetchData(forImmediateUse = false, isOptional = false)
         )

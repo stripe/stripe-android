@@ -6,6 +6,8 @@
   <string name="address_label_city">市</string>
   <!-- Caption for Country field on address form -->
   <string name="address_label_country">国</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="address_label_country_or_region">国または地域</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">群</string>
   <!-- Caption for Name field on address form -->

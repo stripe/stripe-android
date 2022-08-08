@@ -1,11 +1,12 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
 /**
@@ -71,12 +72,13 @@ internal interface LinkRepository {
      * Create a new payment method in the consumer account.
      */
     suspend fun createPaymentDetails(
-        paymentDetails: ConsumerPaymentDetailsCreateParams,
+        paymentMethod: SupportedPaymentMethod,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        userEmail: String,
         stripeIntent: StripeIntent,
-        extraConfirmationParams: Map<String, Any>? = null,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<LinkPaymentDetails>
+    ): Result<LinkPaymentDetails.New>
 
     /**
      * Update an existing payment method in the consumer account.

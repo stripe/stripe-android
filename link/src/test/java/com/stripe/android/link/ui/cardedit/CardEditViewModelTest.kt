@@ -2,14 +2,15 @@ package com.stripe.android.link.ui.cardedit
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.FormControllerSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -44,6 +45,8 @@ class CardEditViewModelTest {
             whenever(initialValues(anyOrNull())).thenReturn(this)
             whenever(viewOnlyFields(anyOrNull())).thenReturn(this)
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
+            whenever(merchantName(anyOrNull())).thenReturn(this)
+            whenever(stripeIntent(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }
@@ -56,6 +59,7 @@ class CardEditViewModelTest {
         IdentifierSpec.Country to FormFieldEntry("US", true),
         IdentifierSpec.PostalCode to FormFieldEntry("12345", true)
     )
+    private val args = mock<LinkActivityContract.Args>()
 
     @Before
     fun before() {
@@ -106,17 +110,15 @@ class CardEditViewModelTest {
         verify(linkAccountManager).updatePaymentDetails(
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
-                    it.toParamMap().equals(
-                        mapOf(
-                            "is_default" to true,
-                            "exp_month" to "12",
-                            "exp_year" to "2040",
-                            "billing_address" to mapOf(
-                                "country_code" to "US",
-                                "postal_code" to "12345"
-                            )
-                        )
+                    it.toParamMap() == mapOf(
+                    "is_default" to true,
+                    "exp_month" to "12",
+                    "exp_year" to "2040",
+                    "billing_address" to mapOf(
+                        "country_code" to "US",
+                        "postal_code" to "12345"
                     )
+                )
             }
         )
     }
@@ -132,17 +134,14 @@ class CardEditViewModelTest {
             verify(linkAccountManager).updatePaymentDetails(
                 argWhere {
                     it is ConsumerPaymentDetailsUpdateParams.Card &&
-                        it.toParamMap().equals(
-                            mapOf(
-                                "is_default" to false,
-                                "exp_month" to "12",
-                                "exp_year" to "2040",
-                                "billing_address" to mapOf(
-                                    "country_code" to "US",
-                                    "postal_code" to "12345"
-                                )
-                            )
+                        it.toParamMap() == mapOf(
+                        "exp_month" to "12",
+                        "exp_year" to "2040",
+                        "billing_address" to mapOf(
+                            "country_code" to "US",
+                            "postal_code" to "12345"
                         )
+                    )
                 }
             )
         }
@@ -157,16 +156,14 @@ class CardEditViewModelTest {
         verify(linkAccountManager).updatePaymentDetails(
             argWhere {
                 it is ConsumerPaymentDetailsUpdateParams.Card &&
-                    it.toParamMap().equals(
-                        mapOf(
-                            "exp_month" to "12",
-                            "exp_year" to "2040",
-                            "billing_address" to mapOf(
-                                "country_code" to "US",
-                                "postal_code" to "12345"
-                            )
-                        )
+                    it.toParamMap() == mapOf(
+                    "exp_month" to "12",
+                    "exp_year" to "2040",
+                    "billing_address" to mapOf(
+                        "country_code" to "US",
+                        "postal_code" to "12345"
                     )
+                )
             }
         )
     }
@@ -188,7 +185,8 @@ class CardEditViewModelTest {
             linkAccountManager = linkAccountManager,
             navigator = navigator,
             logger = Logger.noop(),
-            formControllerProvider = formControllerProvider
+            formControllerProvider = formControllerProvider,
+            args = args
         )
 
     private suspend fun createAndInitViewModel(

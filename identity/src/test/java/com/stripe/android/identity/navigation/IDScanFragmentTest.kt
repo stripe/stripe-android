@@ -18,6 +18,15 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.FPSTracker
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.ID
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_ID
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
@@ -34,15 +43,18 @@ import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -53,6 +65,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class IDScanFragmentTest {
     @get:Rule
@@ -60,11 +73,13 @@ internal class IDScanFragmentTest {
 
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
+        whenever(it.interimResults).thenReturn(mock())
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
 
@@ -73,13 +88,27 @@ internal class IDScanFragmentTest {
     private val documentUploadState =
         MutableStateFlow(DocumentUploadState())
 
+    private val mockFPSTracker = mock<FPSTracker>()
+
+    private val mockScreenTracker = mock<ScreenTracker>()
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
         on { documentUploadState } doReturn documentUploadState
+        on { identityAnalyticsRequestFactory } doReturn
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        on { it.fpsTracker } doReturn mockFPSTracker
+        on { it.screenTracker } doReturn mockScreenTracker
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
     }
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
+        on { getError() } doReturn mock()
     }
 
     private val anyLoadingDocumentUploadState = mock<DocumentUploadState> {
@@ -107,6 +136,23 @@ internal class IDScanFragmentTest {
     }
 
     @Test
+    fun `when started analytics event is sent`() {
+        launchIDScanFragment().onFragment {
+            runBlocking {
+                mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_ID))
+            }
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_ID &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCAN_TYPE] == ID
+                }
+            )
+            verify(mockFPSTracker).start()
+        }
+    }
+
+    @Test
     fun `when front is scanned clicking button triggers back scan`() {
         launchIDScanFragment().onFragment { idScanFragment ->
             // verify start to scan front
@@ -119,6 +165,8 @@ internal class IDScanFragmentTest {
                 same(idScanFragment.lifecycleScope),
                 eq(IdentityScanState.ScanType.ID_FRONT)
             )
+
+            verify(mockFPSTracker).start()
 
             // mock success of front scan
             val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
@@ -145,6 +193,7 @@ internal class IDScanFragmentTest {
 
             // verify start to scan back
             assertThat(idScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockFPSTracker, times(2)).start()
             verify(mockScanFlow).startFlow(
                 same(idScanFragment.requireContext()),
                 any(),
@@ -202,7 +251,7 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT
                         )
                     ),
                     eq(
@@ -241,6 +290,13 @@ internal class IDScanFragmentTest {
                 }
                 successCaptor.lastValue.invoke(mockVerificationPage)
 
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(
+                        SCREEN_NAME_LIVE_CAPTURE_ID
+                    ),
+                    any()
+                )
+
                 // verify navigation attempts
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
@@ -249,11 +305,11 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT
                         )
                     ),
                     eq(
-                        ClearDataParam.UPLOAD_TO_CONFIRM
+                        ClearDataParam.UPLOAD_TO_SELFIE
                     )
                 )
 

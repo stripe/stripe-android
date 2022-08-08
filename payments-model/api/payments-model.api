@@ -3,6 +3,14 @@ public final class com/stripe/android/CardUtils {
 	public static final fun getPossibleCardBrand (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
 }
 
+public final class com/stripe/android/cards/Bin$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/cards/Bin;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/cards/Bin;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/cards/CardNumber$Companion {
 }
 
@@ -12,7 +20,6 @@ public final class com/stripe/android/cards/CardNumber$Unvalidated : com/stripe/
 	public static synthetic fun copy$default (Lcom/stripe/android/cards/CardNumber$Unvalidated;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBin ()Lcom/stripe/android/cards/Bin;
-	public static synthetic fun getFormatted$default (Lcom/stripe/android/cards/CardNumber$Unvalidated;IILjava/lang/Object;)Ljava/lang/String;
 	public final fun getLength ()I
 	public final fun getNormalized ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -23,7 +30,6 @@ public final class com/stripe/android/cards/CardNumber$Unvalidated : com/stripe/
 
 public final class com/stripe/android/model/BankAccount : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/BankAccount$Type;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/BankAccount$Status;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Lcom/stripe/android/model/BankAccount$Status;
 	public final fun component2 ()Ljava/lang/String;
@@ -53,6 +59,14 @@ public final class com/stripe/android/model/BankAccount : com/stripe/android/cor
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/model/BankAccount$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/BankAccount;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/BankAccount;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/BankAccount$Status : java/lang/Enum {
 	public static final field Errored Lcom/stripe/android/model/BankAccount$Status;
 	public static final field New Lcom/stripe/android/model/BankAccount$Status;
@@ -75,7 +89,6 @@ public final class com/stripe/android/model/BankAccount$Type : java/lang/Enum {
 public final class com/stripe/android/model/Card : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/Card$Companion;
-	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/TokenizationMethod;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/String;
@@ -125,6 +138,14 @@ public final class com/stripe/android/model/Card : com/stripe/android/core/model
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/Card$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Card;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/Card;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/CardBrand : java/lang/Enum {
@@ -177,7 +198,6 @@ public abstract interface class com/stripe/android/model/StripePaymentSource : a
 public final class com/stripe/android/model/Token : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/Token$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/model/Token$Type;Ljava/util/Date;ZZLcom/stripe/android/model/BankAccount;Lcom/stripe/android/model/Card;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lcom/stripe/android/model/Token$Type;
 	public final fun component3 ()Ljava/util/Date;
@@ -204,6 +224,14 @@ public final class com/stripe/android/model/Token : com/stripe/android/core/mode
 
 public final class com/stripe/android/model/Token$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/Token;
+}
+
+public final class com/stripe/android/model/Token$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Token;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/Token;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/Token$Type : java/lang/Enum {

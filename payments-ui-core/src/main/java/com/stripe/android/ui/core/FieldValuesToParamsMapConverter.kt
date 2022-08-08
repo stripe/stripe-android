@@ -2,7 +2,7 @@ package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -18,16 +18,18 @@ class FieldValuesToParamsMapConverter {
          */
         fun transformToPaymentMethodCreateParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-            type: PaymentMethod.Type
+            code: PaymentMethodCode,
+            requiresMandate: Boolean
         ) = transformToParamsMap(
             fieldValuePairs,
-            type
+            code
         )
             .filterOutNullValues()
             .toMap()
             .run {
                 PaymentMethodCreateParams.createWithOverride(
-                    type,
+                    code,
+                    requiresMandate = requiresMandate,
                     overrideParamMap = this,
                     productUsage = setOf("PaymentSheet")
                 )
@@ -42,7 +44,7 @@ class FieldValuesToParamsMapConverter {
          */
         private fun transformToParamsMap(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-            type: PaymentMethod.Type,
+            code: PaymentMethodCode
         ): MutableMap<String, Any?> {
             val destMap = mutableMapOf<String, Any?>()
 
@@ -50,7 +52,7 @@ class FieldValuesToParamsMapConverter {
                 .mapValues { entry -> entry.value.value }
                 .mapKeys { it.key.v1 }
 
-            createMap(type, destMap, formKeyValueMap)
+            createMap(code, destMap, formKeyValueMap)
             return destMap
         }
 
@@ -76,37 +78,32 @@ class FieldValuesToParamsMapConverter {
          */
         @Suppress("UNCHECKED_CAST")
         private fun createMap(
-            type: PaymentMethod.Type,
+            code: PaymentMethodCode,
             dest: MutableMap<String, Any?>,
             formFieldKeyValues: Map<String, String?>
         ) {
-            addPath(dest, listOf("type"), type.code)
+            addPath(dest, listOf("type"), code)
 
             formFieldKeyValues.entries
                 .forEach {
-                    // Sofort is the only known LPM that requires the country in the
-                    // billing_details[address][country] and the sofort[country] fields.
-                    if (type == PaymentMethod.Type.Sofort &&
-                        it.key == "billing_details[address][country]"
-                    ) {
-                        addPath(dest, listOf("sofort", "country"), it.value)
-                    }
                     addPath(dest, getKeys(it.key), it.value)
                 }
         }
 
         @VisibleForTesting
         internal fun addPath(map: MutableMap<String, Any?>, keys: List<String>, value: String?) {
-            val key = keys[0]
-            if (keys.size == 1) {
-                map[key] = value
-            } else {
-                var mapValueOfKey = map[key] as? MutableMap<String, Any?>
-                if (mapValueOfKey == null) {
-                    mapValueOfKey = mutableMapOf()
-                    map[key] = mapValueOfKey
+            if (keys.isNotEmpty()) {
+                val key = keys[0]
+                if (keys.size == 1) {
+                    map[key] = value
+                } else {
+                    var mapValueOfKey = map[key] as? MutableMap<String, Any?>
+                    if (mapValueOfKey == null) {
+                        mapValueOfKey = mutableMapOf()
+                        map[key] = mapValueOfKey
+                    }
+                    addPath(mapValueOfKey, keys.subList(1, keys.size), value)
                 }
-                addPath(mapValueOfKey, keys.subList(1, keys.size), value)
             }
         }
 

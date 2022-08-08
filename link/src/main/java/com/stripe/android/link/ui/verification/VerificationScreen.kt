@@ -20,19 +20,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
@@ -43,6 +41,7 @@ import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
 @Composable
@@ -80,6 +79,7 @@ internal fun VerificationBodyFullFlow(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun VerificationBody(
     @StringRes headerStringResId: Int,
@@ -165,7 +165,8 @@ internal fun VerificationBody(
             OTPElementUI(
                 enabled = !isProcessing,
                 element = otpElement,
-                modifier = Modifier.padding(vertical = 10.dp)
+                modifier = Modifier.padding(vertical = 10.dp),
+                colors = MaterialTheme.linkColors.otpElementColors
             )
         }
         if (showChangeEmailMessage) {
@@ -188,9 +189,8 @@ internal fun VerificationBody(
                             enabled = !isProcessing,
                             onClick = onChangeEmailClick
                         ),
-                    style = MaterialTheme.typography.body2
-                        .merge(TextStyle(textDecoration = TextDecoration.Underline)),
-                    color = MaterialTheme.colors.onSecondary
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.linkColors.actionLabel
                 )
             }
         }
@@ -212,7 +212,7 @@ internal fun VerificationBody(
             contentAlignment = Alignment.Center
         ) {
             CompositionLocalProvider(
-                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high,
+                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high
             ) {
                 Text(
                     text = stringResource(id = R.string.verification_resend),

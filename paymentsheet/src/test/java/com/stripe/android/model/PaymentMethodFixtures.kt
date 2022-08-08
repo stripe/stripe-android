@@ -326,6 +326,7 @@ internal object PaymentMethodFixtures {
     )
 
     val US_BANK_ACCOUNT = PaymentMethodJsonParser().parse(US_BANK_ACCOUNT_JSON)
+
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """

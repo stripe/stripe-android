@@ -2,7 +2,14 @@ package com.stripe.android.googlepaylauncher
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
@@ -218,7 +225,7 @@ class GooglePayLauncher internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean = true,
+        var allowCreditCards: Boolean = true
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -276,7 +283,58 @@ class GooglePayLauncher internal constructor(
         fun onResult(result: Result)
     }
 
-    internal companion object {
+    companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
+
+        /**
+         * Create a [GooglePayLauncher] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         * The GooglePayLauncher created is remembered across recompositions. Recomposition will
+         * always return the value produced by composition.
+         */
+        @Composable
+        fun rememberLauncher(
+            config: Config,
+            readyCallback: ReadyCallback,
+            resultCallback: ResultCallback
+        ): GooglePayLauncher {
+            val currentReadyCallback by rememberUpdatedState(readyCallback)
+
+            val context = LocalContext.current
+            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+            val activityResultLauncher = rememberLauncherForActivityResult(
+                GooglePayLauncherContract(),
+                resultCallback::onResult
+            )
+
+            return remember(config) {
+                GooglePayLauncher(
+                    lifecycleScope = lifecycleScope,
+                    config = config,
+                    readyCallback = {
+                        currentReadyCallback.onReady(it)
+                    },
+                    activityResultLauncher = activityResultLauncher,
+                    googlePayRepositoryFactory = {
+                        DefaultGooglePayRepository(
+                            context = context,
+                            environment = config.environment,
+                            billingAddressParameters = config.billingAddressConfig.convert(),
+                            existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                            allowCreditCards = config.allowCreditCards
+                        )
+                    },
+                    PaymentAnalyticsRequestFactory(
+                        context,
+                        PaymentConfiguration.getInstance(context).publishableKey,
+                        setOf(PRODUCT_USAGE)
+                    ),
+                    DefaultAnalyticsRequestExecutor()
+                )
+            }
+        }
     }
 }

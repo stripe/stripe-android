@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import android.os.Looper.getMainLooper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
@@ -9,6 +8,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -225,7 +225,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `total amount label is hidden for SetupIntent`() {
         createScenario(
             FRAGMENT_CONFIG.copy(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         ).onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
 
@@ -284,7 +284,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             PaymentSheetViewModel.Factory(
                 { fragment.requireActivity().application },
                 { PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY },
-                mock(),
+                mock()
             )
         }.value
     }
@@ -308,13 +308,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 updatePaymentMethods(fragmentConfig.stripeIntent)
                 setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
-                registerViewModel(
-                    starterArgs.injectorKey,
-                    this,
-                    LpmRepository(
-                        ApplicationProvider.getApplicationContext<Application>().resources
-                    )
-                )
+                registerViewModel(starterArgs.injectorKey, this, lpmRepository)
             }
         }
         return launchFragmentInContainer(
@@ -323,16 +317,25 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
             ),
             R.style.StripePaymentSheetDefaultTheme,
-            initialState = initialState,
+            initialState = initialState
         )
     }
 
     private companion object {
         private val PAYMENT_METHODS = listOf(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
+
+        val lpmRepository =
+            LpmRepository(
+                LpmRepository.LpmRepositoryArguments(
+                    InstrumentationRegistry.getInstrumentation().targetContext.resources
+                )
+            ).apply {
+                this.updateFromDisk()
+            }
     }
 }

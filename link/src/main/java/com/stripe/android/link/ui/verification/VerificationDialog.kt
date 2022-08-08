@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -30,6 +31,7 @@ import com.stripe.android.link.ui.LinkAppBar
  */
 typealias LinkVerificationCallback = (success: Boolean) -> Unit
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkVerificationDialog(
     linkLauncher: LinkPaymentLauncher,
@@ -48,15 +50,19 @@ fun LinkVerificationDialog(
 
             val injector = requireNotNull(linkLauncher.injector)
             val linkAccount = linkLauncher.linkAccountManager.linkAccount.collectAsState()
+            val linkEventsReporter = linkLauncher.linkEventsReporter
+
+            val onDismiss = {
+                openDialog = false
+                linkEventsReporter.on2FACancel()
+                verificationCallback(false)
+            }
 
             linkAccount.value?.let { account ->
                 if (openDialog) {
                     Dialog(
-                        onDismissRequest = {
-                            openDialog = false
-                            verificationCallback(false)
-                        },
-                        properties = DialogProperties(usePlatformDefaultWidth = false),
+                        onDismissRequest = onDismiss,
+                        properties = DialogProperties(usePlatformDefaultWidth = false)
                     ) {
                         DefaultLinkTheme {
                             Surface(
@@ -69,10 +75,7 @@ fun LinkVerificationDialog(
                                     LinkAppBar(
                                         email = account.email,
                                         isRootScreen = true,
-                                        onButtonClick = {
-                                            openDialog = false
-                                            verificationCallback(false)
-                                        }
+                                        onButtonClick = onDismiss
                                     )
                                     VerificationBody(
                                         headerStringResId = R.string.verification_header_prefilled,

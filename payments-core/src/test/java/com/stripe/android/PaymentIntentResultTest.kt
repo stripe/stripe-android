@@ -48,11 +48,11 @@ class PaymentIntentResultTest {
             created = 500L,
             amount = 1000L,
             clientSecret = "secret",
-            paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT_PAYMENT_METHOD,
+            paymentMethod = PaymentMethodFixtures.OXXO_PAYMENT_METHOD,
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
-            paymentMethodTypes = listOf(PaymentMethod.Type.USBankAccount.code),
+            paymentMethodTypes = listOf(PaymentMethod.Type.Oxxo.code),
             status = StripeIntent.Status.Processing,
             unactivatedPaymentMethods = emptyList(),
             nextActionData = StripeIntent.NextActionData.DisplayOxxoDetails()

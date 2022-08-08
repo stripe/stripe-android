@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.core.os.LocaleListCompat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -11,9 +12,10 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class PhoneNumberController internal constructor(
-    initialPhoneNumber: String = "",
+    val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
-    overrideCountryCodes: Set<String> = emptySet()
+    overrideCountryCodes: Set<String> = emptySet(),
+    override val showOptionalLabel: Boolean = false
 ) : InputController {
     override val label = flowOf(R.string.address_label_phone_number)
 
@@ -24,7 +26,18 @@ class PhoneNumberController internal constructor(
      */
     override val fieldValue: Flow<String> = _fieldValue
 
-    private val countryConfig = CountryConfig(overrideCountryCodes, flagMode = true)
+    private val countryConfig = CountryConfig(
+        overrideCountryCodes,
+        tinyMode = true,
+        expandedLabelMapper = { country ->
+            "${CountryConfig.countryCodeToEmoji(country.code.value)} ${country.name}" +
+                (PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { " $it" } ?: "")
+        },
+        collapsedLabelMapper = { country ->
+            CountryConfig.countryCodeToEmoji(country.code.value) +
+                (PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { "  $it  " } ?: "")
+        }
+    )
     val countryDropdownController = DropdownFieldController(
         countryConfig,
         initiallySelectedCountryCode
@@ -42,10 +55,9 @@ class PhoneNumberController internal constructor(
     override val rawFieldValue = combine(fieldValue, phoneNumberFormatter) { value, formatter ->
         formatter.toE164Format(value)
     }
-    override val isComplete = fieldValue.map { it.isNotBlank() }
-    override val showOptionalLabel = false
-    override val formFieldValue = fieldValue.map {
-        FormFieldEntry(it, it.isNotBlank())
+    override val isComplete = fieldValue.map { it.isNotBlank() || showOptionalLabel }
+    override val formFieldValue = fieldValue.combine(isComplete) { fieldValue, isComplete ->
+        FormFieldEntry(fieldValue, isComplete)
     }
 
     override val error: Flow<FieldError?> = flowOf(null)
@@ -75,12 +87,46 @@ class PhoneNumberController internal constructor(
     }
 
     companion object {
+        /**
+         * Instantiate a [PhoneNumberController] with the given initial values.
+         * If [initialValue] is in the E.164 format, try to find the most likely country code based
+         * on the prefix and the device's locales list.
+         */
         fun createPhoneNumberController(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null
-        ) = PhoneNumberController(
-            initialPhoneNumber = initialValue,
-            initiallySelectedCountryCode = initiallySelectedCountryCode
-        )
+        ): PhoneNumberController {
+            // Find the regions that match the phone number prefix, then pick the top match from the
+            // device's locales
+            if (initiallySelectedCountryCode == null && initialValue.startsWith("+")) {
+                var charIndex = 1
+                while (charIndex < initialValue.length - 1 && charIndex < 4) {
+                    charIndex++
+                    PhoneNumberFormatter.findBestCountryForPrefix(
+                        initialValue.substring(0, charIndex),
+                        LocaleListCompat.getAdjustedDefault()
+                    )?.let {
+                        return PhoneNumberController(
+                            initialPhoneNumber = initialValue.substring(charIndex),
+                            initiallySelectedCountryCode = it
+                        )
+                    }
+                }
+            }
+
+            // Clean up if initial country is set and country prefix is in initial phone number
+            if (initiallySelectedCountryCode != null && initialValue.startsWith("+")) {
+                val prefix = PhoneNumberFormatter.forCountry(initiallySelectedCountryCode).prefix
+                return PhoneNumberController(
+                    initialPhoneNumber = initialValue.removePrefix(prefix),
+                    initiallySelectedCountryCode = initiallySelectedCountryCode
+                )
+            }
+
+            return PhoneNumberController(
+                initialPhoneNumber = initialValue,
+                initiallySelectedCountryCode = initiallySelectedCountryCode
+            )
+        }
     }
 }

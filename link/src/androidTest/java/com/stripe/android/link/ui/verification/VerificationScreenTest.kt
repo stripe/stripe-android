@@ -109,6 +109,8 @@ internal class VerificationScreenTest {
 
         assertThat(otpValue?.isComplete).isTrue()
         assertThat(otpValue?.value).isEqualTo("123")
+
+        composeTestRule.waitForIdle()
     }
 
     @Test
@@ -125,6 +127,8 @@ internal class VerificationScreenTest {
 
         assertThat(otpValue?.isComplete).isTrue()
         assertThat(otpValue?.value).isEqualTo("123456")
+
+        composeTestRule.waitForIdle()
     }
 
     @Test

@@ -41,10 +41,10 @@ class GooglePayButtonTest {
     @Test
     fun `onReadyState() should update the backgroundTint`() {
         googlePayButton.updateState(
-            PrimaryButton.State.StartProcessing,
+            PrimaryButton.State.StartProcessing
         )
         googlePayButton.updateState(
-            PrimaryButton.State.FinishProcessing {},
+            PrimaryButton.State.FinishProcessing {}
         )
         assertThat(primaryButton.isVisible).isTrue()
         assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isFalse()
@@ -60,7 +60,7 @@ class GooglePayButtonTest {
     @Test
     fun `onStartProcessing() should update label`() {
         googlePayButton.updateState(
-            PrimaryButton.State.StartProcessing,
+            PrimaryButton.State.StartProcessing
         )
         assertThat(
             primaryButton.externalLabel
@@ -77,7 +77,7 @@ class GooglePayButtonTest {
         googlePayButton.updateState(
             PrimaryButton.State.FinishProcessing {
                 finishedProcessing = true
-            },
+            }
         )
 
         idleLooper()

@@ -6,6 +6,8 @@
   <string name="address_label_city">Bandar</string>
   <!-- Caption for Country field on address form -->
   <string name="address_label_country">Negara</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="address_label_country_or_region">Negara atau rantau</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Kaunti</string>
   <!-- Caption for Name field on address form -->

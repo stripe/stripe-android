@@ -34,7 +34,6 @@ class LinkActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val args = LinkActivityContract.Args(
         StripeIntentFixtures.PI_SUCCEEDED,
-        true,
         "Example, Inc.",
         "email@stripe.com"
     )

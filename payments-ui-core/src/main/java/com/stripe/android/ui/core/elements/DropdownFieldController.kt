@@ -23,7 +23,7 @@ class DropdownFieldController(
     val selectedIndex: StateFlow<Int> = _selectedIndex
     override val label: Flow<Int> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.map { displayItems[it] }
-    override val rawFieldValue = fieldValue.map { config.convertToRaw(it) }
+    override val rawFieldValue = selectedIndex.map { config.rawItems[it] }
     override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val showOptionalLabel: Boolean = false // not supported yet
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)

@@ -22,6 +22,9 @@ import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_FILE_UPLOAD_PASSPORT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
@@ -32,14 +35,18 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -56,6 +63,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowDialog
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PassportUploadFragmentTest {
     @get:Rule
@@ -63,6 +71,7 @@ class PassportUploadFragmentTest {
     private val mockUri = mock<Uri>()
 
     private val mockIdentityUploadViewModel = mock<IdentityUploadViewModel>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
@@ -78,14 +87,25 @@ class PassportUploadFragmentTest {
 
     private val errorDocumentUploadState = mock<DocumentUploadState> {
         on { hasError() } doReturn true
+        on { getError() } doReturn mock()
     }
 
+    private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
+        whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val mockIdentityViewModelWithSelfie = mock<IdentityViewModel>().also {
@@ -94,6 +114,15 @@ class PassportUploadFragmentTest {
             successCaptor.firstValue(verificationPageWithSelfie)
         }
         whenever(it.documentUploadState).thenReturn(documentUploadState)
+        whenever(it.identityAnalyticsRequestFactory).thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
+        whenever(it.screenTracker).thenReturn(mockScreenTracker)
+        whenever(it.uiContext).thenReturn(testDispatcher)
+        whenever(it.workContext).thenReturn(testDispatcher)
     }
 
     private val navController = TestNavHostController(
@@ -103,7 +132,18 @@ class PassportUploadFragmentTest {
     @Test
     fun `when initialized viewmodel registers activityResultCaller and UI is correct`() {
         launchFragment { binding, _, fragment ->
-            verify(mockIdentityUploadViewModel).registerActivityResultCaller(same(fragment))
+            val callbackCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            verify(mockIdentityUploadViewModel).registerActivityResultCaller(
+                same(fragment),
+                callbackCaptor.capture(),
+                callbackCaptor.capture(),
+                callbackCaptor.capture(),
+                callbackCaptor.capture()
+            )
+
+            runBlocking {
+                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_FILE_UPLOAD_PASSPORT))
+            }
 
             assertThat(binding.selectFront.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.GONE)
@@ -195,6 +235,11 @@ class PassportUploadFragmentTest {
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(SCREEN_NAME_FILE_UPLOAD_PASSPORT),
+                    any()
+                )
+
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
                         idDocumentFront = DocumentUploadParam(
@@ -238,6 +283,11 @@ class PassportUploadFragmentTest {
 
                 binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                verify(mockScreenTracker).screenTransitionStart(
+                    eq(SCREEN_NAME_FILE_UPLOAD_PASSPORT),
+                    any()
+                )
+
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
                         idDocumentFront = DocumentUploadParam(
@@ -248,7 +298,7 @@ class PassportUploadFragmentTest {
                     )
                 )
                 assertThat(clearDataParamCaptor.firstValue).isEqualTo(
-                    ClearDataParam.UPLOAD_TO_CONFIRM
+                    ClearDataParam.UPLOAD_TO_SELFIE
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -259,6 +309,18 @@ class PassportUploadFragmentTest {
 
     private fun verifyFlow(isTakePhoto: Boolean) {
         launchFragment { binding, _, fragment ->
+            val frontPhotoTakenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            val backPhotoTakenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            val frontImageChosenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            val backImageChosenCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
+            verify(mockIdentityUploadViewModel).registerActivityResultCaller(
+                same(fragment),
+                frontPhotoTakenCaptor.capture(),
+                backPhotoTakenCaptor.capture(),
+                frontImageChosenCaptor.capture(),
+                backImageChosenCaptor.capture()
+            )
+
             binding.selectFront.callOnClick()
 
             val dialog = ShadowDialog.getLatestDialog()
@@ -282,20 +344,15 @@ class PassportUploadFragmentTest {
             // dialog dismissed
             assertThat(dialog.isShowing).isFalse()
 
-            // viewmodel triggers
-            val callbackCaptor: KArgumentCaptor<(Uri) -> Unit> = argumentCaptor()
-
             if (isTakePhoto) {
                 verify(mockIdentityUploadViewModel).takePhotoFront(
-                    same(fragment.requireContext()),
-                    callbackCaptor.capture()
+                    same(fragment.requireContext())
                 )
+                frontPhotoTakenCaptor.firstValue(mockUri)
             } else {
-                verify(mockIdentityUploadViewModel).chooseImageFront(callbackCaptor.capture())
+                verify(mockIdentityUploadViewModel).chooseImageFront()
+                frontImageChosenCaptor.firstValue(mockUri)
             }
-
-            // mock photo taken/image chosen
-            callbackCaptor.firstValue(mockUri)
 
             // viewmodel triggers and UI updates
             verify(mockIdentityViewModel).uploadManualResult(
@@ -303,10 +360,12 @@ class PassportUploadFragmentTest {
                 isFront = eq(true),
                 docCapturePage = same(DOCUMENT_CAPTURE),
                 uploadMethod =
-                if (isTakePhoto)
+                if (isTakePhoto) {
                     eq(UploadMethod.MANUALCAPTURE)
-                else
+                } else {
                     eq(UploadMethod.FILEUPLOAD)
+                },
+                scanType = eq(IdentityScanState.ScanType.PASSPORT)
             )
             assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
@@ -342,20 +401,23 @@ class PassportUploadFragmentTest {
         themeResId = R.style.Theme_MaterialComponents
     ) {
         TestPassportUploadFragment(
-            viewModelFactoryFor(mockIdentityUploadViewModel),
+            mock(),
             viewModelFactoryFor(if (requireSelfie) mockIdentityViewModelWithSelfie else mockIdentityViewModel),
             navController
-        )
+        ).also {
+            it.identityUploadViewModelFactory = viewModelFactoryFor(mockIdentityUploadViewModel)
+        }
     }.onFragment {
         testBlock(IdentityUploadFragmentBinding.bind(it.requireView()), navController, it)
     }
 
     internal class TestPassportUploadFragment(
-        identityUploadViewModelFactory: ViewModelProvider.Factory,
+        identityIO: IdentityIO,
         identityViewModelFactory: ViewModelProvider.Factory,
         val navController: TestNavHostController
     ) : PassportUploadFragment(
-        identityUploadViewModelFactory, identityViewModelFactory
+        identityIO,
+        identityViewModelFactory
     ) {
         override fun onCreateView(
             inflater: LayoutInflater,

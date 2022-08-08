@@ -38,7 +38,12 @@ data class IdentifierSpec(val v1: String) {
 
         val City = IdentifierSpec("billing_details[address][city]")
 
+        // FieldValuesToParamsMapConverter will ignore this in the parameter list
+        val DependentLocality = IdentifierSpec("")
+
         val PostalCode = IdentifierSpec("billing_details[address][postal_code]")
+
+        val SortingCode = IdentifierSpec("")
 
         val State = IdentifierSpec("billing_details[address][state]")
 
@@ -46,6 +51,7 @@ data class IdentifierSpec(val v1: String) {
 
         // Unique extracting functionality
         val SaveForFutureUse = IdentifierSpec("save_for_future_use")
+        val OneLineAddress = IdentifierSpec("address")
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
@@ -62,6 +68,7 @@ data class IdentifierSpec(val v1: String) {
             PostalCode.v1 -> PostalCode
             SaveForFutureUse.v1 -> SaveForFutureUse
             State.v1 -> State
+            OneLineAddress.v1 -> OneLineAddress
             else -> {
                 Generic(value)
             }

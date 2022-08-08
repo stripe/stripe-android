@@ -20,7 +20,9 @@ import java.io.Serializable
  * [error code](https://stripe.com/docs/error-codes) that briefly explains the error reported.
  */
 @Parcelize
-data class StripeError @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+data class StripeError
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * The type of error returned. One of `api_connection_error`, `api_error`,
      * `authentication_error`, `card_error`, `idempotency_error`, `invalid_request_error`,
@@ -78,5 +80,11 @@ data class StripeError @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
      *
      * [doc_url](https://stripe.com/docs/api/errors#errors-doc_url)
      */
-    val docUrl: String? = null
+    val docUrl: String? = null,
+
+    /**
+     * Internal list of extra fields related to the error.
+     * Note - value type is ignored and always parsed as string (true -> "true")
+     */
+    internal val extraFields: Map<String, String>? = null
 ) : StripeModel, Serializable

@@ -6,13 +6,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
+import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 
 /**
  * Base error fragment displaying error messages and two buttons
  */
-internal abstract class BaseErrorFragment : Fragment() {
+internal abstract class BaseErrorFragment(
+    private val identityViewModelFactory: ViewModelProvider.Factory
+) : Fragment() {
+    protected val identityViewModel: IdentityViewModel by activityViewModels {
+        identityViewModelFactory
+    }
+
     protected lateinit var title: TextView
     protected lateinit var message1: TextView
     protected lateinit var message2: TextView
@@ -32,6 +44,18 @@ internal abstract class BaseErrorFragment : Fragment() {
         bottomButton = binding.bottomButton
         onCustomizingViews()
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_ERROR)
+        }
+        identityViewModel.sendAnalyticsRequest(
+            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                screenName = SCREEN_NAME_ERROR
+            )
+        )
     }
 
     protected abstract fun onCustomizingViews()

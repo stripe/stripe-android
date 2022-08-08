@@ -21,6 +21,8 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +32,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -46,7 +50,7 @@ import javax.inject.Provider
 internal class FormViewModel @Inject internal constructor(
     paymentMethodCode: PaymentMethodCode,
     config: FormFragmentArguments,
-    private val resourceRepository: ResourceRepository,
+    internal val resourceRepository: ResourceRepository,
     private val transformSpecToElement: TransformSpecToElement
 ) : ViewModel() {
     internal class Factory(
@@ -95,10 +99,27 @@ internal class FormViewModel @Inject internal constructor(
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
-                resourceRepository.waitUntilLoaded()
-                delayedElements.value = transformSpecToElement.transform(
-                    getLpmItems(paymentMethodCode)
-                )
+                // The coroutine scope is needed to do work off the UI thread so that the
+                // repository ready event can be observed in the ComposeFormDataCollection
+                // Fragment and the fragment repository will be updated and ready
+                CoroutineScope(Dispatchers.IO).launch {
+
+                    // If after we complete waiting for the repository things are still
+                    // active, then update the elements
+                    resourceRepository.waitUntilLoaded()
+                    if (resourceRepository.isLoaded() && isActive) {
+                        // When open payment options with returning customer with saved cards, then
+                        // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
+                        // is no longer listening for the resource repository to be ready and so
+                        // the resource repository is not ready!
+                        val values = transformSpecToElement.transform(
+                            getLpmItems(paymentMethodCode)
+                        )
+                        withContext(Dispatchers.Main) {
+                            delayedElements.value = values
+                        }
+                    }
+                }
             }
             this.elements = delayedElements
         }

@@ -8,16 +8,25 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
 import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentTextPage
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -25,12 +34,24 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class ConfirmationFragmentTest {
-
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val mockIdentityViewModel = mock<IdentityViewModel>()
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { identityAnalyticsRequestFactory }.thenReturn(
+            IdentityAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                args = mock()
+            )
+        )
+        on { uiContext } doReturn testDispatcher
+        on { workContext } doReturn testDispatcher
+        on { screenTracker } doReturn mock()
+        on { analyticsState } doReturn mock()
+    }
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.success).thenReturn(
@@ -64,7 +85,7 @@ class ConfirmationFragmentTest {
             any(),
             failureCaptor.capture()
         )
-        failureCaptor.firstValue(null)
+        failureCaptor.firstValue(mock())
     }
 
     @Test
@@ -72,6 +93,12 @@ class ConfirmationFragmentTest {
         launchConfirmationFragment { binding, _ ->
             setUpSuccessVerificationPage()
 
+            verify(mockIdentityViewModel).sendAnalyticsRequest(
+                argThat {
+                    eventName == EVENT_SCREEN_PRESENTED &&
+                        (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_CONFIRMATION
+                }
+            )
             assertThat(binding.titleText.text).isEqualTo(CONFIRMATION_TITLE)
             assertThat(binding.contentText.text.toString()).isEqualTo(CONFIRMATION_BODY)
             assertThat(binding.kontinue.text).isEqualTo(CONFIRMATION_BUTTON_TEXT)
@@ -84,6 +111,7 @@ class ConfirmationFragmentTest {
             setUpSuccessVerificationPage()
             binding.kontinue.callOnClick()
 
+            verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 eq(IdentityVerificationSheet.VerificationFlowResult.Completed)
             )

@@ -9,7 +9,9 @@ import java.net.HttpURLConnection
  *
  * [Errors](https://stripe.com/docs/api/errors)
  */
-class AuthenticationException @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+class AuthenticationException
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     stripeError: StripeError,
     requestId: String? = null
 ) : StripeException(

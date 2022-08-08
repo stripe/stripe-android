@@ -196,7 +196,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     private val mandateDataParams: Map<String, Any>?
         get() {
             return mandateData?.toParamMap()
-                ?: if (paymentMethodCreateParams?.type?.requiresMandate == true && mandateId == null) {
+                ?: if (paymentMethodCreateParams?.requiresMandate == true && mandateId == null) {
                     // Populate with default "online" MandateData
                     MandateDataParams(MandateDataParams.Type.Online.DEFAULT).toParamMap()
                 } else {
@@ -538,7 +538,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 paymentMethodId = paymentMethodId,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card(moto = true),
                 savePaymentMethod = false,
-                useStripeSdk = true,
+                useStripeSdk = true
             )
         }
     }

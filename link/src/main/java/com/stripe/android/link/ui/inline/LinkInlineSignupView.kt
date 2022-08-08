@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.LocalFocusManager
@@ -35,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
@@ -47,6 +47,7 @@ import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -69,6 +70,7 @@ private fun Preview() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LinkInlineSignup(
     injector: NonFallbackInjector,
@@ -121,7 +123,7 @@ internal fun LinkInlineSignup(
     onUserInteracted: () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         PaymentsTheme {
             Column(
@@ -191,7 +193,8 @@ internal fun LinkInlineSignup(
                                 PhoneNumberCollectionSection(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
-                                    requestFocusWhenShown = true
+                                    requestFocusWhenShown =
+                                    phoneNumberController.initialPhoneNumber.isEmpty()
                                 )
                                 LinkTerms(
                                     modifier = Modifier.padding(top = 8.dp),

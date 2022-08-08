@@ -30,7 +30,10 @@ internal data class VerificationPageDataRequirementError(
         IDDOCUMENTFRONT,
 
         @SerialName("id_document_type")
-        IDDOCUMENTTYPE;
+        IDDOCUMENTTYPE,
+
+        @SerialName("face")
+        FACE;
 
         internal companion object {
             private val SCAN_UPLOAD_FRAGMENT_ID_SET = setOf(
@@ -58,6 +61,9 @@ internal data class VerificationPageDataRequirementError(
                     }
                     IDDOCUMENTTYPE -> {
                         fromFragment == R.id.docSelectionFragment
+                    }
+                    FACE -> {
+                        fromFragment == R.id.selfieFragment
                     }
                 }
         }

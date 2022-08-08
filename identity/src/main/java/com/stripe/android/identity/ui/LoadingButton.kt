@@ -18,7 +18,9 @@ internal class LoadingButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : RelativeLayout(
-    context, attrs, defStyleAttr
+    context,
+    attrs,
+    defStyleAttr
 ) {
     init {
         LoadingButtonBinding.inflate(LayoutInflater.from(context), this)

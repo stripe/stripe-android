@@ -16,7 +16,7 @@ class CountryConfigTest {
     @Test
     fun `Verify the label`() {
         assertThat(CountryConfig(locale = Locale.US).label)
-            .isEqualTo(R.string.address_label_country)
+            .isEqualTo(R.string.address_label_country_or_region)
     }
 
     @Test
@@ -30,48 +30,29 @@ class CountryConfigTest {
     }
 
     @Test
-    fun `Verify converts diplay name to country`() {
-        val config = CountryConfig(
-            onlyShowCountryCodes = setOf("AT"),
-            locale = Locale.US
-        )
-        assertThat(
-            config.convertToRaw(config.displayItems[0])
-        ).isEqualTo("AT")
-    }
-
-    @Test
     fun `Regular mode shows only country name when collapsed`() {
         assertThat(
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                flagMode = false
+                tinyMode = false
             ).getSelectedItemLabel(0)
         ).isEqualTo("Austria")
     }
 
     @Test
-    fun `Flag mode shows only flag when collapsed`() {
+    fun `When collapsed correct label is shown`() {
         assertThat(
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                flagMode = true
+                tinyMode = true,
+                collapsedLabelMapper = { country ->
+                    CountryConfig.countryCodeToEmoji(country.code.value)
+                },
+                expandedLabelMapper = { country -> country.name }
             ).getSelectedItemLabel(0)
         ).isEqualTo("🇦🇹")
-    }
-
-    @Test
-    fun `Flag mode converts diplay name to country`() {
-        val config = CountryConfig(
-            onlyShowCountryCodes = setOf("AT"),
-            locale = Locale.US,
-            flagMode = true
-        )
-        assertThat(
-            config.convertToRaw(config.displayItems[0])
-        ).isEqualTo("AT")
     }
 
     @Test

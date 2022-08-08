@@ -29,8 +29,8 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
-import com.stripe.android.ui.core.elements.StaticElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
+import com.stripe.android.ui.core.elements.StaticTextElementUI
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -60,7 +60,7 @@ fun FormUI(
                             hiddenIdentifiers,
                             lastTextFieldIdentifier
                         )
-                        is StaticTextElement -> StaticElementUI(element)
+                        is StaticTextElement -> StaticTextElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
                         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
                             enabled,
@@ -70,12 +70,12 @@ fun FormUI(
                         is AffirmHeaderElement -> AffirmElementUI()
                         is MandateTextElement -> MandateTextUI(element)
                         is CardDetailsSectionElement -> CardDetailsSectionElementUI(
-                            enabled, element.controller, hiddenIdentifiers
+                            enabled,
+                            element.controller,
+                            hiddenIdentifiers
                         )
                         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
-                        is OTPElement -> DefaultPaymentsTheme {
-                            OTPElementUI(enabled, element)
-                        }
+                        is OTPElement -> OTPElementUI(enabled, element)
                         is EmptyFormElement -> {}
                     }
                 }

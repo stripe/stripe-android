@@ -7,8 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.NonFallbackInjectable
-import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -16,7 +15,8 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,19 +39,19 @@ internal class SignUpViewModel @Inject constructor(
     args: LinkActivityContract.Args,
     @Named(PREFILLED_EMAIL) private val customerEmail: String?,
     private val linkAccountManager: LinkAccountManager,
+    private val linkEventsReporter: LinkEventsReporter,
     private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
     private val prefilledEmail =
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
+    private val prefilledPhone =
+        args.customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
 
     val merchantName: String = args.merchantName
 
-    val emailController: TextFieldController = SimpleTextFieldController
-        .createEmailSectionController(prefilledEmail)
-
-    val phoneController: PhoneNumberController =
-        PhoneNumberController.createPhoneNumberController()
+    val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
+    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -92,6 +92,8 @@ internal class SignUpViewModel @Inject constructor(
                 }
             }
         )
+
+        linkEventsReporter.onSignupFlowPresented()
     }
 
     fun onSignUpClick() {
@@ -104,8 +106,12 @@ internal class SignUpViewModel @Inject constructor(
             linkAccountManager.signUp(email, phone, country).fold(
                 onSuccess = {
                     onAccountFetched(it)
+                    linkEventsReporter.onSignupCompleted()
                 },
-                onFailure = ::onError
+                onFailure = {
+                    onError(it)
+                    linkEventsReporter.onSignupFailure()
+                }
             )
         }
     }
@@ -118,6 +124,7 @@ internal class SignUpViewModel @Inject constructor(
                     onAccountFetched(it)
                 } else {
                     _signUpStatus.value = SignUpState.InputtingPhone
+                    linkEventsReporter.onSignupStarted()
                 }
             },
             onFailure = ::onError
@@ -209,7 +216,7 @@ internal class SignUpViewModel @Inject constructor(
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
-        const val LOOKUP_DEBOUNCE_MS = 700L
+        const val LOOKUP_DEBOUNCE_MS = 1000L
 
         const val PREFILLED_EMAIL = "prefilled_email"
     }

@@ -5,7 +5,11 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
@@ -22,6 +26,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -30,21 +35,27 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
-import javax.inject.Inject
-import javax.inject.Singleton
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
  * a particular requested LPM.
+ *
+ * This is not injected as a singleton because when the activity is killed
+ * the FormViewModel and SheetViewModel don't share the Dagger graph and the
+ * repository is not a singleton.  Additionally every time you create a new
+ * form view model a new repository is created and thus needs to be initialized.
  */
-@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository @Inject constructor(
-    resources: Resources?
+class LpmRepository constructor(
+    private val arguments: LpmRepositoryArguments
 ) {
-    private val lpmSerializer: LpmSerializer = LpmSerializer()
+    private val lpmSerializer = LpmSerializer()
+    private val serverInitializedLatch = CountDownLatch(1)
+    var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
-    private lateinit var codeToSupportedPaymentMethod: Map<String, SupportedPaymentMethod>
+    private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
 
     fun values() = codeToSupportedPaymentMethod.values
 
@@ -52,21 +63,104 @@ class LpmRepository @Inject constructor(
         codeToSupportedPaymentMethod[paymentMethodCode]
     }
 
-    init {
-        initialize(
-            resources?.assets?.open("lpms.json")
-        )
+    fun isLoaded() = serverInitializedLatch.count <= 0L
+
+    fun waitUntilLoaded() {
+        serverInitializedLatch.await(20, TimeUnit.SECONDS)
+    }
+
+    /**
+     * This method will read the expected LPMs and their specs as two separate parameters.
+     * Any spec now found from the server will be read from disk json file.
+     *
+     * It is still possible that an lpm that is expected cannot be read successfully from
+     * the json spec on disk or the server spec.
+     *
+     * It is also possible that an LPM is present in the repository that is not present
+     * in the expected LPM list.
+     *
+     * Reading the server spec is all or nothing, any error means none will be read
+     * so it is important that the json on disk is successful.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun update(
+        expectedLpms: List<String>,
+        serverLpmSpecs: String?
+    ) = internalUpdate(expectedLpms, serverLpmSpecs, false)
+
+    @VisibleForTesting
+    fun forceUpdate(
+        expectedLpms: List<String>,
+        serverLpmSpecs: String?
+    ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
+
+    /**
+     * Will add the server specs to the repository and load the ones from disk if
+     * server is not parseable.
+     */
+    private fun internalUpdate(
+        expectedLpms: List<String>,
+        serverLpmSpecs: String?,
+        force: Boolean = false
+    ) {
+        // If the expectedLpms is different form last time, we still need to reload.
+        var lpmsNotParsedFromServerSpec = expectedLpms
+            .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+        if (!isLoaded() || force || lpmsNotParsedFromServerSpec.isNotEmpty()) {
+            serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
+            if (!serverLpmSpecs.isNullOrEmpty()) {
+                serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
+                val serverLpmObjects = lpmSerializer.deserializeList(serverLpmSpecs)
+                if (serverLpmObjects.isNotEmpty()) {
+                    serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
+                }
+                update(serverLpmObjects)
+            }
+
+            // If the server does not return specs, or they are not parsed successfully
+            // we will use the LPM on disk if found
+            lpmsNotParsedFromServerSpec = expectedLpms
+                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+                val mapFromDisk: Map<String, SharedDataSpec>? =
+                    readFromDisk()
+                        ?.associateBy { it.type }
+                        ?.filterKeys { expectedLpms.contains(it) }
+                codeToSupportedPaymentMethod.putAll(
+                    lpmsNotParsedFromServerSpec
+                        .mapNotNull { mapFromDisk?.get(it) }
+                        .mapNotNull { convertToSupportedPaymentMethod(it) }
+                        .associateBy { it.code }
+                )
+            }
+
+            serverInitializedLatch.countDown()
+        }
     }
 
     @VisibleForTesting
-    fun initialize(inputStream: InputStream?) {
-        val parsedSupportedPaymentMethod = parseLpms(inputStream)
+    fun updateFromDisk() {
+        update(readFromDisk())
+    }
+
+    private fun readFromDisk() =
+        parseLpms(arguments.resources?.assets?.open("lpms.json"))
+
+    private fun update(lpms: List<SharedDataSpec>?) {
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        val parsedSupportedPaymentMethod = lpms
             ?.filter { exposedPaymentMethods.contains(it.type) }
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
+            ?.toMutableList()
 
-        // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        codeToSupportedPaymentMethod =
-            parsedSupportedPaymentMethod?.associateBy { it.type.code } ?: emptyMap()
+        parsedSupportedPaymentMethod?.removeAll {
+            !arguments.isFinancialConnectionsAvailable() &&
+                it.code == PaymentMethod.Type.USBankAccount.code
+        }
+
+        codeToSupportedPaymentMethod.putAll(
+            parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
+        )
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -80,7 +174,8 @@ class LpmRepository @Inject constructor(
     private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) =
         when (sharedDataSpec.type) {
             PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Card,
+                "card",
+                false,
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
                 true,
@@ -92,7 +187,8 @@ class LpmRepository @Inject constructor(
                 }
             )
             PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
+                "bancontact",
+                true,
                 R.string.stripe_paymentsheet_payment_method_bancontact,
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 false,
@@ -100,7 +196,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Sofort,
+                "sofort",
+                true,
                 R.string.stripe_paymentsheet_payment_method_sofort,
                 R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 false,
@@ -108,7 +205,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Ideal,
+                "ideal",
+                true,
                 R.string.stripe_paymentsheet_payment_method_ideal,
                 R.drawable.stripe_ic_paymentsheet_pm_ideal,
                 false,
@@ -116,7 +214,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
+                "sepa_debit",
+                true,
                 R.string.stripe_paymentsheet_payment_method_sepa_debit,
                 R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
                 false,
@@ -124,7 +223,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Eps,
+                "eps",
+                true,
                 R.string.stripe_paymentsheet_payment_method_eps,
                 R.drawable.stripe_ic_paymentsheet_pm_eps,
                 false,
@@ -132,7 +232,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.P24,
+                "p24",
+                false,
                 R.string.stripe_paymentsheet_payment_method_p24,
                 R.drawable.stripe_ic_paymentsheet_pm_p24,
                 false,
@@ -140,7 +241,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Giropay,
+                "giropay",
+                false,
                 R.string.stripe_paymentsheet_payment_method_giropay,
                 R.drawable.stripe_ic_paymentsheet_pm_giropay,
                 false,
@@ -148,15 +250,21 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.AfterpayClearpay,
-                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+                "afterpay_clearpay",
+                false,
+                if (isClearpay()) {
+                    R.string.stripe_paymentsheet_payment_method_clearpay
+                } else {
+                    R.string.stripe_paymentsheet_payment_method_afterpay
+                },
                 R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
                 false,
                 AfterpayClearpayRequirement,
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Klarna,
+                "klarna",
+                false,
                 R.string.stripe_paymentsheet_payment_method_klarna,
                 R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 false,
@@ -164,7 +272,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.PayPal,
+                "paypal",
+                false,
                 R.string.stripe_paymentsheet_payment_method_paypal,
                 R.drawable.stripe_ic_paymentsheet_pm_paypal,
                 false,
@@ -172,7 +281,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.Affirm,
+                "affirm",
+                false,
                 R.string.stripe_paymentsheet_payment_method_affirm,
                 R.drawable.stripe_ic_paymentsheet_pm_affirm,
                 false,
@@ -180,7 +290,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.AuBecsDebit,
+                "au_becs_debit",
+                true,
                 R.string.stripe_paymentsheet_payment_method_au_becs_debit,
                 R.drawable.stripe_ic_paymentsheet_pm_bank,
                 true,
@@ -188,7 +299,8 @@ class LpmRepository @Inject constructor(
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
-                PaymentMethod.Type.USBankAccount,
+                "us_bank_account",
+                true,
                 R.string.stripe_paymentsheet_payment_method_us_bank_account,
                 R.drawable.stripe_ic_paymentsheet_pm_bank,
                 true,
@@ -211,7 +323,10 @@ class LpmRepository @Inject constructor(
          * This describes the PaymentMethod Type as described
          * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
          */
-        val type: PaymentMethod.Type,
+        val code: PaymentMethodCode,
+
+        /** This describes if the LPM requires a mandate see [ConfirmPaymentIntentParams.mandateDataParams]. */
+        val requiresMandate: Boolean,
 
         /** This describes the name that appears under the selector. */
         @StringRes val displayNameResource: Int,
@@ -234,21 +349,28 @@ class LpmRepository @Inject constructor(
         /**
          * This describes how the UI should look.
          */
-        val formSpec: LayoutSpec,
+        val formSpec: LayoutSpec
     ) {
-
         /**
          * Returns true if the payment method supports confirming from a saved
          * payment method of this type.  See [PaymentMethodRequirements] for
          * description of the values
          */
-        fun supportsCustomerSavedPM() = requirement.confirmPMFromCustomer == true
+        fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
     companion object {
+        @Volatile
+        private var INSTANCE: LpmRepository? = null
+        fun getInstance(args: LpmRepositoryArguments): LpmRepository =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: LpmRepository(args).also { INSTANCE = it }
+            }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(
-            PaymentMethod.Type.Card,
+            "card",
+            false,
             R.string.stripe_paymentsheet_payment_method_card,
             R.drawable.stripe_ic_paymentsheet_pm_card,
             true,
@@ -259,8 +381,7 @@ class LpmRepository @Inject constructor(
         /**
          * This is a list of the payment methods that we are allowing in the release
          */
-        @VisibleForTesting
-        internal val exposedPaymentMethods by lazy {
+        val exposedPaymentMethods by lazy {
             listOf(
                 PaymentMethod.Type.Card.code,
                 PaymentMethod.Type.Bancontact.code,
@@ -279,4 +400,19 @@ class LpmRepository @Inject constructor(
             )
         }
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed class ServerSpecState(val serverLpmSpecs: String?) {
+        object Uninitialized : ServerSpecState(null)
+        class NoServerSpec(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+        class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+        class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class LpmRepositoryArguments(
+        val resources: Resources?,
+        val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+            DefaultIsFinancialConnectionsAvailable()
+    )
 }

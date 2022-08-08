@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -26,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
-import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
@@ -42,6 +42,7 @@ import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.TextFieldSection
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
 @Composable
@@ -88,6 +89,7 @@ internal fun SignUpBody(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SignUpBody(
     merchantName: String,
@@ -102,13 +104,7 @@ internal fun SignUpBody(
 
     ScrollableTopLevelColumn {
         Text(
-            text = stringResource(
-                if (signUpState == SignUpState.InputtingPhone) {
-                    R.string.sign_up_header_new_user
-                } else {
-                    R.string.sign_up_header
-                }
-            ),
+            text = stringResource(R.string.sign_up_header),
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
@@ -139,7 +135,7 @@ internal fun SignUpBody(
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,
-                        requestFocusWhenShown = true
+                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty()
                     )
                     LinkTerms(
                         modifier = Modifier
@@ -201,7 +197,7 @@ internal fun EmailCollectionSection(
                     .semantics {
                         testTag = progressIndicatorTestTag
                     },
-                color = MaterialTheme.linkColors.buttonLabel,
+                color = MaterialTheme.linkColors.progressIndicator,
                 strokeWidth = 2.dp
             )
         }

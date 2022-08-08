@@ -728,7 +728,7 @@ internal class StripeApiRepositoryTest {
 
             create().confirmPaymentIntent(
                 confirmPaymentIntentParams = confirmPaymentIntentParams,
-                options = ApiRequest.Options(apiKey),
+                options = ApiRequest.Options(apiKey)
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -1596,7 +1596,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params!!["type"], "payment_intent")
             assertEquals(apiRequest.params!!["client_secret"], clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered)
         }
 
     @Test
@@ -1626,7 +1626,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params!!["type"], "setup_intent")
             assertEquals(apiRequest.params!!["client_secret"], clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieveOrdered)
         }
 
     @Test
@@ -1645,7 +1645,7 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create().refreshPaymentIntent(
                     clientSecret,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 )
             )
 
@@ -1700,11 +1700,13 @@ internal class StripeApiRepositoryTest {
             val email = "email@example.com"
             val phoneNumber = "phone number"
             val country = "US"
+            val locale = Locale.US
             val cookie = "cookie1"
             create().consumerSignUp(
                 email,
                 phoneNumber,
                 country,
+                locale,
                 cookie,
                 DEFAULT_OPTIONS
             )
@@ -1714,6 +1716,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(params["email_address"], email)
             assertEquals(params["phone_number"], phoneNumber)
             assertEquals(params["country"], country)
+            assertEquals(params["locale"], locale.toLanguageTag())
             val cookies = params["cookies"] as Map<*, *>
             val secret = cookies["verification_session_client_secrets"] as Collection<*>
             assertThat(secret).containsExactly(cookie)

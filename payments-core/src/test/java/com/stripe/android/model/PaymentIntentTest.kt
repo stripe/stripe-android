@@ -138,7 +138,7 @@ class PaymentIntentTest {
                 partnerId = "wx65997d6307c3827d",
                 prepayId = "test_transaction",
                 timestamp = "1619638941",
-                sign = "8B26124BABC816D7140034DDDC7D3B2F1036CCB2D910E52592687F6A44790D5E",
+                sign = "8B26124BABC816D7140034DDDC7D3B2F1036CCB2D910E52592687F6A44790D5E"
             )
         )
     }

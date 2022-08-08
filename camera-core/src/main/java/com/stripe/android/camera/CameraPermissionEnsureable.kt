@@ -14,6 +14,6 @@ interface CameraPermissionEnsureable {
      */
     fun ensureCameraPermission(
         onCameraReady: () -> Unit,
-        onUserDeniedCameraPermission: () -> Unit,
+        onUserDeniedCameraPermission: () -> Unit
     )
 }

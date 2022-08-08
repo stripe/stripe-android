@@ -48,8 +48,12 @@ class TestHardCodedLpms {
         private val screenshotProcessor = MyScreenCaptureProcessor()
 
         private val lpmRepository = LpmRepository(
-            InstrumentationRegistry.getInstrumentation().targetContext.resources
-        )
+            LpmRepository.LpmRepositoryArguments(
+                InstrumentationRegistry.getInstrumentation().targetContext.resources
+            )
+        ).apply {
+            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+        }
     }
 
     @Before
@@ -72,13 +76,15 @@ class TestHardCodedLpms {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
         authorizationAction = AuthorizeAction.Authorize,
-        takeScreenshotOnLpmLoad = true
+        takeScreenshotOnLpmLoad = true,
+        merchantCountryCode = "GB"
     )
 
     @Test
     fun testCard() {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
+                customer = Customer.New,
                 billing = Billing.On,
                 paymentMethod = LpmRepository.HardcodedCard,
                 authorizationAction = null,
@@ -162,6 +168,7 @@ class TestHardCodedLpms {
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("afterpay_clearpay")!!,
                 authorizationAction = AuthorizeAction.Authorize,
+                merchantCountryCode = "US",
                 currency = Currency.USD,
                 shipping = Shipping.On
             )
@@ -175,6 +182,7 @@ class TestHardCodedLpms {
                 paymentMethod = lpmRepository.fromCode("sofort")!!,
                 authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.EUR,
+                merchantCountryCode = "GB",
                 delayed = DelayedPMs.On,
                 automatic = Automatic.Off
             )
@@ -187,6 +195,7 @@ class TestHardCodedLpms {
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("affirm")!!,
                 authorizationAction = AuthorizeAction.Authorize,
+                merchantCountryCode = "US",
                 currency = Currency.USD,
                 shipping = Shipping.On,
                 automatic = Automatic.Off
@@ -204,6 +213,7 @@ class TestHardCodedLpms {
                 shipping = Shipping.On,
                 delayed = DelayedPMs.On,
                 automatic = Automatic.Off,
+                merchantCountryCode = "AU"
             )
         )
     }
@@ -214,7 +224,8 @@ class TestHardCodedLpms {
             newUser.copy(
                 paymentMethod = lpmRepository.fromCode("klarna")!!,
                 authorizationAction = AuthorizeAction.Authorize,
-                currency = Currency.USD
+                currency = Currency.USD,
+                merchantCountryCode = "US",
             )
         )
     }
@@ -226,6 +237,7 @@ class TestHardCodedLpms {
                 paymentMethod = lpmRepository.fromCode("paypal")!!,
                 authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.GBP,
+                merchantCountryCode = "GB",
                 automatic = Automatic.Off
             )
         )

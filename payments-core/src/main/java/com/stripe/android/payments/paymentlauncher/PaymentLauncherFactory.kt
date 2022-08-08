@@ -23,12 +23,12 @@ class PaymentLauncherFactory(
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentLauncher.PaymentResultCallback,
+        callback: PaymentLauncher.PaymentResultCallback
     ) : this(
         activity.applicationContext,
         activity.registerForActivityResult(
             PaymentLauncherContract(),
-            callback::onPaymentResult,
+            callback::onPaymentResult
         )
     )
 

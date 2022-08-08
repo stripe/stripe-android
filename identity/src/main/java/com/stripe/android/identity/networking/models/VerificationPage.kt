@@ -64,5 +64,7 @@ internal data class VerificationPage(
             requirements.missing.contains(VerificationPageRequirements.Missing.BIOMETRICCONSENT)
 
         fun VerificationPage.isUnsupportedClient() = unsupportedClient
+
+        fun VerificationPage.requireSelfie() = selfieCapture != null
     }
 }

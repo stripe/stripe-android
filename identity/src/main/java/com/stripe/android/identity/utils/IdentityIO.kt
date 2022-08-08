@@ -49,7 +49,7 @@ internal interface IdentityIO {
         verificationId: String,
         fileName: String,
         maxDimension: Int,
-        compressionQuality: Float,
+        compressionQuality: Float
     ): File
 
     /**

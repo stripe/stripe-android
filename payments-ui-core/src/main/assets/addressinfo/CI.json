@@ -20,12 +20,5 @@
     "schema": {
       "nameType": "city"
     }
-  },
-  {
-    "type": "sortingCode",
-    "required": false,
-    "schema": {
-      "nameType": "cedex"
-    }
   }
 ]
