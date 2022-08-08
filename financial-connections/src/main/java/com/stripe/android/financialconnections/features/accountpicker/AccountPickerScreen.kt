@@ -54,15 +54,18 @@ internal fun AccountPickerScreen() {
     LaunchedEffect(authSessionId) {
         authSessionId.value?.let { viewModel.onAuthSessionReceived(it) }
     }
-    AccountPickerContent(state.value) {
-        viewModel.onAccountClicked(it)
-    }
+    AccountPickerContent(
+        state = state.value,
+        onAccountClicked = viewModel::onAccountClicked,
+        onSelectAccounts = { viewModel.selectAccounts(requireNotNull(authSessionId.value)) }
+    )
 }
 
 @Composable
 private fun AccountPickerContent(
     state: AccountPickerState,
-    onAccountClicked: (PartnerAccount) -> Unit
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onSelectAccounts: () -> Unit
 ) {
     FinancialConnectionsScaffold {
         when (val accounts = state.accounts) {
@@ -73,7 +76,8 @@ private fun AccountPickerContent(
             is Success -> AccountPickerLoaded(
                 accounts = accounts(),
                 selectedIds = state.selectedIds,
-                onAccountClicked = onAccountClicked
+                onAccountClicked = onAccountClicked,
+                onSelectAccounts = onSelectAccounts
             )
             is Fail -> UnclassifiedErrorContent()
         }
@@ -84,7 +88,8 @@ private fun AccountPickerContent(
 private fun AccountPickerLoaded(
     accounts: PartnerAccountsList,
     selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onSelectAccounts: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -205,7 +210,8 @@ internal fun AccountPickerPreview() {
                     )
                 )
             ),
-            onAccountClicked = {}
+            onAccountClicked = {},
+            onSelectAccounts = {}
         )
     }
 }

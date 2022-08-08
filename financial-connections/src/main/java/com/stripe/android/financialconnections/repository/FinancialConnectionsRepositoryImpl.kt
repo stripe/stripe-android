@@ -110,6 +110,25 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun postAuthorizationSessionSelectedAccounts(
+        clientSecret: String,
+        sessionId: String,
+        selectAccounts: List<String>
+    ): PartnerAccountsList {
+        val request = apiRequestFactory.createPost(
+            url = authorizationSessionSelectedAccountsUrl,
+            options = options,
+            params = mapOf(
+                PARAMS_ID to sessionId,
+                PARAMS_CLIENT_SECRET to clientSecret,
+            ) + selectAccounts.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
+        )
+        return requestExecutor.execute(
+            request,
+            PartnerAccountsList.serializer()
+        )
+    }
+
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,
@@ -131,6 +150,8 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     }
 
     internal companion object {
+        internal const val PARAM_SELECTED_ACCOUNTS: String = "selected_accounts"
+
         internal const val listAccountsUrl: String =
             "$API_HOST/v1/link_account_sessions/list_accounts"
 
@@ -142,6 +163,9 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
         internal const val authorizationSessionOAuthResultsUrl: String =
             "$API_HOST/v1/connections/auth_sessions/oauth_results"
+
+        internal const val authorizationSessionSelectedAccountsUrl: String =
+            "$API_HOST/v1/connections/auth_sessions/selected_accounts"
 
         internal const val authorizeSessionUrl: String =
             "$API_HOST/v1/connections/auth_sessions/authorized"

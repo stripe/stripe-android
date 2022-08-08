@@ -4,6 +4,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -64,4 +65,10 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String,
         sessionId: String
     ): MixedOAuthParams
+
+    suspend fun postAuthorizationSessionSelectedAccounts(
+        clientSecret: String,
+        sessionId: String,
+        selectAccounts: List<String>
+    ): PartnerAccountsList
 }
