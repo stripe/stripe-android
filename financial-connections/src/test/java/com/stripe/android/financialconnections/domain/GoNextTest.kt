@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
+import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -28,6 +29,7 @@ internal class GoNextTest {
         goNext(
             currentPane = NavigationDirections.consent,
             manifest = sessionManifest().copy(nextPane = expectedNextStep),
+            partnerAccountsList = partnerAccountList().copy(nextPane = NextPane.CONSENT),
             authorizationSession = authorizationSession().copy(nextPane = NextPane.ACCOUNT_PICKER)
         )
 
@@ -44,6 +46,7 @@ internal class GoNextTest {
         goNext(
             currentPane = NavigationDirections.institutionPicker,
             manifest = sessionManifest().copy(nextPane = NextPane.CONSENT),
+            partnerAccountsList = partnerAccountList().copy(nextPane = NextPane.CONSENT),
             authorizationSession = authorizationSession().copy(nextPane = expectedNextStep)
         )
 
@@ -60,6 +63,7 @@ internal class GoNextTest {
         goNext(
             currentPane = NavigationDirections.partnerAuth,
             manifest = sessionManifest().copy(nextPane = NextPane.CONSENT),
+            partnerAccountsList = partnerAccountList().copy(nextPane = NextPane.CONSENT),
             authorizationSession = authorizationSession().copy(nextPane = expectedNextStep)
         )
 

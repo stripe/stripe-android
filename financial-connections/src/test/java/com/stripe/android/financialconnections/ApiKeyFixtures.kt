@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections
 
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 
 internal object ApiKeyFixtures {
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
@@ -41,5 +42,12 @@ internal object ApiKeyFixtures {
         skipAccountSelection = null,
         url = null,
         urlQrCode = null
+    )
+
+    fun partnerAccountList() = PartnerAccountsList(
+        data = emptyList(),
+        hasMore = false,
+        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        url = "",
     )
 }

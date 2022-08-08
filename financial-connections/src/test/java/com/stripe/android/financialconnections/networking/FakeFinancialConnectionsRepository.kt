@@ -23,6 +23,8 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         { TODO() }
     var postAuthorizationSessionOAuthResults: () -> MixedOAuthParams =
         { TODO() }
+    var postAuthorizationSessionSelectedAccounts: () -> PartnerAccountsList =
+        { TODO() }
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
@@ -53,5 +55,13 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         sessionId: String
     ): MixedOAuthParams {
         return postAuthorizationSessionOAuthResults()
+    }
+
+    override suspend fun postAuthorizationSessionSelectedAccounts(
+        clientSecret: String,
+        sessionId: String,
+        selectAccounts: List<String>
+    ): PartnerAccountsList {
+        return postAuthorizationSessionSelectedAccounts()
     }
 }
