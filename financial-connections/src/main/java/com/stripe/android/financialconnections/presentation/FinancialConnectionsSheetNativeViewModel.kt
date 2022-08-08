@@ -45,11 +45,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     is Message.RequestNextStep -> goNext(
                         currentPane = message.currentStep,
                         manifest = getManifest(),
-                        authorizationSession = awaitState().authorizationSession
                     )
-                    is Message.UpdateAuthorizationSession -> setState {
-                        copy(authorizationSession = message.authorizationSession)
-                    }
                     Message.OpenWebAuthFlow -> {
                         val manifest = getManifest()
                         setState {
@@ -126,7 +122,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
-    val authorizationSession: FinancialConnectionsAuthorizationSession?,
     val configuration: FinancialConnectionsSheet.Configuration,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
@@ -138,7 +133,6 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
         configuration = args.configuration,
-        authorizationSession = null,
         viewEffect = null
     )
 }

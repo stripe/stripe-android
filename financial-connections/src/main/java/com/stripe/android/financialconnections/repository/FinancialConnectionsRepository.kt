@@ -32,29 +32,6 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String
     ): FinancialConnectionsSession
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun postAuthorizationSession(
-        clientSecret: String,
-        institutionId: String
-    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String? = null
-    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String

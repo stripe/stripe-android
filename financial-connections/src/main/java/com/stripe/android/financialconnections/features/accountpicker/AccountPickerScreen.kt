@@ -29,13 +29,9 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun AccountPickerScreen() {
     // activity view model
     val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
-    val authSessionId = activityViewModel.collectAsState { it.authorizationSession?.id }
 
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
-    LaunchedEffect(authSessionId) {
-        authSessionId.value?.let { viewModel.onAuthSessionReceived(it) }
-    }
     AccountPickerContent(state.value)
 }
 

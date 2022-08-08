@@ -55,25 +55,6 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun postAuthorizationSession(
-        clientSecret: String,
-        institutionId: String
-    ): FinancialConnectionsAuthorizationSession {
-        val request = apiRequestFactory.createPost(
-            url = authorizationSessionUrl,
-            options = options,
-            params = mapOf(
-                PARAMS_CLIENT_SECRET to clientSecret,
-                "use_mobile_handoff" to false,
-                "institution" to institutionId
-            )
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsAuthorizationSession.serializer()
-        )
-    }
-
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String,
@@ -107,26 +88,6 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         return requestExecutor.execute(
             request,
             MixedOAuthParams.serializer()
-        )
-    }
-
-    override suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String?
-    ): FinancialConnectionsAuthorizationSession {
-        val request = apiRequestFactory.createPost(
-            url = authorizeSessionUrl,
-            options = options,
-            params = mapOf(
-                PARAMS_ID to sessionId,
-                PARAMS_CLIENT_SECRET to clientSecret,
-                "public_token" to publicToken
-            ).filter { it.value != null }
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsAuthorizationSession.serializer()
         )
     }
 

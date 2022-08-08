@@ -23,13 +23,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
 
     internal sealed interface Message {
         /**
-         * Updates global [FinancialConnectionsAuthorizationSession] instance.
-         */
-        data class UpdateAuthorizationSession(
-            val authorizationSession: FinancialConnectionsAuthorizationSession
-        ) : Message
-
-        /**
          * Request navigation to Next available Pane
          */
         data class RequestNextStep(

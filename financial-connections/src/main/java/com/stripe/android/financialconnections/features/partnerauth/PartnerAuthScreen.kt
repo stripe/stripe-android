@@ -20,19 +20,18 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 internal fun PartnerAuthScreen() {
     // activity view model
     val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
-    val authSession = activityViewModel.collectAsState { it.authorizationSession }
     val webAuthFlow = activityViewModel.collectAsState { it.webAuthFlow }
 
     // step view model
     val viewModel: PartnerAuthViewModel = mavericksViewModel()
     val state: State<PartnerAuthState> = viewModel.collectAsState()
 
-    LaunchedEffect(authSession.value?.url) {
-        val url = authSession.value?.url
+    LaunchedEffect(state.value.url) {
+        val url = state.value.url
         if (url != null) activityViewModel.openPartnerAuthFlowInBrowser(url)
     }
     LaunchedEffect(webAuthFlow.value) {
-        viewModel.onWebAuthFlowFinished(webAuthFlow.value, authSession.value!!)
+        viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
     PartnerAuthScreenContent(state)
 }
