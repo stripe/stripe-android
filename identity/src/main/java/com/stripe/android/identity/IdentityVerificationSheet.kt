@@ -101,8 +101,11 @@ interface IdentityVerificationSheet {
          * Creates a [IdentityVerificationSheet] instance in a [Composable]. Which would be
          * recreated if [configuration] or [identityVerificationCallback] changed.
          *
-         * This API registers an [ActivityResultLauncher] into LocalContext.current and notifies its
-         * result to [identityVerificationCallback].
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         * The [IdentityVerificationSheet] created is remembered across recompositions.
+         * Recomposition will always return the value produced by composition.
          */
         @Composable
         fun rememberIdentityVerificationSheet(
@@ -114,7 +117,7 @@ interface IdentityVerificationSheet {
                 IdentityVerificationSheetContract(),
                 identityVerificationCallback::onVerificationFlowResult
             )
-            return remember(configuration, identityVerificationCallback) {
+            return remember(configuration) {
                 StripeIdentityVerificationSheet(
                     activityResultLauncher,
                     context,

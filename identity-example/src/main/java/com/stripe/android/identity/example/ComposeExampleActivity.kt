@@ -54,14 +54,6 @@ abstract class ComposeExampleActivity : ComponentActivity() {
 
     private val viewModel: IdentityExampleViewModel by viewModels()
 
-    private val logoUri: Uri
-        get() = Uri.Builder()
-            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(getBrandLogoResId))
-            .appendPath(resources.getResourceTypeName(getBrandLogoResId))
-            .appendPath(resources.getResourceEntryName(getBrandLogoResId))
-            .build()
-
     data class IdentitySubmissionState(
         val shouldUseNativeSdk: Boolean = true,
         val allowDrivingLicense: Boolean = true,
@@ -114,40 +106,49 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     mutableStateOf<LoadingState>(LoadingState.Idle)
                 }
                 var vsId by remember { mutableStateOf("") }
-                val identityVerificationSheet = IdentityVerificationSheet.rememberIdentityVerificationSheet(
-                    configuration = IdentityVerificationSheet.Configuration(
+                val configuration = remember {
+                    IdentityVerificationSheet.Configuration(
                         // Or use webImage by
                         // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
-                        brandLogo = logoUri
+                        brandLogo = Uri.Builder()
+                            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                            .authority(resources.getResourcePackageName(getBrandLogoResId))
+                            .appendPath(resources.getResourceTypeName(getBrandLogoResId))
+                            .appendPath(resources.getResourceEntryName(getBrandLogoResId))
+                            .build()
                     )
-                ) { result ->
-                    when (result) {
-                        is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
-                            onLoadingStateChanged(
-                                LoadingState.Result(
-                                    vsId = vsId,
-                                    resultString = "Verification result: ${result.javaClass.simpleName} - ${result.throwable}"
+                }
+                val identityVerificationSheet =
+                    IdentityVerificationSheet.rememberIdentityVerificationSheet(
+                        configuration = configuration
+                    ) { result ->
+                        when (result) {
+                            is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
+                                onLoadingStateChanged(
+                                    LoadingState.Result(
+                                        vsId = vsId,
+                                        resultString = "Verification result: ${result.javaClass.simpleName} - ${result.throwable}"
+                                    )
                                 )
-                            )
-                        }
-                        is IdentityVerificationSheet.VerificationFlowResult.Canceled -> {
-                            onLoadingStateChanged(
-                                LoadingState.Result(
-                                    vsId = vsId,
-                                    resultString = "Verification result: ${result.javaClass.simpleName}"
+                            }
+                            is IdentityVerificationSheet.VerificationFlowResult.Canceled -> {
+                                onLoadingStateChanged(
+                                    LoadingState.Result(
+                                        vsId = vsId,
+                                        resultString = "Verification result: ${result.javaClass.simpleName}"
+                                    )
                                 )
-                            )
-                        }
-                        is IdentityVerificationSheet.VerificationFlowResult.Completed -> {
-                            onLoadingStateChanged(
-                                LoadingState.Result(
-                                    vsId = vsId,
-                                    resultString = "Verification result: ${result.javaClass.simpleName}"
+                            }
+                            is IdentityVerificationSheet.VerificationFlowResult.Completed -> {
+                                onLoadingStateChanged(
+                                    LoadingState.Result(
+                                        vsId = vsId,
+                                        resultString = "Verification result: ${result.javaClass.simpleName}"
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
-                }
 
                 LoadVSView(
                     loadingState,
