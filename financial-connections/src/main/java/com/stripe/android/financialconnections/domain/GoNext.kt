@@ -49,8 +49,8 @@ internal class GoNext @Inject constructor(
             NavigationDirections.partnerAuth.destination ->
                 authorizationSession!!.nextPane.toNavigationCommand()
             /**
-             * Auth session authorization endpoint receives a
-             * fresh [FinancialConnectionsAuthorizationSession], source of truth for navigation.
+             * Account selection returns a [PartnerAccountsList] that includes the next pane,
+             * source of truth for navigation.
              */
             NavigationDirections.accountPicker.destination ->
                 partnerAccountsList!!.nextPane.toNavigationCommand()
