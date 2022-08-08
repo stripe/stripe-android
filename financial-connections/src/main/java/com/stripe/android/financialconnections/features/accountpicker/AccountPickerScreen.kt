@@ -93,7 +93,7 @@ private fun AccountPickerLoaded(
         Text(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
+            text = stringResource(R.string.stripe_account_picker_multiselect_account),
             style = FinancialConnectionsTheme.typography.subtitle
         )
         LazyColumn(
@@ -101,7 +101,7 @@ private fun AccountPickerLoaded(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(accounts.data, key = { it.id }) { account ->
-                SelectableAccount(
+                MultiSelectAccount(
                     selected = selectedIds.contains(account.id),
                     onAccountClicked = onAccountClicked,
                     account = account
@@ -112,7 +112,7 @@ private fun AccountPickerLoaded(
 }
 
 @Composable
-private fun SelectableAccount(
+private fun MultiSelectAccount(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount
@@ -121,13 +121,13 @@ private fun SelectableAccount(
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                width = 1.dp,
+                width = 2.dp,
                 color = if (selected) {
                     FinancialConnectionsTheme.colors.textBrand
                 } else {
                     FinancialConnectionsTheme.colors.borderDefault
                 },
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(8.dp)
             )
             .clickable { onAccountClicked(account) }
             .padding(12.dp)
@@ -171,7 +171,7 @@ internal fun AccountPickerPreview() {
     FinancialConnectionsTheme {
         AccountPickerContent(
             AccountPickerState(
-                selectedIds = setOf<String>("id1"),
+                selectedIds = setOf("id1"),
                 accounts = Success(
                     PartnerAccountsList(
                         data = listOf(
