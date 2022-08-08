@@ -165,7 +165,11 @@ private fun MultiSelectAccount(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    group = "Account Picker Pane",
+    name = "One account selected"
+)
 @Composable
 internal fun AccountPickerPreview() {
     FinancialConnectionsTheme {
