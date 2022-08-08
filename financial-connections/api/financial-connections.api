@@ -427,6 +427,13 @@ public final class com/stripe/android/financialconnections/features/accountpicke
 	public static fun newInstance (Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerState;Lcom/stripe/android/financialconnections/domain/PollAuthorizationSessionAccounts;)Lcom/stripe/android/financialconnections/features/accountpicker/AccountPickerViewModel;
 }
 
+public final class com/stripe/android/financialconnections/features/accountpicker/ComposableSingletons$AccountPickerScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/accountpicker/ComposableSingletons$AccountPickerScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$ErrorContentKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$ErrorContentKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
