@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -25,7 +26,8 @@ internal class GoNext @Inject constructor(
     operator fun invoke(
         currentPane: NavigationCommand,
         manifest: FinancialConnectionsSessionManifest,
-        authorizationSession: FinancialConnectionsAuthorizationSession?
+        authorizationSession: FinancialConnectionsAuthorizationSession?,
+        partnerAccountsList: PartnerAccountsList?
     ): NavigationCommand {
         val nextPane = when (currentPane.destination) {
             /**
@@ -46,6 +48,12 @@ internal class GoNext @Inject constructor(
              */
             NavigationDirections.partnerAuth.destination ->
                 authorizationSession!!.nextPane.toNavigationCommand()
+            /**
+             * Auth session authorization endpoint receives a
+             * fresh [FinancialConnectionsAuthorizationSession], source of truth for navigation.
+             */
+            NavigationDirections.accountPicker.destination ->
+                partnerAccountsList!!.nextPane.toNavigationCommand()
             else -> TODO()
         }
         logger.debug("Navigating to next pane: ${nextPane.destination}")

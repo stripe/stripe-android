@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,6 +41,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -51,7 +53,7 @@ internal fun AccountPickerScreen() {
 
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
-    LaunchedEffect(authSessionId) {
+    LaunchedEffect(authSessionId.value) {
         authSessionId.value?.let { viewModel.onAuthSessionReceived(it) }
     }
     AccountPickerContent(
@@ -74,6 +76,7 @@ private fun AccountPickerContent(
                 R.string.stripe_account_picker_loading_desc
             )
             is Success -> AccountPickerLoaded(
+                loading = state.isLoading,
                 accounts = accounts(),
                 selectedIds = state.selectedIds,
                 onAccountClicked = onAccountClicked,
@@ -86,14 +89,16 @@ private fun AccountPickerContent(
 
 @Composable
 private fun AccountPickerLoaded(
+    loading: Boolean,
     accounts: PartnerAccountsList,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAccounts: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
         Text(
             modifier = Modifier
@@ -101,6 +106,7 @@ private fun AccountPickerLoaded(
             text = stringResource(R.string.stripe_account_picker_multiselect_account),
             style = FinancialConnectionsTheme.typography.subtitle
         )
+        Spacer(modifier = Modifier.size(24.dp))
         LazyColumn(
             contentPadding = PaddingValues(top = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -112,6 +118,15 @@ private fun AccountPickerLoaded(
                     account = account
                 )
             }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        FinancialConnectionsButton(
+            loading = loading,
+            onClick = onSelectAccounts,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(text = stringResource(R.string.stripe_consent_pane_agree))
         }
     }
 }

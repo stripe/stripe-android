@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import javax.inject.Inject
 
@@ -13,8 +14,8 @@ internal class SelectAccounts @Inject constructor(
     suspend operator fun invoke(
         selectedAccounts: List<PartnerAccount>,
         sessionId: String
-    ) {
-        repository.postAuthorizationSessionSelectedAccounts(
+    ): PartnerAccountsList {
+        return repository.postAuthorizationSessionSelectedAccounts(
             sessionId = sessionId,
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             selectAccounts = selectedAccounts.map { it.id }
