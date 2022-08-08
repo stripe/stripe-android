@@ -39,6 +39,7 @@
     <string name="stripe_account_picker_loading_desc">Please wait while we retrieve your accounts</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
+    <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
 </resources>
 

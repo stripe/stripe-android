@@ -33,6 +33,11 @@ internal object NavigationDirections {
         override val destination = "account-picker"
     }
 
+    val success = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "success"
+    }
+
     val Default = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = ""

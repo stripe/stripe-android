@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
+import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
@@ -87,6 +88,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
             composable(NavigationDirections.accountPicker.destination) {
                 AccountPickerScreen()
+            }
+            composable(NavigationDirections.success.destination) {
+                SuccessScreen()
             }
         }
     }

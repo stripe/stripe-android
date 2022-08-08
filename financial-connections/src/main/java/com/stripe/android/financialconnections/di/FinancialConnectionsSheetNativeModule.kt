@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
+import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
@@ -21,6 +22,7 @@ import javax.inject.Singleton
         ConsentSubcomponent::class,
         InstitutionPickerSubcomponent::class,
         PartnerAuthSubcomponent::class,
+        SuccessSubcomponent::class,
         AccountPickerSubcomponent::class
     ]
 )

@@ -67,6 +67,7 @@ internal class GoNext @Inject constructor(
         NextPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
         NextPane.CONSENT -> NavigationDirections.consent
         NextPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
+        NextPane.SUCCESS -> NavigationDirections.success
         NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT,
         NextPane.AUTH_OPTIONS,
         NextPane.LINK_CONSENT,
@@ -76,7 +77,6 @@ internal class GoNext @Inject constructor(
         NextPane.NETWORKING_LINK_LOGIN_WARMUP,
         NextPane.NETWORKING_LINK_SIGNUP_PANE,
         NextPane.NETWORKING_LINK_VERIFICATION,
-        NextPane.SUCCESS,
         NextPane.UNEXPECTED_ERROR -> {
             TODO("Unimplemented navigation command: ${this.value}")
         }
