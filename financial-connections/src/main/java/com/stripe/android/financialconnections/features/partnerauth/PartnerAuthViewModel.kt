@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     val completeAuthorizationSession: CompleteAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
@@ -78,7 +79,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         authSession: FinancialConnectionsAuthorizationSession
     ) {
         kotlin.runCatching {
-            val session = completeAuthorizationSession(
+            completeAuthorizationSession(
                 authorizationSessionId = authSession.id,
                 publicToken = oAuthParams.memberGuid
             )

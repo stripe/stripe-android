@@ -5,7 +5,6 @@ import com.stripe.android.core.networking.ApiRequest.Companion.API_HOST
 import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.model.PartnerAccountsList

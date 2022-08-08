@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,9 +26,6 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun AccountPickerScreen() {
-    // activity view model
-    val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
-
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
     AccountPickerContent(state.value)
