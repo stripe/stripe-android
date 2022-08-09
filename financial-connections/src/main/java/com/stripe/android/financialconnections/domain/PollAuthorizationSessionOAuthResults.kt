@@ -9,9 +9,9 @@ import com.stripe.android.financialconnections.utils.shouldRetry
 import javax.inject.Inject
 
 /**
- * Polls accounts from backend after authorization session completes.
+ * Polls OAuth results from backend after user finishes authorization on web browser.
  *
- * Will retry
+ * Will retry upon 202 backend responses every [POLLING_TIME_MS] up to [MAX_TRIES]
  */
 internal class PollAuthorizationSessionOAuthResults @Inject constructor(
     private val repository: FinancialConnectionsRepository,
@@ -33,7 +33,7 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
         }
     }
 
-    companion object {
+    private companion object {
         private const val POLLING_TIME_MS = 2000L
         private const val MAX_TRIES = 10
     }

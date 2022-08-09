@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -108,8 +109,22 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         LaunchedEffect(navigationManager.commands) {
             navigationManager.commands.collect { command ->
                 if (command.destination.isNotEmpty()) {
-                    navController.navigate(command.destination)
+                    navController.navigate(command.destination) {
+                        popUpAfterAuth(navController)
+                    }
                 }
+            }
+        }
+    }
+
+    /**
+     * Skips auth screens from back navigation.
+     */
+    private fun NavOptionsBuilder.popUpAfterAuth(navController: NavHostController) {
+        val destination: String = navController.currentBackStackEntry?.destination?.route ?: return
+        if (navController.currentDestination?.route == NavigationDirections.partnerAuth.destination) {
+            popUpTo(destination) {
+                inclusive = true
             }
         }
     }

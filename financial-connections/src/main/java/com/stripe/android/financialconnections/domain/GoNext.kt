@@ -14,6 +14,7 @@ import javax.inject.Inject
  *
  * @see [FinancialConnectionsSessionManifest.nextPane]
  * @see [FinancialConnectionsAuthorizationSession.nextPane]
+ * @see [com.stripe.android.financialconnections.model.PartnerAccountsList.nextPane]
  *
  */
 internal class GoNext @Inject constructor(
@@ -40,8 +41,8 @@ internal class GoNext @Inject constructor(
             NavigationDirections.consent.destination ->
                 manifest.nextPane.toNavigationCommand()
             /**
-             * after partner auth, auth completion receives an updated [FinancialConnectionsAuthorizationSession],
-             * source of truth for navigation.
+             * Auth session authorization endpoint receives a
+             * fresh [FinancialConnectionsAuthorizationSession], source of truth for navigation.
              */
             NavigationDirections.partnerAuth.destination ->
                 authorizationSession!!.nextPane.toNavigationCommand()

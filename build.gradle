@@ -4,7 +4,7 @@ import java.time.Duration
 buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
-    ext.kotlinVersion = '1.6.21'
+    ext.kotlinVersion = '1.7.0'
     ext.dokkaVersion = '1.7.10'
 
     repositories {
@@ -14,7 +14,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.1'
+        classpath 'com.android.tools.build:gradle:7.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
@@ -63,7 +63,7 @@ ext {
     androidxAppcompatVersion = '1.4.2'
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
-    androidxComposeVersion = '1.2.0-rc02'
+    androidxComposeVersion = '1.2.0'
     androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.8.0'
@@ -81,7 +81,7 @@ ext {
     // material 1.6 causes paymentsheet to not render correctly.
     // see here: https://github.com/material-components/material-components-android/issues/2702
     materialVersion = '1.5.0'
-    daggerVersion = '2.43'
+    daggerVersion = '2.43.2'
     playServicesWalletVersion = '19.1.0'
     placesVersion = '2.6.0'
     playServicesVersion = '1.6.4'

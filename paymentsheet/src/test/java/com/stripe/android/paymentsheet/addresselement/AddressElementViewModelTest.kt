@@ -23,6 +23,7 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 class AddressElementViewModelTest {
     private val defaultArgs = AddressElementActivityContract.Args(
+        "publishableKey",
         AddressLauncherFixtures.BASIC_CONFIG,
         INJECTOR_KEY
     )

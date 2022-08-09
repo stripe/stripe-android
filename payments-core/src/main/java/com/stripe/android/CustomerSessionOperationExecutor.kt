@@ -201,6 +201,7 @@ internal class CustomerSessionOperationExecutor(
                     onCustomerRetrieved(operation, result)
                 }
             }
+            else -> {}
         }
     }
 

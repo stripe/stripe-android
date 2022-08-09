@@ -7,9 +7,11 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
@@ -30,6 +32,17 @@ class SupportedPaymentMethodTest {
     }
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
+
+    @Test
+    fun `If the intent has SFU set on top level or on LPM`() {
+        assertThat(
+            LpmRepository.HardcodedCard
+                .getSpecWithFullfilledRequirements(
+                    PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
+                    CONFIG_CUSTOMER
+                )?.showCheckbox
+        ).isFalse()
+    }
 
     /**
      * To create a baseline for a payment method, create a new file <payment_method>-support.csv,

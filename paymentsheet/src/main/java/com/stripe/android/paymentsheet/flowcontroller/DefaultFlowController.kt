@@ -433,7 +433,6 @@ internal class DefaultFlowController @Inject internal constructor(
             )
             linkLauncher.setup(
                 stripeIntent = initData.stripeIntent,
-                selectedPaymentDetails = null,
                 coroutineScope = lifecycleScope
             )
             linkLauncher.present(linkActivityResultLauncher)
