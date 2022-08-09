@@ -21,9 +21,9 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
         AddressElementViewModelModule::class,
-        FormControllerModule::class
+        FormControllerModule::class,
+        ResourceRepositoryModule::class
     ]
 )
 internal interface AddressElementViewModelFactoryComponent {

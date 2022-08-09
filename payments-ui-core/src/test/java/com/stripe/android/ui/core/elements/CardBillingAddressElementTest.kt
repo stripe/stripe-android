@@ -4,14 +4,14 @@ import android.app.Application
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardBillingAddressElementTest {
-    private val addressFieldElementRepository = AddressFieldElementRepository(
+    private val addressRepository = AddressRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
     val dropdownFieldController = DropdownFieldController(
@@ -20,14 +20,14 @@ internal class CardBillingAddressElementTest {
     val cardBillingElement = CardBillingAddressElement(
         IdentifierSpec.Generic("billing_element"),
         rawValuesMap = emptyMap(),
-        addressFieldElementRepository,
+        addressRepository,
         emptySet(),
         dropdownFieldController
     )
 
     init {
         // We want to use fields that are easy to set in error
-        addressFieldElementRepository.add(
+        addressRepository.add(
             "US",
             listOf(
                 EmailElement(
@@ -36,7 +36,7 @@ internal class CardBillingAddressElementTest {
                 )
             )
         )
-        addressFieldElementRepository.add(
+        addressRepository.add(
             "JP",
             listOf(
                 IbanElement(

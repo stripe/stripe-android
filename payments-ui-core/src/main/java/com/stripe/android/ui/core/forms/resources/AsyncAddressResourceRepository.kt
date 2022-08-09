@@ -4,7 +4,7 @@ import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
@@ -15,24 +15,22 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [ResourceRepository] that loads all resources from JSON asynchronously.
+ * [AsyncAddressResourceRepository] that loads all address resources from JSON asynchronously.
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AsyncResourceRepository @Inject constructor(
+class AsyncAddressResourceRepository @Inject constructor(
     private val resources: Resources,
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
-) : ResourceRepository {
-    private val lpmRepository: LpmRepository = LpmRepository.getInstance(LpmRepository.LpmRepositoryArguments(resources))
-    private lateinit var addressRepository: AddressFieldElementRepository
-
+) : ResourceRepository<AddressRepository> {
+    private lateinit var addressRepository: AddressRepository
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
         loadingJobs.add(
             CoroutineScope(workContext).launch {
-                addressRepository = AddressFieldElementRepository(resources)
+                addressRepository = AddressRepository(resources)
             }
         )
         loadingJobs.add(
@@ -47,12 +45,13 @@ class AsyncResourceRepository @Inject constructor(
     override suspend fun waitUntilLoaded() {
         loadingJobs.joinAll()
         loadingJobs.clear()
-
-        lpmRepository.waitUntilLoaded()
     }
 
-    override fun isLoaded() = loadingJobs.isEmpty() && lpmRepository.isLoaded()
+    override fun isLoaded(): Boolean {
+        return loadingJobs.isEmpty()
+    }
 
-    override fun getLpmRepository() = lpmRepository
-    override fun getAddressRepository() = addressRepository
+    override fun getRepository(): AddressRepository {
+        return addressRepository
+    }
 }

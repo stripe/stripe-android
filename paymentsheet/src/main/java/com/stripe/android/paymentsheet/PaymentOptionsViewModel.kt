@@ -32,6 +32,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,7 +51,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     application: Application,
     logger: Logger,
     @InjectorKey injectorKey: String,
-    resourceRepository: ResourceRepository,
+    lpmResourceRepository: ResourceRepository<LpmRepository>,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
     linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
@@ -61,7 +64,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository,
+    lpmResourceRepository = lpmResourceRepository,
+    addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
@@ -103,9 +107,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         // If we are not recovering from don't keep activities than the resources
         // repository is loaded, and we should save off the LPM repository server specs so
         // it can be restored after don't keep activities or process killed.
-        if (resourceRepository.getLpmRepository().isLoaded()) {
+        if (lpmResourceRepository.getRepository().isLoaded()) {
             lpmServerSpec =
-                resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
         }
     }
 

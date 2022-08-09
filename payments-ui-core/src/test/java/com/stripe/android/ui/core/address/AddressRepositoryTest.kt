@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.address.AddressFieldElementRepository.Companion.DEFAULT_COUNTRY_CODE
-import com.stripe.android.ui.core.address.AddressFieldElementRepository.Companion.supportedCountries
+import com.stripe.android.ui.core.address.AddressRepository.Companion.DEFAULT_COUNTRY_CODE
+import com.stripe.android.ui.core.address.AddressRepository.Companion.supportedCountries
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.RowElement
 import org.junit.Test
@@ -13,9 +13,9 @@ import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
-class AddressFieldElementRepositoryTest {
+class AddressRepositoryTest {
 
-    private val addressFieldElementRepository = AddressFieldElementRepository(
+    private val addressRepository = AddressRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
 
@@ -28,15 +28,15 @@ class AddressFieldElementRepositoryTest {
     fun `Country that doesn't exist return the default country`() {
         assertThat(supportedCountries).doesNotContain("NB")
 
-        assertThat(addressFieldElementRepository.get("NB"))
-            .isEqualTo(addressFieldElementRepository.get(DEFAULT_COUNTRY_CODE))
+        assertThat(addressRepository.get("NB"))
+            .isEqualTo(addressRepository.get(DEFAULT_COUNTRY_CODE))
     }
 
     @Test
     fun `Correct supported country is returned`() {
         assertThat(supportedCountries).contains("DE")
 
-        val elements = addressFieldElementRepository.get("DE")!!
+        val elements = addressRepository.get("DE")!!
         assertThat(elements[0].identifier).isEqualTo(IdentifierSpec.Line1)
         assertThat(elements[1].identifier).isEqualTo(IdentifierSpec.Line2)
         assertThat((elements[2] as RowElement).fields[0].identifier).isEqualTo(IdentifierSpec.PostalCode)
@@ -58,10 +58,10 @@ class AddressFieldElementRepositoryTest {
     fun `Verify all supported countries deserialize`() {
         supportedCountries.forEach {
             if (it != "ZZ") {
-                assertThat(addressFieldElementRepository.get(it))
-                    .isNotEqualTo(addressFieldElementRepository.get(DEFAULT_COUNTRY_CODE))
+                assertThat(addressRepository.get(it))
+                    .isNotEqualTo(addressRepository.get(DEFAULT_COUNTRY_CODE))
             }
-            assertThat(addressFieldElementRepository.get(it))
+            assertThat(addressRepository.get(it))
                 .isNotNull()
         }
     }

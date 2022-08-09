@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -34,7 +35,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
-    private val resourceRepository: ResourceRepository,
+    private val lpmResourceRepository: ResourceRepository<LpmRepository>,
     private val logger: Logger,
     val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext
@@ -104,7 +105,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
             stripeIntent,
             config,
-            resourceRepository.getLpmRepository()
+            lpmResourceRepository.getRepository()
         ).mapNotNull {
             // The SDK is only able to parse customer LPMs
             // that are hard coded in the SDK.
@@ -191,7 +192,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         clientSecret: ClientSecret
     ) = stripeIntentValidator.requireValid(
         initializeRepositoryAndGetStripeIntent(
-            resourceRepository,
+            lpmResourceRepository,
             stripeIntentRepository,
             clientSecret,
             eventReporter
