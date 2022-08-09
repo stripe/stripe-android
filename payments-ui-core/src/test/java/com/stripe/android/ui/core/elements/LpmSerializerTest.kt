@@ -39,7 +39,7 @@ class LpmSerializerTest {
         val nextAction = result.first { it.type == "sofort" }.nextActionSpec
         assertThat(nextAction?.confirmResponseStatusSpecs).isEqualTo(
             ConfirmStatusSpecAssociation(
-                requires_action = ConfirmResponseStatusSpecs.RedirectNextActionSpec(
+                requiresAction = ConfirmResponseStatusSpecs.RedirectNextActionSpec(
                     urlPath = "next_action[redirect_to_url][url]",
                     returnUrlPath = "next_action[redirect_to_url][return_url]"
                 )
@@ -48,7 +48,7 @@ class LpmSerializerTest {
 
         assertThat(nextAction?.postConfirmHandlingPiStatusSpecs).isEqualTo(
             PostConfirmStatusSpecAssociation(
-                requires_action = PostConfirmHandlingPiStatusSpecs.CanceledSpec,
+                requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec,
                 processing = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
                 succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec
             )
@@ -548,7 +548,7 @@ class LpmSerializerTest {
         result.onSuccess {
             assertThat(it.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
                 ConfirmStatusSpecAssociation(
-                    requires_action =
+                    requiresAction =
                     ConfirmResponseStatusSpecs.RedirectNextActionSpec(
                         urlPath = "next_action[redirect_to_url][url]",
                         returnUrlPath = "next_action[redirect_to_url][return_url]"
@@ -559,7 +559,7 @@ class LpmSerializerTest {
             assertThat(it.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
                 PostConfirmStatusSpecAssociation(
                     succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
-                    requires_action = PostConfirmHandlingPiStatusSpecs.CanceledSpec
+                    requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
                 )
             )
         }

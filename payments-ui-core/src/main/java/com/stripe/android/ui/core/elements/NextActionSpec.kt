@@ -75,11 +75,11 @@ fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
 @Serializable
 data class ConfirmStatusSpecAssociation(
     @SerialName("requires_payment_method")
-    val requires_payment_method: ConfirmResponseStatusSpecs? = null,
+    val requiresPaymentMethod: ConfirmResponseStatusSpecs? = null,
     @SerialName("requires_confirmation")
-    val requires_confirmation: ConfirmResponseStatusSpecs? = null,
+    val requiresConfirmation: ConfirmResponseStatusSpecs? = null,
     @SerialName("requires_action")
-    val requires_action: ConfirmResponseStatusSpecs? = null,
+    val requiresAction: ConfirmResponseStatusSpecs? = null,
     @SerialName("processing")
     val processing: ConfirmResponseStatusSpecs? = null,
     @SerialName("succeeded")
@@ -89,9 +89,9 @@ data class ConfirmStatusSpecAssociation(
 ) {
     fun getMap() =
         mapOf(
-            StripeIntent.Status.RequiresPaymentMethod to requires_payment_method,
-            StripeIntent.Status.RequiresConfirmation to requires_confirmation,
-            StripeIntent.Status.RequiresAction to requires_action,
+            StripeIntent.Status.RequiresPaymentMethod to requiresPaymentMethod,
+            StripeIntent.Status.RequiresConfirmation to requiresConfirmation,
+            StripeIntent.Status.RequiresAction to requiresAction,
             StripeIntent.Status.Processing to processing,
             StripeIntent.Status.Succeeded to succeeded,
             StripeIntent.Status.Canceled to canceled
@@ -101,11 +101,11 @@ data class ConfirmStatusSpecAssociation(
 @Serializable
 data class PostConfirmStatusSpecAssociation(
     @SerialName("requires_payment_method")
-    val requires_payment_method: PostConfirmHandlingPiStatusSpecs? = null,
+    val requiresPaymentMethod: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("requires_confirmation")
-    val requires_confirmation: PostConfirmHandlingPiStatusSpecs? = null,
+    val requiresConfirmation: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("requires_action")
-    val requires_action: PostConfirmHandlingPiStatusSpecs? = null,
+    val requiresAction: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("processing")
     val processing: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("succeeded")
@@ -114,9 +114,9 @@ data class PostConfirmStatusSpecAssociation(
     val canceled: PostConfirmHandlingPiStatusSpecs? = null
 ) {
     fun getMap() = mapOf(
-        StripeIntent.Status.RequiresPaymentMethod to requires_payment_method,
-        StripeIntent.Status.RequiresConfirmation to requires_confirmation,
-        StripeIntent.Status.RequiresAction to requires_action,
+        StripeIntent.Status.RequiresPaymentMethod to requiresPaymentMethod,
+        StripeIntent.Status.RequiresConfirmation to requiresConfirmation,
+        StripeIntent.Status.RequiresAction to requiresAction,
         StripeIntent.Status.Processing to processing,
         StripeIntent.Status.Succeeded to succeeded,
         StripeIntent.Status.Canceled to canceled
