@@ -37,6 +37,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -57,7 +58,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
@@ -68,21 +68,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-
-/**
- * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
- * classes to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
- */
-internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
-    return when (this) {
-        is PaymentSheetViewState.Reset ->
-            PrimaryButton.State.Ready
-        is PaymentSheetViewState.StartProcessing ->
-            PrimaryButton.State.StartProcessing
-        is PaymentSheetViewState.FinishProcessing ->
-            PrimaryButton.State.FinishProcessing(this.onComplete)
-    }
-}
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
@@ -467,10 +452,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun launchLink() {
+    override fun completeLinkInlinePayment(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        isReturningUser: Boolean
+    ) {
+        if (isReturningUser) {
+            launchLink(paymentMethodCreateParams)
+        } else {
+            super.completeLinkInlinePayment(paymentMethodCreateParams, isReturningUser)
+        }
+    }
+
+    fun launchLink(paymentMethodCreateParams: PaymentMethodCreateParams? = null) {
         linkActivityResultLauncher?.let { activityResultLauncher ->
             linkLauncher.present(
-                activityResultLauncher
+                activityResultLauncher,
+                paymentMethodCreateParams
             )
             onLinkLaunched()
         }
@@ -491,7 +488,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun onLinkActivityResult(result: LinkActivityResult) {
         val paymentResult = result.convertToPaymentResult()
         if (paymentResult is PaymentResult.Completed) {
-            // If payment was completed, don't show the Payment Sheet.
+            // If payment was completed inside the Link UI, dismiss immediately.
+            eventReporter.onPaymentSuccess(PaymentSelection.Link)
             prefsRepository.savePaymentSelection(PaymentSelection.Link)
             _paymentSheetResult.value = PaymentSheetResult.Completed
         } else {
@@ -500,7 +498,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
             updateSelection(PaymentSelection.New.LinkInline(it))
@@ -532,13 +530,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
+                    is PaymentSelection.New.LinkInline -> PaymentSelection.Link
                     is PaymentSelection.New -> stripeIntent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
-                    PaymentSelection.GooglePay -> selection.value
-                    PaymentSelection.Link -> selection.value
-                    is PaymentSelection.Saved -> selection.value
-                    null -> null
+                    else -> selection.value
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
                 }

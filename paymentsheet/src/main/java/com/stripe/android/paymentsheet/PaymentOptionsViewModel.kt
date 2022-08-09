@@ -181,7 +181,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
             updateSelection(PaymentSelection.New.LinkInline(it))

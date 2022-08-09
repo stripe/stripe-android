@@ -88,6 +88,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _isLinkEnabled = MutableLiveData<Boolean>()
     internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled.distinctUntilChanged()
 
+    internal val activeLinkSession = MutableLiveData(false)
+
     private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
@@ -459,15 +461,19 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
 
             when (linkLauncher.accountStatus.value) {
-                AccountStatus.Verified -> createLinkPaymentDetails(params)
+                AccountStatus.Verified -> {
+                    activeLinkSession.value = true
+                    completeLinkInlinePayment(params, userInput is UserInput.SignIn)
+                }
                 AccountStatus.VerificationStarted,
                 AccountStatus.NeedsVerification -> {
                     linkVerificationCallback = { success ->
+                        activeLinkSession.value = success
                         linkVerificationCallback = null
                         _showLinkVerificationDialog.value = false
 
                         if (success) {
-                            createLinkPaymentDetails(params)
+                            completeLinkInlinePayment(params, userInput is UserInput.SignIn)
                         } else {
                             savedStateHandle[SAVE_PROCESSING] = false
                             updatePrimaryButtonState(PrimaryButton.State.Ready)
@@ -476,6 +482,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     _showLinkVerificationDialog.value = true
                 }
                 AccountStatus.SignedOut -> {
+                    activeLinkSession.value = false
                     viewModelScope.launch {
                         linkLauncher.signInWithUserInput(userInput).fold(
                             onSuccess = {
@@ -494,7 +501,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    private fun createLinkPaymentDetails(paymentMethodCreateParams: PaymentMethodCreateParams) {
+    internal open fun completeLinkInlinePayment(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        isReturningUser: Boolean
+    ) {
         viewModelScope.launch {
             onLinkPaymentDetailsCollected(
                 linkLauncher.attachNewCardToAccount(paymentMethodCreateParams).getOrNull()
@@ -505,7 +515,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     /**
      * Method called after completing collection of payment data for a payment with Link.
      */
-    abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?)
+    abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
 
     abstract fun onUserCancel()
 

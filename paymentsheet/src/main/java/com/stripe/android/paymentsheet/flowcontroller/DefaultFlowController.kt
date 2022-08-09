@@ -25,6 +25,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -264,7 +265,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
         when (val paymentSelection = viewModel.paymentSelection) {
             PaymentSelection.GooglePay -> launchGooglePay(initData)
-            PaymentSelection.Link -> launchLink(initData)
+            PaymentSelection.Link,
+            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, initData)
             else -> confirmPaymentSelection(paymentSelection, initData)
         }
     }
@@ -422,7 +424,10 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun launchLink(initData: InitData) {
+    private fun confirmLink(
+        paymentSelection: PaymentSelection,
+        initData: InitData
+    ) {
         val config = requireNotNull(initData.config)
 
         lifecycleScope.launch {
@@ -431,11 +436,24 @@ internal class DefaultFlowController @Inject internal constructor(
                 customerEmail = config.defaultBillingDetails?.email,
                 customerPhone = config.defaultBillingDetails?.phone
             )
-            linkLauncher.setup(
+            val accountStatus = linkLauncher.setup(
                 stripeIntent = initData.stripeIntent,
                 coroutineScope = lifecycleScope
             )
-            linkLauncher.present(linkActivityResultLauncher)
+            // If a returning user is paying with a new card inline, launch Link to complete payment
+            (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
+                accountStatus == AccountStatus.Verified
+            }?.linkPaymentDetails?.originalParams?.let {
+                linkLauncher.present(linkActivityResultLauncher, it)
+            } ?: run {
+                if (paymentSelection is PaymentSelection.Link) {
+                    // User selected Link as the payment method, not inline
+                    linkLauncher.present(linkActivityResultLauncher)
+                } else {
+                    // New user paying inline, complete without launching Link
+                    confirmPaymentSelection(paymentSelection, initData)
+                }
+            }
         }
     }
 

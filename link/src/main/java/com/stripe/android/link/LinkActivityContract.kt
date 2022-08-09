@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -29,7 +30,7 @@ class LinkActivityContract :
      * @param merchantName The customer-facing business name.
      * @param customerEmail Email of the customer, used to pre-fill the form.
      * @param customerPhone Phone number of the customer, used to pre-fill the form.
-     * @param selectedPaymentDetails The payment method previously selected by the user.
+     * @param prefilledCardParams The payment method information prefilled by the user.
      * @param injectionParams Parameters needed to perform dependency injection.
      *                        If null, a new dependency graph will be created.
      */
@@ -39,7 +40,7 @@ class LinkActivityContract :
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
-        internal val selectedPaymentDetails: LinkPaymentDetails? = null,
+        internal val prefilledCardParams: PaymentMethodCreateParams? = null,
         internal val injectionParams: InjectionParams? = null
     ) : ActivityStarter.Args {
 

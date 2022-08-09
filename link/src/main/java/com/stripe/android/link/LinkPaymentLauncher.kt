@@ -148,7 +148,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             merchantName,
             customerEmail,
             customerPhone,
-            null,
+            prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
                 productUsage,
