@@ -102,27 +102,21 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        // https://www.discoverglobalnetwork.com/content/dam/discover/en_us/dgn/docs/IPP-VAR-Enabler-Compliance.pdf
         @VisibleForTesting
         internal val UNIONPAY16_ACCOUNTS = setOf(
             BinRange(
-                low = "6221260000000000",
-                high = "6237969999999999"
+                low = "6200000000000000",
+                high = "6216828049999999"
             ),
 
             BinRange(
-                low = "6240000000000000",
-                high = "6269999999999999"
-            ),
-
-            BinRange(
-                low = "6282000000000000",
-                high = "6288999999999999"
+                low = "6216828060000000",
+                high = "6299999999999999"
             ),
 
             BinRange(
                 low = "8100000000000000",
-                high = "8171999999999999"
+                high = "8199999999999999"
             )
         ).map {
             AccountRange(
@@ -135,23 +129,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
         @VisibleForTesting
         internal val UNIONPAY19_ACCOUNTS = setOf(
             BinRange(
-                low = "6221260000000000000",
-                high = "6237969999999999999"
-            ),
-
-            BinRange(
-                low = "6240000000000000000",
-                high = "6269999999999999999"
-            ),
-
-            BinRange(
-                low = "6282000000000000000",
-                high = "6288999999999999999"
-            ),
-
-            BinRange(
-                low = "8100000000000000000",
-                high = "8171999999999999999"
+                low = "6216828050000000000",
+                high = "6216828059999999999"
             )
         ).map {
             AccountRange(

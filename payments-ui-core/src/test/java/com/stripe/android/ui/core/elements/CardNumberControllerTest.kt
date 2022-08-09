@@ -134,6 +134,13 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `Entering valid 16 digit UnionPay BIN returns accountRange of 16`() {
+        cardNumberController.onValueChange("6282000000000000")
+        idleLooper()
+        assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(16)
+    }
+
+    @Test
     fun `trailingIcon should have multi trailing icons when field is empty`() {
         val trailingIcons = mutableListOf<TextFieldIcon?>()
         cardNumberController.trailingIcon.asLiveData().observeForever {

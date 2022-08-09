@@ -11,7 +11,7 @@ internal object BinFixtures {
     val DISCOVER = requireNotNull(Bin.create(CardNumberFixtures.DISCOVER_NO_SPACES))
     val DINERSCLUB14 = requireNotNull(Bin.create(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES))
     val DINERSCLUB16 = requireNotNull(Bin.create(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES))
-    val UNIONPAY16 = requireNotNull(Bin.create(CardNumberFixtures.UNIONPAY_16_NO_SPACES))
+    val UNIONPAY16 = requireNotNull(Bin.create("3568400000000000"))
 
     val FAKE = requireNotNull(Bin.create("999999"))
 }
