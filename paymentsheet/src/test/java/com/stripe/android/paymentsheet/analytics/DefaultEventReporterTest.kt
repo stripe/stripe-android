@@ -10,12 +10,12 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -23,7 +23,9 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class DefaultEventReporterTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-
+    private val eventTimeProvider = mock<EventTimeProvider>().apply {
+        whenever(currentTimeMillis()).thenReturn(1000L)
+    }
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
@@ -35,6 +37,7 @@ class DefaultEventReporterTest {
             mode,
             analyticsRequestExecutor,
             analyticsRequestFactory,
+            eventTimeProvider,
             testDispatcher
         )
     }
@@ -79,10 +82,11 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentSuccess() should fire analytics request with expected event value`() = runTest(UnconfinedTestDispatcher()) {
+    fun `onPaymentSuccess() should fire analytics request with expected event value`() {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(false, false)
-        advanceTimeBy(1000L)
+        reset(analyticsRequestExecutor)
+        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentSuccess(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -95,10 +99,11 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentFailure() should fire analytics request with expected event value`() = runTest(UnconfinedTestDispatcher()) {
+    fun `onPaymentFailure() should fire analytics request with expected event value`() {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(false, false)
-        advanceTimeBy(1000L)
+        reset(analyticsRequestExecutor)
+        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentFailure(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -130,6 +135,7 @@ class DefaultEventReporterTest {
             EventReporter.Mode.Complete,
             analyticsRequestExecutor,
             analyticsRequestFactory,
+            eventTimeProvider,
             testDispatcher
         )
     }

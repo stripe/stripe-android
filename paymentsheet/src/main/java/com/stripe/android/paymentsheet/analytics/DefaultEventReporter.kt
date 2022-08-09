@@ -16,6 +16,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val eventTimeProvider: EventTimeProvider,
     @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
     private var paymentSheetShownMillis: Long? = null
@@ -38,7 +39,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions(linkEnabled: Boolean, activeLinkSession: Boolean) {
-        paymentSheetShownMillis = System.currentTimeMillis()
+        paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -49,7 +50,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowNewPaymentOptionForm(linkEnabled: Boolean, activeLinkSession: Boolean) {
-        paymentSheetShownMillis = System.currentTimeMillis()
+        paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
                 mode = mode,
@@ -108,6 +109,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun durationMillisFrom(start: Long?) = start?.let {
-        System.currentTimeMillis() - it
+        eventTimeProvider.currentTimeMillis() - it
     }?.takeIf { it > 0 }
 }
