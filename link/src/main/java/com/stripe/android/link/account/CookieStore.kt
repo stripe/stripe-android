@@ -15,7 +15,7 @@ class CookieStore @Inject internal constructor(
     private val store: EncryptedStore
 ) {
 
-    constructor(context: Context): this(EncryptedStore(context))
+    constructor(context: Context) : this(EncryptedStore(context))
 
     /**
      * Clear all local data.

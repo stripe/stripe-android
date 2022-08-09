@@ -138,7 +138,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-        sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+        sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
+            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
+            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+        )
     }
 
     private fun setupRecyclerView(

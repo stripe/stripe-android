@@ -6,10 +6,8 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -134,9 +132,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(
-            object : LifecycleObserver {
-                @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-                fun onCreate() {
+            object : DefaultLifecycleObserver {
+                override fun onCreate(owner: LifecycleOwner) {
                     paymentLauncher = paymentLauncherFactory.create(
                         { lazyPaymentConfiguration.get().publishableKey },
                         { lazyPaymentConfiguration.get().stripeAccountId },
@@ -147,8 +144,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 }
 
-                @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-                fun onDestroy() {
+                override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher = null
                 }
             }
@@ -316,7 +312,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 }.fold(
                     onSuccess = { initData ->
                         val paymentSelection = PaymentSelection.Saved(
-                            googlePayResult.paymentMethod
+                            googlePayResult.paymentMethod,
+                            isGooglePay = true
                         )
                         viewModel.paymentSelection = paymentSelection
                         confirmPaymentSelection(
@@ -422,10 +419,26 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     internal fun onPaymentResult(paymentResult: PaymentResult) {
+        logPaymentResult(paymentResult)
         lifecycleScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
             )
+        }
+    }
+
+    private fun logPaymentResult(paymentResult: PaymentResult?) {
+        when (paymentResult) {
+            is PaymentResult.Completed -> {
+                if ((viewModel.paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true) {
+                    // Google Pay is treated as a saved PM after confirmation
+                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
+                } else {
+                    eventReporter.onPaymentSuccess(viewModel.paymentSelection)
+                }
+            }
+            is PaymentResult.Failed -> eventReporter.onPaymentFailure(viewModel.paymentSelection)
+            else -> {}
         }
     }
 

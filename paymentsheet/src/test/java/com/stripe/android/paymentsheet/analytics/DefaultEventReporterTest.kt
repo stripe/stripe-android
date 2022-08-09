@@ -51,13 +51,57 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
+        completeEventReporter.onShowExistingPaymentOptions(true, false)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_sheet_savedpm_show" &&
+                    req.params["link_enabled"] == true &&
+                    req.params["active_link_session"] == false
+            }
+        )
+    }
+
+    @Test
+    fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
+        completeEventReporter.onShowNewPaymentOptionForm(false, true)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_sheet_newpm_show" &&
+                    req.params["link_enabled"] == false &&
+                    req.params["active_link_session"] == true
+            }
+        )
+    }
+
+    @Test
     fun `onPaymentSuccess() should fire analytics request with expected event value`() {
+        // Log initial event so that duration is tracked
+        completeEventReporter.onShowExistingPaymentOptions(false, false)
+
         completeEventReporter.onPaymentSuccess(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_complete_payment_savedpm_success"
+                req.params["event"] == "mc_complete_payment_savedpm_success" && req.params.containsKey("duration")
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentFailure() should fire analytics request with expected event value`() {
+        // Log initial event so that duration is tracked
+        completeEventReporter.onShowExistingPaymentOptions(false, false)
+
+        completeEventReporter.onPaymentFailure(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_payment_savedpm_failure" && req.params.containsKey("duration")
             }
         )
     }
