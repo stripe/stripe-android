@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
@@ -77,9 +79,10 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentSuccess() should fire analytics request with expected event value`() {
+    fun `onPaymentSuccess() should fire analytics request with expected event value`() = runTest(UnconfinedTestDispatcher()) {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(false, false)
+        advanceTimeBy(1000L)
 
         completeEventReporter.onPaymentSuccess(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -92,9 +95,10 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentFailure() should fire analytics request with expected event value`() {
+    fun `onPaymentFailure() should fire analytics request with expected event value`() = runTest(UnconfinedTestDispatcher()) {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(false, false)
+        advanceTimeBy(1000L)
 
         completeEventReporter.onPaymentFailure(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
