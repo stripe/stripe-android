@@ -153,6 +153,7 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.zip)
                     }
                 }
+                else -> {}
             }
         }
     }
@@ -225,6 +226,7 @@ class FieldPopulator(
                 is CountrySpec -> {}
                 is SimpleTextSpec -> {}
                 is DropdownSpec -> {}
+                else -> {}
             }
         }
     }
