@@ -93,7 +93,8 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_complete_payment_savedpm_success" && req.params.containsKey("duration")
+                req.params["event"] == "mc_complete_payment_savedpm_success" &&
+                    req.params["duration"] == 1f
             }
         )
     }
@@ -110,7 +111,8 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_complete_payment_savedpm_failure" && req.params.containsKey("duration")
+                req.params["event"] == "mc_complete_payment_savedpm_failure" &&
+                    req.params["duration"] == 1f
             }
         )
     }
