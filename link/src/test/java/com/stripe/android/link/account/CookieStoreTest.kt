@@ -43,6 +43,15 @@ class CookieStoreTest {
     }
 
     @Test
+    fun `clear deletes all data`() {
+        createCookieStore().clear()
+
+        CookieStore.allCookies.forEach {
+            verify(store).delete(it)
+        }
+    }
+
+    @Test
     fun `logout stores hashed email and clears cookie`() {
         val cookieStore = createCookieStore()
         val email = "test@stripe.com"

@@ -63,6 +63,7 @@ public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Facto
 
 public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Companion;
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
 	public final fun presentWithPaymentIntent (Ljava/lang/String;)V
@@ -254,6 +255,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Creator :
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Companion {
+	public final fun resetCustomer (Landroid/content/Context;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : android/os/Parcelable {
