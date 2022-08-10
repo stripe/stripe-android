@@ -40,7 +40,7 @@ class NextActionSpecTest {
     fun `Verify confirm status only correlates to no next action`() {
         val nextActionSpec = NextActionSpec(
             confirmResponseStatusSpecs = ConfirmStatusSpecAssociation(
-                requires_action = ConfirmResponseStatusSpecs.FinishedSpec
+                requiresAction = ConfirmResponseStatusSpecs.FinishedSpec
             ),
             postConfirmHandlingPiStatusSpecs = null
         ).transform()
@@ -53,7 +53,8 @@ class NextActionSpecTest {
             nextActionSpec.postConfirmActionIntentStatus
         ).isEqualTo(
             mapOf(
-                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED
+                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
+                StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED
             )
         )
     }
@@ -64,7 +65,7 @@ class NextActionSpecTest {
             NextActionSpec(
                 confirmResponseStatusSpecs = null,
                 postConfirmHandlingPiStatusSpecs = PostConfirmStatusSpecAssociation(
-                    requires_action = PostConfirmHandlingPiStatusSpecs.CanceledSpec
+                    requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
                 )
             ).transform()
         ).isEqualTo(
@@ -81,10 +82,10 @@ class NextActionSpecTest {
     fun `Verify confirm status overwrite postStatus values`() {
         val nextActionSpec = NextActionSpec(
             confirmResponseStatusSpecs = ConfirmStatusSpecAssociation(
-                requires_action = ConfirmResponseStatusSpecs.FinishedSpec
+                requiresAction = ConfirmResponseStatusSpecs.FinishedSpec
             ),
             postConfirmHandlingPiStatusSpecs = PostConfirmStatusSpecAssociation(
-                requires_action = PostConfirmHandlingPiStatusSpecs.CanceledSpec
+                requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
             )
         ).transform()
 
@@ -96,7 +97,8 @@ class NextActionSpecTest {
             nextActionSpec.postConfirmActionIntentStatus
         ).isEqualTo(
             mapOf(
-                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED
+                StripeIntent.Status.RequiresAction to StripeIntentResult.Outcome.SUCCEEDED,
+                StripeIntent.Status.Succeeded to StripeIntentResult.Outcome.SUCCEEDED
             )
         )
     }

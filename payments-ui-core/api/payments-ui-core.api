@@ -333,9 +333,9 @@ public final class com/stripe/android/ui/core/elements/ConfirmStatusSpecAssociat
 	public final fun getCanceled ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
 	public final fun getMap ()Ljava/util/Map;
 	public final fun getProcessing ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
-	public final fun getRequires_action ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
-	public final fun getRequires_confirmation ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
-	public final fun getRequires_payment_method ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
+	public final fun getRequiresAction ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
+	public final fun getRequiresConfirmation ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
+	public final fun getRequiresPaymentMethod ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
 	public final fun getSucceeded ()Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -723,9 +723,9 @@ public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAsso
 	public final fun getCanceled ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
 	public final fun getMap ()Ljava/util/Map;
 	public final fun getProcessing ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
-	public final fun getRequires_action ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
-	public final fun getRequires_confirmation ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
-	public final fun getRequires_payment_method ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
+	public final fun getRequiresAction ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
+	public final fun getRequiresConfirmation ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
+	public final fun getRequiresPaymentMethod ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
 	public final fun getSucceeded ()Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

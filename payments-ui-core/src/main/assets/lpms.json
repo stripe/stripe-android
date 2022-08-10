@@ -707,5 +707,10 @@
     "async": false,
     "fields": [
     ]
+  },
+  {
+    "type": "us_bank_account",
+    "async": true,
+    "fields": []
   }
 ]
