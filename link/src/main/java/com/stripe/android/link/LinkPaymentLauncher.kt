@@ -20,6 +20,7 @@ import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.injection.MERCHANT_NAME
+import com.stripe.android.link.injection.INITIAL_VALUES_MAP
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
@@ -35,6 +36,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -54,6 +56,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     @Assisted(MERCHANT_NAME) private val merchantName: String,
     @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
     @Assisted(CUSTOMER_PHONE) private val customerPhone: String?,
+    @Assisted(INITIAL_VALUES_MAP) private val initialValuesMap: Map<IdentifierSpec, String?>?,
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -71,6 +74,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .merchantName(merchantName)
         .customerEmail(customerEmail)
         .customerPhone(customerPhone)
+        .initialValuesMap(initialValuesMap)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -149,6 +153,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             merchantName,
             customerEmail,
             customerPhone,
+            initialValuesMap,
             prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,

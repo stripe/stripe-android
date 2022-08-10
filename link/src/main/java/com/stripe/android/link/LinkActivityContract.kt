@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -40,6 +41,7 @@ class LinkActivityContract :
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
+        internal val initialValueMap: Map<IdentifierSpec, String?>? = null,
         internal val prefilledCardParams: PaymentMethodCreateParams? = null,
         internal val injectionParams: InjectionParams? = null
     ) : ActivityStarter.Args {

@@ -18,6 +18,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetPlaygroundBinding
@@ -401,6 +402,21 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
+            shippingDetails = if (viewModel.getSavedToggleState().setShippingAddress) {
+                AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        postalCode = "94102",
+                        state = "California",
+                    ),
+                    name = "John Doe",
+                    isCheckboxSelected = true
+                )
+            } else {
+                 null
+            },
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
             appearance = appearance
         )

@@ -28,9 +28,12 @@ internal fun Section(
     contentOutsideCard: @Composable () -> Unit = {},
     contentInCard: @Composable () -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
         SectionTitle(title)
-        SectionCard(content = contentInCard)
+        SectionCard(
+            content = contentInCard,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
         if (error != null) {
             SectionError(error)
         }

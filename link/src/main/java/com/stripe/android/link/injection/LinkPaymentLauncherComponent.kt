@@ -17,6 +17,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.BindsInstance
 import dagger.Component
@@ -56,6 +57,9 @@ internal abstract class LinkPaymentLauncherComponent {
 
         @BindsInstance
         fun stripeIntent(@Named(LINK_INTENT) stripeIntent: StripeIntent): Builder
+
+        @BindsInstance
+        fun initialValuesMap(@Named(INITIAL_VALUES_MAP) initialValuesMap: Map<IdentifierSpec, String?>?): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

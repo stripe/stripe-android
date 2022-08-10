@@ -15,15 +15,32 @@ data class CardBillingSpec(
     val allowedCountryCodes: Set<String> = supportedBillingCountries
 ) : FormItemSpec() {
     fun transform(
-        addressRepository: AddressRepository,
-        initialValues: Map<IdentifierSpec, String?>
-    ) = createSectionElement(
-        CardBillingAddressElement(
+        initialValues: Map<IdentifierSpec, String?>,
+        addressRepository: AddressRepository
+    ): SectionElement {
+        val sameAsShippingElement =
+            initialValues[IdentifierSpec.SameAsShipping]
+                ?.toBooleanStrictOrNull()
+                ?.let {
+                    SameAsShippingElement(
+                        identifier = IdentifierSpec.SameAsShipping,
+                        controller = SameAsShippingController(it)
+                    )
+                }
+        val addressElement = CardBillingAddressElement(
             IdentifierSpec.Generic("credit_billing"),
             addressRepository = addressRepository,
             countryCodes = allowedCountryCodes,
-            rawValuesMap = initialValues
-        ),
-        label = R.string.billing_details
-    )
+            rawValuesMap = initialValues,
+            sameAsShippingController = sameAsShippingElement?.controller
+        )
+
+        return createSectionElement(
+            listOfNotNull(
+                addressElement,
+                sameAsShippingElement
+            ),
+            R.string.billing_details
+        )
+    }
 }

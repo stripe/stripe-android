@@ -23,6 +23,7 @@ import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.injection.MERCHANT_NAME
+import com.stripe.android.link.injection.INITIAL_VALUES_MAP
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -53,6 +54,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.view.ActivityScenarioFactory
 import dagger.assisted.Assisted
 import kotlinx.coroutines.CoroutineScope
@@ -939,7 +941,8 @@ internal class DefaultFlowControllerTest {
             override fun create(
                 @Assisted(MERCHANT_NAME) merchantName: String,
                 @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
-                @Assisted(CUSTOMER_PHONE) customerPhone: String?
+                @Assisted(CUSTOMER_PHONE) customerPhone: String?,
+                @Assisted(INITIAL_VALUES_MAP) initialValuesMap: Map<IdentifierSpec, String?>?
             ): LinkPaymentLauncher {
                 return linkPaymentLauncher
             }

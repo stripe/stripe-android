@@ -20,7 +20,7 @@ import com.stripe.android.ui.core.elements.menu.Checkbox
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun CheckboxElementUi(
+fun CheckboxElementUI(
     automationTestTag: String = "",
     isChecked: Boolean = false,
     label: String? = null,
@@ -37,7 +37,7 @@ fun CheckboxElementUi(
 
     Row(
         modifier = Modifier
-            .padding(vertical = 2.dp)
+            .requiredHeight(32.dp)
             .semantics {
                 testTag = automationTestTag
                 stateDescription = accessibilityDescription
@@ -48,8 +48,7 @@ fun CheckboxElementUi(
                 onValueChange = onValueChange,
                 enabled = isEnabled
             )
-            .fillMaxWidth()
-            .requiredHeight(48.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(

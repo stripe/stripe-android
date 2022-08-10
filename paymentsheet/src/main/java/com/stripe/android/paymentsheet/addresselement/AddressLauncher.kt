@@ -93,10 +93,9 @@ internal class AddressLauncher internal constructor(
         val buttonTitle: String? = null,
 
         /**
-         * Configuration for the field that collects a phone number.
-         * Defaults to HIDDEN
+         * Configuration for fields to collect in addition to the physical shipping address
          */
-        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL,
+        val additionalFields: AdditionalFieldsConfiguration? = null,
 
         /**
          * Configuration for the title displayed at the top of the screen.
@@ -124,7 +123,7 @@ internal class AddressLauncher internal constructor(
             var defaultValues: DefaultAddressDetails? = null
             var allowedCountries: Set<String> = emptySet()
             var buttonTitle: String? = null
-            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL
+            var additionalFields: AdditionalFieldsConfiguration? = null
             var title: String? = null
             var googlePlacesApiKey: String? = null
             var checkboxLabel: String? = null
@@ -141,8 +140,8 @@ internal class AddressLauncher internal constructor(
             fun buttonTitle(buttonTitle: String?) =
                 apply { this.buttonTitle = buttonTitle }
 
-            fun phone(phone: AdditionalFieldsConfiguration) =
-                apply { this.phone = phone }
+            fun additionalFields(additionalFields: AdditionalFieldsConfiguration) =
+                apply { this.additionalFields = additionalFields }
 
             fun title(title: String?) =
                 apply { this.title = title }
@@ -158,7 +157,7 @@ internal class AddressLauncher internal constructor(
                 defaultValues,
                 allowedCountries,
                 buttonTitle,
-                phone,
+                additionalFields,
                 title,
                 googlePlacesApiKey,
                 checkboxLabel
@@ -166,22 +165,34 @@ internal class AddressLauncher internal constructor(
         }
     }
 
+    /**
+     * @param phone Configuration for the field that collects a phone number. Defaults to
+     * [FieldConfiguration.OPTIONAL]
+     * @param checkboxLabel The label of a checkbox displayed below other fields. If nil, the
+     * checkbox is not displayed. Defaults to null
+     */
     @Parcelize
-    enum class AdditionalFieldsConfiguration : Parcelable {
-        /**
-         * The field is not displayed.
-         */
-        HIDDEN,
+    data class AdditionalFieldsConfiguration(
+        val phone: FieldConfiguration = FieldConfiguration.OPTIONAL,
+        val checkboxLabel: String? = null
+    ) : Parcelable {
+        @Parcelize
+        enum class FieldConfiguration : Parcelable {
+            /**
+             * The field is not displayed.
+             */
+            HIDDEN,
 
-        /**
-         * The field is displayed but the customer can leave it blank.
-         */
-        OPTIONAL,
+            /**
+             * The field is displayed but the customer can leave it blank.
+             */
+            OPTIONAL,
 
-        /**
-         * The field is displayed and the customer is required to fill it in.
-         */
-        REQUIRED
+            /**
+             * The field is displayed and the customer is required to fill it in.
+             */
+            REQUIRED
+        }
     }
 
     @Parcelize

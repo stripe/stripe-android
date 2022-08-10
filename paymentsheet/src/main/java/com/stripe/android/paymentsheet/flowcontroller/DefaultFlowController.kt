@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
@@ -449,10 +450,21 @@ internal class DefaultFlowController @Inject internal constructor(
         val config = requireNotNull(initData.config)
 
         lifecycleScope.launch {
+            val customerPhone = if (config.shippingDetails?.isCheckboxSelected == true) {
+                config.shippingDetails.phoneNumber
+            } else {
+                config.defaultBillingDetails?.phone
+            }
+            val initialValuesMap = if (config.shippingDetails?.isCheckboxSelected == true) {
+                config.shippingDetails.toIdentifierMap(config.defaultBillingDetails)
+            } else {
+                emptyMap()
+            }
             val linkLauncher = linkPaymentLauncherFactory.create(
                 merchantName = config.merchantDisplayName,
                 customerEmail = config.defaultBillingDetails?.email,
-                customerPhone = config.defaultBillingDetails?.phone
+                customerPhone = customerPhone,
+                initialValuesMap = initialValuesMap
             )
             val accountStatus = linkLauncher.setup(
                 stripeIntent = initData.stripeIntent,
