@@ -6,6 +6,8 @@
 
 * [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `resetCustomer` method to 
   `PaymentSheet`, that clears any persisted authentication state.
+* [FIXED][5388](https://github.com/stripe/stripe-android/pull/5388) Fixed issue with Appearance API
+  not working with `FlowController`
 
 ## 20.8.0 - 2022-08-01
 
