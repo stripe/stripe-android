@@ -117,4 +117,46 @@ class InputAddressViewModelTest {
             editDistance = eq(0)
         )
     }
+
+    @Test
+    fun `default checkbox should emit true to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            AddressDetails(
+                checkboxChecked = true
+            )
+        )
+        assertThat(viewModel.checkboxChecked.value).isTrue()
+    }
+
+    @Test
+    fun `default checkbox should emit false to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            AddressDetails(
+                checkboxChecked = false
+            )
+        )
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+    }
+
+    @Test
+    fun `default checkbox should emit false to start by default`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+    }
+
+    @Test
+    fun `clicking the checkbox should change the internal state`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+
+        viewModel.clickCheckbox(true)
+        assertThat(viewModel.checkboxChecked.value).isTrue()
+
+        viewModel.clickCheckbox(false)
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+
+        viewModel.clickCheckbox(true)
+        assertThat(viewModel.checkboxChecked.value).isTrue()
+    }
 }
