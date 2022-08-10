@@ -263,6 +263,9 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
 }
 
+public final class com/stripe/android/ui/core/elements/CheckboxElementUiKt {
+}
+
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
