@@ -25,7 +25,8 @@ sealed class PaymentSelection : Parcelable {
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Saved(
-        val paymentMethod: PaymentMethod
+        val paymentMethod: PaymentMethod,
+        internal val isGooglePay: Boolean = false
     ) : PaymentSelection()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

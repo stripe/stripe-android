@@ -70,6 +70,7 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -186,6 +187,30 @@ internal class DefaultFlowControllerTest {
         }
         verify(eventReporter)
             .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+    }
+
+    @Test
+    fun `successful payment should fire analytics event`() {
+        val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+        val flowController = createFlowController(viewModel = viewModel)
+
+        viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())
+
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(isA<PaymentSelection.New>())
+    }
+
+    @Test
+    fun `failed payment should fire analytics event`() {
+        val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+        val flowController = createFlowController(viewModel = viewModel)
+
+        viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())
+
+        flowController.onPaymentResult(PaymentResult.Failed(RuntimeException()))
+
+        verify(eventReporter).onPaymentFailure(isA<PaymentSelection.New>())
     }
 
     @Test
@@ -857,19 +882,22 @@ internal class DefaultFlowControllerTest {
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
         savedSelection: SavedSelection = SavedSelection.None,
-        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
     ): DefaultFlowController {
         return createFlowController(
             FakeFlowControllerInitializer(
                 paymentMethods,
                 savedSelection,
                 stripeIntent = stripeIntent
-            )
+            ),
+            viewModel
         )
     }
 
     private fun createFlowController(
-        flowControllerInitializer: FlowControllerInitializer
+        flowControllerInitializer: FlowControllerInitializer,
+        viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
     ) = DefaultFlowController(
         testScope,
         lifeCycleOwner,
@@ -881,7 +909,7 @@ internal class DefaultFlowControllerTest {
         INJECTOR_KEY,
         flowControllerInitializer,
         eventReporter,
-        ViewModelProvider(activity)[FlowControllerViewModel::class.java],
+        viewModel,
         paymentLauncherAssistedFactory,
         mock(),
         mock(),

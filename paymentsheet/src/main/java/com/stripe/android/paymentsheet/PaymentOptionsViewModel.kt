@@ -169,7 +169,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                when (linkLauncher.setup(stripeIntent, this)) {
+                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                when (accountStatus) {
                     AccountStatus.Verified,
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
@@ -178,6 +179,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     }
                     AccountStatus.SignedOut -> {}
                 }
+                activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = true
             }
         } else {

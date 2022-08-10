@@ -433,7 +433,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                when (linkLauncher.setup(stripeIntent, this)) {
+                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                when (accountStatus) {
                     AccountStatus.Verified -> launchLink()
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
@@ -449,6 +450,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                     AccountStatus.SignedOut -> {}
                 }
+                activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = true
             }
         } else {
@@ -548,7 +550,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             else -> {
-                eventReporter.onPaymentFailure(selection.value)
+                if (paymentResult is PaymentResult.Failed) {
+                    eventReporter.onPaymentFailure(selection.value)
+                }
 
                 runCatching {
                     stripeIntentValidator.requireValid(stripeIntent)
