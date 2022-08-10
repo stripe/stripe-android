@@ -50,10 +50,6 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.collect_bank_account_for_bank_account_token),
                 FinancialConnectionsBankAccountTokenExampleActivity::class.java
             ),
-            Item(
-                activity.getString(R.string.collect_bank_account_for_data_compose),
-                FinancialConnectionsComposeExampleActivity::class.java
-            ),
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {
