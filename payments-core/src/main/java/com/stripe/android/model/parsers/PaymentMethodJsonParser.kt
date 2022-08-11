@@ -10,11 +10,13 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     override fun parse(json: JSONObject): PaymentMethod {
+        val code = StripeJsonUtils.optString(json, FIELD_TYPE)
         val type =
-            PaymentMethod.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
+            PaymentMethod.Type.fromCode(code)
         val builder = PaymentMethod.Builder()
             .setId(StripeJsonUtils.optString(json, FIELD_ID))
             .setType(type)
+            .setCode(code)
             .setCreated(StripeJsonUtils.optLong(json, FIELD_CREATED))
             .setBillingDetails(
                 json.optJSONObject(FIELD_BILLING_DETAILS)?.let {

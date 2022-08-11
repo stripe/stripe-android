@@ -1007,6 +1007,185 @@ internal object PaymentIntentFixtures {
         )
     }
 
+    val AFTERPAY_REQUIRES_ACTION_JSON_STRING = """
+        {
+          "id": "pi_3LNLYmLu5o3P18Zp04dCLrZf",
+          "object": "payment_intent",
+          "amount": 5099,
+          "amount_details": {
+            "tip": {}
+          },
+          "automatic_payment_methods": null,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_3LNLYmLu5o3P18Zp04dCLrZf_secret_hbuNP7A9J5qsyxOVdTSUwbOGa",
+          "confirmation_method": "automatic",
+          "created": 1658256860,
+          "currency": "usd",
+          "description": null,
+          "last_payment_error": null,
+          "livemode": false,
+          "next_action": {
+            "redirect_to_url": {
+              "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+              "url": "https://hooks.stripe.com/afterpay_clearpay/acct_1HvTI7Lu5o3P18Zp/pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
+            },
+            "type": "redirect_to_url"
+          },
+          "payment_method": {
+            "id": "pm_1LNLZQLu5o3P18ZpXBHpDiPF",
+            "object": "payment_method",
+            "afterpay_clearpay": {},
+            "billing_details": {
+              "address": {
+                "city": "Blackrock",
+                "country": "IE",
+                "line1": "123 Main Street",
+                "line2": "",
+                "postal_code": "T37 F8HK",
+                "state": "Co. Dublin"
+              },
+              "email": "email@email.com",
+              "name": "Jenny Rosen",
+              "phone": null
+            },
+            "created": 1658256900,
+            "customer": null,
+            "livemode": false,
+            "type": "afterpay_clearpay"
+          },
+          "payment_method_options": {
+            "us_bank_account": {
+              "verification_method": "automatic"
+            }
+          },
+          "payment_method_types": [
+            "card",
+            "afterpay_clearpay",
+            "klarna",
+            "us_bank_account",
+            "affirm"
+          ],
+          "processing": null,
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": {
+            "address": {
+              "city": "San Francisco",
+              "country": "US",
+              "line1": "510 Townsend St",
+              "line2": null,
+              "postal_code": "94102",
+              "state": "California"
+            },
+            "carrier": null,
+            "name": "John Doe",
+            "phone": null,
+            "tracking_number": null
+          },
+          "source": null,
+          "status": "requires_action"
+        }
+    """.trimIndent()
+
+    val AFTERPAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            AFTERPAY_REQUIRES_ACTION_JSON_STRING
+        )
+    }
+    val AFTERPAY_REQUIRES_ACTION by lazy {
+        requireNotNull(PARSER.parse(AFTERPAY_REQUIRES_ACTION_JSON))
+    }
+
+    val AFTERPAY_REQUIRES_ACTION_JSON_NO_RETURN_URL by lazy {
+        JSONObject(
+            """
+        {
+          "id": "pi_3LNLYmLu5o3P18Zp04dCLrZf",
+          "object": "payment_intent",
+          "amount": 5099,
+          "amount_details": {
+            "tip": {}
+          },
+          "automatic_payment_methods": null,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_3LNLYmLu5o3P18Zp04dCLrZf_secret_hbuNP7A9J5qsyxOVdTSUwbOGa",
+          "confirmation_method": "automatic",
+          "created": 1658256860,
+          "currency": "usd",
+          "description": null,
+          "last_payment_error": null,
+          "livemode": false,
+          "next_action": {
+            "redirect_to_url": {
+              "url": "https://hooks.stripe.com/afterpay_clearpay/acct_1HvTI7Lu5o3P18Zp/pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
+            },
+            "type": "redirect_to_url"
+          },
+          "payment_method": {
+            "id": "pm_1LNLZQLu5o3P18ZpXBHpDiPF",
+            "object": "payment_method",
+            "afterpay_clearpay": {},
+            "billing_details": {
+              "address": {
+                "city": "Blackrock",
+                "country": "IE",
+                "line1": "123 Main Street",
+                "line2": "",
+                "postal_code": "T37 F8HK",
+                "state": "Co. Dublin"
+              },
+              "email": "email@email.com",
+              "name": "Jenny Rosen",
+              "phone": null
+            },
+            "created": 1658256900,
+            "customer": null,
+            "livemode": false,
+            "type": "afterpay_clearpay"
+          },
+          "payment_method_options": {
+            "us_bank_account": {
+              "verification_method": "automatic"
+            }
+          },
+          "payment_method_types": [
+            "card",
+            "afterpay_clearpay",
+            "klarna",
+            "us_bank_account",
+            "affirm"
+          ],
+          "processing": null,
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": {
+            "address": {
+              "city": "San Francisco",
+              "country": "US",
+              "line1": "510 Townsend St",
+              "line2": null,
+              "postal_code": "94102",
+              "state": "California"
+            },
+            "carrier": null,
+            "name": "John Doe",
+            "phone": null,
+            "tracking_number": null
+          },
+          "source": null,
+          "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+    val AFTERPAY_REQUIRES_ACTION_NO_RETURN_URL by lazy {
+        requireNotNull(PARSER.parse(AFTERPAY_REQUIRES_ACTION_JSON_NO_RETURN_URL))
+    }
+
     val OXXO_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
             """
@@ -1067,6 +1246,127 @@ internal object PaymentIntentFixtures {
 
     val OXXO_REQUIES_ACTION by lazy {
         requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
+    }
+
+    val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+
+            """
+        {
+            "id": "pi_1IcuwoL32KlRo",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1IcuwoL32KlRo_secret_KC0YoHfna465TDVW",
+            "confirmation_method": "automatic",
+            "created": 1617638802,
+            "currency": "mxn",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+              "next_action": {
+                "llamapay_redirect_to_url": {
+                  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+                  "url": "https://hooks.stripe.com/llamapay/acct_1HvTI7Lu5o3P18Zp/pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
+                },
+                "type": "redirect_to_url"
+              },
+            "payment_method": {
+                "id": "pm_1IcuwoL32KlRot01",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": "jrosen@example.com",
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "created": 1617638802,
+                "customer": null,
+                "livemode": false,
+                "konbini": {},
+                "type": "llamapay"
+            },
+            "payment_method_types": ["card", "llamapay"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val KONBINI_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+
+            """
+        {
+            "id": "pi_1IcuwoL32KlRo",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1IcuwoL32KlRo_secret_KC0YoHfna465TDVW",
+            "confirmation_method": "automatic",
+            "created": 1617638802,
+            "currency": "mxn",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "konbini_display_details": {
+                    "expires_after": 1617944399,
+                    "hosted_voucher_url": "https:\/\/payments.stripe.com\/konbini\/voucher\/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb",
+                    "number": "12345678901234657890123456789012"
+                },
+                "type": "konbini_display_details"
+            },
+            "payment_method": {
+                "id": "pm_1IcuwoL32KlRot01",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": "jrosen@example.com",
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "created": 1617638802,
+                "customer": null,
+                "livemode": false,
+                "konbini": {},
+                "type": "konbini"
+            },
+            "payment_method_types": ["card", "konbini"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val KONBINI_REQUIRES_ACTION by lazy {
+        requireNotNull(PARSER.parse(KONBINI_REQUIRES_ACTION_JSON))
     }
 
     val ALIPAY_REQUIRES_ACTION_JSON by lazy {
