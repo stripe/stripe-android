@@ -40,6 +40,7 @@ class CollectBankAccountContract :
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val publishableKey: String,
+        open val stripeAccountId: String?,
         open val clientSecret: String,
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean
@@ -48,21 +49,35 @@ class CollectBankAccountContract :
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class ForPaymentIntent constructor(
+        data class ForPaymentIntent(
             override val publishableKey: String,
+            override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean
-        ) : Args(publishableKey, clientSecret, configuration, attachToIntent)
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = clientSecret,
+            configuration = configuration,
+            attachToIntent = attachToIntent
+        )
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class ForSetupIntent constructor(
+        data class ForSetupIntent(
             override val publishableKey: String,
+            override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean
-        ) : Args(publishableKey, clientSecret, configuration, attachToIntent)
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = clientSecret,
+            configuration = configuration,
+            attachToIntent = attachToIntent
+        )
 
         companion object {
             fun fromIntent(intent: Intent): Args? {

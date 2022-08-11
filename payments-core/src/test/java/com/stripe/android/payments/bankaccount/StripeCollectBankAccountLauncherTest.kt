@@ -27,6 +27,7 @@ class StripeCollectBankAccountLauncherTest {
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = stripeAccountId,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true
@@ -45,6 +46,7 @@ class StripeCollectBankAccountLauncherTest {
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = stripeAccountId,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true

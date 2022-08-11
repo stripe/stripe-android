@@ -41,7 +41,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -72,7 +73,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -106,7 +108,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -137,7 +140,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -159,7 +163,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -190,7 +195,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -223,7 +229,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then
@@ -254,7 +261,8 @@ class CreateFinancialConnectionsSessionTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = customerName,
-                    customerEmail = null
+                    customerEmail = null,
+                    stripeAccountId = args.stripeAccountId
                 )
 
             // Then

@@ -60,12 +60,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
             is CollectBankAccountConfiguration.USBankAccount -> when (args) {
                 is ForPaymentIntent -> createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
                     clientSecret = args.clientSecret,
                     customerName = configuration.name,
                     customerEmail = configuration.email
                 )
                 is ForSetupIntent -> createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
                     clientSecret = args.clientSecret,
                     customerName = configuration.name,
                     customerEmail = configuration.email

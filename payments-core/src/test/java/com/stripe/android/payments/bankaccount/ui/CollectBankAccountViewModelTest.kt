@@ -241,7 +241,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = name,
-                    customerEmail = email
+                    customerEmail = email,
+                    stripeAccountId = args.stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -284,7 +285,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = name,
-                    customerEmail = email
+                    customerEmail = email,
+                    stripeAccountId = args.stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -321,6 +323,7 @@ class CollectBankAccountViewModelTest {
     ): ForPaymentIntent {
         return ForPaymentIntent(
             publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
@@ -335,6 +338,7 @@ class CollectBankAccountViewModelTest {
     ): ForSetupIntent {
         return ForSetupIntent(
             publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
