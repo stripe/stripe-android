@@ -1121,7 +1121,7 @@ internal class StripeApiRepositoryTest {
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         )
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(25)
+            .isEqualTo(26)
     }
 
     @Test
@@ -1133,7 +1133,7 @@ internal class StripeApiRepositoryTest {
             )
         )
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(25)
+            .isEqualTo(26)
     }
 
     @Test
