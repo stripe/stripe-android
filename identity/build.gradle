@@ -65,6 +65,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+    // test
 }
 
 android {
