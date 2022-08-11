@@ -88,17 +88,27 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class ShowNewPaymentOptionForm(
-        mode: EventReporter.Mode
+        mode: EventReporter.Mode,
+        linkEnabled: Boolean,
+        activeLinkSession: Boolean
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
-        override val additionalParams: Map<String, Any> = mapOf()
+        override val additionalParams: Map<String, Any> = mapOf(
+            "link_enabled" to linkEnabled,
+            "active_link_session" to activeLinkSession
+        )
     }
 
     class ShowExistingPaymentOptions(
-        mode: EventReporter.Mode
+        mode: EventReporter.Mode,
+        linkEnabled: Boolean,
+        activeLinkSession: Boolean
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
-        override val additionalParams: Map<String, Any> = mapOf()
+        override val additionalParams: Map<String, Any> = mapOf(
+            "link_enabled" to linkEnabled,
+            "active_link_session" to activeLinkSession
+        )
     }
 
     class SelectPaymentOption(
@@ -113,11 +123,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class Payment(
         mode: EventReporter.Mode,
         result: Result,
+        durationMillis: Long?,
         paymentSelection: PaymentSelection?
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_$result")
-        override val additionalParams: Map<String, Any> = mapOf()
+        override val additionalParams: Map<String, Any> = durationMillis?.let {
+            mapOf("duration" to it / 1000f)
+        } ?: mapOf()
 
         enum class Result(private val code: String) {
             Success("success"),
@@ -139,6 +152,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ) = when (paymentSelection) {
             PaymentSelection.GooglePay -> "googlepay"
             is PaymentSelection.Saved -> "savedpm"
+            PaymentSelection.Link,
+            is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.New -> "newpm"
             else -> "unknown"
         }

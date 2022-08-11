@@ -120,7 +120,7 @@ internal fun WalletBody(
 
     WalletBody(
         paymentDetails = paymentDetails,
-        initiallySelectedId = viewModel.initiallySelectedId,
+        initiallySelectedId = null,
         primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
         primaryButtonState = primaryButtonState,
         errorMessage = errorMessage,

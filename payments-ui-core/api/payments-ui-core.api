@@ -57,15 +57,15 @@ public final class com/stripe/android/ui/core/PaymentsThemeKt {
 	public static final fun getPaymentsShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/ui/core/PaymentsShapes;
 }
 
-public final class com/stripe/android/ui/core/address/AddressFieldElementRepository$Companion {
+public final class com/stripe/android/ui/core/address/AddressRepository$Companion {
 }
 
-public final class com/stripe/android/ui/core/address/AddressFieldElementRepository_Factory : dagger/internal/Factory {
+public final class com/stripe/android/ui/core/address/AddressRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/address/AddressFieldElementRepository_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/address/AddressRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/address/AddressRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressRepository;
 }
 
 public final class com/stripe/android/ui/core/databinding/ActivityCardScanBinding : androidx/viewbinding/ViewBinding {
@@ -261,6 +261,9 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public abstract fun getCardScanEnabled ()Z
 	public fun getEnabled ()Z
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
+}
+
+public final class com/stripe/android/ui/core/elements/CheckboxElementUiKt {
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
@@ -740,12 +743,20 @@ public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
 }
 
-public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory : dagger/internal/Factory {
+public final class com/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
+	public static fun newInstance (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Companion {
@@ -778,7 +789,8 @@ public abstract class com/stripe/android/ui/core/forms/resources/injection/Resou
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule$Companion;
 	public fun <init> ()V
-	public abstract fun bindsResourceRepository (Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;)Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;
+	public abstract fun bindsAddressRepository (Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository;)Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;
+	public abstract fun bindsLpmRepository (Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository;)Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule$Companion {
