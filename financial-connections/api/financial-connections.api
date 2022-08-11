@@ -243,12 +243,28 @@ public final class com/stripe/android/financialconnections/di/FinancialConnectio
 	public static fun providesPublishableKey (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)Ljava/lang/String;
 }
 
+public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetModule_ProvidesFinancialConnectionsManifestRepositoryFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetModule_ProvidesFinancialConnectionsManifestRepositoryFactory;
+	public fun get ()Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun providesFinancialConnectionsManifestRepository (Ljava/lang/String;Lcom/stripe/android/financialconnections/network/FinancialConnectionsRequestExecutor;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/core/networking/ApiRequest$Factory;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;
+}
+
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule_ProvidesFinancialConnectionsInstitutionsRepositoryFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule_ProvidesFinancialConnectionsInstitutionsRepositoryFactory;
 	public fun get ()Lcom/stripe/android/financialconnections/repository/FinancialConnectionsInstitutionsRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun providesFinancialConnectionsInstitutionsRepository (Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule;Ljava/lang/String;Lcom/stripe/android/financialconnections/network/FinancialConnectionsRequestExecutor;Lcom/stripe/android/core/networking/ApiRequest$Factory;)Lcom/stripe/android/financialconnections/repository/FinancialConnectionsInstitutionsRepository;
+}
+
+public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule_ProvidesFinancialConnectionsManifestRepositoryFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule_ProvidesFinancialConnectionsManifestRepositoryFactory;
+	public fun get ()Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun providesFinancialConnectionsManifestRepository (Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule;Ljava/lang/String;Lcom/stripe/android/financialconnections/network/FinancialConnectionsRequestExecutor;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/core/networking/ApiRequest$Factory;Lcom/stripe/android/core/Logger;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSessionManifest;)Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetNativeModule_ProvidesNavigationManagerFactory : dagger/internal/Factory {
@@ -305,14 +321,6 @@ public final class com/stripe/android/financialconnections/di/FinancialConnectio
 	public fun get ()Lcom/stripe/android/core/networking/ApiRequest$Factory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun providesApiRequestFactory ()Lcom/stripe/android/core/networking/ApiRequest$Factory;
-}
-
-public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetSharedModule_ProvidesFinancialConnectionsManifestRepositoryFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/di/FinancialConnectionsSheetSharedModule_ProvidesFinancialConnectionsManifestRepositoryFactory;
-	public fun get ()Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesFinancialConnectionsManifestRepository (Ljava/lang/String;Lcom/stripe/android/financialconnections/network/FinancialConnectionsRequestExecutor;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/core/networking/ApiRequest$Factory;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/repository/FinancialConnectionsManifestRepository;
 }
 
 public final class com/stripe/android/financialconnections/di/FinancialConnectionsSheetSharedModule_ProvidesJson$financial_connections_releaseFactory : dagger/internal/Factory {

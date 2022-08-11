@@ -113,8 +113,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: FinancialConnectionsSheetNativeState
         ): FinancialConnectionsSheetNativeViewModel {
+            val args = viewModelContext.args<FinancialConnectionsSheetNativeActivityArgs>()
             return DaggerFinancialConnectionsSheetNativeComponent
                 .builder()
+                .initialManifest(args.manifest)
                 .application(viewModelContext.app())
                 .configuration(state.configuration)
                 .initialState(state)

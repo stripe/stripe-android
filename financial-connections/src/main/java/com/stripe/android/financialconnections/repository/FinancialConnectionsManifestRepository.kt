@@ -66,14 +66,16 @@ internal interface FinancialConnectionsManifestRepository {
             requestExecutor: FinancialConnectionsRequestExecutor,
             configuration: FinancialConnectionsSheet.Configuration,
             apiRequestFactory: ApiRequest.Factory,
-            logger: Logger
+            logger: Logger,
+            initialManifest: FinancialConnectionsSessionManifest?
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
                 publishableKey,
                 requestExecutor,
                 configuration,
                 apiRequestFactory,
-                logger
+                logger,
+                initialManifest
             )
     }
 }
@@ -83,7 +85,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val configuration: FinancialConnectionsSheet.Configuration,
     val apiRequestFactory: ApiRequest.Factory,
-    val logger: Logger
+    val logger: Logger,
+    initialManifest: FinancialConnectionsSessionManifest?
 ) : FinancialConnectionsManifestRepository {
 
     private val options = ApiRequest.Options(
@@ -95,7 +98,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedManifest: FinancialConnectionsSessionManifest? = null
+    private var cachedManifest: FinancialConnectionsSessionManifest? = initialManifest
 
     override suspend fun getOrFetchManifest(): FinancialConnectionsSessionManifest =
         mutex.withLock {
