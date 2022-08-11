@@ -337,34 +337,6 @@ internal class PaymentMethodEndToEndTest {
 
         assertThat(missingNameException.message)
             .isEqualTo("Missing required param: billing_details[name].")
-
-        val missingEmailException = assertFailsWith<InvalidRequestException>(
-            "Email is required to create an Afterpay payment method"
-        ) {
-            stripe
-                .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterpayClearpay(
-                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
-                    )
-                )
-        }
-
-        assertThat(missingEmailException.message)
-            .isEqualTo("Missing required param: billing_details[email].")
-
-        val missingAddressException = assertFailsWith<InvalidRequestException>(
-            "Email is required to create an Afterpay payment method"
-        ) {
-            stripe
-                .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterpayClearpay(
-                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
-                    )
-                )
-        }
-
-        assertThat(missingAddressException.message)
-            .isEqualTo("Missing required param: billing_details[address][line1].")
     }
 
     @Test
