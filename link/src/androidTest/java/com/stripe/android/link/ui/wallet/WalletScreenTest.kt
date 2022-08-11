@@ -33,6 +33,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -270,7 +271,7 @@ internal class WalletScreenTest {
     }
 
     private fun setContent(
-        isProcessing: Boolean = false,
+        primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
         onAddNewPaymentMethodClick: () -> Unit = {},
         onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
@@ -304,10 +305,10 @@ internal class WalletScreenTest {
         ) {
             DefaultLinkTheme {
                 WalletBody(
-                    isProcessing = isProcessing,
                     paymentDetails = paymentDetails,
                     initiallySelectedId = null,
                     primaryButtonLabel = primaryButtonLabel,
+                    primaryButtonState = primaryButtonState,
                     errorMessage = errorMessage,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onEditPaymentMethod = onEditPaymentMethod,

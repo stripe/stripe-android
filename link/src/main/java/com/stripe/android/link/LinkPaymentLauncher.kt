@@ -17,6 +17,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.model.AccountStatus
@@ -33,6 +34,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -62,9 +64,9 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository,
-    resourceRepository: ResourceRepository
+    addressResourceRepository: ResourceRepository<AddressRepository>
 ) : NonFallbackInjectable {
-    private var args: LinkActivityContract.Args? = null
+    private var stripeIntent: StripeIntent? = null
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .merchantName(merchantName)
         .customerEmail(customerEmail)
@@ -75,7 +77,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .analyticsRequestFactory(paymentAnalyticsRequestFactory)
         .analyticsRequestExecutor(analyticsRequestExecutor)
         .stripeRepository(stripeRepository)
-        .resourceRepository(resourceRepository)
+        .addressResourceRepository(addressResourceRepository)
         .enableLogging(enableLogging)
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)
@@ -85,6 +87,8 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     private val injectorKey: String = WeakMapInjectorRegistry.nextKey(
         requireNotNull(LinkPaymentLauncher::class.simpleName)
     )
+
+    private lateinit var linkComponentBuilder: LinkComponent.Builder
 
     /**
      * The dependency injector for all injectable classes in Link.
@@ -113,32 +117,48 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      * in during instantiation.
      *
      * @param stripeIntent the PaymentIntent or SetupIntent.
-     * @param completePayment whether the payment should be completed, or the selected payment
-     *  method should be returned as a result.
-     * @param selectedPaymentDetails the payment method previously selected by the user, if they are
-     *  returning to Link. It will be the initially selected value.
      * @param coroutineScope the coroutine scope used to collect the account status flow.
      */
     suspend fun setup(
         stripeIntent: StripeIntent,
-        completePayment: Boolean,
-        selectedPaymentDetails: LinkPaymentDetails?,
         coroutineScope: CoroutineScope
     ): AccountStatus {
-        val component = setupDependencies(stripeIntent, completePayment, selectedPaymentDetails)
+        val component = buildLinkPaymentLauncherComponent(stripeIntent)
         accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
         linkEventsReporter = component.linkEventsReporter
+        linkComponentBuilder = component.linkComponentBuilder
+        this.stripeIntent = stripeIntent
         return accountStatus.value
     }
 
     /**
      * Launch the Link UI to process the Stripe Intent sent in [setup].
+     *
+     * @param prefilledNewCardParams The card information prefilled by the user. If non null, Link
+     *  will launch into adding a new card, with the card information pre-filled.
      */
     fun present(
-        activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
+        activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
+        prefilledNewCardParams: PaymentMethodCreateParams? = null
     ) {
-        requireNotNull(args) { "Must call setup before presenting" }
+        val stripeIntent = requireNotNull(stripeIntent) { "Must call setup before presenting" }
+
+        val args = LinkActivityContract.Args(
+            stripeIntent,
+            merchantName,
+            customerEmail,
+            customerPhone,
+            prefilledNewCardParams,
+            LinkActivityContract.Args.InjectionParams(
+                injectorKey,
+                productUsage,
+                enableLogging,
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        )
+        buildLinkComponent(args)
         activityResultLauncher.launch(args)
     }
 
@@ -157,47 +177,28 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      */
     suspend fun attachNewCardToAccount(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
+    ): Result<LinkPaymentDetails.New> =
         linkAccountManager.createPaymentDetails(
             SupportedPaymentMethod.Card,
             paymentMethodCreateParams
         )
 
-    private fun setupDependencies(
-        stripeIntent: StripeIntent,
-        completePayment: Boolean,
-        selectedPaymentDetails: LinkPaymentDetails?
+    /**
+     * Set up [LinkPaymentLauncherComponent], responsible for injecting into classes used by inline
+     * sign up.
+     */
+    private fun buildLinkPaymentLauncherComponent(
+        stripeIntent: StripeIntent
     ): LinkPaymentLauncherComponent {
-        val args = LinkActivityContract.Args(
-            stripeIntent,
-            completePayment,
-            merchantName,
-            customerEmail,
-            customerPhone,
-            selectedPaymentDetails,
-            LinkActivityContract.Args.InjectionParams(
-                injectorKey,
-                productUsage,
-                enableLogging,
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
-            )
-        )
-
         val component = launcherComponentBuilder
-            .starterArgs(args)
+            .stripeIntent(stripeIntent)
             .build()
 
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
-                    is LinkActivityViewModel.Factory -> component.inject(injectable)
-                    is SignUpViewModel.Factory -> component.inject(injectable)
                     is VerificationViewModel.Factory -> component.inject(injectable)
-                    is WalletViewModel.Factory -> component.inject(injectable)
                     is InlineSignupViewModel.Factory -> component.inject(injectable)
-                    is PaymentMethodViewModel.Factory -> component.inject(injectable)
-                    is CardEditViewModel.Factory -> component.inject(injectable)
                     else -> {
                         throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                     }
@@ -205,9 +206,34 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             }
         }
 
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        this.args = args
         this.injector = injector
         return component
+    }
+
+    /**
+     * Set up [LinkComponent], responsible for injecting all dependencies into the Link app.
+     */
+    private fun buildLinkComponent(args: LinkActivityContract.Args) {
+        val linkComponent = linkComponentBuilder.starterArgs(args).build()
+        val injector = object : NonFallbackInjector {
+            override fun inject(injectable: Injectable<*>) {
+                when (injectable) {
+                    is LinkActivityViewModel.Factory -> linkComponent.inject(injectable)
+                    is SignUpViewModel.Factory -> linkComponent.inject(injectable)
+                    is VerificationViewModel.Factory -> linkComponent.inject(injectable)
+                    is WalletViewModel.Factory -> linkComponent.inject(injectable)
+                    is PaymentMethodViewModel.Factory -> linkComponent.inject(injectable)
+                    is CardEditViewModel.Factory -> linkComponent.inject(injectable)
+                    else -> {
+                        throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                    }
+                }
+            }
+        }
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+    }
+
+    companion object {
+        const val LINK_ENABLED = false
     }
 }

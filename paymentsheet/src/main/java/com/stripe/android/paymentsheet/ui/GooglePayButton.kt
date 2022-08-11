@@ -110,6 +110,7 @@ internal class GooglePayButton @JvmOverloads constructor(
             is PrimaryButton.State.FinishProcessing -> {
                 onFinishProcessing()
             }
+            null -> {}
         }
     }
 

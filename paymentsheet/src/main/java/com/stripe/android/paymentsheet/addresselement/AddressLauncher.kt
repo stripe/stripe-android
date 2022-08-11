@@ -54,9 +54,13 @@ internal class AddressLauncher internal constructor(
     )
 
     @JvmOverloads
-    fun present(configuration: Configuration = Configuration()) {
+    fun present(
+        publishableKey: String,
+        configuration: Configuration = Configuration()
+    ) {
         activityResultLauncher.launch(
             AddressElementActivityContract.Args(
+                publishableKey,
                 configuration,
                 injectorKey
             )
@@ -92,19 +96,25 @@ internal class AddressLauncher internal constructor(
          * Configuration for the field that collects a phone number.
          * Defaults to HIDDEN
          */
-        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.HIDDEN,
+        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL,
 
         /**
-         * Configuration for a "Remember this shipping destination" checkbox.
-         * Defaults to false
+         * Configuration for the title displayed at the top of the screen.
+         * Defaults to "Address"
          */
-        val shouldShowCheckBox: Boolean = false,
+        val title: String? = null,
 
         /**
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
-        val googlePlacesApiKey: String? = ""
+        val googlePlacesApiKey: String? = "",
+
+        /**
+         * The label of a checkbox displayed below other fields. If nil, the checkbox is not displayed.
+         * Defaults to null
+         */
+        val checkboxLabel: String? = null
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -114,9 +124,10 @@ internal class AddressLauncher internal constructor(
             var defaultValues: AddressDetails? = null
             var allowedCountries: Set<String> = emptySet()
             var buttonTitle: String? = null
-            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.HIDDEN
-            var shouldShowCheckBox: Boolean = false
+            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL
+            var title: String? = null
             var googlePlacesApiKey: String? = null
+            var checkboxLabel: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -133,11 +144,14 @@ internal class AddressLauncher internal constructor(
             fun phone(phone: AdditionalFieldsConfiguration) =
                 apply { this.phone = phone }
 
-            fun shouldShowCheckBox(shouldShowCheckBox: Boolean) =
-                apply { this.shouldShowCheckBox = shouldShowCheckBox }
+            fun title(title: String?) =
+                apply { this.title = title }
 
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
+
+            fun checkBoxLabel(checkboxLabel: String?) =
+                apply { this.checkboxLabel = checkboxLabel }
 
             fun build() = Configuration(
                 appearance,
@@ -145,8 +159,9 @@ internal class AddressLauncher internal constructor(
                 allowedCountries,
                 buttonTitle,
                 phone,
-                shouldShowCheckBox,
-                googlePlacesApiKey
+                title,
+                googlePlacesApiKey,
+                checkboxLabel
             )
         }
     }

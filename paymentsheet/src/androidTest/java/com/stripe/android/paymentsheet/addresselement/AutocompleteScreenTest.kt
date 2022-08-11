@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
@@ -30,10 +31,12 @@ class AutocompleteScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val args = AddressElementActivityContract.Args(
+        "publishableKey",
         AddressLauncher.Configuration(),
         "injectorKey"
     )
     private val application = ApplicationProvider.getApplicationContext<Application>()
+    private val eventReporter = FakeEventReporter()
 
     @Test
     fun ensure_elements_exist() {
@@ -89,15 +92,13 @@ class AutocompleteScreenTest {
                     viewModel = AutocompleteViewModel(
                         args,
                         AddressElementNavigator(),
+                        mockClient,
                         AutocompleteViewModel.Args(
                             "US"
                         ),
+                        eventReporter,
                         application
-                    ).apply {
-                        initialize {
-                            mockClient
-                        }
-                    }
+                    )
                 )
             }
         }
@@ -126,6 +127,20 @@ class AutocompleteScreenTest {
                     Place(addressComponents)
                 )
             )
+        }
+    }
+
+    private class FakeEventReporter : AddressLauncherEventReporter {
+        override fun onShow(country: String) {
+            // no-op
+        }
+
+        override fun onCompleted(
+            country: String,
+            autocompleteResultSelected: Boolean,
+            editDistance: Int?
+        ) {
+            // no-op
         }
     }
 }

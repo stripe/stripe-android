@@ -111,6 +111,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
         super.onCreate(savedInstanceState)
+        viewModel.registerFromActivity(this)
 
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -139,7 +140,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupTopContainer()
 
         linkButton.apply {
-            onClick = viewModel::launchLink
+            onClick = { viewModel.launchLink() }
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
@@ -354,6 +355,25 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Intent()
                 .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
+    }
+
+    /**
+     * Convert a [PaymentSheetViewState] to a [PrimaryButton.State]
+     */
+    private fun PaymentSheetViewState.convert(): PrimaryButton.State {
+        return when (this) {
+            is PaymentSheetViewState.Reset ->
+                PrimaryButton.State.Ready
+            is PaymentSheetViewState.StartProcessing ->
+                PrimaryButton.State.StartProcessing
+            is PaymentSheetViewState.FinishProcessing ->
+                PrimaryButton.State.FinishProcessing(this.onComplete)
+        }
     }
 
     internal companion object {

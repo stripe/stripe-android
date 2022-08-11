@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.model.PaymentDetailsFixtures
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -39,11 +43,126 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Payment(
                 mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock()),
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Success
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.Saved(mock()),
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Success
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_savedpm_success"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
                 paymentSelection = PaymentSelection.GooglePay,
+                durationMillis = 1L,
                 result = PaymentSheetEvent.Payment.Result.Success
             ).eventName
         ).isEqualTo(
             "mc_complete_payment_googlepay_success"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.Link,
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Success
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_success"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.New.LinkInline(
+                    LinkPaymentDetails.New(
+                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                        mock(),
+                        mock()
+                    )
+                ),
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Success
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_success"
+        )
+    }
+
+    @Test
+    fun `Payment failure event should return expected toString()`() {
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock()),
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Failure
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.Saved(mock()),
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Failure
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_savedpm_failure"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.GooglePay,
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Failure
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_googlepay_failure"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.Link,
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Failure
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_failure"
+        )
+
+        assertThat(
+            PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Complete,
+                paymentSelection = PaymentSelection.New.LinkInline(
+                    LinkPaymentDetails.New(
+                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                        mock(),
+                        mock()
+                    )
+                ),
+                durationMillis = 1L,
+                result = PaymentSheetEvent.Payment.Result.Failure
+            ).eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_failure"
         )
     }
 
