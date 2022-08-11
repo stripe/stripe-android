@@ -8,14 +8,14 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
 import com.stripe.android.financialconnections.model.Institution
-import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
+import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsManifestRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.Date
 
 internal class PostAuthorizationSessionTest {
 
-    private val repository = FakeFinancialConnectionsRepository()
+    private val repository = FakeFinancialConnectionsManifestRepository()
     private val postAuthorizationSession = PostAuthorizationSession(
         repository = repository,
         configuration = FinancialConnectionsSheet.Configuration(
