@@ -11,7 +11,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.Institution
@@ -70,9 +69,8 @@ internal class InstitutionPickerViewModel @Inject constructor(
         clearSearch()
         suspend {
             // api call
-            val session = postAuthorizationSession(institution)
+            postAuthorizationSession(institution)
             // navigate to next step
-            nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
             nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = institutionPicker))
         }.execute {
             copy(

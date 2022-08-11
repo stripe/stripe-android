@@ -12,9 +12,9 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAuthorizationSession
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
@@ -26,20 +26,30 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     val completeAuthorizationSession: CompleteAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
+    val getManifest: GetManifest,
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     val repository: FinancialConnectionsRepository,
     val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
-    val logger: Logger
-) : MavericksViewModel<PartnerAuthState>(PartnerAuthState()) {
+    val logger: Logger,
+    initialState: PartnerAuthState
+) : MavericksViewModel<PartnerAuthState>(initialState) {
+
+    init {
+        viewModelScope.launch {
+            val authSession = getManifest().activeAuthSession!!
+            setState { copy(url = authSession.url) }
+        }
+    }
 
     fun onWebAuthFlowFinished(
-        webStatus: Async<String>,
-        authSession: FinancialConnectionsAuthorizationSession
+        webStatus: Async<String>
     ) {
         viewModelScope.launch {
+            val authSession = getManifest().activeAuthSession!!
             when (webStatus) {
                 is Uninitialized,
                 is Loading -> setState { copy(authenticationStatus = Loading()) }
@@ -69,12 +79,11 @@ internal class PartnerAuthViewModel @Inject constructor(
         authSession: FinancialConnectionsAuthorizationSession
     ) {
         kotlin.runCatching {
-            val session = completeAuthorizationSession(
+            completeAuthorizationSession(
                 authorizationSessionId = authSession.id,
                 publicToken = oAuthParams.memberGuid
             )
             logger.debug("Session authorized!")
-            nativeAuthFlowCoordinator().emit(UpdateAuthorizationSession(session))
             nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = NavigationDirections.partnerAuth))
         }.onFailure {
             logger.error("failed authorizing session", it)
@@ -100,5 +109,6 @@ internal class PartnerAuthViewModel @Inject constructor(
 }
 
 internal data class PartnerAuthState(
+    val url: String? = null,
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState

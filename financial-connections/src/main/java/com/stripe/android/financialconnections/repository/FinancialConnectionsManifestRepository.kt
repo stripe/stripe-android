@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
@@ -60,6 +61,29 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String
     ): FinancialConnectionsSessionManifest
 
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun postAuthorizationSession(
+        clientSecret: String,
+        institutionId: String
+    ): FinancialConnectionsAuthorizationSession
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun completeAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+        publicToken: String? = null
+    ): FinancialConnectionsAuthorizationSession
+
     companion object {
         operator fun invoke(
             publishableKey: String,
@@ -108,7 +132,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     url = getManifestUrl,
                     options = options,
                     params = mapOf(
-                        NetworkConstants.PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
+                        NetworkConstants.PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+                        "expand" to listOf("active_auth_session")
                     )
                 )
                 return requestExecutor.execute(
@@ -152,6 +177,59 @@ private class FinancialConnectionsManifestRepositoryImpl(
             financialConnectionsRequest,
             FinancialConnectionsSessionManifest.serializer()
         ).also { updateCachedManifest("consent acquired", it) }
+    }
+
+    override suspend fun postAuthorizationSession(
+        clientSecret: String,
+        institutionId: String
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = FinancialConnectionsRepositoryImpl.authorizationSessionUrl,
+            options = options,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "use_mobile_handoff" to false,
+                "institution" to institutionId
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
+        ).also {
+            updateCachedActiveAuthSession("postAuthorizationSession", it)
+        }
+    }
+
+    override suspend fun completeAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+        publicToken: String?
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = FinancialConnectionsRepositoryImpl.authorizeSessionUrl,
+            options = options,
+            params = mapOf(
+                NetworkConstants.PARAMS_ID to sessionId,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "public_token" to publicToken
+            ).filter { it.value != null }
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
+        ).also {
+            updateCachedActiveAuthSession("completeAuthorizationSession", it)
+        }
+    }
+
+    private fun updateCachedActiveAuthSession(
+        source: String,
+        authSession: FinancialConnectionsAuthorizationSession
+    ) {
+        logger.debug("MANIFEST: updating local active auth session from $source")
+        cachedManifest = cachedManifest?.copy(
+            activeAuthSession = authSession
+        )
     }
 
     private fun updateCachedManifest(
