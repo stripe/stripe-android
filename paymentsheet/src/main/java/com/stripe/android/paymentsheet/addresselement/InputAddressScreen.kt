@@ -21,15 +21,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.CheckboxElementUi
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Composable
 internal fun InputAddressScreen(
     primaryButtonEnabled: Boolean,
     primaryButtonText: String,
+    title: String,
     onPrimaryButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
-    formContent: @Composable ColumnScope.() -> Unit
+    formContent: @Composable ColumnScope.() -> Unit,
+    checkboxContent: @Composable ColumnScope.() -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -45,11 +48,12 @@ internal fun InputAddressScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Text(
-                stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
+                title,
                 style = MaterialTheme.typography.h4,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             formContent()
+            checkboxContent()
             AddressElementPrimaryButton(
                 isEnabled = primaryButtonEnabled,
                 text = primaryButtonText
@@ -83,10 +87,22 @@ internal fun InputAddressScreen(
             val buttonText = viewModel.args.config?.buttonTitle ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_primary_button
             )
+            val titleText = viewModel.args.config?.title ?: stringResource(
+                R.string.stripe_paymentsheet_address_element_shipping_address
+            )
+            val formEnabled by viewModel.formEnabled.collectAsState(initial = true)
+            val checkboxChecked by viewModel.checkboxChecked.collectAsState(false)
+
             InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,
                 primaryButtonText = buttonText,
-                onPrimaryButtonClick = { viewModel.clickPrimaryButton() },
+                title = titleText,
+                onPrimaryButtonClick = {
+                    viewModel.clickPrimaryButton(
+                        completeValues,
+                        checkboxChecked
+                    )
+                },
                 onCloseClick = { viewModel.navigator.dismiss() },
                 formContent = {
                     FormUI(
@@ -101,6 +117,18 @@ internal fun InputAddressScreen(
                         ) {
                             CircularProgressIndicator()
                         }
+                    }
+                },
+                checkboxContent = {
+                    viewModel.args.config?.checkboxLabel?.let { label ->
+                        CheckboxElementUi(
+                            isChecked = checkboxChecked,
+                            label = label,
+                            isEnabled = formEnabled,
+                            onValueChange = {
+                                viewModel.clickCheckbox(!checkboxChecked)
+                            }
+                        )
                     }
                 }
             )

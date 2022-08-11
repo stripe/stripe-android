@@ -56,16 +56,15 @@ internal fun AutocompleteScreen(
 ) {
     val application = LocalContext.current.applicationContext as Application
     val viewModel: AutocompleteViewModel =
-        viewModel<AutocompleteViewModel>(
+        viewModel(
             factory = AutocompleteViewModel.Factory(
-                injector,
-                AutocompleteViewModel.Args(
+                injector = injector,
+                args = AutocompleteViewModel.Args(
                     country = country
-                )
-            ) { application }
-        ).also {
-            it.initialize()
-        }
+                ),
+                applicationSupplier = { application }
+            )
+        )
 
     AutocompleteScreenUI(viewModel = viewModel)
 }

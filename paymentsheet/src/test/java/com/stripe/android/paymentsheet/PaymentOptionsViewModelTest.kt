@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
@@ -19,8 +18,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -43,13 +41,7 @@ internal class PaymentOptionsViewModelTest {
     private val prefsRepository = FakePrefsRepository()
     private val customerRepository = FakeCustomerRepository()
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
-    private val resourceRepository =
-        StaticResourceRepository(
-            AddressFieldElementRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
-            mock()
-        )
+    private val lpmResourceRepository = StaticLpmResourceRepository(mock())
 
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,
@@ -60,7 +52,8 @@ internal class PaymentOptionsViewModelTest {
         application = ApplicationProvider.getApplicationContext(),
         logger = Logger.noop(),
         injectorKey = DUMMY_INJECTOR_KEY,
-        resourceRepository = resourceRepository,
+        lpmResourceRepository = lpmResourceRepository,
+        addressResourceRepository = mock(),
         savedStateHandle = SavedStateHandle(),
         linkPaymentLauncherFactory = mock()
     )
@@ -104,7 +97,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
         }
 
@@ -140,7 +133,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository,
+            lpmResourceRepository = lpmResourceRepository,
+            addressResourceRepository = mock(),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
         )
@@ -172,7 +166,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository,
+            lpmResourceRepository = lpmResourceRepository,
+            addressResourceRepository = mock(),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
         )
@@ -205,7 +200,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository,
+            lpmResourceRepository = lpmResourceRepository,
+            addressResourceRepository = mock(),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
         )
@@ -237,7 +233,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository,
+            lpmResourceRepository = lpmResourceRepository,
+            addressResourceRepository = mock(),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
         )
@@ -263,7 +260,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository,
+            lpmResourceRepository = lpmResourceRepository,
+            addressResourceRepository = mock(),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
         )

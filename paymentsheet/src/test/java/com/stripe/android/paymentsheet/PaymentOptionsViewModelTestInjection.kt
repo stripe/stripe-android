@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
@@ -64,10 +64,8 @@ internal open class PaymentOptionsViewModelTestInjection {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = injectorKey,
-            resourceRepository = StaticResourceRepository(
-                mock(),
-                lpmRepository
-            ),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = mock(),
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
@@ -83,7 +81,8 @@ internal open class PaymentOptionsViewModelTestInjection {
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
-            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = mock(),
             transformSpecToElement = mock()
         )
     ) {

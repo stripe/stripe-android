@@ -53,9 +53,9 @@ import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlin.properties.Delegates
@@ -68,8 +68,7 @@ internal class PaymentOptionsAdapter(
         (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
     val paymentMethodDeleteListener:
         (paymentMethod: Item.SavedPaymentMethod) -> Unit,
-    val addCardClickListener: () -> Unit,
-    val linkClickListener: () -> Unit
+    val addCardClickListener: () -> Unit
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
     @VisibleForTesting
     internal var items: List<Item> = emptyList()
@@ -145,6 +144,7 @@ internal class PaymentOptionsAdapter(
             items.indexOfFirst { item ->
                 val b = when (savedSelection) {
                     SavedSelection.GooglePay -> item is Item.GooglePay
+                    SavedSelection.Link -> item is Item.Link
                     is SavedSelection.PaymentMethod -> {
                         when (item) {
                             is Item.SavedPaymentMethod -> {
@@ -233,8 +233,9 @@ internal class PaymentOptionsAdapter(
             val newSelectedItem = items[position]
 
             when (newSelectedItem) {
-                Item.AddCard, Item.Link -> null
+                Item.AddCard -> null
                 Item.GooglePay -> PaymentSelection.GooglePay
+                Item.Link -> PaymentSelection.Link
                 is Item.SavedPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
             }?.let { paymentSelection ->
                 paymentOptionSelectedListener(
@@ -260,7 +261,7 @@ internal class PaymentOptionsAdapter(
             ViewType.GooglePay ->
                 GooglePayViewHolder(parent, width, ::onItemSelected)
             ViewType.Link ->
-                LinkViewHolder(parent, width, linkClickListener)
+                LinkViewHolder(parent, width, ::onItemSelected)
             ViewType.SavedPaymentMethod ->
                 SavedPaymentMethodViewHolder(
                     parent,
@@ -464,11 +465,15 @@ internal class PaymentOptionsAdapter(
     internal class LinkViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
-        private val onItemSelectedListener: () -> Unit
+        private val onItemSelectedListener: ((Int, Boolean) -> Unit)
     ) : PaymentOptionViewHolder(
         composeView
     ) {
-        constructor(parent: ViewGroup, width: Dp, onItemSelectedListener: () -> Unit) : this(
+        constructor(
+            parent: ViewGroup,
+            width: Dp,
+            onItemSelectedListener: ((Int, Boolean) -> Unit)
+        ) : this(
             composeView = ComposeView(parent.context),
             width = width,
             onItemSelectedListener = onItemSelectedListener
@@ -491,7 +496,7 @@ internal class PaymentOptionsAdapter(
                         iconRes = R.drawable.stripe_link_mark,
                         labelText = itemView.resources.getString(R.string.link),
                         description = itemView.resources.getString(R.string.link),
-                        onItemSelectedListener = onItemSelectedListener
+                        onItemSelectedListener = { onItemSelectedListener(position, true) }
                     )
                 }
             }

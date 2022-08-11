@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -75,7 +76,14 @@ interface PaymentLauncher {
          * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
          * [ActivityResultLauncher] into current activity, it should be called as part of Compose
          * initialization path.
+         * This method creates a new PaymentLauncher object every time it is called, even during
+         * recompositions.
          */
+        @Deprecated(
+            "This method creates a new PaymentLauncher object every time it is called, even" +
+                "during recompositions.",
+            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher(publishableKey, stripeAccountId, callback)")
+        )
         @Composable
         fun createForCompose(
             publishableKey: String,
@@ -88,5 +96,34 @@ interface PaymentLauncher {
                 callback::onPaymentResult
             )
         ).create(publishableKey, stripeAccountId)
+
+        /**
+         * Create a [PaymentLauncher] used for Jetpack Compose.
+         *
+         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
+         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
+         * initialization path.
+         * The PaymentLauncher created is remembered across recompositions. Recomposition will
+         * always return the value produced by composition.
+         */
+        @Composable
+        fun rememberLauncher(
+            publishableKey: String,
+            stripeAccountId: String? = null,
+            callback: PaymentResultCallback
+        ): PaymentLauncher {
+            val context = LocalContext.current
+            val activityResultLauncher = rememberLauncherForActivityResult(
+                PaymentLauncherContract(),
+                callback::onPaymentResult
+            )
+
+            return remember(publishableKey, stripeAccountId) {
+                PaymentLauncherFactory(
+                    context,
+                    activityResultLauncher
+                ).create(publishableKey, stripeAccountId)
+            }
+        }
     }
 }

@@ -1,26 +1,22 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
-import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
-import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
-import com.stripe.android.link.ui.wallet.WalletViewModel
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.BindsInstance
 import dagger.Component
@@ -29,27 +25,23 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Component that holds the dependency graph for the lifecycle of LinkPaymentLauncher and related
- * classes.
+ * Component that holds the dependency graph for [LinkPaymentLauncher] and related classes used for
+ * inline sign up, before Link is launched.
  */
 @Singleton
 @Component(
     modules = [
-        LinkPaymentLauncherModule::class,
-        LoggingModule::class
+        LinkCommonModule::class,
+        CoreCommonModule::class
     ]
 )
 internal abstract class LinkPaymentLauncherComponent {
     abstract val linkAccountManager: LinkAccountManager
     abstract val linkEventsReporter: LinkEventsReporter
+    abstract val linkComponentBuilder: LinkComponent.Builder
 
-    abstract fun inject(factory: LinkActivityViewModel.Factory)
-    abstract fun inject(factory: SignUpViewModel.Factory)
     abstract fun inject(factory: VerificationViewModel.Factory)
-    abstract fun inject(factory: WalletViewModel.Factory)
     abstract fun inject(factory: InlineSignupViewModel.Factory)
-    abstract fun inject(factory: PaymentMethodViewModel.Factory)
-    abstract fun inject(factory: CardEditViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -61,6 +53,9 @@ internal abstract class LinkPaymentLauncherComponent {
 
         @BindsInstance
         fun customerPhone(@Named(CUSTOMER_PHONE) customerPhone: String?): Builder
+
+        @BindsInstance
+        fun stripeIntent(@Named(LINK_INTENT) stripeIntent: StripeIntent): Builder
 
         @BindsInstance
         fun context(context: Context): Builder
@@ -81,7 +76,7 @@ internal abstract class LinkPaymentLauncherComponent {
         fun stripeRepository(stripeRepository: StripeRepository): Builder
 
         @BindsInstance
-        fun resourceRepository(resourceRepository: ResourceRepository): Builder
+        fun addressResourceRepository(addressResourceRepository: ResourceRepository<AddressRepository>): Builder
 
         @BindsInstance
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
@@ -94,9 +89,6 @@ internal abstract class LinkPaymentLauncherComponent {
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun starterArgs(starterArgs: LinkActivityContract.Args): Builder
 
         fun build(): LinkPaymentLauncherComponent
     }

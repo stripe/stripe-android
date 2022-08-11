@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -47,8 +47,7 @@ internal class DefaultFlowControllerInitializerTest {
     private val stripeIntentRepository =
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val resourceRepository = StaticResourceRepository(
-        mock(),
+    private val lpmResourceRepository = StaticLpmResourceRepository(
         LpmRepository(
             LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
         ).apply {
@@ -204,7 +203,7 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -239,7 +238,7 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
         }
 
@@ -269,7 +268,7 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.GooglePay)
         }
 
@@ -406,7 +405,7 @@ internal class DefaultFlowControllerInitializerTest {
             stripeIntentRepo,
             StripeIntentValidator(),
             customerRepo,
-            resourceRepository,
+            lpmResourceRepository,
             Logger.noop(),
             eventReporter,
             testDispatcher

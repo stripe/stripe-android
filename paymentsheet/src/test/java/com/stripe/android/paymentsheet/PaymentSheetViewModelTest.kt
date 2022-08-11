@@ -44,7 +44,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -97,7 +97,7 @@ internal class PaymentSheetViewModelTest {
         )
     }
     private val prefsRepository = FakePrefsRepository()
-    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
+    private val lpmResourceRepository = StaticLpmResourceRepository(lpmRepository)
 
     private val primaryButtonUIState = PrimaryButton.UIState(
         label = "Test",
@@ -497,7 +497,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(
                     SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
                 )
@@ -545,7 +545,7 @@ internal class PaymentSheetViewModelTest {
                         PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
                     )
                 )
-            assertThat(prefsRepository.getSavedSelection(true))
+            assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(
                     SavedSelection.PaymentMethod(
                         PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
@@ -1019,7 +1019,8 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
-            resourceRepository,
+            lpmResourceRepository,
+            mock(),
             mock(),
             mock(),
             Logger.noop(),

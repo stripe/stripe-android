@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.Context
-import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,6 +12,7 @@ import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -20,6 +20,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,17 +51,16 @@ import javax.inject.Provider
 internal class FormViewModel @Inject internal constructor(
     paymentMethodCode: PaymentMethodCode,
     config: FormFragmentArguments,
-    internal val resourceRepository: ResourceRepository,
+    internal val lpmResourceRepository: ResourceRepository<LpmRepository>,
+    internal val addressResourceRepository: ResourceRepository<AddressRepository>,
     private val transformSpecToElement: TransformSpecToElement
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,
-        val resource: Resources,
         var paymentMethodCode: PaymentMethodCode,
         private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val resource: Resources,
             val context: Context
         )
 
@@ -70,7 +70,7 @@ internal class FormViewModel @Inject internal constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val context = contextSupplier()
-            injectWithFallback(config.injectorKey, FallbackInitializeParam(resource, context))
+            injectWithFallback(config.injectorKey, FallbackInitializeParam(context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
                 .paymentMethodCode(paymentMethodCode)
@@ -80,7 +80,6 @@ internal class FormViewModel @Inject internal constructor(
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
             DaggerFormViewModelComponent.builder()
                 .context(arg.context)
-                .resources(arg.resource)
                 .build()
                 .inject(this)
         }
@@ -89,8 +88,10 @@ internal class FormViewModel @Inject internal constructor(
     // Initial value is null while loading in the background
     internal val elements: StateFlow<List<FormElement>?>
 
+    private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
+
     init {
-        if (resourceRepository.isLoaded()) {
+        if (resourceRepositories.all { it.isLoaded() }) {
             elements = MutableStateFlow(
                 transformSpecToElement.transform(
                     getLpmItems(paymentMethodCode)
@@ -106,8 +107,8 @@ internal class FormViewModel @Inject internal constructor(
 
                     // If after we complete waiting for the repository things are still
                     // active, then update the elements
-                    resourceRepository.waitUntilLoaded()
-                    if (resourceRepository.isLoaded() && isActive) {
+                    resourceRepositories.forEach { it.waitUntilLoaded() }
+                    if (resourceRepositories.all { it.isLoaded() } && isActive) {
                         // When open payment options with returning customer with saved cards, then
                         // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
                         // is no longer listening for the resource repository to be ready and so
@@ -126,9 +127,9 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     private fun getLpmItems(paymentMethodCode: PaymentMethodCode): List<FormItemSpec> {
-        require(resourceRepository.isLoaded())
+        require(resourceRepositories.all { it.isLoaded() })
         return requireNotNull(
-            resourceRepository.getLpmRepository().fromCode(
+            lpmResourceRepository.getRepository().fromCode(
                 paymentMethodCode
             )
         ).formSpec.items

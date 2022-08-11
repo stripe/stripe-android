@@ -9,16 +9,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -29,7 +32,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -45,7 +51,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     application: Application,
     logger: Logger,
     @InjectorKey injectorKey: String,
-    resourceRepository: ResourceRepository,
+    lpmResourceRepository: ResourceRepository<LpmRepository>,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
     linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
@@ -57,7 +64,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository,
+    lpmResourceRepository = lpmResourceRepository,
+    addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
@@ -85,7 +93,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
-        setupLink(args.stripeIntent, false)
+        setupLink(args.stripeIntent)
 
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
@@ -99,9 +107,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         // If we are not recovering from don't keep activities than the resources
         // repository is loaded, and we should save off the LPM repository server specs so
         // it can be restored after don't keep activities or process killed.
-        if (resourceRepository.getLpmRepository().isLoaded()) {
+        if (lpmResourceRepository.getRepository().isLoaded()) {
             lpmServerSpec =
-                resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
         }
     }
 
@@ -141,7 +149,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved -> {
+                is PaymentSelection.Saved ->
                     // We don't want the USBankAccount selection to close the payment sheet right
                     // away, the user needs to accept a mandate
                     if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
@@ -149,38 +157,40 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             paymentSelection
                         )
                     }
-                }
-                is PaymentSelection.GooglePay -> processExistingPaymentMethod(paymentSelection)
+                is PaymentSelection.GooglePay,
+                is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
         }
     }
 
-    override fun onLinkLaunched() {
-        super.onLinkLaunched()
-        _processing.value = true
-    }
-
-    override fun onLinkActivityResult(result: LinkActivityResult) {
-        when (result) {
-            is LinkActivityResult.Success.Selected -> {
-                onLinkPaymentDetailsCollected(result.paymentDetails)
-            }
-            else -> {
-                if (result is LinkActivityResult.Failed) {
-                    _error.value = result.error.localizedMessage
+    override fun setupLink(stripeIntent: StripeIntent) {
+        if (LINK_ENABLED &&
+            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
+        ) {
+            viewModelScope.launch {
+                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                when (accountStatus) {
+                    AccountStatus.Verified,
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> {
+                        // If account exists, select link by default
+                        savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
+                    }
+                    AccountStatus.SignedOut -> {}
                 }
-
-                super.onLinkActivityResult(result)
-                _processing.value = false
+                activeLinkSession.value = accountStatus == AccountStatus.Verified
+                _isLinkEnabled.value = true
             }
+        } else {
+            _isLinkEnabled.value = false
         }
     }
 
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(PaymentSelection.New.Link(it))
+            updateSelection(PaymentSelection.New.LinkInline(it))
             onUserSelection()
         } ?: run {
             // Creating Link PaymentDetails failed, fallback to regular checkout.

@@ -35,7 +35,8 @@ internal class PrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private var defaultTintList: ColorStateList? = null
+    @VisibleForTesting
+    internal var defaultTintList: ColorStateList? = null
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
@@ -88,8 +89,8 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
             primaryButtonStyle.getOnBackgroundColor(context)
         )
-        backgroundTintList = tintList
         defaultTintList = tintList
+        backgroundTintList = tintList
     }
 
     override fun setBackgroundTintList(tintList: ColorStateList?) {
@@ -184,6 +185,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             is State.FinishProcessing -> {
                 onFinishProcessing(state.onComplete)
             }
+            null -> {}
         }
     }
 

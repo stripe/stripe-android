@@ -1106,6 +1106,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayEnvironment : j
 
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncher {
 	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Companion;
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;)V
 	public final fun presentForPaymentIntent (Ljava/lang/String;)V
@@ -1142,6 +1143,10 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Billin
 	public static final field Min Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;
 	public static fun values ()[Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Companion {
+	public final fun rememberLauncher (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher;
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config : android/os/Parcelable {
@@ -1348,6 +1353,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public static final field DEVELOPER_ERROR I
 	public static final field INTERNAL_ERROR I
 	public static final field NETWORK_ERROR I
+	public synthetic fun <init> (Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Landroidx/activity/result/ActivityResultLauncher;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
 	public final fun present (Ljava/lang/String;)V
@@ -1395,6 +1401,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Companion {
+	public final fun rememberLauncher (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config : android/os/Parcelable {
@@ -3048,6 +3055,10 @@ public final class com/stripe/android/model/ListPaymentMethodsParams$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/LuxeNextActionRepository$Companion {
+	public final fun getInstance ()Lcom/stripe/android/model/LuxeNextActionRepository;
+}
+
 public abstract class com/stripe/android/model/LuxePostConfirmActionCreator {
 	public static final field $stable I
 }
@@ -3165,8 +3176,8 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;
 	public final fun component9 ()J
-	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Ljava/util/List;Lcom/stripe/android/model/StripeIntent$NextActionData;)Lcom/stripe/android/model/PaymentIntent;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentIntent;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Ljava/util/List;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Ljava/util/List;Lcom/stripe/android/model/StripeIntent$NextActionData;Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentIntent;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Ljava/util/List;Lcom/stripe/android/model/StripeIntent$NextActionData;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
@@ -3186,6 +3197,7 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public fun getNextActionType ()Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
 	public fun getPaymentMethodId ()Ljava/lang/String;
+	public final fun getPaymentMethodOptions ()Ljava/util/Map;
 	public fun getPaymentMethodTypes ()Ljava/util/List;
 	public final fun getReceiptEmail ()Ljava/lang/String;
 	public final fun getSetupFutureUsage ()Lcom/stripe/android/model/StripeIntent$Usage;
@@ -6940,6 +6952,7 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncher$C
 	public static synthetic fun create$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$Companion;Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static synthetic fun create$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$Companion;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public final fun createForCompose (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
+	public final fun rememberLauncher (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 }
 
 public abstract interface class com/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback {

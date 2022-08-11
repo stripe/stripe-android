@@ -3,7 +3,10 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.SavedStateHandle
@@ -24,9 +27,10 @@ import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -379,6 +383,38 @@ class PaymentOptionsActivityTest {
         }
     }
 
+    @Test
+    fun `primary button appearance is set`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
+                        appearance = PaymentSheet.Appearance(
+                            primaryButton = PaymentSheet.PrimaryButton(
+                                colorsLight = PaymentSheet.PrimaryButtonColors(
+                                    background = Color.Magenta,
+                                    onBackground = Color.Magenta,
+                                    border = Color.Magenta
+                                ),
+                                shape = PaymentSheet.PrimaryButtonShape(),
+                                typography = PaymentSheet.PrimaryButtonTypography()
+                            )
+                        )
+                    )
+                )
+            )
+        ).use {
+            idleLooper()
+            it.onActivity { activity ->
+                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.continueButton.defaultTintList).isEqualTo(
+                    ColorStateList.valueOf(Color.Magenta.toArgb())
+                )
+            }
+        }
+    }
+
     private fun createIntent(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): Intent {
@@ -408,6 +444,9 @@ class PaymentOptionsActivityTest {
         ).apply {
             this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         }
+        val addressRepository = AddressRepository(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
         return PaymentOptionsViewModel(
             args = args,
             prefsRepositoryFactory = { FakePrefsRepository() },
@@ -417,11 +456,11 @@ class PaymentOptionsActivityTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = StaticResourceRepository(
-                AddressFieldElementRepository(
-                    ApplicationProvider.getApplicationContext<Context>().resources
-                ),
+            lpmResourceRepository = StaticLpmResourceRepository(
                 lpmRepository
+            ),
+            addressResourceRepository = StaticAddressResourceRepository(
+                addressRepository
             ),
             savedStateHandle = SavedStateHandle(),
             linkPaymentLauncherFactory = mock()
