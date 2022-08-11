@@ -81,3 +81,17 @@ jobs:
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}
+
+  # Use emerge tools to analyze the example app size
+  apk-size-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate Android (or iOS) release bundle
+        run: ./gradlew :identity-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@v1.0.2
+        with:
+          artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_IDENTITY_EXAMPLE_KEY }}
+          build_type: release # Optional, change if your workflow builds a specific type
