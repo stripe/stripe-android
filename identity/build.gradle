@@ -66,6 +66,7 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
     // test
+    // test2
 }
 
 android {
