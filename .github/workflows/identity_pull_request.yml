@@ -17,7 +17,7 @@ jobs:
         with:
           ref: ${{ github.base_ref }}
       - name: Build base branch
-        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/release/identity-example-release-unsigned.apk identity-example/build/outputs/apk/release/identity-example-release-base.apk
+        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/release/identity-example-release-base.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build PR branch
-        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/release/identity-example-release-unsigned.apk identity-example/build/outputs/apk/release/identity-example-release-pr.apk
+        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/release/identity-example-release-pr.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Generate Android (or iOS) release bundle
+      - name: Generate Android release bundle
         run: ./gradlew :identity-example:bundleRelease
       - name: Upload artifact to Emerge
         uses: EmergeTools/emerge-upload-action@v1.0.2
