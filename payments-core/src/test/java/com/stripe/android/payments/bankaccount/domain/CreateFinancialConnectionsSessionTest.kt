@@ -42,7 +42,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
@@ -74,7 +74,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
@@ -109,7 +109,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
@@ -141,7 +141,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
@@ -155,6 +155,7 @@ class CreateFinancialConnectionsSessionTest {
             // Given
             val publishableKey = "publishable_key"
             val clientSecret = "seti_1234_secret_5678"
+            val stripeAccountId = "accountId"
             givenCreateSessionWithSetupIntentReturns { linkedAccountSession }
 
             // When
@@ -164,7 +165,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = stripeAccountId
                 )
 
             // Then
@@ -175,7 +176,10 @@ class CreateFinancialConnectionsSessionTest {
                     customerName,
                     null
                 ),
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
         }
@@ -196,7 +200,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
@@ -230,7 +234,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
@@ -262,7 +266,7 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmail = null,
-                    stripeAccountId = args.stripeAccountId
+                    stripeAccountId = null
                 )
 
             // Then
