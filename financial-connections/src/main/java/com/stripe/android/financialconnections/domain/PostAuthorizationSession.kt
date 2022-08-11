@@ -6,7 +6,7 @@ import com.stripe.android.financialconnections.exception.InstitutionPlannedExcep
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.Institution
-import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.seconds
  * an authorization session.
  */
 internal class PostAuthorizationSession @Inject constructor(
-    val repository: FinancialConnectionsRepository,
+    val repository: FinancialConnectionsManifestRepository,
     val configuration: FinancialConnectionsSheet.Configuration
 ) {
 

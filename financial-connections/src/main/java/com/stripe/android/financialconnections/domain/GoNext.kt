@@ -26,7 +26,6 @@ internal class GoNext @Inject constructor(
     operator fun invoke(
         currentPane: NavigationCommand,
         manifest: FinancialConnectionsSessionManifest,
-        authorizationSession: FinancialConnectionsAuthorizationSession?,
         partnerAccountsList: PartnerAccountsList?
     ): NavigationCommand {
         val nextPane = when (currentPane.destination) {
@@ -35,7 +34,7 @@ internal class GoNext @Inject constructor(
              * after picking a bank, source of truth for navigation.
              */
             NavigationDirections.institutionPicker.destination ->
-                authorizationSession!!.nextPane.toNavigationCommand()
+                manifest.activeAuthSession!!.nextPane.toNavigationCommand()
             /**
              * Consent step receives a fresh [FinancialConnectionsSessionManifest]
              * after agreeing, source of truth for navigation.
@@ -47,7 +46,7 @@ internal class GoNext @Inject constructor(
              * fresh [FinancialConnectionsAuthorizationSession], source of truth for navigation.
              */
             NavigationDirections.partnerAuth.destination ->
-                authorizationSession!!.nextPane.toNavigationCommand()
+                manifest.activeAuthSession!!.nextPane.toNavigationCommand()
             /**
              * Account selection returns a [PartnerAccountsList] that includes the next pane,
              * source of truth for navigation.

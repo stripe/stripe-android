@@ -8,7 +8,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -47,7 +46,6 @@ import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -115,34 +113,9 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `On initialization when initially selected item exists then it is selected`() = runTest {
-        val selected = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
-        whenever(args.selectedPaymentDetails).thenReturn(
-            LinkPaymentDetails.Saved(
-                selected,
-                mock()
-            )
-        )
-        whenever(linkAccountManager.listPaymentDetails())
-            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
-
-        val viewModel = createViewModel()
-
-        assertThat(viewModel.initiallySelectedId).isEqualTo(selected.id)
-
-        verify(navigator, times(0)).navigateTo(anyOrNull(), anyOrNull())
-    }
-
-    @Test
-    fun `On initialization when initially selected is new then navigate to AddPaymentMethod`() =
+    fun `On initialization when prefilledCardParams is not null then navigate to AddPaymentMethod`() =
         runTest {
-            whenever(args.selectedPaymentDetails).thenReturn(
-                LinkPaymentDetails.New(
-                    mock(),
-                    mock(),
-                    mock()
-                )
-            )
+            whenever(args.prefilledCardParams).thenReturn(mock())
             whenever(linkAccountManager.listPaymentDetails())
                 .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 

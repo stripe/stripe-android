@@ -5,7 +5,6 @@ import com.stripe.android.core.networking.ApiRequest.Companion.API_HOST
 import com.stripe.android.financialconnections.di.PUBLISHABLE_KEY
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -52,25 +51,6 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         return requestExecutor.execute(
             financialConnectionsRequest,
             FinancialConnectionsSession.serializer()
-        )
-    }
-
-    override suspend fun postAuthorizationSession(
-        clientSecret: String,
-        institutionId: String
-    ): FinancialConnectionsAuthorizationSession {
-        val request = apiRequestFactory.createPost(
-            url = authorizationSessionUrl,
-            options = options,
-            params = mapOf(
-                PARAMS_CLIENT_SECRET to clientSecret,
-                "use_mobile_handoff" to false,
-                "institution" to institutionId
-            )
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsAuthorizationSession.serializer()
         )
     }
 
@@ -126,26 +106,6 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         return requestExecutor.execute(
             request,
             PartnerAccountsList.serializer()
-        )
-    }
-
-    override suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String?
-    ): FinancialConnectionsAuthorizationSession {
-        val request = apiRequestFactory.createPost(
-            url = authorizeSessionUrl,
-            options = options,
-            params = mapOf(
-                PARAMS_ID to sessionId,
-                PARAMS_CLIENT_SECRET to clientSecret,
-                "public_token" to publicToken
-            ).filter { it.value != null }
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsAuthorizationSession.serializer()
         )
     }
 

@@ -16,8 +16,10 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val eventTimeProvider: EventTimeProvider,
     @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
+    private var paymentSheetShownMillis: Long? = null
 
     override fun onInit(configuration: PaymentSheet.Configuration?) {
         fireEvent(
@@ -36,18 +38,24 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowExistingPaymentOptions() {
+    override fun onShowExistingPaymentOptions(linkEnabled: Boolean, activeLinkSession: Boolean) {
+        paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
-                mode = mode
+                mode = mode,
+                linkEnabled = linkEnabled,
+                activeLinkSession = activeLinkSession
             )
         )
     }
 
-    override fun onShowNewPaymentOptionForm() {
+    override fun onShowNewPaymentOptionForm(linkEnabled: Boolean, activeLinkSession: Boolean) {
+        paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
-                mode = mode
+                mode = mode,
+                linkEnabled = linkEnabled,
+                activeLinkSession = activeLinkSession
             )
         )
     }
@@ -66,6 +74,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
+                durationMillis = durationMillisFrom(paymentSheetShownMillis),
                 result = PaymentSheetEvent.Payment.Result.Success
             )
         )
@@ -76,6 +85,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
+                durationMillis = durationMillisFrom(paymentSheetShownMillis),
                 result = PaymentSheetEvent.Payment.Result.Failure
             )
         )
@@ -97,4 +107,8 @@ internal class DefaultEventReporter @Inject internal constructor(
             )
         }
     }
+
+    private fun durationMillisFrom(start: Long?) = start?.let {
+        eventTimeProvider.currentTimeMillis() - it
+    }?.takeIf { it > 0 }
 }

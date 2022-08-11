@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -19,6 +20,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.willSuspendableAnswer
 
@@ -32,26 +34,44 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val repository = FinancialConnectionsManifestRepository(
+    private fun buildRepository(
+        initialManifest: FinancialConnectionsSessionManifest? = null
+    ) = FinancialConnectionsManifestRepository(
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
         configuration = configuration,
-        logger = Logger.noop()
+        logger = Logger.noop(),
+        initialManifest = initialManifest
     )
 
     @Test
-    fun `getOrFetchManifest - when manifest retrieved twice concurrently, API call runs once`() = runTest {
-        givenFetchManifestRequestReturnsAfterDelay(sessionManifest())
+    fun `getOrFetchManifest - when manifest retrieved twice concurrently, API call runs once`() =
+        runTest {
+            givenFetchManifestRequestReturnsAfterDelay(sessionManifest())
 
-        // simulates to concurrent accesses to manifest.
-        awaitAll(
-            async { repository.getOrFetchManifest() },
-            async { repository.getOrFetchManifest() },
-        )
+            val repository = buildRepository()
 
-        verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
-    }
+            // simulates to concurrent accesses to manifest.
+            awaitAll(
+                async { repository.getOrFetchManifest() },
+                async { repository.getOrFetchManifest() },
+            )
+
+            verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
+        }
+
+    @Test
+    fun `getOrFetchManifest - when initial manifest passed in constructor, returns it and no network interaction`() =
+        runTest {
+            val initialManifest = sessionManifest()
+            val repository = buildRepository(initialManifest = initialManifest)
+
+            val returnedManifest = repository.getOrFetchManifest()
+
+            assertThat(returnedManifest).isEqualTo(initialManifest)
+            verifyNoInteractions(mockRequestExecutor)
+        }
 
     /**
      * Simulates an API call to retrieve manifest that takes some time.

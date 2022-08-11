@@ -6,7 +6,6 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -31,29 +30,6 @@ internal interface FinancialConnectionsRepository {
     suspend fun getFinancialConnectionsSession(
         clientSecret: String
     ): FinancialConnectionsSession
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun postAuthorizationSession(
-        clientSecret: String,
-        institutionId: String
-    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String? = null
-    ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,

@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -19,14 +20,14 @@ abstract class FormControllerModule {
 
         @Provides
         fun provideTransformSpecToElements(
-            resourceRepository: ResourceRepository,
+            addressResourceRepository: ResourceRepository<AddressRepository>,
             context: Context,
             merchantName: String,
             stripeIntent: StripeIntent?,
             initialValues: Map<IdentifierSpec, String?>,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
-            resourceRepository = resourceRepository,
+            addressResourceRepository = addressResourceRepository,
             initialValues = initialValues,
             amount = (stripeIntent as? PaymentIntent)?.let {
                 val amount = it.amount

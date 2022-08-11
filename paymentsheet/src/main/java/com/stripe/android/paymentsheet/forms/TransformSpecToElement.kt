@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import android.content.Context
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -12,13 +13,13 @@ import javax.inject.Inject
  * Wrapper around [TransformSpecToElements] that uses the parameters from [FormFragmentArguments].
  */
 internal class TransformSpecToElement @Inject constructor(
-    resourceRepository: ResourceRepository,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     formFragmentArguments: FormFragmentArguments,
     context: Context
 ) {
     private val transformSpecToElements =
         TransformSpecToElements(
-            resourceRepository = resourceRepository,
+            addressResourceRepository = addressResourceRepository,
             initialValues = formFragmentArguments.getInitialValuesMap(),
             amount = formFragmentArguments.amount,
             saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,

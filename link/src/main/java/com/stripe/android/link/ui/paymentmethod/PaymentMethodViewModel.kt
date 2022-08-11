@@ -23,6 +23,7 @@ import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -77,8 +78,9 @@ internal class PaymentMethodViewModel @Inject constructor(
                 .viewOnlyFields(emptySet())
                 .viewModelScope(viewModelScope)
                 .initialValues(
-                    (args.selectedPaymentDetails as? LinkPaymentDetails.New)
-                        ?.takeIf { loadFromArgs }?.buildFormValues() ?: emptyMap()
+                    args.prefilledCardParams?.toParamMap()?.takeIf { loadFromArgs }?.let {
+                        convertToFormValuesMap(it)
+                    } ?: emptyMap()
                 )
                 .stripeIntent(args.stripeIntent)
                 .merchantName(args.merchantName)

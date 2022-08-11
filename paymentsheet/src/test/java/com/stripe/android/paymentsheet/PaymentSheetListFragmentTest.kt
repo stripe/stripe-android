@@ -28,6 +28,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -192,7 +193,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     @Test
     fun `started fragment should report onShowExistingPaymentOptions() event`() {
         createScenario().onFragment {
-            verify(eventReporter).onShowExistingPaymentOptions()
+            verify(eventReporter).onShowExistingPaymentOptions(any(), any())
         }
     }
 

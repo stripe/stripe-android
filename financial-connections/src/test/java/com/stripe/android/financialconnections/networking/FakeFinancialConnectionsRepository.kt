@@ -1,10 +1,8 @@
 package com.stripe.android.financialconnections.networking
 
-import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -17,8 +15,6 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         { financialConnectionsSessionWithNoMoreAccounts }
     var getAccountsResultProvider: () -> FinancialConnectionsAccountList =
         { moreFinancialConnectionsAccountList }
-    var postAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
-        { ApiKeyFixtures.authorizationSession() }
     var getAuthorizationSessionAccounts: () -> PartnerAccountsList =
         { TODO() }
     var postAuthorizationSessionOAuthResults: () -> MixedOAuthParams =
@@ -33,17 +29,6 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
     override suspend fun getFinancialConnectionsSession(
         clientSecret: String
     ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
-
-    override suspend fun postAuthorizationSession(
-        clientSecret: String,
-        institutionId: String
-    ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
-
-    override suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String?
-    ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
 
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,

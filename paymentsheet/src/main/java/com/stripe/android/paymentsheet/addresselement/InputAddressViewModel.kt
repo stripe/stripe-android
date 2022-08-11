@@ -38,6 +38,9 @@ internal class InputAddressViewModel @Inject constructor(
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
 
+    private val _checkboxChecked = MutableStateFlow(false)
+    val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
+
     init {
         viewModelScope.launch {
             navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)?.collect {
@@ -81,6 +84,11 @@ internal class InputAddressViewModel @Inject constructor(
                     .initialValues(initialValues)
                     .build().formController
             }
+        }
+
+        // allows merchants to check the box by default and to restore the value later.
+        args.config?.defaultValues?.checkboxChecked?.let {
+            _checkboxChecked.value = it
         }
     }
 
@@ -147,7 +155,10 @@ internal class InputAddressViewModel @Inject constructor(
         )
     }
 
-    fun clickPrimaryButton(completedFormValues: Map<IdentifierSpec, FormFieldEntry>?) {
+    fun clickPrimaryButton(
+        completedFormValues: Map<IdentifierSpec, FormFieldEntry>?,
+        checkboxChecked: Boolean
+    ) {
         _formEnabled.value = false
         dismissWithAddress(
             AddressDetails(
@@ -158,7 +169,8 @@ internal class InputAddressViewModel @Inject constructor(
                 line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
                 postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
                 state = completedFormValues?.get(IdentifierSpec.State)?.value,
-                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value
+                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
+                checkboxChecked = checkboxChecked
             )
         )
     }
@@ -175,6 +187,10 @@ internal class InputAddressViewModel @Inject constructor(
         navigator.dismiss(
             AddressLauncherResult.Succeeded(address)
         )
+    }
+
+    fun clickCheckbox(newValue: Boolean) {
+        _checkboxChecked.value = newValue
     }
 
     internal class Factory(

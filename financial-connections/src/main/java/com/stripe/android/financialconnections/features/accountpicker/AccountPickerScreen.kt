@@ -19,7 +19,6 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -33,7 +32,6 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -42,21 +40,16 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun AccountPickerScreen() {
-    // activity view model
-    val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
-    val authSessionId = activityViewModel.collectAsState { it.authorizationSession?.id }
-
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
-    LaunchedEffect(authSessionId.value) {
-        authSessionId.value?.let { viewModel.onAuthSessionReceived(it) }
+    AccountPickerContent(state.value) {
+        viewModel.onAccountClicked(it)
     }
     AccountPickerContent(
         state = state.value,
@@ -235,6 +228,105 @@ internal fun AccountPickerPreview() {
             ),
             onAccountClicked = {},
             onSelectAccounts = {}
+        )
+    }
+}
+
+@Composable
+private fun MultiSelectAccount(
+    selected: Boolean,
+    onAccountClicked: (PartnerAccount) -> Unit,
+    account: PartnerAccount
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 2.dp,
+                color = if (selected) {
+                    FinancialConnectionsTheme.colors.textBrand
+                } else {
+                    FinancialConnectionsTheme.colors.borderDefault
+                },
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable { onAccountClicked(account) }
+            .padding(12.dp)
+    ) {
+
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = selected,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = FinancialConnectionsTheme.colors.textBrand,
+                    checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
+                    uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
+                ),
+                onCheckedChange = null
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Column {
+                Text(
+                    text = account.name,
+                    color = FinancialConnectionsTheme.colors.textPrimary,
+                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
+                )
+                account.displayableAccountNumbers?.let {
+                    Text(
+                        text = "****$it",
+                        color = FinancialConnectionsTheme.colors.textSecondary,
+                        style = FinancialConnectionsTheme.typography.captionTight,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    group = "Account Picker Pane",
+    name = "One account selected"
+)
+@Composable
+internal fun AccountPickerPreview() {
+    FinancialConnectionsTheme {
+        AccountPickerContent(
+            AccountPickerState(
+                selectedIds = setOf("id1"),
+                accounts = Success(
+                    PartnerAccountsList(
+                        data = listOf(
+                            PartnerAccount(
+                                authorization = "Authorization",
+                                category = FinancialConnectionsAccount.Category.CASH,
+                                id = "id1",
+                                name = "Account 1",
+                                balanceAmount = 1000,
+                                displayableAccountNumbers = "1234",
+                                currency = "$",
+                                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                                supportedPaymentMethodTypes = emptyList(),
+                            ),
+                            PartnerAccount(
+                                authorization = "Authorization",
+                                category = FinancialConnectionsAccount.Category.CASH,
+                                id = "id2",
+                                name = "Account 2",
+                                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                                supportedPaymentMethodTypes = emptyList()
+                            )
+                        ),
+                        hasMore = false,
+                        nextPane = FinancialConnectionsSessionManifest.NextPane.ACCOUNT_PICKER,
+                        url = ""
+                    )
+                )
+            ),
+            onAccountClicked = {}
         )
     }
 }
