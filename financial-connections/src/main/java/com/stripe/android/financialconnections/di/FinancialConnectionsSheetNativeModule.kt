@@ -1,13 +1,17 @@
 package com.stripe.android.financialconnections.di
 
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +34,24 @@ internal class FinancialConnectionsSheetNativeModule {
     @Provides
     fun providesNavigationManager() = NavigationManager(
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    )
+
+    @Singleton
+    @Provides
+    fun providesFinancialConnectionsManifestRepository(
+        @Named(PUBLISHABLE_KEY) publishableKey: String,
+        requestExecutor: FinancialConnectionsRequestExecutor,
+        configuration: FinancialConnectionsSheet.Configuration,
+        apiRequestFactory: ApiRequest.Factory,
+        logger: Logger,
+        @Named(INITIAL_MANIFEST) initialManifest: FinancialConnectionsSessionManifest
+    ) = FinancialConnectionsManifestRepository(
+        publishableKey = publishableKey,
+        requestExecutor = requestExecutor,
+        configuration = configuration,
+        apiRequestFactory = apiRequestFactory,
+        logger = logger,
+        initialManifest = initialManifest
     )
 
     @Singleton

@@ -6,6 +6,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -14,12 +15,14 @@ import javax.inject.Inject
 
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
+    private val getManifest: GetManifest,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
 ) : MavericksViewModel<AccountPickerState>(initialState) {
 
-    fun onAuthSessionReceived(authSessionId: String) {
+    init {
         suspend {
-            pollAuthorizationSessionAccounts(authSessionId)
+            val authSession = requireNotNull(getManifest().activeAuthSession)
+            pollAuthorizationSessionAccounts(authSession.id)
         }.execute { copy(accounts = it) }
     }
 

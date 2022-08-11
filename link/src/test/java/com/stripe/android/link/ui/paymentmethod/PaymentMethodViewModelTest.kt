@@ -299,7 +299,7 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `when loading from arguments then form is prefilled`() = runTest {
-        whenever(args.selectedPaymentDetails).thenReturn(createLinkPaymentDetails())
+        whenever(args.prefilledCardParams).thenReturn(createLinkPaymentDetails().originalParams)
         createViewModel(true)
 
         val initialValuesCaptor: KArgumentCaptor<Map<IdentifierSpec, String?>> = argumentCaptor()

@@ -27,8 +27,10 @@ internal class GoNextTest {
         // When
         goNext(
             currentPane = NavigationDirections.consent,
-            manifest = sessionManifest().copy(nextPane = expectedNextStep),
-            authorizationSession = authorizationSession().copy(nextPane = NextPane.ACCOUNT_PICKER)
+            manifest = sessionManifest().copy(
+                nextPane = expectedNextStep,
+                activeAuthSession = authorizationSession().copy(nextPane = NextPane.ACCOUNT_PICKER)
+            ),
         )
 
         // Then
@@ -43,8 +45,10 @@ internal class GoNextTest {
         // When
         goNext(
             currentPane = NavigationDirections.institutionPicker,
-            manifest = sessionManifest().copy(nextPane = NextPane.CONSENT),
-            authorizationSession = authorizationSession().copy(nextPane = expectedNextStep)
+            manifest = sessionManifest().copy(
+                nextPane = NextPane.CONSENT,
+                activeAuthSession = authorizationSession().copy(nextPane = NextPane.PARTNER_AUTH)
+            ),
         )
 
         // Then
@@ -59,8 +63,10 @@ internal class GoNextTest {
         // When
         goNext(
             currentPane = NavigationDirections.partnerAuth,
-            manifest = sessionManifest().copy(nextPane = NextPane.CONSENT),
-            authorizationSession = authorizationSession().copy(nextPane = expectedNextStep)
+            manifest = sessionManifest().copy(
+                nextPane = NextPane.CONSENT,
+                activeAuthSession = authorizationSession().copy(nextPane = expectedNextStep)
+            ),
         )
 
         // Then

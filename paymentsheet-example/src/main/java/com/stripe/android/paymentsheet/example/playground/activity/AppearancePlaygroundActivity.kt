@@ -90,7 +90,7 @@ internal class AppearancePlaygroundActivity : BasePaymentSheetActivity() {
                 ) {
                     CustomizationUi(appearance)
                     MainButton(
-                        label = stringResource(R.string.reset_defaults),
+                        label = stringResource(R.string.reset),
                         enabled = !inProgress
                     ) {
                         viewModel.appearance.postValue(PaymentSheet.Appearance())

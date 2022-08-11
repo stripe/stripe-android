@@ -54,7 +54,10 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
-        sheetViewModel.eventReporter.onShowExistingPaymentOptions()
+        sheetViewModel.eventReporter.onShowExistingPaymentOptions(
+            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
+            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -128,7 +131,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter = PaymentOptionsAdapter(
-            sheetViewModel.resourceRepository.getLpmRepository(),
+            sheetViewModel.lpmResourceRepository.getRepository(),
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,

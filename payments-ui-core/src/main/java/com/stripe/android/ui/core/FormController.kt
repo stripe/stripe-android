@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -28,7 +29,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FormController @Inject constructor(
     private val formSpec: LayoutSpec,
-    private val resourceRepository: ResourceRepository,
+    private val addressResourceRepository: ResourceRepository<AddressRepository>,
     private val transformSpecToElement: TransformSpecToElements,
     viewModelScope: CoroutineScope
 ) {
@@ -36,19 +37,17 @@ class FormController @Inject constructor(
     val elements: StateFlow<List<FormElement>?>
 
     init {
-        if (resourceRepository.isLoaded()) {
-            elements =
-                MutableStateFlow(transformSpecToElement.transform(formSpec.items))
+        if (addressResourceRepository.isLoaded()) {
+            elements = MutableStateFlow(transformSpecToElement.transform(formSpec.items))
         } else {
             val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
                 CoroutineScope(Dispatchers.IO).launch {
-                    resourceRepository.waitUntilLoaded()
-                    delayedElements.value =
-                        transformSpecToElement.transform(formSpec.items)
+                    addressResourceRepository.waitUntilLoaded()
+                    delayedElements.value = transformSpecToElement.transform(formSpec.items)
                 }
             }
-            this.elements = delayedElements
+            elements = delayedElements
         }
     }
 

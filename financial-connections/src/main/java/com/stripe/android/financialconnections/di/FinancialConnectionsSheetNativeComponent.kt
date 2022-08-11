@@ -8,11 +8,13 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -37,6 +39,12 @@ internal interface FinancialConnectionsSheetNativeComponent {
 
     @Component.Builder
     interface Builder {
+
+        @BindsInstance
+        fun initialManifest(
+            @Named(INITIAL_MANIFEST) manifest: FinancialConnectionsSessionManifest
+        ): Builder
+
         @BindsInstance
         fun application(application: Application): Builder
 

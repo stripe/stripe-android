@@ -16,6 +16,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.BindsInstance
 import dagger.Component
@@ -75,7 +76,7 @@ internal abstract class LinkPaymentLauncherComponent {
         fun stripeRepository(stripeRepository: StripeRepository): Builder
 
         @BindsInstance
-        fun resourceRepository(resourceRepository: ResourceRepository): Builder
+        fun addressResourceRepository(addressResourceRepository: ResourceRepository<AddressRepository>): Builder
 
         @BindsInstance
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder

@@ -37,6 +37,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -57,8 +58,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -68,21 +70,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-
-/**
- * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
- * classes to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
- */
-internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
-    return when (this) {
-        is PaymentSheetViewState.Reset ->
-            PrimaryButton.State.Ready
-        is PaymentSheetViewState.StartProcessing ->
-            PrimaryButton.State.StartProcessing
-        is PaymentSheetViewState.FinishProcessing ->
-            PrimaryButton.State.FinishProcessing(this.onComplete)
-    }
-}
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
@@ -95,7 +82,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    resourceRepository: ResourceRepository,
+    lpmResourceRepository: ResourceRepository<LpmRepository>,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -112,7 +100,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository,
+    lpmResourceRepository = lpmResourceRepository,
+    addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
@@ -235,14 +224,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             CoroutineScope(workContext).launch {
                 runCatching {
                     val intent = initializeRepositoryAndGetStripeIntent(
-                        resourceRepository,
+                        lpmResourceRepository,
                         stripeIntentRepository,
                         args.clientSecret,
                         eventReporter
                     )
 
                     lpmServerSpec =
-                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                        lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
 
                     // The lpm server specs need to be saved so that upon the
                     // activity being killed the state can be restored.
@@ -294,7 +283,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     getSupportedSavedCustomerPMs(
                         stripeIntent,
                         config,
-                        resourceRepository.getLpmRepository()
+                        lpmResourceRepository.getRepository()
                     ).mapNotNull {
                         // The SDK is only able to parse customer LPMs
                         // that are hard coded in the SDK.
@@ -444,7 +433,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                when (linkLauncher.setup(stripeIntent, this)) {
+                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                when (accountStatus) {
                     AccountStatus.Verified -> launchLink()
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
@@ -460,6 +450,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                     AccountStatus.SignedOut -> {}
                 }
+                activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = true
             }
         } else {
@@ -467,10 +458,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun launchLink() {
+    override fun completeLinkInlinePayment(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        isReturningUser: Boolean
+    ) {
+        if (isReturningUser) {
+            launchLink(paymentMethodCreateParams)
+        } else {
+            super.completeLinkInlinePayment(paymentMethodCreateParams, isReturningUser)
+        }
+    }
+
+    fun launchLink(paymentMethodCreateParams: PaymentMethodCreateParams? = null) {
         linkActivityResultLauncher?.let { activityResultLauncher ->
             linkLauncher.present(
-                activityResultLauncher
+                activityResultLauncher,
+                paymentMethodCreateParams
             )
             onLinkLaunched()
         }
@@ -491,7 +494,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun onLinkActivityResult(result: LinkActivityResult) {
         val paymentResult = result.convertToPaymentResult()
         if (paymentResult is PaymentResult.Completed) {
-            // If payment was completed, don't show the Payment Sheet.
+            // If payment was completed inside the Link UI, dismiss immediately.
+            eventReporter.onPaymentSuccess(PaymentSelection.Link)
             prefsRepository.savePaymentSelection(PaymentSelection.Link)
             _paymentSheetResult.value = PaymentSheetResult.Completed
         } else {
@@ -500,7 +504,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
             updateSelection(PaymentSelection.New.LinkInline(it))
@@ -532,13 +536,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
+                    is PaymentSelection.New.LinkInline -> PaymentSelection.Link
                     is PaymentSelection.New -> stripeIntent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
-                    PaymentSelection.GooglePay -> selection.value
-                    PaymentSelection.Link -> selection.value
-                    is PaymentSelection.Saved -> selection.value
-                    null -> null
+                    else -> selection.value
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
                 }
@@ -548,7 +550,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             else -> {
-                eventReporter.onPaymentFailure(selection.value)
+                if (paymentResult is PaymentResult.Failed) {
+                    eventReporter.onPaymentFailure(selection.value)
+                }
 
                 runCatching {
                     stripeIntentValidator.requireValid(stripeIntent)

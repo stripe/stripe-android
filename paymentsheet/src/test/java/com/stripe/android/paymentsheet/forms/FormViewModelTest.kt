@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARG
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.AddressElement
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -34,7 +34,8 @@ import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
@@ -65,13 +66,11 @@ internal class FormViewModelTest {
     )
     val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
-    private val resourceRepository =
-        StaticResourceRepository(
-            AddressFieldElementRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
-            mock()
+    private val addressResourceRepository = StaticAddressResourceRepository(
+        AddressRepository(
+            ApplicationProvider.getApplicationContext<Context>().resources
         )
+    )
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
@@ -95,7 +94,6 @@ internal class FormViewModelTest {
         WeakMapInjectorRegistry.register(injector, injectorKey)
         val factory = FormViewModel.Factory(
             config,
-            ApplicationProvider.getApplicationContext<Application>().resources,
             PaymentMethod.Type.Sofort.code
         ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
@@ -112,22 +110,21 @@ internal class FormViewModelTest {
         val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
         val factory = FormViewModel.Factory(
             config,
-            ApplicationProvider.getApplicationContext<Application>().resources,
             PaymentMethod.Type.Sofort.code
         ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
         verify(factorySpy).fallbackInitialize(
             argWhere {
-                it.resource == ApplicationProvider.getApplicationContext<Application>().resources
+                it.context == ApplicationProvider.getApplicationContext<Application>()
             }
         )
     }
 
-    private fun createRepositorySupportedPaymentMethod(
+    private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
         layoutSpec: LayoutSpec
-    ): StaticResourceRepository {
+    ): StaticLpmResourceRepository {
         val mockLpmRepository = mock<LpmRepository>()
 
         whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
@@ -141,10 +138,7 @@ internal class FormViewModelTest {
                 layoutSpec
             )
         )
-        return StaticResourceRepository(
-            AddressFieldElementRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
+        return StaticLpmResourceRepository(
             mockLpmRepository
         )
     }
@@ -156,14 +150,15 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
                     EmailSpec(),
                     SaveForFutureUseSpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         // Set all the card fields, billing is set in the args
@@ -200,13 +195,14 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
                     SaveForFutureUseSpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -233,13 +229,14 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
                     CountrySpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         // Verify formFieldValues does not contain email
@@ -257,7 +254,7 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.P24.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.P24,
                 LayoutSpec.create(
                     NameSpec(),
@@ -265,7 +262,8 @@ internal class FormViewModelTest {
                     CountrySpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
@@ -285,14 +283,15 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
                     EmailSpec(),
                     CountrySpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         val emailController =
@@ -322,7 +321,7 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.Card.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
                 LayoutSpec.create(
                     EmailSpec(),
@@ -330,7 +329,8 @@ internal class FormViewModelTest {
                     SaveForFutureUseSpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         val emailController =
@@ -370,7 +370,7 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.P24.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.P24,
                 LayoutSpec.create(
                     NameSpec(),
@@ -379,7 +379,8 @@ internal class FormViewModelTest {
                     SaveForFutureUseSpec()
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         val nameElement =
@@ -420,7 +421,7 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.SepaDebit.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.SepaDebit,
                 LayoutSpec.create(
                     NameSpec(),
@@ -436,7 +437,8 @@ internal class FormViewModelTest {
                     )
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
@@ -506,7 +508,7 @@ internal class FormViewModelTest {
         val formViewModel = FormViewModel(
             PaymentMethod.Type.SepaDebit.code,
             args,
-            resourceRepository = createRepositorySupportedPaymentMethod(
+            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.SepaDebit,
                 LayoutSpec.create(
                     NameSpec(),
@@ -522,7 +524,8 @@ internal class FormViewModelTest {
                     )
                 )
             ),
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+            addressResourceRepository = addressResourceRepository,
+            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(

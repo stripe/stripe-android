@@ -17,13 +17,16 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.injection.MERCHANT_NAME
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -65,9 +68,9 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -184,6 +187,30 @@ internal class DefaultFlowControllerTest {
         }
         verify(eventReporter)
             .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+    }
+
+    @Test
+    fun `successful payment should fire analytics event`() {
+        val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+        val flowController = createFlowController(viewModel = viewModel)
+
+        viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())
+
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(isA<PaymentSelection.New>())
+    }
+
+    @Test
+    fun `failed payment should fire analytics event`() {
+        val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+        val flowController = createFlowController(viewModel = viewModel)
+
+        viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())
+
+        flowController.onPaymentResult(PaymentResult.Failed(RuntimeException()))
+
+        verify(eventReporter).onPaymentFailure(isA<PaymentSelection.New>())
     }
 
     @Test
@@ -628,7 +655,73 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull())
+        verify(linkPaymentLauncher).present(any(), eq(null))
+    }
+
+    @Test
+    fun `confirmPaymentSelection() with LinkInline and user signed in should launch LinkPaymentLauncher`() = runTest {
+        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.Verified)
+
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.Link,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+            )
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ -> }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                PaymentSelection.New.LinkInline(
+                    LinkPaymentDetails.New(
+                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                        mock(),
+                        PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    )
+                )
+            )
+        )
+
+        flowController.confirm()
+
+        verify(linkPaymentLauncher).present(any(), eq(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+    }
+
+    @Test
+    fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() = runTest {
+        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.Link,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+            )
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ -> }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                PaymentSelection.New.LinkInline(
+                    LinkPaymentDetails.New(
+                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                        mock(),
+                        PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    )
+                )
+            )
+        )
+
+        flowController.confirm()
+
+        verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
     }
 
     private fun verifyPaymentSelection(
@@ -789,19 +882,22 @@ internal class DefaultFlowControllerTest {
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
         savedSelection: SavedSelection = SavedSelection.None,
-        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
     ): DefaultFlowController {
         return createFlowController(
             FakeFlowControllerInitializer(
                 paymentMethods,
                 savedSelection,
                 stripeIntent = stripeIntent
-            )
+            ),
+            viewModel
         )
     }
 
     private fun createFlowController(
-        flowControllerInitializer: FlowControllerInitializer
+        flowControllerInitializer: FlowControllerInitializer,
+        viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
     ) = DefaultFlowController(
         testScope,
         lifeCycleOwner,
@@ -813,8 +909,9 @@ internal class DefaultFlowControllerTest {
         INJECTOR_KEY,
         flowControllerInitializer,
         eventReporter,
-        ViewModelProvider(activity)[FlowControllerViewModel::class.java],
+        viewModel,
         paymentLauncherAssistedFactory,
+        mock(),
         mock(),
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,

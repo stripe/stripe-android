@@ -13,7 +13,8 @@ internal data class AddressDetails(
     val line2: String? = null,
     val postalCode: String? = null,
     val state: String? = null,
-    val phoneNumber: String? = null
+    val phoneNumber: String? = null,
+    val checkboxChecked: Boolean? = null
 ) : Parcelable {
     companion object {
         const val KEY = "ShippingAddress"
