@@ -48,6 +48,26 @@ class PaymentMethodPreferenceJsonParserTest {
     }
 
     @Test
+    fun parsePaymentIntent_shouldCreateObjectLinkFundingSources() {
+        val paymentMethodPreference = PaymentMethodPreferenceForPaymentIntentJsonParser().parse(
+            PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
+        )!!
+
+        Truth.assertThat(paymentMethodPreference.intent.linkFundingSources)
+            .containsExactly("card", "bank_account")
+    }
+
+    @Test
+    fun parseSetupIntent_shouldCreateObjectLinkFundingSources() {
+        val paymentMethodPreference = PaymentMethodPreferenceForSetupIntentJsonParser().parse(
+            PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
+        )!!
+
+        Truth.assertThat(paymentMethodPreference.intent.linkFundingSources)
+            .containsExactly("card", "bank_account")
+    }
+
+    @Test
     fun `Test ordered payment methods returned in PI payment_method_type variable`() {
         val parsedData = PaymentMethodPreferenceForPaymentIntentJsonParser().parse(
             JSONObject(

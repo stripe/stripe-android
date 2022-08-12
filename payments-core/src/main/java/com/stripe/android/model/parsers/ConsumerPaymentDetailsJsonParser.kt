@@ -35,6 +35,16 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
                         cardDetails.getString(FIELD_CARD_LAST_4)
                     )
                 }
+                ConsumerPaymentDetails.BankAccount.type -> {
+                    val bankAccountDetails = json.getJSONObject(FIELD_BANK_ACCOUNT_DETAILS)
+                    ConsumerPaymentDetails.BankAccount(
+                        json.getString(FIELD_ID),
+                        json.getBoolean(FIELD_IS_DEFAULT),
+                        optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
+                        bankAccountDetails.getString(FIELD_BANK_ACCOUNT_BANK_NAME),
+                        bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4)
+                    )
+                }
                 else -> null
             }
         }
@@ -62,5 +72,10 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
         private const val FIELD_CARD_EXPIRY_MONTH = "exp_month"
         private const val FIELD_CARD_BRAND = "brand"
         private const val FIELD_CARD_LAST_4 = "last4"
+
+        private const val FIELD_BANK_ACCOUNT_DETAILS = "bank_account_details"
+        private const val FIELD_BANK_ACCOUNT_BANK_ICON_CODE = "bank_icon_code"
+        private const val FIELD_BANK_ACCOUNT_BANK_NAME = "bank_name"
+        private const val FIELD_BANK_ACCOUNT_LAST_4 = "last4"
     }
 }
