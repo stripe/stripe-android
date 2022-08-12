@@ -53,6 +53,10 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     implementation "androidx.browser:browser:$androidxBrowserVersion"
 
+    // Compose
+    implementation "androidx.compose.runtime:runtime:$androidxComposeVersion"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
@@ -119,6 +123,11 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 }
 
