@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
@@ -121,12 +122,14 @@ internal class AutocompleteViewModel @Inject constructor(
                     val address = it.place.transformGoogleToStripeAddress(getApplication())
                     addressResult.value = Result.success(
                         AddressDetails(
-                            city = address.city,
-                            country = address.country,
-                            line1 = address.line1,
-                            line2 = address.line2,
-                            postalCode = address.postalCode,
-                            state = address.state
+                            address = PaymentSheet.Address(
+                                city = address.city,
+                                country = address.country,
+                                line1 = address.line1,
+                                line2 = address.line2,
+                                postalCode = address.postalCode,
+                                state = address.state
+                            )
                         )
                     )
                     setResultAndGoBack()
@@ -143,7 +146,9 @@ internal class AutocompleteViewModel @Inject constructor(
     fun onBackPressed() {
         val result = if (queryFlow.value.isNotBlank()) {
             AddressDetails(
-                line1 = queryFlow.value
+                address = PaymentSheet.Address(
+                    line1 = queryFlow.value
+                )
             )
         } else {
             null
@@ -154,7 +159,9 @@ internal class AutocompleteViewModel @Inject constructor(
     fun onEnterAddressManually() {
         setResultAndGoBack(
             AddressDetails(
-                line1 = queryFlow.value
+                address = PaymentSheet.Address(
+                    line1 = queryFlow.value
+                )
             )
         )
     }
