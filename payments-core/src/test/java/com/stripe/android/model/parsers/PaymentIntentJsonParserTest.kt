@@ -225,4 +225,10 @@ class PaymentIntentJsonParserTest {
             )
         )
     }
+
+    @Test
+    fun parse_withLinkFundingSources_shouldCreateExpectedObject() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_LINK_FUNDING_SOURCES
+        assertThat(paymentIntent.linkFundingSources).containsExactly("card", "bank_account")
+    }
 }

@@ -13,7 +13,8 @@ data class ConsumerPaymentDetails internal constructor(
 
     sealed class PaymentDetails(
         open val id: String,
-        open val isDefault: Boolean
+        open val isDefault: Boolean,
+        open val type: String
     ) : Parcelable
 
     @Parcelize
@@ -24,7 +25,7 @@ data class ConsumerPaymentDetails internal constructor(
         val expiryMonth: Int,
         val brand: CardBrand,
         val last4: String
-    ) : PaymentDetails(id, isDefault) {
+    ) : PaymentDetails(id, isDefault, type) {
         companion object {
             const val type = "card"
 
@@ -48,6 +49,19 @@ data class ConsumerPaymentDetails internal constructor(
                     )
                 }
             }
+        }
+    }
+
+    @Parcelize
+    data class BankAccount(
+        override val id: String,
+        override val isDefault: Boolean,
+        val bankIconCode: String?,
+        val bankName: String,
+        val last4: String
+    ) : PaymentDetails(id, isDefault, type) {
+        companion object {
+            const val type = "bank_account"
         }
     }
 }

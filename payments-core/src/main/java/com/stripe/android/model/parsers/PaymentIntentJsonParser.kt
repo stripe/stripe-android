@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.Address
 import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.PaymentIntent
@@ -21,7 +22,7 @@ class PaymentIntentJsonParser(
         }
 
         val id = optString(json, FIELD_ID)
-        val paymentMethodTypes = ModelJsonParser.jsonArrayToList(
+        val paymentMethodTypes = jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )
         val amount = StripeJsonUtils.optLong(json, FIELD_AMOUNT)
@@ -82,9 +83,12 @@ class PaymentIntentJsonParser(
             }
         }
 
-        val unactivatedPaymentMethods = ModelJsonParser.jsonArrayToList(
+        val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         )
+
+        val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
+            .map { it.lowercase() }
 
         return PaymentIntent(
             id = id,
@@ -106,8 +110,9 @@ class PaymentIntentJsonParser(
             setupFutureUsage = setupFutureUsage,
             lastPaymentError = lastPaymentError,
             shipping = shipping,
-            nextActionData = nextActionData,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
             paymentMethodOptionsJsonString = paymentMethodOptions
         )
     }
@@ -190,5 +195,6 @@ class PaymentIntentJsonParser(
         private const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
             "unactivated_payment_method_types"
+        private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
     }
 }
