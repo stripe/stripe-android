@@ -33,6 +33,9 @@ and adds new `rememberLauncher` features for Payments
 * [DEPRECATED][5274](https://github.com/stripe/stripe-android/pull/5274)
   Deprecate `PaymentLauncher.createForCompose` in favor of  `PaymentLauncher.rememberLauncher`.
 
+### Identity
+* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose
+
 ## 20.7.0 - 2022-07-06
 
 This release adds additional support for Afterpay/Clearpay in PaymentSheet.
