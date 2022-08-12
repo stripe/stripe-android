@@ -22,12 +22,14 @@ class AttachFinancialConnectionsSessionTest {
     private val stripeRepository = mock<StripeRepository>()
     private val attachFinancialConnectionsSession = AttachFinancialConnectionsSession(stripeRepository)
 
+    private val publishableKey = "publishable_key"
+    private val linkedAccountSessionId = "session_id"
+    private val stripeAccountId = "stripe_account_id"
+
     @Test
     fun `forPaymentIntent - given repository succeeds, linkedSession attached and paymentIntent returned`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "pi_1234_secret_5678"
             val paymentIntent = mock<PaymentIntent> {
                 on { this.clientSecret } doReturn clientSecret
@@ -36,9 +38,10 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
-                publishableKey,
-                linkedAccountSessionId,
-                clientSecret
+                publishableKey = publishableKey,
+                linkedAccountSessionId = linkedAccountSessionId,
+                clientSecret = clientSecret,
+                stripeAccountId = stripeAccountId
             )
 
             // Then
@@ -56,8 +59,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forPaymentIntent - given repository returns null, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "pi_1234_secret_5678"
             givenAttachPaymentIntentReturns { null }
 
@@ -65,7 +66,8 @@ class AttachFinancialConnectionsSessionTest {
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then
@@ -83,8 +85,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forPaymentIntent - given repository throws exception, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "pi_1234_secret_5678"
             val expectedException = APIException()
             givenAttachPaymentIntentReturns { throw expectedException }
@@ -93,7 +93,8 @@ class AttachFinancialConnectionsSessionTest {
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then
@@ -111,8 +112,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forPaymentIntent - given wrong secret, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "wrong_secret"
             val paymentIntent = mock<PaymentIntent>()
             givenAttachPaymentIntentReturns { paymentIntent }
@@ -121,7 +120,8 @@ class AttachFinancialConnectionsSessionTest {
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then
@@ -133,8 +133,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forSetupIntent - given repository succeeds, linkedSession attached and setupIntent returned`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "seti_1234_secret_5678"
             val setupIntent = mock<SetupIntent> {
                 on { this.clientSecret } doReturn clientSecret
@@ -145,7 +143,8 @@ class AttachFinancialConnectionsSessionTest {
             val result: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then
@@ -153,7 +152,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -163,8 +162,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forSetupIntent - given repository returns null, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "seti_1234_secret_5678"
             givenAttachSetupIntentReturns { null }
 
@@ -172,7 +169,8 @@ class AttachFinancialConnectionsSessionTest {
             val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then
@@ -180,7 +178,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
             )
             assertThat(setupIntent.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
         }
@@ -190,8 +188,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forSetupIntent - given repository throws exception, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val linkedAccountSessionId = "session_id"
             val clientSecret = "seti_1234_secret_5678"
             val expectedException = APIException()
             givenAttachSetupIntentReturns { throw expectedException }
@@ -200,7 +196,8 @@ class AttachFinancialConnectionsSessionTest {
             val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then
@@ -208,7 +205,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
             )
             assertThat(setupIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -228,7 +225,8 @@ class AttachFinancialConnectionsSessionTest {
             val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
-                clientSecret
+                clientSecret,
+                stripeAccountId
             )
 
             // Then

@@ -135,11 +135,13 @@ internal class CollectBankAccountViewModel @Inject constructor(
             when (args) {
                 is ForPaymentIntent -> attachFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = financialConnectionsSession.id
                 )
                 is ForSetupIntent -> attachFinancialConnectionsSession.forSetupIntent(
                     publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = financialConnectionsSession.id
                 )
