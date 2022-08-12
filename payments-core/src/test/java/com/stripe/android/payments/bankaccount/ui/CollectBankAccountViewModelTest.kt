@@ -44,6 +44,7 @@ class CollectBankAccountViewModelTest {
     private val retrieveStripeIntent: RetrieveStripeIntent = mock()
 
     private val publishableKey = "publishable_key"
+    private val stripeAccountId = "stripe_account_id"
     private val clientSecret = "client_secret"
     private val name = "name"
     private val email = "email"
@@ -115,7 +116,12 @@ class CollectBankAccountViewModelTest {
 
             // Then
             cancelAndConsumeRemainingEvents()
-            verify(attachFinancialConnectionsSession, never()).forPaymentIntent(any(), any(), any())
+            verify(attachFinancialConnectionsSession, never()).forPaymentIntent(
+                any(),
+                any(),
+                any(),
+                any()
+            )
         }
     }
 
@@ -135,7 +141,12 @@ class CollectBankAccountViewModelTest {
 
             // Then
             cancelAndConsumeRemainingEvents()
-            verify(attachFinancialConnectionsSession, never()).forSetupIntent(any(), any(), any())
+            verify(attachFinancialConnectionsSession, never()).forSetupIntent(
+                any(),
+                any(),
+                any(),
+                any()
+            )
         }
     }
 
@@ -241,7 +252,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = name,
-                    customerEmail = email
+                    customerEmail = email,
+                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -254,8 +266,9 @@ class CollectBankAccountViewModelTest {
             onBlocking {
                 forPaymentIntent(
                     publishableKey = publishableKey,
+                    linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    linkedAccountSessionId = linkedAccountSessionId
+                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -268,8 +281,9 @@ class CollectBankAccountViewModelTest {
             onBlocking {
                 forSetupIntent(
                     publishableKey = publishableKey,
+                    linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    linkedAccountSessionId = linkedAccountSessionId
+                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -284,7 +298,8 @@ class CollectBankAccountViewModelTest {
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
                     customerName = name,
-                    customerEmail = email
+                    customerEmail = email,
+                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -321,6 +336,7 @@ class CollectBankAccountViewModelTest {
     ): ForPaymentIntent {
         return ForPaymentIntent(
             publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
@@ -335,6 +351,7 @@ class CollectBankAccountViewModelTest {
     ): ForSetupIntent {
         return ForSetupIntent(
             publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,

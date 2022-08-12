@@ -9,7 +9,7 @@ import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
 internal class CreateFinancialConnectionsSession @Inject constructor(
-    private val stripeRepository: StripeRepository
+    private val stripeRepository: StripeRepository,
 ) {
 
     /**
@@ -19,7 +19,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
-        customerEmail: String?
+        customerEmail: String?,
+        stripeAccountId: String?
     ): Result<FinancialConnectionsSession> = kotlin.runCatching {
         stripeRepository.createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
@@ -28,7 +29,10 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 customerName = customerName,
                 customerEmailAddress = customerEmail
             ),
-            requestOptions = ApiRequest.Options(publishableKey)
+            requestOptions = ApiRequest.Options(
+                publishableKey,
+                stripeAccountId
+            )
         )
     }.mapCatching { it ?: throw InternalError("Error creating session for PaymentIntent") }
 
@@ -39,7 +43,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
-        customerEmail: String?
+        customerEmail: String?,
+        stripeAccountId: String?
     ): Result<FinancialConnectionsSession> = kotlin.runCatching {
         stripeRepository.createSetupIntentFinancialConnectionsSession(
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
@@ -48,7 +53,10 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 customerName = customerName,
                 customerEmailAddress = customerEmail
             ),
-            requestOptions = ApiRequest.Options(publishableKey)
+            requestOptions = ApiRequest.Options(
+                publishableKey,
+                stripeAccountId
+            )
         )
     }.mapCatching { it ?: throw InternalError("Error creating session for SetupIntent") }
 }
