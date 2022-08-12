@@ -53,6 +53,18 @@ abstract class ComposeExampleActivity : ComponentActivity() {
     protected abstract val getBrandLogoResId: Int
 
     private val viewModel: IdentityExampleViewModel by viewModels()
+    private val configuration by lazy {
+        IdentityVerificationSheet.Configuration(
+            // Or use webImage by
+            // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
+            brandLogo = Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(resources.getResourcePackageName(getBrandLogoResId))
+                .appendPath(resources.getResourceTypeName(getBrandLogoResId))
+                .appendPath(resources.getResourceEntryName(getBrandLogoResId))
+                .build()
+        )
+    }
 
     data class IdentitySubmissionState(
         val shouldUseNativeSdk: Boolean = true,
@@ -106,18 +118,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     mutableStateOf<LoadingState>(LoadingState.Idle)
                 }
                 var vsId by remember { mutableStateOf("") }
-                val configuration = remember {
-                    IdentityVerificationSheet.Configuration(
-                        // Or use webImage by
-                        // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
-                        brandLogo = Uri.Builder()
-                            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                            .authority(resources.getResourcePackageName(getBrandLogoResId))
-                            .appendPath(resources.getResourceTypeName(getBrandLogoResId))
-                            .appendPath(resources.getResourceEntryName(getBrandLogoResId))
-                            .build()
-                    )
-                }
+
                 val identityVerificationSheet =
                     IdentityVerificationSheet.rememberIdentityVerificationSheet(
                         configuration = configuration
