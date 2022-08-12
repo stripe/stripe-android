@@ -48,13 +48,10 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
-    AccountPickerContent(state.value) {
-        viewModel.onAccountClicked(it)
-    }
     AccountPickerContent(
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
-        onSelectAccounts = { viewModel.selectAccounts(requireNotNull(authSessionId.value)) }
+        onSelectAccounts = viewModel::selectAccounts
     )
 }
 
@@ -228,105 +225,6 @@ internal fun AccountPickerPreview() {
             ),
             onAccountClicked = {},
             onSelectAccounts = {}
-        )
-    }
-}
-
-@Composable
-private fun MultiSelectAccount(
-    selected: Boolean,
-    onAccountClicked: (PartnerAccount) -> Unit,
-    account: PartnerAccount
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 2.dp,
-                color = if (selected) {
-                    FinancialConnectionsTheme.colors.textBrand
-                } else {
-                    FinancialConnectionsTheme.colors.borderDefault
-                },
-                shape = RoundedCornerShape(8.dp)
-            )
-            .clickable { onAccountClicked(account) }
-            .padding(12.dp)
-    ) {
-
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = selected,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = FinancialConnectionsTheme.colors.textBrand,
-                    checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
-                    uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
-                ),
-                onCheckedChange = null
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Column {
-                Text(
-                    text = account.name,
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                )
-                account.displayableAccountNumbers?.let {
-                    Text(
-                        text = "****$it",
-                        color = FinancialConnectionsTheme.colors.textSecondary,
-                        style = FinancialConnectionsTheme.typography.captionTight,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Preview(
-    showBackground = true,
-    group = "Account Picker Pane",
-    name = "One account selected"
-)
-@Composable
-internal fun AccountPickerPreview() {
-    FinancialConnectionsTheme {
-        AccountPickerContent(
-            AccountPickerState(
-                selectedIds = setOf("id1"),
-                accounts = Success(
-                    PartnerAccountsList(
-                        data = listOf(
-                            PartnerAccount(
-                                authorization = "Authorization",
-                                category = FinancialConnectionsAccount.Category.CASH,
-                                id = "id1",
-                                name = "Account 1",
-                                balanceAmount = 1000,
-                                displayableAccountNumbers = "1234",
-                                currency = "$",
-                                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                                supportedPaymentMethodTypes = emptyList(),
-                            ),
-                            PartnerAccount(
-                                authorization = "Authorization",
-                                category = FinancialConnectionsAccount.Category.CASH,
-                                id = "id2",
-                                name = "Account 2",
-                                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                                supportedPaymentMethodTypes = emptyList()
-                            )
-                        ),
-                        hasMore = false,
-                        nextPane = FinancialConnectionsSessionManifest.NextPane.ACCOUNT_PICKER,
-                        url = ""
-                    )
-                )
-            ),
-            onAccountClicked = {}
         )
     }
 }

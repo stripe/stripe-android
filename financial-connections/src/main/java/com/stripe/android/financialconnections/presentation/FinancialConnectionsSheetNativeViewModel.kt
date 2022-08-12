@@ -48,12 +48,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         goNext(
                             currentPane = message.currentStep,
                             manifest = getManifest(),
-                            authorizationSession = awaitState.authorizationSession,
                             partnerAccountsList = awaitState.partnerAccountsList
                         )
-                    }
-                    is Message.UpdateAuthorizationSession -> setState {
-                        copy(authorizationSession = message.authorizationSession)
                     }
                     is Message.UpdateAccountList -> setState {
                         copy(partnerAccountsList = message.accountList)
@@ -121,8 +117,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: FinancialConnectionsSheetNativeState
         ): FinancialConnectionsSheetNativeViewModel {
+            val args = viewModelContext.args<FinancialConnectionsSheetNativeActivityArgs>()
             return DaggerFinancialConnectionsSheetNativeComponent
                 .builder()
+                .initialManifest(args.manifest)
                 .application(viewModelContext.app())
                 .configuration(state.configuration)
                 .initialState(state)

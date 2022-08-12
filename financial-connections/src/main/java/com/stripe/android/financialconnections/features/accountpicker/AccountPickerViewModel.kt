@@ -7,15 +7,12 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAccountList
-import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
-import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.domain.SelectAccounts
-import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -26,6 +23,7 @@ internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
+    private val coordinator: NativeAuthFlowCoordinator,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
 ) : MavericksViewModel<AccountPickerState>(initialState) {
 
@@ -46,13 +44,14 @@ internal class AccountPickerViewModel @Inject constructor(
         }
     }
 
-    fun selectAccounts(authSessionId: String) {
+    fun selectAccounts() {
         withState { state ->
             state.accounts()?.let { accounts ->
                 suspend {
+                    val manifest = getManifest()
                     val accountsList: PartnerAccountsList = selectAccounts(
                         selectedAccounts = accounts.data.filter { state.selectedIds.contains(it.id) },
-                        sessionId = authSessionId,
+                        sessionId = manifest.activeAuthSession!!.id,
                     )
                     coordinator().emit(UpdateAccountList(accountsList))
                     coordinator().emit(RequestNextStep(currentStep = NavigationDirections.accountPicker))
@@ -60,16 +59,6 @@ internal class AccountPickerViewModel @Inject constructor(
                 }.execute {
                     copy(selectAccounts = it)
                 }
-            }
-        }
-    }
-
-    fun onAccountClicked(account: PartnerAccount) {
-        withState {
-            if (it.selectedIds.contains(account.id)) {
-                setState { copy(selectedIds = selectedIds - account.id) }
-            } else {
-                setState { copy(selectedIds = selectedIds + account.id) }
             }
         }
     }
