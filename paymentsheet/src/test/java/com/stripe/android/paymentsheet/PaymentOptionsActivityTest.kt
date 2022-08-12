@@ -439,9 +439,8 @@ class PaymentOptionsActivityTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel {
-        val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).apply {
+        val lpmRepository = LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources)
+        .apply {
             this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         }
         val addressRepository = AddressRepository(

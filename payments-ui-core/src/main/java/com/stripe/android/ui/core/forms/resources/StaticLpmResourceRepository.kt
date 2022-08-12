@@ -8,7 +8,7 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StaticLpmResourceRepository(
     private val lpmRepository: LpmRepository =
-        LpmRepository(LpmRepository.LpmRepositoryArguments(null))
+        LpmRepository(null)
 ) : ResourceRepository<LpmRepository> {
     override suspend fun waitUntilLoaded() {
         // Nothing to do since everything is pre-loaded

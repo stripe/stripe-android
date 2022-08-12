@@ -332,9 +332,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
         val lpmRepository =
             LpmRepository(
-                LpmRepository.LpmRepositoryArguments(
-                    InstrumentationRegistry.getInstrumentation().targetContext.resources
-                )
+                InstrumentationRegistry.getInstrumentation().targetContext.resources
             ).apply {
                 this.updateFromDisk()
             }

@@ -11,7 +11,7 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AsyncLpmResourceRepository @Inject constructor(
-    private val resources: Resources
+    private val lpmRepository: LpmRepository
 ) : ResourceRepository<LpmRepository> {
     override suspend fun waitUntilLoaded() {
         getRepository().waitUntilLoaded()
@@ -22,6 +22,6 @@ class AsyncLpmResourceRepository @Inject constructor(
     }
 
     override fun getRepository(): LpmRepository {
-        return LpmRepository.getInstance(LpmRepository.LpmRepositoryArguments(resources))
+        return lpmRepository
     }
 }

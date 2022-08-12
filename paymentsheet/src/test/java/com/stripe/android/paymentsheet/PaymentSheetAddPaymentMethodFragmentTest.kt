@@ -523,7 +523,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
     companion object {
         val lpmRepository =
-            LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)).apply {
+            LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
                 this.forceUpdate(
                     listOf(
                         PaymentMethod.Type.Card.code,

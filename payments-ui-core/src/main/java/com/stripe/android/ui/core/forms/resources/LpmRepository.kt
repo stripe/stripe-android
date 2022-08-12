@@ -37,6 +37,8 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
@@ -47,11 +49,14 @@ import java.util.concurrent.TimeUnit
  * repository is not a singleton.  Additionally every time you create a new
  * form view model a new repository is created and thus needs to be initialized.
  */
+@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository constructor(
-    private val arguments: LpmRepositoryArguments,
-    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance
+class LpmRepository @Inject constructor(
+    val resources: Resources?,
 ) {
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData()
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
+        DefaultIsFinancialConnectionsAvailable()
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
@@ -141,7 +146,7 @@ class LpmRepository constructor(
     }
 
     private fun readFromDisk() =
-        parseLpms(arguments.resources?.assets?.open("lpms.json"))
+        parseLpms(resources?.assets?.open("lpms.json"))
 
     private fun update(lpms: List<SharedDataSpec>?) {
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
@@ -151,7 +156,7 @@ class LpmRepository constructor(
             ?.toMutableList()
 
         parsedSupportedPaymentMethod?.removeAll {
-            !arguments.isFinancialConnectionsAvailable() &&
+            !isFinancialConnectionsAvailable() &&
                 it.code == PaymentMethod.Type.USBankAccount.code
         }
 
@@ -377,13 +382,6 @@ class LpmRepository constructor(
     }
 
     companion object {
-        @Volatile
-        private var INSTANCE: LpmRepository? = null
-        fun getInstance(args: LpmRepositoryArguments): LpmRepository =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE ?: LpmRepository(args).also { INSTANCE = it }
-            }
-
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = SupportedPaymentMethod(
             "card",
@@ -425,11 +423,4 @@ class LpmRepository constructor(
         class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
         class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
     }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class LpmRepositoryArguments(
-        val resources: Resources?,
-        val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-            DefaultIsFinancialConnectionsAvailable()
-    )
 }

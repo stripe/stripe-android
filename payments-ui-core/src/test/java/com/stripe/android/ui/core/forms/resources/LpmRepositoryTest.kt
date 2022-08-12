@@ -15,23 +15,19 @@ import java.util.Locale
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return true
-                }
+        ApplicationProvider.getApplicationContext<Application>().resources,
+        object : IsFinancialConnectionsAvailable {
+            override fun invoke(): Boolean {
+                return true
             }
-        )
+        }
     )
 
     @Test
     fun `Test label for afterpay show correctly when clearpay string`() {
         Locale.setDefault(Locale.UK)
         val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
+            ApplicationProvider.getApplicationContext<Application>().resources
         )
         lpmRepository.updateFromDisk()
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
@@ -44,9 +40,7 @@ class LpmRepositoryTest {
     fun `Test label for afterpay show correctly when afterpay string`() {
         Locale.setDefault(Locale.US)
         val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
+            ApplicationProvider.getApplicationContext<Application>().resources
         )
         lpmRepository.updateFromDisk()
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
@@ -175,15 +169,12 @@ class LpmRepositoryTest {
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
         val lpmRepository = LpmRepository(
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-            arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return true
-                    }
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return true
                 }
-            )
+            }
         )
 
         assertThat(lpmRepository.fromCode("card")).isNull()
@@ -279,15 +270,12 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that us_bank_account not supported when financial connections sdk not available`() {
         val lpmRepository = LpmRepository(
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-            arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return false
-                    }
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return false
                 }
-            )
+            }
         )
 
         lpmRepository.forceUpdate(

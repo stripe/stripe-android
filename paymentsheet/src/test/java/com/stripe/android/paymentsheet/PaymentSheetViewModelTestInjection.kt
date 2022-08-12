@@ -92,9 +92,7 @@ internal open class PaymentSheetViewModelTestInjection {
             FakePrefsRepository(),
             lpmResourceRepository = StaticLpmResourceRepository(
                 LpmRepository(
-                    LpmRepository.LpmRepositoryArguments(
-                        ApplicationProvider.getApplicationContext<Application>().resources
-                    )
+                    ApplicationProvider.getApplicationContext<Application>().resources
                 ).apply {
                     this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
                 }

@@ -31,7 +31,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewModelTestInjection() {
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources)).apply {
+    private val lpmRepository = LpmRepository(context.resources).apply {
         this.forceUpdate(listOf(PaymentMethod.Type.Card.code), null)
     }
 

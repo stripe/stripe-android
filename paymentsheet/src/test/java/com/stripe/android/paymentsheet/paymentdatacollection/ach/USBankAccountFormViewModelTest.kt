@@ -43,10 +43,9 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
     private val lpmRepository =
-        LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)).apply {
+        LpmRepository(ApplicationProvider.getApplicationContext<Application>().resources).apply {
             this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
         }
-    private val usBankAccount = lpmRepository.fromCode(PaymentMethod.Type.USBankAccount.code)!!
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         formArgs = FormFragmentArguments(
