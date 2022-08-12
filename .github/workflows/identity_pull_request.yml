@@ -32,7 +32,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build PR branch
-        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/release/identity-example-release-pr.apk
+#        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/release/identity-example-release-pr.apk
+        run: ./gradlew :identity-example:assembleRelease && ls identity-example/build/outputs && ls identity-example/build && ls identity-example/build/outputs/apk && ls identity-example/build/outputs/apk/theme1 && ls identity-example/build/outputs/apk/theme1/release
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
