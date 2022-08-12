@@ -263,6 +263,9 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
 }
 
+public final class com/stripe/android/ui/core/elements/CheckboxElementUiKt {
+}
+
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -760,6 +763,15 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Comp
 	public final fun getExposedPaymentMethods ()Ljava/util/List;
 	public final fun getHardcodedCard ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
 	public final fun getInstance (Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmRepositoryArguments;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun containsKey (Ljava/lang/String;)Z
+	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
+	public final fun putAll (Ljava/util/Map;)V
+	public final fun values ()Ljava/util/Collection;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$NoServerSpec : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {

@@ -3,7 +3,10 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.SavedStateHandle
@@ -376,6 +379,38 @@ class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 viewModel.updateBelowButtonText(null)
                 assertThat(activity.viewBinding.notes.isVisible).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun `primary button appearance is set`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
+                        appearance = PaymentSheet.Appearance(
+                            primaryButton = PaymentSheet.PrimaryButton(
+                                colorsLight = PaymentSheet.PrimaryButtonColors(
+                                    background = Color.Magenta,
+                                    onBackground = Color.Magenta,
+                                    border = Color.Magenta
+                                ),
+                                shape = PaymentSheet.PrimaryButtonShape(),
+                                typography = PaymentSheet.PrimaryButtonTypography()
+                            )
+                        )
+                    )
+                )
+            )
+        ).use {
+            idleLooper()
+            it.onActivity { activity ->
+                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.continueButton.defaultTintList).isEqualTo(
+                    ColorStateList.valueOf(Color.Magenta.toArgb())
+                )
             }
         }
     }

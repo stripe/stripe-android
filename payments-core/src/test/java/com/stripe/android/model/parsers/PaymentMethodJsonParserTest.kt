@@ -31,12 +31,13 @@ class PaymentMethodJsonParserTest {
             created = 1550757934255L,
             liveMode = true,
             type = PaymentMethod.Type.Ideal,
-            customerId = "cus_AQsHpvKfKwJDrF",
             billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            customerId = "cus_AQsHpvKfKwJDrF",
             ideal = PaymentMethod.Ideal(
                 bank = "my bank",
                 bankIdentifierCode = "bank id"
-            )
+            ),
+            code = "ideal"
         )
 
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.IDEAL_JSON))
@@ -66,10 +67,15 @@ class PaymentMethodJsonParserTest {
         assertThat(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
             .isEqualTo(
                 PaymentMethod(
-                    type = PaymentMethod.Type.SepaDebit,
                     id = "pm_1FSQaJCR",
-                    liveMode = false,
                     created = 1570809799L,
+                    liveMode = false,
+                    type = PaymentMethod.Type.SepaDebit,
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "jenny.rosen@example.com",
+                        address = Address()
+                    ),
                     sepaDebit = PaymentMethod.SepaDebit(
                         "3704",
                         null,
@@ -77,11 +83,7 @@ class PaymentMethodJsonParserTest {
                         "vIZc7Ywn0",
                         "3000"
                     ),
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "jenny.rosen@example.com",
-                        address = Address()
-                    )
+                    code = "sepa_debit"
                 )
             )
     }

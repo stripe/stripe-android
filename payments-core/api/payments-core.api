@@ -3090,6 +3090,10 @@ public final class com/stripe/android/model/ListPaymentMethodsParams$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/LuxeNextActionRepository$Companion {
+	public final fun getInstance ()Lcom/stripe/android/model/LuxeNextActionRepository;
+}
+
 public final class com/stripe/android/model/MandateDataParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -3346,24 +3350,24 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/c
 	public final field upi Lcom/stripe/android/model/PaymentMethod$Upi;
 	public final field usBankAccount Lcom/stripe/android/model/PaymentMethod$USBankAccount;
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component10 ()Lcom/stripe/android/model/PaymentMethod$Ideal;
-	public final fun component11 ()Lcom/stripe/android/model/PaymentMethod$SepaDebit;
-	public final fun component12 ()Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;
-	public final fun component13 ()Lcom/stripe/android/model/PaymentMethod$BacsDebit;
-	public final fun component14 ()Lcom/stripe/android/model/PaymentMethod$Sofort;
-	public final fun component15 ()Lcom/stripe/android/model/PaymentMethod$Upi;
-	public final fun component16 ()Lcom/stripe/android/model/PaymentMethod$Netbanking;
-	public final fun component17 ()Lcom/stripe/android/model/PaymentMethod$USBankAccount;
+	public final fun component10 ()Lcom/stripe/android/model/PaymentMethod$Fpx;
+	public final fun component11 ()Lcom/stripe/android/model/PaymentMethod$Ideal;
+	public final fun component12 ()Lcom/stripe/android/model/PaymentMethod$SepaDebit;
+	public final fun component13 ()Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;
+	public final fun component14 ()Lcom/stripe/android/model/PaymentMethod$BacsDebit;
+	public final fun component15 ()Lcom/stripe/android/model/PaymentMethod$Sofort;
+	public final fun component16 ()Lcom/stripe/android/model/PaymentMethod$Upi;
+	public final fun component17 ()Lcom/stripe/android/model/PaymentMethod$Netbanking;
+	public final fun component18 ()Lcom/stripe/android/model/PaymentMethod$USBankAccount;
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()Z
-	public final fun component4 ()Lcom/stripe/android/model/PaymentMethod$Type;
-	public final fun component5 ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Lcom/stripe/android/model/PaymentMethod$Card;
-	public final fun component8 ()Lcom/stripe/android/model/PaymentMethod$CardPresent;
-	public final fun component9 ()Lcom/stripe/android/model/PaymentMethod$Fpx;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;Lcom/stripe/android/model/PaymentMethod$USBankAccount;)Lcom/stripe/android/model/PaymentMethod;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;Lcom/stripe/android/model/PaymentMethod$USBankAccount;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod;
+	public final fun component5 ()Lcom/stripe/android/model/PaymentMethod$Type;
+	public final fun component6 ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Lcom/stripe/android/model/PaymentMethod$Card;
+	public final fun component9 ()Lcom/stripe/android/model/PaymentMethod$CardPresent;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Long;ZLjava/lang/String;Lcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;Lcom/stripe/android/model/PaymentMethod$USBankAccount;)Lcom/stripe/android/model/PaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/Long;ZLjava/lang/String;Lcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;Lcom/stripe/android/model/PaymentMethod$USBankAccount;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentMethod;
@@ -3483,6 +3487,7 @@ public final class com/stripe/android/model/PaymentMethod$Builder : com/stripe/a
 	public final fun setBillingDetails (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setCard (Lcom/stripe/android/model/PaymentMethod$Card;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setCardPresent (Lcom/stripe/android/model/PaymentMethod$CardPresent;)Lcom/stripe/android/model/PaymentMethod$Builder;
+	public final fun setCode (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setCreated (Ljava/lang/Long;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setCustomerId (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Builder;
 	public final fun setFpx (Lcom/stripe/android/model/PaymentMethod$Fpx;)Lcom/stripe/android/model/PaymentMethod$Builder;

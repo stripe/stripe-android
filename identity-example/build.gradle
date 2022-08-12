@@ -43,6 +43,11 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 
     flavorDimensions += "theme"
@@ -75,13 +80,29 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+    implementation 'com.github.kittinunf.fuel:fuel-coroutines:2.3.1'
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
     implementation "androidx.browser:browser:$androidxBrowserVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
 
     testImplementation "junit:junit:$junitVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+
+    // compose
+    // Integration with activities
+    implementation "androidx.activity:activity-compose:$androidxComposeVersion"
+    // Integration with ViewModels
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
+    implementation("androidx.compose.ui:ui:$androidxComposeVersion")
+    // Material Design
+    implementation("androidx.compose.material:material:$androidxComposeVersion")
+    // Integration with observables
+    implementation("androidx.compose.runtime:runtime-livedata:$androidxComposeVersion")
+    // MdcTheme
+    implementation "com.google.android.material:compose-theme-adapter:1.1.15"
+
 }
 
 task ktlint(type: JavaExec, group: "verification") {
