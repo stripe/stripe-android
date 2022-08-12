@@ -20,15 +20,16 @@ class CollectBankAccountForPaymentSheetLauncherTest {
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
         launcher.presentWithPaymentIntent(
-            PUBLISHABLE_KEY,
-            CLIENT_SECRET,
-            CONFIGURATION
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            clientSecret = CLIENT_SECRET,
+            configuration = CONFIGURATION
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = stripeAccountId,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = false
@@ -39,15 +40,16 @@ class CollectBankAccountForPaymentSheetLauncherTest {
     @Test
     fun `presentWithSetupIntent - launches CollectBankAccountActivity with correct arguments`() {
         launcher.presentWithSetupIntent(
-            PUBLISHABLE_KEY,
-            CLIENT_SECRET,
-            CONFIGURATION
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            clientSecret = CLIENT_SECRET,
+            configuration = CONFIGURATION
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = stripeAccountId,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = false
@@ -58,6 +60,7 @@ class CollectBankAccountForPaymentSheetLauncherTest {
     companion object {
         private const val CLIENT_SECRET = "client_secret"
         private const val PUBLISHABLE_KEY = "publishableKey"
+        private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null
