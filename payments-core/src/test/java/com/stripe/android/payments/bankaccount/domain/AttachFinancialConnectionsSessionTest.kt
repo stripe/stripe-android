@@ -49,7 +49,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -64,10 +64,10 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
-                publishableKey,
-                linkedAccountSessionId,
-                clientSecret,
-                stripeAccountId
+                publishableKey = publishableKey,
+                linkedAccountSessionId = linkedAccountSessionId,
+                clientSecret = clientSecret,
+                stripeAccountId = stripeAccountId
             )
 
             // Then
@@ -75,7 +75,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
             )
             assertThat(result.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
         }
@@ -91,10 +91,10 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
-                publishableKey,
-                linkedAccountSessionId,
-                clientSecret,
-                stripeAccountId
+                publishableKey = publishableKey,
+                linkedAccountSessionId = linkedAccountSessionId,
+                clientSecret = clientSecret,
+                stripeAccountId = stripeAccountId
             )
 
             // Then
@@ -102,7 +102,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }

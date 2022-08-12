@@ -87,7 +87,7 @@ internal class StripeCollectBankAccountLauncher constructor(
         )
     }
 
-    override fun  presentWithSetupIntent(
+    override fun presentWithSetupIntent(
         publishableKey: String,
         stripeAccountId: String?,
         clientSecret: String,

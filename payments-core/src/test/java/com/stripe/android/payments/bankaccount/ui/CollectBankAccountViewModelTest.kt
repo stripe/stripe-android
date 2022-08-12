@@ -253,7 +253,7 @@ class CollectBankAccountViewModelTest {
                     clientSecret = clientSecret,
                     customerName = name,
                     customerEmail = email,
-                    stripeAccountId = null
+                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -299,7 +299,7 @@ class CollectBankAccountViewModelTest {
                     clientSecret = clientSecret,
                     customerName = name,
                     customerEmail = email,
-                    stripeAccountId = null
+                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
