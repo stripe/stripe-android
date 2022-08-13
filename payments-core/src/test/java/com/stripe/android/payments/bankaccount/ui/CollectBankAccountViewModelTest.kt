@@ -75,7 +75,7 @@ class CollectBankAccountViewModelTest {
                 OpenConnectionsFlow(
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = null
+                    stripeAccountId = stripeAccountId
                 )
             )
         }
@@ -96,7 +96,7 @@ class CollectBankAccountViewModelTest {
                 OpenConnectionsFlow(
                     publishableKey = publishableKey,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = null
+                    stripeAccountId = stripeAccountId
                 )
             )
         }
