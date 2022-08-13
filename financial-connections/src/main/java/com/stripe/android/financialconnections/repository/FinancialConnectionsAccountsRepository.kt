@@ -117,7 +117,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         source: String,
         manifest: PartnerAccountsList
     ) {
-        logger.debug("MANIFEST: updating local manifest from $source")
+        logger.debug("updating local partner accounts from $source")
         cachedAccounts = manifest
     }
 
