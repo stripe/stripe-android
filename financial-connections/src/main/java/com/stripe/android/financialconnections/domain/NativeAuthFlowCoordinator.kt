@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
@@ -22,13 +21,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
     }
 
     internal sealed interface Message {
-        /**
-         * Updates global [PartnerAccountsList] instance.
-         */
-        data class UpdateAccountList(
-            val accountList: PartnerAccountsList
-        ) : Message
-
         /**
          * Request navigation to Next available Pane
          */

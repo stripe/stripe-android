@@ -30,23 +30,10 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         clientSecret: String
     ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
 
-    override suspend fun postAuthorizationSessionAccounts(
-        clientSecret: String,
-        sessionId: String
-    ): PartnerAccountsList = getAuthorizationSessionAccounts()
-
     override suspend fun postAuthorizationSessionOAuthResults(
         clientSecret: String,
         sessionId: String
     ): MixedOAuthParams {
         return postAuthorizationSessionOAuthResults()
-    }
-
-    override suspend fun postAuthorizationSessionSelectedAccounts(
-        clientSecret: String,
-        sessionId: String,
-        selectAccounts: List<String>
-    ): PartnerAccountsList {
-        return postAuthorizationSessionSelectedAccounts()
     }
 }

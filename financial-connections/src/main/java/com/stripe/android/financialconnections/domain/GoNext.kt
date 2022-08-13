@@ -20,14 +20,13 @@ import javax.inject.Inject
  */
 internal class GoNext @Inject constructor(
     private val navigationManager: NavigationManager,
+    private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
+    private val getManifest: GetManifest,
     private val logger: Logger
 ) {
 
-    operator fun invoke(
-        currentPane: NavigationCommand,
-        manifest: FinancialConnectionsSessionManifest,
-        partnerAccountsList: PartnerAccountsList?
-    ): NavigationCommand {
+    suspend operator fun invoke(currentPane: NavigationCommand): NavigationCommand {
+        val manifest = getManifest()
         val nextPane = when (currentPane.destination) {
             /**
              * institution picker step receives a fresh [FinancialConnectionsAuthorizationSession]
@@ -51,8 +50,10 @@ internal class GoNext @Inject constructor(
              * Account selection returns a [PartnerAccountsList] that includes the next pane,
              * source of truth for navigation.
              */
-            NavigationDirections.accountPicker.destination ->
-                partnerAccountsList!!.nextPane.toNavigationCommand()
+            NavigationDirections.accountPicker.destination -> {
+
+                getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id).nextPane.toNavigationCommand()
+            }
             else -> TODO()
         }
         logger.debug("Navigating to next pane: ${nextPane.destination}")

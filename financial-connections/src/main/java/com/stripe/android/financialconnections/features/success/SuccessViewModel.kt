@@ -1,29 +1,35 @@
 package com.stripe.android.financialconnections.features.success
 
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
-import com.airbnb.mvrx.withState
+import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
 internal class SuccessViewModel @Inject constructor(
-    initialState: SuccessState
+    initialState: SuccessState,
+    getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
+    getManifest: GetManifest
 ) : MavericksViewModel<SuccessState>(initialState) {
 
-    companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {
-
-        override fun initialState(viewModelContext: ViewModelContext): SuccessState {
-            val parentViewModel =
-                viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
-            return withState(parentViewModel) {
-                SuccessState(
-                    partnerAccountsList = requireNotNull(it.partnerAccountsList)
-                )
-            }
+    init {
+        suspend {
+            val manifest = getManifest()
+            getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id)
+        }.execute {
+            copy(
+                partnerAccountsList = it
+            )
         }
+    }
+
+    companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {
 
         override fun create(
             viewModelContext: ViewModelContext,
@@ -41,5 +47,5 @@ internal class SuccessViewModel @Inject constructor(
 }
 
 internal data class SuccessState(
-    val partnerAccountsList: PartnerAccountsList
+    val partnerAccountsList: Async<PartnerAccountsList> = Uninitialized
 ) : MavericksState

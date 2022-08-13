@@ -3,11 +3,11 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import javax.inject.Inject
 
 internal class SelectAccounts @Inject constructor(
-    private val repository: FinancialConnectionsRepository,
+    private val repository: FinancialConnectionsAccountsRepository,
     private val configuration: FinancialConnectionsSheet.Configuration
 ) {
 

@@ -10,7 +10,6 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateAccountList
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -53,7 +52,6 @@ internal class AccountPickerViewModel @Inject constructor(
                         selectedAccounts = accounts.data.filter { state.selectedIds.contains(it.id) },
                         sessionId = manifest.activeAuthSession!!.id,
                     )
-                    coordinator().emit(UpdateAccountList(accountsList))
                     coordinator().emit(RequestNextStep(currentStep = NavigationDirections.accountPicker))
                     accountsList
                 }.execute {

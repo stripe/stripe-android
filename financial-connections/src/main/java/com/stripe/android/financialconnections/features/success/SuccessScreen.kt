@@ -20,7 +20,9 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
     val state = viewModel.collectAsState { it.partnerAccountsList }
-    SuccessContent(accounts = state.value)
+    state.value()?.let {
+        SuccessContent(accounts = it)
+    }
 }
 
 @Composable

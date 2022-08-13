@@ -21,7 +21,6 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledExc
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,17 +42,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    is Message.RequestNextStep -> {
-                        val awaitState = awaitState()
-                        goNext(
-                            currentPane = message.currentStep,
-                            manifest = getManifest(),
-                            partnerAccountsList = awaitState.partnerAccountsList
-                        )
-                    }
-                    is Message.UpdateAccountList -> setState {
-                        copy(partnerAccountsList = message.accountList)
-                    }
+                    is Message.RequestNextStep -> goNext(currentPane = message.currentStep)
                     Message.OpenWebAuthFlow -> {
                         val manifest = getManifest()
                         setState {
@@ -67,7 +56,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     /**
      * When authorization flow finishes, it will redirect to a URL scheme stripe-auth://link-accounts
-     * captured by [com.stripe.android.financialconnections.FinancialConnectionsSheetNativeRedirectActivity]
+     * captured by [com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity]
      * that will launch this activity in `singleTask` mode.
      *
      * @param intent the new intent with the redirect URL in the intent data
@@ -133,7 +122,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
     val authorizationSession: FinancialConnectionsAuthorizationSession?,
-    val partnerAccountsList: PartnerAccountsList?,
     val configuration: FinancialConnectionsSheet.Configuration,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
@@ -145,7 +133,6 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
         configuration = args.configuration,
-        partnerAccountsList = null,
         authorizationSession = null,
         viewEffect = null
     )
