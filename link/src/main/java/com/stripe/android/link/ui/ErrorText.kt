@@ -22,40 +22,6 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkColors
 
-@Preview
-@Composable
-private fun ErrorTextPreview() {
-    ErrorText(text = "Test error message")
-}
-
-@Composable
-internal fun ErrorText(
-    text: String,
-    modifier: Modifier = Modifier,
-    style: ErrorTextStyle = ErrorTextStyle.Medium
-) {
-    Row(
-        modifier = modifier.background(
-            color = MaterialTheme.linkColors.errorComponentBackground,
-            shape = style.shape
-        ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_link_error),
-            contentDescription = null,
-            modifier = style.iconModifier,
-            tint = MaterialTheme.linkColors.errorText
-        )
-        Text(
-            text = text,
-            modifier = style.textModifier,
-            style = style.textStyle,
-            color = MaterialTheme.linkColors.errorText
-        )
-    }
-}
-
 internal sealed class ErrorTextStyle {
     abstract val shape: Shape
     abstract val iconModifier: Modifier
@@ -89,6 +55,40 @@ internal sealed class ErrorTextStyle {
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
             lineHeight = 20.sp
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ErrorTextPreview() {
+    ErrorText(text = "Test error message")
+}
+
+@Composable
+internal fun ErrorText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: ErrorTextStyle = ErrorTextStyle.Medium
+) {
+    Row(
+        modifier = modifier.background(
+            color = MaterialTheme.linkColors.errorComponentBackground,
+            shape = style.shape
+        ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_link_error),
+            contentDescription = null,
+            modifier = style.iconModifier,
+            tint = MaterialTheme.linkColors.errorText
+        )
+        Text(
+            text = text,
+            modifier = style.textModifier,
+            style = style.textStyle,
+            color = MaterialTheme.linkColors.errorText
         )
     }
 }

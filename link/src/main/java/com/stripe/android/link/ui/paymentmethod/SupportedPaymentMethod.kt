@@ -9,7 +9,7 @@ import com.stripe.android.ui.core.forms.LinkCardForm
 import kotlinx.parcelize.Parcelize
 
 /**
- * Class representing the Payment Methods that are supported by Link.
+ * Represents the Payment Methods that are supported by Link.
  *
  * @param type The Payment Method type. Matches the [ConsumerPaymentDetails] types.
  * @param formSpec Specification of how the payment method data collection UI should look.
@@ -19,7 +19,7 @@ internal sealed class SupportedPaymentMethod(
     val formSpec: List<FormItemSpec>
 ) : Parcelable {
     /**
-     * Builds the [ConsumerPaymentDetailsCreateParams] used to create this payment method.
+     * Build the [ConsumerPaymentDetailsCreateParams] that will to create this payment method.
      */
     abstract fun createParams(
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -27,7 +27,7 @@ internal sealed class SupportedPaymentMethod(
     ): ConsumerPaymentDetailsCreateParams
 
     /**
-     * Creates a map containing additional parameters that must be sent during payment confirmation.
+     * A map containing additional parameters that must be sent during payment confirmation.
      */
     open fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams):
         Map<String, Any>? = null

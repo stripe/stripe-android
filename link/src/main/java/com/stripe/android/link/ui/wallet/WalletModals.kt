@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
+import com.stripe.android.link.model.removeConfirmation
+import com.stripe.android.link.model.removeLabel
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -161,15 +163,3 @@ internal fun ConfirmRemoveDialog(
         )
     }
 }
-
-private val ConsumerPaymentDetails.PaymentDetails.removeLabel
-    get() = when (this) {
-        is ConsumerPaymentDetails.Card -> R.string.wallet_remove_card
-        is ConsumerPaymentDetails.BankAccount -> R.string.wallet_remove_linked_account
-    }
-
-private val ConsumerPaymentDetails.PaymentDetails.removeConfirmation
-    get() = when (this) {
-        is ConsumerPaymentDetails.Card -> R.string.wallet_remove_card_confirmation
-        is ConsumerPaymentDetails.BankAccount -> R.string.wallet_remove_account_confirmation
-    }
