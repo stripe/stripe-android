@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -25,6 +26,13 @@ internal object FinancialConnectionsSheetConfigurationModule {
     fun providesPublishableKey(
         configuration: FinancialConnectionsSheet.Configuration
     ): String = configuration.publishableKey
+
+    @Provides
+    @Named(STRIPE_ACCOUNT_ID)
+    @Singleton
+    fun providesStripeAccountId(
+        configuration: FinancialConnectionsSheet.Configuration
+    ): String? = configuration.stripeAccountId
 
     @Provides
     @Named(ENABLE_LOGGING)

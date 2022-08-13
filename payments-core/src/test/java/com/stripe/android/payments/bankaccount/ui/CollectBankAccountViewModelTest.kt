@@ -73,8 +73,9 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
-                    publishableKey,
-                    financialConnectionsSession.clientSecret!!
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = null
                 )
             )
         }
@@ -93,8 +94,9 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
-                    publishableKey,
-                    financialConnectionsSession.clientSecret!!
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = null
                 )
             )
         }

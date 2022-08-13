@@ -80,7 +80,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     _viewEffect.emit(
                         OpenConnectionsFlow(
                             financialConnectionsSessionSecret = financialConnectionsSessionSecret,
-                            publishableKey = args.publishableKey
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = args.stripeAccountId
                         )
                     )
                 }

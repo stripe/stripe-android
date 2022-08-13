@@ -75,6 +75,7 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                         .postValue("Collecting bank account information for payment")
                     launcher.presentWithPaymentIntent(
                         publishableKey = settings.publishableKey,
+                        stripeAccountId = settings.stripeAccountId,
                         clientSecret = it.getString("secret"),
                         configuration = CollectBankAccountConfiguration.USBankAccount(
                             name = viewBinding.name.text?.toString() ?: "",
