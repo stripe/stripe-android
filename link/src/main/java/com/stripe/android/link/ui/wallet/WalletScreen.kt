@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,13 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
@@ -23,6 +27,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +44,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,14 +59,18 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import com.stripe.android.ui.core.paymentsColors
 
 @Preview
 @Composable
@@ -67,7 +78,7 @@ private fun WalletBodyPreview() {
     DefaultLinkTheme {
         Surface {
             WalletBody(
-                paymentDetails = listOf(
+                paymentDetailsList = listOf(
                     ConsumerPaymentDetails.Card(
                         "id1",
                         true,
@@ -85,10 +96,12 @@ private fun WalletBodyPreview() {
                         "4444"
                     )
                 ),
-                initiallySelectedId = null,
+                supportedTypes = SupportedPaymentMethod.allTypes,
+                selectedItem = null,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonState = PrimaryButtonState.Enabled,
                 errorMessage = null,
+                onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
                 onDeletePaymentMethod = {},
@@ -113,61 +126,12 @@ internal fun WalletBody(
         )
     )
 
-    val paymentDetails by viewModel.paymentDetails.collectAsState()
+    val paymentDetailsList by viewModel.paymentDetailsList.collectAsState()
     val primaryButtonState by viewModel.primaryButtonState.collectAsState()
-
+    val selectedItem by viewModel.selectedItem.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    WalletBody(
-        paymentDetails = paymentDetails,
-        initiallySelectedId = null,
-        primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
-        primaryButtonState = primaryButtonState,
-        errorMessage = errorMessage,
-        onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
-        onEditPaymentMethod = viewModel::editPaymentMethod,
-        onDeletePaymentMethod = viewModel::deletePaymentMethod,
-        onPrimaryButtonClick = viewModel::onSelectedPaymentDetails,
-        onPayAnotherWayClick = viewModel::payAnotherWay,
-        showBottomSheetContent = showBottomSheetContent
-    )
-}
-
-@Composable
-internal fun WalletBody(
-    paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
-    initiallySelectedId: String?,
-    primaryButtonLabel: String,
-    primaryButtonState: PrimaryButtonState,
-    errorMessage: ErrorMessage?,
-    onAddNewPaymentMethodClick: () -> Unit,
-    onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onPrimaryButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onPayAnotherWayClick: () -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
-) {
-    var isWalletExpanded by rememberSaveable { mutableStateOf(false) }
-    var cardBeingRemoved by remember { mutableStateOf<ConsumerPaymentDetails.Card?>(null) }
-    var openDialog by remember { mutableStateOf(false) }
-
-    cardBeingRemoved?.let {
-        // Launch dialog when the value of [cardBeingRemoved] changes.
-        LaunchedEffect(it) {
-            openDialog = true
-        }
-
-        ConfirmRemoveDialog(openDialog) { confirmed ->
-            if (confirmed) {
-                onDeletePaymentMethod(it)
-            }
-
-            openDialog = false
-            cardBeingRemoved = null
-        }
-    }
-
-    if (paymentDetails.isEmpty()) {
+    if (paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -177,75 +141,148 @@ internal fun WalletBody(
             CircularProgressIndicator()
         }
     } else {
-        ScrollableTopLevelColumn {
-            Spacer(modifier = Modifier.height(12.dp))
+        WalletBody(
+            paymentDetailsList = paymentDetailsList,
+            supportedTypes = viewModel.supportedTypes,
+            selectedItem = selectedItem,
+            primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+            primaryButtonState = primaryButtonState,
+            errorMessage = errorMessage,
+            onItemSelected = viewModel::onItemSelected,
+            onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
+            onEditPaymentMethod = viewModel::editPaymentMethod,
+            onDeletePaymentMethod = viewModel::deletePaymentMethod,
+            onPrimaryButtonClick = viewModel::onConfirmPayment,
+            onPayAnotherWayClick = viewModel::payAnotherWay,
+            showBottomSheetContent = showBottomSheetContent
+        )
+    }
+}
 
-            var selectedItemId by rememberSaveable {
-                mutableStateOf(initiallySelectedId ?: getDefaultSelectedCard(paymentDetails))
+@Composable
+internal fun WalletBody(
+    paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
+    supportedTypes: Set<String>,
+    selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    primaryButtonLabel: String,
+    primaryButtonState: PrimaryButtonState,
+    errorMessage: ErrorMessage?,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onAddNewPaymentMethodClick: () -> Unit,
+    onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
+    onPayAnotherWayClick: () -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
+) {
+    val selectedItemIsValid = selectedItem?.let { supportedTypes.contains(it.type) } ?: false
+    var isWalletExpanded by rememberSaveable { mutableStateOf(!selectedItemIsValid) }
+    var itemBeingRemoved by remember {
+        mutableStateOf<ConsumerPaymentDetails.PaymentDetails?>(null)
+    }
+    var openDialog by remember { mutableStateOf(false) }
+
+    itemBeingRemoved?.let {
+        // Launch dialog when the value of [cardBeingRemoved] changes.
+        LaunchedEffect(it) {
+            openDialog = true
+        }
+
+        ConfirmRemoveDialog(
+            paymentDetails = it,
+            showDialog = openDialog
+        ) { confirmed ->
+            if (confirmed) {
+                onDeletePaymentMethod(it)
             }
 
-            // Update selected item if it's not on the list anymore
-            if (paymentDetails.firstOrNull { it.id == selectedItemId } == null) {
-                selectedItemId = getDefaultSelectedCard(paymentDetails)
-            }
+            openDialog = false
+            itemBeingRemoved = null
+        }
+    }
 
-            if (isWalletExpanded) {
-                ExpandedPaymentDetails(
-                    paymentDetails = paymentDetails,
-                    selectedItemId = selectedItemId,
-                    enabled = !primaryButtonState.isBlocking,
-                    onIndexSelected = {
-                        selectedItemId = paymentDetails[it].id
-                        isWalletExpanded = false
-                    },
-                    onMenuButtonClick = {
-                        showBottomSheetContent {
-                            WalletBottomSheetContent(
-                                onCancelClick = {
-                                    showBottomSheetContent(null)
-                                },
-                                onEditClick = {
-                                    showBottomSheetContent(null)
-                                    onEditPaymentMethod(it)
-                                },
-                                onRemoveClick = {
-                                    showBottomSheetContent(null)
-                                    cardBeingRemoved = it
-                                }
-                            )
-                        }
-                    },
-                    onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
-                    onCollapse = {
-                        isWalletExpanded = false
-                    }
-                )
-            } else {
-                CollapsedPaymentDetails(
-                    selectedPaymentMethod = paymentDetails.first { it.id == selectedItemId },
-                    enabled = !primaryButtonState.isBlocking,
-                    onClick = {
-                        isWalletExpanded = true
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            errorMessage?.let {
-                ErrorText(text = it.getMessage(LocalContext.current.resources))
-            }
-            PrimaryButton(
-                label = primaryButtonLabel,
-                state = primaryButtonState,
-                icon = R.drawable.stripe_ic_lock
-            ) {
-                onPrimaryButtonClick(paymentDetails.first { it.id == selectedItemId })
-            }
-            SecondaryButton(
+    ScrollableTopLevelColumn {
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (isWalletExpanded || !selectedItemIsValid) {
+            isWalletExpanded = true
+            ExpandedPaymentDetails(
+                paymentDetailsList = paymentDetailsList,
+                supportedTypes = supportedTypes,
+                selectedItem = selectedItem?.takeIf { selectedItemIsValid },
                 enabled = !primaryButtonState.isBlocking,
-                label = stringResource(id = R.string.wallet_pay_another_way),
-                onClick = onPayAnotherWayClick
+                onItemSelected = {
+                    onItemSelected(it)
+                    isWalletExpanded = false
+                },
+                onMenuButtonClick = {
+                    showBottomSheetContent {
+                        WalletBottomSheetContent(
+                            paymentDetails = it,
+                            onRemoveClick = {
+                                showBottomSheetContent(null)
+                                itemBeingRemoved = it
+                            },
+                            onCancelClick = {
+                                showBottomSheetContent(null)
+                            },
+                            onEditClick = {
+                                showBottomSheetContent(null)
+                                onEditPaymentMethod(it)
+                            }
+                        )
+                    }
+                },
+                onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
+                onCollapse = {
+                    isWalletExpanded = false
+                }
+            )
+        } else {
+            CollapsedPaymentDetails(
+                selectedPaymentMethod = selectedItem!!,
+                enabled = !primaryButtonState.isBlocking,
+                onClick = {
+                    isWalletExpanded = true
+                }
             )
         }
+        if (selectedItem is ConsumerPaymentDetails.BankAccount) {
+            Html(
+                html = stringResource(R.string.wallet_bank_account_terms),
+                imageGetter = emptyMap(),
+                color = MaterialTheme.paymentsColors.placeholderText,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                urlSpanStyle = SpanStyle(
+                    color = MaterialTheme.colors.primary
+                )
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        errorMessage?.let {
+            ErrorText(
+                text = it.getMessage(LocalContext.current.resources),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        PrimaryButton(
+            label = primaryButtonLabel,
+            state = if (selectedItemIsValid) {
+                primaryButtonState
+            } else {
+                PrimaryButtonState.Disabled
+            },
+            icon = R.drawable.stripe_ic_lock,
+            onButtonClick = onPrimaryButtonClick
+        )
+        SecondaryButton(
+            enabled = !primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.wallet_pay_another_way),
+            onClick = onPayAnotherWayClick
+        )
     }
 }
 
@@ -276,12 +313,13 @@ internal fun CollapsedPaymentDetails(
     ) {
         Text(
             text = stringResource(id = R.string.wallet_collapsed_payment),
-            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            modifier = Modifier.padding(
+                start = HorizontalPadding,
+                end = 8.dp
+            ),
             color = MaterialTheme.linkColors.disabledText
         )
-        if (selectedPaymentMethod is ConsumerPaymentDetails.Card) {
-            CardDetails(card = selectedPaymentMethod)
-        }
+        PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
@@ -298,11 +336,12 @@ internal fun CollapsedPaymentDetails(
 
 @Composable
 private fun ExpandedPaymentDetails(
-    paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
-    selectedItemId: String,
+    paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
+    supportedTypes: Set<String>,
+    selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     enabled: Boolean,
-    onIndexSelected: (Int) -> Unit,
-    onMenuButtonClick: (ConsumerPaymentDetails.Card) -> Unit,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
@@ -347,23 +386,19 @@ private fun ExpandedPaymentDetails(
         }
 
         // TODO(brnunes-stripe): Use LazyColumn.
-        paymentDetails.forEachIndexed { index, item ->
-            when (item) {
-                is ConsumerPaymentDetails.Card -> {
-                    CardPaymentMethodItem(
-                        cardDetails = item,
-                        enabled = enabled,
-                        isSelected = selectedItemId == item.id,
-                        onClick = {
-                            onIndexSelected(index)
-                        },
-                        onMenuButtonClick = {
-                            onMenuButtonClick(item)
-                        }
-                    )
+        paymentDetailsList.forEachIndexed { index, item ->
+            PaymentMethodItem(
+                paymentDetails = item,
+                enabled = enabled,
+                isSupported = supportedTypes.contains(item.type),
+                isSelected = selectedItem?.id == item.id,
+                onClick = {
+                    onItemSelected(item)
+                },
+                onMenuButtonClick = {
+                    onMenuButtonClick(item)
                 }
-                else -> {}
-            }
+            )
         }
 
         Row(
@@ -390,9 +425,10 @@ private fun ExpandedPaymentDetails(
 }
 
 @Composable
-private fun CardPaymentMethodItem(
-    cardDetails: ConsumerPaymentDetails.Card,
+private fun PaymentMethodItem(
+    paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     enabled: Boolean,
+    isSupported: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
     onMenuButtonClick: () -> Unit
@@ -400,8 +436,8 @@ private fun CardPaymentMethodItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .clickable(enabled = enabled, onClick = onClick),
+            .defaultMinSize(minHeight = 56.dp)
+            .clickable(enabled = enabled && isSupported, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
@@ -413,24 +449,42 @@ private fun CardPaymentMethodItem(
                 unselectedColor = MaterialTheme.linkColors.disabledText
             )
         )
-        CardDetails(card = cardDetails)
-        Spacer(modifier = Modifier.weight(1f))
-        if (cardDetails.isDefault) {
-            Box(
-                modifier = Modifier
-                    .height(20.dp)
-                    .background(
-                        color = MaterialTheme.colors.secondary,
-                        shape = MaterialTheme.shapes.small
-                    ),
-                contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .weight(1f)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(id = R.string.wallet_default),
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                    color = MaterialTheme.linkColors.disabledText,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
+                PaymentDetails(paymentDetails = paymentDetails, enabled = isSupported)
+                Spacer(modifier = Modifier.weight(1f))
+                if (paymentDetails.isDefault) {
+                    Box(
+                        modifier = Modifier
+                            .height(20.dp)
+                            .background(
+                                color = MaterialTheme.colors.secondary,
+                                shape = MaterialTheme.shapes.small
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.wallet_default),
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                            color = MaterialTheme.linkColors.disabledText,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+            if (!isSupported) {
+                ErrorText(
+                    text = stringResource(id = R.string.wallet_unavailable),
+                    style = ErrorTextStyle.Small,
+                    modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
                 )
             }
         }
@@ -446,30 +500,101 @@ private fun CardPaymentMethodItem(
             )
         }
     }
-    Divider(color = MaterialTheme.linkColors.componentDivider, thickness = 1.dp)
+    Divider(
+        modifier = Modifier.padding(horizontal = 20.dp),
+        color = MaterialTheme.linkColors.componentDivider,
+        thickness = 1.dp
+    )
+}
+
+@Composable
+internal fun PaymentDetails(
+    paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    enabled: Boolean
+) {
+    when (paymentDetails) {
+        is ConsumerPaymentDetails.Card -> {
+            CardDetails(card = paymentDetails, enabled = enabled)
+        }
+        is ConsumerPaymentDetails.BankAccount -> {
+            BankAccountDetails(bankAccount = paymentDetails, enabled = enabled)
+        }
+    }
 }
 
 @Composable
 internal fun CardDetails(
-    card: ConsumerPaymentDetails.Card
+    card: ConsumerPaymentDetails.Card,
+    enabled: Boolean
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = painterResource(id = card.brand.icon),
-            contentDescription = card.brand.displayName,
-            modifier = Modifier.padding(horizontal = 6.dp),
-            tint = Color.Unspecified
-        )
-        Text(
-            text = "•••• ",
-            color = MaterialTheme.colors.onPrimary
-        )
-        Text(
-            text = card.last4,
-            color = MaterialTheme.colors.onPrimary
-        )
+    CompositionLocalProvider(LocalContentAlpha provides if (enabled) 1f else 0.6f) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(id = card.brand.icon),
+                contentDescription = card.brand.displayName,
+                modifier = Modifier
+                    .width(38.dp)
+                    .padding(horizontal = 6.dp),
+                alpha = LocalContentAlpha.current
+            )
+            Text(
+                text = "•••• ",
+                color = MaterialTheme.colors.onPrimary
+                    .copy(alpha = LocalContentAlpha.current)
+            )
+            Text(
+                text = card.last4,
+                color = MaterialTheme.colors.onPrimary
+                    .copy(alpha = LocalContentAlpha.current),
+                style = MaterialTheme.typography.h6
+            )
+        }
     }
 }
 
-private fun getDefaultSelectedCard(paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>) =
-    paymentDetails.firstOrNull { it.isDefault }?.id ?: paymentDetails.first().id
+@Composable
+internal fun BankAccountDetails(
+    bankAccount: ConsumerPaymentDetails.BankAccount,
+    enabled: Boolean
+) {
+    CompositionLocalProvider(LocalContentAlpha provides if (enabled) 1f else 0.6f) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(bankAccount.icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .width(38.dp)
+                    .padding(horizontal = 6.dp),
+                tint = MaterialTheme.linkColors.actionLabelLight
+                    .copy(alpha = LocalContentAlpha.current)
+            )
+            Column(horizontalAlignment = Alignment.Start) {
+                Text(
+                    text = bankAccount.bankName,
+                    color = MaterialTheme.colors.onPrimary
+                        .copy(alpha = LocalContentAlpha.current),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.h6
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "•••• ",
+                        color = MaterialTheme.colors.onSecondary
+                            .copy(alpha = LocalContentAlpha.current),
+                        style = MaterialTheme.typography.body2
+                    )
+                    Text(
+                        text = bankAccount.last4,
+                        color = MaterialTheme.colors.onSecondary
+                            .copy(alpha = LocalContentAlpha.current),
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+            }
+        }
+    }
+}
+
+private val ConsumerPaymentDetails.BankAccount.icon
+    get() = R.drawable.ic_link_bank

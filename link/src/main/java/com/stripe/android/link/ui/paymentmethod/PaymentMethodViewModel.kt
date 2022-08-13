@@ -94,8 +94,8 @@ internal class PaymentMethodViewModel @Inject constructor(
         val paymentMethodCreateParams =
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
-                paymentMethod.type.code,
-                paymentMethod.requiresMandate
+                paymentMethod.type,
+                false
             )
 
         viewModelScope.launch {

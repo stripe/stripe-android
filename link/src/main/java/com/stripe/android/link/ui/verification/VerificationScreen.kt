@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -171,15 +172,16 @@ internal fun VerificationBody(
         }
         if (showChangeEmailMessage) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 14.dp),
+                modifier = Modifier.padding(vertical = 14.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = stringResource(id = R.string.verification_not_email, email),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSecondary
+                    modifier = Modifier.weight(weight = 1f, fill = false),
+                    color = MaterialTheme.colors.onSecondary,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.body2
                 )
                 Text(
                     text = stringResource(id = R.string.verification_change_email),
@@ -189,13 +191,17 @@ internal fun VerificationBody(
                             enabled = !isProcessing,
                             onClick = onChangeEmailClick
                         ),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.linkColors.actionLabel
+                    color = MaterialTheme.linkColors.actionLabel,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.body2
                 )
             }
         }
         errorMessage?.let {
-            ErrorText(text = it.getMessage(LocalContext.current.resources))
+            ErrorText(
+                text = it.getMessage(LocalContext.current.resources),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         Box(
             modifier = Modifier

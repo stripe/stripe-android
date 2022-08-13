@@ -129,7 +129,10 @@ internal fun PaymentMethodBody(
         }
         Spacer(modifier = Modifier.height(8.dp))
         errorMessage?.let {
-            ErrorText(text = it.getMessage(LocalContext.current.resources))
+            ErrorText(
+                text = it.getMessage(LocalContext.current.resources),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         PrimaryButton(
             label = primaryButtonLabel,

@@ -189,7 +189,7 @@ internal class LinkApiRepository @Inject constructor(
         runCatching {
             stripeRepository.listPaymentDetails(
                 consumerSessionClientSecret,
-                setOf("card"),
+                SupportedPaymentMethod.allTypes,
                 consumerPublishableKey?.let {
                     ApiRequest.Options(it)
                 } ?: ApiRequest.Options(

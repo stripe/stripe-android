@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,9 +94,8 @@ private fun LinkButton(
                     modifier = Modifier
                         .height(22.dp)
                         .padding(
-                            start = 5.dp,
-                            top = 3.dp,
-                            bottom = 3.dp
+                            horizontal = 5.dp,
+                            vertical = 3.dp
                         ),
                     tint = MaterialTheme.linkColors.buttonLabel
                         .copy(alpha = LocalContentAlpha.current)
@@ -114,7 +114,9 @@ private fun LinkButton(
                             modifier = Modifier
                                 .padding(6.dp),
                             color = MaterialTheme.linkColors.buttonLabel,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
                         )
                     }
                 }
