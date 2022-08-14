@@ -8,7 +8,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 
 internal interface FinancialConnectionsRepository {
     @Throws(
@@ -30,11 +29,6 @@ internal interface FinancialConnectionsRepository {
     suspend fun getFinancialConnectionsSession(
         clientSecret: String
     ): FinancialConnectionsSession
-
-    suspend fun postAuthorizationSessionAccounts(
-        clientSecret: String,
-        sessionId: String
-    ): PartnerAccountsList
 
     suspend fun postAuthorizationSessionOAuthResults(
         clientSecret: String,

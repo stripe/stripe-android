@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,7 +21,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -44,15 +48,18 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
-    AccountPickerContent(state.value) {
-        viewModel.onAccountClicked(it)
-    }
+    AccountPickerContent(
+        state = state.value,
+        onAccountClicked = viewModel::onAccountClicked,
+        onSelectAccounts = viewModel::selectAccounts
+    )
 }
 
 @Composable
 private fun AccountPickerContent(
     state: AccountPickerState,
-    onAccountClicked: (PartnerAccount) -> Unit
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onSelectAccounts: () -> Unit
 ) {
     FinancialConnectionsScaffold {
         when (val accounts = state.accounts) {
@@ -61,24 +68,30 @@ private fun AccountPickerContent(
                 R.string.stripe_account_picker_loading_desc
             )
             is Success -> AccountPickerLoaded(
+                loading = state.isLoading,
                 accounts = accounts(),
                 selectedIds = state.selectedIds,
-                onAccountClicked = onAccountClicked
+                onAccountClicked = onAccountClicked,
+                onSelectAccounts = onSelectAccounts
             )
             is Fail -> UnclassifiedErrorContent()
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun AccountPickerLoaded(
+    loading: Boolean,
     accounts: PartnerAccountsList,
     selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onSelectAccounts: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
         Text(
             modifier = Modifier
@@ -86,6 +99,7 @@ private fun AccountPickerLoaded(
             text = stringResource(R.string.stripe_account_picker_multiselect_account),
             style = FinancialConnectionsTheme.typography.subtitle
         )
+        Spacer(modifier = Modifier.size(24.dp))
         LazyColumn(
             contentPadding = PaddingValues(top = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -97,6 +111,20 @@ private fun AccountPickerLoaded(
                     account = account
                 )
             }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        FinancialConnectionsButton(
+            loading = loading,
+            onClick = onSelectAccounts,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = pluralStringResource(
+                    R.plurals.stripe_account_picker_confirm,
+                    selectedIds.size
+                )
+            )
         }
     }
 }
@@ -195,7 +223,8 @@ internal fun AccountPickerPreview() {
                     )
                 )
             ),
-            onAccountClicked = {}
+            onAccountClicked = {},
+            onSelectAccounts = {}
         )
     }
 }

@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.result.ActivityResult
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -137,16 +139,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    /**
-     * The native auth flow activity result is equivalent to the browser flow.
-     *
-     * @see [onBrowserActivityResult]
-     */
-    internal fun onNativeAuthFlowResult() {
-        setState {
-            if (authFlowActive && activityRecreated) {
+    internal fun onNativeAuthFlowResult(activityResult: ActivityResult) {
+        if (activityResult.resultCode == Activity.RESULT_OK) {
+            withState { fetchFinancialConnectionsSession(it) }
+        } else {
+            setState {
                 copy(viewEffect = FinishWithResult(Canceled))
-            } else this
+            }
         }
     }
 
