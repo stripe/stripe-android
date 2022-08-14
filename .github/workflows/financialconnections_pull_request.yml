@@ -91,6 +91,6 @@ jobs:
       - name: Upload artifact to Emerge
         uses: EmergeTools/emerge-upload-action@v1.0.2
         with:
-          artifact_path: financial-connections-example/build/outputs/bundle/release/financial-connections-example-release-pr.aab
+          artifact_path: financial-connections-example/build/outputs/bundle/release/financial-connections-example-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
           build_type: release # Optional, change if your workflow builds a specific type
