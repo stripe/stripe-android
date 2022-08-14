@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
-import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -30,8 +29,16 @@ internal class AccountPickerViewModel @Inject constructor(
 
     init {
         suspend {
-            val authSession = requireNotNull(getManifest().activeAuthSession)
-            pollAuthorizationSessionAccounts(authSession.id)
+            val manifest = getManifest()
+            val authSession = requireNotNull(manifest.activeAuthSession)
+            val partnerAccountList = pollAuthorizationSessionAccounts(authSession.id)
+            partnerAccountList.data.map { account ->
+                AccountPickerState.PartnerAccountUI(
+                    account = account,
+                    enabled = manifest.paymentMethodType == null ||
+                        account.supportedPaymentMethodTypes.contains(manifest.paymentMethodType)
+                )
+            }.sortedBy { it.enabled }
         }.execute { copy(accounts = it) }
     }
 
@@ -55,7 +62,9 @@ internal class AccountPickerViewModel @Inject constructor(
                 suspend {
                     val manifest = getManifest()
                     val accountsList: PartnerAccountsList = selectAccounts(
-                        selectedAccounts = accounts.data.filter { state.selectedIds.contains(it.id) },
+                        selectedAccounts = accounts
+                            .filter { state.selectedIds.contains(it.account.id) }
+                            .map { it.account },
                         sessionId = manifest.activeAuthSession!!.id,
                     )
                     coordinator().emit(RequestNextStep(currentStep = NavigationDirections.accountPicker))
@@ -86,11 +95,19 @@ internal class AccountPickerViewModel @Inject constructor(
 }
 
 internal data class AccountPickerState(
-    val accounts: Async<PartnerAccountsList> = Uninitialized,
+    val accounts: Async<List<PartnerAccountUI>> = Uninitialized,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectionMode: SelectionMode = SelectionMode.DROPDOWN,
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
+
+    val isLoading: Boolean
+        get() = selectAccounts is Loading || accounts is Loading
+
+    data class PartnerAccountUI(
+        val account: PartnerAccount,
+        val enabled: Boolean
+    )
 
     enum class SelectionMode {
         DROPDOWN, RADIO, CHECKBOXES
