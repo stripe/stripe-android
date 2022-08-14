@@ -38,11 +38,12 @@ fun CharSequence.levenshtein(other: CharSequence): Int {
 
 internal fun AddressDetails.editDistance(otherAddress: AddressDetails?): Int {
     var editDistance = 0
-    editDistance += (city ?: "").levenshtein(otherAddress?.city ?: "")
-    editDistance += (country ?: "").levenshtein(otherAddress?.country ?: "")
-    editDistance += (line1 ?: "").levenshtein(otherAddress?.line1 ?: "")
-    editDistance += (line2 ?: "").levenshtein(otherAddress?.line2 ?: "")
-    editDistance += (postalCode ?: "").levenshtein(otherAddress?.postalCode ?: "")
-    editDistance += (state ?: "").levenshtein(otherAddress?.state ?: "")
+    val comparedAddress = otherAddress?.address
+    editDistance += (address?.city ?: "").levenshtein(comparedAddress?.city ?: "")
+    editDistance += (address?.country ?: "").levenshtein(comparedAddress?.country ?: "")
+    editDistance += (address?.line1 ?: "").levenshtein(comparedAddress?.line1 ?: "")
+    editDistance += (address?.line2 ?: "").levenshtein(comparedAddress?.line2 ?: "")
+    editDistance += (address?.postalCode ?: "").levenshtein(comparedAddress?.postalCode ?: "")
+    editDistance += (address?.state ?: "").levenshtein(comparedAddress?.state ?: "")
     return editDistance
 }

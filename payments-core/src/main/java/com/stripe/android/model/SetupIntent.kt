@@ -91,6 +91,11 @@ data class SetupIntent internal constructor(
      */
     override val unactivatedPaymentMethods: List<String>,
 
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    override val linkFundingSources: List<String>,
+
     override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
 

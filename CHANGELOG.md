@@ -8,6 +8,12 @@
   `PaymentSheet`, that clears any persisted authentication state.
 * [FIXED][5388](https://github.com/stripe/stripe-android/pull/5388) Fixed issue with Appearance API
   not working with `FlowController`
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) Bank Account Payments that pass 
+  stripeAccountId for connected accounts will now succeed.
+
+### CollectBankAccountLauncher
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) CollectBankAccountLauncher now 
+  accepts stripeAccountId for Connect merchants.
 
 ## 20.8.0 - 2022-08-01
 
@@ -32,6 +38,9 @@ and adds new `rememberLauncher` features for Payments
   Compose.
 * [DEPRECATED][5274](https://github.com/stripe/stripe-android/pull/5274)
   Deprecate `PaymentLauncher.createForCompose` in favor of  `PaymentLauncher.rememberLauncher`.
+
+### Identity
+* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose
 
 ## 20.7.0 - 2022-07-06
 

@@ -64,6 +64,11 @@ sealed interface StripeIntent : StripeModel {
      */
     val unactivatedPaymentMethods: List<String>
 
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    val linkFundingSources: List<String>
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
@@ -258,6 +263,7 @@ sealed interface StripeIntent : StripeModel {
             override fun hashCode(): Int {
                 return 0
             }
+
             override fun equals(other: Any?): Boolean {
                 return this === other
             }

@@ -49,21 +49,18 @@ import java.util.concurrent.TimeUnit
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository constructor(
-    private val arguments: LpmRepositoryArguments
+    private val arguments: LpmRepositoryArguments,
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance
 ) {
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
-    private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
-
-    fun values() = codeToSupportedPaymentMethod.values
-
-    fun fromCode(code: String?) = code?.let { paymentMethodCode ->
-        codeToSupportedPaymentMethod[paymentMethodCode]
-    }
-
     fun isLoaded() = serverInitializedLatch.count <= 0L
+
+    fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
+
+    fun values() = lpmInitialFormData.values()
 
     fun waitUntilLoaded() {
         serverInitializedLatch.await(20, TimeUnit.SECONDS)
@@ -103,10 +100,10 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        // If the expectedLpms is different form last time, we still need to reload.
-        var lpmsNotParsedFromServerSpec = expectedLpms
-            .filter { !codeToSupportedPaymentMethod.containsKey(it) }
-        if (!isLoaded() || force || lpmsNotParsedFromServerSpec.isNotEmpty()) {
+        val newSpecsToLoad =
+            expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
+
+        if (!isLoaded() || force || newSpecsToLoad) {
             serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
             if (!serverLpmSpecs.isNullOrEmpty()) {
                 serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
@@ -119,14 +116,14 @@ class LpmRepository constructor(
 
             // If the server does not return specs, or they are not parsed successfully
             // we will use the LPM on disk if found
-            lpmsNotParsedFromServerSpec = expectedLpms
-                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+            val lpmsNotParsedFromServerSpec = expectedLpms
+                .filter { !lpmInitialFormData.containsKey(it) }
             if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
                 val mapFromDisk: Map<String, SharedDataSpec>? =
                     readFromDisk()
                         ?.associateBy { it.type }
                         ?.filterKeys { expectedLpms.contains(it) }
-                codeToSupportedPaymentMethod.putAll(
+                lpmInitialFormData.putAll(
                     lpmsNotParsedFromServerSpec
                         .mapNotNull { mapFromDisk?.get(it) }
                         .mapNotNull { convertToSupportedPaymentMethod(it) }
@@ -158,7 +155,7 @@ class LpmRepository constructor(
                 it.code == PaymentMethod.Type.USBankAccount.code
         }
 
-        codeToSupportedPaymentMethod.putAll(
+        lpmInitialFormData.putAll(
             parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
         )
     }
@@ -357,6 +354,26 @@ class LpmRepository constructor(
          * description of the values
          */
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    class LpmInitialFormData {
+
+        private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
+
+        fun values() = codeToSupportedPaymentMethod.values
+
+        fun fromCode(code: String?) = code?.let { paymentMethodCode ->
+            codeToSupportedPaymentMethod[paymentMethodCode]
+        }
+
+        fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
+        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) =
+            codeToSupportedPaymentMethod.putAll(map)
+
+        internal companion object {
+            val Instance = LpmInitialFormData()
+        }
     }
 
     companion object {

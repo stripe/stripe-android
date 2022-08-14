@@ -4,13 +4,17 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.Address
+import com.stripe.android.model.LuxeNextActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
+class PaymentIntentJsonParser(
+    val luxeNextActionRepository: LuxeNextActionRepository = LuxeNextActionRepository.Instance
+) : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         val objectType = optString(json, FIELD_OBJECT)
         if (OBJECT_TYPE != objectType) {
@@ -18,7 +22,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         }
 
         val id = optString(json, FIELD_ID)
-        val paymentMethodTypes = ModelJsonParser.jsonArrayToList(
+        val paymentMethodTypes = jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )
         val amount = StripeJsonUtils.optLong(json, FIELD_AMOUNT)
@@ -64,12 +68,27 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             ShippingJsonParser().parse(it)
         }
         val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
-            NextActionDataParser().parse(it)
+            when (
+                val luxeNextActionResult = luxeNextActionRepository.getAction(
+                    paymentMethod?.code,
+                    status,
+                    json
+                )
+            ) {
+                is LuxeNextActionRepository.Result.Action -> luxeNextActionResult.nextActionData
+                is LuxeNextActionRepository.Result.NoAction -> null
+                is LuxeNextActionRepository.Result.NotSupported -> {
+                    NextActionDataParser().parse(it)
+                }
+            }
         }
 
-        val unactivatedPaymentMethods = ModelJsonParser.jsonArrayToList(
+        val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         )
+
+        val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
+            .map { it.lowercase() }
 
         return PaymentIntent(
             id = id,
@@ -91,8 +110,9 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             setupFutureUsage = setupFutureUsage,
             lastPaymentError = lastPaymentError,
             shipping = shipping,
-            nextActionData = nextActionData,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
             paymentMethodOptionsJsonString = paymentMethodOptions
         )
     }
@@ -175,5 +195,6 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
             "unactivated_payment_method_types"
+        private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
     }
 }

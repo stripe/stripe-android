@@ -1121,7 +1121,7 @@ internal class StripeApiRepositoryTest {
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         )
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(25)
+            .isEqualTo(26)
     }
 
     @Test
@@ -1133,7 +1133,7 @@ internal class StripeApiRepositoryTest {
             )
         )
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(25)
+            .isEqualTo(26)
     }
 
     @Test
@@ -1819,7 +1819,7 @@ internal class StripeApiRepositoryTest {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON.toString(),
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
@@ -1864,7 +1864,7 @@ internal class StripeApiRepositoryTest {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON.toString(),
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))

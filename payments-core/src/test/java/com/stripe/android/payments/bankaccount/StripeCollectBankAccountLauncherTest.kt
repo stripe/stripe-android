@@ -19,14 +19,16 @@ class StripeCollectBankAccountLauncherTest {
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
         launcher.presentWithPaymentIntent(
-            PUBLISHABLE_KEY,
-            CLIENT_SECRET,
-            CONFIGURATION
+            publishableKey = PUBLISHABLE_KEY,
+            clientSecret = CLIENT_SECRET,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            configuration = CONFIGURATION
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true
@@ -37,14 +39,16 @@ class StripeCollectBankAccountLauncherTest {
     @Test
     fun `presentWithSetupIntent - launches CollectBankAccountActivity with correct arguments`() {
         launcher.presentWithSetupIntent(
-            PUBLISHABLE_KEY,
-            CLIENT_SECRET,
-            CONFIGURATION
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            clientSecret = CLIENT_SECRET,
+            configuration = CONFIGURATION
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true
@@ -55,6 +59,7 @@ class StripeCollectBankAccountLauncherTest {
     companion object {
         private const val CLIENT_SECRET = "client_secret"
         private const val PUBLISHABLE_KEY = "publishableKey"
+        private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null

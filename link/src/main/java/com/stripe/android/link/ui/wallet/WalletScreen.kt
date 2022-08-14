@@ -362,6 +362,7 @@ private fun ExpandedPaymentDetails(
                         }
                     )
                 }
+                else -> {}
             }
         }
 
