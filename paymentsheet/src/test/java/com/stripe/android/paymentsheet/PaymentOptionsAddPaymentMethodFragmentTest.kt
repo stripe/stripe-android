@@ -26,6 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -90,6 +91,8 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         if (registerInjector) {
             registerViewModel(args.injectorKey, viewModel, lpmRepository)
         }
+
+        TestUtils.idleLooper()
         return launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
             bundleOf(
                 PaymentOptionsActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,

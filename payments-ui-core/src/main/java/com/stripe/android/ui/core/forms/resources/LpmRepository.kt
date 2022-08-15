@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -35,6 +36,7 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -54,9 +56,9 @@ import javax.inject.Singleton
 class LpmRepository @Inject constructor(
     val resources: Resources?,
 ) {
-    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData()
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
         DefaultIsFinancialConnectionsAvailable()
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData()
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
@@ -96,6 +98,8 @@ class LpmRepository @Inject constructor(
         serverLpmSpecs: String?
     ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
 
+    private val uuid = UUID.randomUUID().leastSignificantBits
+
     /**
      * Will add the server specs to the repository and load the ones from disk if
      * server is not parseable.
@@ -105,6 +109,8 @@ class LpmRepository @Inject constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
+        Log.e("MLB", "internal update: $uuid")
+
         val newSpecsToLoad =
             expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
 
