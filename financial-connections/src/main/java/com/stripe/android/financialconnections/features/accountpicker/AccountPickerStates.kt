@@ -92,18 +92,16 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
             )
         )
 
-        private fun accessibleCallout() =
-            AccessibleDataCalloutModel(
-                businessName = "My business",
-                permissions = listOf(
-                    FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-                    FinancialConnectionsAccount.Permissions.BALANCES,
-                    FinancialConnectionsAccount.Permissions.OWNERSHIP,
-                    FinancialConnectionsAccount.Permissions.TRANSACTIONS
-                ),
-                isStripeDirect = true,
-                dataPolicyUrl = ""
-            )
-
+        private fun accessibleCallout() = AccessibleDataCalloutModel(
+            businessName = "My business",
+            permissions = listOf(
+                FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
+                FinancialConnectionsAccount.Permissions.BALANCES,
+                FinancialConnectionsAccount.Permissions.OWNERSHIP,
+                FinancialConnectionsAccount.Permissions.TRANSACTIONS
+            ),
+            isStripeDirect = true,
+            dataPolicyUrl = ""
+        )
     }
 }

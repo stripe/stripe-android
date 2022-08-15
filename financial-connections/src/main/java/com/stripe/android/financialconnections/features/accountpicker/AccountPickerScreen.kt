@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.foundation.Image
@@ -155,6 +157,7 @@ private fun AccountPickerLoaded(
     }
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DropdownContent(
