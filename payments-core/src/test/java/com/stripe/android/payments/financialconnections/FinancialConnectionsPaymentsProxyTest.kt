@@ -21,7 +21,11 @@ class FinancialConnectionsPaymentsProxyTest {
     private val mockActivity: AppCompatActivity = mock()
 
     private class FakeProxy : FinancialConnectionsPaymentsProxy {
-        override fun present(financialConnectionsSessionClientSecret: String, publishableKey: String) {
+        override fun present(
+            financialConnectionsSessionClientSecret: String,
+            publishableKey: String,
+            stripeAccountId: String?
+        ) {
             // noop
         }
     }
@@ -73,14 +77,22 @@ class FinancialConnectionsPaymentsProxyTest {
                 fragment = mockFragment,
                 onComplete = {},
                 isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
-            ).present("", "")
+            ).present(
+                financialConnectionsSessionClientSecret = "",
+                publishableKey = "",
+                stripeAccountId = null
+            )
         }
         assertFailsWith<IllegalStateException> {
             FinancialConnectionsPaymentsProxy.create(
                 activity = mockActivity,
                 onComplete = {},
                 isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
-            ).present("", "")
+            ).present(
+                financialConnectionsSessionClientSecret = "",
+                publishableKey = "",
+                stripeAccountId = null
+            )
         }
     }
 

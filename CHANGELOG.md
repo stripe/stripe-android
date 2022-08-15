@@ -11,10 +11,16 @@
 * [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) Bank Account Payments that pass 
   stripeAccountId for connected accounts will now succeed.
 
-### CollectBankAccountLauncher
-* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) CollectBankAccountLauncher now 
-  accepts stripeAccountId for Connect merchants.
+### Payments
 
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) `CollectBankAccountLauncher` now 
+  accepts `stripeAccountId` for Connect merchants.
+
+### Financial Connections
+
+* [FIXED][5408](https://github.com/stripe/stripe-android/pull/5408) `FinancialConnectionsSheet#Configuration`
+  now accepts `stripeAccountId` for Connect merchants.
+* 
 ## 20.8.0 - 2022-08-01
 
 This release contains several bug fixes for Payments, PaymentSheet, deprecates `createForCompose`, 
