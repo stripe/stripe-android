@@ -25,9 +25,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.consent.ConsentUrlBuilder
 import com.stripe.android.financialconnections.features.fullName
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -161,7 +164,17 @@ internal data class AccessibleDataCalloutModel(
     val permissions: List<Permissions>,
     val isStripeDirect: Boolean,
     val dataPolicyUrl: String
-)
+) {
+    companion object {
+        fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
+            AccessibleDataCalloutModel(
+                businessName = ConsentTextBuilder.getBusinessName(manifest),
+                permissions = manifest.permissions,
+                isStripeDirect = manifest.isStripeDirect ?: false,
+                dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest)
+            )
+    }
+}
 
 @Preview
 @Composable

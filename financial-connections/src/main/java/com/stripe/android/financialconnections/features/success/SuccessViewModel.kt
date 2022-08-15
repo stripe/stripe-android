@@ -8,6 +8,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -21,11 +22,11 @@ internal class SuccessViewModel @Inject constructor(
     init {
         suspend {
             val manifest = getManifest()
-            getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id)
+            val model = AccessibleDataCalloutModel.fromManifest(manifest)
+            val accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id)
+            model to accounts
         }.execute {
-            copy(
-                partnerAccountsList = it
-            )
+            copy(partnerAccountInfo = it)
         }
     }
 
@@ -47,5 +48,5 @@ internal class SuccessViewModel @Inject constructor(
 }
 
 internal data class SuccessState(
-    val partnerAccountsList: Async<PartnerAccountsList> = Uninitialized
+    val partnerAccountInfo: Async<Pair<AccessibleDataCalloutModel, PartnerAccountsList>> = Uninitialized
 ) : MavericksState
