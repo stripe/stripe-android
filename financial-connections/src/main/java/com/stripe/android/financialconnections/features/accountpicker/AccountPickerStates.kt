@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.accountpicker
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
+import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 
@@ -21,19 +22,22 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
         fun multiSelect() = AccountPickerState(
             selectedIds = setOf("id1"),
             selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
-            accounts = Success(partnerAccountList())
+            accounts = Success(partnerAccountList()),
+            accessibleDataCalloutModel = accessibleCallout()
         )
 
         fun singleSelect() = AccountPickerState(
             selectedIds = setOf("id1"),
             selectionMode = AccountPickerState.SelectionMode.RADIO,
-            accounts = Success(partnerAccountList())
+            accounts = Success(partnerAccountList()),
+            accessibleDataCalloutModel = accessibleCallout()
         )
 
         fun dropdown() = AccountPickerState(
             selectedIds = setOf("id1"),
             selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
-            accounts = Success(partnerAccountList())
+            accounts = Success(partnerAccountList()),
+            accessibleDataCalloutModel = accessibleCallout()
         )
 
         private fun partnerAccountList() = listOf(
@@ -87,5 +91,19 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 enabled = false
             )
         )
+
+        private fun accessibleCallout() =
+            AccessibleDataCalloutModel(
+                businessName = "My business",
+                permissions = listOf(
+                    FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
+                    FinancialConnectionsAccount.Permissions.BALANCES,
+                    FinancialConnectionsAccount.Permissions.OWNERSHIP,
+                    FinancialConnectionsAccount.Permissions.TRANSACTIONS
+                ),
+                isStripeDirect = true,
+                dataPolicyUrl = ""
+            )
+
     }
 }
