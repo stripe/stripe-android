@@ -83,7 +83,9 @@ internal open class PaymentOptionsViewModelTestInjection {
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = mock(),
-            transformSpecToElement = mock()
+            transformSpecToElement = mock(),
+            workContext = testDispatcher,
+            uiContext = testDispatcher
         )
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()

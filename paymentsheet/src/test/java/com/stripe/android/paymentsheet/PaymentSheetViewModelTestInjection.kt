@@ -120,7 +120,9 @@ internal open class PaymentSheetViewModelTestInjection {
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = mock(),
-            transformSpecToElement = mock()
+            transformSpecToElement = mock(),
+            workContext = testDispatcher,
+            uiContext = testDispatcher
         )
     ) {
         injector = object : Injector {

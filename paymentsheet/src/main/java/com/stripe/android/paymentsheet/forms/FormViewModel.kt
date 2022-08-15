@@ -53,7 +53,9 @@ internal class FormViewModel @Inject internal constructor(
     config: FormFragmentArguments,
     internal val lpmResourceRepository: ResourceRepository<LpmRepository>,
     internal val addressResourceRepository: ResourceRepository<AddressRepository>,
-    private val transformSpecToElement: TransformSpecToElement
+    private val transformSpecToElement: TransformSpecToElement,
+    @IOContext workContext: CoroutineContext = Dispatchers.IO,
+    @UIContext uiContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,
@@ -103,8 +105,7 @@ internal class FormViewModel @Inject internal constructor(
                 // The coroutine scope is needed to do work off the UI thread so that the
                 // repository ready event can be observed in the ComposeFormDataCollection
                 // Fragment and the fragment repository will be updated and ready
-                CoroutineScope(Dispatchers.IO).launch {
-
+                CoroutineScope(workContext).launch {
                     // If after we complete waiting for the repository things are still
                     // active, then update the elements
                     resourceRepositories.forEach { it.waitUntilLoaded() }
@@ -116,7 +117,7 @@ internal class FormViewModel @Inject internal constructor(
                         val values = transformSpecToElement.transform(
                             getLpmItems(paymentMethodCode)
                         )
-                        withContext(Dispatchers.Main) {
+                        withContext(uiContext) {
                             delayedElements.value = values
                         }
                     }
