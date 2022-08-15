@@ -54,7 +54,7 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository @Inject constructor(
-    val resources: Resources?,
+    val resources: Resources?
 ) {
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
         DefaultIsFinancialConnectionsAvailable()

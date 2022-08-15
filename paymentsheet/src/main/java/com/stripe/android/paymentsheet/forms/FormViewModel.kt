@@ -58,7 +58,7 @@ internal class FormViewModel @Inject internal constructor(
     internal val addressResourceRepository: ResourceRepository<AddressRepository>,
     private val transformSpecToElement: TransformSpecToElement,
     @IOContext workContext: CoroutineContext = Dispatchers.IO,
-    @UIContext uiContext: CoroutineContext = Dispatchers.Main,
+    @UIContext uiContext: CoroutineContext = Dispatchers.Main
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,
@@ -136,7 +136,7 @@ internal class FormViewModel @Inject internal constructor(
         }
         val allLoaded = resourceRepositories.filter { it.getRepository() != null }
             .map { it.isLoaded() }
-        return !allLoaded.contains(false) //resourceRepositories.all { it.isLoaded() }
+        return !allLoaded.contains(false) // resourceRepositories.all { it.isLoaded() }
     }
 
     private fun getLpmItems(paymentMethodCode: PaymentMethodCode): List<FormItemSpec> {

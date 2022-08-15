@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.forms.resources
 
-import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import javax.inject.Inject
 import javax.inject.Singleton
