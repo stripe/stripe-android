@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
@@ -100,3 +101,23 @@ internal data class AccessibleDataCalloutModel(
     val isStripeDirect: Boolean,
     val dataPolicyUrl: String
 )
+
+@Preview
+@Composable
+internal fun AccessibleDataCalloutPreview() {
+    FinancialConnectionsTheme {
+        AccessibleDataCallout(
+            AccessibleDataCalloutModel(
+                businessName = "My business",
+                permissions = listOf(
+                    Permissions.PAYMENT_METHOD,
+                    Permissions.BALANCES,
+                    Permissions.OWNERSHIP,
+                    Permissions.TRANSACTIONS
+                ),
+                isStripeDirect = true,
+                dataPolicyUrl = ""
+            )
+        )
+    }
+}
