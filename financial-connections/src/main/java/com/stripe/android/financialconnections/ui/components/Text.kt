@@ -17,22 +17,23 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun AnnotatedText(
     text: TextResource,
     onClickableTextClick: (String) -> Unit,
-    textStyle: TextStyle,
-    clickableStyle: SpanStyle = FinancialConnectionsTheme.typography.bodyEmphasized
-        .toSpanStyle()
-        .copy(color = FinancialConnectionsTheme.colors.textBrand)
+    defaultStyle: TextStyle,
+    annotationStyles: Map<StringAnnotation, SpanStyle> = mapOf(
+        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+            .toSpanStyle()
+            .copy(color = FinancialConnectionsTheme.colors.textBrand)
+    )
 ) {
     val resource = annotatedStringResource(
         resource = text
     ) { annotation ->
-        when (StringAnnotation.values().firstOrNull { it.value == annotation.key }) {
-            StringAnnotation.CLICKABLE -> clickableStyle
-            else -> null
-        }
+        val annotation: StringAnnotation? = StringAnnotation.values()
+            .firstOrNull { it.value == annotation.key }
+        annotationStyles[annotation]
     }
     ClickableText(
         text = resource,
-        style = textStyle,
+        style = defaultStyle,
         onClick = { offset ->
             resource.getStringAnnotations(
                 tag = StringAnnotation.CLICKABLE.value,
@@ -68,5 +69,6 @@ private fun annotatedStringResource(
 }
 
 internal enum class StringAnnotation(val value: String) {
-    CLICKABLE("clickable")
+    CLICKABLE("clickable"),
+    BOLD("bold")
 }

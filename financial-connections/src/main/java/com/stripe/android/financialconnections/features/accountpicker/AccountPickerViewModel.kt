@@ -13,10 +13,14 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.consent.ConsentUrlBuilder
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class AccountPickerViewModel @Inject constructor(
@@ -28,6 +32,19 @@ internal class AccountPickerViewModel @Inject constructor(
 ) : MavericksViewModel<AccountPickerState>(initialState) {
 
     init {
+        viewModelScope.launch {
+            val manifest = getManifest()
+            setState {
+                copy(
+                    accessibleDataCalloutModel = AccessibleDataCalloutModel(
+                        businessName = ConsentTextBuilder.getBusinessName(manifest),
+                        permissions = manifest.permissions,
+                        isStripeDirect = manifest.isStripeDirect ?: false,
+                        dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest)
+                    )
+                )
+            }
+        }
         suspend {
             val manifest = getManifest()
             val authSession = requireNotNull(manifest.activeAuthSession)
@@ -98,6 +115,7 @@ internal data class AccountPickerState(
     val accounts: Async<List<PartnerAccountUI>> = Uninitialized,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectionMode: SelectionMode = SelectionMode.DROPDOWN,
+    val accessibleDataCalloutModel: AccessibleDataCalloutModel? = null,
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
 

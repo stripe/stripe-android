@@ -44,6 +44,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import kotlinx.coroutines.launch
 
@@ -80,6 +81,7 @@ internal fun ConsentScreen() {
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ViewEffect(
     viewModel: ConsentViewModel,
@@ -186,7 +188,7 @@ private fun ConsentFooter(
         AnnotatedText(
             text = TextResource.StringId(R.string.consent_pane_tc),
             onClickableTextClick = { onClickableTextClick(it) },
-            textStyle = FinancialConnectionsTheme.typography.body.copy(
+            defaultStyle = FinancialConnectionsTheme.typography.body.copy(
                 textAlign = TextAlign.Center,
                 color = FinancialConnectionsTheme.colors.textSecondary
             )
@@ -240,12 +242,14 @@ private fun ConsentPermissionsBottomSheetContent(
             AnnotatedText(
                 text = TextResource.StringId(R.string.stripe_consent_requested_data_learnmore),
                 onClickableTextClick = { onClickableTextClick(it) },
-                textStyle = FinancialConnectionsTheme.typography.body.copy(
+                defaultStyle = FinancialConnectionsTheme.typography.body.copy(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 ),
-                clickableStyle = FinancialConnectionsTheme.typography.caption
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand)
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                        .toSpanStyle()
+                        .copy(color = FinancialConnectionsTheme.colors.textBrand)
+                )
             )
             Spacer(modifier = Modifier.size(16.dp))
             FinancialConnectionsButton(
@@ -308,7 +312,7 @@ private fun ConsentBullet(
         AnnotatedText(
             text,
             onClickableTextClick = { onClickableTextClick?.invoke(it) },
-            textStyle = FinancialConnectionsTheme.typography.body.copy(
+            defaultStyle = FinancialConnectionsTheme.typography.body.copy(
                 color = FinancialConnectionsTheme.colors.textSecondary
             )
         )

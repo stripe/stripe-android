@@ -45,7 +45,10 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.*
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
+import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -83,7 +86,8 @@ private fun AccountPickerContent(
                 selectedIds = state.selectedIds,
                 onAccountClicked = onAccountClicked,
                 onSelectAccounts = onSelectAccounts,
-                selectionMode = state.selectionMode
+                selectionMode = state.selectionMode,
+                accessibleDataCalloutModel = state.accessibleDataCalloutModel
             )
             is Fail -> UnclassifiedErrorContent()
         }
@@ -95,6 +99,7 @@ private fun AccountPickerContent(
 private fun AccountPickerLoaded(
     loading: Boolean,
     accounts: List<PartnerAccountUI>,
+    accessibleDataCalloutModel: AccessibleDataCalloutModel?,
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
@@ -129,6 +134,8 @@ private fun AccountPickerLoaded(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
+        accessibleDataCalloutModel?.let { AccessibleDataCallout(it) }
+        Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
             loading = loading,
             onClick = onSelectAccounts,
