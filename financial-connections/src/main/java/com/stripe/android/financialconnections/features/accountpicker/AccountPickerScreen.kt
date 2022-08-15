@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +35,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -177,6 +180,7 @@ private fun DropdownContent(
             value = selectedOptionText
                 ?: stringResource(id = R.string.stripe_account_picker_dropdown_hint),
             onValueChange = { },
+            leadingIcon = { if (selectedOptionText != null) InstitutionIcon() },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
@@ -199,19 +203,35 @@ private fun DropdownContent(
                         expanded = false
                     }
                 ) {
-                    Text(
-                        text = "${selectedAccount.account.name} ${selectedAccount.account.numbers}",
-                        color = if (selectedAccount.enabled) {
-                            FinancialConnectionsTheme.colors.textPrimary
-                        } else {
-                            FinancialConnectionsTheme.colors.textDisabled
-                        },
-                        style = FinancialConnectionsTheme.typography.bodyEmphasized
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        InstitutionIcon()
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(
+                            text = "${selectedAccount.account.name} ${selectedAccount.account.numbers}",
+                            color = if (selectedAccount.enabled) {
+                                FinancialConnectionsTheme.colors.textPrimary
+                            } else {
+                                FinancialConnectionsTheme.colors.textDisabled
+                            },
+                            style = FinancialConnectionsTheme.typography.bodyEmphasized
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun InstitutionIcon() {
+    Image(
+        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        contentDescription = null,
+        modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(6.dp))
+
+    )
 }
 
 private val PartnerAccount.numbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""

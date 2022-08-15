@@ -40,6 +40,7 @@ internal fun FinancialConnectionsOutlinedTextField(
             focusedLabelColor = FinancialConnectionsTheme.colors.textBrand,
             cursorColor = FinancialConnectionsTheme.colors.textBrand,
             trailingIconColor = FinancialConnectionsTheme.colors.borderDefault,
+            focusedTrailingIconColor = FinancialConnectionsTheme.colors.borderDefault
         ),
         onValueChange = onValueChange,
         label = label
