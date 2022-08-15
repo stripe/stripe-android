@@ -5,7 +5,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
@@ -38,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -109,7 +112,7 @@ internal class FormViewModel @Inject internal constructor(
                     // If after we complete waiting for the repository things are still
                     // active, then update the elements
                     resourceRepositories.forEach { it.waitUntilLoaded() }
-                    if (resourceRepositories.all { it.isLoaded() } && isActive) {
+                    if (areResourceRepositoriesLoaded() && isActive) {
                         // When open payment options with returning customer with saved cards, then
                         // click on Add, then kill, then re-open, ComposeFormDataCollectionFragment
                         // is no longer listening for the resource repository to be ready and so
@@ -127,8 +130,17 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
+    private fun areResourceRepositoriesLoaded(): Boolean {
+        resourceRepositories.forEach {
+            println("Got here 12: isLoaded: ${it.isLoaded()} repo: ${it.getRepository()}")
+        }
+        val allLoaded = resourceRepositories.filter { it.getRepository() != null }
+            .map { it.isLoaded() }
+        return !allLoaded.contains(false) //resourceRepositories.all { it.isLoaded() }
+    }
+
     private fun getLpmItems(paymentMethodCode: PaymentMethodCode): List<FormItemSpec> {
-        require(resourceRepositories.all { it.isLoaded() })
+        require(areResourceRepositoriesLoaded())
         return requireNotNull(
             lpmResourceRepository.getRepository().fromCode(
                 paymentMethodCode
