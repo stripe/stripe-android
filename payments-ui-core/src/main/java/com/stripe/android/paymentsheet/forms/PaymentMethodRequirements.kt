@@ -273,7 +273,7 @@ internal val PaypalRequirement = PaymentMethodRequirements(
  * This defines the requirements for usage as a Payment Method.
  */
 internal val AffirmRequirement = PaymentMethodRequirements(
-    piRequirements = emptySet(),//setOf(ShippingAddress),
+    piRequirements = setOf(ShippingAddress),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
