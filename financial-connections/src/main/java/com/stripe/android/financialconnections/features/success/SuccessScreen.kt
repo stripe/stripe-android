@@ -1,16 +1,19 @@
 package com.stripe.android.financialconnections.features.success
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,6 +25,7 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -29,6 +33,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
     val state = viewModel.collectAsState { it.partnerAccountInfo }
+    BackHandler(enabled = true) {}
     state.value()?.let { (accessibleDataModel, accounts) ->
         SuccessContent(
             accessibleDataModel = accessibleDataModel,
@@ -42,6 +47,7 @@ private fun SuccessContent(
     accessibleDataModel: AccessibleDataCalloutModel,
     accounts: List<PartnerAccount>,
 ) {
+    val localContext = LocalContext.current
     FinancialConnectionsScaffold {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -65,6 +71,19 @@ private fun SuccessContent(
                 model = accessibleDataModel,
                 accounts = accounts
             )
+            Spacer(modifier = Modifier.weight(1f))
+            FinancialConnectionsButton(
+                loading = false,
+                onClick = {
+                    val activity = (localContext as? Activity)
+                    activity?.setResult(Activity.RESULT_OK)
+                    activity?.finish()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.success_pane_done))
+            }
         }
     }
 }
@@ -74,6 +93,17 @@ private fun SuccessContent(
 internal fun SuccessScreenPreview() {
     FinancialConnectionsTheme {
         SuccessContent(
+            accessibleDataModel = AccessibleDataCalloutModel(
+                businessName = "My business",
+                permissions = listOf(
+                    FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
+                    FinancialConnectionsAccount.Permissions.BALANCES,
+                    FinancialConnectionsAccount.Permissions.OWNERSHIP,
+                    FinancialConnectionsAccount.Permissions.TRANSACTIONS
+                ),
+                isStripeDirect = true,
+                dataPolicyUrl = ""
+            ),
             accounts = listOf(
                 PartnerAccount(
                     authorization = "Authorization",
@@ -101,16 +131,6 @@ internal fun SuccessScreenPreview() {
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-            ), accessibleDataModel = AccessibleDataCalloutModel(
-                businessName = "My business",
-                permissions = listOf(
-                    FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-                    FinancialConnectionsAccount.Permissions.BALANCES,
-                    FinancialConnectionsAccount.Permissions.OWNERSHIP,
-                    FinancialConnectionsAccount.Permissions.TRANSACTIONS
-                ),
-                isStripeDirect = true,
-                dataPolicyUrl = ""
             )
         )
     }

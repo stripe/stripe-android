@@ -55,5 +55,6 @@
     <string name="data_accessible_type_transactions">transactions</string>
     <string name="data_accessible_type_ownership">account ownership details</string>
     <string name="data_accessible_callout_connected_accounts">%1$s - %2$s accounts</string>
+    <string name="success_pane_done">Done</string>
 </resources>
 
