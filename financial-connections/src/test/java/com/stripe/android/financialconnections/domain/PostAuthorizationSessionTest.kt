@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
-import com.stripe.android.financialconnections.model.Institution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsManifestRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -23,12 +23,13 @@ internal class PostAuthorizationSessionTest {
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
     )
-    private val selectedInstitution = Institution(
+    private val selectedInstitution = FinancialConnectionsInstitution(
         id = "id",
         name = "name",
         url = "url",
         featured = true,
-        featuredOrder = null
+        featuredOrder = null,
+        mobileHandoffCapable = false
     )
 
     @Test

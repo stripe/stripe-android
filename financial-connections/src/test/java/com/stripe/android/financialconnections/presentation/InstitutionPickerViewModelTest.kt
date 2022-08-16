@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
-import com.stripe.android.financialconnections.model.Institution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -50,12 +50,13 @@ internal class InstitutionPickerViewModelTest {
     fun `init - featured institutions are fetched`() = runTest {
         val institutionResponse = InstitutionResponse(
             listOf(
-                Institution(
+                FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
                     url = "url",
                     featured = true,
-                    featuredOrder = null
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
                 )
             )
         )
@@ -74,23 +75,25 @@ internal class InstitutionPickerViewModelTest {
         val query = "query"
         val searchResults = InstitutionResponse(
             listOf(
-                Institution(
+                FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
                     url = "url",
                     featured = false,
-                    featuredOrder = null
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
                 )
             )
         )
         val featuredResults = InstitutionResponse(
             listOf(
-                Institution(
+                FinancialConnectionsInstitution(
                     id = "featured_id",
                     name = "featured_name",
                     url = "featured_url",
                     featured = true,
-                    featuredOrder = null
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
                 )
             )
         )
