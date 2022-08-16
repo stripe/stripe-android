@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## X.X.X
+## 20.9.0 - 2022-08-16
+This release contains several bug fixes for Payments, PaymentSheet and Financial Connections. 
+Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity. 
 
 ### PaymentSheet
 
@@ -20,7 +22,10 @@
 
 * [FIXED][5408](https://github.com/stripe/stripe-android/pull/5408) `FinancialConnectionsSheet#Configuration`
   now accepts `stripeAccountId` for Connect merchants.
-* 
+
+### Identity
+* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose.
+
 ## 20.8.0 - 2022-08-01
 
 This release contains several bug fixes for Payments, PaymentSheet, deprecates `createForCompose`, 
@@ -44,9 +49,6 @@ and adds new `rememberLauncher` features for Payments
   Compose.
 * [DEPRECATED][5274](https://github.com/stripe/stripe-android/pull/5274)
   Deprecate `PaymentLauncher.createForCompose` in favor of  `PaymentLauncher.rememberLauncher`.
-
-### Identity
-* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose
 
 ## 20.7.0 - 2022-07-06
 
