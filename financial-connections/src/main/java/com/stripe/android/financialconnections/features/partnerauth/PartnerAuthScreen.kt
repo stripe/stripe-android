@@ -1,8 +1,26 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -14,7 +32,9 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun PartnerAuthScreen() {
@@ -33,14 +53,18 @@ internal fun PartnerAuthScreen() {
     LaunchedEffect(webAuthFlow.value) {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
-    PartnerAuthScreenContent(state)
+    PartnerAuthScreenContent(state.value, viewModel::onLaunchAuthClick)
 }
 
 @Composable
-private fun PartnerAuthScreenContent(state: State<PartnerAuthState>) {
+private fun PartnerAuthScreenContent(
+    state: PartnerAuthState,
+    onContinueClick: () -> Unit
+) {
     FinancialConnectionsScaffold {
-        when (state.value.authenticationStatus) {
-            Uninitialized, is Loading, is Success -> LoadingContent(
+        when (state.authenticationStatus) {
+            is Uninitialized -> PrepaneContent(state.institutionName, onContinueClick)
+            is Loading, is Success -> LoadingContent(
                 titleResId = R.string.stripe_picker_loading_title,
                 contentResId = R.string.stripe_picker_loading_desc
             )
@@ -49,5 +73,70 @@ private fun PartnerAuthScreenContent(state: State<PartnerAuthState>) {
                 UnclassifiedErrorContent()
             }
         }
+    }
+}
+
+@Composable
+fun PrepaneContent(
+    institutionName: String,
+    onContinueClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+            contentDescription = null,
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(6.dp))
+
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            text = stringResource(R.string.stripe_prepane_title, institutionName),
+            style = FinancialConnectionsTheme.typography.subtitle
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            text = stringResource(R.string.stripe_prepane_desc, institutionName),
+            style = FinancialConnectionsTheme.typography.body
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        FinancialConnectionsButton(
+            onClick = onContinueClick,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Continue",
+                    modifier = Modifier.align(Alignment.Center),
+                    textAlign = TextAlign.Center
+                )
+                Icon(
+                    painterResource(id = R.drawable.stripe_ic_external),
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    tint = FinancialConnectionsTheme.colors.textWhite,
+                    contentDescription = "Continue"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun PrepaneContentPreview() {
+    FinancialConnectionsTheme {
+        PartnerAuthScreenContent(
+            state = PartnerAuthState(
+                institutionName = "Random bank",
+                url = null,
+                authenticationStatus = Uninitialized
+            ),
+            onContinueClick = {}
+        )
     }
 }

@@ -4,8 +4,8 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.Institution
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -20,12 +20,12 @@ internal class PostAuthorizationSession @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        institution: Institution
+        institution: FinancialConnectionsInstitution
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession {
         return try {
             repository.postAuthorizationSession(
                 configuration.financialConnectionsSessionClientSecret,
-                institutionId = institution.id
+                institution = institution
             )
         } catch (
             @Suppress("SwallowedException") e: StripeException
@@ -35,7 +35,7 @@ internal class PostAuthorizationSession @Inject constructor(
     }
 
     private fun StripeException.toDomainException(
-        institution: Institution,
+        institution: FinancialConnectionsInstitution,
     ): StripeException = this.stripeError?.let {
         val institutionUnavailable: String? = it.extraFields?.get("institution_unavailable")
         val availableAt: String? = it.extraFields?.get("expected_to_be_available_at")

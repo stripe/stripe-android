@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.exception
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.model.Institution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
 internal class InstitutionUnplannedException(
-    val institution: Institution,
+    val institution: FinancialConnectionsInstitution,
     stripeException: StripeException
 ) : StripeException(
     stripeException.stripeError,

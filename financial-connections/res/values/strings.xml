@@ -22,6 +22,8 @@
     <string name="stripe_consent_requested_data_ownership_desc">Account owner name and mailing address associated with your account</string>
     <string name="stripe_consent_requested_data_learnmore"><annotation clickable="data_access">Learn more about data access</annotation></string>
     <string name="stripe_ok">OK</string>
+    <string name="stripe_prepane_title">Link with %1$s</string>
+    <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.\n\nThis page will update once you’re done.</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
     <string name="stripe_picker_loading_title">Establishing connection</string>
     <string name="stripe_picker_loading_desc">Please wait while the connection is established</string>

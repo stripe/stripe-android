@@ -54,7 +54,7 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedExc
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.model.Institution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -93,7 +93,7 @@ private fun InstitutionPickerContent(
     searchMode: Boolean,
     query: String,
     onQueryChanged: (String) -> Unit,
-    onInstitutionSelected: (Institution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
     onSelectAnotherBank: () -> Unit,
     onCancelSearchClick: () -> Unit,
     onSearchFocused: () -> Unit
@@ -161,7 +161,7 @@ private fun LoadedContent(
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
     institutionsProvider: () -> Async<InstitutionResponse>,
-    onInstitutionSelected: (Institution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
     featuredInstitutions: Async<InstitutionResponse>
 ) {
     Column(
@@ -236,7 +236,7 @@ private fun FinancialConnectionsSearchRow(
 @Composable
 private fun SearchInstitutionsList(
     institutionsProvider: () -> Async<InstitutionResponse>,
-    onInstitutionSelected: (Institution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
     query: String,
 ) {
     LazyColumn(
@@ -283,8 +283,8 @@ private fun SearchInstitutionsList(
 
 @Composable
 private fun InstitutionResultTile(
-    onInstitutionSelected: (Institution) -> Unit,
-    institution: Institution
+    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    institution: FinancialConnectionsInstitution
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -321,8 +321,8 @@ private fun InstitutionResultTile(
 
 @Composable
 private fun FeaturedInstitutionsGrid(
-    institutions: List<Institution>,
-    onInstitutionSelected: (Institution) -> Unit
+    institutions: List<FinancialConnectionsInstitution>,
+    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),

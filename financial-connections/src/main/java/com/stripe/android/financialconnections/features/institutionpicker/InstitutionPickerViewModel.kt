@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
-import com.stripe.android.financialconnections.model.Institution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -65,7 +65,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }.execute { copy(searchInstitutions = it) }
     }
 
-    fun onInstitutionSelected(institution: Institution) {
+    fun onInstitutionSelected(institution: FinancialConnectionsInstitution) {
         clearSearch()
         suspend {
             // api call

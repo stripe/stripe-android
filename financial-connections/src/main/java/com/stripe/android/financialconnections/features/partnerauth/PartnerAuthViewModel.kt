@@ -40,6 +40,13 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val manifest = getManifest().activeInstitution!!
+            setState { copy(institutionName = manifest.name) }
+        }
+    }
+
+    fun onLaunchAuthClick() {
+        viewModelScope.launch {
             val authSession = getManifest().activeAuthSession!!
             setState { copy(url = authSession.url) }
         }
@@ -51,7 +58,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         viewModelScope.launch {
             val authSession = getManifest().activeAuthSession!!
             when (webStatus) {
-                is Uninitialized,
+                is Uninitialized -> {}
                 is Loading -> setState { copy(authenticationStatus = Loading()) }
                 is Success -> {
                     logger.debug("Web AuthFlow completed! waiting for oauth results")
@@ -109,6 +116,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 }
 
 internal data class PartnerAuthState(
+    val institutionName: String = "",
     val url: String? = null,
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState

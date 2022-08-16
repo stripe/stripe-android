@@ -4,7 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
-import com.stripe.android.financialconnections.model.Institution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 
 internal class InstitutionPickerStates :
@@ -76,26 +76,29 @@ internal class InstitutionPickerStates :
 
         private fun institutionResponse() = InstitutionResponse(
             listOf(
-                Institution(
+                FinancialConnectionsInstitution(
                     id = "1",
                     name = "Very very long institution 1",
                     url = "institution 1 url",
                     featured = false,
-                    featuredOrder = null
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
                 ),
-                Institution(
+                FinancialConnectionsInstitution(
                     id = "2",
                     name = "Institution 2",
                     url = "Institution 2 url",
                     featured = false,
-                    featuredOrder = null
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
                 ),
-                Institution(
+                FinancialConnectionsInstitution(
                     id = "3",
                     name = "Institution 3",
                     url = "Institution 3 url",
                     featured = false,
-                    featuredOrder = null
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
                 )
             )
         )

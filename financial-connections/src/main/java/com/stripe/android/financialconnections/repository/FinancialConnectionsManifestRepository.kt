@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -69,7 +70,7 @@ internal interface FinancialConnectionsManifestRepository {
     )
     suspend fun postAuthorizationSession(
         clientSecret: String,
-        institutionId: String
+        institution: FinancialConnectionsInstitution
     ): FinancialConnectionsAuthorizationSession
 
     @Throws(
@@ -181,7 +182,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun postAuthorizationSession(
         clientSecret: String,
-        institutionId: String
+        institution: FinancialConnectionsInstitution
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizationSessionUrl,
@@ -189,13 +190,14 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "use_mobile_handoff" to false,
-                "institution" to institutionId
+                "institution" to institution.id
             )
         )
         return requestExecutor.execute(
             request,
             FinancialConnectionsAuthorizationSession.serializer()
         ).also {
+            updateActiveInstitution("postAuthorizationSession", institution)
             updateCachedActiveAuthSession("postAuthorizationSession", it)
         }
     }
@@ -222,6 +224,15 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    private fun updateActiveInstitution(
+        source: String,
+        institution: FinancialConnectionsInstitution
+    ) {
+        logger.debug("MANIFEST: updating local active institution from $source")
+        cachedManifest = cachedManifest?.copy(
+            activeInstitution = institution
+        )
+    }
     private fun updateCachedActiveAuthSession(
         source: String,
         authSession: FinancialConnectionsAuthorizationSession
