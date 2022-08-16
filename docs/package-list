@@ -18,6 +18,7 @@ com.stripe.android.identity
 com.stripe.android.identity.utils
 module:link
 com.stripe.android.link
+com.stripe.android.link.account
 com.stripe.android.link.confirmation
 com.stripe.android.link.injection
 com.stripe.android.link.model
