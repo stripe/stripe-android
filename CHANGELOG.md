@@ -24,7 +24,7 @@ Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity.
   now accepts `stripeAccountId` for Connect merchants.
 
 ### Identity
-* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose
+* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose.
 
 ## 20.8.0 - 2022-08-01
 
