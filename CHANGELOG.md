@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## 20.9.0 - 2022-08-16
+This release contains several bug fixes for Payments, PaymentSheet and Financial Connections. 
+Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity. 
 
 ### PaymentSheet
 
