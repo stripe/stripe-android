@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.MeasureComposableWidth
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.paymentsColors
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
@@ -71,9 +72,8 @@ internal fun PaymentMethodsUI(
             // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
             LazyRow(
                 state = state,
-                modifier = Modifier
-                    .padding(start = PM_LIST_PADDING.dp)
-                    .testTag(TEST_TAG_LIST)
+                contentPadding = PaddingValues(horizontal = PM_LIST_PADDING.dp),
+                modifier = Modifier.testTag(TEST_TAG_LIST)
             ) {
                 itemsIndexed(items = paymentMethods, itemContent = { index, item ->
                     PaymentMethodUI(
