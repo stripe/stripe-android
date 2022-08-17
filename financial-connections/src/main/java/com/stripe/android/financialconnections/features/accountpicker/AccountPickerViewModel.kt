@@ -114,7 +114,7 @@ internal class AccountPickerViewModel @Inject constructor(
 internal data class AccountPickerState(
     val accounts: Async<List<PartnerAccountUI>> = Uninitialized,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
-    val selectionMode: SelectionMode = SelectionMode.DROPDOWN,
+    val selectionMode: SelectionMode = SelectionMode.CHECKBOXES,
     val accessibleDataCalloutModel: AccessibleDataCalloutModel? = null,
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
