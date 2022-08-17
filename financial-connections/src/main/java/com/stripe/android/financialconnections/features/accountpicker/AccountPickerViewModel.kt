@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
-import com.stripe.android.financialconnections.features.consent.ConsentUrlBuilder
+import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -40,7 +40,7 @@ internal class AccountPickerViewModel @Inject constructor(
                         businessName = ConsentTextBuilder.getBusinessName(manifest),
                         permissions = manifest.permissions,
                         isStripeDirect = manifest.isStripeDirect ?: false,
-                        dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest)
+                        dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                     )
                 )
             }

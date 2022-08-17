@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAcc
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -24,11 +25,13 @@ internal class SuccessViewModel @Inject constructor(
     init {
         suspend {
             val manifest = getManifest()
-            val model = AccessibleDataCalloutModel.fromManifest(manifest)
-            val accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id)
-            model to accounts
+            SuccessState.Payload(
+                accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
+                accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id),
+                disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest)
+            )
         }.execute {
-            copy(partnerAccountInfo = it)
+            copy(payload = it)
         }
     }
 
@@ -50,5 +53,11 @@ internal class SuccessViewModel @Inject constructor(
 }
 
 internal data class SuccessState(
-    val partnerAccountInfo: Async<Pair<AccessibleDataCalloutModel, PartnerAccountsList>> = Uninitialized
-) : MavericksState
+    val payload: Async<Payload> = Uninitialized
+) : MavericksState {
+    data class Payload(
+        val accessibleData: AccessibleDataCalloutModel,
+        val accounts: PartnerAccountsList,
+        val disconnectUrl: String
+    )
+}

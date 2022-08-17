@@ -28,11 +28,11 @@ internal class ConsentViewModel @Inject constructor(
             val manifest = repository.getOrFetchManifest()
             setState {
                 copy(
-                    disconnectUrl = ConsentUrlBuilder.getDisconnectUrl(manifest),
-                    faqUrl = ConsentUrlBuilder.getFAQUrl(manifest),
-                    dataPolicyUrl = ConsentUrlBuilder.getDataPolicyUrl(manifest),
-                    stripeToSUrl = ConsentUrlBuilder.getStripeTOSUrl(manifest),
-                    privacyCenterUrl = ConsentUrlBuilder.getPrivacyCenterUrl(manifest),
+                    disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
+                    faqUrl = FinancialConnectionsUrlResolver.getFAQUrl(manifest),
+                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest),
+                    stripeToSUrl = FinancialConnectionsUrlResolver.getStripeTOSUrl(manifest),
+                    privacyCenterUrl = FinancialConnectionsUrlResolver.getPrivacyCenterUrl(manifest),
                     title = ConsentTextBuilder.getConsentTitle(manifest),
                     bullets = ConsentTextBuilder.getBullets(manifest),
                     requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),

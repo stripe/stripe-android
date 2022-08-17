@@ -14,6 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,19 +26,23 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
-    val state = viewModel.collectAsState { it.partnerAccountInfo }
+    val state = viewModel.collectAsState { it.payload }
     BackHandler(enabled = true) {}
-    state.value()?.let { (accessibleDataModel, accounts) ->
+    state.value()?.let { (accessibleDataModel, accounts, disconnectUrl) ->
         SuccessContent(
             accessibleDataModel = accessibleDataModel,
-            accounts = accounts.data
+            accounts = accounts.data,
+            disconnectUrl = disconnectUrl
         )
     }
 }
@@ -45,9 +50,11 @@ internal fun SuccessScreen() {
 @Composable
 private fun SuccessContent(
     accessibleDataModel: AccessibleDataCalloutModel,
+    disconnectUrl: String,
     accounts: List<PartnerAccount>,
 ) {
     val localContext = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -70,6 +77,18 @@ private fun SuccessContent(
             AccessibleDataCalloutWithAccounts(
                 model = accessibleDataModel,
                 accounts = accounts
+            )
+            AnnotatedText(
+                text = TextResource.StringId(R.string.success_pane_disconnect),
+                onClickableTextClick = { uriHandler.openUri(disconnectUrl) },
+                defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                    color = FinancialConnectionsTheme.colors.textSecondary
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                        .toSpanStyle()
+                        .copy(color = FinancialConnectionsTheme.colors.textBrand)
+                )
             )
             Spacer(modifier = Modifier.weight(1f))
             FinancialConnectionsButton(
@@ -131,7 +150,8 @@ internal fun SuccessScreenPreview() {
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-            )
+            ),
+            disconnectUrl = ""
         )
     }
 }
