@@ -33,7 +33,7 @@ internal class DateConfig : TextFieldConfig {
             Error.Blank
         } else {
             val newString = convertTo4DigitDate(input)
-            return when {
+            when {
                 newString.length < 4 -> {
                     Error.Incomplete(R.string.incomplete_expiry_date)
                 }
