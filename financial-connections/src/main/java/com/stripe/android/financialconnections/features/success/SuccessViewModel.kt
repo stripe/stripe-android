@@ -32,9 +32,6 @@ internal class SuccessViewModel @Inject constructor(
         }
     }
 
-    fun onDoneClick() {
-    }
-
     companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {
 
         override fun create(
