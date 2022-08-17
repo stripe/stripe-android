@@ -23,7 +23,7 @@ import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.INITIAL_VALUES_MAP
+import com.stripe.android.link.injection.INITIAL_FORM_VALUES_MAP
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -942,7 +942,7 @@ internal class DefaultFlowControllerTest {
                 @Assisted(MERCHANT_NAME) merchantName: String,
                 @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
                 @Assisted(CUSTOMER_PHONE) customerPhone: String?,
-                @Assisted(INITIAL_VALUES_MAP) initialValuesMap: Map<IdentifierSpec, String?>?
+                @Assisted(INITIAL_FORM_VALUES_MAP) initialFormValuesMap: Map<IdentifierSpec, String?>?
             ): LinkPaymentLauncher {
                 return linkPaymentLauncher
             }

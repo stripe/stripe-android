@@ -252,12 +252,12 @@ public final class com/stripe/android/link/injection/LinkActivityContractArgsMod
 	public static fun provideCustomerPhone (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialValuesMapFactory : dagger/internal/Factory {
+public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialFormValuesMapFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialValuesMapFactory;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialFormValuesMapFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/util/Map;
-	public static fun provideInitialValuesMap (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/util/Map;
+	public static fun provideInitialFormValuesMap (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/util/Map;
 }
 
 public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory : dagger/internal/Factory {

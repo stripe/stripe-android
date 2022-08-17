@@ -31,6 +31,7 @@ class LinkActivityContract :
      * @param merchantName The customer-facing business name.
      * @param customerEmail Email of the customer, used to pre-fill the form.
      * @param customerPhone Phone number of the customer, used to pre-fill the form.
+     * @param initialFormValuesMap The initial form values for [FormController]
      * @param prefilledCardParams The payment method information prefilled by the user.
      * @param injectionParams Parameters needed to perform dependency injection.
      *                        If null, a new dependency graph will be created.
@@ -41,7 +42,7 @@ class LinkActivityContract :
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
-        internal val initialValueMap: Map<IdentifierSpec, String?>? = null,
+        internal val initialFormValuesMap: Map<IdentifierSpec, String?>? = null,
         internal val prefilledCardParams: PaymentMethodCreateParams? = null,
         internal val injectionParams: InjectionParams? = null
     ) : ActivityStarter.Args {

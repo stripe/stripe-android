@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 
 const val SAME_AS_SHIPPING_CHECKBOX_TEST_TAG = "SAME_AS_SHIPPING_CHECKBOX_TEST_TAG"
 
@@ -15,12 +15,11 @@ fun SameAsShippingElementUI(
 ) {
     val checked by controller.value.collectAsState(false)
     val label by controller.label.collectAsState(null)
-    val resources = LocalContext.current.resources
 
     CheckboxElementUI(
         automationTestTag = SAME_AS_SHIPPING_CHECKBOX_TEST_TAG,
         isChecked = checked,
-        label = label?.let { resources.getString(it) },
+        label = label?.let { stringResource(it) },
         isEnabled = true,
         onValueChange = {
             controller.onValueChange(!checked)

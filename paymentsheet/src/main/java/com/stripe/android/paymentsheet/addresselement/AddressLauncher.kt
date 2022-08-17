@@ -168,11 +168,11 @@ internal class AddressLauncher internal constructor(
     /**
      * @param phone Configuration for the field that collects a phone number. Defaults to
      * [FieldConfiguration.OPTIONAL]
-     * @param checkboxLabel The label of a checkbox displayed below other fields. If nil, the
+     * @param checkboxLabel The label of a checkbox displayed below other fields. If null, the
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration(
+    data class AdditionalFieldsConfiguration @JvmOverloads constructor(
         val phone: FieldConfiguration = FieldConfiguration.OPTIONAL,
         val checkboxLabel: String? = null
     ) : Parcelable {

@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -185,21 +186,22 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
 
     val linkLauncher = linkPaymentLauncherFactory.let {
-        val customerPhone = if (config?.shippingDetails?.isCheckboxSelected == true) {
-            config.shippingDetails.phoneNumber
+        val shippingDetails: AddressDetails? = null // TODO: config.shippingDetails
+        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.phoneNumber
         } else {
             config?.defaultBillingDetails?.phone
         }
-        val initialValuesMap = if (config?.shippingDetails?.isCheckboxSelected == true) {
-            config.shippingDetails.toIdentifierMap(config.defaultBillingDetails)
+        val initialValuesMap = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.toIdentifierMap(config?.defaultBillingDetails)
         } else {
             emptyMap()
         }
-        return@let it.create(
+        it.create(
             merchantName = merchantName,
             customerEmail = config?.defaultBillingDetails?.email,
             customerPhone = customerPhone,
-            initialValuesMap = initialValuesMap
+            initialFormValuesMap = initialValuesMap
         )
     }
 

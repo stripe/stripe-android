@@ -76,7 +76,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             ?.takeIf { loadFromArgs }
             ?.let { convertToFormValuesMap(it) }
             ?: emptyMap()
-        val initialValuesMap = args.initialValueMap
+        val initialValuesMap = args.initialFormValuesMap
             ?: emptyMap()
         val combinedMap = cardMap + initialValuesMap
         formController.value =
