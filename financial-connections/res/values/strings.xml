@@ -24,6 +24,7 @@
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
     <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.\n\nThis page will update once you’re done.</string>
+    <string name="stripe_prepane_continue">Continue</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
     <string name="stripe_picker_loading_title">Establishing connection</string>
     <string name="stripe_picker_loading_desc">Please wait while the connection is established</string>
@@ -47,5 +48,11 @@
     </plurals>
     <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
+    <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
+    <string name="stripe_partner_finicity">Finicity</string>
+    <string name="stripe_partner_mx">MX</string>
+    <string name="stripe_partner_truelayer">Truelayer</string>
+    <string name="stripe_partner_testmode">TestMode</string>
+    <string name="stripe_partner_wellsfargo">Wells Fargo</string>
 </resources>
 
