@@ -33,7 +33,7 @@ internal class DateConfig : TextFieldConfig {
             Error.Blank
         } else {
             val newString = convertTo4DigitDate(input)
-            when {
+            return when {
                 newString.length < 4 -> {
                     Error.Incomplete(R.string.incomplete_expiry_date)
                 }
@@ -41,7 +41,7 @@ internal class DateConfig : TextFieldConfig {
                     Error.Invalid(R.string.incomplete_expiry_date)
                 }
                 else -> {
-                    return determineTextFieldState(
+                    determineTextFieldState(
                         requireNotNull(newString.take(2).toIntOrNull()),
                         requireNotNull(newString.takeLast(2).toIntOrNull()),
                         // Calendar.getInstance().get(Calendar.MONTH) is 0-based, so add 1
