@@ -68,7 +68,10 @@ private fun PartnerAuthScreenContent(
     FinancialConnectionsScaffold {
         when (state.authenticationStatus) {
             is Uninitialized -> PrePaneContent(
-                state.institutionName, state.partner, onContinueClick)
+                institutionName = state.institutionName,
+                partner = state.partner,
+                onContinueClick = onContinueClick
+            )
             is Loading, is Success -> LoadingContent(
                 titleResId = R.string.stripe_picker_loading_title,
                 contentResId = R.string.stripe_picker_loading_desc
