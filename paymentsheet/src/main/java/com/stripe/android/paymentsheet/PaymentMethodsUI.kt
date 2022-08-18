@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -43,7 +44,7 @@ internal fun PaymentMethodsUI(
     paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
-    onItemSelectedListener: (SupportedPaymentMethod) -> Unit
+    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
