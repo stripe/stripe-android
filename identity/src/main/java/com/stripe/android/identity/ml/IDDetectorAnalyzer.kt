@@ -78,7 +78,7 @@ internal class IDDetectorAnalyzer(
         var bestCategoryIndex = INDEX_INVALID
 
         // Find the best score in the output 2d array of (392, 4),
-        // Return its index within range [0, 392) on 1d as bestIndex.
+        // return its index within range [0, 392) on 1d as bestIndex.
         for (currentOutputIndex in 0 until OUTPUT_SIZE) {
             val currentScores = categories[currentOutputIndex]
             val currentBestCategoryIndex = currentScores.indices.maxBy {
