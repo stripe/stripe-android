@@ -16,6 +16,7 @@ import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameConfig
@@ -206,6 +207,15 @@ internal class TransformSpecToElementTest {
 
         assertThat(cardNumberElement.controller)
             .isInstanceOf(CardNumberViewOnlyController::class.java)
+    }
+
+    @Test
+    fun `Empty spec is transformed to single EmptyFormElement`() {
+        val formElement = transformSpecToElements.transform(
+            emptyList()
+        )
+
+        assertThat(formElement).containsExactly(EmptyFormElement())
     }
 
     companion object {

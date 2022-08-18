@@ -83,7 +83,6 @@ class TransformSpecToElements(
                     initialValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
-                else -> EmptyFormElement()
             }
-        }
+        }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }
