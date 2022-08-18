@@ -69,7 +69,6 @@ internal class IDDetectorAnalyzer(
         )
         inferenceStat.trackResult()
 
-
         // To get more results, run nonMaxSuppressionMultiClass on the categories.
         // Fut for IDDetector, we just need to find the highest score and return it's
         // corresponding box.
@@ -90,7 +89,6 @@ internal class IDDetectorAnalyzer(
                 bestIndex = currentOutputIndex
                 bestCategoryIndex = currentBestCategoryIndex
             }
-
         }
         val bestCategory = INDEX_CATEGORY_MAP[bestCategoryIndex] ?: Category.INVALID
         val bestBoundingBox = boundingBoxes[bestIndex]
@@ -117,11 +115,11 @@ internal class IDDetectorAnalyzer(
         private val idDetectorMinScore: Float,
         private val modelPerformanceTracker: ModelPerformanceTracker
     ) : AnalyzerFactory<
-        AnalyzerInput,
-        IdentityScanState,
-        AnalyzerOutput,
-        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-        > {
+            AnalyzerInput,
+            IdentityScanState,
+            AnalyzerOutput,
+            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+            > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(
                 modelFile,
