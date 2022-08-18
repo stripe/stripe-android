@@ -215,7 +215,7 @@ internal class TransformSpecToElementTest {
             emptyList()
         )
 
-        assertThat(formElement.first()).isEqualTo(EmptyFormElement())
+        assertThat(formElement).containsExactly(EmptyFormElement())
     }
 
     companion object {
