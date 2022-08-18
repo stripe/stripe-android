@@ -80,7 +80,7 @@ internal class IDDetectorAnalyzer(
         // Find the best score in the output 2d array of (392, 4),
         // Return its index within range [0, 392) on 1d as bestIndex.
         for (currentOutputIndex in 0 until OUTPUT_SIZE) {
-            val currentScores = categories[currentOutputIndex] // array of 4
+            val currentScores = categories[currentOutputIndex]
             val currentBestCategoryIndex = currentScores.indices.maxBy {
                 currentScores[it]
             }
@@ -104,7 +104,7 @@ internal class IDDetectorAnalyzer(
             bestCategory,
             bestScore,
             LIST_OF_INDICES.map {
-                categories[it][bestCategoryIndex].roundToMaxDecimals(2)
+                categories[bestIndex][it].roundToMaxDecimals(2)
             }
         )
     }
