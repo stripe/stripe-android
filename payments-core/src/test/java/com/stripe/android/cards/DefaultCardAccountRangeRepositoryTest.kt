@@ -21,7 +21,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -33,10 +32,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
     private val realStore = DefaultCardAccountRangeStore(application)
     private val realRepository = createRealRepository(realStore)
 
-    @Ignore("Failing due to remote change")
     @Suppress("LongMethod")
     @Test
-    fun `repository with real sources returns expected results`() = runBlocking {
+    fun `repository with real sources returns expected results`(): Unit = runBlocking {
         assertThat(
             realRepository.getAccountRange(
                 CardNumber.Unvalidated("42424")
@@ -83,7 +81,6 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).isEqualTo(
             AccountRangeFixtures.AMERICANEXPRESS
         )
-
         assertThat(
             realStore.get(BinFixtures.AMEX)
         ).hasSize(1)
@@ -105,27 +102,44 @@ internal class DefaultCardAccountRangeRepositoryTest {
         )
 
         assertThat(
-            realRepository.getAccountRange(
-                CardNumber.Unvalidated("356840")
-            )
-        ).isEqualTo(
-            AccountRangeFixtures.JCB
-        )
-        assertThat(
             realStore.get(BinFixtures.JCB)
         ).isEmpty()
 
         assertThat(
             realRepository.getAccountRange(
-                CardNumber.Unvalidated("621682")
+                CardNumber.Unvalidated("601100")
             )
         ).isEqualTo(
-            AccountRangeFixtures.UNIONPAY19
+            AccountRangeFixtures.DISCOVER
+        )
+        assertThat(
+            realStore.get(BinFixtures.DISCOVER)
+        ).containsExactly(
+            AccountRange(
+                binRange = BinRange(low = "6011000000000000", high = "6011011999999999"),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Discover,
+                country = "US"
+            )
         )
 
         assertThat(
-            realStore.get(BinFixtures.UNIONPAY_CN)
-        ).hasSize(69)
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("356840")
+            )
+        ).isEqualTo(
+            AccountRangeFixtures.UNIONPAY16
+        )
+        assertThat(
+            realStore.get(BinFixtures.UNIONPAY16)
+        ).containsExactly(
+            AccountRange(
+                binRange = BinRange(low = "3568400000000000", high = "3568409999999999"),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.UnionPay,
+                country = "CN"
+            )
+        )
     }
 
     @Test
