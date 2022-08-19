@@ -100,7 +100,7 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
-    fun `handleOnNewIntent - Link flows, linked account param is extracted`() {
+    fun `handleOnNewIntent - on Link flows with valid account, id param is extracted`() {
         runTest {
             // Given
             val linkedAccountId = "1234"
@@ -126,7 +126,7 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
-    fun `handleOnNewIntent - on Link flows, linked account param is extracted`() {
+    fun `handleOnNewIntent - on Link flows with invalid account, error is thrown`() {
         runTest {
             // Given
             val linkedAccountId = "1234"
@@ -137,16 +137,13 @@ class FinancialConnectionsSheetViewModelTest {
 
             // When
             viewModel.handleOnNewIntent(successIntent(
-                "stripe-auth://link-accounts/success?linked_account=$linkedAccountId"
+                "stripe-auth://link-accounts/success"
             ))
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
-                assertThat(viewEffect.result).isEqualTo(
-                    Completed(linkedAccountId = linkedAccountId)
-                )
+                assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
         }
     }
