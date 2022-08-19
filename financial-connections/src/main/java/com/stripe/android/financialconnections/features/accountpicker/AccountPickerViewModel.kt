@@ -46,7 +46,7 @@ internal class AccountPickerViewModel @Inject constructor(
             }.sortedBy { it.enabled }
             AccountPickerState.Payload(
                 accounts = accounts,
-                selectionMode = SelectionMode.CHECKBOXES, //TODO choose proper mode.
+                selectionMode = SelectionMode.CHECKBOXES, // TODO choose proper mode.
                 accessibleData = AccessibleDataCalloutModel(
                     businessName = ConsentTextBuilder.getBusinessName(manifest),
                     permissions = manifest.permissions,
