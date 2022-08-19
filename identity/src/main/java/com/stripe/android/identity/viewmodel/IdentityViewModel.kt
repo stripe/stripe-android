@@ -626,7 +626,8 @@ internal class IdentityViewModel constructor(
                     _verificationPage.postValue(Resource.success(it))
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
-                            it.documentCapture.models.idDetectorUrl,
+//                            it.documentCapture.models.idDetectorUrl,
+                            "https://b.stripecdn.com/gelato-statics-srv/assets/d137be6ecc86477800ea4ef82154174092dc4c16/assets/id_detectors/tflite/2022-08-19/model.tflite",
                             _idDetectorModelFile
                         )
                         it.selfieCapture?.let { selfieCapture ->
