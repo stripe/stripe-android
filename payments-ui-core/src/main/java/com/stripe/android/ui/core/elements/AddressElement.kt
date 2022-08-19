@@ -68,6 +68,12 @@ open class AddressElement constructor(
             addressRepository.get(countryCode)
                 ?: emptyList()
         }
+        .map { fields ->
+            fields.forEach { field ->
+                field.setRawValue(rawValuesMap)
+            }
+            fields
+        }
 
     val fields = combine(
         countryElement.controller.rawFieldValue,
@@ -111,10 +117,9 @@ open class AddressElement constructor(
                     emptyValuesMap
                 }
             )
-        }
-
-        fields.forEach {
-            it.setRawValue(rawValuesMap)
+            fields.forEach {
+                it.setRawValue(rawValuesMap)
+            }
         }
 
         fields

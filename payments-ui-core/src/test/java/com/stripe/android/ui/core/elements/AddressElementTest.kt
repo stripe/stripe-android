@@ -8,6 +8,7 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -136,6 +137,30 @@ class AddressElementTest {
             .isEqualTo(
                 FormFieldEntry("DE89370400440532013000", true)
             )
+    }
+
+    @Test
+    fun `changing country updates the fields`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            sameAsShippingController = null
+        )
+
+        val country = suspend {
+            addressElement.fields.first().map {
+                it.getFormFieldValueFlow().first()[0].second.value
+            }.first()
+        }
+
+        countryDropdownFieldController.onValueChange(0)
+
+        assertThat(country()).isEqualTo("US")
+
+        countryDropdownFieldController.onValueChange(1)
+
+        assertThat(country()).isEqualTo("JP")
     }
 
     @Test
