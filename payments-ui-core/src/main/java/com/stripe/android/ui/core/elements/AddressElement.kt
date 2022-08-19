@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -21,7 +22,8 @@ open class AddressElement constructor(
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
-    )
+    ),
+    sameAsShippingController: SameAsShippingController?
 ) : SectionMultiFieldElement(_identifier) {
 
     @VisibleForTesting
@@ -54,6 +56,9 @@ open class AddressElement constructor(
         )
     )
 
+    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: ""}
+    private val emptyValuesMap = rawValuesMap.mapValues { "" }
+
     private val otherFields = countryElement.controller.rawFieldValue
         .distinctUntilChanged()
         .map { countryCode ->
@@ -63,17 +68,12 @@ open class AddressElement constructor(
             addressRepository.get(countryCode)
                 ?: emptyList()
         }
-        .map { fields ->
-            fields.forEach { field ->
-                field.setRawValue(rawValuesMap)
-            }
-            fields
-        }
 
     val fields = combine(
         countryElement.controller.rawFieldValue,
-        otherFields
-    ) { country, otherFields ->
+        otherFields,
+        sameAsShippingController?.value ?: flowOf(null)
+    ) { country, otherFields, sameAsShipping ->
         val condensed = listOf(nameElement, countryElement, addressAutoCompleteElement)
         val expanded = listOf(nameElement, countryElement).plus(otherFields)
         val baseElements = when (addressType) {
@@ -97,11 +97,27 @@ open class AddressElement constructor(
             }
         }
 
-        if (addressType.phoneNumberState != PhoneNumberState.HIDDEN) {
+        val fields = if (addressType.phoneNumberState != PhoneNumberState.HIDDEN) {
             baseElements.plus(phoneNumberElement)
         } else {
             baseElements
         }
+
+        sameAsShipping?.let {
+            setRawValue(
+                if (it) {
+                    originalValuesMap
+                } else {
+                    emptyValuesMap
+                }
+            )
+        }
+
+        fields.forEach {
+            it.setRawValue(rawValuesMap)
+        }
+
+        fields
     }
 
     val controller = AddressController(fields)

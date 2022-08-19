@@ -68,6 +68,35 @@ public final class com/stripe/android/ui/core/address/AddressRepository_Factory 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressRepository;
 }
 
+public final class com/stripe/android/ui/core/address/ShippingAddress : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/Boolean;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcom/stripe/android/model/Address;
+	public final fun component4 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/Boolean;)Lcom/stripe/android/ui/core/address/ShippingAddress;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/address/ShippingAddress;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/Boolean;ILjava/lang/Object;)Lcom/stripe/android/ui/core/address/ShippingAddress;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/model/Address;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
+	public final fun getSameAsShippingEnabled ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/address/ShippingAddress$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/address/ShippingAddress;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/ui/core/address/ShippingAddress;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/ui/core/databinding/ActivityCardScanBinding : androidx/viewbinding/ViewBinding {
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
@@ -263,7 +292,7 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
 }
 
-public final class com/stripe/android/ui/core/elements/CheckboxElementUiKt {
+public final class com/stripe/android/ui/core/elements/CheckboxElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
@@ -441,10 +470,19 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion 
 	public final fun getOneLineAddress ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getSameAsShipping ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getSortingCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun getState ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
@@ -574,6 +612,25 @@ public final class com/stripe/android/ui/core/elements/PhoneNumberState$Companio
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/ui/core/elements/SameAsShippingController : com/stripe/android/ui/core/elements/InputController {
+	public static final field $stable I
+	public fun <init> (Z)V
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getLabel ()Lkotlinx/coroutines/flow/Flow;
+	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getShowOptionalLabel ()Z
+	public final fun getValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public fun onRawValueChange (Ljava/lang/String;)V
+	public final fun onValueChange (Z)V
+}
+
+public final class com/stripe/android/ui/core/elements/SameAsShippingElementUIKt {
+	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
+}
+
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
 	public static final field SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
@@ -596,6 +653,10 @@ public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec$Comp
 }
 
 public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/SectionFieldElement$DefaultImpls {
+	public static fun getShouldRenderOutsideCard (Lcom/stripe/android/ui/core/elements/SectionFieldElement;)Z
 }
 
 public final class com/stripe/android/ui/core/elements/SectionUIKt {

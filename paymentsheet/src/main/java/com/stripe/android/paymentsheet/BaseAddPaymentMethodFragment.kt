@@ -256,6 +256,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
+                shippingDetails = null, // TODO: config?.shippingDetails,
                 injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {

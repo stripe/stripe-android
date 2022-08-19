@@ -27,6 +27,7 @@ class LinkActivityContractTest {
             "customer@email.com",
             "1234567890",
             null,
+            null,
             injectionParams
         )
 

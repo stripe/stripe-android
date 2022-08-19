@@ -21,7 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.CheckboxElementUi
+import com.stripe.android.ui.core.elements.CheckboxElementUI
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Composable
@@ -121,7 +121,7 @@ internal fun InputAddressScreen(
                 },
                 checkboxContent = {
                     viewModel.args.config?.checkboxLabel?.let { label ->
-                        CheckboxElementUi(
+                        CheckboxElementUI(
                             isChecked = checkboxChecked,
                             label = label,
                             isEnabled = formEnabled,
