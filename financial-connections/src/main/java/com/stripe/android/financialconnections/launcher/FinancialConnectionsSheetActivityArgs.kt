@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.launcher
 
 import android.content.Intent
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import kotlinx.parcelize.Parcelize
@@ -23,6 +24,12 @@ internal sealed class FinancialConnectionsSheetActivityArgs constructor(
 
     @Parcelize
     data class ForToken(
+        override val configuration: FinancialConnectionsSheet.Configuration
+    ) : FinancialConnectionsSheetActivityArgs(configuration)
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class ForLink(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
