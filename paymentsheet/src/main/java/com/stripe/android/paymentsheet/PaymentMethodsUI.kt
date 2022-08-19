@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -16,7 +15,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
@@ -44,22 +42,14 @@ internal fun PaymentMethodsUI(
     paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
-    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
+    onItemSelectedListener: (SupportedPaymentMethod) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
 
     LaunchedEffect(selectedIndex) {
         state.scrollToItem(selectedIndex, 0)
     }
 
-    LaunchedEffect(isEnabled) {
-        if (isEnabled) {
-            state.reenableScrolling(scope)
-        } else {
-            state.disableScrolling(scope)
-        }
-    }
     PaymentsTheme {
         BoxWithConstraints(
             modifier = Modifier
@@ -70,10 +60,10 @@ internal fun PaymentMethodsUI(
                 paymentMethods.size
             )
 
-            // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
             LazyRow(
                 state = state,
                 contentPadding = PaddingValues(horizontal = PM_LIST_PADDING.dp),
+                userScrollEnabled = isEnabled,
                 modifier = Modifier.testTag(TEST_TAG_LIST)
             ) {
                 itemsIndexed(items = paymentMethods, itemContent = { index, item ->
