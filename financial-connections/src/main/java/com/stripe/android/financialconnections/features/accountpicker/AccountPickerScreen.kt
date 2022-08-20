@@ -55,6 +55,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.encryptedNumbers
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -80,19 +81,19 @@ private fun AccountPickerContent(
     onSelectAccounts: () -> Unit
 ) {
     FinancialConnectionsScaffold {
-        when (val accounts = state.accounts) {
+        when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent(
                 R.string.stripe_account_picker_loading_title,
                 R.string.stripe_account_picker_loading_desc
             )
             is Success -> AccountPickerLoaded(
                 loading = state.isLoading,
-                accounts = accounts(),
+                accounts = payload().accounts,
                 selectedIds = state.selectedIds,
                 onAccountClicked = onAccountClicked,
                 onSelectAccounts = onSelectAccounts,
-                selectionMode = state.selectionMode,
-                accessibleDataCalloutModel = state.accessibleDataCalloutModel
+                selectionMode = payload().selectionMode,
+                accessibleDataCalloutModel = payload().accessibleData
             )
             is Fail -> UnclassifiedErrorContent()
         }
@@ -169,7 +170,7 @@ private fun DropdownContent(
     val selectedOptionText: String? = remember(selectedIds) {
         accounts
             .firstOrNull { selectedIds.contains(it.account.id) }
-            ?.let { "${it.account.name} ${it.account.numbers}" }
+            ?.let { "${it.account.name} ${it.account.encryptedNumbers}" }
     }
     Spacer(modifier = Modifier.size(12.dp))
     ExposedDropdownMenuBox(
@@ -210,7 +211,7 @@ private fun DropdownContent(
                         InstitutionIcon()
                         Spacer(modifier = Modifier.size(8.dp))
                         Text(
-                            text = "${selectedAccount.account.name} ${selectedAccount.account.numbers}",
+                            text = "${selectedAccount.account.name} ${selectedAccount.account.encryptedNumbers}",
                             color = if (selectedAccount.enabled) {
                                 FinancialConnectionsTheme.colors.textPrimary
                             } else {
@@ -233,11 +234,8 @@ private fun InstitutionIcon() {
         modifier = Modifier
             .size(36.dp)
             .clip(RoundedCornerShape(6.dp))
-
     )
 }
-
-private val PartnerAccount.numbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
 
 @Composable
 private fun SingleSelectContent(

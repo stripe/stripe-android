@@ -21,23 +21,35 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     companion object {
         fun multiSelect() = AccountPickerState(
             selectedIds = setOf("id1"),
-            selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
-            accounts = Success(partnerAccountList()),
-            accessibleDataCalloutModel = accessibleCallout()
+            payload = Success(
+                AccountPickerState.Payload(
+                    selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
+                    accounts = partnerAccountList(),
+                    accessibleData = accessibleCallout()
+                )
+            )
         )
 
         fun singleSelect() = AccountPickerState(
             selectedIds = setOf("id1"),
-            selectionMode = AccountPickerState.SelectionMode.RADIO,
-            accounts = Success(partnerAccountList()),
-            accessibleDataCalloutModel = accessibleCallout()
+            payload = Success(
+                AccountPickerState.Payload(
+                    selectionMode = AccountPickerState.SelectionMode.RADIO,
+                    accounts = partnerAccountList(),
+                    accessibleData = accessibleCallout()
+                )
+            )
         )
 
         fun dropdown() = AccountPickerState(
             selectedIds = setOf("id1"),
-            selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
-            accounts = Success(partnerAccountList()),
-            accessibleDataCalloutModel = accessibleCallout()
+            payload = Success(
+                AccountPickerState.Payload(
+                    selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
+                    accounts = partnerAccountList(),
+                    accessibleData = accessibleCallout()
+                )
+            )
         )
 
         private fun partnerAccountList() = listOf(
