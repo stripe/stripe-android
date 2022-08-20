@@ -55,7 +55,6 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.encryptedNumbers
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton

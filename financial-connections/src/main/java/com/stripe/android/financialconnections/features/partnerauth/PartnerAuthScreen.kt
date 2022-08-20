@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -160,12 +161,14 @@ private fun Callout(
                 R.string.stripe_prepane_partner_callout,
                 listOf(stringResource(id = partner.toStringResId()))
             ),
-            textStyle = FinancialConnectionsTheme.typography.captionTight.copy(
+            defaultStyle = FinancialConnectionsTheme.typography.captionTight.copy(
                 color = FinancialConnectionsTheme.colors.textSecondary
             ),
-            clickableStyle = FinancialConnectionsTheme.typography.captionTightEmphasized
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionTightEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textBrand)
+            ),
             onClickableTextClick = {}
         )
     }
