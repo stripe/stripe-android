@@ -141,6 +141,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     internal fun onNativeAuthFlowResult(activityResult: ActivityResult) {
         if (activityResult.resultCode == Activity.RESULT_OK) {
+            setState { copy(authFlowActive = false) }
             withState { fetchFinancialConnectionsSession(it) }
         } else {
             setState {

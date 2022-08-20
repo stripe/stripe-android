@@ -20,7 +20,7 @@ internal object ConsentTextBuilder {
 
     internal fun getDataRequestedTitle(
         manifest: FinancialConnectionsSessionManifest
-    ): TextResource = when (val name = manifest.name) {
+    ): TextResource = when (val name = getBusinessName(manifest)) {
         null -> TextResource.StringId(
             R.string.stripe_consent_requested_data_title_no_businessname
         )
@@ -31,7 +31,7 @@ internal object ConsentTextBuilder {
     }
 
     fun getConsentTitle(manifest: FinancialConnectionsSessionManifest): TextResource {
-        val name = manifest.name
+        val name = getBusinessName(manifest)
         return when {
             name == null -> TextResource.StringId(
                 R.string.stripe_consent_pane_title_no_businessname
@@ -50,7 +50,7 @@ internal object ConsentTextBuilder {
     private fun getRequestedDataBullet(
         manifest: FinancialConnectionsSessionManifest
     ): TextResource {
-        val name = manifest.name
+        val name = getBusinessName(manifest)
         return when {
             name == null -> TextResource.StringId(
                 R.string.stripe_consent_pane_body1_no_businessname
@@ -94,6 +94,7 @@ internal object ConsentTextBuilder {
         }
     }
 
-    private val FinancialConnectionsSessionManifest.name
-        get() = businessName ?: connectPlatformName
+    fun getBusinessName(manifest: FinancialConnectionsSessionManifest): String? {
+        return manifest.businessName ?: manifest.connectPlatformName
+    }
 }

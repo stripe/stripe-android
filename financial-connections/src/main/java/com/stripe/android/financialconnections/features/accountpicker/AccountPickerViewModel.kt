@@ -7,11 +7,16 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -23,33 +28,63 @@ internal class AccountPickerViewModel @Inject constructor(
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
     private val coordinator: NativeAuthFlowCoordinator,
+    private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
 ) : MavericksViewModel<AccountPickerState>(initialState) {
 
     init {
         suspend {
-            val authSession = requireNotNull(getManifest().activeAuthSession)
-            pollAuthorizationSessionAccounts(authSession.id)
-        }.execute { copy(accounts = it) }
+            val manifest = getManifest()
+            val authSession = requireNotNull(manifest.activeAuthSession)
+            val partnerAccountList = pollAuthorizationSessionAccounts(authSession.id)
+            val accounts = partnerAccountList.data.map { account ->
+                AccountPickerState.PartnerAccountUI(
+                    account = account,
+                    enabled = manifest.paymentMethodType == null ||
+                        account.supportedPaymentMethodTypes.contains(manifest.paymentMethodType)
+                )
+            }.sortedBy { it.enabled }
+            AccountPickerState.Payload(
+                accounts = accounts,
+                selectionMode = SelectionMode.CHECKBOXES, // TODO choose proper mode.
+                accessibleData = AccessibleDataCalloutModel(
+                    businessName = ConsentTextBuilder.getBusinessName(manifest),
+                    permissions = manifest.permissions,
+                    isStripeDirect = manifest.isStripeDirect ?: false,
+                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
+                )
+            )
+        }.execute {
+            copy(
+                payload = it
+            )
+        }
     }
 
     fun onAccountClicked(account: PartnerAccount) {
-        withState {
-            if (it.selectedIds.contains(account.id)) {
-                setState { copy(selectedIds = selectedIds - account.id) }
-            } else {
-                setState { copy(selectedIds = selectedIds + account.id) }
+        withState { state ->
+            when (state.payload()?.selectionMode) {
+                SelectionMode.DROPDOWN,
+                SelectionMode.RADIO -> setState { copy(selectedIds = setOf(account.id)) }
+                SelectionMode.CHECKBOXES -> if (state.selectedIds.contains(account.id)) {
+                    setState { copy(selectedIds = selectedIds - account.id) }
+                } else {
+                    setState { copy(selectedIds = selectedIds + account.id) }
+                }
+                null -> logger.error("account clicked without available payload.")
             }
         }
     }
 
     fun selectAccounts() {
         withState { state ->
-            state.accounts()?.let { accounts ->
+            state.payload()?.accounts?.let { accounts ->
                 suspend {
                     val manifest = getManifest()
                     val accountsList: PartnerAccountsList = selectAccounts(
-                        selectedAccounts = accounts.data.filter { state.selectedIds.contains(it.id) },
+                        selectedAccounts = accounts
+                            .filter { state.selectedIds.contains(it.account.id) }
+                            .map { it.account },
                         sessionId = manifest.activeAuthSession!!.id,
                     )
                     coordinator().emit(RequestNextStep(currentStep = NavigationDirections.accountPicker))
@@ -80,11 +115,26 @@ internal class AccountPickerViewModel @Inject constructor(
 }
 
 internal data class AccountPickerState(
-    val accounts: Async<PartnerAccountsList> = Uninitialized,
+    val payload: Async<Payload> = Uninitialized,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
 
     val isLoading: Boolean
-        get() = selectAccounts is Loading || accounts is Loading
+        get() = payload is Loading || selectAccounts is Loading
+
+    data class Payload(
+        val accounts: List<PartnerAccountUI>,
+        val selectionMode: SelectionMode,
+        val accessibleData: AccessibleDataCalloutModel
+    )
+
+    data class PartnerAccountUI(
+        val account: PartnerAccount,
+        val enabled: Boolean
+    )
+
+    enum class SelectionMode {
+        DROPDOWN, RADIO, CHECKBOXES
+    }
 }
