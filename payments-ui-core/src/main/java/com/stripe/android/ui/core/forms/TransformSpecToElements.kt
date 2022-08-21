@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.forms
 import android.content.Context
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.address.ShippingAddress
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec

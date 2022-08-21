@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @kotlinx.serialization.Serializable
 @Parcelize
-data class IdentifierSpec(val v1: String): Parcelable {
+data class IdentifierSpec(val v1: String) : Parcelable {
     constructor() : this("") {
     }
 

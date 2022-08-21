@@ -8,7 +8,6 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -364,7 +363,7 @@ class AddressElementTest {
             addressRepository,
             mapOf(
                 IdentifierSpec.SameAsShipping to "true",
-                IdentifierSpec.Country to "JP",
+                IdentifierSpec.Country to "JP"
             ),
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal(),

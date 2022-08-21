@@ -56,7 +56,7 @@ open class AddressElement constructor(
         )
     )
 
-    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: ""}
+    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: "" }
     private val emptyValuesMap = rawValuesMap.mapValues { "" }
 
     private val otherFields = countryElement.controller.rawFieldValue
