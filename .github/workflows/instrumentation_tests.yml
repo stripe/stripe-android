@@ -75,7 +75,6 @@ jobs:
         if: failure()
         run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
 
-
   screenshot-regression-tests:
     runs-on: macos-latest
     steps:
