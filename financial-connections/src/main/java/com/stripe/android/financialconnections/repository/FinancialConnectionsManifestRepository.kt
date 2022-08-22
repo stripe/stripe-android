@@ -87,18 +87,18 @@ internal interface FinancialConnectionsManifestRepository {
 
     companion object {
         operator fun invoke(
-            publishableKey: String,
             requestExecutor: FinancialConnectionsRequestExecutor,
             configuration: FinancialConnectionsSheet.Configuration,
             apiRequestFactory: ApiRequest.Factory,
+            apiOptions: ApiRequest.Options,
             logger: Logger,
             initialManifest: FinancialConnectionsSessionManifest?
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
-                publishableKey,
                 requestExecutor,
                 configuration,
                 apiRequestFactory,
+                apiOptions,
                 logger,
                 initialManifest
             )
@@ -106,17 +106,13 @@ internal interface FinancialConnectionsManifestRepository {
 }
 
 private class FinancialConnectionsManifestRepositoryImpl(
-    publishableKey: String,
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val configuration: FinancialConnectionsSheet.Configuration,
     val apiRequestFactory: ApiRequest.Factory,
+    val apiOptions: ApiRequest.Options,
     val logger: Logger,
     initialManifest: FinancialConnectionsSessionManifest?
 ) : FinancialConnectionsManifestRepository {
-
-    private val options = ApiRequest.Options(
-        apiKey = publishableKey
-    )
 
     /**
      * Ensures that manifest accesses via [getOrFetchManifest] suspend until
@@ -131,7 +127,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 // fetch manifest and save it locally
                 val financialConnectionsRequest = apiRequestFactory.createGet(
                     url = getManifestUrl,
-                    options = options,
+                    options = apiOptions,
                     params = mapOf(
                         NetworkConstants.PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         "expand" to listOf("active_auth_session")
@@ -150,7 +146,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest = mutex.withLock {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = generateHostedUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 PARAMS_FULLSCREEN to true,
                 PARAMS_HIDE_CLOSE_BUTTON to true,
@@ -169,7 +165,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest = mutex.withLock {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = consentAcquiredUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
@@ -186,7 +182,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizationSessionUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "use_mobile_handoff" to false,
@@ -209,7 +205,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizeSessionUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,

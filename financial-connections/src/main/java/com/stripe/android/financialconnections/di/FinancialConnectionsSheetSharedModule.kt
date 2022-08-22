@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -39,6 +40,16 @@ import kotlin.coroutines.CoroutineContext
     includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
 internal object FinancialConnectionsSheetSharedModule {
+
+    @Provides
+    @Singleton
+    internal fun providesApiOptions(
+        @Named(PUBLISHABLE_KEY) publishableKey: String,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?,
+    ): ApiRequest.Options = ApiRequest.Options(
+        apiKey = publishableKey,
+        stripeAccount = stripeAccountId
+    )
 
     @Provides
     @Singleton

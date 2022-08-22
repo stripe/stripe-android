@@ -31,7 +31,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     private fun buildRepository() = FinancialConnectionsAccountsRepository(
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         requestExecutor = mockRequestExecutor,
-        apiRequestFactory = apiRequestFactory,
+        apiRequestFactory = apiRequestFactory,,
         logger = Logger.noop(),
     )
 

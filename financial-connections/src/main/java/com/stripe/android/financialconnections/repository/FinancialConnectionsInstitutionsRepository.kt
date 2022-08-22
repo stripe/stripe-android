@@ -12,31 +12,27 @@ internal interface FinancialConnectionsInstitutionsRepository {
 
     companion object {
         operator fun invoke(
-            publishableKey: String,
             requestExecutor: FinancialConnectionsRequestExecutor,
+            apiOptions: ApiRequest.Options,
             apiRequestFactory: ApiRequest.Factory
         ): FinancialConnectionsInstitutionsRepository = FinancialConnectionsInstitutionsRepositoryImpl(
-            publishableKey,
             requestExecutor,
+            apiOptions,
             apiRequestFactory
         )
     }
 }
 
 private class FinancialConnectionsInstitutionsRepositoryImpl(
-    publishableKey: String,
     private val requestExecutor: FinancialConnectionsRequestExecutor,
+    private val apiOptions: ApiRequest.Options,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsInstitutionsRepository {
-
-    private val options = ApiRequest.Options(
-        apiKey = publishableKey
-    )
 
     override suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = featuredInstitutionsUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "limit" to SEARCH_INSTITUTIONS_LIMIT
@@ -54,7 +50,7 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = institutionsUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "query" to query,
