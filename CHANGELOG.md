@@ -2,6 +2,9 @@
 
 ## X.X.X - 2022-XX-XX
 
+## 20.10.0 - 2022-08-22
+This release contains several bug fixes for PaymentSheet and binary size optimization for Identity.
+
 ### PaymentSheet
 
 * [FIXED][5422](https://github.com/stripe/stripe-android/pull/5422) Card expiration dates with a single-digit month are now preserved correctly when closing and re-opening the `PaymentSheet` via the `FlowController`.
