@@ -17,6 +17,8 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.features.partnerauth.isOAuth
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -33,6 +35,7 @@ internal class AccountPickerViewModel @Inject constructor(
 ) : MavericksViewModel<AccountPickerState>(initialState) {
 
     init {
+        logErrors()
         suspend {
             val manifest = getManifest()
             val authSession = requireNotNull(manifest.activeAuthSession)
@@ -40,26 +43,60 @@ internal class AccountPickerViewModel @Inject constructor(
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
                     account = account,
-                    enabled = manifest.paymentMethodType == null ||
-                        account.supportedPaymentMethodTypes.contains(manifest.paymentMethodType)
+                    enabled = account.enabled(manifest)
                 )
             }.sortedBy { it.enabled }
+            val (preselectedIds, selectionMode) = selectionConfig(accounts, manifest)
             AccountPickerState.Payload(
                 accounts = accounts,
-                selectionMode = SelectionMode.CHECKBOXES, // TODO choose proper mode.
+                selectionMode = selectionMode,
                 accessibleData = AccessibleDataCalloutModel(
                     businessName = ConsentTextBuilder.getBusinessName(manifest),
                     permissions = manifest.permissions,
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
-                )
+                ),
+                selectedIds = preselectedIds
             )
-        }.execute {
-            copy(
-                payload = it
-            )
-        }
+        }.execute { copy(payload = it) }
     }
+
+    private fun logErrors() {
+        onAsync(AccountPickerState::payload, onFail = {
+            logger.error("Error retrieving accounts", it)
+        })
+        onAsync(AccountPickerState::selectAccounts, onFail = {
+            logger.error("Error selecting accounts", it)
+        })
+    }
+
+    /**
+     * in the special case that this is single account and the institution would have
+     * skipped account selection but _didn't_ (because we still saw this), we should
+     * render the variant of the AccountPicker which uses a select dropdown. This is
+     * meant to prevent showing a radio-button account picker immediately after the user
+     * interacted with a checkbox select picker, which is the predominant UX of oauth popovers today.
+     */
+    private fun selectionConfig(
+        accounts: List<AccountPickerState.PartnerAccountUI>,
+        manifest: FinancialConnectionsSessionManifest
+    ): Pair<Set<String>, SelectionMode> =
+        when {
+            manifest.singleAccount -> when {
+                manifest.activeAuthSession?.skipAccountSelection == true &&
+                    manifest.activeAuthSession.flow?.isOAuth() == true -> Pair(
+                    setOfNotNull(accounts.firstOrNull { it.enabled }?.account?.id),
+                    SelectionMode.DROPDOWN
+                )
+                else -> emptySet<String>() to SelectionMode.RADIO
+            }
+            else -> emptySet<String>() to SelectionMode.CHECKBOXES
+        }
+
+    private fun PartnerAccount.enabled(
+        manifest: FinancialConnectionsSessionManifest
+    ) = manifest.paymentMethodType == null ||
+        supportedPaymentMethodTypes.contains(manifest.paymentMethodType)
 
     fun onAccountClicked(account: PartnerAccount) {
         withState { state ->
@@ -126,7 +163,8 @@ internal data class AccountPickerState(
     data class Payload(
         val accounts: List<PartnerAccountUI>,
         val selectionMode: SelectionMode,
-        val accessibleData: AccessibleDataCalloutModel
+        val accessibleData: AccessibleDataCalloutModel,
+        val selectedIds: Set<String>
     )
 
     data class PartnerAccountUI(

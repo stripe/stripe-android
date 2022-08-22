@@ -331,66 +331,45 @@ internal data class FinancialConnectionsSessionManifest(
 
     ) : Parcelable {
 
-        /**
-         *
-         *
-         * Values: FINICITY_CONNECT_V2_FIX,FINICITY_CONNECT_V2_LITE,FINICITY_CONNECT_V2_OAUTH,
-         * FINICITY_CONNECT_V2_OAUTH_REDIRECT,FINICITY_CONNECT_V2_OAUTH_WEBVIEW,MX_CONNECT,
-         * MX_OAUTH,MX_OAUTH_REDIRECT,MX_OAUTH_WEBVIEW,TESTMODE,TESTMODE_OAUTH,
-         * TESTMODE_OAUTH_WEBVIEW,TRUELAYER_OAUTH,TRUELAYER_OAUTH_HANDOFF,
-         * TRUELAYER_OAUTH_WEBVIEW,WELLS_FARGO,WELLS_FARGO_WEBVIEW
-         */
         @Serializable
-        enum class Flow(val value: String) {
-            @SerialName(value = "finicity_connect_v2_fix")
+        enum class Flow(val value: kotlin.String?) {
+            @SerialName("direct")
+            DIRECT("direct"),
+            @SerialName("direct_webview")
+            DIRECT_WEBVIEW("direct_webview"),
+            @SerialName("finicity_connect_v2_fix")
             FINICITY_CONNECT_V2_FIX("finicity_connect_v2_fix"),
-
-            @SerialName(value = "finicity_connect_v2_lite")
+            @SerialName("finicity_connect_v2_lite")
             FINICITY_CONNECT_V2_LITE("finicity_connect_v2_lite"),
-
-            @SerialName(value = "finicity_connect_v2_oauth")
+            @SerialName("finicity_connect_v2_oauth")
             FINICITY_CONNECT_V2_OAUTH("finicity_connect_v2_oauth"),
-
-            @SerialName(value = "finicity_connect_v2_oauth_redirect")
+            @SerialName("finicity_connect_v2_oauth_redirect")
             FINICITY_CONNECT_V2_OAUTH_REDIRECT("finicity_connect_v2_oauth_redirect"),
-
-            @SerialName(value = "finicity_connect_v2_oauth_webview")
+            @SerialName("finicity_connect_v2_oauth_webview")
             FINICITY_CONNECT_V2_OAUTH_WEBVIEW("finicity_connect_v2_oauth_webview"),
-
-            @SerialName(value = "mx_connect")
+            @SerialName("mx_connect")
             MX_CONNECT("mx_connect"),
-
-            @SerialName(value = "mx_oauth")
+            @SerialName("mx_oauth")
             MX_OAUTH("mx_oauth"),
-
-            @SerialName(value = "mx_oauth_redirect")
+            @SerialName("mx_oauth_redirect")
             MX_OAUTH_REDIRECT("mx_oauth_redirect"),
-
-            @SerialName(value = "mx_oauth_webview")
+            @SerialName("mx_oauth_webview")
             MX_OAUTH_WEBVIEW("mx_oauth_webview"),
-
-            @SerialName(value = "testmode")
+            @SerialName("testmode")
             TESTMODE("testmode"),
-
-            @SerialName(value = "testmode_oauth")
+            @SerialName("testmode_oauth")
             TESTMODE_OAUTH("testmode_oauth"),
-
-            @SerialName(value = "testmode_oauth_webview")
+            @SerialName("testmode_oauth_webview")
             TESTMODE_OAUTH_WEBVIEW("testmode_oauth_webview"),
-
-            @SerialName(value = "truelayer_oauth")
+            @SerialName("truelayer_oauth")
             TRUELAYER_OAUTH("truelayer_oauth"),
-
-            @SerialName(value = "truelayer_oauth_handoff")
+            @SerialName("truelayer_oauth_handoff")
             TRUELAYER_OAUTH_HANDOFF("truelayer_oauth_handoff"),
-
-            @SerialName(value = "truelayer_oauth_webview")
+            @SerialName("truelayer_oauth_webview")
             TRUELAYER_OAUTH_WEBVIEW("truelayer_oauth_webview"),
-
-            @SerialName(value = "wells_fargo")
+            @SerialName("wells_fargo")
             WELLS_FARGO("wells_fargo"),
-
-            @SerialName(value = "wells_fargo_webview")
+            @SerialName("wells_fargo_webview")
             WELLS_FARGO_WEBVIEW("wells_fargo_webview");
         }
     }
