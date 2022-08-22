@@ -123,7 +123,7 @@ internal fun CardEditBody(
     onCancelClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    ScrollableTopLevelColumn(omitTopPadding = true) {
+    ScrollableTopLevelColumn {
         Text(
             text = stringResource(R.string.wallet_update_card),
             modifier = Modifier

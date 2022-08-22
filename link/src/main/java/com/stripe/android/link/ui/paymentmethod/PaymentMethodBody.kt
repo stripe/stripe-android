@@ -115,7 +115,7 @@ internal fun PaymentMethodBody(
     onSecondaryButtonClick: () -> Unit,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    ScrollableTopLevelColumn(omitTopPadding = true) {
+    ScrollableTopLevelColumn {
         Text(
             text = stringResource(R.string.pm_add_new_card),
             modifier = Modifier

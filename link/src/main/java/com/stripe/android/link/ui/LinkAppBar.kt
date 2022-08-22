@@ -78,7 +78,8 @@ internal fun LinkAppBar(
                 tint = MaterialTheme.linkColors.linkLogo
             )
 
-            AnimatedVisibility(visible = !email.isNullOrEmpty()) {
+            val showEmail = isRootScreen && !email.isNullOrEmpty()
+            AnimatedVisibility(visible = showEmail) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
