@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,8 +17,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,20 +31,6 @@ import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
-
-@Preview
-@Composable
-internal fun LinkAppBar() {
-    DefaultLinkTheme {
-        Surface {
-            LinkAppBar(
-                email = "email@example.com",
-                isRootScreen = true,
-                onButtonClick = {}
-            )
-        }
-    }
-}
 
 @Composable
 internal fun LinkAppBar(
@@ -74,9 +63,12 @@ internal fun LinkAppBar(
             )
         }
 
+        val contentAlpha by animateFloatAsState(targetValue = if (isRootScreen) 1f else 0f)
+
         Column(
             modifier = Modifier
                 .weight(1f)
+                .alpha(contentAlpha)
                 .padding(top = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -105,5 +97,61 @@ internal fun LinkAppBar(
         }
 
         Spacer(modifier = Modifier.width(MinimumTouchTargetSize))
+    }
+}
+
+@Preview
+@Composable
+internal fun LinkAppBar() {
+    DefaultLinkTheme {
+        Surface {
+            LinkAppBar(
+                email = "email@example.com",
+                isRootScreen = true,
+                onButtonClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+internal fun LinkAppBar_NoEmail() {
+    DefaultLinkTheme {
+        Surface {
+            LinkAppBar(
+                email = null,
+                isRootScreen = true,
+                onButtonClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+internal fun LinkAppBar_ChildScreen() {
+    DefaultLinkTheme {
+        Surface {
+            LinkAppBar(
+                email = "email@example.com",
+                isRootScreen = false,
+                onButtonClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+internal fun LinkAppBar_ChildScreen_NoEmail() {
+    DefaultLinkTheme {
+        Surface {
+            LinkAppBar(
+                email = null,
+                isRootScreen = false,
+                onButtonClick = {}
+            )
+        }
     }
 }
