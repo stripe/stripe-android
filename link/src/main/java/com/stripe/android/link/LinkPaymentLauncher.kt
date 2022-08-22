@@ -239,6 +239,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     }
 
     companion object {
-        val LINK_ENABLED = BuildConfig.DEBUG
+        const val LINK_ENABLED = false
     }
 }
