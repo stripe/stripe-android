@@ -49,6 +49,7 @@ class FieldValuesToParamsMapConverter {
             val destMap = mutableMapOf<String, Any?>()
 
             val formKeyValueMap = fieldValuePairs
+                .filterNot { it.key.ignoreField }
                 .mapValues { entry -> entry.value.value }
                 .mapKeys { it.key.v1 }
 
