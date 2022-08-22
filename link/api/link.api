@@ -491,22 +491,6 @@ public final class com/stripe/android/link/ui/paymentmethod/PaymentMethodViewMod
 	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/link/ui/paymentmethod/PaymentMethodViewModel$Factory;Ljavax/inject/Provider;)V
 }
 
-public final class com/stripe/android/link/ui/paymentmethod/SupportedPaymentMethod$BankAccount$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/ui/paymentmethod/SupportedPaymentMethod$BankAccount;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/ui/paymentmethod/SupportedPaymentMethod$BankAccount;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/link/ui/paymentmethod/SupportedPaymentMethod$Card$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/ui/paymentmethod/SupportedPaymentMethod$Card;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/ui/paymentmethod/SupportedPaymentMethod$Card;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

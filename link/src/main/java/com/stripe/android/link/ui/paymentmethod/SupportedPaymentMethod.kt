@@ -1,12 +1,10 @@
 package com.stripe.android.link.ui.paymentmethod
 
-import android.os.Parcelable
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.forms.LinkCardForm
-import kotlinx.parcelize.Parcelize
 
 /**
  * Represents the Payment Methods that are supported by Link.
@@ -14,26 +12,11 @@ import kotlinx.parcelize.Parcelize
  * @param type The Payment Method type. Matches the [ConsumerPaymentDetails] types.
  * @param formSpec Specification of how the payment method data collection UI should look.
  */
-internal sealed class SupportedPaymentMethod(
+internal enum class SupportedPaymentMethod(
     val type: String,
     val formSpec: List<FormItemSpec>
-) : Parcelable {
-    /**
-     * Build the [ConsumerPaymentDetailsCreateParams] that will to create this payment method.
-     */
-    abstract fun createParams(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        email: String
-    ): ConsumerPaymentDetailsCreateParams
-
-    /**
-     * A map containing additional parameters that must be sent during payment confirmation.
-     */
-    open fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams):
-        Map<String, Any>? = null
-
-    @Parcelize
-    object Card : SupportedPaymentMethod(
+) {
+    Card(
         ConsumerPaymentDetails.Card.type,
         LinkCardForm.items
     ) {
@@ -52,10 +35,8 @@ internal sealed class SupportedPaymentMethod(
             (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)?.let { card ->
                 mapOf("card" to mapOf("cvc" to card["cvc"]))
             }
-    }
-
-    @Parcelize
-    object BankAccount : SupportedPaymentMethod(
+    },
+    BankAccount(
         ConsumerPaymentDetails.BankAccount.type,
         emptyList()
     ) {
@@ -65,7 +46,21 @@ internal sealed class SupportedPaymentMethod(
         ): ConsumerPaymentDetailsCreateParams {
             TODO("Not yet implemented")
         }
-    }
+    };
+
+    /**
+     * Build the [ConsumerPaymentDetailsCreateParams] that will to create this payment method.
+     */
+    abstract fun createParams(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        email: String
+    ): ConsumerPaymentDetailsCreateParams
+
+    /**
+     * A map containing additional parameters that must be sent during payment confirmation.
+     */
+    open fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams):
+        Map<String, Any>? = null
 
     internal companion object {
         val allTypes = setOf(Card.type, BankAccount.type)
