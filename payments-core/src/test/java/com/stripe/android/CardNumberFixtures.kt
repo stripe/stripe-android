@@ -45,10 +45,10 @@ internal object CardNumberFixtures {
     val JCB_BIN = JCB_NO_SPACES.take(6)
     val JCB = CardNumber.Unvalidated(JCB_NO_SPACES)
 
-    const val UNIONPAY_NO_SPACES = "6200000000000005"
-    const val UNIONPAY_WITH_SPACES = "6200 0000 0000 0005"
-    val UNIONPAY_BIN = UNIONPAY_NO_SPACES.take(6)
-    val UNIONPAY = CardNumber.Unvalidated(UNIONPAY_NO_SPACES)
+    const val UNIONPAY_16_NO_SPACES = "6200000000000005"
+    const val UNIONPAY_16_WITH_SPACES = "6200 0000 0000 0005"
+    val UNIONPAY_16_BIN = UNIONPAY_16_NO_SPACES.take(6)
+    val UNIONPAY_16 = CardNumber.Unvalidated(UNIONPAY_16_NO_SPACES)
 
     const val UNIONPAY_19_NO_SPACES = "6200500000000000004"
     const val UNIONPAY_19_WITH_SPACES = "6200 5000 0000 0000 004"

@@ -9,7 +9,7 @@ import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
 internal class CreateFinancialConnectionsSession @Inject constructor(
-    private val stripeRepository: StripeRepository,
+    private val stripeRepository: StripeRepository
 ) {
 
     /**

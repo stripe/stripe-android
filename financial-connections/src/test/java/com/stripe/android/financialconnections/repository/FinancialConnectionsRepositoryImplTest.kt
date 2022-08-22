@@ -26,11 +26,10 @@ class FinancialConnectionsRepositoryImplTest {
 
     private val financialConnectionsRepositoryImpl = FinancialConnectionsRepositoryImpl(
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-        requestExecutor = FinancialConnectionsRequestExecutor(
-            stripeNetworkClient = mockStripeNetworkClient,
-            json = testJson()
-        ),
-        apiRequestFactory = apiRequestFactory
+        stripeNetworkClient = mockStripeNetworkClient,
+        apiRequestFactory = apiRequestFactory,
+        json = testJson(),
+        stripeAccountId = null
     )
 
     @Test
@@ -42,7 +41,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -56,7 +56,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -70,7 +71,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -84,7 +86,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -98,7 +101,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -112,7 +116,8 @@ class FinancialConnectionsRepositoryImplTest {
                 )
             )
 
-            val result = financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }

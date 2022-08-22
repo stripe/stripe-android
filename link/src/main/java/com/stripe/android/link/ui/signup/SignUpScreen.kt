@@ -145,7 +145,10 @@ internal fun SignUpBody(
                     )
                 }
                 errorMessage?.let {
-                    ErrorText(text = it.getMessage(LocalContext.current.resources))
+                    ErrorText(
+                        text = it.getMessage(LocalContext.current.resources),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),

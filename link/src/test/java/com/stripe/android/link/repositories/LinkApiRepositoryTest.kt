@@ -285,7 +285,7 @@ class LinkApiRepositoryTest {
 
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
-            argThat { contains("card") && size == 1 },
+            eq(SupportedPaymentMethod.allTypes),
             eq(ApiRequest.Options(consumerKey))
         )
     }
@@ -297,7 +297,7 @@ class LinkApiRepositoryTest {
 
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
-            argThat { contains("card") && size == 1 },
+            eq(SupportedPaymentMethod.allTypes),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }

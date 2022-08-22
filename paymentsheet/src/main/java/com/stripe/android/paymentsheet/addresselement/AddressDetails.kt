@@ -2,10 +2,11 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class AddressDetails(
+data class AddressDetails(
     /**
      * The customer's full name
      */
@@ -39,3 +40,26 @@ internal fun AddressLauncher.DefaultAddressDetails.toAddressDetails(): AddressDe
         phoneNumber = this.phoneNumber,
         isCheckboxSelected = this.isCheckboxSelected
     )
+
+internal fun AddressDetails.toIdentifierMap(
+    billingDetails: PaymentSheet.BillingDetails? = null
+): Map<IdentifierSpec, String?> {
+    return if (billingDetails == null) {
+        mapOf(
+            IdentifierSpec.Name to name,
+            IdentifierSpec.Line1 to address?.line1,
+            IdentifierSpec.Line2 to address?.line2,
+            IdentifierSpec.City to address?.city,
+            IdentifierSpec.State to address?.state,
+            IdentifierSpec.PostalCode to address?.postalCode,
+            IdentifierSpec.Country to address?.country,
+            IdentifierSpec.Phone to phoneNumber
+        ).plus(
+            mapOf(
+                IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
+            ).takeIf { isCheckboxSelected != null } ?: emptyMap()
+        )
+    } else {
+        emptyMap()
+    }
+}

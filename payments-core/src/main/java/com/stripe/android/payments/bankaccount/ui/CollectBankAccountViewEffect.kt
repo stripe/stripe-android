@@ -15,7 +15,8 @@ internal sealed class CollectBankAccountViewEffect {
      */
     data class OpenConnectionsFlow(
         val publishableKey: String,
-        val financialConnectionsSessionSecret: String
+        val financialConnectionsSessionSecret: String,
+        val stripeAccountId: String?
     ) : CollectBankAccountViewEffect()
 
     /**

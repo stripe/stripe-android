@@ -66,18 +66,8 @@ internal class InputAddressViewModel @Inject constructor(
 
         viewModelScope.launch {
             collectedAddress.collect { addressDetails ->
-                val initialValues: Map<IdentifierSpec, String?> = addressDetails?.let {
-                    mapOf(
-                        IdentifierSpec.Name to addressDetails.name,
-                        IdentifierSpec.Line1 to addressDetails.address?.line1,
-                        IdentifierSpec.Line2 to addressDetails.address?.line2,
-                        IdentifierSpec.City to addressDetails.address?.city,
-                        IdentifierSpec.State to addressDetails.address?.state,
-                        IdentifierSpec.PostalCode to addressDetails.address?.postalCode,
-                        IdentifierSpec.Country to addressDetails.address?.country,
-                        IdentifierSpec.Phone to addressDetails.phoneNumber
-                    )
-                } ?: emptyMap()
+                val initialValues: Map<IdentifierSpec, String?> = addressDetails?.toIdentifierMap()
+                    ?: emptyMap()
 
                 _formController.value = formControllerProvider.get()
                     .viewOnlyFields(emptySet())
@@ -118,7 +108,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
-        val phoneNumberState = parsePhoneNumberConfig(args.config?.phone)
+        val phoneNumberState = parsePhoneNumberConfig(args.config?.additionalFields?.phone)
         val addressSpec = if (condensedForm) {
             AddressSpec(
                 showLabel = false,
@@ -220,12 +210,15 @@ internal class InputAddressViewModel @Inject constructor(
     internal companion object {
         // This mapping is required to prevent merchants from depending on ui-core
         fun parsePhoneNumberConfig(
-            configuration: AddressLauncher.AdditionalFieldsConfiguration?
+            configuration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration?
         ): PhoneNumberState {
             return when (configuration) {
-                AddressLauncher.AdditionalFieldsConfiguration.HIDDEN -> PhoneNumberState.HIDDEN
-                AddressLauncher.AdditionalFieldsConfiguration.OPTIONAL -> PhoneNumberState.OPTIONAL
-                AddressLauncher.AdditionalFieldsConfiguration.REQUIRED -> PhoneNumberState.REQUIRED
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN ->
+                    PhoneNumberState.HIDDEN
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL ->
+                    PhoneNumberState.OPTIONAL
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED ->
+                    PhoneNumberState.REQUIRED
                 null -> PhoneNumberState.OPTIONAL
             }
         }

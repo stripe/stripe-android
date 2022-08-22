@@ -19,7 +19,7 @@ fun SaveForFutureUseElementUI(
     val label by controller.label.collectAsState(null)
     val resources = LocalContext.current.resources
 
-    CheckboxElementUi(
+    CheckboxElementUI(
         automationTestTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG,
         isChecked = checked,
         label = label?.let { resources.getString(it, element.merchantName) },

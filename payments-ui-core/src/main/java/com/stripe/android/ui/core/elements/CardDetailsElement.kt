@@ -60,7 +60,7 @@ internal class CardDetailsElement(
             controller.cvcElement.identifier to cvc,
             IdentifierSpec.CardBrand to FormFieldEntry(brand.code, true),
             IdentifierSpec.CardExpMonth to expirationDate.copy(
-                value = month.toString()
+                value = month.toString().padStart(length = 2, padChar = '0')
             ),
             IdentifierSpec.CardExpYear to expirationDate.copy(
                 value = year.toString()

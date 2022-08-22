@@ -72,16 +72,19 @@ internal class PaymentMethodViewModel @Inject constructor(
     val formController = MutableStateFlow<FormController?>(null)
 
     fun init(loadFromArgs: Boolean) {
+        val cardMap = args.prefilledCardParams?.toParamMap()
+            ?.takeIf { loadFromArgs }
+            ?.let { convertToFormValuesMap(it) }
+            ?: emptyMap()
+        val initialValuesMap = args.initialFormValuesMap
+            ?: emptyMap()
+        val combinedMap = cardMap + initialValuesMap
         formController.value =
             formControllerProvider.get()
                 .formSpec(LayoutSpec(paymentMethod.formSpec))
                 .viewOnlyFields(emptySet())
                 .viewModelScope(viewModelScope)
-                .initialValues(
-                    args.prefilledCardParams?.toParamMap()?.takeIf { loadFromArgs }?.let {
-                        convertToFormValuesMap(it)
-                    } ?: emptyMap()
-                )
+                .initialValues(combinedMap)
                 .stripeIntent(args.stripeIntent)
                 .merchantName(args.merchantName)
                 .build().formController
@@ -94,8 +97,8 @@ internal class PaymentMethodViewModel @Inject constructor(
         val paymentMethodCreateParams =
             FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
                 formValues,
-                paymentMethod.type.code,
-                paymentMethod.requiresMandate
+                paymentMethod.type,
+                false
             )
 
         viewModelScope.launch {
